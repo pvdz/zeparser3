@@ -1,0 +1,13 @@
+How do you put two newlines in a raw string with only one line-continuation?
+Is `\u{}` valid?
+Is there a max to the number of digits of a hex escape? And what about unicode escape?
+How do you put two consecutive dots in valid JS without it being three?
+What's the longest way to write a number that results in a zero without repeating any characters?
+What's the biggest operator? (>>>=, or instanceof)
+Can the new `\u{..}` unicode escape cause an error in comments?
+How many distinct newline characters does JS acknowledge? (4: \r \n ls ps)
+Can comments cause an ASI?
+Can you have backslashes in var names? (trick question: no)
+Can you use the non breaking space (&nbsp; or 0xA0) as whitespace?
+How do you generate an error with just a (single or double quoted) string?
+Which of the single digit escapes are allowed in strings in sloppy mode? and in strict mode?
