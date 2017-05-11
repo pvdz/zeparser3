@@ -220,18 +220,12 @@ function ZeTokenizer(input, goal) {
     ++pointer;
   }
 
-  function skipA(chr) {
-    ASSERT(pointer >= 0 && pointer < len, 'pointer not oob');
-    ASSERT(!arguments.length, 'no args');
-
-    if (read() !== chr) THROW('Expected ' + chr + ' have ' + input.charCodeAt(pointer - 1));
-  }
-
   function ASSERT_skip(chr) { // these calls are replaced with skip() in a build step
     // note: consider this `skip()` in prod
-    ASSERT(pointer >= 0 && pointer < len);
-    ASSERT(arguments.length === 1);
+    ASSERT(pointer >= 0 && pointer < len, 'should not be oob before the skip');
+    ASSERT(arguments.length === 1, 'require explicit char');
     ASSERT(input.charCodeAt(pointer) === chr, 'skip expecting different char');
+
     ++pointer;
   }
 
@@ -1069,8 +1063,13 @@ function ZeTokenizer(input, goal) {
     return parseIdentFromUnicodeEscape(FIRST_CHAR);
   }
 
+  let nCapturingParens = 0;
+  let largestBackReference = 0;
   function parseRegex(c) {
+    nCapturingParens = 0;
+    largestBackReference = 0;
     let ustatusBody = parseRegexBody(c);
+    if (nCapturingParens < largestBackReference) ustatusBody = ALWAYS_BAD;
     let ustatusFlags = parseRegexFlags();
     if (ustatusBody === ALWAYS_BAD || ustatusFlags === ALWAYS_BAD) {
       // body had bad escape or flags occurred twice
@@ -1099,6 +1098,7 @@ function ZeTokenizer(input, goal) {
     return _parseRegexBody(c, 0, ALWAYS_GOOD);
   }
   function _parseRegexBody(c, groupLevel, uflagStatus) {
+//console.log('_parseRegexBody', uflagStatus, groupLevel, '0x' + c.toString(16))
     ASSERT(typeof c === 'number', 'c is an ord');
     ASSERT(typeof groupLevel === 'number' && groupLevel >= 0, 'valid group level');
     ASSERT(typeof uflagStatus === 'number' && uflagStatus >= 0, 'valid flag');
@@ -1117,9 +1117,14 @@ function ZeTokenizer(input, goal) {
       switch (c) {
         case $$FWDSLASH_2F:
           // end of regex body
-          ASSERT_skip($$FWDSLASH_2F);
 
-          if (groupLevel !== 0) return ALWAYS_BAD; // all groups must be closed before the floor is closed
+          if (groupLevel !== 0) {
+            // all groups must be closed before the floor is closed
+            // dont consume the forward slash. let only the root caller do this
+            return ALWAYS_BAD;
+          }
+
+          ASSERT_skip($$FWDSLASH_2F);
           return uflagStatus;
 
         case $$OR_7C:
@@ -1183,7 +1188,35 @@ function ZeTokenizer(input, goal) {
           // parse group (?: (!: (
           ASSERT_skip($$PAREN_L_28);
 
-          let subbad = _parseRegexBody(peek(), groupLevel + 1, ALWAYS_GOOD);
+          if (pointer >= len) {
+            uflagStatus = ALWAYS_BAD;
+            break;
+          }
+          c = peek();
+          if (c === $$QMARK_3F) {
+            ASSERT_skip($$QMARK_3F);
+            if (pointer >= len) {
+              uflagStatus = ALWAYS_BAD;
+              break;
+            }
+            c = peek();
+            if (c === $$COLON_3A || c === $$IS_3D || c === $$EXCL_21) {
+              ASSERT_skip(c);
+              // non capturing group
+              if (pointer >= len) {
+                uflagStatus = ALWAYS_BAD;
+                break;
+              }
+              c = peek();
+            } else {
+              uflagStatus = ALWAYS_BAD;
+            }
+          } else {
+            // capturing group
+            ++nCapturingParens;
+          }
+
+          let subbad = _parseRegexBody(c, groupLevel + 1, ALWAYS_GOOD);
           if (subbad === ALWAYS_BAD) {
             uflagStatus = ALWAYS_BAD;
           } else if (subbad === GOOD_SANS_U_FLAG) {
@@ -1194,13 +1227,6 @@ function ZeTokenizer(input, goal) {
             else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
           }
 
-          c = peek();
-          if (c === $$PAREN_R_29) {
-            afterAtom = true;
-            ASSERT_skip($$PAREN_R_29);
-          } else {
-            uflagStatus = ALWAYS_BAD;
-          }
           break;
         case $$PAREN_R_29:
           // a paren might be found in a sub-parse. the outer parse may be recursively parsing a group
@@ -1365,6 +1391,11 @@ function ZeTokenizer(input, goal) {
 
       // digits
       case $$0_30:
+        ASSERT_skip($$0_30);
+        // cannot be followed by another digit
+        if (pointer >= len) return ALWAYS_GOOD; // let error happen elsewhere
+        if (isAsciiNumber(peek())) return ALWAYS_BAD;
+        return ALWAYS_GOOD;
       case $$1_31:
       case $$2_32:
       case $$3_33:
@@ -1374,28 +1405,40 @@ function ZeTokenizer(input, goal) {
       case $$7_37:
       case $$8_38:
       case $$9_39:
-        // https://www.ecma-international.org/ecma-262/7.0/#sec-decimalescape :
-        // If \ is followed by a decimal number n whose first digit is not 0, then the escape sequence
-        // is considered to be a backreference. It is an error if n is greater than the total number
-        // of left capturing parentheses in the entire regular expression. \0 represents the <NUL>
-        // character and cannot be followed by a decimal digit.
-        // ... crap.
-        // https://www.ecma-international.org/ecma-262/7.0/#sec-regular-expression-patterns-semantics
-        // The production `ClassEscape::DecimalEscape but only if` evaluates as follows:
-        //  Evaluate DecimalEscape to obtain an EscapeValue E.
-        // ... double crap.
-        // so let's make it an option not to throw when the exception happens.
-        ASSERT_skip(c);
-        // cannot be followed by another digit
-        if (pointer >= len) return ALWAYS_GOOD; // let error happen elsewhere
-        if (isAsciiNumber(peek())) return ALWAYS_BAD;
-        return ALWAYS_GOOD;
+        return parseBackReference(c);
 
       default:
         ASSERT_skip(c);
         return ALWAYS_BAD;
     }
     ASSERT(false, 'dis be dead code');
+  }
+  function parseBackReference(c) {
+    // https://www.ecma-international.org/ecma-262/7.0/#sec-decimalescape :
+    // If \ is followed by a decimal number n whose first digit is not 0, then the escape sequence
+    // is considered to be a backreference. It is an error if n is greater than the total number
+    // of left capturing parentheses in the entire regular expression. \0 represents the <NUL>
+    // character and cannot be followed by a decimal digit.
+    // ... crap.
+    // https://www.ecma-international.org/ecma-262/7.0/#sec-regular-expression-patterns-semantics
+    // The production `ClassEscape::DecimalEscape but only if` evaluates as follows:
+    //  Evaluate DecimalEscape to obtain an EscapeValue E.
+    // ... double crap.
+    // so let's make it an option not to throw when the exception happens.
+
+    ASSERT(c >= $$1_31 && c <= $$9_39, 'should be digit 1~9');
+    ASSERT_skip(c);
+
+    let refindex = c - $$0_30;
+    while (pointer < len) {
+      c = peek();
+      if (!isAsciiNumber(c)) break;
+      refindex = refindex * 10 + (c - $$0_30);
+      ASSERT_skip(c);
+    }
+
+    largestBackReference = refindex; // can only validate this after completing body parse
+    return ALWAYS_GOOD;
   }
   function parseRegexUnicodeEscape() {
     // only if unicode flag
@@ -1710,6 +1753,10 @@ function ZeTokenizer(input, goal) {
 
       // digits
       case $$0_30:
+        ASSERT_skip(c);
+        // cannot be followed by another digit
+        if (pointer < len && isAsciiNumber(peek())) return CHARCLASS_BAD;
+        return 0;
       case $$1_31:
       case $$2_32:
       case $$3_33:
@@ -1720,9 +1767,8 @@ function ZeTokenizer(input, goal) {
       case $$8_38:
       case $$9_39:
         ASSERT_skip(c);
-        // cannot be followed by another digit
-        if (pointer < len && isAsciiNumber(peek())) return CHARCLASS_BAD;
-        return c - $$0_30;
+        // always illegal in a char class
+        return CHARCLASS_BAD;
 
       // syntax chars
       case $$XOR_5E:
