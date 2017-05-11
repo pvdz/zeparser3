@@ -517,6 +517,7 @@ let regexes = [
   [['/^/', '/$/', '/./'], $REGEX, SLASH_REGEX, 'off to a good start'],
   [['/+/', '/?/', '/)/', '/]/', '/{/', '/}/', '/|/'], $ERROR, SLASH_REGEX, 'off to a bad start'],
   [['/a|*/', '/a|+/', '/a|?/', '/a|)/', '/a|]/', '/a|{/', '/a|}/', '/a||/'], $ERROR, SLASH_REGEX, 'and you started so well'],
+  [['/a(*)/', '/a(+)/', '/a(?)/', '/a|(|))/', '/a|(])/', '/a|({)/', '/a|(})/', '/a|(|)/'], $ERROR, SLASH_REGEX, 'wrapped syntax char start'],
   [['/\\/', '/a|\\/'], $ERROR, SLASH_REGEX, '(eol/eof case)', 'suffixsp'],
   // \c<x>
   [['/\\ca/', '/\\cb/', '/\\cd/', '/\\ce/', '/\\cf/', '/\\cg/', '/\\ch/', '/\\ci/', '/\\cj/', '/\\ck/', '/\\cl/', '/\\cm/', '/\\cn/', '/\\co/', '/\\cp/', '/\\cq/', '/\\cr/', '/\\cs/', '/\\ct/', '/\\cu/', '/\\cv/', '/\\cw/', '/\\cx/', '/\\cy/', '/\\cz/'], $REGEX, SLASH_REGEX, 'control character lc'],
@@ -891,6 +892,7 @@ let regexesu = [
   [['/^/u', '/$/u', '/./u'], $REGEXU, SLASH_REGEX, 'off to a good start'],
   [['/+/u', '/?/u', '/)/u', '/]/u', '/{/u', '/}/u', '/|/u'], $ERROR, SLASH_REGEX, 'off to a bad start'],
   [['/a|*/u', '/a|+/u', '/a|?/u', '/a|)/u', '/a|]/u', '/a|{/u', '/a|}/u', '/a||/u'], $ERROR, SLASH_REGEX, 'and you started so well'],
+  [['/a(*)/u', '/a(+)/u', '/a(?)/u', '/a|(|))/u', '/a|(])/u', '/a|({)/u', '/a|(})/u', '/a|(|)/u'], $ERROR, SLASH_REGEX, 'wrapped syntax char start'],
   [['/\\/u', '/a|\\/u'], $ERROR, SLASH_REGEX, '(eol/eof case)', 'suffixsp'],
   // \c<x>
   [['/\\ca/u', '/\\cb/u', '/\\cd/u', '/\\ce/u', '/\\cf/u', '/\\cg/u', '/\\ch/u', '/\\ci/u', '/\\cj/u', '/\\ck/u', '/\\cl/u', '/\\cm/u', '/\\cn/u', '/\\co/u', '/\\cp/u', '/\\cq/u', '/\\cr/u', '/\\cs/u', '/\\ct/u', '/\\cu/u', '/\\cv/u', '/\\cw/u', '/\\cx/u', '/\\cy/u', '/\\cz/u'], $REGEXU, SLASH_REGEX, 'control character lc'],
