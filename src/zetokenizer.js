@@ -140,10 +140,11 @@ const $STRING_DOUBLE = 1 << ++$flag;
 const $IDENT = 1 << ++$flag;
 const $PUNCTUATOR = 1 << ++$flag;
 const $REGEX = 1 << ++$flag;
+const $REGEXU = (1 << ++$flag) | $REGEX; // with /u flag
 const $TICK_HEAD = 1 << ++$flag;
 const $TICK_BODY = 1 << ++$flag;
 const $TICK_TAIL = 1 << ++$flag;
-const $TICK_PURE = $TICK_HEAD | $TICK_TAIL
+const $TICK_PURE = $TICK_HEAD | $TICK_TAIL;
 const $ASI = 1 << ++$flag;
 const $EOF = 1 << ++$flag;
 ASSERT($flag < 32, 'cannot use more than 32 flags');
@@ -160,8 +161,18 @@ const REX = false;
 const BAD_ESCAPE = true;
 const GOOD_ESCAPE = false;
 
+const ALWAYS_GOOD = 0;
+const GOOD_WITH_U_FLAG = 1;
+const GOOD_SANS_U_FLAG = 2;
+const ALWAYS_BAD = 4;
+
 const FIRST_CHAR = true;
 const NON_START = false;
+
+const CHARCLASS_BAD = 0x110000;
+const CHARCLASS_BAD_RANGE = 0x110001;
+const CHARCLASS_BADU = 1<<23;
+const CHARCLASS_BADN = 1<<24;
 
 function ZeTokenizer(input, goal) {
   ASSERT(typeof input === 'string', 'input string');
@@ -213,7 +224,7 @@ function ZeTokenizer(input, goal) {
     ASSERT(pointer >= 0 && pointer < len, 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
-    if (input.charCodeAt(pointer++) !== chr) THROW('Expected ' + chr + ' have ' + input.charCodeAt(pointer - 1));
+    if (read() !== chr) THROW('Expected ' + chr + ' have ' + input.charCodeAt(pointer - 1));
   }
 
   function ASSERT_skip(chr) { // these calls are replaced with skip() in a build step
@@ -977,6 +988,9 @@ function ZeTokenizer(input, goal) {
     let c;
     do {
       if (pointer >= len1) {
+        if (pointer < len) {
+          skip();
+        }
         return $ERROR;
       }
 
@@ -1055,6 +1069,884 @@ function ZeTokenizer(input, goal) {
     return parseIdentFromUnicodeEscape(FIRST_CHAR);
   }
 
+  function parseRegex(c) {
+    let ustatusBody = parseRegexBody(c);
+    let ustatusFlags = parseRegexFlags();
+    if (ustatusBody === ALWAYS_BAD || ustatusFlags === ALWAYS_BAD) {
+      // body had bad escape or flags occurred twice
+      return $ERROR;
+    }
+
+    if (ustatusBody === GOOD_WITH_U_FLAG) {
+      // body had an escape that is only valid with an u flag
+      if (ustatusFlags === GOOD_WITH_U_FLAG) return $REGEXU;
+      // in this case the body had syntax that's only valid with a u flag and the flag was not present
+      return $ERROR;
+    }
+
+    if (ustatusBody === GOOD_SANS_U_FLAG) {
+      // body had an escape or char class range that is invalid with a u flag
+      if (ustatusFlags !== GOOD_WITH_U_FLAG) return $REGEX;
+      // in this case the body had syntax that's invalid with a u flag and the flag was present anyways
+      return $ERROR;
+    }
+    ASSERT(ustatusBody === ALWAYS_GOOD, 'the body had no syntax depending on a u flag so is always good');
+    if (ustatusFlags === GOOD_WITH_U_FLAG) return $REGEXU;
+    return $REGEX;
+  }
+  function parseRegexBody(c) {
+    ASSERT(c !== $$STAR_2A && c !== $$FWDSLASH_2F, 'earlier checks should already have peeked for a comment token');
+    return _parseRegexBody(c, 0, ALWAYS_GOOD);
+  }
+  function _parseRegexBody(c, groupLevel, uflagStatus) {
+    ASSERT(typeof c === 'number', 'c is an ord');
+    ASSERT(typeof groupLevel === 'number' && groupLevel >= 0, 'valid group level');
+    ASSERT(typeof uflagStatus === 'number' && uflagStatus >= 0, 'valid flag');
+    // - there are two grammars; a simple (RegularExpressionLiteral) and a more granular grammar (Pattern). Pattern governs. The first cannot be extended/changed, the second may be.
+    //   - the spec describes such an extension in (B.1.4) we may need to use that as our end goal
+    // - there are two parsing modes; unicode and without unicode. the unicode is slightly more strict
+    //   - reflects on surrogate pairs, long unicode escapes, and valid char class ranges
+
+    let afterAtom = true;
+
+    // dont start with a quantifier
+    let badStart = c === $$STAR_2A || c === $$PLUS_2B || c === $$QMARK_3F || c === $$CURLY_L_7B || c === $$OR_7C;
+    if (badStart) uflagStatus = ALWAYS_BAD;
+
+    do {
+      switch (c) {
+        case $$FWDSLASH_2F:
+          // end of regex body
+          ASSERT_skip($$FWDSLASH_2F);
+
+          if (groupLevel !== 0) return ALWAYS_BAD; // all groups must be closed before the floor is closed
+          return uflagStatus;
+
+        case $$OR_7C:
+          // op; parse another body with len>=1
+          ASSERT_skip($$OR_7C);
+          if (pointer >= len) return ALWAYS_BAD;
+          c = peek();
+          if (c === $$FWDSLASH_2F || c === $$OR_7C) uflagStatus = ALWAYS_BAD; // must have an atom following an OR
+          else return _parseRegexBody(c, groupLevel, uflagStatus);
+          break;
+
+        case $$XOR_5E:
+          // atom; match start of a line/file
+          ASSERT_skip($$XOR_5E);
+          afterAtom = true;
+          break;
+
+        case $$DOT_2E:
+          // atom; match one character
+          ASSERT_skip($$DOT_2E);
+          afterAtom = true;
+          break;
+
+        case $$$_24:
+          // atom; match the end of a file/line
+          ASSERT_skip($$$_24);
+          afterAtom = true;
+          break;
+
+        case $$BACKSLASH_5C:
+          // atom escape is different from charclass escape
+          ASSERT_skip($$BACKSLASH_5C);
+
+          if (pointer > len) {
+            uflagStatus = ALWAYS_BAD;
+          } else {
+            let d = peek();
+            // \b \B cannot have quantifiers
+            if (d === $$B_62 || d === $$B_UC_42) {
+              ASSERT_skip(d);
+            } else {
+              let escapeStatus = parseRegexAtomEscape(d);
+              if (escapeStatus === ALWAYS_BAD) {
+                uflagStatus = ALWAYS_BAD;
+              } else if (escapeStatus === GOOD_SANS_U_FLAG) {
+                if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
+                else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = ALWAYS_BAD;
+                afterAtom = true;
+              } else if (escapeStatus === GOOD_WITH_U_FLAG) {
+                if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
+                else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
+                afterAtom = true;
+              } else {
+                afterAtom = true;
+              }
+            }
+          }
+          break;
+
+        case $$PAREN_L_28:
+          // parse group (?: (!: (
+          ASSERT_skip($$PAREN_L_28);
+
+          let subbad = _parseRegexBody(peek(), groupLevel + 1, ALWAYS_GOOD);
+          if (subbad === ALWAYS_BAD) {
+            uflagStatus = ALWAYS_BAD;
+          } else if (subbad === GOOD_SANS_U_FLAG) {
+            if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
+            else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = ALWAYS_BAD;
+          } else if (subbad === GOOD_WITH_U_FLAG) {
+            if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
+            else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
+          }
+
+          c = peek();
+          if (c === $$PAREN_R_29) {
+            afterAtom = true;
+            ASSERT_skip($$PAREN_R_29);
+          } else {
+            uflagStatus = ALWAYS_BAD;
+          }
+          break;
+        case $$PAREN_R_29:
+          // a paren might be found in a sub-parse. the outer parse may be recursively parsing a group
+          ASSERT_skip($$PAREN_R_29);
+          if (groupLevel > 0) return uflagStatus;
+          uflagStatus = ALWAYS_BAD;
+          break;
+
+        case $$SQUARE_L_5B:
+          // CharacterClass
+          ASSERT_skip($$SQUARE_L_5B);
+
+          let charClassEscapeStatus = parseRegexCharClass();
+          if (charClassEscapeStatus === ALWAYS_BAD) {
+            uflagStatus = ALWAYS_BAD;
+          } else if (charClassEscapeStatus === GOOD_SANS_U_FLAG) {
+            if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
+            else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = ALWAYS_BAD;
+            afterAtom = true;
+          } else if (charClassEscapeStatus === GOOD_WITH_U_FLAG) {
+            if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
+            else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
+            afterAtom = true;
+          } else {
+            afterAtom = true;
+          }
+
+          afterAtom = true;
+          break;
+
+        case $$STAR_2A:
+        case $$PLUS_2B:
+        case $$QMARK_3F:
+          // doesnt matter to us which quantifier we find here
+          ASSERT_skip(c);
+          if (afterAtom) {
+            afterAtom = false;
+            if (pointer < len) {
+              if (peeky($$QMARK_3F)) {
+                ASSERT_skip($$QMARK_3F);
+              }
+            }
+          } else {
+            uflagStatus = ALWAYS_BAD;
+          }
+          break;
+
+        case $$CURLY_L_7B:
+          // explicit quantifier
+          ASSERT_skip($$CURLY_L_7B);
+          if (afterAtom) {
+            if (!parseRegexCurlyQuantifier()) uflagStatus = ALWAYS_BAD;
+            if (pointer < len) {
+              if (peeky($$QMARK_3F)) {
+                ASSERT_skip($$QMARK_3F);
+              }
+            }
+            afterAtom = false;
+          } else {
+            uflagStatus = ALWAYS_BAD;
+          }
+          break;
+        case $$SQUARE_R_5D:
+          // this is always bad since we have a quantifier parser that consumes valid curlies
+          ASSERT_skip($$SQUARE_R_5D);
+          uflagStatus = ALWAYS_BAD;
+          break;
+
+        case $$CR_0D:
+        case $$LF_0A:
+        case $$PS_2028:
+        case $$LS_2029:
+          return ALWAYS_BAD; // same as end of input
+
+        default:
+          ASSERT_skip(c); // this ought to be a valid regex source character
+      }
+
+      if (pointer >= len) break;
+      c = peek();
+    } while (true);
+
+    // this is a fail because we didnt got to the end of input before the closing /
+    return ALWAYS_BAD;
+  }
+  function parseRegexAtomEscape(c) {
+    // backslash already parsed
+
+    // -- u flag is important
+    // -- u flag can affect range (surrogate pairs in es5 vs es6)
+    // -- char class range _must_ be low-hi unless dash is the first or last char
+    // -- \u{...} only allowed with u flag
+    // -- unicode, digit, char, hex escapes
+
+
+    switch (c) {
+      case $$U_75:
+        ASSERT_skip($$U_75);
+        return parseRegexUnicodeEscape();
+
+      case $$X_78:
+        ASSERT_skip($$X_78);
+        if (pointer >= len) return ALWAYS_BAD;
+        let a = peek();
+        if (!isAsciiNumber(a)) return ALWAYS_BAD;
+        ASSERT_skip(a);
+        if (pointer >= len) return ALWAYS_BAD;
+        let b = peek();
+        if (!isAsciiNumber(b)) return ALWAYS_BAD;
+        ASSERT_skip(b);
+        return ALWAYS_GOOD;
+
+      // char escapes
+      case $$C_63:
+        ASSERT_skip($$C_63);
+        if (pointer >= len) return ALWAYS_BAD;
+        let d = peek();
+        if (isAsciiLetter(d)) {
+          ASSERT_skip(d);
+          return ALWAYS_GOOD;
+        }
+        return ALWAYS_BAD;
+
+      // control escapes
+      case $$F_66:
+        ASSERT_skip(c);
+        return ALWAYS_GOOD;
+
+      case $$N_6E:
+      case $$R_72:
+      case $$T_74:
+      case $$V_76:
+
+      // char class escpes
+      case $$D_64:
+      case $$D_UC_44:
+      case $$S_73:
+      case $$S_UC_53:
+      case $$W_77:
+      case $$W_UC_57:
+        // "an error occurs if either ClassAtom does not represent a single character (for example, if one is \w)
+        ASSERT_skip(c);
+        return ALWAYS_GOOD;
+
+      // syntax chars
+      case $$XOR_5E:
+      case $$$_24:
+      case $$BACKSLASH_5C:
+      case $$DOT_2E:
+      case $$STAR_2A:
+      case $$PLUS_2B:
+      case $$QMARK_3F:
+      case $$PAREN_L_28:
+      case $$PAREN_R_29:
+      case $$SQUARE_L_5B:
+      case $$SQUARE_R_5D:
+      case $$CURLY_L_7B:
+      case $$CURLY_R_7D:
+      case $$OR_7C:
+        ASSERT_skip(c);
+        return ALWAYS_GOOD;
+
+      // digits
+      case $$0_30:
+      case $$1_31:
+      case $$2_32:
+      case $$3_33:
+      case $$4_34:
+      case $$5_35:
+      case $$6_36:
+      case $$7_37:
+      case $$8_38:
+      case $$9_39:
+        // https://www.ecma-international.org/ecma-262/7.0/#sec-decimalescape :
+        // If \ is followed by a decimal number n whose first digit is not 0, then the escape sequence
+        // is considered to be a backreference. It is an error if n is greater than the total number
+        // of left capturing parentheses in the entire regular expression. \0 represents the <NUL>
+        // character and cannot be followed by a decimal digit.
+        // ... crap.
+        // https://www.ecma-international.org/ecma-262/7.0/#sec-regular-expression-patterns-semantics
+        // The production `ClassEscape::DecimalEscape but only if` evaluates as follows:
+        //  Evaluate DecimalEscape to obtain an EscapeValue E.
+        // ... double crap.
+        // so let's make it an option not to throw when the exception happens.
+        ASSERT_skip(c);
+        // cannot be followed by another digit
+        if (pointer >= len) return ALWAYS_GOOD; // let error happen elsewhere
+        if (isAsciiNumber(peek())) return ALWAYS_BAD;
+        return ALWAYS_GOOD;
+
+      default:
+        ASSERT_skip(c);
+        return ALWAYS_BAD;
+    }
+    ASSERT(false, 'dis be dead code');
+  }
+  function parseRegexUnicodeEscape() {
+    // only if unicode flag
+    // - surrogate pairs may matter
+    // - class char status matters
+    // - long unicode escape is allowed
+
+    // we dont know whether u-mode is enabled until after we've parsed the flags
+    // so we must parse as loose as possible and keep track of parsing specific u-flag or non-u-flag stuff
+    // then after flag parsing confirm that the flag presence conforms to expectations
+
+    if (pointer >= len) return BAD_ESCAPE;
+    let c = peek(); // dont read. we dont want to consume a bad \n here
+    if (c === $$CURLY_L_7B) {
+      ASSERT_skip($$CURLY_L_7B);
+      let r = parseRegexUnicodeEscapeVary();
+      if (r === GOOD_ESCAPE) {
+        ASSERT_skip($$CURLY_R_7D);
+        return GOOD_WITH_U_FLAG;
+      }
+      return ALWAYS_BAD;
+    } else {
+      return parseRegexUnicodeEscapeQuad(c);
+    }
+  }
+  function parseRegexUnicodeEscapeQuad(a) {
+    // we've already consumed a. we must consume 3 more chars for this quad unicode escape
+    if (pointer >= len-3) return ALWAYS_BAD;
+    let b = peekd(1);
+    let c = peekd(2);
+    let d = peekd(3);
+
+    // if this is a bad escape then dont consume the chars. one of them could be a closing quote
+    if (isHex(a) && isHex(b) && isHex(c) && isHex(d)) {
+      // okay, _now_ consume them
+      ASSERT_skip(a);
+      ASSERT_skip(b);
+      ASSERT_skip(c);
+      ASSERT_skip(d);
+      return ALWAYS_GOOD; // outside char classes we can ignore surrogates
+    } else {
+      return ALWAYS_BAD;
+    }
+  }
+  function parseRegexUnicodeEscapeVary() {
+    // "It is a Syntax Error if the MV of HexDigits > 1114111."
+    // this means the actual hex value cannot exceed 6 chars (0x10ffff). however,
+    // it can have any number of leading zeroes so we still need to loop
+
+    // must at least parse one hex digit (but it may be invalid so we can't read())
+    if (pointer >= len) return BAD_ESCAPE;  // first one is mandatory
+    let a = peek();
+    if (!isHex(a)) return BAD_ESCAPE; // first one is mandatory
+    ASSERT_skip(a);
+
+    // skip leading zeroes if there are any
+    if (a === $$0_30) {
+      if (pointer >= len) return BAD_ESCAPE;
+      a = skipZeroes();
+      if (!isHex(a)) {
+        // note: we already asserted a zero
+        return a === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+      }
+      ASSERT_skip(a);
+    }
+
+    if (pointer >= len) return BAD_ESCAPE;
+    let b = peek();
+    if (!isHex(b)) {
+      return b === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+    }
+    ASSERT_skip(b);
+
+    if (pointer >= len) return BAD_ESCAPE;
+    let c = peek();
+    if (!isHex(c)) {
+      return c === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+    }
+    ASSERT_skip(c);
+
+    if (pointer >= len) return BAD_ESCAPE;
+    let d = peek();
+    if (!isHex(d)) {
+      return d === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+    }
+    ASSERT_skip(d);
+
+    if (pointer >= len) return BAD_ESCAPE;
+    let e = peek();
+    if (!isHex(e)) {
+      return e === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+    }
+    ASSERT_skip(e);
+
+    if (pointer >= len) return BAD_ESCAPE;
+    let f = peek();
+    if (!isHex(f)) {
+      return f === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+    }
+    ASSERT_skip(f);
+
+    let codePoint = hexToNum(a) << 20 | hexToNum(b) << 16 | hexToNum(c) << 12 | hexToNum(d) << 8 | hexToNum(e) << 4 | hexToNum(f);
+    // the total may not exceed 0x10ffff
+    if (codePoint > 0x10ffff) return BAD_ESCAPE;
+    if (pointer >= len) return BAD_ESCAPE;
+    if (peek() !== $$CURLY_R_7D) return BAD_ESCAPE;
+    return GOOD_ESCAPE;
+  }
+
+  function parseRegexCharClass() {
+    // parse a character class
+    // the problem is a combination of;
+    // - ranges
+    // - u-flag enabling surrogate pairs
+    // - surrogate heads and tails can appear without the other without error
+    // - flags only known after the body is parsed
+    // this leads to situations where the same dash may mean a range with
+    // the u-flag and it may mean an actual dash without the u-flag and
+    // vice versa. and you wont know until you parsed the flags whether
+    // which case to enforce.
+    // the other problem is that surrogates cause you to need the next
+    // character for u-mode before confirming ranges but not needing this
+    // without u-mode.
+
+    let prev = 0;
+    let surrogate = 0; // current surrogate if prev is a head and c is a tail
+    let isSurrogate = false;
+    let isSurrogateHead = false;
+    let wasSurrogate = true; // start at surrogate boundary
+    let wasSurrogateHead = false; // there was no prev char
+    let urangeOpen = false; // we have not yet seen a range dash in umode
+    let urangeLeft = 0; // track codepoint of left of range
+    let nrangeOpen = false; // we have not yet seen a range dash in no-umode
+    let nrangeLeft = 0; // track codeunit of left of range
+
+    let flagState = ALWAYS_GOOD;
+
+    let n = 0;
+    while (pointer < len) {
+      let c = peek();
+//console.log(n, 'pointer=',pointer,': c=',c,',flag:',flagState)
+      switch (c) {
+        case $$SQUARE_R_5D:
+          ASSERT_skip($$SQUARE_R_5D);
+
+          // code point range may be open if the rhs was a surrogate head.
+          // that's the only range case that needs to be checked here.
+          if (urangeOpen && wasSurrogateHead && (urangeLeft === CHARCLASS_BAD_RANGE || prev === CHARCLASS_BAD_RANGE || urangeLeft > prev)) {
+            if (flagState === GOOD_WITH_U_FLAG) return ALWAYS_BAD;
+            if (flagState === ALWAYS_BAD) return ALWAYS_BAD;
+            return GOOD_SANS_U_FLAG;
+          }
+
+          return flagState;
+
+        case $$BACKSLASH_5C:
+          ASSERT_skip($$BACKSLASH_5C);
+          c = parseClassCharEscape(); // note: this may lead to c being >0xffff !!
+
+          if (c === CHARCLASS_BAD) {
+            flagState = ALWAYS_BAD;
+          } else if (c & CHARCLASS_BADN) {
+            c ^= CHARCLASS_BADN; // remove the badn flag
+            ASSERT(c <= 0x110000, 'c should now be valid unicode range or one above for error');
+            if (c === CHARCLASS_BAD) flagState = ALWAYS_BAD;
+            else if (flagState === ALWAYS_GOOD) flagState = GOOD_WITH_U_FLAG;
+            else if (flagState === GOOD_SANS_U_FLAG) flagState = ALWAYS_BAD;
+          //} else if (c === CHARCLASS_BAD_RANGE) { // check at range time
+          //  console.log('got a class escape that is only bad in range')
+          }
+//console.log(' - escaped; c=',c, ', flagState=',flagState)
+          break;
+
+        case $$CR_0D:
+        case $$LF_0A:
+        case $$PS_2028:
+        case $$LS_2029:
+          return ALWAYS_BAD; // same as end of input
+
+        default:
+          ASSERT_skip(c);
+      }
+
+      if (wasSurrogateHead && isSurrogateTail(c)) {
+        isSurrogate = true;
+        isSurrogateHead = false;
+        surrogate = getSurrogate(prev, c);
+      } else if (!wasSurrogate && !wasSurrogateHead && (c & 0x1fffff) > 0xffff) { // long unicode escape
+        isSurrogate = true;
+        isSurrogateHead = false;
+        surrogate = c;
+      } else {
+        isSurrogate = false;
+        isSurrogateHead = isSurrogateLead(c);
+      }
+
+//console.log(' - result before; c=', c, '(0x' + c.toString(16), '), is surrogate?', isSurrogate, ', was surrogate?', wasSurrogate, ', surrogate:', surrogate, ', isSurrogateHead?', isSurrogateHead, ', wasSurrogateHead?', wasSurrogateHead, ', urangeOpen:',urangeOpen,', nrangeOpen:',nrangeOpen, ', urangeLeft=', urangeLeft, ', nrangeLeft=', nrangeLeft)
+
+      if (urangeOpen) {
+//console.log(' - urange is open, check surrogate cases:', isSurrogateHead, wasSurrogateHead);
+        // if c is a head we must check the next char for being a tail before we can determine the code _point_
+        // otoh, if c is a tail or a non-surrogate then we can now safely do range checks since the codepoint wont change
+        // if this is a head and the previous was too then the previous was the rhs on its own and we check `prev` instead
+        let urangeRight = isSurrogate ? surrogate : wasSurrogateHead ? prev : c;
+        if (!isSurrogateHead || wasSurrogateHead) {
+//console.log(' - c is code point boundary;', urangeLeft, '>', (isSurrogate ? surrogate : wasSurrogateHead?prev:c), urangeLeft > (isSurrogate ? surrogate : wasSurrogateHead?prev:c))
+          urangeOpen = false;
+          if (urangeLeft === CHARCLASS_BAD_RANGE || urangeRight === CHARCLASS_BAD_RANGE || urangeLeft > urangeRight) {
+            if (flagState === GOOD_WITH_U_FLAG) flagState = ALWAYS_BAD;
+            else if (flagState === ALWAYS_BAD) flagState = ALWAYS_BAD;
+            else flagState = GOOD_SANS_U_FLAG;
+          }
+        }
+      } else if (c === $$DASH_2D && n > 0) {
+        urangeOpen = true;
+      } else {
+        urangeLeft = isSurrogate ? surrogate : c;
+      }
+
+      if (nrangeOpen) {
+        nrangeOpen = false;
+//console.log(' - nrange is open');
+        if (nrangeLeft === CHARCLASS_BAD_RANGE || c === CHARCLASS_BAD_RANGE || nrangeLeft > c) {
+          if (flagState === GOOD_SANS_U_FLAG) flagState = ALWAYS_BAD;
+          else if (flagState === ALWAYS_BAD) flagState = ALWAYS_BAD;
+          else flagState = GOOD_WITH_U_FLAG;
+        }
+      } else if (c === $$DASH_2D && n > 0) {
+        nrangeOpen = true;
+      } else {
+        nrangeLeft = c;
+//console.log(n,': nrangeLeft now', nrangeLeft);
+      }
+
+//console.log(' - result before; c=', c, '(0x' + c.toString(16), '), is surrogate?', isSurrogate, ', was surrogate?', wasSurrogate, ', surrogate:', surrogate, ', isSurrogateHead?', isSurrogateHead, ', wasSurrogateHead?', wasSurrogateHead, ', urangeOpen:',urangeOpen,', nrangeOpen:',nrangeOpen, ', urangeLeft=', urangeLeft, ', nrangeLeft=', nrangeLeft)
+
+      wasSurrogate = isSurrogate;
+      wasSurrogateHead = isSurrogateHead;
+      prev = c;
+
+      ++n;
+    }
+    return ALWAYS_BAD; // no end
+  }
+  function parseClassCharEscape() {
+    // atom escape is slightly different from charclass escape
+
+    if (pointer > len) return -1;
+    let c = peek();
+
+    switch (c) {
+      case $$U_75:
+        ASSERT_skip($$U_75);
+        return parseRegexUnicodeEscape2();
+
+      case $$X_78:
+        ASSERT_skip($$X_78);
+        if (pointer >= len-1) return CHARCLASS_BAD;
+        let a = peek();
+        if (!isAsciiNumber(a)) return CHARCLASS_BAD;
+        ASSERT_skip(a);
+        let b = peek();
+        if (!isAsciiNumber(b)) return CHARCLASS_BAD;
+        ASSERT_skip(b);
+        return (hexToNum(a) << 4) | hexToNum(b);
+
+      // char escapes
+      case $$C_63:
+        ASSERT_skip($$C_63);
+        if (pointer < len) {
+          let d = peek();
+          if (isAsciiLetter(d)) {
+            ASSERT_skip(d);
+            return d;
+          }
+        }
+        return CHARCLASS_BAD;
+
+      // control escapes
+      case $$B_62: // "Return the CharSet containing the single character <BS> U+0008 (BACKSPACE)."
+        ASSERT_skip($$B_62);
+        return 0x0008;
+      case $$F_66:
+        ASSERT_skip($$F_66);
+        return 0x000C;
+      case $$N_6E:
+        ASSERT_skip($$N_6E);
+        return 0x000A;
+      case $$R_72:
+        ASSERT_skip($$R_72);
+        return 0x000D;
+      case $$T_74:
+        ASSERT_skip($$T_74);
+        return 0x0009;
+      case $$V_76:
+        ASSERT_skip($$V_76);
+        return 0x000B;
+
+      // char class escapes
+      case $$D_64:
+      case $$D_UC_44:
+      case $$S_73:
+      case $$S_UC_53:
+      case $$W_77:
+      case $$W_UC_57:
+        // "an error occurs if either ClassAtom does not represent a single character (for example, if one is \w)
+        // but this only applies to ranges... so we need to create a special token for this to make the distinction
+        // because we dont know right now whether c is part of a range or not. in fact it may only be part of a
+        // range with or without u flag but not the other. so difficult.
+        ASSERT_skip(c);
+        return CHARCLASS_BAD_RANGE;
+
+      // digits
+      case $$0_30:
+      case $$1_31:
+      case $$2_32:
+      case $$3_33:
+      case $$4_34:
+      case $$5_35:
+      case $$6_36:
+      case $$7_37:
+      case $$8_38:
+      case $$9_39:
+        ASSERT_skip(c);
+        // cannot be followed by another digit
+        if (pointer < len && isAsciiNumber(peek())) return CHARCLASS_BAD;
+        return c - $$0_30;
+
+      // syntax chars
+      case $$XOR_5E:
+      case $$$_24:
+      case $$BACKSLASH_5C:
+      case $$DOT_2E:
+      case $$STAR_2A:
+      case $$PLUS_2B:
+      case $$QMARK_3F:
+      case $$PAREN_L_28:
+      case $$PAREN_R_29:
+      case $$SQUARE_L_5B:
+      case $$SQUARE_R_5D:
+      case $$CURLY_L_7B:
+      case $$CURLY_R_7D:
+      case $$OR_7C:
+        ASSERT_skip(c);
+        return c;
+
+      case $$DASH_2D:
+        ASSERT_skip($$DASH_2D);
+        // only valid with u-flag!
+        return $$DASH_2D | CHARCLASS_BADN;
+    }
+
+    // bad escapes
+    ASSERT_skip(c);
+    return CHARCLASS_BAD;
+  }
+  function hexToNum(c) {
+    ASSERT(isHex(c), 'hexToNum c should be verified hex');
+    if (c <= $$9_39) return c - $$0_30;
+    if (c <= $$Z_UC_5A) return (c - $$A_UC_41) + 10;
+    return (c - $$A_61) + 10;
+  }
+  function parseRegexFlags() {
+    // there are 5 valid flags and in unicode mode each flag may only occur once
+    // 12.2.8.1: "It is a Syntax Error if FlagText of RegularExpressionLiteral contains any code points other than "g", "i", "m", "u", or"y", or if it contains the same code point more than once."
+
+    let g = 0;
+    let i = 0;
+    let m = 0;
+    let u = 0;
+    let y = 0;
+    while (pointer < len) {
+      let c = peek();
+      switch (c) {
+        case $$G_67:
+          ++g;
+          break;
+        case $$I_69:
+          ++i;
+          break;
+        case $$M_6D:
+          ++m;
+          break;
+        case $$U_75:
+          ++u; // \\u{...} is only supported with this flag and an early error otherwise
+          break;
+        case $$Y_79:
+          ++y;
+          break;
+        default:
+          return (g|i|m|u|y) > 1 ? ALWAYS_BAD : u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
+      }
+      ASSERT_skip(c);
+    }
+    // the error is the (slightly and very theoretical) slow path because it leads to an error anyways
+    // if any flags occurred more than once, the or below will result in >1
+    return (g|i|m|u|y) > 1 ? ALWAYS_BAD : u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
+  }
+  function parseRegexCurlyQuantifier() {
+    // just parsed the curly
+
+    // next should be either a comma or a digit
+    if (pointer >= len) return false;
+    let hasDigit = false;
+    let c;
+    do {
+      c = peek();
+      if (!isAsciiNumber(c)) break;
+      ASSERT_skip(c);
+      hasDigit = true;
+    } while (pointer < len);
+    if (c === $$COMMA_2C) {
+      ASSERT_skip($$COMMA_2C);
+      do {
+        c = peek();
+        if (!isAsciiNumber(c)) break;
+        ASSERT_skip(c);
+        hasDigit = true;
+      } while (pointer < len);
+    }
+    if (c === $$CURLY_R_7D) {
+      ASSERT_skip($$CURLY_R_7D);
+      return hasDigit;
+    }
+    return false;
+  }
+  function isSurrogateLead(c) {
+    // "A sequence of two code units, where the first code unit c1 is in the range 0xD800 to 0xDBFF and the second code unit c2 is in the range 0xDC00 to 0xDFFF, is a surrogate pair and is interpreted as a code point with the value (c1 - 0xD800) × 0x400 + (c2 - 0xDC00) + 0x10000. (See 10.1.2)
+    return c >= 0xD800 && c <= 0xDBFF;
+  }
+  function isSurrogateTail(c) {
+    // "A sequence of two code units, where the first code unit c1 is in the range 0xD800 to 0xDBFF and the second code unit c2 is in the range 0xDC00 to 0xDFFF, is a surrogate pair and is interpreted as a code point with the value (c1 - 0xD800) × 0x400 + (c2 - 0xDC00) + 0x10000. (See 10.1.2)
+    return c >= 0xDC00 && c <= 0xDFFF;
+  }
+  function getSurrogate(c1, c2) {
+    // "A sequence of two code units, where the first code unit c1 is in the range 0xD800 to 0xDBFF and the second code unit c2 is in the range 0xDC00 to 0xDFFF, is a surrogate pair and is interpreted as a code point with the value (c1 - 0xD800) × 0x400 + (c2 - 0xDC00) + 0x10000. (See 10.1.2)
+    return (c1 - 0xD800) * 0x400 + (c2 - 0xDC00) + 0x10000;
+  }
+
+  function parseRegexUnicodeEscape2() {
+    // only if unicode flag
+    // - surrogate pairs may matter
+    // - class char status matters
+    // - long unicode escape is allowed
+
+    // we dont know whether u-mode is enabled until after we've parsed the flags
+    // so we must parse as loose as possible and keep track of parsing specific u-flag or non-u-flag stuff
+    // then after flag parsing confirm that the flag presence conforms to expectations
+
+    if (pointer >= len) return CHARCLASS_BAD;
+    let c = peek(); // dont read. we dont want to consume a bad \n here
+    if (c === $$CURLY_L_7B) {
+      ASSERT_skip($$CURLY_L_7B);
+      let r = parseRegexUnicodeEscapeVary2();
+      if (r !== CHARCLASS_BAD || (pointer < len && peeky($$CURLY_R_7D))) ASSERT_skip($$CURLY_R_7D);
+      return r;
+    } else {
+      return parseRegexUnicodeEscapeQuad2(c);
+    }
+  }
+  function parseRegexUnicodeEscapeQuad2(a) {
+    // we've already consumed a char in `a`. we must consume 3 more chars for this quad unicode escape
+    if (pointer >= len-3) return CHARCLASS_BAD;
+    let b = peekd(1);
+    let c = peekd(2);
+    let d = peekd(3);
+
+    // if this is a bad escape then dont consume the chars. one of them could be a closing quote
+    if (isHex(a) && isHex(b) && isHex(c) && isHex(d)) {
+      // okay, _now_ consume them
+      ASSERT_skip(a);
+      ASSERT_skip(b);
+      ASSERT_skip(c);
+      ASSERT_skip(d);
+
+      let r = (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d);
+      //console.log(r, hexToNum(a).toString(16) + hexToNum(b).toString(16) + hexToNum(c).toString(16) + hexToNum(d).toString(16),'->', r.toString(16))
+      return r;
+    } else {
+      return CHARCLASS_BAD;
+    }
+  }
+  function parseRegexUnicodeEscapeVary2() {
+    // "It is a Syntax Error if the MV of HexDigits > 1114111."
+    // this means the actual hex value cannot exceed 6 chars (0x10ffff). however,
+    // it can have any number of leading zeroes so we still need to loop
+
+    // must at least parse one hex digit (but it may be invalid so we can't read())
+    if (pointer >= len) return CHARCLASS_BAD;  // first one is mandatory
+    let a = peek();
+    if (!isHex(a)) return CHARCLASS_BAD; // first one is mandatory
+    ASSERT_skip(a);
+
+    // skip leading zeroes if there are any
+    if (a === $$0_30) {
+      if (pointer >= len) return CHARCLASS_BAD;
+      a = skipZeroes();
+      if (!isHex(a)) {
+        // note: we already asserted a zero
+        return a === $$CURLY_R_7D ? 0 | CHARCLASS_BADN : CHARCLASS_BAD;
+      }
+      ASSERT_skip(a);
+    }
+
+    if (pointer >= len) return CHARCLASS_BAD;
+    let b = peek();
+    if (!isHex(b)) {
+      if (b === $$CURLY_R_7D) return hexToNum(a) | CHARCLASS_BADN;
+      return CHARCLASS_BAD;
+    }
+    ASSERT_skip(b);
+
+    if (pointer >= len) return CHARCLASS_BAD;
+    let c = peek();
+    if (!isHex(c)) {
+      if (c === $$CURLY_R_7D) return (hexToNum(a) << 4) | hexToNum(b) | CHARCLASS_BADN;
+      return CHARCLASS_BAD;
+    }
+    ASSERT_skip(c);
+
+    if (pointer >= len) return CHARCLASS_BAD;
+    let d = peek();
+    if (!isHex(d)) {
+      if (d === $$CURLY_R_7D) return (hexToNum(a) << 8) | (hexToNum(b) << 4) | hexToNum(c) | CHARCLASS_BADN;
+      return CHARCLASS_BAD;
+    }
+    ASSERT_skip(d);
+
+    if (pointer >= len) return CHARCLASS_BAD;
+    let e = peek();
+    if (!isHex(e)) {
+      if (e === $$CURLY_R_7D) return (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d) | CHARCLASS_BADN;
+      return CHARCLASS_BAD;
+    }
+    ASSERT_skip(e);
+
+    if (pointer >= len) return CHARCLASS_BAD;
+    let f = peek();
+    if (!isHex(f)) {
+      if (f === $$CURLY_R_7D) return (hexToNum(a) << 16) | (hexToNum(b) << 12) | (hexToNum(c) << 8) | (hexToNum(d) << 4) | hexToNum(e) | CHARCLASS_BADN;
+      return CHARCLASS_BAD;
+    }
+    ASSERT_skip(f);
+
+    if (pointer >= len) return CHARCLASS_BAD;
+    if (peek() !== $$CURLY_R_7D) return CHARCLASS_BAD;
+
+    let r = (hexToNum(a) << 20) | (hexToNum(b) << 16) | (hexToNum(c) << 12) | (hexToNum(d) << 8) | (hexToNum(e) << 4) | hexToNum(f);
+    return Math.min(0x110000, r) | CHARCLASS_BADN;
+  }
+
   function parseOtherUnicode(c) {
     switch (c) {
       case $$BOM_FEFF:
@@ -1091,6 +1983,7 @@ function debug_toktype(type) {
     case $NUMBER_OLD: return 'NUMBER_OLD';
     case $PUNCTUATOR: return 'PUNCTUATOR';
     case $REGEX: return 'REGEX';
+    case $REGEXU: return 'REGEXU';
     case $SPACE: return 'SPACE';
     case $STRING: return 'STRING';
     case $STRING_DOUBLE: return 'STRING_DOUBLE';
@@ -1125,6 +2018,7 @@ module.exports = { ZeTokenizer,
   $NUMBER_OLD,
   $PUNCTUATOR,
   $REGEX,
+  $REGEXU,
   $SPACE,
   $STRING,
   $STRING_DOUBLE,

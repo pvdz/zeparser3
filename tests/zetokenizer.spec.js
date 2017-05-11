@@ -26,6 +26,7 @@ let { ZeTokenizer,
   $NUMBER_OLD,
   $PUNCTUATOR,
   $REGEX,
+  $REGEXU,
   $SPACE,
   $STRING,
   $STRING_DOUBLE,
@@ -404,6 +405,8 @@ let strings_double = [
   [`"\\x`, $ERROR, "incomplete hex escape at end of eol / eof", "suffixsp"],
   [[`"\\xq0"`, `"\\xq1"`, `"\\xq2"`, `"\\xq3"`, `"\\xq4"`, `"\\xq5"`, `"\\xq6"`, `"\\xq7"`, `"\\xq8"`, `"\\xq9"`, `"\\xqa"`, `"\\xqb"`, `"\\xqc"`, `"\\xqd"`, `"\\xqe"`, `"\\xqf"`, `"\\xqA"`, `"\\xqB"`, `"\\xqC"`, `"\\xqD"`, `"\\xqE"`, `"\\xqF"`], $ERROR, "incomplete hex character 1"],
   [[`"\\x0q"`, `"\\x1q"`, `"\\x2q"`, `"\\x3q"`, `"\\x4q"`, `"\\x5q"`, `"\\x6q"`, `"\\x7q"`, `"\\x8q"`, `"\\x9q"`, `"\\xaq"`, `"\\xbq"`, `"\\xcq"`, `"\\xdq"`, `"\\xeq"`, `"\\xfq"`, `"\\xAq"`, `"\\xBq"`, `"\\xCq"`, `"\\xDq"`, `"\\xEq"`, `"\\xFq"`], $ERROR, "incomplete hex character 2"],
+
+  // "Two IdentiᲪierName that are canonically equivalent according to the Unicode standard are not equal unless, after replacement of each UnicodeEscapeSequence, they are represented by the exact same sequence of code points."
 ];
 if (strings_single.length !== strings_double.length) console.error('Warning: Inconsistent! Make sure string tests are synced between single and double quoted strings!');
 let identifiers = [
@@ -444,6 +447,469 @@ let identifiers = [
   [[`abc\\u007Xvwxyz`, `abc\\u007Xvwxyz`, `abc\\u00Xvwxyz`, `abc\\u0Xvwxyz`, `abc\\uXvwxyz`, `abc\\Xvwxyz`], $ERROR, 'idents that start with invalid chars in an escape and have a tail'],
   [[`\\u{000000000000000000070}bc`, `a\\u{0000000000000000000071}c`, `ab\\u{0000000000000000000072}`], $IDENT, 'leading zero padding'],
 ];
+let regexes = [
+  [`/abc/`, $REGEX, SLASH_REGEX],
+  [`/abc`, $ERROR, SLASH_REGEX, 'eof before closed regex', 'suffixsp'],
+
+  // or
+  [`/a|b/`, $REGEX, SLASH_REGEX],
+  [[`/|a/`, `/a|/`, `/|/`, '/a||/'], $ERROR, SLASH_REGEX, 'bad OR because no atoms'],
+  [[`/|a`, `/a|`, `/|`, '/a||'], $ERROR, SLASH_REGEX, 'bad OR because eof/eol', 'suffixsp'],
+
+  // simple atoms and quantifiers
+  [[`/^abc/`, `/abc$/`, `/a.c/`], $REGEX, SLASH_REGEX, 'simple atoms'],
+  [[`/^/`, `/ab^cd/`, `/abc^/`, `/abc^abc/`, `/$/`, `/$abc/`, `/abc$abc/`], $REGEX, SLASH_REGEX, 'simple atoms where you dont usually see them'],
+  [[`/^`, `/abc$`, `/a.`], $ERROR, SLASH_REGEX, 'eol/eof after simple atoms', 'suffixsp'],
+  [[`/a*/`, `/a?/`, `/a+/`], $REGEX, SLASH_REGEX, 'simple quantifiers'],
+  [[`/a*b/`, `/a?b/`, `/a+b/`], $REGEX, SLASH_REGEX, 'simple quantifiers with suffix'],
+  [[`/a*`, `/a?`, `/a+`], $ERROR, SLASH_REGEX, 'eol/eof after simple quantifiers', 'suffixsp'],
+  [[`/a*?`, `/a?*`, `/a+?`], $ERROR, SLASH_REGEX, 'eol/eof after simple non-greedy quantifiers', 'suffixsp'],
+  [[`/?/`, `/+/`, `/?a/`, `/+a/`, `/??/`, `/+?/`, `/|*/`, `/|?/`, `/|+/`], $ERROR, SLASH_REGEX, 'simple quantifiers in an invalid place'],
+  [[`/*/`, `/*`, `/*a/`, `/*a`], $ERROR, SLASH_REGEX, 'actually a comment, still invalid at eof', ['suffixls','suffixcr','suffcrlf','suffixsp']],
+  [[`/?`, `/+`, `/?a`, `/+a`, `/??`, `/+?`, `/|*`, `/|?`, `/|+`], $ERROR, SLASH_REGEX, 'simple quantifiers in an invalid place with eol/eof', 'suffixsp'],
+  [[`/a**/`, `/a?+/`, `/a++/`], $ERROR, SLASH_REGEX, 'quantifing a quantifier'],
+  [[`/a**`, `/a?*`, `/a++`], $ERROR, SLASH_REGEX, 'quantifing a quantifier at eol/eof', 'suffixsp'],
+  [`/a??/`, $REGEX, SLASH_REGEX, 'quantifing a quantifier', 'suffixsp'],
+  [`/a??`, $ERROR, SLASH_REGEX, 'quantifing a quantifier at eol/eof', 'suffixsp'],
+
+  // most permutations with {d,d}
+  [[`/a{0}/`, `/a{1}/`, `/a{2}/`, `/a{3}/`, `/a{4}/`, `/a{5}/`, `/a{6}/`, `/a{7}/`, `/a{8}/`, `/a{9}/`], $REGEX, SLASH_REGEX],
+  [[`/a{01}/`, `/a{12}/`, `/a{23}/`, `/a{34}/`, `/a{45}/`, `/a{56}/`, `/a{67}/`, `/a{78}/`, `/a{89}/`, `/a{90}/`], $REGEX, SLASH_REGEX],
+  [[`/a{0,}/`, `/a{1,}/`, `/a{2,}/`, `/a{3,}/`, `/a{4,}/`, `/a{5,}/`, `/a{6,}/`, `/a{7,}/`, `/a{8,}/`, `/a{9,}/`], $REGEX, SLASH_REGEX],
+  [[`/a{01,}/`, `/a{12,}/`, `/a{23,}/`, `/a{34,}/`, `/a{45,}/`, `/a{56,}/`, `/a{67,}/`, `/a{78,}/`, `/a{89,}/`, `/a{90,}/`], $REGEX, SLASH_REGEX],
+  [[`/a{0,0}/`, `/a{1,1}/`, `/a{2,2}/`, `/a{3,3}/`, `/a{4,4}/`, `/a{5,5}/`, `/a{6,6}/`, `/a{7,7}/`, `/a{8,8}/`, `/a{9,9}/`], $REGEX, SLASH_REGEX],
+  [[`/a{01,0}/`, `/a{12,1}/`, `/a{23,2}/`, `/a{34,3}/`, `/a{45,4}/`, `/a{56,5}/`, `/a{67,6}/`, `/a{78,7}/`, `/a{89,8}/`, `/a{90,9}/`], $REGEX, SLASH_REGEX],
+  [[`/a{0,05}/`, `/a{1,16}/`, `/a{2,27}/`, `/a{3,38}/`, `/a{4,49}/`, `/a{5,50}/`, `/a{6,61}/`, `/a{7,72}/`, `/a{8,83}/`, `/a{9,94}/`], $REGEX, SLASH_REGEX],
+  [[`/a{01,05}/`, `/a{12,16}/`, `/a{23,27}/`, `/a{34,38}/`, `/a{45,49}/`, `/a{56,50}/`, `/a{67,61}/`, `/a{78,72}/`, `/a{89,83}/`, `/a{90,94}/`], $REGEX, SLASH_REGEX],
+  [[`/a{,0}/`, `/a{,1}/`, `/a{,2}/`, `/a{,3}/`, `/a{,4}/`, `/a{,5}/`, `/a{,6}/`, `/a{,7}/`, `/a{,8}/`, `/a{,9}/`], $REGEX, SLASH_REGEX],
+  [[`/a{,05}/`, `/a{,16}/`, `/a{,27}/`, `/a{,38}/`, `/a{,49}/`, `/a{,50}/`, `/a{,61}/`, `/a{,72}/`, `/a{,83}/`, `/a{,94}/`], $REGEX, SLASH_REGEX],
+  [['/a{ 1}/', '/a{1 }/', '/a{1, 1}/', '/a{ 1, 1}/', '/a{1 ,1}/', '/a{ 1 , 1}/', '/a{1,1 }/', '/a{1, 1 }/', '/a{ 1, 1 }/', '/a{ 1 , 1 }/'], $ERROR, SLASH_REGEX, 'no spaces allowed in quantifier'],
+
+  // flags
+  [['/foo/g', '/foo/i', '/foo/m', '/foo/y'], $REGEX, SLASH_REGEX],
+  [['/foo/gg', '/foo/ii', '/foo/mm', '/foo/yy'], $ERROR, SLASH_REGEX],
+  [['/foo/ig', '/foo/mi', '/foo/gy'], $REGEX, SLASH_REGEX],
+  [['/foo/gmi', '/foo/igy'], $REGEX, SLASH_REGEX],
+  [['/foo/gmmi', '/foo/ggymi', '/foo/myiy', '/foo/igyi'], $ERROR, SLASH_REGEX],
+
+  // escapes (only \f \n \r \t \v should work)
+  [['/\\d/', '/\\D/', '/\\f/', '/\\n/', '/\\r/', '/\\s/', '/\\S/', '/\\t/', '/\\v/', '/\\w/', '/\\W/'], $REGEX, SLASH_REGEX, 'only escaping a single letter'],
+  [['/abc\\d/', '/abc\\D/', '/abc\\f/', '/abc\\n/', '/abc\\r/', '/abc\\s/', '/abc\\S/', '/abc\\t/', '/abc\\v/', '/abc\\w/', '/abc\\W/'], $REGEX, SLASH_REGEX, 'escaping a prefixed single letter'],
+  [['/\\fabcd/', '/\\dabcd/', '/\\Dabcd/', '/\\nabcd/', '/\\rabcd/', '/\\sabcd/', '/\\Sabcd/', '/\\tabcd/', '/\\vabcd/', '/\\wabcd/', '/\\Wabcd/'], $REGEX, SLASH_REGEX, 'escaping a suffixed single letter'],
+  [['/abc\\fdeff/', '/abc\\ddeff/', '/abc\\Ddeff/', '/abc\\ndeff/', '/abc\\rdeff/', '/abc\\sdeff/', '/abc\\Sdeff/', '/abc\\tdeff/', '/abc\\vdeff/', '/abc\\wdeff/', '/abc\\Wdeff/'], $REGEX, SLASH_REGEX, 'escaping a single letter in the middle'],
+  // the other char escapes are errors...
+  [['/\\a/', '/\\e/', '/\\g/', '/\\h/', '/\\i/', '/\\j/', '/\\k/', '/\\l/', '/\\m/', '/\\o/', '/\\p/', '/\\q/', '/\\u/', '/\\x/', '/\\y/', '/\\z/'], $ERROR, SLASH_REGEX, 'only escaping a single lc letter'],
+  [['/\\A/', '/\\E/', '/\\F/', '/\\G/', '/\\H/', '/\\I/', '/\\J/', '/\\K/', '/\\L/', '/\\M/', '/\\N/', '/\\O/', '/\\P/', '/\\Q/', '/\\R/', '/\\T/', '/\\U/', '/\\V/', '/\\X/', '/\\Y/', '/\\Z/'], $ERROR, SLASH_REGEX, 'only escaping a single uc letter'],
+  [['/abc\\a/', '/abc\\e/', '/abc\\g/', '/abc\\h/', '/abc\\i/', '/abc\\j/', '/abc\\k/', '/abc\\l/', '/abc\\m/', '/abc\\o/', '/abc\\p/', '/abc\\q/', '/abc\\u/', '/abc\\x/', '/abc\\y/', '/abc\\z/'], $ERROR, SLASH_REGEX, 'escaping a prefixed single lc letter'],
+  [['/abc\\A/', '/abc\\E/', '/abc\\F/', '/abc\\G/', '/abc\\H/', '/abc\\I/', '/abc\\J/', '/abc\\K/', '/abc\\L/', '/abc\\M/', '/abc\\N/', '/abc\\O/', '/abc\\P/', '/abc\\Q/', '/abc\\R/', '/abc\\T/', '/abc\\U/', '/abc\\V/', '/abc\\X/', '/abc\\Y/', '/abc\\Z/'], $ERROR, SLASH_REGEX, 'escaping a prefixed single uc letter'],
+  [['/\\aabcd/', '/\\eabcd/', '/\\gabcd/', '/\\habcd/', '/\\iabcd/', '/\\jabcd/', '/\\kabcd/', '/\\labcd/', '/\\mabcd/', '/\\oabcd/', '/\\pabcd/', '/\\qabcd/', '/\\xabcd/', '/\\yabcd/', '/\\zabcd/'], $ERROR, SLASH_REGEX, 'escaping a suffixed single lc letter'],
+  [['/\\Aabcd/', '/\\Cabcd/', '/\\Eabcd/', '/\\Fabcd/', '/\\Gabcd/', '/\\Habcd/', '/\\Iabcd/', '/\\Jabcd/', '/\\Kabcd/', '/\\Labcd/', '/\\Mabcd/', '/\\Nabcd/', '/\\Oabcd/', '/\\Pabcd/', '/\\Qabcd/', '/\\Rabcd/', '/\\Tabcd/', '/\\Uabcd/', '/\\Vabcd/', '/\\Xabcd/', '/\\Yabcd/', '/\\Zabcd/'], $ERROR, SLASH_REGEX, 'escaping a suffixed single uc letter'],
+  [['/abc\\adeff/', '/abc\\gdeff/', '/abc\\hdeff/', '/abc\\ideff/', '/abc\\jdeff/', '/abc\\kdeff/', '/abc\\ldeff/', '/abc\\mdeff/', '/abc\\odeff/', '/abc\\pdeff/', '/abc\\qdeff/', '/abc\\xdeff/', '/abc\\ydeff/', '/abc\\zdeff/'], $ERROR, SLASH_REGEX, 'escaping a single lc letter in the middle'],
+  [['/abc\\Adeff/', '/abc\\Cdeff/', '/abc\\Edeff/', '/abc\\Fdeff/', '/abc\\Gdeff/', '/abc\\Hdeff/', '/abc\\Ideff/', '/abc\\Jdeff/', '/abc\\Kdeff/', '/abc\\Ldeff/', '/abc\\Mdeff/', '/abc\\Ndeff/', '/abc\\Odeff/', '/abc\\Pdeff/', '/abc\\Qdeff/', '/abc\\Rdeff/', '/abc\\Tdeff/', '/abc\\Udeff/', '/abc\\Vdeff/', '/abc\\Xdeff/', '/abc\\Ydeff/', '/abc\\Zdeff/'], $ERROR, SLASH_REGEX, 'escaping a single uc letter in the middle'],
+  [['/\\_/', '/abc\\_/', '/\\_abcd/', '/abc\\_abcd/'], $ERROR, SLASH_REGEX, '_ is not an escapable char'],
+  [['/\\$/', '/abc\\$/', '/\\$abcd/', '/abc\\$abcd/'], $REGEX, SLASH_REGEX, '$ is a syntax char we can escape'],
+  // escaping "syntax characters"
+  [[`/\\^/`, `/\\$/`, `/\\\\/`, `/\\./`, `/\\*/`, `/\\+/`, `/\\?/`, `/\\(/`, `/\\)/`, `/\\[/`, `/\\]/`, `/\\{/`, `/\\}/`, `/\\|/`], $REGEX, SLASH_REGEX, 'syntax char escapes'],
+  [[`/abc\\^/`, `/abc\\$/`, `/abc\\\\/`, `/abc\\./`, `/abc\\*/`, `/abc\\+/`, `/abc\\?/`, `/abc\\(/`, `/abc\\)/`, `/abc\\[/`, `/abc\\]/`, `/abc\\{/`, `/abc\\}/`, `/abc\\|/`], $REGEX, SLASH_REGEX, 'syntax char escapes with prefix'],
+  [[`/\\^def/`, `/\\$def/`, `/\\\\def/`, `/\\.def/`, `/\\*def/`, `/\\+def/`, `/\\?def/`, `/\\(def/`, `/\\)def/`, `/\\[def/`, `/\\]def/`, `/\\{def/`, `/\\}def/`, `/\\|def/`], $REGEX, SLASH_REGEX, 'syntax char escapes with suffix'],
+  [[`/\\^`, `/\\$`, `/\\\\`, `/\\.`, `/\\*`, `/\\+`, `/\\?`, `/\\(`, `/\\)`, `/\\[`, `/\\]`, `/\\{`, `/\\}`, `/\\|`], $ERROR, SLASH_REGEX, 'syntax char escapes with early eol/eof', 'suffixsp'],
+  [[`/\\'/`, `/\\"/`, `/\\\`/`], $ERROR, SLASH_REGEX, 'typical string escapes dont work in regexes'],
+  // \c<x>
+  [['/\\ca/', '/\\cb/', '/\\cd/', '/\\ce/', '/\\cf/', '/\\cg/', '/\\ch/', '/\\ci/', '/\\cj/', '/\\ck/', '/\\cl/', '/\\cm/', '/\\cn/', '/\\co/', '/\\cp/', '/\\cq/', '/\\cr/', '/\\cs/', '/\\ct/', '/\\cu/', '/\\cv/', '/\\cw/', '/\\cx/', '/\\cy/', '/\\cz/'], $REGEX, SLASH_REGEX, 'control character lc'],
+  [['/\\cA/', '/\\cB/', '/\\cD/', '/\\cE/', '/\\cF/', '/\\cG/', '/\\cH/', '/\\cI/', '/\\cJ/', '/\\cK/', '/\\cL/', '/\\cM/', '/\\cN/', '/\\cO/', '/\\cP/', '/\\cQ/', '/\\cR/', '/\\cS/', '/\\cT/', '/\\cU/', '/\\cV/', '/\\cW/', '/\\cX/', '/\\cY/', '/\\cZ/'], $REGEX, SLASH_REGEX, 'control character uc'],
+  [['/\\ca', '/\\cb', '/\\cc', '/\\cd', '/\\ce', '/\\cf', '/\\cg', '/\\ch', '/\\ci', '/\\cj', '/\\ck', '/\\cl', '/\\cm', '/\\cn', '/\\co', '/\\cp', '/\\cq', '/\\cr', '/\\cs', '/\\ct', '/\\cu', '/\\cv', '/\\cw', '/\\cx', '/\\cy', '/\\cz'], $ERROR, SLASH_REGEX, 'control character lc eol/eof', 'suffixsp'],
+  [['/\\cA', '/\\cB', '/\\cC', '/\\cD', '/\\cE', '/\\cF', '/\\cG', '/\\cH', '/\\cI', '/\\cJ', '/\\cK', '/\\cL', '/\\cM', '/\\cN', '/\\cO', '/\\cP', '/\\cQ', '/\\cR', '/\\cS', '/\\cT', '/\\cU', '/\\cV', '/\\cW', '/\\cX', '/\\cY', '/\\cZ'], $ERROR, SLASH_REGEX, 'control character uc eol/eof', 'suffixsp'],
+  // same escapes but early eol/eof/bad
+  [['/\\a', '/\\b', '/\\d', '/\\e', '/\\f', '/\\g', '/\\h', '/\\i', '/\\j', '/\\k', '/\\l', '/\\m', '/\\n', '/\\o', '/\\p', '/\\q', '/\\r', '/\\s', '/\\t', '/\\u', '/\\v', '/\\w', '/\\x', '/\\y', '/\\z'], $ERROR, SLASH_REGEX, 'only escaping a single lc letter', 'suffixsp'],
+  [['/\\A', '/\\B', '/\\D', '/\\E', '/\\F', '/\\G', '/\\H', '/\\I', '/\\J', '/\\K', '/\\L', '/\\M', '/\\N', '/\\O', '/\\P', '/\\Q', '/\\R', '/\\S', '/\\T', '/\\U', '/\\V', '/\\W', '/\\X', '/\\Y', '/\\Z'], $ERROR, SLASH_REGEX, 'only escaping a single uc letter', 'suffixsp'],
+  [['/abc\\a', '/abc\\b', '/abc\\d', '/abc\\e', '/abc\\f', '/abc\\g', '/abc\\h', '/abc\\i', '/abc\\j', '/abc\\k', '/abc\\l', '/abc\\m', '/abc\\n', '/abc\\o', '/abc\\p', '/abc\\q', '/abc\\r', '/abc\\s', '/abc\\t', '/abc\\u', '/abc\\v', '/abc\\w', '/abc\\x', '/abc\\y', '/abc\\z'], $ERROR, SLASH_REGEX, 'escaping a prefixed single lc letter', 'suffixsp'],
+  [['/abc\\A', '/abc\\B', '/abc\\D', '/abc\\E', '/abc\\F', '/abc\\G', '/abc\\H', '/abc\\I', '/abc\\J', '/abc\\K', '/abc\\L', '/abc\\M', '/abc\\N', '/abc\\O', '/abc\\P', '/abc\\Q', '/abc\\R', '/abc\\S', '/abc\\T', '/abc\\U', '/abc\\V', '/abc\\W', '/abc\\X', '/abc\\Y', '/abc\\Z'], $ERROR, SLASH_REGEX, 'escaping a prefixed single uc letter', 'suffixsp'],
+  [['/\\aabcd', '/\\babcd', '/\\cabcd', '/\\dabcd', '/\\eabcd', '/\\fabcd', '/\\gabcd', '/\\habcd', '/\\iabcd', '/\\jabcd', '/\\kabcd', '/\\labcd', '/\\mabcd', '/\\nabcd', '/\\oabcd', '/\\pabcd', '/\\qabcd', '/\\rabcd', '/\\sabcd', '/\\tabcd', '/\\uabcd', '/\\vabcd', '/\\wabcd', '/\\xabcd', '/\\yabcd', '/\\zabcd'], $ERROR, SLASH_REGEX, 'escaping a suffixed single lc letter', 'suffixsp'],
+  [['/\\Aabcd', '/\\Babcd', '/\\Cabcd', '/\\Dabcd', '/\\Eabcd', '/\\Fabcd', '/\\Gabcd', '/\\Habcd', '/\\Iabcd', '/\\Jabcd', '/\\Kabcd', '/\\Labcd', '/\\Mabcd', '/\\Nabcd', '/\\Oabcd', '/\\Pabcd', '/\\Qabcd', '/\\Rabcd', '/\\Sabcd', '/\\Tabcd', '/\\Uabcd', '/\\Vabcd', '/\\Wabcd', '/\\Xabcd', '/\\Yabcd', '/\\Zabcd'], $ERROR, SLASH_REGEX, 'escaping a suffixed single uc letter', 'suffixsp'],
+  [['/abc\\adeff', '/abc\\bdeff', '/abc\\cdeff', '/abc\\ddeff', '/abc\\edeff', '/abc\\fdeff', '/abc\\gdeff', '/abc\\hdeff', '/abc\\ideff', '/abc\\jdeff', '/abc\\kdeff', '/abc\\ldeff', '/abc\\mdeff', '/abc\\ndeff', '/abc\\odeff', '/abc\\pdeff', '/abc\\qdeff', '/abc\\rdeff', '/abc\\sdeff', '/abc\\tdeff', '/abc\\udeff', '/abc\\vdeff', '/abc\\wdeff', '/abc\\xdeff', '/abc\\ydeff', '/abc\\zdeff'], $ERROR, SLASH_REGEX, 'escaping a single lc letter in the middle', 'suffixsp'],
+  [['/abc\\Adeff', '/abc\\Bdeff', '/abc\\Cdeff', '/abc\\Ddeff', '/abc\\Edeff', '/abc\\Fdeff', '/abc\\Gdeff', '/abc\\Hdeff', '/abc\\Ideff', '/abc\\Jdeff', '/abc\\Kdeff', '/abc\\Ldeff', '/abc\\Mdeff', '/abc\\Ndeff', '/abc\\Odeff', '/abc\\Pdeff', '/abc\\Qdeff', '/abc\\Rdeff', '/abc\\Sdeff', '/abc\\Tdeff', '/abc\\Udeff', '/abc\\Vdeff', '/abc\\Wdeff', '/abc\\Xdeff', '/abc\\Ydeff', '/abc\\Zdeff'], $ERROR, SLASH_REGEX, 'escaping a single uc letter in the middle', 'suffixsp'],
+  [['/\\$', '/abc\\$', '/\\$abcd', '/abc\\$abcd', '/\\_', '/abc\\_', '/\\_abcd', '/abc\\_abcd'], $ERROR, SLASH_REGEX, '$ and _', 'suffixsp'],
+  // hex escapes
+  [['/\\x01/', '/\\x12/', '/\\x23/', '/\\x34/', '/\\x45/', '/\\x56/', '/\\x67/', '/\\x78/', '/\\x89/', '/\\x90/'], $REGEX, SLASH_REGEX, 'valid hex escapes'],
+  [['/\\x/', '/\\x0/', '/\\x1/', '/\\x2/', '/\\x3/', '/\\x4/', '/\\x5/', '/\\x6/', '/\\x7/', '/\\x8/', '/\\x9/'], $ERROR, SLASH_REGEX, 'invalid hex escape with one char'],
+  [['/\\x', '/\\x0', '/\\x1', '/\\x2', '/\\x3', '/\\x4', '/\\x5', '/\\x6', '/\\x7', '/\\x8', '/\\x9'], $ERROR, SLASH_REGEX, 'invalid hex escape with one charat eol/eof', 'suffixsp'],
+  [['/\\x01', '/\\x12', '/\\x23', '/\\x34', '/\\x45', '/\\x56', '/\\x67', '/\\x78', '/\\x89', '/\\x90'], $ERROR, SLASH_REGEX, 'hex escape at eof/eol', 'suffixsp'],
+  // digit escape
+  [['/\\0/', '/\\1/', '/\\2/', '/\\3/', '/\\4/', '/\\5/', '/\\6/', '/\\7/', '/\\8/', '/\\9/'], $REGEX, SLASH_REGEX, 'digit escapes'],
+  [['/\\00/', '/\\12/', '/\\23/', '/\\34/', '/\\45/', '/\\56/', '/\\67/', '/\\78/', '/\\89/', '/\\91/'], $ERROR, SLASH_REGEX, 'digit escapes cant be followed by another digit'],
+  [['/1\\0/', '/2\\1/', '/3\\2/', '/4\\3/', '/5\\4/', '/6\\5/', '/7\\6/', '/8\\7/', '/9\\8/', '/0\\9/'], $REGEX, SLASH_REGEX, 'digit escapes can be preceded by digits'],
+  [['/1\\0x/', '/2\\1x/', '/3\\2x/', '/4\\3x/', '/5\\4x/', '/6\\5x/', '/7\\6x/', '/8\\7x/', '/9\\8x/', '/0\\9x/'], $REGEX, SLASH_REGEX, 'digit escapes can be succeeded by nondigits'],
+  [['/\\0', '/\\1', '/\\2', '/\\3', '/\\4', '/\\5', '/\\6', '/\\7', '/\\8', '/\\9'], $ERROR, SLASH_REGEX, 'digit escapes at eol/eof', 'suffixsp'],
+  // unicode quad escapes (more relevant for u-mode but still good to have in both). see also the class escapes
+  [['/\\u1234/', '/x\\u0567/', '/\\uf89ay/', '/x\\ubcdey/'], $REGEX, SLASH_REGEX, 'non surrogate'],
+  [['/\\u', '/\\u0', '/\\uf8', '/\\ubcd', '/\\ubcde'], $ERROR, SLASH_REGEX, 'incomplete unicode quad escape eol/eof', 'suffixsp'],
+  [['/x\\u', '/x\\u0', '/x\\uf8', '/x\\ubcd', '/x\\ubcde'], $ERROR, SLASH_REGEX, 'incomplete unicode quad escape eol/eof', 'suffixsp'],
+  //// surrogate stuff
+  [['/\\ud800/', '/x\\ud810/', '/\\ud900y/', '/x\\udabcy/', '/x\\udabcy/g', '/x\\udabcy/m', '/x\\udabcy/iy'], $REGEX, SLASH_REGEX, 'lead surrogate'],
+  [['/\\ud800\\ud800/', '/x\\ud810\\ud810/', '/\\ud900\\ud900y/', '/x\\udabc\\udabcy/'], $REGEX, SLASH_REGEX, 'lead + lead surrogate'],
+  [['/\\udc00/', '/x\\udc10/', '/\\udd00y/', '/x\\udebcy/', '/x\\udebcy/g', '/x\\udebcy/im', '/x\\udebcy/y'], $REGEX, SLASH_REGEX, 'trail surrogate'],
+  [['/\\udc00\\udc00/', '/x\\udc10\\udc10/', '/\\udd00\\udd00y/', '/x\\udebc\\udebcy/', '/x\\udebc\\udebcy/i'], $REGEX, SLASH_REGEX, 'trail + trail surrogate'],
+  [['/\\ud800\\udc00/', '/x\\ud810\\udc10/', '/\\ud900\\udd00y/', '/x\\udabc\\udebcy/', '/x\\udabc\\udebcy/g'], $REGEX, SLASH_REGEX, 'lead + trail surrogate'],
+  [['/\\u1234\\ud800/', '/x\\u0567\\ud810/', '/\\uf89a\\ud900y/', '/x\\ubcde\\udabcy/', '/x\\ubcde\\udabcy/m'], $REGEX, SLASH_REGEX, 'non + lead surrogate'],
+  [['/\\u1234\\udc00/', '/x\\u0567\\udc10/', '/\\uf89a\\udd00y/', '/x\\ubcde\\udebcy/', '/x\\ubcde\\udebcy/y'], $REGEX, SLASH_REGEX, 'non + trail pair'],
+  [['/\\u1234\\u1234\\udc00/', '/x\\u0567\\u0567\\udc10/', '/\\uf89a\\uf89a\\udd00y/', '/x\\ubcde\\ubcde\\udebcy/'], $REGEX, SLASH_REGEX, 'non + non + trail pair'],
+  [['/\\u1234\\udc00\\udc00/', '/x\\u0567\\udc10\\udc10/', '/\\uf89a\\udd00\\udd00y/', '/x\\ubcde\\udebc\\udebcy/'], $REGEX, SLASH_REGEX, 'non + trail + trail pair'],
+  [['/\\ud800\\ud800\\udc00/', '/x\\ud810\\ud810\\udc10/', '/\\ud900\\ud900\\udd00y/', '/x\\udabc\\udabc\\udebcy/'], $REGEX, SLASH_REGEX, 'lead + lead + trail surrogate'],
+  [['/\\ud800\\udc00\\udc00/', '/x\\ud810\\udc10\\udc10/', '/\\ud900\\udd00\\udd00y/', '/x\\udabc\\udebc\\udebcy/'], $REGEX, SLASH_REGEX, 'lead + trail + trail surrogate'],
+  [['/\\ud800\\udc00\\ud800/', '/x\\ud810\\udc10\\ud810/', '/\\ud900\\udd00\\ud900y/', '/x\\udabc\\udebc\\udabcy/'], $REGEX, SLASH_REGEX, 'lead + trail + lead surrogate'],
+  //// unicode long escapes (all illegal without u flag)
+  [[`/\\u{0123}/`, `/\\u{4567}/`, `/\\u{89abc}/`, `/\\u{defAB}/`, `/\\u{CDEF}/`], $ERROR, SLASH_REGEX],
+  [`/prefix \\u{012345}/`, $ERROR, SLASH_REGEX],
+  [`/\\u{012345} postfix/`, $ERROR, SLASH_REGEX],
+  [`/\\u{012345}\\u{6789a}/`, $ERROR, SLASH_REGEX],
+  [[`/\\u{}/`, `/\\u{fail}/`, `/\\u{afail}/`, `/\\u{0fail}/`, `/\\u{xxxx}/`], $ERROR, SLASH_REGEX, 'long unicode escape bad contents'],
+  [[`/\\u{/`, `/\\u{a/`, `/\\u{af/`, `/\\u{012/`, `/\\u{01234/`, `/\\u{012345/`], $ERROR, SLASH_REGEX, 'unclosed long unicode escapes'],
+  [[`/\\u{1}/`, `/\\u{12}/`, `/\\u{123}/`, `/\\u{1234}/`, `/\\u{12345}/`, `/\\u{103456}/`], $ERROR, SLASH_REGEX, 'incomplete long unicode escapes'],
+  [[`/\\u{`, `/\\u{a`, `/\\u{af`, `/\\u{123`, `/\\u{1234`, `/\\u{12345`, `/\\u{103456`], $ERROR, SLASH_REGEX, 'incomplete long unicode escapes in unclosed string', 'suffixsp'],
+  [`/\\u{10ffff}/`, $ERROR, SLASH_REGEX, 'It is a Syntax Error if the MV of HexDigits > 1114111.'],
+  [`/\\u{110000}/`, $ERROR, SLASH_REGEX, 'It is a Syntax Error if the MV of HexDigits > 1114111.'],
+  [`/\\u{0000000000000000000010ffff}/`, $ERROR, SLASH_REGEX, 'must take care that the hex may still have any number of leading zeroes'],
+  [`/\\u{00000000000000000000110000}/`, $ERROR, SLASH_REGEX, 'must take care that the hex may still have any number of leading zeroes'],
+  // character classes simple
+  [[`/[]/`, `/a[]/`, `/[]b/`, `/a[]b/`], $REGEX, SLASH_REGEX, 'empty class is explicitly allowed'],
+  [[`/[^]/`, `/a[^]/`, `/[^]b/`, `/a[^]b/`], $REGEX, SLASH_REGEX, 'empty inverted class is explicitly allowed'],
+  [[`/[a]/`, `/[b]/`, `/[c]/`, `/[d]/`, `/[e]/`, `/[f]/`, `/[g]/`, `/[h]/`, `/[i]/`, `/[j]/`, `/[k]/`, `/[l]/`, `/[m]/`, `/[n]/`, `/[o]/`, `/[p]/`, `/[q]/`, `/[r]/`, `/[s]/`, `/[t]/`, `/[u]/`, `/[v]/`, `/[w]/`, `/[x]/`, `/[y]/`, `/[z]/`], $REGEX, SLASH_REGEX, 'simple char class with one char'],
+  [[`/[A]/`, `/[B]/`, `/[C]/`, `/[D]/`, `/[E]/`, `/[F]/`, `/[G]/`, `/[H]/`, `/[I]/`, `/[J]/`, `/[K]/`, `/[L]/`, `/[M]/`, `/[N]/`, `/[O]/`, `/[P]/`, `/[Q]/`, `/[R]/`, `/[S]/`, `/[T]/`, `/[U]/`, `/[V]/`, `/[W]/`, `/[X]/`, `/[Y]/`, `/[Z]/`], $REGEX, SLASH_REGEX, 'simple char class with one char'],
+  [[`/[rD]/`, `/[Kq]/`, `/[$%]/`], $REGEX, SLASH_REGEX, 'simple char class with two chars'],
+  [`/[-]/`, $REGEX, SLASH_REGEX, 'the class with just a dash should be legal'],
+  [[`/[-b]/`, `/[-bcd]/`], $REGEX, SLASH_REGEX, 'leading dash'],
+  [[`/[a-]/`, `/[abc-]/`], $REGEX, SLASH_REGEX, 'trailing dash'],
+  // character class escapes (pretty much a repeat of the previous wrapped in [] ...)
+  [[`/[\\b]/`, `/[a\\bc]/`, `/[\\bc]/`, `/[a\\bb]/`], $REGEX, SLASH_REGEX, 'class escape b'],
+  [[`/[\\-]/`, `/[a\\-c]/`, `/[\\-c]/`, `/[a\\-b]/`], $ERROR, SLASH_REGEX, 'class escape dash with valid ranges is still illegal without u flag'],
+  [`/[b\\-a]/`, $ERROR, SLASH_REGEX, 'class escape dash with invalid ranges is illegal'],
+  [['/[\\0]/', '/[\\1]/', '/[\\2]/', '/[\\3]/', '/[\\4]/', '/[\\5]/', '/[\\6]/', '/[\\7]/', '/[\\8]/', '/[\\9]/'], $REGEX, SLASH_REGEX, 'digit escapes'],
+  [['/[\\00]/', '/[\\12]/', '/[\\23]/', '/[\\34]/', '/[\\45]/', '/[\\56]/', '/[\\67]/', '/[\\78]/', '/[\\89]/', '/[\\91]/'], $ERROR, SLASH_REGEX, 'digit escapes cant be followed by another digit'],
+  [['/[1\\0]/', '/[2\\1]/', '/[3\\2]/', '/[4\\3]/', '/[5\\4]/', '/[6\\5]/', '/[7\\6]/', '/[8\\7]/', '/[9\\8]/', '/[0\\9]/'], $REGEX, SLASH_REGEX, 'digit escapes can be preceded by digits'],
+  [['/[1\\0x]/', '/[2\\1x]/', '/[3\\2x]/', '/[4\\3x]/', '/[5\\4x]/', '/[6\\5x]/', '/[7\\6x]/', '/[8\\7x]/', '/[9\\8x]/', '/[0\\9x]/'], $REGEX, SLASH_REGEX, 'digit escapes can be succeeded by nondigits'],
+  [['/[\\0', '/[\\1', '/[\\2', '/[\\3', '/[\\4', '/[\\5', '/[\\6', '/[\\7', '/[\\8', '/[\\9'], $ERROR, SLASH_REGEX, 'digit escapes at eol/eof', 'suffixsp'],
+  [['/[\\d]/', '/[\\D]/', '/[\\f]/', '/[\\n]/', '/[\\r]/', '/[\\s]/', '/[\\S]/', '/[\\t]/', '/[\\v]/', '/[\\w]/', '/[\\W]/'], $REGEX, SLASH_REGEX, 'only escaping a single letter'],
+  [['/[abc\\d]/', '/[abc\\D]/', '/[abc\\f]/', '/[abc\\n]/', '/[abc\\r]/', '/[abc\\s]/', '/[abc\\S]/', '/[abc\\t]/', '/[abc\\v]/', '/[abc\\w]/', '/[abc\\W]/'], $REGEX, SLASH_REGEX, 'escaping a prefixed single letter'],
+  [['/[\\fabcd]/', '/[\\dabcd]/', '/[\\Dabcd]/', '/[\\nabcd]/', '/[\\rabcd]/', '/[\\sabcd]/', '/[\\Sabcd]/', '/[\\tabcd]/', '/[\\vabcd]/', '/[\\wabcd]/', '/[\\Wabcd]/'], $REGEX, SLASH_REGEX, 'escaping a suffixed single letter'],
+  [['/[abc\\fdeff]/', '/[abc\\ddeff]/', '/[abc\\Ddeff]/', '/[abc\\ndeff]/', '/[abc\\rdeff]/', '/[abc\\sdeff]/', '/[abc\\Sdeff]/', '/[abc\\tdeff]/', '/[abc\\vdeff]/', '/[abc\\wdeff]/', '/[abc\\Wdeff]/'], $REGEX, SLASH_REGEX, 'escaping a single letter in the middle'],
+  [['/[\\a]/', '/[\\e]/', '/[\\g]/', '/[\\h]/', '/[\\i]/', '/[\\j]/', '/[\\k]/', '/[\\l]/', '/[\\m]/', '/[\\o]/', '/[\\p]/', '/[\\q]/', '/[\\u]/', '/[\\x]/', '/[\\y]/', '/[\\z]/'], $ERROR, SLASH_REGEX, 'only escaping a single lc letter'],
+  [['/[\\A]/', '/[\\E]/', '/[\\F]/', '/[\\G]/', '/[\\H]/', '/[\\I]/', '/[\\J]/', '/[\\K]/', '/[\\L]/', '/[\\M]/', '/[\\N]/', '/[\\O]/', '/[\\P]/', '/[\\Q]/', '/[\\R]/', '/[\\T]/', '/[\\U]/', '/[\\V]/', '/[\\X]/', '/[\\Y]/', '/[\\Z]/'], $ERROR, SLASH_REGEX, 'only escaping a single uc letter'],
+  [['/[abc\\a]/', '/[abc\\e]/', '/[abc\\g]/', '/[abc\\h]/', '/[abc\\i]/', '/[abc\\j]/', '/[abc\\k]/', '/[abc\\l]/', '/[abc\\m]/', '/[abc\\o]/', '/[abc\\p]/', '/[abc\\q]/', '/[abc\\u]/', '/[abc\\x]/', '/[abc\\y]/', '/[abc\\z]/'], $ERROR, SLASH_REGEX, 'escaping a prefixed single lc letter'],
+  [['/[abc\\A]/', '/[abc\\E]/', '/[abc\\F]/', '/[abc\\G]/', '/[abc\\H]/', '/[abc\\I]/', '/[abc\\J]/', '/[abc\\K]/', '/[abc\\L]/', '/[abc\\M]/', '/[abc\\N]/', '/[abc\\O]/', '/[abc\\P]/', '/[abc\\Q]/', '/[abc\\R]/', '/[abc\\T]/', '/[abc\\U]/', '/[abc\\V]/', '/[abc\\X]/', '/[abc\\Y]/', '/[abc\\Z]/'], $ERROR, SLASH_REGEX, 'escaping a prefixed single uc letter'],
+  [['/[\\aabcd]/', '/[\\eabcd]/', '/[\\gabcd]/', '/[\\habcd]/', '/[\\iabcd]/', '/[\\jabcd]/', '/[\\kabcd]/', '/[\\labcd]/', '/[\\mabcd]/', '/[\\oabcd]/', '/[\\pabcd]/', '/[\\qabcd]/', '/[\\xabcd]/', '/[\\yabcd]/', '/[\\zabcd]/'], $ERROR, SLASH_REGEX, 'escaping a suffixed single lc letter'],
+  [['/[\\Aabcd]/', '/[\\Cabcd]/', '/[\\Eabcd]/', '/[\\Fabcd]/', '/[\\Gabcd]/', '/[\\Habcd]/', '/[\\Iabcd]/', '/[\\Jabcd]/', '/[\\Kabcd]/', '/[\\Labcd]/', '/[\\Mabcd]/', '/[\\Nabcd]/', '/[\\Oabcd]/', '/[\\Pabcd]/', '/[\\Qabcd]/', '/[\\Rabcd]/', '/[\\Tabcd]/', '/[\\Uabcd]/', '/[\\Vabcd]/', '/[\\Xabcd]/', '/[\\Yabcd]/', '/[\\Zabcd]/'], $ERROR, SLASH_REGEX, 'escaping a suffixed single uc letter'],
+  [['/[abc\\adeff]/', '/[abc\\gdeff]/', '/[abc\\hdeff]/', '/[abc\\ideff]/', '/[abc\\jdeff]/', '/[abc\\kdeff]/', '/[abc\\ldeff]/', '/[abc\\mdeff]/', '/[abc\\odeff]/', '/[abc\\pdeff]/', '/[abc\\qdeff]/', '/[abc\\xdeff]/', '/[abc\\ydeff]/', '/[abc\\zdeff]/'], $ERROR, SLASH_REGEX, 'escaping a single lc letter in the middle'],
+  [['/[abc\\Adeff]/', '/[abc\\Cdeff]/', '/[abc\\Edeff]/', '/[abc\\Fdeff]/', '/[abc\\Gdeff]/', '/[abc\\Hdeff]/', '/[abc\\Ideff]/', '/[abc\\Jdeff]/', '/[abc\\Kdeff]/', '/[abc\\Ldeff]/', '/[abc\\Mdeff]/', '/[abc\\Ndeff]/', '/[abc\\Odeff]/', '/[abc\\Pdeff]/', '/[abc\\Qdeff]/', '/[abc\\Rdeff]/', '/[abc\\Tdeff]/', '/[abc\\Udeff]/', '/[abc\\Vdeff]/', '/[abc\\Xdeff]/', '/[abc\\Ydeff]/', '/[abc\\Zdeff]/'], $ERROR, SLASH_REGEX, 'escaping a single uc letter in the middle'],
+  [['/[\\_]/', '/[abc\\_]/', '/[\\_abcd]/', '/[abc\\_abcd]/'], $ERROR, SLASH_REGEX, '_ is not an escapable char'],
+  [['/[\\$]/', '/[abc\\$]/', '/[\\$abcd]/', '/[abc\\$abcd]/'], $REGEX, SLASH_REGEX, '$ is a syntax char we can escape'],
+  [[`/[\\^]/`, `/[\\$]/`, `/[\\\\]/`, `/[\\.]/`, `/[\\*]/`, `/[\\+]/`, `/[\\?]/`, `/[\\(]/`, `/[\\)]/`, `/[\\[]/`, `/[\\]]/`, `/[\\{]/`, `/[\\}]/`, `/[\\|]/`], $REGEX, SLASH_REGEX, 'syntax char escapes'],
+  [[`/[abc\\^]/`, `/[abc\\$]/`, `/[abc\\\\]/`, `/[abc\\.]/`, `/[abc\\*]/`, `/[abc\\+]/`, `/[abc\\?]/`, `/[abc\\(]/`, `/[abc\\)]/`, `/[abc\\[]/`, `/[abc\\]]/`, `/[abc\\{]/`, `/[abc\\}]/`, `/[abc\\|]/`], $REGEX, SLASH_REGEX, 'syntax char escapes with prefix'],
+  [[`/[\\^def]/`, `/[\\$def]/`, `/[\\\\def]/`, `/[\\.def]/`, `/[\\*def]/`, `/[\\+def]/`, `/[\\?def]/`, `/[\\(def]/`, `/[\\)def]/`, `/[\\[def]/`, `/[\\]def]/`, `/[\\{def]/`, `/[\\}def]/`, `/[\\|def]/`], $REGEX, SLASH_REGEX, 'syntax char escapes with suffix'],
+  [[`/[\\^`, `/[\\$`, `/[\\\\`, `/[\\.`, `/[\\*`, `/[\\+`, `/[\\?`, `/[\\(`, `/[\\)`, `/[\\]`, `/[\\]`, `/[\\{`, `/[\\}`, `/[\\|`], $ERROR, SLASH_REGEX, 'syntax char escapes with early eol/eof', 'suffixsp'],
+  [[`/[\\']/`, `/[\\"]/`, `/[\\\`]/`], $ERROR, SLASH_REGEX, 'typical string escapes dont work in regexes'],
+  [['/[\\ca]/', '/[\\cb]/', '/[\\cd]/', '/[\\ce]/', '/[\\cf]/', '/[\\cg]/', '/[\\ch]/', '/[\\ci]/', '/[\\cj]/', '/[\\ck]/', '/[\\cl]/', '/[\\cm]/', '/[\\cn]/', '/[\\co]/', '/[\\cp]/', '/[\\cq]/', '/[\\cr]/', '/[\\cs]/', '/[\\ct]/', '/[\\cu]/', '/[\\cv]/', '/[\\cw]/', '/[\\cx]/', '/[\\cy]/', '/[\\cz]/'], $REGEX, SLASH_REGEX, 'control character lc'],
+  [['/[\\cA]/', '/[\\cB]/', '/[\\cD]/', '/[\\cE]/', '/[\\cF]/', '/[\\cG]/', '/[\\cH]/', '/[\\cI]/', '/[\\cJ]/', '/[\\cK]/', '/[\\cL]/', '/[\\cM]/', '/[\\cN]/', '/[\\cO]/', '/[\\cP]/', '/[\\cQ]/', '/[\\cR]/', '/[\\cS]/', '/[\\cT]/', '/[\\cU]/', '/[\\cV]/', '/[\\cW]/', '/[\\cX]/', '/[\\cY]/', '/[\\cZ]/'], $REGEX, SLASH_REGEX, 'control character uc'],
+  [['/[\\ca', '/[\\cb', '/[\\cc', '/[\\cd', '/[\\ce', '/[\\cf', '/[\\cg', '/[\\ch', '/[\\ci', '/[\\cj', '/[\\ck', '/[\\cl', '/[\\cm', '/[\\cn', '/[\\co', '/[\\cp', '/[\\cq', '/[\\cr', '/[\\cs', '/[\\ct', '/[\\cu', '/[\\cv', '/[\\cw', '/[\\cx', '/[\\cy', '/[\\cz'], $ERROR, SLASH_REGEX, 'control character lc eol/eof', 'suffixsp'],
+  [['/[\\cA', '/[\\cB', '/[\\cC', '/[\\cD', '/[\\cE', '/[\\cF', '/[\\cG', '/[\\cH', '/[\\cI', '/[\\cJ', '/[\\cK', '/[\\cL', '/[\\cM', '/[\\cN', '/[\\cO', '/[\\cP', '/[\\cQ', '/[\\cR', '/[\\cS', '/[\\cT', '/[\\cU', '/[\\cV', '/[\\cW', '/[\\cX', '/[\\cY', '/[\\cZ'], $ERROR, SLASH_REGEX, 'control character uc eol/eof', 'suffixsp'],
+  [['/[\\a', '/[\\b', '/[\\d', '/[\\e', '/[\\f', '/[\\g', '/[\\h', '/[\\i', '/[\\j', '/[\\k', '/[\\l', '/[\\m', '/[\\n', '/[\\o', '/[\\p', '/[\\q', '/[\\r', '/[\\s', '/[\\t', '/[\\u', '/[\\v', '/[\\w', '/[\\x', '/[\\y', '/[\\z'], $ERROR, SLASH_REGEX, 'only escaping a single lc letter', 'suffixsp'],
+  [['/[\\A', '/[\\B', '/[\\D', '/[\\E', '/[\\F', '/[\\G', '/[\\H', '/[\\I', '/[\\J', '/[\\K', '/[\\L', '/[\\M', '/[\\N', '/[\\O', '/[\\P', '/[\\Q', '/[\\R', '/[\\S', '/[\\T', '/[\\U', '/[\\V', '/[\\W', '/[\\X', '/[\\Y', '/[\\Z'], $ERROR, SLASH_REGEX, 'only escaping a single uc letter', 'suffixsp'],
+  [['/[abc\\a', '/[abc\\b', '/[abc\\d', '/[abc\\e', '/[abc\\f', '/[abc\\g', '/[abc\\h', '/[abc\\i', '/[abc\\j', '/[abc\\k', '/[abc\\l', '/[abc\\m', '/[abc\\n', '/[abc\\o', '/[abc\\p', '/[abc\\q', '/[abc\\r', '/[abc\\s', '/[abc\\t', '/[abc\\u', '/[abc\\v', '/[abc\\w', '/[abc\\x', '/[abc\\y', '/[abc\\z'], $ERROR, SLASH_REGEX, 'escaping a prefixed single lc letter', 'suffixsp'],
+  [['/[abc\\A', '/[abc\\B', '/[abc\\D', '/[abc\\E', '/[abc\\F', '/[abc\\G', '/[abc\\H', '/[abc\\I', '/[abc\\J', '/[abc\\K', '/[abc\\L', '/[abc\\M', '/[abc\\N', '/[abc\\O', '/[abc\\P', '/[abc\\Q', '/[abc\\R', '/[abc\\S', '/[abc\\T', '/[abc\\U', '/[abc\\V', '/[abc\\W', '/[abc\\X', '/[abc\\Y', '/[abc\\Z'], $ERROR, SLASH_REGEX, 'escaping a prefixed single uc letter', 'suffixsp'],
+  [['/[\\aabcd', '/[\\babcd', '/[\\cabcd', '/[\\dabcd', '/[\\eabcd', '/[\\fabcd', '/[\\gabcd', '/[\\habcd', '/[\\iabcd', '/[\\jabcd', '/[\\kabcd', '/[\\labcd', '/[\\mabcd', '/[\\nabcd', '/[\\oabcd', '/[\\pabcd', '/[\\qabcd', '/[\\rabcd', '/[\\sabcd', '/[\\tabcd', '/[\\uabcd', '/[\\vabcd', '/[\\wabcd', '/[\\xabcd', '/[\\yabcd', '/[\\zabcd'], $ERROR, SLASH_REGEX, 'escaping a suffixed single lc letter', 'suffixsp'],
+  [['/[\\Aabcd', '/[\\Babcd', '/[\\Cabcd', '/[\\Dabcd', '/[\\Eabcd', '/[\\Fabcd', '/[\\Gabcd', '/[\\Habcd', '/[\\Iabcd', '/[\\Jabcd', '/[\\Kabcd', '/[\\Labcd', '/[\\Mabcd', '/[\\Nabcd', '/[\\Oabcd', '/[\\Pabcd', '/[\\Qabcd', '/[\\Rabcd', '/[\\Sabcd', '/[\\Tabcd', '/[\\Uabcd', '/[\\Vabcd', '/[\\Wabcd', '/[\\Xabcd', '/[\\Yabcd', '/[\\Zabcd'], $ERROR, SLASH_REGEX, 'escaping a suffixed single uc letter', 'suffixsp'],
+  [['/[abc\\adeff', '/[abc\\bdeff', '/[abc\\cdeff', '/[abc\\ddeff', '/[abc\\edeff', '/[abc\\fdeff', '/[abc\\gdeff', '/[abc\\hdeff', '/[abc\\ideff', '/[abc\\jdeff', '/[abc\\kdeff', '/[abc\\ldeff', '/[abc\\mdeff', '/[abc\\ndeff', '/[abc\\odeff', '/[abc\\pdeff', '/[abc\\qdeff', '/[abc\\rdeff', '/[abc\\sdeff', '/[abc\\tdeff', '/[abc\\udeff', '/[abc\\vdeff', '/[abc\\wdeff', '/[abc\\xdeff', '/[abc\\ydeff', '/[abc\\zdeff'], $ERROR, SLASH_REGEX, 'escaping a single lc letter in the middle', 'suffixsp'],
+  [['/[abc\\Adeff', '/[abc\\Bdeff', '/[abc\\Cdeff', '/[abc\\Ddeff', '/[abc\\Edeff', '/[abc\\Fdeff', '/[abc\\Gdeff', '/[abc\\Hdeff', '/[abc\\Ideff', '/[abc\\Jdeff', '/[abc\\Kdeff', '/[abc\\Ldeff', '/[abc\\Mdeff', '/[abc\\Ndeff', '/[abc\\Odeff', '/[abc\\Pdeff', '/[abc\\Qdeff', '/[abc\\Rdeff', '/[abc\\Sdeff', '/[abc\\Tdeff', '/[abc\\Udeff', '/[abc\\Vdeff', '/[abc\\Wdeff', '/[abc\\Xdeff', '/[abc\\Ydeff', '/[abc\\Zdeff'], $ERROR, SLASH_REGEX, 'escaping a single uc letter in the middle', 'suffixsp'],
+  [['/[\\$', '/[abc\\$', '/[\\$abcd', '/[abc\\$abcd', '/[\\_', '/[abc\\_', '/[\\_abcd', '/[abc\\_abcd'], $ERROR, SLASH_REGEX, '$ and _', 'suffixsp'],
+  [['/[\\x01]/', '/[\\x12]/', '/[\\x23]/', '/[\\x34]/', '/[\\x45]/', '/[\\x56]/', '/[\\x67]/', '/[\\x78]/', '/[\\x89]/', '/[\\x90]/'], $REGEX, SLASH_REGEX, 'valid hex escapes'],
+  [['/[\\x]/', '/[\\x0]/', '/[\\x1]/', '/[\\x2]/', '/[\\x3]/', '/[\\x4]/', '/[\\x5]/', '/[\\x6]/', '/[\\x7]/', '/[\\x8]/', '/[\\x9]/'], $ERROR, SLASH_REGEX, 'invalid hex escape with one char'],
+  [['/[\\x', '/[\\x0', '/[\\x1', '/[\\x2', '/[\\x3', '/[\\x4', '/[\\x5', '/[\\x6', '/[\\x7', '/[\\x8', '/[\\x9'], $ERROR, SLASH_REGEX, 'invalid hex escape with one charat eol/eof', 'suffixsp'],
+  [['/[\\x01', '/[\\x12', '/[\\x23', '/[\\x34', '/[\\x45', '/[\\x56', '/[\\x67', '/[\\x78', '/[\\x89', '/[\\x90'], $ERROR, SLASH_REGEX, 'hex escape at eof/eol', 'suffixsp'],
+  [['/[\\u1234]/', '/[x\\u0567]/', '/[\\uf89ay]/', '/[x\\ubcdey]/'], $REGEX, SLASH_REGEX, 'non surrogate'],
+  [['/[\\u', '/[\\u0', '/[\\uf8', '/[\\ubcd', '/[\\ubcde'], $ERROR, SLASH_REGEX, 'incomplete unicode quad escape eol/eof', 'suffixsp'],
+  [['/[x\\u', '/[x\\u0', '/[x\\uf8', '/[x\\ubcd', '/[x\\ubcde'], $ERROR, SLASH_REGEX, 'incomplete unicode quad escape eol/eof', 'suffixsp'],
+  [['/[\\ud800]/', '/[x\\ud810]/', '/[\\ud900y]/', '/[x\\udabcy]/', '/[x\\udabcy]/g', '/[x\\udabcy]/m', '/[x\\udabcy]/iy'], $REGEX, SLASH_REGEX, 'lead surrogate'],
+  [['/[\\ud800\\ud800]/', '/[x\\ud810\\ud810]/', '/[\\ud900\\ud900y]/', '/[x\\udabc\\udabcy]/'], $REGEX, SLASH_REGEX, 'lead + lead surrogate'],
+  [['/[\\udc00]/', '/[x\\udc10]/', '/[\\udd00y]/', '/[x\\udebcy]/', '/[x\\udebcy]/g', '/[x\\udebcy]/im', '/[x\\udebcy]/y'], $REGEX, SLASH_REGEX, 'trail surrogate'],
+  [['/[\\udc00\\udc00]/', '/[x\\udc10\\udc10]/', '/[\\udd00\\udd00y]/', '/[x\\udebc\\udebcy]/', '/[x\\udebc\\udebcy]/i'], $REGEX, SLASH_REGEX, 'trail + trail surrogate'],
+  [['/[\\ud800\\udc00]/', '/[x\\ud810\\udc10]/', '/[\\ud900\\udd00y]/', '/[x\\udabc\\udebcy]/', '/[x\\udabc\\udebcy]/g'], $REGEX, SLASH_REGEX, 'lead + trail surrogate'],
+  [['/[\\u1234\\ud800]/', '/[x\\u0567\\ud810]/', '/[\\uf89a\\ud900y]/', '/[x\\ubcde\\udabcy]/', '/[x\\ubcde\\udabcy]/m'], $REGEX, SLASH_REGEX, 'non + lead surrogate'],
+  [['/[\\u1234\\udc00]/', '/[x\\u0567\\udc10]/', '/[\\uf89a\\udd00y]/', '/[x\\ubcde\\udebcy]/', '/[x\\ubcde\\udebcy]/y'], $REGEX, SLASH_REGEX, 'non + trail pair'],
+  [['/[\\u1234\\u1234\\udc00]/', '/[x\\u0567\\u0567\\udc10]/', '/[\\uf89a\\uf89a\\udd00y]/', '/[x\\ubcde\\ubcde\\udebcy]/'], $REGEX, SLASH_REGEX, 'non + non + trail pair'],
+  [['/[\\u1234\\udc00\\udc00]/', '/[x\\u0567\\udc10\\udc10]/', '/[\\uf89a\\udd00\\udd00y]/', '/[x\\ubcde\\udebc\\udebcy]/'], $REGEX, SLASH_REGEX, 'non + trail + trail pair'],
+  [['/[\\ud800\\ud800\\udc00]/', '/[x\\ud810\\ud810\\udc10]/', '/[\\ud900\\ud900\\udd00y]/', '/[x\\udabc\\udabc\\udebcy]/'], $REGEX, SLASH_REGEX, 'lead + lead + trail surrogate'],
+  [['/[\\ud800\\udc00\\udc00]/', '/[x\\ud810\\udc10\\udc10]/', '/[\\ud900\\udd00\\udd00y]/', '/[x\\udabc\\udebc\\udebcy]/'], $REGEX, SLASH_REGEX, 'lead + trail + trail surrogate'],
+  [['/[\\ud800\\udc00\\ud800]/', '/[x\\ud810\\udc10\\ud810]/', '/[\\ud900\\udd00\\ud900y]/', '/[x\\udabc\\udebc\\udabcy]/'], $REGEX, SLASH_REGEX, 'lead + trail + lead surrogate'],
+  [[`/[\\u{0123}]/`, `/[\\u{4567}]/`, `/[\\u{89abc}]/`, `/[\\u{defAB}]/`, `/[\\u{CDEF}]/`], $ERROR, SLASH_REGEX],
+  [`/[prefix \\u{012345}]/`, $ERROR, SLASH_REGEX],
+  [`/[\\u{012345} postfix]/`, $ERROR, SLASH_REGEX],
+  [`/[\\u{012345}\\u{6789a}]/`, $ERROR, SLASH_REGEX],
+  [[`/[\\u{}]/`, `/[\\u{fail}]/`, `/[\\u{afail}]/`, `/[\\u{0fail}]/`, `/[\\u{xxxx}]/`], $ERROR, SLASH_REGEX, 'long unicode escape bad contents'],
+  [[`/[\\u{]/`, `/[\\u{a]/`, `/[\\u{af]/`, `/[\\u{012]/`, `/[\\u{01234]/`, `/[\\u{012345]/`], $ERROR, SLASH_REGEX, 'unclosed long unicode escapes'],
+  [[`/[\\u{1}]/`, `/[\\u{12}]/`, `/[\\u{123}]/`, `/[\\u{1234}]/`, `/[\\u{12345}]/`, `/[\\u{103456}]/`], $ERROR, SLASH_REGEX, 'incomplete long unicode escapes'],
+  [[`/[\\u{`, `/[\\u{a`, `/[\\u{af`, `/[\\u{123`, `/[\\u{1234`, `/[\\u{12345`, `/[\\u{103456`], $ERROR, SLASH_REGEX, 'incomplete long unicode escapes in unclosed string', 'suffixsp'],
+  [`/[\\u{10ffff}]/`, $ERROR, SLASH_REGEX, 'It is a Syntax Error if the MV of HexDigits > 1114111.'],
+  [[`/[\\u{110000}]/`, `/[\\u{120000}]/`, `/[\\u{900000}]/`, `/[\\u{123456789}]/`, `/[\\u{ffffffffffffffff}]/`], $ERROR, SLASH_REGEX, 'It is a Syntax Error if the MV of HexDigits > 1114111.'],
+  [`/[\\u{10000000000000000}]/`, $ERROR, SLASH_REGEX, 'regex value that would exceed 32bits'],
+  [`/[\\u{fffffffffffffffffffff}]/`, $ERROR, SLASH_REGEX, 'regex value that would exceed 32bits'],
+  [`/[\\u{0000000000000000000010ffff}]/`, $ERROR, SLASH_REGEX, 'must take care that the hex may still have any number of leading zeroes'],
+  [[`/[\\u{00000000000000000000110000}]/`, `/[\\u{00000000000000000000120000}]/`, `/[\\u{0000000000123456789}]/`, `/[\\u{000000ffffffffffffffff}]/`], $ERROR, SLASH_REGEX, 'must take care that the hex may still have any number of leading zeroes'],
+  [['/[\\da-z]/', '/[\\DA-Z]/', '/[\\sa-z]/', '/[\\SA-S]/', '/[\\wa-z]/', '/[\\WA-Z]/'], $REGEX, SLASH_REGEX, 'class escapes are also valid in char classes that contain ranges'],
+  [['/[\\d-z]/', '/[\\D-Z]/', '/[\\s-z]/', '/[\\S-S]/', '/[\\w-z]/', '/[\\W-Z]/'], $ERROR, SLASH_REGEX, 'class escapes are never valid when part of a range'],
+  [['/[x\\da-z]/', '/[x\\DA-Z]/', '/[x\\sa-z]/', '/[x\\SA-S]/', '/[x\\wa-z]/', '/[x\\WA-Z]/'], $REGEX, SLASH_REGEX, 'with prefix class escapes are also valid in char classes that contain ranges'],
+  [['/[x\\d-z]/', '/[x\\D-Z]/', '/[x\\s-z]/', '/[x\\S-S]/', '/[x\\w-z]/', '/[x\\W-Z]/'], $ERROR, SLASH_REGEX, 'with prefix class escapes are never valid when part of a range'],
+  [['/[a-z\\d]/', '/[A-Z\\D]/', '/[a-z\\s]/', '/[A-S\\S]/', '/[a-z\\w]/', '/[A-Z\\W]/'], $REGEX, SLASH_REGEX, 'class escapes are also valid in char classes that contain ranges'],
+  [['/[a-\\d]/', '/[A-\\D]/', '/[a-\\s]/', '/[A-\\S]/', '/[a-\\w]/', '/[A-\\W]/'], $ERROR, SLASH_REGEX, 'class escapes are never valid when part of a range'],
+  [['/[a-z\\dx]/', '/[A-Z\\Dx]/', '/[a-z\\sx]/', '/[A-S\\Sx]/', '/[a-z\\wx]/', '/[A-Z\\Wx]/'], $REGEX, SLASH_REGEX, 'with suffix class escapes are also valid in char classes that contain ranges'],
+  [['/[a-\\dx]/', '/[A-\\Dx]/', '/[a-\\sx]/', '/[A-\\Sx]/', '/[a-\\wx]/', '/[A-\\Wx]/'], $ERROR, SLASH_REGEX, 'with suffix class escapes are never valid when part of a range'],
+  ['/\\2(x)/u', $ERROR, SLASH_REGEX, 'it is an error if a digital non-zero escape evaluates to a number bigger than the number of groups'],
+  // surrogate pairs revisited
+  ['/[1-9]/', $REGEX, SLASH_REGEX, 'char class ranges should be lo-hi'],
+  ['/[9-1]/', $ERROR, SLASH_REGEX, 'char class ranges should be lo-hi and it is a syntax error otherwise'],
+  ['/[\\u5000-\\u6000]/', $REGEX, SLASH_REGEX, 'escapes are no problem for ranges'],
+  ['/[\\u6000-\\u5000]/', $ERROR, SLASH_REGEX, 'escapes are also bound by the lo-hi rule'],
+  ['/[\\uD83D\\uDCA9]/', $REGEX, SLASH_REGEX, 'Unicode Character PILE OF POO (U+1F4A9) surrogate pair base test case. sans u-flag this matches two individual chars'],
+  ['/[\\uD83D\\uDCAB]/', $REGEX, SLASH_REGEX, 'Unicode Character DIZZY SYMBOL (U+1F4AB) surrogate pair base test case. sans u-flag this matches two individual chars'],
+  [['/[\\uD83D\\uDCA9-\\uD83D\\uDCAB]/', '/[\uD83D\\uDCA9-\\uD83D\\uDCAB]/', '/[\\uD83D\uDCA9-\\uD83D\\uDCAB]/', '/[\\uD83D\\uDCA9-\uD83D\\uDCAB]/', '/[\\uD83D\\uDCA9-\\uD83D\uDCAB]/', '/[\uD83D\uDCA9-\\uD83D\\uDCAB]/', '/[\uD83D\\uDCA9-\uD83D\\uDCAB]/', '/[\uD83D\\uDCA9-\\uD83D\uDCAB]/', '/[\\uD83D\uDCA9-\uD83D\\uDCAB]/', '/[\\uD83D\uDCA9-\\uD83D\uDCAB]/', '/[\\uD83D\\uDCA9-\uD83D\uDCAB]/', '/[\uD83D\uDCA9-\uD83D\\uDCAB]/', '/[\uD83D\uDCA9-\\uD83D\uDCAB]/', '/[\\uD83D\uDCA9-\uD83D\uDCAB]/', '/[\uD83D\uDCA9-\uD83D\uDCAB]/'], $ERROR, SLASH_REGEX, 'range poo to dizzy some are escapes and some are literal but surrogates should still work (and error without u flag)'],
+  [['/[\\1-\\7]/', '/[\\u0001-\\7]/', '/[\\1-\\u0007]/', '/[\\x01-\\7]/', '/[A-\\cH]/', '/[\\cH-Z]/'], $REGEX, SLASH_REGEX, 'ranges using various escapes'],
+  [['/[\\u{5}-1]/', '/[\\1-\\u{347}]/'], $ERROR, SLASH_REGEX, 'ranges using various escapes and long unicode escapes'],
+  [['/[1-\\u{500}]/', '/\\u{01}-\\x07/'], $ERROR, SLASH_REGEX, 'various ranges using escapes but using long unicodes'],
+  [['/[--0]/', '/[+--]/'], $REGEX, SLASH_REGEX, 'dash is also a dash at the start or end of a range'],
+  [['/[-+]/', '/[+-]/', '/[---+]/', '/[---0]/'], $REGEX, SLASH_REGEX, 'positive dash edge cases'],
+  ['/[-]/', $REGEX, SLASH_REGEX, 'a dash'],
+  ['/[--]/', $REGEX, SLASH_REGEX, 'no range, just twice the dash'],
+  ['/[---]/', $REGEX, SLASH_REGEX, 'a range that starts and ends with a dash'],
+  ['/[----]/', $REGEX, SLASH_REGEX, 'a range that starts and ends with a dash and then followed by a single character that is also a dash'],
+  ['/[-----]/', $REGEX, SLASH_REGEX, 'a range that starts and ends with a dash and then followed by a single character that is also a dash and ends with a dash because they cant make another range'],
+  ['/[------]/', $REGEX, SLASH_REGEX, 'twice the range that starts and ends with a dash can i stop now?'],
+  ['/[-------]/', $REGEX, SLASH_REGEX, 'certainly we can proof by induction now'],
+  ['/[--------]/', $REGEX, SLASH_REGEX, 'yeah'],
+  ['/[---------]/', $REGEX, SLASH_REGEX, 'this is n+2 so qed'],
+  [['/[--+]/', '/[0--]/', '/[x---]/', '/[0---]/'], $ERROR, SLASH_REGEX, 'negative dash edge cases'],
+  ['/[x-\\uD83D\\uDE07--+]/', $ERROR, SLASH_REGEX, 'range with a surrogate on the right; with u flag causing two valid ranges (x-D83DDE07 and --+), without u flag causing a valid range (x-D83D) and an invalid range (DE07--)'],
+  ['/[x-\\uD83D\\uDE07--x-\\uD83D\\uDE07--]/', $ERROR, SLASH_REGEX, 'more silliness'],
+];
+// exhaustive set of lead/tail/non surrogate combos, with one to three chars on each side of the dash (so (4**4)*(3**2)=2304 tests with a few dupes due to the empty case)
+['', 'B', 'L', 'T'].forEach(a => ['', 'B', 'L', 'T'].forEach(b => ['B', 'L', 'T'].forEach(c => ['B', 'L', 'T'].forEach(d => ['', 'B', 'L', 'T'].forEach(e => ['', 'B', 'L', 'T'].forEach(f => {
+  regexes.push([`/[${a}${b}${c}-${d}${e}${f}]/`.replace(/B/g, 'x').replace(/L/g, '\\uD83D').replace(/T/g, '\\uDCA9'), c<=d?$REGEX:$ERROR, SLASH_REGEX, 'generated case '+ a+b+c+d+e+f]);
+}))))));
+
+// u specific flags
+let regexesu = [
+  [`/abc/u`, $REGEXU, SLASH_REGEX],
+
+  // or
+  [`/a|b/u`, $REGEXU, SLASH_REGEX],
+  [[`/|a/u`, `/a|/u`, `/|/u`, '/a||/u'], $ERROR, SLASH_REGEX, 'bad OR because no atoms'],
+
+  // simple atoms and quantifiers
+  [[`/^abc/u`, `/abc$/u`, `/a.c/u`], $REGEXU, SLASH_REGEX, 'simple atoms'],
+  [[`/^/u`, `/ab^cd/u`, `/abc^/u`, `/abc^abc/u`, `/$/u`, `/$abc/u`, `/abc$abc/u`], $REGEXU, SLASH_REGEX, 'simple atoms where you dont usually see them'],
+  [[`/a*/u`, `/a?/u`, `/a+/u`], $REGEXU, SLASH_REGEX, 'simple quantifiers'],
+  [[`/a*b/u`, `/a?b/u`, `/a+b/u`], $REGEXU, SLASH_REGEX, 'simple quantifiers with suffix'],
+  [[`/?/u`, `/+/u`, `/?a/u`, `/+a/u`, `/??/u`, `/+?/u`, `/|*/u`, `/|?/u`, `/|+/u`], $ERROR, SLASH_REGEX, 'simple quantifiers in an invalid place'],
+  [[`/a**/u`, `/a?+/u`, `/a++/u`], $ERROR, SLASH_REGEX, 'quantifing a quantifier'],
+  [`/a??/u`, $REGEXU, SLASH_REGEX, 'quantifing a quantifier', 'suffixsp'],
+
+  // most permutations with {d,d}
+  [[`/a{0}/u`, `/a{1}/u`, `/a{2}/u`, `/a{3}/u`, `/a{4}/u`, `/a{5}/u`, `/a{6}/u`, `/a{7}/u`, `/a{8}/u`, `/a{9}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{01}/u`, `/a{12}/u`, `/a{23}/u`, `/a{34}/u`, `/a{45}/u`, `/a{56}/u`, `/a{67}/u`, `/a{78}/u`, `/a{89}/u`, `/a{90}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{0,}/u`, `/a{1,}/u`, `/a{2,}/u`, `/a{3,}/u`, `/a{4,}/u`, `/a{5,}/u`, `/a{6,}/u`, `/a{7,}/u`, `/a{8,}/u`, `/a{9,}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{01,}/u`, `/a{12,}/u`, `/a{23,}/u`, `/a{34,}/u`, `/a{45,}/u`, `/a{56,}/u`, `/a{67,}/u`, `/a{78,}/u`, `/a{89,}/u`, `/a{90,}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{0,0}/u`, `/a{1,1}/u`, `/a{2,2}/u`, `/a{3,3}/u`, `/a{4,4}/u`, `/a{5,5}/u`, `/a{6,6}/u`, `/a{7,7}/u`, `/a{8,8}/u`, `/a{9,9}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{01,0}/u`, `/a{12,1}/u`, `/a{23,2}/u`, `/a{34,3}/u`, `/a{45,4}/u`, `/a{56,5}/u`, `/a{67,6}/u`, `/a{78,7}/u`, `/a{89,8}/u`, `/a{90,9}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{0,05}/u`, `/a{1,16}/u`, `/a{2,27}/u`, `/a{3,38}/u`, `/a{4,49}/u`, `/a{5,50}/u`, `/a{6,61}/u`, `/a{7,72}/u`, `/a{8,83}/u`, `/a{9,94}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{01,05}/u`, `/a{12,16}/u`, `/a{23,27}/u`, `/a{34,38}/u`, `/a{45,49}/u`, `/a{56,50}/u`, `/a{67,61}/u`, `/a{78,72}/u`, `/a{89,83}/u`, `/a{90,94}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{,0}/u`, `/a{,1}/u`, `/a{,2}/u`, `/a{,3}/u`, `/a{,4}/u`, `/a{,5}/u`, `/a{,6}/u`, `/a{,7}/u`, `/a{,8}/u`, `/a{,9}/u`], $REGEXU, SLASH_REGEX],
+  [[`/a{,05}/u`, `/a{,16}/u`, `/a{,27}/u`, `/a{,38}/u`, `/a{,49}/u`, `/a{,50}/u`, `/a{,61}/u`, `/a{,72}/u`, `/a{,83}/u`, `/a{,94}/u`], $REGEXU, SLASH_REGEX],
+  [['/a{ 1}/u', '/a{1 }/u', '/a{1, 1}/u', '/a{ 1, 1}/u', '/a{1 ,1}/u', '/a{ 1 , 1}/u', '/a{1,1 }/u', '/a{1, 1 }/u', '/a{ 1, 1 }/u', '/a{ 1 , 1 }/u'], $ERROR, SLASH_REGEX, 'no spaces allowed in quantifier'],
+
+  [['/foo/u'], $REGEXU, SLASH_REGEX],
+  [['/foo/uu'], $ERROR, SLASH_REGEX],
+  [['/foo/um', '/foo/ui', '/foo/ug', '/foo/uy'], $REGEXU, SLASH_REGEX],
+  [['/foo/mu', '/foo/iu', '/foo/gu', '/foo/yu'], $REGEXU, SLASH_REGEX],
+  [['/foo/uig', '/foo/gui', '/foo/ium', '/foo/myu', '/foo/ugy'], $REGEXU, SLASH_REGEX],
+  [['/foo/uiug', '/foo/gmumi', '/foo/ggumi', '/foo/myuy', '/foo/iugyi'], $ERROR, SLASH_REGEX],
+
+  // escapes (only \f \n \r \t \v should work)
+  [['/\\d/u', '/\\D/u', '/\\f/u', '/\\n/u', '/\\r/u', '/\\s/u', '/\\S/u', '/\\t/u', '/\\v/u', '/\\w/u', '/\\W/u'], $REGEXU, SLASH_REGEX, 'only escaping a single letter'],
+  [['/abc\\d/u', '/abc\\D/u', '/abc\\f/u', '/abc\\n/u', '/abc\\r/u', '/abc\\s/u', '/abc\\S/u', '/abc\\t/u', '/abc\\v/u', '/abc\\w/u', '/abc\\W/u'], $REGEXU, SLASH_REGEX, 'escaping a prefixed single letter'],
+  [['/\\fabcd/u', '/\\dabcd/u', '/\\Dabcd/u', '/\\nabcd/u', '/\\rabcd/u', '/\\sabcd/u', '/\\Sabcd/u', '/\\tabcd/u', '/\\vabcd/u', '/\\wabcd/u', '/\\Wabcd/u'], $REGEXU, SLASH_REGEX, 'escaping a suffixed single letter'],
+  [['/abc\\fdeff/u', '/abc\\ddeff/u', '/abc\\Ddeff/u', '/abc\\ndeff/u', '/abc\\rdeff/u', '/abc\\sdeff/u', '/abc\\Sdeff/u', '/abc\\tdeff/u', '/abc\\vdeff/u', '/abc\\wdeff/u', '/abc\\Wdeff/u'], $REGEXU, SLASH_REGEX, 'escaping a single letter in the middle'],
+  // the other char escapes are errors...
+  [['/\\a/u', '/\\e/u', '/\\g/u', '/\\h/u', '/\\i/u', '/\\j/u', '/\\k/u', '/\\l/u', '/\\m/u', '/\\o/u', '/\\p/u', '/\\q/u', '/\\u/u', '/\\x/u', '/\\y/u', '/\\z/u'], $ERROR, SLASH_REGEX, 'only escaping a single lc letter'],
+  [['/\\A/u', '/\\E/u', '/\\F/u', '/\\G/u', '/\\H/u', '/\\I/u', '/\\J/u', '/\\K/u', '/\\L/u', '/\\M/u', '/\\N/u', '/\\O/u', '/\\P/u', '/\\Q/u', '/\\R/u', '/\\T/u', '/\\U/u', '/\\V/u', '/\\X/u', '/\\Y/u', '/\\Z/u'], $ERROR, SLASH_REGEX, 'only escaping a single uc letter'],
+  [['/abc\\a/u', '/abc\\e/u', '/abc\\g/u', '/abc\\h/u', '/abc\\i/u', '/abc\\j/u', '/abc\\k/u', '/abc\\l/u', '/abc\\m/u', '/abc\\o/u', '/abc\\p/u', '/abc\\q/u', '/abc\\u/u', '/abc\\x/u', '/abc\\y/u', '/abc\\z/u'], $ERROR, SLASH_REGEX, 'escaping a prefixed single lc letter'],
+  [['/abc\\A/u', '/abc\\E/u', '/abc\\F/u', '/abc\\G/u', '/abc\\H/u', '/abc\\I/u', '/abc\\J/u', '/abc\\K/u', '/abc\\L/u', '/abc\\M/u', '/abc\\N/u', '/abc\\O/u', '/abc\\P/u', '/abc\\Q/u', '/abc\\R/u', '/abc\\T/u', '/abc\\U/u', '/abc\\V/u', '/abc\\X/u', '/abc\\Y/u', '/abc\\Z/u'], $ERROR, SLASH_REGEX, 'escaping a prefixed single uc letter'],
+  [['/\\aabcd/u', '/\\eabcd/u', '/\\gabcd/u', '/\\habcd/u', '/\\iabcd/u', '/\\jabcd/u', '/\\kabcd/u', '/\\labcd/u', '/\\mabcd/u', '/\\oabcd/u', '/\\pabcd/u', '/\\qabcd/u', '/\\xabcd/u', '/\\yabcd/u', '/\\zabcd/u'], $ERROR, SLASH_REGEX, 'escaping a suffixed single lc letter'],
+  [['/\\Aabcd/u', '/\\Cabcd/u', '/\\Eabcd/u', '/\\Fabcd/u', '/\\Gabcd/u', '/\\Habcd/u', '/\\Iabcd/u', '/\\Jabcd/u', '/\\Kabcd/u', '/\\Labcd/u', '/\\Mabcd/u', '/\\Nabcd/u', '/\\Oabcd/u', '/\\Pabcd/u', '/\\Qabcd/u', '/\\Rabcd/u', '/\\Tabcd/u', '/\\Uabcd/u', '/\\Vabcd/u', '/\\Xabcd/u', '/\\Yabcd/u', '/\\Zabcd/u'], $ERROR, SLASH_REGEX, 'escaping a suffixed single uc letter'],
+  [['/abc\\adeff/u', '/abc\\gdeff/u', '/abc\\hdeff/u', '/abc\\ideff/u', '/abc\\jdeff/u', '/abc\\kdeff/u', '/abc\\ldeff/u', '/abc\\mdeff/u', '/abc\\odeff/u', '/abc\\pdeff/u', '/abc\\qdeff/u', '/abc\\xdeff/u', '/abc\\ydeff/u', '/abc\\zdeff/u'], $ERROR, SLASH_REGEX, 'escaping a single lc letter in the middle'],
+  [['/abc\\Adeff/u', '/abc\\Cdeff/u', '/abc\\Edeff/u', '/abc\\Fdeff/u', '/abc\\Gdeff/u', '/abc\\Hdeff/u', '/abc\\Ideff/u', '/abc\\Jdeff/u', '/abc\\Kdeff/u', '/abc\\Ldeff/u', '/abc\\Mdeff/u', '/abc\\Ndeff/u', '/abc\\Odeff/u', '/abc\\Pdeff/u', '/abc\\Qdeff/u', '/abc\\Rdeff/u', '/abc\\Tdeff/u', '/abc\\Udeff/u', '/abc\\Vdeff/u', '/abc\\Xdeff/u', '/abc\\Ydeff/u', '/abc\\Zdeff/u'], $ERROR, SLASH_REGEX, 'escaping a single uc letter in the middle'],
+  [['/\\_/u', '/abc\\_/u', '/\\_abcd/u', '/abc\\_abcd/u'], $ERROR, SLASH_REGEX, '_ is not an escapable char'],
+  [['/\\$/u', '/abc\\$/u', '/\\$abcd/u', '/abc\\$abcd/u'], $REGEXU, SLASH_REGEX, '$ is a syntax char we can escape'],
+  // escaping "syntax characters"
+  [[`/\\^/u`, `/\\$/u`, `/\\\\/u`, `/\\./u`, `/\\*/u`, `/\\+/u`, `/\\?/u`, `/\\(/u`, `/\\)/u`, `/\\[/u`, `/\\]/u`, `/\\{/u`, `/\\}/u`, `/\\|/u`], $REGEXU, SLASH_REGEX, 'syntax char escapes'],
+  [[`/abc\\^/u`, `/abc\\$/u`, `/abc\\\\/u`, `/abc\\./u`, `/abc\\*/u`, `/abc\\+/u`, `/abc\\?/u`, `/abc\\(/u`, `/abc\\)/u`, `/abc\\[/u`, `/abc\\]/u`, `/abc\\{/u`, `/abc\\}/u`, `/abc\\|/u`], $REGEXU, SLASH_REGEX, 'syntax char escapes with prefix'],
+  [[`/\\^def/u`, `/\\$def/u`, `/\\\\def/u`, `/\\.def/u`, `/\\*def/u`, `/\\+def/u`, `/\\?def/u`, `/\\(def/u`, `/\\)def/u`, `/\\[def/u`, `/\\]def/u`, `/\\{def/u`, `/\\}def/u`, `/\\|def/u`], $REGEXU, SLASH_REGEX, 'syntax char escapes with suffix'],
+  [[`/\\'/u`, `/\\"/u`, `/\\\`/u`], $ERROR, SLASH_REGEX, 'typical string escapes dont work in regexes'],
+  // \c<x>
+  [['/\\ca/u', '/\\cb/u', '/\\cd/u', '/\\ce/u', '/\\cf/u', '/\\cg/u', '/\\ch/u', '/\\ci/u', '/\\cj/u', '/\\ck/u', '/\\cl/u', '/\\cm/u', '/\\cn/u', '/\\co/u', '/\\cp/u', '/\\cq/u', '/\\cr/u', '/\\cs/u', '/\\ct/u', '/\\cu/u', '/\\cv/u', '/\\cw/u', '/\\cx/u', '/\\cy/u', '/\\cz/u'], $REGEXU, SLASH_REGEX, 'control character lc'],
+  [['/\\cA/u', '/\\cB/u', '/\\cD/u', '/\\cE/u', '/\\cF/u', '/\\cG/u', '/\\cH/u', '/\\cI/u', '/\\cJ/u', '/\\cK/u', '/\\cL/u', '/\\cM/u', '/\\cN/u', '/\\cO/u', '/\\cP/u', '/\\cQ/u', '/\\cR/u', '/\\cS/u', '/\\cT/u', '/\\cU/u', '/\\cV/u', '/\\cW/u', '/\\cX/u', '/\\cY/u', '/\\cZ/u'], $REGEXU, SLASH_REGEX, 'control character uc'],
+  // hex escapes
+  [['/\\x01/u', '/\\x12/u', '/\\x23/u', '/\\x34/u', '/\\x45/u', '/\\x56/u', '/\\x67/u', '/\\x78/u', '/\\x89/u', '/\\x90/u'], $REGEXU, SLASH_REGEX, 'valid hex escapes'],
+  [['/\\x/u', '/\\x0/u', '/\\x1/u', '/\\x2/u', '/\\x3/u', '/\\x4/u', '/\\x5/u', '/\\x6/u', '/\\x7/u', '/\\x8/u', '/\\x9/u'], $ERROR, SLASH_REGEX, 'invalid hex escape with one char'],
+  // digit escape
+  [['/\\0/u', '/\\1/u', '/\\2/u', '/\\3/u', '/\\4/u', '/\\5/u', '/\\6/u', '/\\7/u', '/\\8/u', '/\\9/u'], $REGEXU, SLASH_REGEX, 'digit escapes'],
+  [['/\\00/u', '/\\12/u', '/\\23/u', '/\\34/u', '/\\45/u', '/\\56/u', '/\\67/u', '/\\78/u', '/\\89/u', '/\\91/u'], $ERROR, SLASH_REGEX, 'digit escapes cant be followed by another digit'],
+  [['/1\\0/u', '/2\\1/u', '/3\\2/u', '/4\\3/u', '/5\\4/u', '/6\\5/u', '/7\\6/u', '/8\\7/u', '/9\\8/u', '/0\\9/u'], $REGEXU, SLASH_REGEX, 'digit escapes can be preceded by digits'],
+  [['/1\\0x/u', '/2\\1x/u', '/3\\2x/u', '/4\\3x/u', '/5\\4x/u', '/6\\5x/u', '/7\\6x/u', '/8\\7x/u', '/9\\8x/u', '/0\\9x/u'], $REGEXU, SLASH_REGEX, 'digit escapes can be succeeded by nondigits'],
+  // unicode quad escapes (more relevant for u-mode but still good to have in both). see also the class escapes
+  [['/\\u1234/u', '/x\\u0567/u', '/\\uf89ay/u', '/x\\ubcdey/u'], $REGEXU, SLASH_REGEX, 'non surrogate'],
+  //// surrogate stuff
+  [['/\\ud800/u', '/x\\ud810/u', '/\\ud900y/u', '/x\\udabcy/u', '/x\\udabcy/ug', '/x\\udabcy/um', '/x\\udabcy/iuy'], $REGEXU, SLASH_REGEX, 'lead surrogate'],
+  [['/\\ud800\\ud800/u', '/x\\ud810\\ud810/u', '/\\ud900\\ud900y/u', '/x\\udabc\\udabcy/u'], $REGEXU, SLASH_REGEX, 'lead + lead surrogate'],
+  [['/\\udc00/u', '/x\\udc10/u', '/\\udd00y/u', '/x\\udebcy/u', '/x\\udebcy/gu', '/x\\udebcy/ium', '/x\\udebcy/uy'], $REGEXU, SLASH_REGEX, 'trail surrogate'],
+  [['/\\udc00\\udc00/u', '/x\\udc10\\udc10/u', '/\\udd00\\udd00y/u', '/x\\udebc\\udebcy/u', '/x\\udebc\\udebcy/iu'], $REGEXU, SLASH_REGEX, 'trail + trail surrogate'],
+  [['/\\ud800\\udc00/u', '/x\\ud810\\udc10/u', '/\\ud900\\udd00y/u', '/x\\udabc\\udebcy/u', '/x\\udabc\\udebcy/ug'], $REGEXU, SLASH_REGEX, 'lead + trail surrogate'],
+  [['/\\u1234\\ud800/u', '/x\\u0567\\ud810/u', '/\\uf89a\\ud900y/u', '/x\\ubcde\\udabcy/u', '/x\\ubcde\\udabcy/mu'], $REGEXU, SLASH_REGEX, 'non + lead surrogate'],
+  [['/\\u1234\\udc00/u', '/x\\u0567\\udc10/u', '/\\uf89a\\udd00y/u', '/x\\ubcde\\udebcy/u', '/x\\ubcde\\udebcy/uy'], $REGEXU, SLASH_REGEX, 'non + trail pair'],
+  [['/\\u1234\\u1234\\udc00/u', '/x\\u0567\\u0567\\udc10/u', '/\\uf89a\\uf89a\\udd00y/u', '/x\\ubcde\\ubcde\\udebcy/u'], $REGEXU, SLASH_REGEX, 'non + non + trail pair'],
+  [['/\\u1234\\udc00\\udc00/u', '/x\\u0567\\udc10\\udc10/u', '/\\uf89a\\udd00\\udd00y/u', '/x\\ubcde\\udebc\\udebcy/u'], $REGEXU, SLASH_REGEX, 'non + trail + trail pair'],
+  [['/\\ud800\\ud800\\udc00/u', '/x\\ud810\\ud810\\udc10/u', '/\\ud900\\ud900\\udd00y/u', '/x\\udabc\\udabc\\udebcy/u'], $REGEXU, SLASH_REGEX, 'lead + lead + trail surrogate'],
+  [['/\\ud800\\udc00\\udc00/u', '/x\\ud810\\udc10\\udc10/u', '/\\ud900\\udd00\\udd00y/u', '/x\\udabc\\udebc\\udebcy/u'], $REGEXU, SLASH_REGEX, 'lead + trail + trail surrogate'],
+  [['/\\ud800\\udc00\\ud800/u', '/x\\ud810\\udc10\\ud810/u', '/\\ud900\\udd00\\ud900y/u', '/x\\udabc\\udebc\\udabcy/u'], $REGEXU, SLASH_REGEX, 'lead + trail + lead surrogate'],
+  //// unicode long escapes (all illegal without u flag)
+  [[`/\\u{0123}/u`, `/\\u{4567}/u`, `/\\u{89abc}/u`, `/\\u{defAB}/u`, `/\\u{CDEF}/u`], $REGEXU, SLASH_REGEX],
+  [`/prefix \\u{012345}/u`, $REGEXU, SLASH_REGEX],
+  [`/\\u{012345} postfix/u`, $REGEXU, SLASH_REGEX],
+  [`/\\u{012345}\\u{6789a}/u`, $REGEXU, SLASH_REGEX],
+  [[`/\\u{}/u`, `/\\u{fail}/u`, `/\\u{afail}/u`, `/\\u{0fail}/u`, `/\\u{xxxx}/u`], $ERROR, SLASH_REGEX, 'long unicode escape bad contents'],
+  [[`/\\u{/u`, `/\\u{a/u`, `/\\u{af/u`, `/\\u{012/u`, `/\\u{01234/u`, `/\\u{012345/u`], $ERROR, SLASH_REGEX, 'unclosed long unicode escapes'],
+  [[`/\\u{1}/u`, `/\\u{12}/u`, `/\\u{123}/u`, `/\\u{1234}/u`, `/\\u{12345}/u`, `/\\u{103456}/u`], $REGEXU, SLASH_REGEX, 'long unicode escapes'],
+  [`/\\u{10ffff}/u`, $REGEXU, SLASH_REGEX, 'It is a Syntax Error if the MV of HexDigits > 1114111.'],
+  [`/\\u{110000}/u`, $ERROR, SLASH_REGEX, 'It is a Syntax Error if the MV of HexDigits > 1114111.'],
+  [`/\\u{0000000000000000000010ffff}/u`, $REGEXU, SLASH_REGEX, 'must take care that the hex may still have any number of leading zeroes'],
+  [`/\\u{00000000000000000000110000}/u`, $ERROR, SLASH_REGEX, 'must take care that the hex may still have any number of leading zeroes'],
+  // character classes simple
+  [[`/[]/u`, `/a[]/u`, `/[]b/u`, `/a[]b/u`], $REGEXU, SLASH_REGEX, 'empty class is explicitly allowed'],
+  [[`/[^]/u`, `/a[^]/u`, `/[^]b/u`, `/a[^]b/u`], $REGEXU, SLASH_REGEX, 'empty inverted class is explicitly allowed'],
+  [[`/[a]/u`, `/[b]/u`, `/[c]/u`, `/[d]/u`, `/[e]/u`, `/[f]/u`, `/[g]/u`, `/[h]/u`, `/[i]/u`, `/[j]/u`, `/[k]/u`, `/[l]/u`, `/[m]/u`, `/[n]/u`, `/[o]/u`, `/[p]/u`, `/[q]/u`, `/[r]/u`, `/[s]/u`, `/[t]/u`, `/[u]/u`, `/[v]/u`, `/[w]/u`, `/[x]/u`, `/[y]/u`, `/[z]/u`], $REGEXU, SLASH_REGEX, 'simple char class with one char'],
+  [[`/[A]/u`, `/[B]/u`, `/[C]/u`, `/[D]/u`, `/[E]/u`, `/[F]/u`, `/[G]/u`, `/[H]/u`, `/[I]/u`, `/[J]/u`, `/[K]/u`, `/[L]/u`, `/[M]/u`, `/[N]/u`, `/[O]/u`, `/[P]/u`, `/[Q]/u`, `/[R]/u`, `/[S]/u`, `/[T]/u`, `/[U]/u`, `/[V]/u`, `/[W]/u`, `/[X]/u`, `/[Y]/u`, `/[Z]/u`], $REGEXU, SLASH_REGEX, 'simple char class with one char'],
+  [[`/[rD]/u`, `/[Kq]/u`, `/[$%]/u`], $REGEXU, SLASH_REGEX, 'simple char class with two chars'],
+  [`/[-]/u`, $REGEXU, SLASH_REGEX, 'the class with just a dash should be legal'],
+  [[`/[-b]/u`, `/[-bcd]/u`], $REGEXU, SLASH_REGEX, 'leading dash'],
+  [[`/[a-]/u`, `/[abc-]/u`], $REGEXU, SLASH_REGEX, 'trailing dash'],
+  // character class escapes (pretty much a repeat of the previous wrapped in [] ...)
+  [[`/[\\b]/u`, `/[a\\bc]/u`, `/[\\bc]/u`, `/[a\\bb]/u`], $REGEXU, SLASH_REGEX, 'class escape b'],
+  [[`/[\\-]/u`, `/[a\\-c]/u`, `/[\\-c]/u`, `/[a\\-b]/u`], $REGEXU, SLASH_REGEX, 'class escape dash with valid ranges is still illegal without u flag'],
+  [`/[b\\-a]/u`, $ERROR, SLASH_REGEX, 'class escape dash with invalid ranges is illegal'],
+  [['/[\\0]/u', '/[\\1]/u', '/[\\2]/u', '/[\\3]/u', '/[\\4]/u', '/[\\5]/u', '/[\\6]/u', '/[\\7]/u', '/[\\8]/u', '/[\\9]/u'], $REGEXU, SLASH_REGEX, 'digit escapes'],
+  [['/[\\00]/u', '/[\\12]/u', '/[\\23]/u', '/[\\34]/u', '/[\\45]/u', '/[\\56]/u', '/[\\67]/u', '/[\\78]/u', '/[\\89]/u', '/[\\91]/u'], $ERROR, SLASH_REGEX, 'digit escapes cant be followed by another digit'],
+  [['/[1\\0]/u', '/[2\\1]/u', '/[3\\2]/u', '/[4\\3]/u', '/[5\\4]/u', '/[6\\5]/u', '/[7\\6]/u', '/[8\\7]/u', '/[9\\8]/u', '/[0\\9]/u'], $REGEXU, SLASH_REGEX, 'digit escapes can be preceded by digits'],
+  [['/[1\\0x]/u', '/[2\\1x]/u', '/[3\\2x]/u', '/[4\\3x]/u', '/[5\\4x]/u', '/[6\\5x]/u', '/[7\\6x]/u', '/[8\\7x]/u', '/[9\\8x]/u', '/[0\\9x]/u'], $REGEXU, SLASH_REGEX, 'digit escapes can be succeeded by nondigits'],
+  [['/[\\d]/u', '/[\\D]/u', '/[\\f]/u', '/[\\n]/u', '/[\\r]/u', '/[\\s]/u', '/[\\S]/u', '/[\\t]/u', '/[\\v]/u', '/[\\w]/u', '/[\\W]/u'], $REGEXU, SLASH_REGEX, 'only escaping a single letter'],
+  [['/[abc\\d]/u', '/[abc\\D]/u', '/[abc\\f]/u', '/[abc\\n]/u', '/[abc\\r]/u', '/[abc\\s]/u', '/[abc\\S]/u', '/[abc\\t]/u', '/[abc\\v]/u', '/[abc\\w]/u', '/[abc\\W]/u'], $REGEXU, SLASH_REGEX, 'escaping a prefixed single letter'],
+  [['/[\\fabcd]/u', '/[\\dabcd]/u', '/[\\Dabcd]/u', '/[\\nabcd]/u', '/[\\rabcd]/u', '/[\\sabcd]/u', '/[\\Sabcd]/u', '/[\\tabcd]/u', '/[\\vabcd]/u', '/[\\wabcd]/u', '/[\\Wabcd]/u'], $REGEXU, SLASH_REGEX, 'escaping a suffixed single letter'],
+  [['/[abc\\fdeff]/u', '/[abc\\ddeff]/u', '/[abc\\Ddeff]/u', '/[abc\\ndeff]/u', '/[abc\\rdeff]/u', '/[abc\\sdeff]/u', '/[abc\\Sdeff]/u', '/[abc\\tdeff]/u', '/[abc\\vdeff]/u', '/[abc\\wdeff]/u', '/[abc\\Wdeff]/u'], $REGEXU, SLASH_REGEX, 'escaping a single letter in the middle'],
+  [['/[\\a]/u', '/[\\e]/u', '/[\\g]/u', '/[\\h]/u', '/[\\i]/u', '/[\\j]/u', '/[\\k]/u', '/[\\l]/u', '/[\\m]/u', '/[\\o]/u', '/[\\p]/u', '/[\\q]/u', '/[\\u]/u', '/[\\x]/u', '/[\\y]/u', '/[\\z]/u'], $ERROR, SLASH_REGEX, 'only escaping a single lc letter'],
+  [['/[\\A]/u', '/[\\E]/u', '/[\\F]/u', '/[\\G]/u', '/[\\H]/u', '/[\\I]/u', '/[\\J]/u', '/[\\K]/u', '/[\\L]/u', '/[\\M]/u', '/[\\N]/u', '/[\\O]/u', '/[\\P]/u', '/[\\Q]/u', '/[\\R]/u', '/[\\T]/u', '/[\\U]/u', '/[\\V]/u', '/[\\X]/u', '/[\\Y]/u', '/[\\Z]/u'], $ERROR, SLASH_REGEX, 'only escaping a single uc letter'],
+  [['/[abc\\a]/u', '/[abc\\e]/u', '/[abc\\g]/u', '/[abc\\h]/u', '/[abc\\i]/u', '/[abc\\j]/u', '/[abc\\k]/u', '/[abc\\l]/u', '/[abc\\m]/u', '/[abc\\o]/u', '/[abc\\p]/u', '/[abc\\q]/u', '/[abc\\u]/u', '/[abc\\x]/u', '/[abc\\y]/u', '/[abc\\z]/u'], $ERROR, SLASH_REGEX, 'escaping a prefixed single lc letter'],
+  [['/[abc\\A]/u', '/[abc\\E]/u', '/[abc\\F]/u', '/[abc\\G]/u', '/[abc\\H]/u', '/[abc\\I]/u', '/[abc\\J]/u', '/[abc\\K]/u', '/[abc\\L]/u', '/[abc\\M]/u', '/[abc\\N]/u', '/[abc\\O]/u', '/[abc\\P]/u', '/[abc\\Q]/u', '/[abc\\R]/u', '/[abc\\T]/u', '/[abc\\U]/u', '/[abc\\V]/u', '/[abc\\X]/u', '/[abc\\Y]/u', '/[abc\\Z]/u'], $ERROR, SLASH_REGEX, 'escaping a prefixed single uc letter'],
+  [['/[\\aabcd]/u', '/[\\eabcd]/u', '/[\\gabcd]/u', '/[\\habcd]/u', '/[\\iabcd]/u', '/[\\jabcd]/u', '/[\\kabcd]/u', '/[\\labcd]/u', '/[\\mabcd]/u', '/[\\oabcd]/u', '/[\\pabcd]/u', '/[\\qabcd]/u', '/[\\xabcd]/u', '/[\\yabcd]/u', '/[\\zabcd]/u'], $ERROR, SLASH_REGEX, 'escaping a suffixed single lc letter'],
+  [['/[\\Aabcd]/u', '/[\\Cabcd]/u', '/[\\Eabcd]/u', '/[\\Fabcd]/u', '/[\\Gabcd]/u', '/[\\Habcd]/u', '/[\\Iabcd]/u', '/[\\Jabcd]/u', '/[\\Kabcd]/u', '/[\\Labcd]/u', '/[\\Mabcd]/u', '/[\\Nabcd]/u', '/[\\Oabcd]/u', '/[\\Pabcd]/u', '/[\\Qabcd]/u', '/[\\Rabcd]/u', '/[\\Tabcd]/u', '/[\\Uabcd]/u', '/[\\Vabcd]/u', '/[\\Xabcd]/u', '/[\\Yabcd]/u', '/[\\Zabcd]/u'], $ERROR, SLASH_REGEX, 'escaping a suffixed single uc letter'],
+  [['/[abc\\adeff]/u', '/[abc\\gdeff]/u', '/[abc\\hdeff]/u', '/[abc\\ideff]/u', '/[abc\\jdeff]/u', '/[abc\\kdeff]/u', '/[abc\\ldeff]/u', '/[abc\\mdeff]/u', '/[abc\\odeff]/u', '/[abc\\pdeff]/u', '/[abc\\qdeff]/u', '/[abc\\xdeff]/u', '/[abc\\ydeff]/u', '/[abc\\zdeff]/u'], $ERROR, SLASH_REGEX, 'escaping a single lc letter in the middle'],
+  [['/[abc\\Adeff]/u', '/[abc\\Cdeff]/u', '/[abc\\Edeff]/u', '/[abc\\Fdeff]/u', '/[abc\\Gdeff]/u', '/[abc\\Hdeff]/u', '/[abc\\Ideff]/u', '/[abc\\Jdeff]/u', '/[abc\\Kdeff]/u', '/[abc\\Ldeff]/u', '/[abc\\Mdeff]/u', '/[abc\\Ndeff]/u', '/[abc\\Odeff]/u', '/[abc\\Pdeff]/u', '/[abc\\Qdeff]/u', '/[abc\\Rdeff]/u', '/[abc\\Tdeff]/u', '/[abc\\Udeff]/u', '/[abc\\Vdeff]/u', '/[abc\\Xdeff]/u', '/[abc\\Ydeff]/u', '/[abc\\Zdeff]/u'], $ERROR, SLASH_REGEX, 'escaping a single uc letter in the middle'],
+  [['/[\\_]/u', '/[abc\\_]/u', '/[\\_abcd]/u', '/[abc\\_abcd]/u'], $ERROR, SLASH_REGEX, '_ is not an escapable char'],
+  [['/[\\$]/u', '/[abc\\$]/u', '/[\\$abcd]/u', '/[abc\\$abcd]/u'], $REGEXU, SLASH_REGEX, '$ is a syntax char we can escape'],
+  [[`/[\\^]/u`, `/[\\$]/u`, `/[\\\\]/u`, `/[\\.]/u`, `/[\\*]/u`, `/[\\+]/u`, `/[\\?]/u`, `/[\\(]/u`, `/[\\)]/u`, `/[\\[]/u`, `/[\\]]/u`, `/[\\{]/u`, `/[\\}]/u`, `/[\\|]/u`], $REGEXU, SLASH_REGEX, 'syntax char escapes'],
+  [[`/[abc\\^]/u`, `/[abc\\$]/u`, `/[abc\\\\]/u`, `/[abc\\.]/u`, `/[abc\\*]/u`, `/[abc\\+]/u`, `/[abc\\?]/u`, `/[abc\\(]/u`, `/[abc\\)]/u`, `/[abc\\[]/u`, `/[abc\\]]/u`, `/[abc\\{]/u`, `/[abc\\}]/u`, `/[abc\\|]/u`], $REGEXU, SLASH_REGEX, 'syntax char escapes with prefix'],
+  [[`/[\\^def]/u`, `/[\\$def]/u`, `/[\\\\def]/u`, `/[\\.def]/u`, `/[\\*def]/u`, `/[\\+def]/u`, `/[\\?def]/u`, `/[\\(def]/u`, `/[\\)def]/u`, `/[\\[def]/u`, `/[\\]def]/u`, `/[\\{def]/u`, `/[\\}def]/u`, `/[\\|def]/u`], $REGEXU, SLASH_REGEX, 'syntax char escapes with suffix'],
+  [[`/[\\^`, `/[\\$`, `/[\\\\`, `/[\\.`, `/[\\*`, `/[\\+`, `/[\\?`, `/[\\(`, `/[\\)`, `/[\\]`, `/[\\]`, `/[\\{`, `/[\\}`, `/[\\|`], $ERROR, SLASH_REGEX, 'syntax char escapes with early eol/eof', 'suffixsp'],
+  [[`/[\\']/u`, `/[\\"]/u`, `/[\\\`]/u`], $ERROR, SLASH_REGEX, 'typical string escapes dont work in regexes'],
+  [['/[\\ca]/u', '/[\\cb]/u', '/[\\cd]/u', '/[\\ce]/u', '/[\\cf]/u', '/[\\cg]/u', '/[\\ch]/u', '/[\\ci]/u', '/[\\cj]/u', '/[\\ck]/u', '/[\\cl]/u', '/[\\cm]/u', '/[\\cn]/u', '/[\\co]/u', '/[\\cp]/u', '/[\\cq]/u', '/[\\cr]/u', '/[\\cs]/u', '/[\\ct]/u', '/[\\cu]/u', '/[\\cv]/u', '/[\\cw]/u', '/[\\cx]/u', '/[\\cy]/u', '/[\\cz]/u'], $REGEXU, SLASH_REGEX, 'control character lc'],
+  [['/[\\cA]/u', '/[\\cB]/u', '/[\\cD]/u', '/[\\cE]/u', '/[\\cF]/u', '/[\\cG]/u', '/[\\cH]/u', '/[\\cI]/u', '/[\\cJ]/u', '/[\\cK]/u', '/[\\cL]/u', '/[\\cM]/u', '/[\\cN]/u', '/[\\cO]/u', '/[\\cP]/u', '/[\\cQ]/u', '/[\\cR]/u', '/[\\cS]/u', '/[\\cT]/u', '/[\\cU]/u', '/[\\cV]/u', '/[\\cW]/u', '/[\\cX]/u', '/[\\cY]/u', '/[\\cZ]/u'], $REGEXU, SLASH_REGEX, 'control character uc'],
+  [['/[\\x01]/u', '/[\\x12]/u', '/[\\x23]/u', '/[\\x34]/u', '/[\\x45]/u', '/[\\x56]/u', '/[\\x67]/u', '/[\\x78]/u', '/[\\x89]/u', '/[\\x90]/u'], $REGEXU, SLASH_REGEX, 'valid hex escapes'],
+  [['/[\\x]/u', '/[\\x0]/u', '/[\\x1]/u', '/[\\x2]/u', '/[\\x3]/u', '/[\\x4]/u', '/[\\x5]/u', '/[\\x6]/u', '/[\\x7]/u', '/[\\x8]/u', '/[\\x9]/u'], $ERROR, SLASH_REGEX, 'invalid hex escape with one char'],
+  [['/[\\u1234]/u', '/[x\\u0567]/u', '/[\\uf89ay]/u', '/[x\\ubcdey]/u'], $REGEXU, SLASH_REGEX, 'non surrogate'],
+  [['/[\\ud800]/u', '/[x\\ud810]/u', '/[\\ud900y]/u', '/[x\\udabcy]/u', '/[x\\udabcy]/ug', '/[x\\udabcy]/um', '/[x\\udabcy]/iuy'], $REGEXU, SLASH_REGEX, 'lead surrogate'],
+  [['/[\\ud800\\ud800]/u', '/[x\\ud810\\ud810]/u', '/[\\ud900\\ud900y]/u', '/[x\\udabc\\udabcy]/u'], $REGEXU, SLASH_REGEX, 'lead + lead surrogate'],
+  [['/[\\udc00]/u', '/[x\\udc10]/u', '/[\\udd00y]/u', '/[x\\udebcy]/u', '/[x\\udebcy]/gu', '/[x\\udebcy]/imu', '/[x\\udebcy]/uy'], $REGEXU, SLASH_REGEX, 'trail surrogate'],
+  [['/[\\udc00\\udc00]/u', '/[x\\udc10\\udc10]/u', '/[\\udd00\\udd00y]/u', '/[x\\udebc\\udebcy]/u', '/[x\\udebc\\udebcy]/ui'], $REGEXU, SLASH_REGEX, 'trail + trail surrogate'],
+  [['/[\\ud800\\udc00]/u', '/[x\\ud810\\udc10]/u', '/[\\ud900\\udd00y]/u', '/[x\\udabc\\udebcy]/u', '/[x\\udabc\\udebcy]/ug'], $REGEXU, SLASH_REGEX, 'lead + trail surrogate'],
+  [['/[\\u1234\\ud800]/u', '/[x\\u0567\\ud810]/u', '/[\\uf89a\\ud900y]/u', '/[x\\ubcde\\udabcy]/u', '/[x\\ubcde\\udabcy]/mu'], $REGEXU, SLASH_REGEX, 'non + lead surrogate'],
+  [['/[\\u1234\\udc00]/u', '/[x\\u0567\\udc10]/u', '/[\\uf89a\\udd00y]/u', '/[x\\ubcde\\udebcy]/u', '/[x\\ubcde\\udebcy]/yu'], $REGEXU, SLASH_REGEX, 'non + trail pair'],
+  [['/[\\u1234\\u1234\\udc00]/u', '/[x\\u0567\\u0567\\udc10]/u', '/[\\uf89a\\uf89a\\udd00y]/u', '/[x\\ubcde\\ubcde\\udebcy]/u'], $REGEXU, SLASH_REGEX, 'non + non + trail pair'],
+  [['/[\\u1234\\udc00\\udc00]/u', '/[x\\u0567\\udc10\\udc10]/u', '/[\\uf89a\\udd00\\udd00y]/u', '/[x\\ubcde\\udebc\\udebcy]/u'], $REGEXU, SLASH_REGEX, 'non + trail + trail pair'],
+  [['/[\\ud800\\ud800\\udc00]/u', '/[x\\ud810\\ud810\\udc10]/u', '/[\\ud900\\ud900\\udd00y]/u', '/[x\\udabc\\udabc\\udebcy]/u'], $REGEXU, SLASH_REGEX, 'lead + lead + trail surrogate'],
+  [['/[\\ud800\\udc00\\udc00]/u', '/[x\\ud810\\udc10\\udc10]/u', '/[\\ud900\\udd00\\udd00y]/u', '/[x\\udabc\\udebc\\udebcy]/u'], $REGEXU, SLASH_REGEX, 'lead + trail + trail surrogate'],
+  [['/[\\ud800\\udc00\\ud800]/u', '/[x\\ud810\\udc10\\ud810]/u', '/[\\ud900\\udd00\\ud900y]/u', '/[x\\udabc\\udebc\\udabcy]/u'], $REGEXU, SLASH_REGEX, 'lead + trail + lead surrogate'],
+  [[`/[\\u{0123}]/u`, `/[\\u{4567}]/u`, `/[\\u{89abc}]/u`, `/[\\u{defAB}]/u`, `/[\\u{CDEF}]/u`], $REGEXU, SLASH_REGEX],
+  [`/[prefix \\u{012345}]/u`, $REGEXU, SLASH_REGEX],
+  [`/[\\u{012345} postfix]/u`, $REGEXU, SLASH_REGEX],
+  [`/[\\u{012345}\\u{6789a}]/u`, $REGEXU, SLASH_REGEX],
+  [[`/[\\u{}]/u`, `/[\\u{fail}]/u`, `/[\\u{afail}]/u`, `/[\\u{0fail}]/u`, `/[\\u{xxxx}]/u`], $ERROR, SLASH_REGEX, 'long unicode escape bad contents'],
+  [[`/[\\u{]/u`, `/[\\u{a]/u`, `/[\\u{af]/u`, `/[\\u{012]/u`, `/[\\u{01234]/u`, `/[\\u{012345]/u`], $ERROR, SLASH_REGEX, 'unclosed long unicode escapes'],
+  [[`/[\\u{1}]/u`, `/[\\u{12}]/u`, `/[\\u{123}]/u`, `/[\\u{1234}]/u`, `/[\\u{12345}]/u`, `/[\\u{103456}]/u`], $REGEXU, SLASH_REGEX, 'long unicode escapes'],
+  [[`/[\\u{`, `/[\\u{a`, `/[\\u{af`, `/[\\u{123`, `/[\\u{1234`, `/[\\u{12345`, `/[\\u{103456`], $ERROR, SLASH_REGEX, 'incomplete long unicode escapes in unclosed string', 'suffixsp'],
+  [`/[\\u{10ffff}]/u`, $REGEXU, SLASH_REGEX, 'It is a Syntax Error if the MV of HexDigits > 1114111.'],
+  [[`/[\\u{110000}]/u`, `/[\\u{120000}]/u`, `/[\\u{900000}]/u`, `/[\\u{123456789}]/u`, `/[\\u{ffffffffffffffff}]/u`], $ERROR, SLASH_REGEX, 'It is a Syntax Error if the MV of HexDigits > 1114111.'],
+  [`/[\\u{10000000000000000}]/u`, $ERROR, SLASH_REGEX, 'regex value that would exceed 32bits'],
+  [`/[\\u{fffffffffffffffffffff}]/u`, $ERROR, SLASH_REGEX, 'regex value that would exceed 32bits'],
+  [`/[\\u{0000000000000000000010ffff}]/u`, $REGEXU, SLASH_REGEX, 'must take care that the hex may still have any number of leading zeroes'],
+  [[`/[\\u{00000000000000000000110000}]/u`, `/[\\u{00000000000000000000120000}]/u`, `/[\\u{0000000000123456789}]/u`, `/[\\u{000000ffffffffffffffff}]/u`], $ERROR, SLASH_REGEX, 'must take care that the hex may still have any number of leading zeroes'],
+  [['/[\\da-z]/u', '/[\\DA-Z]/u', '/[\\sa-z]/u', '/[\\SA-S]/u', '/[\\wa-z]/u', '/[\\WA-Z]/u'], $REGEXU, SLASH_REGEX, 'class escapes are also valid in char classes that contain ranges'],
+  [['/[\\d-z]/u', '/[\\D-Z]/u', '/[\\s-z]/u', '/[\\S-S]/u', '/[\\w-z]/u', '/[\\W-Z]/u'], $ERROR, SLASH_REGEX, 'class escapes are never valid when part of a range'],
+  [['/[x\\da-z]/u', '/[x\\DA-Z]/u', '/[x\\sa-z]/u', '/[x\\SA-S]/u', '/[x\\wa-z]/u', '/[x\\WA-Z]/u'], $REGEXU, SLASH_REGEX, 'with prefix class escapes are also valid in char classes that contain ranges'],
+  [['/[x\\d-z]/u', '/[x\\D-Z]/u', '/[x\\s-z]/u', '/[x\\S-S]/u', '/[x\\w-z]/u', '/[x\\W-Z]/u'], $ERROR, SLASH_REGEX, 'with prefix class escapes are never valid when part of a range'],
+  [['/[a-z\\d]/u', '/[A-Z\\D]/u', '/[a-z\\s]/u', '/[A-S\\S]/u', '/[a-z\\w]/u', '/[A-Z\\W]/u'], $REGEXU, SLASH_REGEX, 'class escapes are also valid in char classes that contain ranges'],
+  [['/[a-\\d]/u', '/[A-\\D]/u', '/[a-\\s]/u', '/[A-\\S]/u', '/[a-\\w]/u', '/[A-\\W]/u'], $ERROR, SLASH_REGEX, 'class escapes are never valid when part of a range'],
+  [['/[a-z\\dx]/u', '/[A-Z\\Dx]/u', '/[a-z\\sx]/u', '/[A-S\\Sx]/u', '/[a-z\\wx]/u', '/[A-Z\\Wx]/u'], $REGEXU, SLASH_REGEX, 'with suffix class escapes are also valid in char classes that contain ranges'],
+  [['/[a-\\dx]/u', '/[A-\\Dx]/u', '/[a-\\sx]/u', '/[A-\\Sx]/u', '/[a-\\wx]/u', '/[A-\\Wx]/u'], $ERROR, SLASH_REGEX, 'with suffix class escapes are never valid when part of a range'],
+  ['/\\2(x)/u', $ERROR, SLASH_REGEX, 'it is an error if a digital non-zero escape evaluates to a number bigger than the number of groups'],
+  // surrogate pairs revisited
+  ['/[1-9]/u', $REGEXU, SLASH_REGEX, 'char class ranges should be lo-hi'],
+  ['/[9-1]/u', $ERROR, SLASH_REGEX, 'char class ranges should be lo-hi and it is a syntax error otherwise'],
+  ['/[\\u5000-\\u6000]/u', $REGEXU, SLASH_REGEX, 'escapes are no problem for ranges'],
+  ['/[\\u6000-\\u5000]/u', $ERROR, SLASH_REGEX, 'escapes are also bound by the lo-hi rule'],
+  ['/[\\uD83D\\uDCA9]/u', $REGEXU, SLASH_REGEX, 'Unicode Character PILE OF POO (U+1F4A9) surrogate pair base test case. sans u-flag this matches two individual chars'],
+  ['/[\\uD83D\\uDCAB]/u', $REGEXU, SLASH_REGEX, 'Unicode Character DIZZY SYMBOL (U+1F4AB) surrogate pair base test case. sans u-flag this matches two individual chars'],
+  [['/[\\uD83D\\uDCA9-\\uD83D\\uDCAB]/u', '/[\uD83D\\uDCA9-\\uD83D\\uDCAB]/u', '/[\\uD83D\uDCA9-\\uD83D\\uDCAB]/u', '/[\\uD83D\\uDCA9-\uD83D\\uDCAB]/u', '/[\\uD83D\\uDCA9-\\uD83D\uDCAB]/u', '/[\uD83D\uDCA9-\\uD83D\\uDCAB]/u', '/[\uD83D\\uDCA9-\uD83D\\uDCAB]/u', '/[\uD83D\\uDCA9-\\uD83D\uDCAB]/u', '/[\\uD83D\uDCA9-\uD83D\\uDCAB]/u', '/[\\uD83D\uDCA9-\\uD83D\uDCAB]/u', '/[\\uD83D\\uDCA9-\uD83D\uDCAB]/u', '/[\uD83D\uDCA9-\uD83D\\uDCAB]/u', '/[\uD83D\uDCA9-\\uD83D\uDCAB]/u', '/[\\uD83D\uDCA9-\uD83D\uDCAB]/u', '/[\uD83D\uDCA9-\uD83D\uDCAB]/u'], $REGEXU, SLASH_REGEX, 'range poo to dizzy some are escapes and some are literal but surrogates should still work (and error without u flag)'],
+  [['/[\\1-\\7]/u', '/[\\u0001-\\7]/u', '/[\\1-\\u0007]/u', '/[\\x01-\\7]/u', '/[A-\\cH]/u', '/[\\cH-Z]/u'], $REGEXU, SLASH_REGEX, 'ranges using various escapes'],
+  [['/[\\u{5}-1]/u', '/[\\1-\\u{347}]/u'], $REGEXU, SLASH_REGEX, 'ranges using various escapes and long unicode escapes'],
+  [['/[1-\\u{500}]/u', '/\\u{01}-\\x07/u'], $REGEXU, SLASH_REGEX, 'various ranges using escapes but using long unicodes'],
+  [['/[--0]/u', '/[+--]/u'], $REGEXU, SLASH_REGEX, 'dash is also a dash at the start or end of a range'],
+  [['/[-+]/u', '/[+-]/u', '/[---+]/u', '/[---0]/u'], $REGEXU, SLASH_REGEX, 'positive dash edge cases'],
+  ['/[-]/u', $REGEXU, SLASH_REGEX, 'a dash'],
+  ['/[--]/u', $REGEXU, SLASH_REGEX, 'no range, just twice the dash'],
+  ['/[---]/u', $REGEXU, SLASH_REGEX, 'a range that starts and ends with a dash'],
+  ['/[----]/u', $REGEXU, SLASH_REGEX, 'a range that starts and ends with a dash and then followed by a single character that is also a dash'],
+  ['/[-----]/u', $REGEXU, SLASH_REGEX, 'a range that starts and ends with a dash and then followed by a single character that is also a dash and ends with a dash because they cant make another range'],
+  ['/[------]/u', $REGEXU, SLASH_REGEX, 'twice the range that starts and ends with a dash can i stop now?'],
+  ['/[-------]/u', $REGEXU, SLASH_REGEX, 'certainly we can proof by induction now'],
+  ['/[--------]/u', $REGEXU, SLASH_REGEX, 'yeah'],
+  ['/[---------]/u', $REGEXU, SLASH_REGEX, 'this is n+2 so qed'],
+  [['/[--+]/u', '/[0--]/u', '/[x---]/u', '/[0---]/u'], $ERROR, SLASH_REGEX, 'negative dash edge cases'],
+  ['/[x-\\uD83D\\uDE07--+]/u', $ERROR, SLASH_REGEX, 'range with a surrogate on the right; with u flag causing two valid ranges (x-D83DDE07 and --+), without u flag causing a valid range (x-D83D) and an invalid range (DE07--)'],
+  ['/[x-\\uD83D\\uDE07--x-\\uD83D\\uDE07--]/u', $ERROR, SLASH_REGEX, 'more silliness'],
+];
+// exhaustive set of lead/tail/non surrogate combos, with one to three chars on each side of the dash (so (4**4)*(3**2)=2304 tests with a few dupes due to the empty case)
+['', 'B', 'L', 'T'].forEach(a => ['', 'B', 'L', 'T'].forEach(b => ['B', 'L', 'T'].forEach(c => ['B', 'L', 'T'].forEach(d => ['', 'B', 'L', 'T'].forEach(e => ['', 'B', 'L', 'T'].forEach(f => {
+  let p = `${a}${b}${c}-${d}${e}${f}`;
+  let r = `/S[${p}]/u`;
+  let rr = r
+    .replace(/B/g, 'x')
+    .replace(/L/g, '\\uD83D')
+    .replace(/T/g, '\\uDCA9')
+    .replace(/S/g, p);
+
+  let t1 = '(?:B-)'; // B<=*
+  let t2 = '(?:L-L)'; // L<=L L<=LT
+  let t3 = '(?:L-T)'; // L<=T
+  let t4 = '(?:T-LT)'; // T<=LT LT<=LT (but T>L)
+  let t5 = '(?:(?:B|T|^)T-T)'; // T<=T (but LT > T)
+  let test = new RegExp(`${t1}|${t2}|${t3}|${t4}|${t5}`);
+  let out = (test.test(p)) ? $REGEXU : $ERROR;
+  regexesu.push([rr, out, SLASH_REGEX, 'generated case '+ p]);
+}))))));
 
 let testIndex = 0;
 let all = [
@@ -454,6 +920,8 @@ let all = [
   ...strings_single,
   ...strings_double,
   ...identifiers,
+  ...regexes,
+  ...regexesu,
 ];
 let fails = 0;
 for (let [input, output, modi, desc, skip] of all) {
@@ -469,10 +937,15 @@ for (let [input, output, modi, desc, skip] of all) {
 
   for (let outerCode of input) {
     for (let mode of modi) {
+      let orifailed = false;
       for (let testMode of ['original', '- prefixsp', '- suffixsp', '- prefixnl', '- suffixls', '- suffixcr', '- suffcrlf']) {
         ++testIndex;
+        if (orifailed) {
+          console.log('SKIP: ' + testIndex + ' (original failed)');
+          continue;
+        }
 
-        //if (testIndex !== 1541) continue;
+        //if (testIndex !== 9311) continue;
 
         let code = outerCode;
         let outs = output.slice(0);
@@ -562,8 +1035,11 @@ for (let [input, output, modi, desc, skip] of all) {
             } while (token.type !== $EOF);
           }
 
-          console.log((failed ? 'FAIL: ' : 'PASS: ') + testIndex + ' (' + (strictness === STRICT_MODE ? 'strict' : 'sloppy') + ')(' + testMode + '): `' + toPrint(code) + '`  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype));
-          if (failed) ++fails;
+          if (failed) console.log((failed ? 'FAIL: ' : 'PASS: ') + testIndex + ' (' + (strictness === STRICT_MODE ? 'strict' : 'sloppy') + ')(' + testMode + '): `' + toPrint(code) + '`  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype));
+          if (failed) {
+            ++fails;
+            if (testMode === 'original') orifailed = true;
+          }
         } catch (rethrow) {
           console.log('ERROR: ' + testIndex + ' (' + (strictness === STRICT_MODE ? 'strict' : 'sloppy') + ')(' + testMode + '): `' + toPrint(code) + '`  -->  ' + outs.map(debug_toktype) + ', was so far; ' + collects.map(debug_toktype));
           throw rethrow;
