@@ -1256,6 +1256,11 @@ function ZeTokenizer(input, goal) {
 
           afterAtom = true;
           break;
+        case $$SQUARE_R_5D:
+          // this is always bad since we have a quantifier parser that consumes valid curlies
+          ASSERT_skip($$SQUARE_R_5D);
+          uflagStatus = ALWAYS_BAD;
+          break;
 
         case $$STAR_2A:
         case $$PLUS_2B:
@@ -1289,9 +1294,9 @@ function ZeTokenizer(input, goal) {
             uflagStatus = ALWAYS_BAD;
           }
           break;
-        case $$SQUARE_R_5D:
+        case $$CURLY_R_7D:
           // this is always bad since we have a quantifier parser that consumes valid curlies
-          ASSERT_skip($$SQUARE_R_5D);
+          ASSERT_skip($$CURLY_R_7D);
           uflagStatus = ALWAYS_BAD;
           break;
 

@@ -514,6 +514,10 @@ let regexes = [
   [[`/\\^def/`, `/\\$def/`, `/\\\\def/`, `/\\.def/`, `/\\*def/`, `/\\+def/`, `/\\?def/`, `/\\(def/`, `/\\)def/`, `/\\[def/`, `/\\]def/`, `/\\{def/`, `/\\}def/`, `/\\|def/`], $REGEX, SLASH_REGEX, 'syntax char escapes with suffix'],
   [[`/\\^`, `/\\$`, `/\\\\`, `/\\.`, `/\\*`, `/\\+`, `/\\?`, `/\\(`, `/\\)`, `/\\[`, `/\\]`, `/\\{`, `/\\}`, `/\\|`], $ERROR, SLASH_REGEX, 'syntax char escapes with early eol/eof', 'suffixsp'],
   [[`/\\'/`, `/\\"/`, `/\\\`/`], $ERROR, SLASH_REGEX, 'typical string escapes dont work in regexes'],
+  [['/^/', '/$/', '/./'], $REGEX, SLASH_REGEX, 'off to a good start'],
+  [['/+/', '/?/', '/)/', '/]/', '/{/', '/}/', '/|/'], $ERROR, SLASH_REGEX, 'off to a bad start'],
+  [['/a|*/', '/a|+/', '/a|?/', '/a|)/', '/a|]/', '/a|{/', '/a|}/', '/a||/'], $ERROR, SLASH_REGEX, 'and you started so well'],
+  [['/\\/', '/a|\\/'], $ERROR, SLASH_REGEX, '(eol/eof case)', 'suffixsp'],
   // \c<x>
   [['/\\ca/', '/\\cb/', '/\\cd/', '/\\ce/', '/\\cf/', '/\\cg/', '/\\ch/', '/\\ci/', '/\\cj/', '/\\ck/', '/\\cl/', '/\\cm/', '/\\cn/', '/\\co/', '/\\cp/', '/\\cq/', '/\\cr/', '/\\cs/', '/\\ct/', '/\\cu/', '/\\cv/', '/\\cw/', '/\\cx/', '/\\cy/', '/\\cz/'], $REGEX, SLASH_REGEX, 'control character lc'],
   [['/\\cA/', '/\\cB/', '/\\cD/', '/\\cE/', '/\\cF/', '/\\cG/', '/\\cH/', '/\\cI/', '/\\cJ/', '/\\cK/', '/\\cL/', '/\\cM/', '/\\cN/', '/\\cO/', '/\\cP/', '/\\cQ/', '/\\cR/', '/\\cS/', '/\\cT/', '/\\cU/', '/\\cV/', '/\\cW/', '/\\cX/', '/\\cY/', '/\\cZ/'], $REGEX, SLASH_REGEX, 'control character uc'],
@@ -884,6 +888,10 @@ let regexesu = [
   [[`/abc\\^/u`, `/abc\\$/u`, `/abc\\\\/u`, `/abc\\./u`, `/abc\\*/u`, `/abc\\+/u`, `/abc\\?/u`, `/abc\\(/u`, `/abc\\)/u`, `/abc\\[/u`, `/abc\\]/u`, `/abc\\{/u`, `/abc\\}/u`, `/abc\\|/u`], $REGEXU, SLASH_REGEX, 'syntax char escapes with prefix'],
   [[`/\\^def/u`, `/\\$def/u`, `/\\\\def/u`, `/\\.def/u`, `/\\*def/u`, `/\\+def/u`, `/\\?def/u`, `/\\(def/u`, `/\\)def/u`, `/\\[def/u`, `/\\]def/u`, `/\\{def/u`, `/\\}def/u`, `/\\|def/u`], $REGEXU, SLASH_REGEX, 'syntax char escapes with suffix'],
   [[`/\\'/u`, `/\\"/u`, `/\\\`/u`], $ERROR, SLASH_REGEX, 'typical string escapes dont work in regexes'],
+  [['/^/u', '/$/u', '/./u'], $REGEXU, SLASH_REGEX, 'off to a good start'],
+  [['/+/u', '/?/u', '/)/u', '/]/u', '/{/u', '/}/u', '/|/u'], $ERROR, SLASH_REGEX, 'off to a bad start'],
+  [['/a|*/u', '/a|+/u', '/a|?/u', '/a|)/u', '/a|]/u', '/a|{/u', '/a|}/u', '/a||/u'], $ERROR, SLASH_REGEX, 'and you started so well'],
+  [['/\\/u', '/a|\\/u'], $ERROR, SLASH_REGEX, '(eol/eof case)', 'suffixsp'],
   // \c<x>
   [['/\\ca/u', '/\\cb/u', '/\\cd/u', '/\\ce/u', '/\\cf/u', '/\\cg/u', '/\\ch/u', '/\\ci/u', '/\\cj/u', '/\\ck/u', '/\\cl/u', '/\\cm/u', '/\\cn/u', '/\\co/u', '/\\cp/u', '/\\cq/u', '/\\cr/u', '/\\cs/u', '/\\ct/u', '/\\cu/u', '/\\cv/u', '/\\cw/u', '/\\cx/u', '/\\cy/u', '/\\cz/u'], $REGEXU, SLASH_REGEX, 'control character lc'],
   [['/\\cA/u', '/\\cB/u', '/\\cD/u', '/\\cE/u', '/\\cF/u', '/\\cG/u', '/\\cH/u', '/\\cI/u', '/\\cJ/u', '/\\cK/u', '/\\cL/u', '/\\cM/u', '/\\cN/u', '/\\cO/u', '/\\cP/u', '/\\cQ/u', '/\\cR/u', '/\\cS/u', '/\\cT/u', '/\\cU/u', '/\\cV/u', '/\\cW/u', '/\\cX/u', '/\\cY/u', '/\\cZ/u'], $REGEXU, SLASH_REGEX, 'control character uc'],
@@ -1214,7 +1222,7 @@ for (let [input, output, modi, desc, skip] of all) {
           continue;
         }
 
-        //if (testIndex !== 6154) continue;
+        //if (testIndex !== 17034) continue;
 
         let code = outerCode;
         let outs = output.slice(0);
