@@ -13,3 +13,11 @@ How do you generate an error with just a (single or double quoted) string?
 Which of the single digit escapes are allowed in strings in sloppy mode? and in strict mode?
 Create the empty regular expression (`//` would lead to a comment)
 How do you get `//` in the source code without leading to a comment? And not part of a string/comment.
+Are these regexes valid?  /a|/  /|a/  /|/
+
+
+
+
+function f(a,b){ b=5; console.log(arguments[1]); } f(); f(1); f(1,2); f(1, undefined); // implicit arguments bind
+
+s=new Set(); s.add(NaN); s.add(NaN); log(s.size); // NaN == NaN

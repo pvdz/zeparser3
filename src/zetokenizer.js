@@ -250,10 +250,11 @@ function ZeTokenizer(input, goal) {
     return parseTickBody();
   }
 
-  function nextToken(slashState, strictModeState=SLOPPY_MODE, _returnAny) {
-    ASSERT(arguments.length >= 1 && arguments.length <= 3, 'arg count 1~3');
+  function nextToken(slashState, strictModeState=SLOPPY_MODE, fromTemplateBody=false, _returnAny) {
+    ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
     ASSERT(typeof slashState === 'boolean', 'slashstate bool');
     ASSERT(typeof strictModeState === 'boolean', 'strictModeState bool');
+    ASSERT(typeof fromTemplateBody === 'boolean', 'fromTemplateBody bool');
     ASSERT(!finished, 'should not next() after eof token');
 
     consumedNewline = false;
@@ -263,7 +264,7 @@ function ZeTokenizer(input, goal) {
       if (pointer < len) {
         let start = pointer;
         wasWhite = false;
-        let consumedTokenType = next(slashState, strictModeState);
+        let consumedTokenType = next(slashState, strictModeState, fromTemplateBody);
         token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite);
       } else {
         token = createToken($EOF, pointer, pointer, consumedNewline, true);
@@ -287,10 +288,11 @@ function ZeTokenizer(input, goal) {
     };
   }
 
-  function next(slashState, strictness) {
-    ASSERT(arguments.length === 2);
+  function next(slashState, strictness, fromTemplate) {
+    ASSERT(arguments.length === 3);
     ASSERT(typeof slashState === 'boolean', 'slashState bool');
     ASSERT(typeof strictness === 'boolean', 'strictness bool');
+    ASSERT(typeof fromTemplate === 'boolean', 'fromTemplate bool');
 
     let c = read();
 
@@ -321,7 +323,7 @@ function ZeTokenizer(input, goal) {
       case $$PLUS_2B:
         return parseSameOrCompound(c); // + ++ +=
       case $$TICK_60:
-        return parseTemplateString(c);
+        return parseTemplateString(strictness, fromTemplate);
       case $$0_30:
         return parseLeadingZero(strictness);
       case $$1_31:
@@ -361,6 +363,7 @@ function ZeTokenizer(input, goal) {
       case $$CURLY_L_7B:
         return $PUNCTUATOR;
       case $$CURLY_R_7D:
+        if (fromTemplate) return parseTemplateString(strictness, true);
         return $PUNCTUATOR;
       case $$SQUARE_L_5B:
         return $PUNCTUATOR;
@@ -679,8 +682,58 @@ function ZeTokenizer(input, goal) {
     return $PUNCTUATOR;
   }
 
-  function parseTemplateString() {
-    THROW('fixme');
+  function parseTemplateString(strictness, fromBody) {
+    ASSERT(arguments.length === 2, 'need 2 args');
+    ASSERT(typeof strictness === 'boolean', 'strictness bool');
+    ASSERT(typeof fromBody === 'boolean', 'fromBody bool');
+
+    // `...`
+    // `...${expr}...`
+    // `...${expr}...${expr}...`
+
+    let bad = false;
+    let c;
+    while (pointer < len) {
+      // while we will want to consume at least one more byte for proper strings,
+      // there could be a malformed string and we wouldnt want to consume the newline
+      c = peek();
+
+      // do ${ first, that way we can just use the peeked char in case it's a dud, without revisiting
+      while (c === $$$_24) {
+        ASSERT_skip($$$_24);
+        if (pointer >= len) {
+          bad = true;
+          return $ERROR;
+        }
+
+        c = peek();
+        if (c === $$CURLY_L_7B) {
+          ASSERT_skip($$CURLY_L_7B);
+          return bad ? $ERROR : fromBody ? $TICK_BODY : $TICK_HEAD;
+        }
+      }
+
+      if (c === $$TICK_60) {
+        ASSERT_skip($$TICK_60);
+        return bad ? $ERROR : fromBody ? $TICK_TAIL : $TICK_PURE;
+      }
+
+      //if (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
+      //  newline stuff
+      //}
+      //if (c === $$CR_0D) {
+      //  if (pointer < len && peeky($$LF_0A)) ASSERT_skip($$LF_0A); // handle crlf properly in terms of token generation
+      //  newline stuff
+      //}
+
+      ASSERT_skip(c);
+
+      if (c === $$BACKSLASH_5C) {
+        bad = parseStringEscape(strictness) === BAD_ESCAPE || bad;
+      }
+    }
+
+    return $ERROR; // unclosed string or illegal escape
   }
 
   function parseLeadingZero(strictModeState) {
@@ -1099,7 +1152,7 @@ function ZeTokenizer(input, goal) {
   }
   function _parseRegexBody(c, groupLevel, uflagStatus) {
 //console.log('_parseRegexBody', uflagStatus, groupLevel, '0x' + c.toString(16))
-    ASSERT(typeof c === 'number', 'c is an ord');
+    //ASSERT(typeof c === 'number', 'c is an ord');
     ASSERT(typeof groupLevel === 'number' && groupLevel >= 0, 'valid group level');
     ASSERT(typeof uflagStatus === 'number' && uflagStatus >= 0, 'valid flag');
     // - there are two grammars; a simple (RegularExpressionLiteral) and a more granular grammar (Pattern). Pattern governs. The first cannot be extended/changed, the second may be.
@@ -1107,13 +1160,15 @@ function ZeTokenizer(input, goal) {
     // - there are two parsing modes; unicode and without unicode. the unicode is slightly more strict
     //   - reflects on surrogate pairs, long unicode escapes, and valid char class ranges
 
-    let afterAtom = true;
+    let afterAtom = false;
 
     // dont start with a quantifier
-    let badStart = c === $$STAR_2A || c === $$PLUS_2B || c === $$QMARK_3F || c === $$CURLY_L_7B || c === $$OR_7C;
+    let badStart = c === $$STAR_2A || c === $$PLUS_2B || c === $$QMARK_3F || c === $$CURLY_L_7B;
     if (badStart) uflagStatus = ALWAYS_BAD;
 
     do {
+//console.log('_parseRegexBody loop:', c, 'x' + c.toString(16), '[' + String.fromCharCode(c)+']', uflagStatus)
+      //ASSERT(afterAtom = 1, 'making sure afterAtom is set everywhere (will break tests but shouldnt throw at all)');
       switch (c) {
         case $$FWDSLASH_2F:
           // end of regex body
@@ -1128,12 +1183,9 @@ function ZeTokenizer(input, goal) {
           return uflagStatus;
 
         case $$OR_7C:
-          // op; parse another body with len>=1
+          // left and/or right side of the pipe can be empty. weird but syntactically valid
           ASSERT_skip($$OR_7C);
-          if (pointer >= len) return ALWAYS_BAD;
-          c = peek();
-          if (c === $$FWDSLASH_2F || c === $$OR_7C) uflagStatus = ALWAYS_BAD; // must have an atom following an OR
-          else return _parseRegexBody(c, groupLevel, uflagStatus);
+          afterAtom = false;
           break;
 
         case $$XOR_5E:
@@ -1157,6 +1209,7 @@ function ZeTokenizer(input, goal) {
         case $$BACKSLASH_5C:
           // atom escape is different from charclass escape
           ASSERT_skip($$BACKSLASH_5C);
+          afterAtom = true; // except in certain cases...
 
           if (pointer > len) {
             uflagStatus = ALWAYS_BAD;
@@ -1165,6 +1218,7 @@ function ZeTokenizer(input, goal) {
             // \b \B cannot have quantifiers
             if (d === $$B_62 || d === $$B_UC_42) {
               ASSERT_skip(d);
+              afterAtom = false;
             } else {
               let escapeStatus = parseRegexAtomEscape(d);
               if (escapeStatus === ALWAYS_BAD) {
@@ -1172,13 +1226,9 @@ function ZeTokenizer(input, goal) {
               } else if (escapeStatus === GOOD_SANS_U_FLAG) {
                 if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
                 else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = ALWAYS_BAD;
-                afterAtom = true;
               } else if (escapeStatus === GOOD_WITH_U_FLAG) {
                 if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
                 else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
-                afterAtom = true;
-              } else {
-                afterAtom = true;
               }
             }
           }
@@ -1187,6 +1237,7 @@ function ZeTokenizer(input, goal) {
         case $$PAREN_L_28:
           // parse group (?: (!: (
           ASSERT_skip($$PAREN_L_28);
+          afterAtom = false; // useless. just in case
 
           if (pointer >= len) {
             uflagStatus = ALWAYS_BAD;
@@ -1217,6 +1268,7 @@ function ZeTokenizer(input, goal) {
           }
 
           let subbad = _parseRegexBody(c, groupLevel + 1, ALWAYS_GOOD);
+          afterAtom = true;
           if (subbad === ALWAYS_BAD) {
             uflagStatus = ALWAYS_BAD;
           } else if (subbad === GOOD_SANS_U_FLAG) {
@@ -1233,6 +1285,7 @@ function ZeTokenizer(input, goal) {
           ASSERT_skip($$PAREN_R_29);
           if (groupLevel > 0) return uflagStatus;
           uflagStatus = ALWAYS_BAD;
+          afterAtom = true; // meh
           break;
 
         case $$SQUARE_L_5B:
@@ -1245,21 +1298,17 @@ function ZeTokenizer(input, goal) {
           } else if (charClassEscapeStatus === GOOD_SANS_U_FLAG) {
             if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
             else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = ALWAYS_BAD;
-            afterAtom = true;
           } else if (charClassEscapeStatus === GOOD_WITH_U_FLAG) {
             if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
             else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
-            afterAtom = true;
-          } else {
-            afterAtom = true;
           }
-
           afterAtom = true;
           break;
         case $$SQUARE_R_5D:
           // this is always bad since we have a quantifier parser that consumes valid curlies
           ASSERT_skip($$SQUARE_R_5D);
           uflagStatus = ALWAYS_BAD;
+          afterAtom = true; // meh
           break;
 
         case $$STAR_2A:
@@ -1298,6 +1347,7 @@ function ZeTokenizer(input, goal) {
           // this is always bad since we have a quantifier parser that consumes valid curlies
           ASSERT_skip($$CURLY_R_7D);
           uflagStatus = ALWAYS_BAD;
+          afterAtom = false;
           break;
 
         case $$CR_0D:
@@ -1308,7 +1358,9 @@ function ZeTokenizer(input, goal) {
 
         default:
           ASSERT_skip(c); // this ought to be a valid regex source character
+          afterAtom = true;
       }
+      //ASSERT(afterAtom !== 1, 'making sure afterAtom is set everywhere (will break tests but shouldnt throw at all)'); //[' + c + ', x' + c.toString(16) + ')]');
 
       if (pointer >= len) break;
       c = peek();
@@ -1412,9 +1464,35 @@ function ZeTokenizer(input, goal) {
       case $$9_39:
         return parseBackReference(c);
 
-      default:
+      case $$FWDSLASH_2F:
+        // explicitly allowed
+        ASSERT_skip($$FWDSLASH_2F);
+        return ALWAYS_GOOD;
+
+      case $$CR_0D:
+      case $$LF_0A:
+      case $$PS_2028:
+      case $$LS_2029:
         ASSERT_skip(c);
-        return ALWAYS_BAD;
+        return ALWAYS_BAD; // regex has no line continuation
+
+      default:
+        // this is, probably;
+        //
+        // IdentityEscape [U] ::
+        //   [+U] SyntaxCharacter
+        //   [+U] /
+        //   [~U] SourceCharacter but not UnicodeIDContinue
+
+        ASSERT_skip(c);
+        // unicodeidcontinue is;
+        // (idstart=) uppercase letters, lowercase letters, titlecase letters, modifier letters, other letters, letter numbers, other_id_start without white_space
+        // or; [[:L:][:Ni:][:Other_ID_Start:]--[:Pattern_Syntax:]--[:Patter_White_Space:]]
+        // plus: nonspacing marks, spacing combining marks, decimal number, connector punctuation, other_id_continue sans white_space and syntax
+        // or; [[:ID_Start:][:Mn:][:Mc:][:Nd:][:Pc:][:Other_ID_Continue:]--[:Pattern_Syntax:]--[:Pattern_White_Space:]]
+        // in ascii, unicode continue is all the ascii letters :(
+        if (isIdentRestChr(c)) return ALWAYS_BAD;
+        return GOOD_SANS_U_FLAG; // TODO: verify that UnicodeIDContinue thing for other characters within ascii range and add specific tests for them
     }
     ASSERT(false, 'dis be dead code');
   }
@@ -1584,7 +1662,7 @@ function ZeTokenizer(input, goal) {
     let n = 0;
     while (pointer < len) {
       let c = peek();
-//console.log(n, 'pointer=',pointer,': c=',c,',flag:',flagState)
+//console.log(n, 'pointer=',pointer,': c=',c, 'x=', c.toString(16), ' [' + String.fromCharCode(c) + '], flag:',flagState)
       switch (c) {
         case $$SQUARE_R_5D:
           ASSERT_skip($$SQUARE_R_5D);
@@ -1691,6 +1769,8 @@ function ZeTokenizer(input, goal) {
   function parseClassCharEscape() {
     // atom escape is slightly different from charclass escape
 
+    // https://www.ecma-international.org/ecma-262/7.0/#sec-classescape
+
     if (pointer > len) return -1;
     let c = peek();
 
@@ -1703,10 +1783,10 @@ function ZeTokenizer(input, goal) {
         ASSERT_skip($$X_78);
         if (pointer >= len-1) return CHARCLASS_BAD;
         let a = peek();
-        if (!isAsciiNumber(a)) return CHARCLASS_BAD;
+        if (!isHex(a)) return CHARCLASS_BAD;
         ASSERT_skip(a);
         let b = peek();
-        if (!isAsciiNumber(b)) return CHARCLASS_BAD;
+        if (!isHex(b)) return CHARCLASS_BAD;
         ASSERT_skip(b);
         return (hexToNum(a) << 4) | hexToNum(b);
 
@@ -1722,10 +1802,14 @@ function ZeTokenizer(input, goal) {
         }
         return CHARCLASS_BAD;
 
-      // control escapes
+      // "A ClassAtom can use any of the escape sequences that are allowed in the rest of the regular expression except for \b, \B, and backreferences. Inside a CharacterClass, \b means the backspace character, while \B and backreferences raise errors. Using a backreference inside a ClassAtom causes an error."
       case $$B_62: // "Return the CharSet containing the single character <BS> U+0008 (BACKSPACE)."
         ASSERT_skip($$B_62);
         return 0x0008;
+      case $$B_UC_42:
+        return CHARCLASS_BAD_RANGE;
+
+      // control escapes
       case $$F_66:
         ASSERT_skip($$F_66);
         return 0x000C;
@@ -1793,6 +1877,11 @@ function ZeTokenizer(input, goal) {
         ASSERT_skip(c);
         return c;
 
+      case $$FWDSLASH_2F:
+        // explicitly allowed
+        ASSERT_skip($$FWDSLASH_2F);
+        return $$FWDSLASH_2F;
+
       case $$DASH_2D:
         ASSERT_skip($$DASH_2D);
         // only valid with u-flag!
@@ -1813,11 +1902,14 @@ function ZeTokenizer(input, goal) {
     // there are 5 valid flags and in unicode mode each flag may only occur once
     // 12.2.8.1: "It is a Syntax Error if FlagText of RegularExpressionLiteral contains any code points other than "g", "i", "m", "u", or"y", or if it contains the same code point more than once."
 
+    // TODO: dotall flag "s" : https://tc39.github.io/proposal-regexp-dotall-flag/
+
     let g = 0;
     let i = 0;
     let m = 0;
     let u = 0;
     let y = 0;
+    let bad = 0;
     while (pointer < len) {
       let c = peek();
       switch (c) {
@@ -1836,40 +1928,85 @@ function ZeTokenizer(input, goal) {
         case $$Y_79:
           ++y;
           break;
+        case $$BACKSLASH_5C:
+          break; // see below
         default:
-          return (g|i|m|u|y) > 1 ? ALWAYS_BAD : u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
+          if (isAsciiLetter(c)) ++bad; // unknown flags are considered syntax errors by the semantics
+          else return bad ? ALWAYS_BAD : (g|i|m|u|y) > 1 ? ALWAYS_BAD : u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
       }
       ASSERT_skip(c);
+
+      // escaped flags (rare path that we must invalidate)
+      if (c === $$BACKSLASH_5C) {
+        // while syntactically a unicode escaped flag could be valid, the semantics explicitly disallow it
+        // just gracefully parse a unicode escape and return an error token
+        // (note: this is already the "slow" path because we know it's an error)
+        if (pointer >= len) return ALWAYS_BAD;
+        if (peeky($$U_75)) {
+          ASSERT_skip($$U_75);
+          parseRegexUnicodeEscape();
+        }
+        ++bad;
+      }
     }
     // the error is the (slightly and very theoretical) slow path because it leads to an error anyways
     // if any flags occurred more than once, the or below will result in >1
-    return (g|i|m|u|y) > 1 ? ALWAYS_BAD : u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
+    return bad ? ALWAYS_BAD : (g|i|m|u|y) > 1 ? ALWAYS_BAD : u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
   }
   function parseRegexCurlyQuantifier() {
-    // just parsed the curly
+    // parsed the curly, verify the range is not {hi,lo}
 
     // next should be either a comma or a digit
     if (pointer >= len) return false;
-    let hasDigit = false;
+    let hasLow = false;
+    let hasHi = false;
+    let min = 0;
+    let max = 0;
     let c;
+    let start = true;
+    let badNumber = false;
     do {
       c = peek();
       if (!isAsciiNumber(c)) break;
       ASSERT_skip(c);
-      hasDigit = true;
+      hasLow = true;
+      if (start) {
+        start = false;
+        if (c === $$0_30) {
+          if (pointer >= len) return false;
+          c = peek();
+          if (!isAsciiNumber(c)) break;
+          badNumber = true;
+          ASSERT_skip(c);
+        }
+      }
+      min = (min * 10) + (c - $$0_30);
     } while (pointer < len);
     if (c === $$COMMA_2C) {
       ASSERT_skip($$COMMA_2C);
+      start = true;
       do {
         c = peek();
         if (!isAsciiNumber(c)) break;
         ASSERT_skip(c);
-        hasDigit = true;
+        hasHi = true;
+        if (start) {
+          start = false;
+          if (c === $$0_30) {
+            if (pointer >= len) return false;
+            c = peek();
+            if (!isAsciiNumber(c)) break;
+            badNumber = true;
+            ASSERT_skip(c);
+          }
+        }
+        max = (max * 10) + (c - $$0_30);
       } while (pointer < len);
     }
     if (c === $$CURLY_R_7D) {
       ASSERT_skip($$CURLY_R_7D);
-      return hasDigit;
+      //return (hasLow && (min <= max || !hasHi)) || (!hasLow && hasHi);
+      return !badNumber && (hasLow !== hasHi || (hasLow && hasHi && min <= max));
     }
     return false;
   }
@@ -2051,7 +2188,7 @@ function debug_toktype(type) {
 
 //export default ZeTokenizer;
 //export {
-module.exports = { ZeTokenizer,
+require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   $ASI,
   $COMMENT,
   $COMMENT_SINGLE,
