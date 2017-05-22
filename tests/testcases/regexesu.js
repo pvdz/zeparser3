@@ -177,6 +177,10 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   [`/[-]/u`, $REGEXU, PARSE_MODE_REGEX, 'the class with just a dash should be legal'],
   [[`/[-b]/u`, `/[-bcd]/u`], $REGEXU, PARSE_MODE_REGEX, 'leading dash'],
   [[`/[a-]/u`, `/[abc-]/u`], $REGEXU, PARSE_MODE_REGEX, 'trailing dash'],
+  [['/[^-J]/ug', '/[^-fdsasgJ]/gu'], $REGEXU, PARSE_MODE_REGEX, 'leading dash with invert'],
+  [['/[^J-]/ug', '/[^Jdsads-]/ug'], $REGEXU, PARSE_MODE_REGEX, 'trailing dash with invert'],
+  ['/[^--]/ug', $REGEXU, PARSE_MODE_REGEX, 'double dash with invert'],
+  ['/[^---]/ug', $REGEXU, PARSE_MODE_REGEX, 'triple dash with invert'],
   // character class escapes (pretty much a repeat of the previous wrapped in [] ...)
   [[`/[\\b]/u`, `/[a\\bc]/u`, `/[\\bc]/u`, `/[a\\bb]/u`], $REGEXU, PARSE_MODE_REGEX, 'class escape b'],
   [[`/[\\-]/u`, `/[a\\-c]/u`, `/[\\-c]/u`, `/[a\\-b]/u`], $REGEXU, PARSE_MODE_REGEX, 'class escape dash with valid ranges is still illegal without u flag'],

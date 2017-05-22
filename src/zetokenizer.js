@@ -141,9 +141,10 @@ const $IDENT = 1 << ++$flag;
 const $PUNCTUATOR = 1 << ++$flag;
 const $REGEX = 1 << ++$flag;
 const $REGEXU = (1 << ++$flag) | $REGEX; // with /u flag
-const $TICK_HEAD = 1 << ++$flag;
-const $TICK_BODY = 1 << ++$flag;
-const $TICK_TAIL = 1 << ++$flag;
+const $TICK = 1 << ++$flag;
+const $TICK_HEAD = (1 << ++$flag) | $TICK;
+const $TICK_BODY = (1 << ++$flag) | $TICK;
+const $TICK_TAIL = (1 << ++$flag) | $TICK;
 const $TICK_PURE = $TICK_HEAD | $TICK_TAIL;
 const $ASI = 1 << ++$flag;
 const $EOF = 1 << ++$flag;
@@ -175,7 +176,7 @@ const CHARCLASS_BADU = 1<<23;
 const CHARCLASS_BADN = 1<<24;
 
 function ZeTokenizer(input, goal) {
-  ASSERT(typeof input === 'string', 'input string');
+  ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(typeof goal === 'boolean', 'goal boolean');
 
   let pointer = 0;
@@ -323,7 +324,7 @@ function ZeTokenizer(input, goal) {
       case $$PLUS_2B:
         return parseSameOrCompound(c); // + ++ +=
       case $$TICK_60:
-        return parseTemplateString(strictness, fromTemplate);
+        return parseTemplateString(strictness, true);
       case $$0_30:
         return parseLeadingZero(strictness);
       case $$1_31:
@@ -363,7 +364,7 @@ function ZeTokenizer(input, goal) {
       case $$CURLY_L_7B:
         return $PUNCTUATOR;
       case $$CURLY_R_7D:
-        if (fromTemplate) return parseTemplateString(strictness, true);
+        if (fromTemplate) return parseTemplateString(strictness, false);
         return $PUNCTUATOR;
       case $$SQUARE_L_5B:
         return $PUNCTUATOR;
@@ -682,10 +683,9 @@ function ZeTokenizer(input, goal) {
     return $PUNCTUATOR;
   }
 
-  function parseTemplateString(strictness, fromBody) {
+  function parseTemplateString(strictness, fromTick) {
     ASSERT(arguments.length === 2, 'need 2 args');
     ASSERT(typeof strictness === 'boolean', 'strictness bool');
-    ASSERT(typeof fromBody === 'boolean', 'fromBody bool');
 
     // `...`
     // `...${expr}...`
@@ -709,13 +709,13 @@ function ZeTokenizer(input, goal) {
         c = peek();
         if (c === $$CURLY_L_7B) {
           ASSERT_skip($$CURLY_L_7B);
-          return bad ? $ERROR : fromBody ? $TICK_BODY : $TICK_HEAD;
+          return bad ? $ERROR : fromTick ? $TICK_HEAD : $TICK_BODY;
         }
       }
 
       if (c === $$TICK_60) {
         ASSERT_skip($$TICK_60);
-        return bad ? $ERROR : fromBody ? $TICK_TAIL : $TICK_PURE;
+        return bad ? $ERROR : fromTick ? $TICK_PURE : $TICK_TAIL;
       }
 
       //if (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
@@ -929,7 +929,7 @@ function ZeTokenizer(input, goal) {
       let data;
       if (input.charCodeAt(start) === $$CURLY_L_7B) {
         data = input.slice(start + 1, pointer);
-        if (pointer > len) return $ERROR;
+        if (pointer >= len) return $ERROR;
         if (peeky($$CURLY_R_7D)) ASSERT_skip($$CURLY_R_7D);
         else return $ERROR;
       } else {
@@ -1211,7 +1211,7 @@ function ZeTokenizer(input, goal) {
           ASSERT_skip($$BACKSLASH_5C);
           afterAtom = true; // except in certain cases...
 
-          if (pointer > len) {
+          if (pointer >= len) {
             uflagStatus = ALWAYS_BAD;
           } else {
             let d = peek();
@@ -1659,9 +1659,16 @@ function ZeTokenizer(input, goal) {
 
     let flagState = ALWAYS_GOOD;
 
+    if (pointer >= len) return ALWAYS_BAD;
+    let c = peek();
+    if (c === $$XOR_5E) {
+      ASSERT_skip($$XOR_5E);
+      if (pointer >= len) return ALWAYS_BAD;
+      c = peek();
+    }
+
     let n = 0;
-    while (pointer < len) {
-      let c = peek();
+    while (true) {
 //console.log(n, 'pointer=',pointer,': c=',c, 'x=', c.toString(16), ' [' + String.fromCharCode(c) + '], flag:',flagState)
       switch (c) {
         case $$SQUARE_R_5D:
@@ -1763,6 +1770,8 @@ function ZeTokenizer(input, goal) {
       prev = c;
 
       ++n;
+      if (pointer >= len) return ALWAYS_BAD;
+      c = peek();
     }
     return ALWAYS_BAD; // no end
   }
@@ -1771,7 +1780,7 @@ function ZeTokenizer(input, goal) {
 
     // https://www.ecma-international.org/ecma-262/7.0/#sec-classescape
 
-    if (pointer > len) return -1;
+    if (pointer >= len) return -1;
     let c = peek();
 
     switch (c) {
@@ -1985,6 +1994,7 @@ function ZeTokenizer(input, goal) {
     if (c === $$COMMA_2C) {
       ASSERT_skip($$COMMA_2C);
       start = true;
+      if (pointer >= len) return false;
       do {
         c = peek();
         if (!isAsciiNumber(c)) break;
@@ -2177,6 +2187,7 @@ function debug_toktype(type) {
     case $STRING_DOUBLE: return 'STRING_DOUBLE';
     case $STRING_SINGLE: return 'STRING_SINGLE';
     case $TAB: return 'TAB';
+    case $TICK: return 'TICK';
     case $TICK_BODY: return 'TICK_BODY';
     case $TICK_HEAD: return 'TICK_HEAD';
     case $TICK_PURE: return 'TICK_PURE';

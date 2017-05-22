@@ -201,6 +201,10 @@ let regexesn = [
   [`/[-]/`, $REGEX, PARSE_MODE_REGEX, 'the class with just a dash should be legal'],
   [[`/[-b]/`, `/[-bcd]/`], $REGEX, PARSE_MODE_REGEX, 'leading dash'],
   [[`/[a-]/`, `/[abc-]/`], $REGEX, PARSE_MODE_REGEX, 'trailing dash'],
+  [['/[^-J]/g', '/[^-fdsasgJ]/g'], $REGEX, PARSE_MODE_REGEX, 'leading dash with invert'],
+  [['/[^J-]/g', '/[^Jdsads-]/g'], $REGEX, PARSE_MODE_REGEX, 'trailing dash with invert'],
+  ['/[^--]/g', $REGEX, PARSE_MODE_REGEX, 'double dash with invert'],
+  ['/[^---]/g', $REGEX, PARSE_MODE_REGEX, 'triple dash with invert'],
   // character class escapes (pretty much a repeat of the previous wrapped in [] ...)
   [[`/[\\b]/`, `/[a\\bc]/`, `/[\\bc]/`, `/[a\\bb]/`], $REGEX, PARSE_MODE_REGEX, 'class escape b'],
   [[`/[\\-]/`, `/[a\\-c]/`, `/[\\-c]/`, `/[a\\-b]/`], $ERROR, PARSE_MODE_REGEX, 'class escape dash with valid ranges is still illegal without u flag'],
@@ -395,7 +399,6 @@ let regexesn = [
     '/a(?!b(?!cde/',
   ], $ERROR, PARSE_MODE_REGEX],
 
-
   // test262
   [[
     '/0{2,1}/',
@@ -441,6 +444,10 @@ let regexesn = [
   ], $REGEX, PARSE_MODE_REGEX, 'from ecma test suite'],
 
   [['/\\;/', '/\\ /', '/\\:/'], $REGEX, PARSE_MODE_REGEX, 'escaped non-special is a IdentityEscape without u-flag and an error with u-flag'],
+
+  ['/x{,', $ERROR, PARSE_MODE_REGEX, 'invalid curly quantifier', 'suffixsp'],
+  ['/[+9]\\uD83D\\uDE07q\\uD83D(?:q??)\\uDE07\\uDE07\\', $ERROR, PARSE_MODE_REGEX, 'trailing backslash', ['suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
+
 ];
 // exhaustive set of lead/tail/non surrogate combos, with one to three chars on each side of the dash (so (4**4)*(3**2)=2304 tests with a few dupes due to the empty case)
 ['', 'B', 'L', 'T'].forEach(a => ['', 'B', 'L', 'T'].forEach(b => ['B', 'L', 'T'].forEach(c => ['B', 'L', 'T'].forEach(d => ['', 'B', 'L', 'T'].forEach(e => ['', 'B', 'L', 'T'].forEach(f => {

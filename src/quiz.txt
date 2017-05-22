@@ -21,3 +21,7 @@ Are these regexes valid?  /a|/  /|a/  /|/
 function f(a,b){ b=5; console.log(arguments[1]); } f(); f(1); f(1,2); f(1, undefined); // implicit arguments bind
 
 s=new Set(); s.add(NaN); s.add(NaN); log(s.size); // NaN == NaN
+
+
+https://twitter.com/bmeurer/status/866339039200325632
+
