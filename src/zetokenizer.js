@@ -224,6 +224,9 @@ function ZeTokenizer(input, goal) {
   function eof() {
     return pointer >= len;
   }
+  function eofd(d) {
+    return pointer >= len - d;
+  }
   function neof() {
     return pointer < len;
   }
@@ -543,7 +546,7 @@ function ZeTokenizer(input, goal) {
   }
   function parseStringEscapeUnicodeQuad(a) {
     // we've already consumed a. we must consume 3 more chars for this quad unicode escape
-    if (pointer >= len-3) return BAD_ESCAPE;
+    if (eofd(3)) return BAD_ESCAPE;
     let b = peekd(1);
     let c = peekd(2);
     let d = peekd(3);
@@ -628,7 +631,7 @@ function ZeTokenizer(input, goal) {
     return c;
   }
   function parseStringEscapeHex() {
-    if (pointer >= len-1) return BAD_ESCAPE;
+    if (eofd(1)) return BAD_ESCAPE;
     let a = peek();
     let b = peekd(1);
     // confirm they are both hex digits
@@ -807,7 +810,7 @@ function ZeTokenizer(input, goal) {
       let d = peekd(1);
       let e = d;
       if (d === $$DASH_2D || d === $$PLUS_2B) {
-        if (pointer >= len - 2) {
+        if (eofd(2)) {
           // we cant parse an exponent. the parser will deal with the inevitable error
           return;
         }
@@ -1043,24 +1046,20 @@ function ZeTokenizer(input, goal) {
     return $COMMENT_SINGLE;
   }
   function parseMultiComment() {
-    let len1 = len-1; // we need to be able to still parse two chars; */
     let c;
-    do {
-      if (pointer >= len1) {
-        if (neof()) {
-          skip();
-        }
-        return $ERROR;
-      }
-
+    while (neof()) {
       c = read();
+      while (c === $$STAR_2A) {
+        if (eof()) return $ERROR;
+        c = read();
+        if (c === $$FWDSLASH_2F) return $COMMENT_MULTI;
+      }
       if (c === $$CR_0D || isLfPsLs(c)) {
         // if we implement line numbers, make sure to count crlf as one here
         consumedNewline = true;
       }
-    } while (c !== $$STAR_2A || !peeky($$FWDSLASH_2F));
-    ASSERT_skip($$FWDSLASH_2F); // */
-    return $COMMENT_MULTI;
+    }
+    return $ERROR;
   }
 
   function parseEqual() {
