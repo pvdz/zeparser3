@@ -187,14 +187,14 @@ function ZeTokenizer(input, goal) {
   let finished = false; // generated an $EOF?
 
   function peek() {
-    ASSERT(pointer >= 0 && pointer < len, 'pointer not oob');
+    ASSERT(pointer >= 0 && neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
     return input.charCodeAt(pointer);
   }
 
   function peeky(ord) {
-    ASSERT(pointer >= 0 && pointer < len, 'pointer not oob');
+    ASSERT(pointer >= 0 && neof(), 'pointer not oob');
     ASSERT(arguments.length === 1, 'one args');
 
     return peek() === ord;
@@ -208,22 +208,29 @@ function ZeTokenizer(input, goal) {
   }
 
   function read() {
-    ASSERT(pointer >= 0 && pointer < len, 'pointer not oob');
+    ASSERT(pointer >= 0 && neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
     return input.charCodeAt(pointer++); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
   }
 
   function skip() {
-    ASSERT(pointer >= 0 && pointer < len, 'pointer not oob');
+    ASSERT(pointer >= 0 && neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
     ++pointer;
   }
 
+  function eof() {
+    return pointer >= len;
+  }
+  function neof() {
+    return pointer < len;
+  }
+
   function ASSERT_skip(chr) { // these calls are replaced with skip() in a build step
     // note: consider this `skip()` in prod
-    ASSERT(pointer >= 0 && pointer < len, 'should not be oob before the skip');
+    ASSERT(pointer >= 0 && neof(), 'should not be oob before the skip');
     ASSERT(arguments.length === 1, 'require explicit char');
     ASSERT(input.charCodeAt(pointer) === chr, 'skip expecting different char');
 
@@ -262,7 +269,7 @@ function ZeTokenizer(input, goal) {
 
     let token;
     do {
-      if (pointer < len) {
+      if (neof()) {
         let start = pointer;
         wasWhite = false;
         let consumedTokenType = next(slashState, strictModeState, fromTemplateBody);
@@ -396,7 +403,7 @@ function ZeTokenizer(input, goal) {
   }
 
   function parseLeadingDot() {
-    if (pointer >= len) return $PUNCTUATOR; // will lead to an error in the parser
+    if (eof()) return $PUNCTUATOR; // will lead to an error in the parser
 
     let c = peek();
     if (c === $$DOT_2E) {
@@ -409,7 +416,7 @@ function ZeTokenizer(input, goal) {
 
     if (isAsciiNumber(c)) {
       ASSERT_skip(c);
-      if (pointer < len) {
+      if (neof()) {
         c = skipDigits();
         parseExponentMaybe(c);
       }
@@ -420,7 +427,7 @@ function ZeTokenizer(input, goal) {
   }
 
   function parseCR() {
-    if (pointer < len && peeky($$LF_0A)) {
+    if (neof() && peeky($$LF_0A)) {
       skip();
       return $CRLF;
     }
@@ -445,7 +452,7 @@ function ZeTokenizer(input, goal) {
 
     let bad = false;
     let c;
-    while (pointer < len) {
+    while (neof()) {
       // while we will want to consume at least one more byte for proper strings,
       // there could be a malformed string and we wouldnt want to consume the newline
       c = peek();
@@ -460,7 +467,7 @@ function ZeTokenizer(input, goal) {
       }
 
       if (c === $$CR_0D) {
-        if (pointer < len && peeky($$LF_0A)) ASSERT_skip($$LF_0A); // handle crlf properly in terms of token generation
+        if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A); // handle crlf properly in terms of token generation
         bad = true;
         break;
       }
@@ -479,7 +486,7 @@ function ZeTokenizer(input, goal) {
     ASSERT(arguments.length === 1, 'need 1 arg');
     ASSERT(typeof strictness === 'boolean', 'strictness bool');
 
-    if (pointer >= len) return BAD_ESCAPE; // you cant escape eof ;)
+    if (eof()) return BAD_ESCAPE; // you cant escape eof ;)
 
     // read() because we need to consume at least one char here
     let c = read();
@@ -509,7 +516,7 @@ function ZeTokenizer(input, goal) {
 
       case $$CR_0D:
         // edge case: `\crlf` is a valid line continuation
-        if (pointer < len && peeky($$LF_0A)) ASSERT_skip($$LF_0A);
+        if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A);
         break;
     }
 
@@ -518,7 +525,7 @@ function ZeTokenizer(input, goal) {
   }
   function parseIdentOrStringEscapeUnicode() {
     // this is _after_ `\u` have been consumed already!
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     // we could read() here because we want to consume two more chars (at least)
     // however, if the escape is bad we would also consume the closing quote so we peek()
     let c = peek();
@@ -554,46 +561,46 @@ function ZeTokenizer(input, goal) {
     // it can have any number of leading zeroes so we still need to loop
 
     // must at least parse one hex digit (but it may be invalid so we can't read())
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let a = peek();
     if (!isHex(a)) return BAD_ESCAPE; // first one is mandatory
     ASSERT_skip(a);
 
     // skip leading zeroes if there are any
     if (a === $$0_30) {
-      if (pointer >= len) return BAD_ESCAPE;
+      if (eof()) return BAD_ESCAPE;
       a = skipZeroes();
       if (!isHex(a)) return a === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE; // note: we already asserted a zero. we can find a curly close now
       ASSERT_skip(a);
     }
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let b = peek();
     if (!isHex(b)) return b === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(b);
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let c = peek();
     if (!isHex(c)) return c === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(c);
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let d = peek();
     if (!isHex(d)) return d === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(d);
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let e = peek();
     if (!isHex(e)) return e === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(e);
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let f = peek();
     if (!isHex(f)) return f === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(f);
 
     // we've parsed 6 hexdigits now. the biggest number allowed is 0x10ffff but first we _must_ find a curly next
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     if (peek() !== $$CURLY_R_7D) return BAD_ESCAPE;
     ASSERT_skip($$CURLY_R_7D);
 
@@ -605,12 +612,12 @@ function ZeTokenizer(input, goal) {
     return BAD_ESCAPE;
   }
   function skipZeroes() {
-    ASSERT(pointer < len, 'should already been checked');
+    ASSERT(neof(), 'should already been checked');
 
     let c = peek();
     while (c === $$0_30) {
       ASSERT_skip($$0_30);
-      if (pointer >= len) return 0;
+      if (eof()) return 0;
       c = peek();
     }
     return c;
@@ -636,7 +643,7 @@ function ZeTokenizer(input, goal) {
 
     if (strictness === STRICT_MODE) {
       if (a === $$0_30) {
-        if (pointer >= len) return GOOD_ESCAPE; // will still lead to an error later for the next token
+        if (eof()) return GOOD_ESCAPE; // will still lead to an error later for the next token
         let b = peek();
         if (b < $$0_30 || b > $$9_39) return GOOD_ESCAPE; // `\0` without digit following is ok in strict
       }
@@ -655,13 +662,13 @@ function ZeTokenizer(input, goal) {
 
     return GOOD_ESCAPE;
 
-    //if (pointer >= len) return GOOD_ESCAPE;
+    //if (eof()) return GOOD_ESCAPE;
     //let b = peek();
     //if (!isOctal(b)) return GOOD_ESCAPE;
     //ASSERT_skip(b);
     //
     //if (a >= $$0_30 && a <= $$3_33) {
-    //  if (pointer >= len) return GOOD_ESCAPE;
+    //  if (eof()) return GOOD_ESCAPE;
     //  let c = peek();
     //  if (!isOctal(c)) return GOOD_ESCAPE;
     //  ASSERT_skip(c);
@@ -672,7 +679,7 @@ function ZeTokenizer(input, goal) {
     // (c is an op like + - & |)
     // c cc c=
 
-    if (pointer < len) {
+    if (neof()) {
       let d = peek();
       if (d === c) {
         ASSERT_skip(c); // @@
@@ -693,7 +700,7 @@ function ZeTokenizer(input, goal) {
 
     let bad = false;
     let c;
-    while (pointer < len) {
+    while (neof()) {
       // while we will want to consume at least one more byte for proper strings,
       // there could be a malformed string and we wouldnt want to consume the newline
       c = peek();
@@ -701,7 +708,7 @@ function ZeTokenizer(input, goal) {
       // do ${ first, that way we can just use the peeked char in case it's a dud, without revisiting
       while (c === $$$_24) {
         ASSERT_skip($$$_24);
-        if (pointer >= len) {
+        if (eof()) {
           bad = true;
           return $ERROR;
         }
@@ -722,7 +729,7 @@ function ZeTokenizer(input, goal) {
       //  newline stuff
       //}
       //if (c === $$CR_0D) {
-      //  if (pointer < len && peeky($$LF_0A)) ASSERT_skip($$LF_0A); // handle crlf properly in terms of token generation
+      //  if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A); // handle crlf properly in terms of token generation
       //  newline stuff
       //}
 
@@ -739,14 +746,14 @@ function ZeTokenizer(input, goal) {
   function parseLeadingZero(strictModeState) {
     // 0 0. 0.<digits> 0<digits> 0x<hex> 0b<bin> 0o<octal>
 
-    if (pointer >= len) return $NUMBER_DEC;
+    if (eof()) return $NUMBER_DEC;
 
     // peek here. the next character can easily not be part of this token
     let c = peek();
 
     if (isAsciiNumber(c)) {
       skip();
-      if (pointer < len) skipDigits();
+      if (neof()) skipDigits();
       // this is an "illegal" octal escape in strict mode
       if (strictModeState === STRICT_MODE) return $ERROR;
       return $NUMBER_OLD;
@@ -768,10 +775,10 @@ function ZeTokenizer(input, goal) {
     return $NUMBER_DEC;
   }
   function parseDecimal() {
-    if (pointer < len) {
+    if (neof()) {
       // optionally skip digits now. we dont care if that actually happens (we already know there was at least one)
       let c = skipDigits();
-      if (pointer >= len) return $NUMBER_DEC;
+      if (eof()) return $NUMBER_DEC;
 
       // optional fraction
       if (c === $$DOT_2E) parseFromFractionDot();
@@ -783,7 +790,7 @@ function ZeTokenizer(input, goal) {
     let c = peek();
     while (isAsciiNumber(c)) {
       ASSERT_skip(c);
-      if (pointer >= len) return 0; // monomorphism but meh. caller should check EOF state before using return value
+      if (eof()) return 0; // monomorphism but meh. caller should check EOF state before using return value
       c = peek();
     }
     return c;
@@ -812,25 +819,25 @@ function ZeTokenizer(input, goal) {
         }
         ASSERT(isAsciiNumber(e), 'should be digit');
         skip();
-        if (pointer < len) skipDigits();
+        if (neof()) skipDigits();
       }
     }
   }
   function parseFromFractionDot() {
     ASSERT_skip($$DOT_2E);
     // optionally skip digits now. we dont care if that actually happens. trailing dot is allowed on decimals
-    if (pointer < len) {
+    if (neof()) {
       let c = skipDigits();
       parseExponentMaybe(c);
     }
   }
   function parseHex() {
-    if (pointer >= len) return $ERROR; // 0x is illegal without a digit
+    if (eof()) return $ERROR; // 0x is illegal without a digit
 
     // at least one digit is required
     if (!isHex(peek())) return $ERROR; // 0x is illegal without a digit
 
-    while (pointer < len && isHex(peek())) skip();
+    while (neof() && isHex(peek())) skip();
 
     return $NUMBER_HEX;
   }
@@ -841,12 +848,12 @@ function ZeTokenizer(input, goal) {
     return false;
   }
   function parseOctal() {
-    if (pointer >= len) return $ERROR; // 0o is illegal without a digit
+    if (eof()) return $ERROR; // 0o is illegal without a digit
 
     // at least one digit is required
     if (!isOctal(peek())) return $ERROR; // 0o is illegal without a digit
 
-    while (pointer < len && isOctal(peek())) skip();
+    while (neof() && isOctal(peek())) skip();
 
     return $NUMBER_OCT;
   }
@@ -854,12 +861,12 @@ function ZeTokenizer(input, goal) {
     return ord >= $$0_30 && ord <= $$7_37;
   }
   function parseBinary() {
-    if (pointer >= len) return $ERROR; // 0b is illegal without a digit
+    if (eof()) return $ERROR; // 0b is illegal without a digit
 
     // at least one digit is required
     if (!isOctal(peek())) return $ERROR; // 0b is illegal without a digit
 
-    while (pointer < len && isOctal(peek())) skip();
+    while (neof() && isOctal(peek())) skip();
 
     return $NUMBER_BIN;
   }
@@ -867,11 +874,11 @@ function ZeTokenizer(input, goal) {
   function parseExcl() {
     // != !==
 
-    if (pointer >= len) return $ERROR; // there is no punctuator with just `!`
+    if (eof()) return $ERROR; // there is no punctuator with just `!`
 
     if (peeky($$IS_3D)) {
       ASSERT_skip($$IS_3D); // !=
-      if (pointer < len && peeky($$IS_3D)) {
+      if (neof() && peeky($$IS_3D)) {
         ASSERT_skip($$IS_3D); // !==
       }
       return $PUNCTUATOR;
@@ -883,11 +890,11 @@ function ZeTokenizer(input, goal) {
   function parseStar() {
     // * *= ** **=
 
-    if (pointer < len) {
+    if (neof()) {
       let c = peek();
       if (c === $$STAR_2A) {
         ASSERT_skip($$STAR_2A); // **
-        if (pointer < len && peeky($$IS_3D)) {
+        if (neof() && peeky($$IS_3D)) {
           ASSERT_skip($$IS_3D); // **=
         }
       } else if (c === $$IS_3D) {
@@ -903,11 +910,11 @@ function ZeTokenizer(input, goal) {
     return _parseIdentifierRest();
   }
   function _parseIdentifierRest() {
-    if (pointer < len) {
+    if (neof()) {
       let c = peek();
       while (isIdentRestChr(c)) { // super hot
         ASSERT_skip(c);
-        if (pointer >= len) break;
+        if (eof()) break;
         c = peek();
       }
       // slow path, dont test this inside the super hot loop above
@@ -920,7 +927,7 @@ function ZeTokenizer(input, goal) {
     return $IDENT;
   }
   function parseIdentFromUnicodeEscape(fromStart) {
-    if (pointer >= len) return $ERROR;
+    if (eof()) return $ERROR;
     if (peeky($$U_75)) ASSERT_skip($$U_75);
 
     // Note: this is a slow path. and a super edge case.
@@ -929,7 +936,7 @@ function ZeTokenizer(input, goal) {
       let data;
       if (input.charCodeAt(start) === $$CURLY_L_7B) {
         data = input.slice(start + 1, pointer);
-        if (pointer >= len) return $ERROR;
+        if (eof()) return $ERROR;
         if (peeky($$CURLY_R_7D)) ASSERT_skip($$CURLY_R_7D);
         else return $ERROR;
       } else {
@@ -982,14 +989,14 @@ function ZeTokenizer(input, goal) {
   function parseCompoundAssignment() {
     // % %= ^ ^=
 
-    if (pointer < len && peeky($$IS_3D)) {
+    if (neof() && peeky($$IS_3D)) {
       ASSERT_skip($$IS_3D); // @=
     }
     return $PUNCTUATOR;
   }
 
   function parseFwdSlash(slashState) {
-    if (pointer >= len) {
+    if (eof()) {
       // I don't think there's any way this can lead to a valid parse... but let the parser deal with that.
       return $PUNCTUATOR;
     }
@@ -1020,7 +1027,7 @@ function ZeTokenizer(input, goal) {
     }
   }
   function parseSingleComment() {
-    while (pointer < len) {
+    while (neof()) {
       let c = peek();
       if (c === $$LF_0A || c === $$CR_0D || c === $$PS_2028 || c === $$LS_2029) {
         // TODO: should check whether we can optimize the next token parse since we already know it to be a newline. may not be very relevant in the grand scheme of things tho. (the overhead to confirm may more expensive)
@@ -1035,7 +1042,7 @@ function ZeTokenizer(input, goal) {
     let c;
     do {
       if (pointer >= len1) {
-        if (pointer < len) {
+        if (neof()) {
           skip();
         }
         return $ERROR;
@@ -1053,11 +1060,11 @@ function ZeTokenizer(input, goal) {
 
   function parseEqual() {
     // = == === =>
-    if (pointer < len) {
+    if (neof()) {
       let c = peek();
       if (c === $$IS_3D) {
         ASSERT_skip($$IS_3D); // ==
-        if (pointer < len && peeky($$IS_3D)) {
+        if (neof() && peeky($$IS_3D)) {
           ASSERT_skip($$IS_3D); // ===
         }
       } else if (c === $$GT_3E) {
@@ -1069,13 +1076,13 @@ function ZeTokenizer(input, goal) {
 
   function parseLtPunctuator() {
     // < << <= <<=
-    if (pointer < len) {
+    if (neof()) {
       let c = peek();
       if (c === $$IS_3D) {
         ASSERT_skip($$IS_3D); // >=
       } else if (c === $$LT_3C) {
         ASSERT_skip($$LT_3C); // >>
-        if (pointer < len && peeky($$IS_3D)) {
+        if (neof() && peeky($$IS_3D)) {
           ASSERT_skip($$IS_3D); // >>=
         }
       }
@@ -1085,19 +1092,19 @@ function ZeTokenizer(input, goal) {
 
   function parseGtPunctuator() {
     // > >> >>> >= >>= >>>=
-    if (pointer < len) {
+    if (neof()) {
       let c = peek();
       if (c === $$IS_3D) {
         ASSERT_skip($$IS_3D); // >=
       } else if (c === $$GT_3E) {
         ASSERT_skip($$GT_3E); // >>
-        if (pointer < len) {
+        if (neof()) {
           c = peek();
           if (c === $$IS_3D) {
             ASSERT_skip($$IS_3D); // >>=
           } else if (c === $$GT_3E) {
             ASSERT_skip($$GT_3E); // >>>
-            if (pointer < len && peeky($$IS_3D)) {
+            if (neof() && peeky($$IS_3D)) {
               ASSERT_skip($$IS_3D); // >>>=
             }
           }
@@ -1211,7 +1218,7 @@ function ZeTokenizer(input, goal) {
           ASSERT_skip($$BACKSLASH_5C);
           afterAtom = true; // except in certain cases...
 
-          if (pointer >= len) {
+          if (eof()) {
             uflagStatus = ALWAYS_BAD;
           } else {
             let d = peek();
@@ -1239,14 +1246,14 @@ function ZeTokenizer(input, goal) {
           ASSERT_skip($$PAREN_L_28);
           afterAtom = false; // useless. just in case
 
-          if (pointer >= len) {
+          if (eof()) {
             uflagStatus = ALWAYS_BAD;
             break;
           }
           c = peek();
           if (c === $$QMARK_3F) {
             ASSERT_skip($$QMARK_3F);
-            if (pointer >= len) {
+            if (eof()) {
               uflagStatus = ALWAYS_BAD;
               break;
             }
@@ -1254,7 +1261,7 @@ function ZeTokenizer(input, goal) {
             if (c === $$COLON_3A || c === $$IS_3D || c === $$EXCL_21) {
               ASSERT_skip(c);
               // non capturing group
-              if (pointer >= len) {
+              if (eof()) {
                 uflagStatus = ALWAYS_BAD;
                 break;
               }
@@ -1318,7 +1325,7 @@ function ZeTokenizer(input, goal) {
           ASSERT_skip(c);
           if (afterAtom) {
             afterAtom = false;
-            if (pointer < len) {
+            if (neof()) {
               if (peeky($$QMARK_3F)) {
                 ASSERT_skip($$QMARK_3F);
               }
@@ -1333,7 +1340,7 @@ function ZeTokenizer(input, goal) {
           ASSERT_skip($$CURLY_L_7B);
           if (afterAtom) {
             if (!parseRegexCurlyQuantifier()) uflagStatus = ALWAYS_BAD;
-            if (pointer < len) {
+            if (neof()) {
               if (peeky($$QMARK_3F)) {
                 ASSERT_skip($$QMARK_3F);
               }
@@ -1362,7 +1369,7 @@ function ZeTokenizer(input, goal) {
       }
       //ASSERT(afterAtom !== 1, 'making sure afterAtom is set everywhere (will break tests but shouldnt throw at all)'); //[' + c + ', x' + c.toString(16) + ')]');
 
-      if (pointer >= len) break;
+      if (eof()) break;
       c = peek();
     } while (true);
 
@@ -1386,11 +1393,11 @@ function ZeTokenizer(input, goal) {
 
       case $$X_78:
         ASSERT_skip($$X_78);
-        if (pointer >= len) return ALWAYS_BAD;
+        if (eof()) return ALWAYS_BAD;
         let a = peek();
         if (!isAsciiNumber(a)) return ALWAYS_BAD;
         ASSERT_skip(a);
-        if (pointer >= len) return ALWAYS_BAD;
+        if (eof()) return ALWAYS_BAD;
         let b = peek();
         if (!isAsciiNumber(b)) return ALWAYS_BAD;
         ASSERT_skip(b);
@@ -1399,7 +1406,7 @@ function ZeTokenizer(input, goal) {
       // char escapes
       case $$C_63:
         ASSERT_skip($$C_63);
-        if (pointer >= len) return ALWAYS_BAD;
+        if (eof()) return ALWAYS_BAD;
         let d = peek();
         if (isAsciiLetter(d)) {
           ASSERT_skip(d);
@@ -1450,7 +1457,7 @@ function ZeTokenizer(input, goal) {
       case $$0_30:
         ASSERT_skip($$0_30);
         // cannot be followed by another digit
-        if (pointer >= len) return ALWAYS_GOOD; // let error happen elsewhere
+        if (eof()) return ALWAYS_GOOD; // let error happen elsewhere
         if (isAsciiNumber(peek())) return ALWAYS_BAD;
         return ALWAYS_GOOD;
       case $$1_31:
@@ -1513,7 +1520,7 @@ function ZeTokenizer(input, goal) {
     ASSERT_skip(c);
 
     let refindex = c - $$0_30;
-    while (pointer < len) {
+    while (neof()) {
       c = peek();
       if (!isAsciiNumber(c)) break;
       refindex = refindex * 10 + (c - $$0_30);
@@ -1533,7 +1540,7 @@ function ZeTokenizer(input, goal) {
     // so we must parse as loose as possible and keep track of parsing specific u-flag or non-u-flag stuff
     // then after flag parsing confirm that the flag presence conforms to expectations
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let c = peek(); // dont read. we dont want to consume a bad \n here
     if (c === $$CURLY_L_7B) {
       ASSERT_skip($$CURLY_L_7B);
@@ -1572,14 +1579,14 @@ function ZeTokenizer(input, goal) {
     // it can have any number of leading zeroes so we still need to loop
 
     // must at least parse one hex digit (but it may be invalid so we can't read())
-    if (pointer >= len) return BAD_ESCAPE;  // first one is mandatory
+    if (eof()) return BAD_ESCAPE;  // first one is mandatory
     let a = peek();
     if (!isHex(a)) return BAD_ESCAPE; // first one is mandatory
     ASSERT_skip(a);
 
     // skip leading zeroes if there are any
     if (a === $$0_30) {
-      if (pointer >= len) return BAD_ESCAPE;
+      if (eof()) return BAD_ESCAPE;
       a = skipZeroes();
       if (!isHex(a)) {
         // note: we already asserted a zero
@@ -1588,35 +1595,35 @@ function ZeTokenizer(input, goal) {
       ASSERT_skip(a);
     }
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let b = peek();
     if (!isHex(b)) {
       return b === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(b);
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let c = peek();
     if (!isHex(c)) {
       return c === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(c);
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let d = peek();
     if (!isHex(d)) {
       return d === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(d);
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let e = peek();
     if (!isHex(e)) {
       return e === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(e);
 
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     let f = peek();
     if (!isHex(f)) {
       return f === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
@@ -1626,7 +1633,7 @@ function ZeTokenizer(input, goal) {
     let codePoint = hexToNum(a) << 20 | hexToNum(b) << 16 | hexToNum(c) << 12 | hexToNum(d) << 8 | hexToNum(e) << 4 | hexToNum(f);
     // the total may not exceed 0x10ffff
     if (codePoint > 0x10ffff) return BAD_ESCAPE;
-    if (pointer >= len) return BAD_ESCAPE;
+    if (eof()) return BAD_ESCAPE;
     if (peek() !== $$CURLY_R_7D) return BAD_ESCAPE;
     return GOOD_ESCAPE;
   }
@@ -1659,11 +1666,11 @@ function ZeTokenizer(input, goal) {
 
     let flagState = ALWAYS_GOOD;
 
-    if (pointer >= len) return ALWAYS_BAD;
+    if (eof()) return ALWAYS_BAD;
     let c = peek();
     if (c === $$XOR_5E) {
       ASSERT_skip($$XOR_5E);
-      if (pointer >= len) return ALWAYS_BAD;
+      if (eof()) return ALWAYS_BAD;
       c = peek();
     }
 
@@ -1770,7 +1777,7 @@ function ZeTokenizer(input, goal) {
       prev = c;
 
       ++n;
-      if (pointer >= len) return ALWAYS_BAD;
+      if (eof()) return ALWAYS_BAD;
       c = peek();
     }
     return ALWAYS_BAD; // no end
@@ -1780,7 +1787,7 @@ function ZeTokenizer(input, goal) {
 
     // https://www.ecma-international.org/ecma-262/7.0/#sec-classescape
 
-    if (pointer >= len) return -1;
+    if (eof()) return -1;
     let c = peek();
 
     switch (c) {
@@ -1802,7 +1809,7 @@ function ZeTokenizer(input, goal) {
       // char escapes
       case $$C_63:
         ASSERT_skip($$C_63);
-        if (pointer < len) {
+        if (neof()) {
           let d = peek();
           if (isAsciiLetter(d)) {
             ASSERT_skip(d);
@@ -1853,7 +1860,7 @@ function ZeTokenizer(input, goal) {
       case $$0_30:
         ASSERT_skip(c);
         // cannot be followed by another digit
-        if (pointer < len && isAsciiNumber(peek())) return CHARCLASS_BAD;
+        if (neof() && isAsciiNumber(peek())) return CHARCLASS_BAD;
         return 0;
       case $$1_31:
       case $$2_32:
@@ -1919,7 +1926,7 @@ function ZeTokenizer(input, goal) {
     let u = 0;
     let y = 0;
     let bad = 0;
-    while (pointer < len) {
+    while (neof()) {
       let c = peek();
       switch (c) {
         case $$G_67:
@@ -1950,7 +1957,7 @@ function ZeTokenizer(input, goal) {
         // while syntactically a unicode escaped flag could be valid, the semantics explicitly disallow it
         // just gracefully parse a unicode escape and return an error token
         // (note: this is already the "slow" path because we know it's an error)
-        if (pointer >= len) return ALWAYS_BAD;
+        if (eof()) return ALWAYS_BAD;
         if (peeky($$U_75)) {
           ASSERT_skip($$U_75);
           parseRegexUnicodeEscape();
@@ -1966,7 +1973,7 @@ function ZeTokenizer(input, goal) {
     // parsed the curly, verify the range is not {hi,lo}
 
     // next should be either a comma or a digit
-    if (pointer >= len) return false;
+    if (eof()) return false;
     let hasLow = false;
     let hasHi = false;
     let min = 0;
@@ -1982,7 +1989,7 @@ function ZeTokenizer(input, goal) {
       if (start) {
         start = false;
         if (c === $$0_30) {
-          if (pointer >= len) return false;
+          if (eof()) return false;
           c = peek();
           if (!isAsciiNumber(c)) break;
           badNumber = true;
@@ -1990,11 +1997,11 @@ function ZeTokenizer(input, goal) {
         }
       }
       min = (min * 10) + (c - $$0_30);
-    } while (pointer < len);
+    } while (neof());
     if (c === $$COMMA_2C) {
       ASSERT_skip($$COMMA_2C);
       start = true;
-      if (pointer >= len) return false;
+      if (eof()) return false;
       do {
         c = peek();
         if (!isAsciiNumber(c)) break;
@@ -2003,7 +2010,7 @@ function ZeTokenizer(input, goal) {
         if (start) {
           start = false;
           if (c === $$0_30) {
-            if (pointer >= len) return false;
+            if (eof()) return false;
             c = peek();
             if (!isAsciiNumber(c)) break;
             badNumber = true;
@@ -2011,7 +2018,7 @@ function ZeTokenizer(input, goal) {
           }
         }
         max = (max * 10) + (c - $$0_30);
-      } while (pointer < len);
+      } while (neof());
     }
     if (c === $$CURLY_R_7D) {
       ASSERT_skip($$CURLY_R_7D);
@@ -2043,12 +2050,12 @@ function ZeTokenizer(input, goal) {
     // so we must parse as loose as possible and keep track of parsing specific u-flag or non-u-flag stuff
     // then after flag parsing confirm that the flag presence conforms to expectations
 
-    if (pointer >= len) return CHARCLASS_BAD;
+    if (eof()) return CHARCLASS_BAD;
     let c = peek(); // dont read. we dont want to consume a bad \n here
     if (c === $$CURLY_L_7B) {
       ASSERT_skip($$CURLY_L_7B);
       let r = parseRegexUnicodeEscapeVary2();
-      if (r !== CHARCLASS_BAD || (pointer < len && peeky($$CURLY_R_7D))) ASSERT_skip($$CURLY_R_7D);
+      if (r !== CHARCLASS_BAD || (neof() && peeky($$CURLY_R_7D))) ASSERT_skip($$CURLY_R_7D);
       return r;
     } else {
       return parseRegexUnicodeEscapeQuad2(c);
@@ -2082,14 +2089,14 @@ function ZeTokenizer(input, goal) {
     // it can have any number of leading zeroes so we still need to loop
 
     // must at least parse one hex digit (but it may be invalid so we can't read())
-    if (pointer >= len) return CHARCLASS_BAD;  // first one is mandatory
+    if (eof()) return CHARCLASS_BAD;  // first one is mandatory
     let a = peek();
     if (!isHex(a)) return CHARCLASS_BAD; // first one is mandatory
     ASSERT_skip(a);
 
     // skip leading zeroes if there are any
     if (a === $$0_30) {
-      if (pointer >= len) return CHARCLASS_BAD;
+      if (eof()) return CHARCLASS_BAD;
       a = skipZeroes();
       if (!isHex(a)) {
         // note: we already asserted a zero
@@ -2098,7 +2105,7 @@ function ZeTokenizer(input, goal) {
       ASSERT_skip(a);
     }
 
-    if (pointer >= len) return CHARCLASS_BAD;
+    if (eof()) return CHARCLASS_BAD;
     let b = peek();
     if (!isHex(b)) {
       if (b === $$CURLY_R_7D) return hexToNum(a) | CHARCLASS_BADN;
@@ -2106,7 +2113,7 @@ function ZeTokenizer(input, goal) {
     }
     ASSERT_skip(b);
 
-    if (pointer >= len) return CHARCLASS_BAD;
+    if (eof()) return CHARCLASS_BAD;
     let c = peek();
     if (!isHex(c)) {
       if (c === $$CURLY_R_7D) return (hexToNum(a) << 4) | hexToNum(b) | CHARCLASS_BADN;
@@ -2114,7 +2121,7 @@ function ZeTokenizer(input, goal) {
     }
     ASSERT_skip(c);
 
-    if (pointer >= len) return CHARCLASS_BAD;
+    if (eof()) return CHARCLASS_BAD;
     let d = peek();
     if (!isHex(d)) {
       if (d === $$CURLY_R_7D) return (hexToNum(a) << 8) | (hexToNum(b) << 4) | hexToNum(c) | CHARCLASS_BADN;
@@ -2122,7 +2129,7 @@ function ZeTokenizer(input, goal) {
     }
     ASSERT_skip(d);
 
-    if (pointer >= len) return CHARCLASS_BAD;
+    if (eof()) return CHARCLASS_BAD;
     let e = peek();
     if (!isHex(e)) {
       if (e === $$CURLY_R_7D) return (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d) | CHARCLASS_BADN;
@@ -2130,7 +2137,7 @@ function ZeTokenizer(input, goal) {
     }
     ASSERT_skip(e);
 
-    if (pointer >= len) return CHARCLASS_BAD;
+    if (eof()) return CHARCLASS_BAD;
     let f = peek();
     if (!isHex(f)) {
       if (f === $$CURLY_R_7D) return (hexToNum(a) << 16) | (hexToNum(b) << 12) | (hexToNum(c) << 8) | (hexToNum(d) << 4) | hexToNum(e) | CHARCLASS_BADN;
@@ -2138,7 +2145,7 @@ function ZeTokenizer(input, goal) {
     }
     ASSERT_skip(f);
 
-    if (pointer >= len) return CHARCLASS_BAD;
+    if (eof()) return CHARCLASS_BAD;
     if (peek() !== $$CURLY_R_7D) return CHARCLASS_BAD;
 
     let r = (hexToNum(a) << 20) | (hexToNum(b) << 16) | (hexToNum(c) << 12) | (hexToNum(d) << 8) | (hexToNum(e) << 4) | hexToNum(f);
