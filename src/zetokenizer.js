@@ -408,8 +408,8 @@ function ZeTokenizer(input, goal) {
     let c = peek();
     if (c === $$DOT_2E) {
       if (peekd(1) === $$DOT_2E) {
-        skip();
-        skip();
+        ASSERT_skip($$DOT_2E);
+        ASSERT_skip($$DOT_2E);
       } // the else will ultimately lead to an error in the parser
       return $PUNCTUATOR;
     }
@@ -428,10 +428,14 @@ function ZeTokenizer(input, goal) {
 
   function parseCR() {
     if (neof() && peeky($$LF_0A)) {
-      skip();
+      ASSERT_skip($$LF_0A);
       return $CRLF;
     }
     return $NL;
+  }
+
+  function isLfPsLs(c) {
+    return (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029);
   }
 
   function parseSingleString(strictness) {
@@ -461,12 +465,13 @@ function ZeTokenizer(input, goal) {
         break;
       }
 
-      if (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
+      if (isLfPsLs(c)) {
         bad = true;
         break;
       }
 
       if (c === $$CR_0D) {
+        // this peeky is already on a slow error path so no need to "optimize" it to prevent double parsing that byte
         if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A); // handle crlf properly in terms of token generation
         bad = true;
         break;
@@ -725,7 +730,7 @@ function ZeTokenizer(input, goal) {
         return bad ? $ERROR : fromTick ? $TICK_PURE : $TICK_TAIL;
       }
 
-      //if (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
+      //if (isLfPsLs(c)) {
       //  newline stuff
       //}
       //if (c === $$CR_0D) {
@@ -1029,7 +1034,7 @@ function ZeTokenizer(input, goal) {
   function parseSingleComment() {
     while (neof()) {
       let c = peek();
-      if (c === $$LF_0A || c === $$CR_0D || c === $$PS_2028 || c === $$LS_2029) {
+      if (c === $$CR_0D || isLfPsLs(c)) {
         // TODO: should check whether we can optimize the next token parse since we already know it to be a newline. may not be very relevant in the grand scheme of things tho. (the overhead to confirm may more expensive)
         break;
       }
@@ -1049,7 +1054,7 @@ function ZeTokenizer(input, goal) {
       }
 
       c = read();
-      if (c === $$LF_0A || c === $$CR_0D || c === $$PS_2028 || c === $$LS_2029) {
+      if (c === $$CR_0D || isLfPsLs(c)) {
         // if we implement line numbers, make sure to count crlf as one here
         consumedNewline = true;
       }
