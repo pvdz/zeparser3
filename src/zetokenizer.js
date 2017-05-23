@@ -187,14 +187,14 @@ function ZeTokenizer(input, goal) {
   let finished = false; // generated an $EOF?
 
   function peek() {
-    ASSERT(pointer >= 0 && neof(), 'pointer not oob');
+    ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
     return input.charCodeAt(pointer);
   }
 
   function peeky(ord) {
-    ASSERT(pointer >= 0 && neof(), 'pointer not oob');
+    ASSERT(neof(), 'pointer not oob');
     ASSERT(arguments.length === 1, 'one args');
 
     return peek() === ord;
@@ -208,14 +208,14 @@ function ZeTokenizer(input, goal) {
   }
 
   function read() {
-    ASSERT(pointer >= 0 && neof(), 'pointer not oob');
+    ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
     return input.charCodeAt(pointer++); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
   }
 
   function skip() {
-    ASSERT(pointer >= 0 && neof(), 'pointer not oob');
+    ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
     ++pointer;
@@ -230,10 +230,13 @@ function ZeTokenizer(input, goal) {
   function neof() {
     return pointer < len;
   }
+  function neofd(d) {
+    return pointer < len - d;
+  }
 
   function ASSERT_skip(chr) { // these calls are replaced with skip() in a build step
     // note: consider this `skip()` in prod
-    ASSERT(pointer >= 0 && neof(), 'should not be oob before the skip');
+    ASSERT(neof(), 'should not be oob before the skip');
     ASSERT(arguments.length === 1, 'require explicit char');
     ASSERT(input.charCodeAt(pointer) === chr, 'skip expecting different char');
 
@@ -806,7 +809,7 @@ function ZeTokenizer(input, goal) {
   function parseExponentMaybe(c) {
     // this part is a little tricky. if an `e` follows, an optional +- may follow but at least one digit must follow regardless
     // note that if we parse anything at all, it will be at least two bytes (hence the len-1 part)
-    if (pointer < len - 1 && c === $$E_65 || c === $$E_UC_45) {
+    if (neofd(1) && c === $$E_65 || c === $$E_UC_45) {
       let d = peekd(1);
       let e = d;
       if (d === $$DASH_2D || d === $$PLUS_2B) {
@@ -1560,7 +1563,7 @@ function ZeTokenizer(input, goal) {
   }
   function parseRegexUnicodeEscapeQuad(a) {
     // we've already consumed a. we must consume 3 more chars for this quad unicode escape
-    if (pointer >= len-3) return ALWAYS_BAD;
+    if (eofd(3)) return ALWAYS_BAD;
     let b = peekd(1);
     let c = peekd(2);
     let d = peekd(3);
@@ -1801,7 +1804,7 @@ function ZeTokenizer(input, goal) {
 
       case $$X_78:
         ASSERT_skip($$X_78);
-        if (pointer >= len-1) return CHARCLASS_BAD;
+        if (eofd(1)) return CHARCLASS_BAD;
         let a = peek();
         if (!isHex(a)) return CHARCLASS_BAD;
         ASSERT_skip(a);
@@ -2067,7 +2070,7 @@ function ZeTokenizer(input, goal) {
   }
   function parseRegexUnicodeEscapeQuad2(a) {
     // we've already consumed a char in `a`. we must consume 3 more chars for this quad unicode escape
-    if (pointer >= len-3) return CHARCLASS_BAD;
+    if (eofd(3)) return CHARCLASS_BAD;
     let b = peekd(1);
     let c = peekd(2);
     let d = peekd(3);
