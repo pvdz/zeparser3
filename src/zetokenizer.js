@@ -112,7 +112,6 @@ let {
   $$BOM_FEFF,
 
   ASSERT,
-  THROW,
 } = require('./utils'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from 'utils';
 
@@ -271,6 +270,7 @@ function ZeTokenizer(input, goal) {
     ASSERT(typeof fromTemplateBody === 'boolean', 'fromTemplateBody bool');
     ASSERT(!finished, 'should not next() after eof token');
 
+    if (goal === GOAL_MODULE) strictModeState = true;
     consumedNewline = false;
 
     let token;
@@ -440,10 +440,6 @@ function ZeTokenizer(input, goal) {
     return $NL;
   }
 
-  function isLfPsLs(c) {
-    return (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029);
-  }
-
   function parseSingleString(strictness) {
     ASSERT(arguments.length === 1, 'need 1 arg');
     ASSERT(typeof strictness === 'boolean', 'strictness bool');
@@ -570,13 +566,11 @@ function ZeTokenizer(input, goal) {
     // "It is a Syntax Error if the MV of HexDigits > 1114111."
     // this means the actual hex value cannot exceed 6 chars (0x10ffff). however,
     // it can have any number of leading zeroes so we still need to loop
-
     // must at least parse one hex digit (but it may be invalid so we can't read())
     if (eof()) return BAD_ESCAPE;
     let a = peek();
     if (!isHex(a)) return BAD_ESCAPE; // first one is mandatory
     ASSERT_skip(a);
-
     // skip leading zeroes if there are any
     if (a === $$0_30) {
       if (eof()) return BAD_ESCAPE;
@@ -584,32 +578,26 @@ function ZeTokenizer(input, goal) {
       if (!isHex(a)) return a === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE; // note: we already asserted a zero. we can find a curly close now
       ASSERT_skip(a);
     }
-
     if (eof()) return BAD_ESCAPE;
     let b = peek();
     if (!isHex(b)) return b === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(b);
-
     if (eof()) return BAD_ESCAPE;
     let c = peek();
     if (!isHex(c)) return c === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(c);
-
     if (eof()) return BAD_ESCAPE;
     let d = peek();
     if (!isHex(d)) return d === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(d);
-
     if (eof()) return BAD_ESCAPE;
     let e = peek();
     if (!isHex(e)) return e === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(e);
-
     if (eof()) return BAD_ESCAPE;
     let f = peek();
     if (!isHex(f)) return f === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     ASSERT_skip(f);
-
     // we've parsed 6 hexdigits now. the biggest number allowed is 0x10ffff but first we _must_ find a curly next
     if (eof()) return BAD_ESCAPE;
     if (peek() !== $$CURLY_R_7D) return BAD_ESCAPE;
@@ -2169,12 +2157,26 @@ function ZeTokenizer(input, goal) {
         return parseNewline();
 
       default:
-        THROW('fixme');
+        return $ERROR;
+        --pointer;
+        THROW('fixme, c=0x'+ c.toString(16));
     }
+  }
+
+  function THROW(str) {
+    console.log('Tokenizer error at #|# ```');
+    console.log(input.slice(Math.max(0, pointer - 20), pointer) + '#|#' + input.slice(pointer, pointer + 20));
+    console.log('```');
+    throw new Error(str);
   }
 
   return nextToken;
 }
+
+
+  function isLfPsLs(c) {
+    return (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029);
+  }
 
 function debug_toktype(type) {
   switch (type) {

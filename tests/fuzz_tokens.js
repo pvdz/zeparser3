@@ -1,8 +1,4 @@
-#!/usr/bin/env node
-
 //import ZeTokenizer, {
-let mr = Math.random();
-let mc = 0;
 let { default: ZeTokenizer,
   $ASI,
   $COMMENT,
@@ -344,8 +340,6 @@ let pieces = {
 
 function rng(max, min) {
   min |= 0;
-  //mc += mr;
-  //return min + Math.floor((mc%1) * (max - min));
   return min + Math.floor(Math.random() * (max - min));
 }
 function r(arrfunc, extra) {
@@ -380,76 +374,10 @@ function generate(obj) {
   return s + t;
 }
 
-function repeat(n, arr) {
-  for (let i = 0; i < n; ++i) {
-    //if (i % 1000 === 0) mr = Math.random() * 0.3; // make sure the seed remains spicy
-    let obj = r(arr);
-    let code = generate(obj);
-    let out = parseSafe(code, obj);
-    let token = obj.token;
-    if (true && obj.evallable) {
-      let reallyGood = false;
-      try { Function('return ' + code); reallyGood = true; } catch(e) { }
-      if (reallyGood !== (token !== $ERROR)) {
-        let pp = toPrint(code);
-        console.log(i + '   !!!BAD TEST!!!   ' + pp, reallyGood, token === $ERROR);
-        console.log(out);
-        throw 'stop because a test expected a different result from real world';
-      }
-    }
-    if (typeof token === 'function') token = token(code);
-    if (typeof out === 'string') {
-      let pp = toPrint(code);
-      console.log(i + '   !!!CRASH!!!   ' + pp);
-      console.log(out);
-      throw 'stop because a test crashed';
-    } else {
-      let ok = out.type === token;
-      let printing = !ok || (i % 5e4 === 0);
-      if (printing) {
-        let pp = toPrint(code);
-        let white1 = ' '.repeat(Math.max(5, 20-debug_toktype(out.type).length));
-        let white2 = ' '.repeat(Math.max(5, 50-pp.length));
-        if (ok) {
-          console.log(i + ' PASS  ' + debug_toktype(out.type) + white1 + pp);
-        } else {
-          console.log(i +' FAIL!! ' + debug_toktype(out.type) + white1 + pp + white2 + ' --> expected ' + debug_toktype(token));
-        }
-      }
-      if (!ok) throw 'stop because a test failed';
-    }
-  }
-}
-function parseSafe(code, obj) {
-  try {
-    let tok = ZeTokenizer(code, false);
-    return tok(!!obj.slashIsRegex, !!obj.strictMode, !!obj.fromTemplate, true);
-  } catch (e) {
-    return new Error(e).stack;
-  }
-}
+module.exports = {default: generate,
+  pieces,
 
-function toPrint(s) {
-  return s
-    .replace(/[^\u0000-\u00ff\u2028]/g, function (s) {
-      return '\\u' + s.charCodeAt(0).toString(16).toUpperCase();
-    })
-    .replace(/[\xa0\x0b\x0c]/g, function (s) {
-      return '\\x' + s.charCodeAt(0).toString(16).toUpperCase();
-    })
-    .replace(/\t/g, '\\t')
-    .replace(/\u2028/g, '\u21a9')
-    .replace(/\u000a/g, '\u21b5')
-    .replace(/\u000d/g, '\\r');
-}
-
-repeat(Infinity, [
-  [pieces.comment.single, pieces.comment.multi],
-  [pieces.number.hex, pieces.number.bin, pieces.number.oct, pieces.number.dec.int, pieces.number.dec.dot, pieces.number.dec.exp, pieces.number.dec.all],
-  [pieces.string.single, pieces.string.double],
-  pieces.template,
-  pieces.ident,
-  [pieces.regex.sloppy, pieces.regex.strict],
-
-  [pieces.error.string.single, pieces.error.string.double, pieces.error.template, pieces.error.regex.sloppy, pieces.error.regex.strict],
-]);
+  rng,
+  r,
+  R,
+};
