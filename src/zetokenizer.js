@@ -191,26 +191,45 @@ function ZeTokenizer(input, goal) {
 
     return input.charCodeAt(pointer);
   }
-
-  function peeky(ord) {
-    ASSERT(neof(), 'pointer not oob');
-    ASSERT(arguments.length === 1, 'one args');
-
-    return peek() === ord;
-  }
-
   function peekd(delta) {
     ASSERT(pointer + delta >= 0 && pointer + delta < len, 'pointer not oob');
     ASSERT(arguments.length === 1, 'one args');
 
     return input.charCodeAt(pointer + delta);
   }
+  function peeky(ord) {
+    ASSERT(neof(), 'pointer not oob');
+    ASSERT(arguments.length === 1, 'one args');
 
-  function read() {
+    return peek() === ord;
+  }
+  function peekyd(d, ord) {
+    ASSERT(neofd(d), 'pointer not oob [' + d + '][' + pointer + ']');
+    ASSERT(typeof ord === 'number', 'ord shoud be number');
+    ASSERT(arguments.length === 2, 'two args');
+
+    return peekd(d) === ord;
+  }
+
+  function slice(from, to) {
+    ASSERT(typeof from === 'number' && from >= 0 && from <= len, 'from shoud be valid index');
+    ASSERT(typeof to === 'number' && to >= 0 && to <= len, 'to shoud be valid index');
+    ASSERT(arguments.length === 2, 'two args');
+
+    return input.slice(from, to);
+  }
+
+  function peekSkip() {
     ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
     return input.charCodeAt(pointer++); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
+  }
+  function skipPeek() {
+    ASSERT(neofd(1), 'pointer not oob');
+    ASSERT(!arguments.length, 'no args');
+
+    return input.charCodeAt(++pointer); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
   }
 
   function skip() {
@@ -237,7 +256,7 @@ function ZeTokenizer(input, goal) {
     // note: consider this `skip()` in prod
     ASSERT(neof(), 'should not be oob before the skip');
     ASSERT(arguments.length === 1, 'require explicit char');
-    ASSERT(input.charCodeAt(pointer) === chr, 'skip expecting different char');
+    ASSERT(peeky(chr), 'skip expecting different char');
 
     ++pointer;
   }
@@ -298,7 +317,7 @@ function ZeTokenizer(input, goal) {
       nl, // was there a newline between the start of the previous relevant token and this one?
       start,
       stop, // start of next token
-      str: input.slice(start, stop),
+      str: slice(start, stop),
     };
   }
 
@@ -308,7 +327,7 @@ function ZeTokenizer(input, goal) {
     ASSERT(typeof strictness === 'boolean', 'strictness bool');
     ASSERT(typeof fromTemplate === 'boolean', 'fromTemplate bool');
 
-    let c = read();
+    let c = peekSkip();
 
     if (isAsciiLetter(c)) return parseIdentifierRest(c);
 
@@ -496,7 +515,7 @@ function ZeTokenizer(input, goal) {
     if (eof()) return BAD_ESCAPE; // you cant escape eof ;)
 
     // read() because we need to consume at least one char here
-    let c = read();
+    let c = peekSkip();
     // note: the parser only really cares about \u and \x. it needs no extra work for \t \n etc
     // note: it _does_ need to take care of escaped digits
     switch(c) {
@@ -933,13 +952,13 @@ function ZeTokenizer(input, goal) {
     let start = pointer;
     if (parseIdentOrStringEscapeUnicode() === GOOD_ESCAPE) {
       let data;
-      if (input.charCodeAt(start) === $$CURLY_L_7B) {
-        data = input.slice(start + 1, pointer);
+      if (peekyd(start - pointer, $$CURLY_L_7B)) {
+        data = slice(start + 1, pointer);
         if (eof()) return $ERROR;
         if (peeky($$CURLY_R_7D)) ASSERT_skip($$CURLY_R_7D);
         else return $ERROR;
       } else {
-        data = input.slice(start , pointer);
+        data = slice(start , pointer);
       }
       ASSERT(data.length > 0, 'a valid escape should contain at least one digit');
       ASSERT(data.charCodeAt(0) !== $$CURLY_L_7B && isHex(data.charCodeAt(0)), 'if wrapped, the opener should be removed');
@@ -1039,10 +1058,10 @@ function ZeTokenizer(input, goal) {
   function parseMultiComment() {
     let c;
     while (neof()) {
-      c = read();
+      c = peekSkip();
       while (c === $$STAR_2A) {
         if (eof()) return $ERROR;
-        c = read();
+        c = peekSkip();
         if (c === $$FWDSLASH_2F) return $COMMENT_MULTI;
       }
       if (c === $$CR_0D || isLfPsLs(c)) {
@@ -2165,7 +2184,7 @@ function ZeTokenizer(input, goal) {
 
   function THROW(str) {
     console.log('Tokenizer error at #|# ```');
-    console.log(input.slice(Math.max(0, pointer - 20), pointer) + '#|#' + input.slice(pointer, pointer + 20));
+    console.log(slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, pointer + 20));
     console.log('```');
     throw new Error(str);
   }
