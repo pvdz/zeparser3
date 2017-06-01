@@ -106,12 +106,13 @@ const $$LS_2029 = 0x2029; // valid newline
 const $$PS_2028 = 0x2028; // valid newline
 const $$BOM_FEFF = 0xFEFF; // considered a space
 
-function ASSERT(bool, desc) {
-  if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>'));
+function ASSERT(bool, desc, ...rest) {
+  if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>') + ' [' + require('util').inspect(rest, false, null) + ']');
 }
 
-function THROW(str) {
-  throw new Error(str);
+function THROW(str, ...rest) {
+  console.log('error args:', require('util').inspect(rest, false, null));
+  throw new Error(str + ' [' + require('util').inspect(rest, false, null) + ']');
 }
 
 //export {

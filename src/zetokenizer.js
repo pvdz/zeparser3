@@ -116,7 +116,9 @@ let {
 //} from 'utils';
 
 // note: cannot use more than 32 flags...
+
 // TODO: collapse the dynamic initializations to static numbers
+// flags for token types
 let $flag = 0;
 const $ERROR = 0;
 const $WHITE = 1 << ++$flag;
@@ -134,8 +136,8 @@ const $NUMBER_BIN = (1 << ++$flag) | $NUMBER;
 const $NUMBER_OCT = (1 << ++$flag) | $NUMBER;
 const $NUMBER_OLD = (1 << ++$flag) | $NUMBER;
 const $STRING = 1 << ++$flag;
-const $STRING_SINGLE = 1 << ++$flag;
-const $STRING_DOUBLE = 1 << ++$flag;
+const $STRING_SINGLE = (1 << ++$flag) | $STRING;
+const $STRING_DOUBLE = (1 << ++$flag) | $STRING;
 const $IDENT = 1 << ++$flag;
 const $PUNCTUATOR = 1 << ++$flag;
 const $REGEX = 1 << ++$flag;
@@ -148,6 +150,68 @@ const $TICK_PURE = $TICK_HEAD | $TICK_TAIL;
 const $ASI = 1 << ++$flag;
 const $EOF = 1 << ++$flag;
 ASSERT($flag < 32, 'cannot use more than 32 flags');
+
+// flags for operators/punctuators
+//let $_flag = 0;
+//const $_PARENL = 1 << ++$_flag;
+////const $_PARENR = 1 << ++$_flag;
+//const $_CURLYL = 1 << ++$_flag;
+////const $_CURLYR = 1 << ++$_flag;
+//const $_SQUAREL = 1 << ++$_flag;
+////const $_SQUARER = 1 << ++$_flag;
+//const $_DOT = 1 << ++$_flag;
+//const $_INC = 1 << ++$_flag; // ++
+//const $_DEC = 1 << ++$_flag; // --
+//const $_EXCL = 1 << ++$_flag;
+//const $_TILDE = 1 << ++$_flag;
+//const $_PLUS = 1 << ++$_flag;
+//const $_MIN = 1 << ++$_flag;
+//const $_MUL = 1 << ++$_flag;
+//const $_POW = 1 << ++$_flag;
+//const $_DIV = 1 << ++$_flag;
+//const $_MOD = 1 << ++$_flag;
+//const $_SHL = 1 << ++$_flag;
+//const $_SHR = 1 << ++$_flag;
+//const $_USHR = 1 << ++$_flag;
+//const $_LT = 1 << ++$_flag;
+//const $_LTE = 1 << ++$_flag;
+//const $_GT = 1 << ++$_flag;
+//const $_GTE = 1 << ++$_flag;
+//const $_AND = 1 << ++$_flag;
+//const $_XOR = 1 << ++$_flag;
+//const $_OR = 1 << ++$_flag;
+//const $_EQEQ = 1 << ++$_flag;
+//const $_EQEQEQ = 1 << ++$_flag;
+//const $_NEQ = 1 << ++$_flag;
+//const $_NEQEQ = 1 << ++$_flag;
+//const $_ANDAND = 1 << ++$_flag;
+//const $_OROR = 1 << ++$_flag;
+//const $_QMARK = 1 << ++$_flag;
+//const $_SEMI = 1 << ++$_flag;
+//const $_COLON = 1 << ++$_flag;
+//const $_COMMA = 1 << ++$_flag;
+//// assignment ops
+//const $_EQ = 1 << ++$_flag;
+//const $_EQPLUS = $_EQ | $_PLUS;
+//const $_EQMIN = $_EQ | $_MIN;
+//const $_EQPOW = $_EQ | $_POW;
+//const $_EQMUL = $_EQ | $_MUL;
+//const $_EQDIV = $_EQ | $_DIV;
+//const $_EQMOD = $_EQ | $_MOD;
+//const $_EQSHL = $_EQ | $_SHL;
+//const $_EQSHR = $_EQ | $_SHR;
+//const $_EQUSHR = $_EQ | $_USHR;
+//const $_EQAND = $_EQ | $_AND;
+//const $_EQXOR = $_EQ | $_XOR;
+//const $_EQOR = $_EQ | $_OR;
+//ASSERT($_flag < 32, 'cannot use more than 32 flags');
+
+// flags for identifiers
+//let __flag = 0;
+//const __IF = 1 << ++__flag;
+//... etc
+//ASSERT(__flag < 32, 'cannot use more than 32 flags');
+
 
 const GOAL_MODULE = true;
 const GOAL_SCRIPT = false;
@@ -174,7 +238,13 @@ const CHARCLASS_BAD_RANGE = 0x110001;
 const CHARCLASS_BADU = 1<<23;
 const CHARCLASS_BADN = 1<<24;
 
-function ZeTokenizer(input, goal) {
+const EOF_SYMBOL = 0x10000; // well. it's better than undefined. (todo: write blog post and refer to that)
+
+const COLLECT_TOKENS_NONE = 0;
+const COLLECT_TOKENS_SOLID = 1; // non-whitespace
+const COLLECT_TOKENS_ALL = 2;
+
+function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(typeof goal === 'boolean', 'goal boolean');
 
@@ -185,13 +255,23 @@ function ZeTokenizer(input, goal) {
   let consumedNewline = false; // whitespace newline token or string token that contained newline or multiline comment
   let finished = false; // generated an $EOF?
 
+  let cache = input.charCodeAt(0);
+
+  let tokens = null;
+  if (collectTokens !== COLLECT_TOKENS_NONE) {
+    tokens = [];
+    nextToken.tokens = tokens; // probably will want to find a better way..
+  }
+
   function peek() {
     ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
+    ASSERT(cache === input.charCodeAt(pointer), 'cache should be up to date');
 
-    return input.charCodeAt(pointer);
+    return cache;
   }
   function peekd(delta) {
+    ASSERT(delta, 'jump should be at least something otehrwise use peek()');
     ASSERT(pointer + delta >= 0 && pointer + delta < len, 'pointer not oob');
     ASSERT(arguments.length === 1, 'one args');
 
@@ -220,23 +300,25 @@ function ZeTokenizer(input, goal) {
   }
 
   function peekSkip() {
-    ASSERT(neof(), 'pointer not oob');
+    //ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
-    return input.charCodeAt(pointer++); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
+    let t = cache;
+    cache = skipPeek();
+    return t;
   }
   function skipPeek() {
-    ASSERT(neofd(1), 'pointer not oob');
+    //ASSERT(neofd(1), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
-    return input.charCodeAt(++pointer); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
+    return cache = input.charCodeAt(++pointer); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
   }
 
   function skip() {
     ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
 
-    ++pointer;
+    cache = input.charCodeAt(++pointer);
   }
 
   function eof() {
@@ -258,7 +340,7 @@ function ZeTokenizer(input, goal) {
     ASSERT(arguments.length === 1, 'require explicit char');
     ASSERT(peeky(chr), 'skip expecting different char');
 
-    ++pointer;
+    skip();
   }
 
   function nextDiv() {
@@ -295,21 +377,35 @@ function ZeTokenizer(input, goal) {
     let token;
     do {
       if (neof()) {
+        let cstart = cache;
         let start = pointer;
         wasWhite = false;
         let consumedTokenType = next(slashState, strictModeState, fromTemplateBody);
-        token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite);
+        token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite, cstart);
+        if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
-        token = createToken($EOF, pointer, pointer, consumedNewline, true);
+        token = createToken($EOF, pointer, pointer, consumedNewline, true, 0);
         finished = true;
         break;
       }
     } while (wasWhite && !_returnAny);
+    if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
 
     return token;
   }
 
-  function createToken(type, start, stop, nl, ws) {
+  function addAsi() {
+    let token = createToken($ASI, pointer, pointer, false, false, $$SEMI_3B);
+    // are asi's whitespace? i dunno. they're kinda special so maybe.
+    // put it _before_ the current token (that should be the "offending" token)
+    tokens.push(token, tokens.pop());
+  }
+
+  function createToken(type, start, stop, nl, ws, c) {
+//ASSERT(cache === input.charCodeAt(start), 'c should not be skipped yet');
+
+    ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c');
+
     return {
       type,
       _t: debug_toktype(type),
@@ -317,6 +413,7 @@ function ZeTokenizer(input, goal) {
       nl, // was there a newline between the start of the previous relevant token and this one?
       start,
       stop, // start of next token
+      c,
       str: slice(start, stop),
     };
   }
@@ -452,6 +549,7 @@ function ZeTokenizer(input, goal) {
   }
 
   function parseCR() {
+    wasWhite = true;
     if (neof() && peeky($$LF_0A)) {
       ASSERT_skip($$LF_0A);
       return $CRLF;
@@ -1130,6 +1228,7 @@ function ZeTokenizer(input, goal) {
 
   function parseNewline() {
     consumedNewline = true;
+    wasWhite = true;
     return $NL;
   }
 
@@ -2189,13 +2288,13 @@ function ZeTokenizer(input, goal) {
     throw new Error(str);
   }
 
+  nextToken.asi = addAsi;
   return nextToken;
 }
 
-
-  function isLfPsLs(c) {
-    return (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029);
-  }
+function isLfPsLs(c) {
+  return (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029);
+}
 
 function debug_toktype(type) {
   switch (type) {
@@ -2258,11 +2357,16 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   $STRING_DOUBLE,
   $STRING_SINGLE,
   $TAB,
+  $TICK,
   $TICK_BODY,
   $TICK_HEAD,
   $TICK_PURE,
   $TICK_TAIL,
   $WHITE,
+
+  COLLECT_TOKENS_NONE,
+  COLLECT_TOKENS_SOLID,
+  COLLECT_TOKENS_ALL,
 
   GOAL_MODULE,
   GOAL_SCRIPT,
