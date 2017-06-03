@@ -1426,6 +1426,7 @@ let tests = [
 
   [
     'expression',
+
     [
       '  member',
       {
@@ -3380,7 +3381,186 @@ let tests = [
 
       ],
     ], // group/arrow
-  ],
+
+    [
+      '  literals',
+      {
+        code: 'null',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: null,
+            raw: 'null',
+          }},
+        ]},
+        desc: 'null literal',
+        tokens: [$IDENT, $ASI],
+      },
+      {
+        code: 'true',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: true,
+            raw: 'true',
+          }},
+        ]},
+        desc: 'true literal',
+        tokens: [$IDENT, $ASI],
+      },
+      {
+        code: 'false',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: false,
+            raw: 'false',
+          }},
+        ]},
+        desc: 'false literal',
+        tokens: [$IDENT, $ASI],
+      },
+      {
+        code: 'super',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Super',
+          }},
+        ]},
+        desc: 'super literal', // to be refined...
+        tokens: [$IDENT, $ASI],
+      },
+      {
+        code: '"foo"',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: '<TODO>',
+            raw: '"foo"',
+          }},
+        ]},
+        desc: 'double string literal',
+        tokens: [$STRING_DOUBLE, $ASI],
+      },
+      {
+        code: `'foo'`,
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: '<TODO>',
+            raw: `'foo'`,
+          }},
+        ]},
+        desc: 'single string literal',
+        tokens: [$STRING_SINGLE, $ASI],
+      },
+      {
+        code: '123',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: '<TODO>',
+            raw: '123',
+          }},
+        ]},
+        desc: 'decimal number',
+        tokens: [$NUMBER_DEC, $ASI],
+      },
+      {
+        code: '0x123',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: '<TODO>',
+            raw: '0x123',
+          }},
+        ]},
+        desc: 'hexadecimal number',
+        tokens: [$NUMBER_HEX, $ASI],
+      },
+      {
+        code: '0o123',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: '<TODO>',
+            raw: '0o123',
+          }},
+        ]},
+        desc: 'octal number',
+        tokens: [$NUMBER_OCT, $ASI],
+      },
+      {
+        code: '0b1010',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: '<TODO>',
+            raw: '0b1010',
+          }},
+        ]},
+        desc: 'binary number',
+        tokens: [$NUMBER_BIN, $ASI],
+      },
+      {
+        code: '0456',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'Literal',
+            value: '<TODO>',
+            raw: '0456',
+          }},
+        ]},
+        desc: 'legacy octal number',
+        tokens: [$NUMBER_OLD, $ASI],
+      },
+      {
+        code: 'this',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'ThisExpression',
+          }},
+        ]},
+        desc: 'this keyword',
+        tokens: [$IDENT, $ASI],
+      },
+    ], // literals
+    [
+      '  template',
+      {
+        code: '`foo`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [],
+            quasis: [
+              {type: 'TemplateElement', tail: true, value: {raw: '`foo`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'pure template',
+        tokens: [$TICK_PURE, $ASI],
+      },
+      {
+        code: '`foo${bar}baz`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {type: 'Identifier', name: 'bar'},
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'head${expr}tail template',
+        tokens: [$TICK_HEAD, $IDENT, $TICK_TAIL, $ASI],
+      },
+      // nested template stuff
+    ], // template
+  ], // expression
 ];
 
 

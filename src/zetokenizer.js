@@ -216,11 +216,14 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 const GOAL_MODULE = true;
 const GOAL_SCRIPT = false;
 
-const STRICT_MODE = true;
-const SLOPPY_MODE = false;
-
-const DIV = true;
-const REX = false;
+const STRICT_MODE = 1 << 1;
+const FOR_REGEX = 1 << 2;
+const IN_TEMPLATE = 1 << 3;
+// start of the first statement without knowing strict mode status:
+// - div means regular expression
+// - closing curly means closing curly (not template body/tail)
+// - sloppy mode until proven otherwise
+const INITIAL_LEXER_FLAGS = FOR_REGEX;
 
 const BAD_ESCAPE = true;
 const GOOD_ESCAPE = false;
@@ -343,35 +346,11 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     skip();
   }
 
-  function nextDiv() {
-    // bias towards stuff that may follow an expression (binary operators, postfix, semi, parens, brackets, in, instanceof, etc)
-    // in particular; if the next token starts with a `/` and isn't a comment, consider it a division
-
-    return nextToken(DIV);
-  }
-
-  function nextRex() {
-    // bias towards stuff could be the start of a statement or an expression (identifiers, numbers)
-    // in particular; if the next token starts with a `/` and isn't a comment, consider it a regular expression
-
-    return nextToken(REX)
-  }
-
-  function nextTick() {
-    // expect `}` and parse continue to parse a tick body
-
-    // templates cant parse legacy octal or weird cases
-    return parseTickBody();
-  }
-
-  function nextToken(slashState, strictModeState=SLOPPY_MODE, fromTemplateBody=false, _returnAny) {
+  function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=false) {
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
-    ASSERT(typeof slashState === 'boolean', 'slashstate bool');
-    ASSERT(typeof strictModeState === 'boolean', 'strictModeState bool');
-    ASSERT(typeof fromTemplateBody === 'boolean', 'fromTemplateBody bool');
     ASSERT(!finished, 'should not next() after eof token');
 
-    if (goal === GOAL_MODULE) strictModeState = true;
+    if (goal === GOAL_MODULE) lexerFlags |= STRICT_MODE;
     consumedNewline = false;
 
     let token;
@@ -380,7 +359,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
         let cstart = cache;
         let start = pointer;
         wasWhite = false;
-        let consumedTokenType = next(slashState, strictModeState, fromTemplateBody);
+        let consumedTokenType = next(lexerFlags);
         token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite, cstart);
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
@@ -418,11 +397,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     };
   }
 
-  function next(slashState, strictness, fromTemplate) {
-    ASSERT(arguments.length === 3);
-    ASSERT(typeof slashState === 'boolean', 'slashState bool');
-    ASSERT(typeof strictness === 'boolean', 'strictness bool');
-    ASSERT(typeof fromTemplate === 'boolean', 'fromTemplate bool');
+  function next(lexerFlags) {
+    ASSERT(arguments.length === 1);
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags bit flags');
 
     let c = peekSkip();
 
@@ -449,13 +426,13 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
         wasWhite = true;
         return $TAB;
       case $$DQUOTE_22:
-        return parseDoubleString(strictness);
+        return parseDoubleString(lexerFlags);
       case $$PLUS_2B:
         return parseSameOrCompound(c); // + ++ +=
       case $$TICK_60:
-        return parseTemplateString(strictness, true);
+        return parseTemplateString(lexerFlags, true);
       case $$0_30:
-        return parseLeadingZero(strictness);
+        return parseLeadingZero(lexerFlags);
       case $$1_31:
       case $$2_32:
       case $$3_33:
@@ -467,7 +444,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       case $$9_39:
         return parseDecimal();
       case $$FWDSLASH_2F:
-        return parseFwdSlash(slashState); // / /= //.. /*..*/
+        return parseFwdSlash(lexerFlags); // / /= //.. /*..*/
       case $$EXCL_21:
         return parseExcl(); // != !==
       case $$AND_26:
@@ -475,7 +452,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       case $$DASH_2D:
         return parseSameOrCompound(c); // - -- -=
       case $$SQUOTE_27:
-        return parseSingleString(strictness);
+        return parseSingleString(lexerFlags);
       case $$STAR_2A:
         return parseStar(); // * *= ** **=
       case $$$_24:
@@ -493,7 +470,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       case $$CURLY_L_7B:
         return $PUNCTUATOR;
       case $$CURLY_R_7D:
-        if (fromTemplate) return parseTemplateString(strictness, false);
+        if ((lexerFlags & IN_TEMPLATE) === IN_TEMPLATE) return parseTemplateString(lexerFlags, false);
         return $PUNCTUATOR;
       case $$SQUARE_L_5B:
         return $PUNCTUATOR;
@@ -557,21 +534,21 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     return $NL;
   }
 
-  function parseSingleString(strictness) {
+  function parseSingleString(lexerFlags) {
     ASSERT(arguments.length === 1, 'need 1 arg');
-    ASSERT(typeof strictness === 'boolean', 'strictness bool');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    return parseAnyString($$SQUOTE_27, $STRING_SINGLE, strictness);
+    return parseAnyString($$SQUOTE_27, $STRING_SINGLE, lexerFlags);
   }
-  function parseDoubleString(strictness) {
+  function parseDoubleString(lexerFlags) {
     ASSERT(arguments.length === 1, 'need 1 arg');
-    ASSERT(typeof strictness === 'boolean', 'strictness bool');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    return parseAnyString($$DQUOTE_22, $STRING_DOUBLE, strictness);
+    return parseAnyString($$DQUOTE_22, $STRING_DOUBLE, lexerFlags);
   }
-  function parseAnyString(marker, tokenType, strictness) {
+  function parseAnyString(marker, tokenType, lexerFlags) {
     ASSERT(arguments.length === 3, 'need 3 args');
-    ASSERT(typeof strictness === 'boolean', 'strictness bool');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     let bad = false;
     let c;
@@ -599,16 +576,16 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT_skip(c);
 
       if (c === $$BACKSLASH_5C) {
-        bad = parseStringEscape(strictness) === BAD_ESCAPE || bad;
+        bad = parseStringEscape(lexerFlags) === BAD_ESCAPE || bad;
       }
     }
 
     if (bad || c !== marker) return $ERROR; // unclosed string or illegal escape
     return tokenType;
   }
-  function parseStringEscape(strictness) {
+  function parseStringEscape(lexerFlags) {
     ASSERT(arguments.length === 1, 'need 1 arg');
-    ASSERT(typeof strictness === 'boolean', 'strictness bool');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     if (eof()) return BAD_ESCAPE; // you cant escape eof ;)
 
@@ -636,7 +613,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       case $$8_38:
       case $$9_39:
         // need to determine what to do with \8 and \9 in strict mode
-        return parseStringEscapeOctal(c, strictness);
+        return parseStringEscapeOctal(c, lexerFlags);
 
       case $$CR_0D:
         // edge case: `\crlf` is a valid line continuation
@@ -752,12 +729,12 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       return BAD_ESCAPE;
     }
   }
-  function parseStringEscapeOctal(a, strictness) {
+  function parseStringEscapeOctal(a, lexerFlags) {
     ASSERT(arguments.length === 2, 'need 2 args');
     ASSERT(typeof a === 'number', 'first digit ord');
-    ASSERT(typeof strictness === 'boolean', 'strictness bool');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    if (strictness === STRICT_MODE) {
+    if ((lexerFlags & STRICT_MODE) === STRICT_MODE) {
       if (a === $$0_30) {
         if (eof()) return GOOD_ESCAPE; // will still lead to an error later for the next token
         let b = peek();
@@ -806,9 +783,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     return $PUNCTUATOR;
   }
 
-  function parseTemplateString(strictness, fromTick) {
+  function parseTemplateString(lexerFlags, fromTick) {
     ASSERT(arguments.length === 2, 'need 2 args');
-    ASSERT(typeof strictness === 'boolean', 'strictness bool');
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     // `...`
     // `...${expr}...`
@@ -852,14 +829,15 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT_skip(c);
 
       if (c === $$BACKSLASH_5C) {
-        bad = parseStringEscape(strictness) === BAD_ESCAPE || bad;
+        // TODO: isnt a string escape in a template always considered a strict mode escape?
+        bad = parseStringEscape(lexerFlags) === BAD_ESCAPE || bad;
       }
     }
 
     return $ERROR; // unclosed string or illegal escape
   }
 
-  function parseLeadingZero(strictModeState) {
+  function parseLeadingZero(lexerFlags) {
     // 0 0. 0.<digits> 0<digits> 0x<hex> 0b<bin> 0o<octal>
 
     if (eof()) return $NUMBER_DEC;
@@ -871,7 +849,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       skip();
       if (neof()) skipDigits();
       // this is an "illegal" octal escape in strict mode
-      if (strictModeState === STRICT_MODE) return $ERROR;
+      if ((lexerFlags & STRICT_MODE) === STRICT_MODE) return $ERROR;
       return $NUMBER_OLD;
     } else if (c === $$DOT_2E) {
       parseFromFractionDot();
@@ -1111,7 +1089,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     return $PUNCTUATOR;
   }
 
-  function parseFwdSlash(slashState) {
+  function parseFwdSlash(lexerFlags) {
     if (eof()) {
       // I don't think there's any way this can lead to a valid parse... but let the parser deal with that.
       return $PUNCTUATOR;
@@ -1127,11 +1105,11 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT_skip($$STAR_2A); // /*
       return parseMultiComment();
     } else {
-      return parseSingleFwdSlash(slashState, c);
+      return parseSingleFwdSlash(lexerFlags, c);
     }
   }
-  function parseSingleFwdSlash(slashState, c) {
-    if (slashState === REX) {
+  function parseSingleFwdSlash(lexerFlags, c) {
+    if ((lexerFlags & FOR_REGEX) === FOR_REGEX) {
       // parse a regex. use the c
       return parseRegex(c);
     } else {
@@ -2372,10 +2350,9 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   GOAL_SCRIPT,
 
   STRICT_MODE,
-  SLOPPY_MODE,
-
-  DIV,
-  REX,
+  FOR_REGEX,
+  IN_TEMPLATE,
+  INITIAL_LEXER_FLAGS,
 
   debug_toktype,
 };

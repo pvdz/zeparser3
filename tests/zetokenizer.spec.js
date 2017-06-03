@@ -25,43 +25,17 @@ let {
 
 //import ZeTokenizer, {
 let { default: ZeTokenizer,
-  //$ASI, // determined by parser
-  $COMMENT,
-  $COMMENT_SINGLE,
-  $COMMENT_MULTI,
   $CRLF,
   $EOF,
-  $ERROR,
-  $IDENT,
   $NL,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
-  $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
   $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
-  $WHITE,
 
   GOAL_MODULE,
   GOAL_SCRIPT,
 
   STRICT_MODE,
-  SLOPPY_MODE,
-
-  DIV,
-  REX,
+  FOR_REGEX,
+  IN_TEMPLATE,
 
   debug_toktype,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
@@ -111,6 +85,7 @@ let all = [
   ...strings_template_tail,
   ];
 
+LOG('### Running...');
 let fails = 0;
 for (let [input, output, modi, desc, skip] of all) {
   if (typeof modi === 'string') {
@@ -203,9 +178,10 @@ for (let [input, output, modi, desc, skip] of all) {
         outs.push($EOF);
 
         let collects = [];
-        let divrex = (mode & PARSE_MODE_REGEX) ? REX : DIV;
-        let strictness = (mode & USE_STRICT_MODE) ? STRICT_MODE : SLOPPY_MODE;
-        let fromTickBody = (mode & PARSE_MODE_TICK) ? true : false;
+        let lexerFlags = 0;
+        if (mode & PARSE_MODE_REGEX) lexerFlags |= FOR_REGEX;
+        if (mode & USE_STRICT_MODE) lexerFlags |= STRICT_MODE;
+        if (mode & PARSE_MODE_TICK) lexerFlags |= IN_TEMPLATE;
         let asModule = (mode & MODE_MODULE) ? GOAL_MODULE : GOAL_SCRIPT;
 
         try {
@@ -214,7 +190,7 @@ for (let [input, output, modi, desc, skip] of all) {
           let failed = false;
           let token;
           for (let exp of outs) {
-            token = tok(divrex, strictness, fromTickBody, true);
+            token = tok(lexerFlags, true);
             collects.push(token.type);
             if (token.type !== exp) LOG('(1) failed=', failed = true, 'because', debug_toktype(token.type), '!==', debug_toktype(exp));
             if (token.type === $EOF) break;
@@ -226,18 +202,18 @@ for (let [input, output, modi, desc, skip] of all) {
             failed = true;
             LOG('FAIL (2) because last token wasnt EOF');
             do {
-              token = tok(divrex, strictness, fromTickBody, true);
+              token = tok(lexerFlags, true);
               collects.push(token.type);
             } while (token.type !== $EOF);
           }
 
-          LOG((failed ? 'FAIL: ' : 'PASS: ') + testIndex + ' (' + (strictness === STRICT_MODE ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + divrex + fromTickBody + asModule + ']: ', [toPrint(code)], '  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype) + (!failed ? '' : ' => ' + desc));
+          LOG((failed ? 'FAIL: ' : 'PASS: ') + testIndex + ' (' + ((mode & STRICT_MODE) ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + (mode & PARSE_MODE_REGEX) + (mode & PARSE_MODE_TICK) + asModule + ']: ', [toPrint(code)], '  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype) + (!failed ? '' : ' => ' + desc));
           if (failed) {
             ++fails;
             if (testVariety === 'original') orifailed = true;
           }
         } catch (rethrow) {
-          LOG('ERROR: ' + testIndex + ' (' + (strictness === STRICT_MODE ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + divrex + fromTickBody + asModule + ']: `' + toPrint(code) + '`  -->  ' + outs.map(debug_toktype) + ', was so far; ' + collects.map(debug_toktype) + ' => ' + desc);
+          LOG('ERROR: ' + testIndex + ' (' + ((mode & STRICT_MODE) ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + (mode & PARSE_MODE_REGEX) + (mode & PARSE_MODE_TICK) + asModule + ']: `' + toPrint(code) + '`  -->  ' + outs.map(debug_toktype) + ', was so far; ' + collects.map(debug_toktype) + ' => ' + desc);
           throw rethrow;
         }
       }
