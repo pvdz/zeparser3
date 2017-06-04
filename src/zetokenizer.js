@@ -968,7 +968,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
   function parseExcl() {
     // != !==
 
-    if (eof()) return $ERROR; // there is no punctuator with just `!`
+    if (eof()) return $PUNCTUATOR;
 
     if (peeky($$IS_3D)) {
       ASSERT_skip($$IS_3D); // !=
@@ -978,7 +978,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       return $PUNCTUATOR;
     }
 
-    return $ERROR; // there is no punctuator with just `!`
+    return $PUNCTUATOR;
   }
 
   function parseStar() {
