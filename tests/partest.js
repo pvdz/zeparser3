@@ -45,8 +45,8 @@ let { default: ZeTokenizer,
   STRICT_MODE,
   SLOPPY_MODE,
 
-  DIV,
-  REX,
+  FOR_DIVISION,
+  FOR_REGEX,
 
   debug_toktype,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
@@ -528,6 +528,85 @@ let tests = [
         desc: 'for-classic, init and test and update, empty body',
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       },
+      {
+        code: 'for (a + b * c * d;b;c);',
+        ast: {type: 'Program', body: [
+          {type: 'ForStatement',
+            init: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '+',
+              right: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'b'},
+                  operator: '*',
+                  right: {type: 'Identifier', name: 'c'},
+                },
+                operator: '*',
+                right: {type: 'Identifier', name: 'd'},
+              },
+            },
+            test: {type: 'Identifier', name: 'b'},
+            update: {type: 'Identifier', name: 'c'},
+            body: {type: 'EmptyStatement'}},
+        ]},
+        desc: 'for-classic, init and test and update, empty body',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'for (a * b + c * d;b;c);',
+        ast: {type: 'Program', body: [
+          {type: 'ForStatement',
+            init: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'a'},
+                operator: '*',
+                right: {type: 'Identifier', name: 'b'},
+              },
+              operator: '+',
+              right: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'c'},
+                operator: '*',
+                right: {type: 'Identifier', name: 'd'},
+              },
+            },
+            test: {type: 'Identifier', name: 'b'},
+            update: {type: 'Identifier', name: 'c'},
+            body: {type: 'EmptyStatement'}},
+        ]},
+        desc: 'for-classic, init and test and update, empty body',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'for ((a * b + c) * d;b;c);',
+        ast: {type: 'Program', body: [
+          {type: 'ForStatement',
+            init: {
+              type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'a'},
+                  operator: '*',
+                  right: {type: 'Identifier', name: 'b'},
+                },
+                operator: '+',
+                right: {type: 'Identifier', name: 'c'},
+              },
+              operator: '*',
+              right: {type: 'Identifier', name: 'd'},
+            },
+            test: {type: 'Identifier', name: 'b'},
+            update: {type: 'Identifier', name: 'c'},
+            body: {type: 'EmptyStatement'}},
+        ]},
+        desc: 'for-classic, expression disambiguation test',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      },
       '    var decls',
       {
         code: 'for (var a;;);',
@@ -814,6 +893,156 @@ let tests = [
         ]},
         desc: 'function decl, two args, empty body',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f(a=b){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'AssignmentPattern',
+              left: {type: 'Identifier', name: 'a'},
+              right: {type: 'Identifier', name: 'b'},
+            },
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'simple arg default',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f(a=b=c){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'AssignmentPattern',
+              left: {type: 'Identifier', name: 'a'},
+              right: {type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'b'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'c'},
+              },
+            },
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'arg default that is also an assignment',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f([a]){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'a'}]},
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'an array destructuring arg',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f([a]=x){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'AssignmentPattern',
+              left: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'a'}]},
+              right: {type: 'Identifier', name: 'x'},
+            },
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'an array destructuring arg with arg default (an AssignmentPattern!)',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f([a=b]){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'ArrayPattern', elements: [
+              {type: 'AssignmentPattern',
+                left: {type: 'Identifier', name: 'a'},
+                right: {type: 'Identifier', name: 'b'},
+              },
+            ]},
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'an array destructuring arg with destructuring default (also an AssignmentPattern!)',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f([a=b=c]){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'ArrayPattern', elements: [
+              {type: 'AssignmentPattern',
+                left: {type: 'Identifier', name: 'a'},
+                right: {type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'b'},
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'c'},
+                },
+              },
+            ]},
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'array destructuring with an AssignmentPattern AND AssignmentExpression',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f([a=b+=c]){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'ArrayPattern', elements: [
+              {type: 'AssignmentPattern',
+                left: {type: 'Identifier', name: 'a'},
+                right: {type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'b'},
+                  operator: '+=',
+                  right: {type: 'Identifier', name: 'c'},
+                },
+              },
+            ]},
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'array destructuring with an AssignmentPattern AND a _compound_ AssignmentExpression',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f([a = b = c] = arr){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'AssignmentPattern',
+              left: {type: 'ArrayPattern', elements: [
+                {type: 'AssignmentPattern',
+                  left: {type: 'Identifier', name: 'a'},
+                  right: {type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: 'b'},
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'c'},
+                  },
+                },
+              ]},
+              right: {type: 'Identifier', name: 'arr'},
+            },
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'array destructuring with an AssignmentPattern AND AssignmentExpression AND another outer arg default',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f([a], b){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'a'}]},
+            {type: 'Identifier', name: 'b'},
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'an array destructuring arg and regular arg',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'function f(b, [a]){}',
+        ast: {type: 'Program', body: [
+          {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+            {type: 'Identifier', name: 'b'},
+            {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'a'}]},
+          ], body: {type: 'BlockStatement', body: []}},
+        ]},
+        desc: 'regular arg and an array destructuring arg',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
     ],
     [
@@ -1579,7 +1808,11 @@ let tests = [
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
               left: {type: 'ArrayPattern', elements: [
-                {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'foo'}, operator: '=', right: {type: 'Identifier', name: 'A'}},
+                {type: 'AssignmentPattern',
+                  left: {type: 'Identifier', name: 'foo'},
+                  operator: '=', // innocent artifact because the AssignmentPattern was an AssignmentExpression before
+                  right: {type: 'Identifier', name: 'A'},
+                },
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'arr'},
@@ -1608,8 +1841,8 @@ let tests = [
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
               left: {type: 'ArrayPattern', elements: [
-                {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'foo'}, operator: '=',right: {type: 'Identifier', name: 'A'}},
-                {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'bar'}, operator: '=',right: {type: 'Identifier', name: 'B'}},
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, operator: '=',right: {type: 'Identifier', name: 'A'}},
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, operator: '=',right: {type: 'Identifier', name: 'B'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'arr'},
@@ -1629,7 +1862,7 @@ let tests = [
                   {type: 'Identifier', name: 'y'},
                   {type: 'Identifier', name: 'z'},
                 ]},
-                {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'arr'},
@@ -1673,7 +1906,7 @@ let tests = [
                     ]},
                   ]},
                 ]},
-                {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'arr'},
@@ -1690,10 +1923,10 @@ let tests = [
                 {type: 'Identifier', name: 'foo'},
                 {type: 'ArrayPattern', elements: [
                   {type: 'Identifier', name: 'x'},
-                  {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'y'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '20'}},
+                  {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '20'}},
                   {type: 'Identifier', name: 'z'},
                 ]},
-                {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'arr'},
@@ -2609,7 +2842,7 @@ let tests = [
               ]},
             ]}}]},
             desc: 'object with one async method',
-            tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           },
         ], // setters
 
@@ -2617,7 +2850,7 @@ let tests = [
         // can not use async/generators on getters/setters ({async get foo(){}})
         // getters with non-zero param count
         // setters with not-one param count
-      ],
+      ], // literal
       [
         '    destructuring',
         {
@@ -2730,7 +2963,7 @@ let tests = [
                   {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false,
                     key: {type: 'Identifier', name: 'a'},
                     value: {
-                      type: 'AssignmentExpression',
+                      type: 'AssignmentPattern',
                       left: {type: 'Identifier', name: 'a'}, // same token as above
                       operator: '=',
                       right: {type: 'Identifier', name: 'b'},
@@ -2752,7 +2985,7 @@ let tests = [
                   {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false,
                     key: {type: 'Identifier', name: 'a'},
                     value: {
-                      type: 'AssignmentExpression',
+                      type: 'AssignmentPattern',
                       left: {type: 'Identifier', name: 'v'},
                       operator: '=',
                       right: {type: 'Identifier', name: 'b'},
@@ -2998,7 +3231,7 @@ let tests = [
         ast: {type: 'Program', body: [
           {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
             left: {type: 'ArrayPattern', elements: [
-              {type: 'AssignmentExpression',
+              {type: 'AssignmentPattern',
                 left: {type: 'Identifier', name: 'pweeze'},
                 operator: '=',
                 right: {type: 'AssignmentExpression',
@@ -3381,7 +3614,6 @@ let tests = [
 
       ],
     ], // group/arrow
-
     [
       '  literals',
       {
@@ -3558,8 +3790,1839 @@ let tests = [
         desc: 'head${expr}tail template',
         tokens: [$TICK_HEAD, $IDENT, $TICK_TAIL, $ASI],
       },
-      // nested template stuff
+      {
+        code: '`foo ${a} and ${b} and ${c} baz`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {type: 'Identifier', name: 'a'},
+              {type: 'Identifier', name: 'b'},
+              {type: 'Identifier', name: 'c'},
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'template with multiple middle pieces',
+        tokens: [$TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $IDENT, $TICK_TAIL, $ASI],
+      },
+      {
+        code: '{`foo baz`}',
+        ast: {type: 'Program', body: [
+          {type: 'BlockStatement', body: [
+            {type: 'ExpressionStatement', expression: {
+              type: 'TemplateLiteral',
+              expressions: [
+              ],
+              quasis: [
+                {type: 'TemplateElement', tail: true, value: {raw: '`foo baz`', cooked: '<TODO>'}},
+              ],
+            }},
+          ]},
+        ]},
+        desc: 'block wrapped 1-part template to check disambiguation',
+        tokens: [$PUNCTUATOR, $TICK_PURE, $ASI, $PUNCTUATOR],
+      },
+      {
+        code: '{`foo ${a} baz`}',
+        ast: {type: 'Program', body: [
+          {type: 'BlockStatement', body: [
+            {type: 'ExpressionStatement', expression: {
+              type: 'TemplateLiteral',
+              expressions: [
+                {type: 'Identifier', name: 'a'},
+              ],
+              quasis: [
+                {type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}},
+                {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}},
+              ],
+            }},
+          ]},
+        ]},
+        desc: 'block wrapped 2-part template to check disambiguation',
+        tokens: [$PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_TAIL, $ASI, $PUNCTUATOR],
+      },
+      {
+        code: '{`foo ${a} and ${b} and ${c} baz`}',
+        ast: {type: 'Program', body: [
+          {type: 'BlockStatement', body: [
+            {type: 'ExpressionStatement', expression: {type: 'TemplateLiteral',
+              expressions: [
+                {type: 'Identifier', name: 'a'},
+                {type: 'Identifier', name: 'b'},
+                {type: 'Identifier', name: 'c'},
+              ],
+              quasis: [
+                {type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}},
+                {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
+                {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
+                {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}},
+              ],
+            }},
+          ]},
+        ]},
+        desc: 'block wrapped 3-part template to check disambiguation',
+        tokens: [$PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $IDENT, $TICK_TAIL, $ASI, $PUNCTUATOR],
+      },
+      {
+        code: '`foo${{}}baz`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {type: 'ObjectExpression', properties: []}
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'object literal inside the tick expression',
+        tokens: [$TICK_HEAD, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
+      },
+      {
+        code: '`foo${{a,b}}baz`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {type: 'ObjectExpression', properties: [
+                {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'a'}},
+                {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'b'}, value: {type: 'Identifier', name: 'b'}},
+              ]},
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'object literal with multiple shorthands inside the tick expression',
+        tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_TAIL, $ASI],
+      },
+      {
+        code: '`foo${`foo`}baz`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {
+                type: 'TemplateLiteral',
+                expressions: [],
+                quasis: [
+                  {type: 'TemplateElement', tail: true, value: {raw: '`foo`', cooked: '<TODO>'}},
+                ],
+              },
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'head${expr}tail template',
+        tokens: [$TICK_HEAD, $TICK_PURE, $TICK_TAIL, $ASI],
+      },
+      {
+        code: '`foo${`foo${bar}baz`}baz`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {
+                type: 'TemplateLiteral',
+                expressions: [
+                  {type: 'Identifier', name: 'bar'},
+                ],
+                quasis: [
+                  {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
+                  {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
+                ],
+              },
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'nested tick pairs',
+        tokens: [$TICK_HEAD, $TICK_HEAD, $IDENT, $TICK_TAIL, $TICK_TAIL, $ASI],
+      },
+      {
+        code: '{`foo ${a} and ${b} and ${`w ${d} x ${e} y ${f} z`} baz`}',
+        ast: {type: 'Program', body: [
+          {type: 'BlockStatement', body: [
+            {type: 'ExpressionStatement', expression: {type: 'TemplateLiteral',
+              expressions: [
+                {type: 'Identifier', name: 'a'},
+                {type: 'Identifier', name: 'b'},
+                {type: 'TemplateLiteral',
+                  expressions: [
+                    {type: 'Identifier', name: 'd'},
+                    {type: 'Identifier', name: 'e'},
+                    {type: 'Identifier', name: 'f'},
+                  ],
+                  quasis: [
+                    {type: 'TemplateElement', tail: false, value: {raw: '`w ${', cooked: '<TODO>'}},
+                    {type: 'TemplateElement', tail: false, value: {raw: '} x ${', cooked: '<TODO>'}},
+                    {type: 'TemplateElement', tail: false, value: {raw: '} y ${', cooked: '<TODO>'}},
+                    {type: 'TemplateElement', tail: true, value: {raw: '} z`', cooked: '<TODO>'}},
+                  ],
+                },
+              ],
+              quasis: [
+                {type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}},
+                {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
+                {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
+                {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}},
+              ],
+            }},
+          ]},
+        ]},
+        desc: 'block wrapped 3-part template to check disambiguation',
+        tokens: [$PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $IDENT, $TICK_TAIL, $TICK_TAIL, $ASI, $PUNCTUATOR],
+      },
+      // empty template `${}`
     ], // template
+    [
+      '  math',
+      {
+        code: 'a+b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '+',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin +',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a-b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '-',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin -',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a*b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '*',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin *',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a/b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '/',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin /',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a**b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '**',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin ** (pow)',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a%b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '%',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin or',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // math
+    [
+      '  bitwise',
+      {
+        code: 'a|b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '|',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin or',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a&b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '&',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin &',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a^b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '^',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin or',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: '~a',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UnaryExpression',
+            operator: '~',
+            prefix: true,
+            argument: {type: 'Identifier', name: 'a'},
+          }},
+        ]},
+        desc: 'una ~',
+        tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a<<b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '<<',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'rel <<',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a>>b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '>>',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'rel >>',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a>>>b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '>>>',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'rel >>>',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // bitwise
+    [
+      '  logic',
+      {
+        code: 'a&&b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'LogicalExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '&&',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'logical &&',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a||b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'LogicalExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '||',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'logical ||',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // logical
+    [
+      '  relational',
+      {
+        code: 'a<b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '<',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'relational <',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a<=b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '<=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'relational <=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a>b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '>',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'relational >',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a>=b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '>=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'relational >=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // relational
+    [
+      '  ternary',
+      {
+        code: 'a?b:c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'ConditionalExpression',
+            test: {type: 'Identifier', name: 'a'},
+            consequent: {type: 'Identifier', name: 'b'},
+            alternate: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: 'function call, no args',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // ternary
+    [
+      '  idents',
+      {
+        code: 'a in b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: 'in',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin in',
+        tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+      },
+      {
+        code: 'a instanceof b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: 'instanceof',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin instanceof',
+        tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+      },
+    ], // idents
+    [
+      '  assigns',
+      {
+        code: 'a *= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '*=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin *=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a /= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '/=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin /=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a %= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '%=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin %=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a += b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '+=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin +=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a -= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '-=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin -=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a <<= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '<<=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin <<=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a >>= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '>>=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin >>=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a >>>= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '>>>=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin >>>=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a &= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '&=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin &=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a |= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '|=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin |=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a ^= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '^=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin ^=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a |= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '|=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin |=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a **= b',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '**=',
+            right: {type: 'Identifier', name: 'b'},
+          }},
+        ]},
+        desc: 'bin **=',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a = b = c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '=',
+            right: {type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '=',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: 'triple eq chain',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a = b = c = d',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '=',
+            right: {type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '=',
+              right: {type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'c'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'd'},
+              },
+            },
+          }},
+        ]},
+        desc: 'quad eq chain',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // assigns
+    [
+      '  unary',
+      {
+        code: '+a',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UnaryExpression',
+            operator: '+',
+            prefix: true,
+            argument: {type: 'Identifier', name: 'a'},
+          }},
+        ]},
+        desc: 'positive prefix',
+        tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: '-a',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UnaryExpression',
+            operator: '-',
+            prefix: true,
+            argument: {type: 'Identifier', name: 'a'},
+          }},
+        ]},
+        desc: 'negative prefix',
+        tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: '~a',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UnaryExpression',
+            operator: '~',
+            prefix: true,
+            argument: {type: 'Identifier', name: 'a'},
+          }},
+        ]},
+        desc: 'bitwise invert',
+        tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: '++a',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UpdateExpression',
+            operator: '++',
+            prefix: true,
+            argument: {type: 'Identifier', name: 'a'},
+          }},
+        ]},
+        desc: 'incremental prefix',
+        tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: '--a',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UpdateExpression',
+            operator: '--',
+            prefix: true,
+            argument: {type: 'Identifier', name: 'a'},
+          }},
+        ]},
+        desc: 'decremental prefix',
+        tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a++',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UpdateExpression',
+            argument: {type: 'Identifier', name: 'a'},
+            operator: '++',
+            prefix: false,
+          }},
+        ]},
+        desc: 'incremental suffix',
+        tokens: [$IDENT, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'a--',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UpdateExpression',
+            argument: {type: 'Identifier', name: 'a'},
+            operator: '--',
+            prefix: false,
+          }},
+        ]},
+        desc: 'decremental suffix',
+        tokens: [$IDENT, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: '!a',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'UnaryExpression',
+            operator: '!',
+            prefix: true,
+            argument: {type: 'Identifier', name: 'a'},
+          }},
+        ]},
+        desc: 'boolean invert',
+        tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // unary
+    [
+      '  new',
+      {
+        code: 'new Foo()',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'NewExpression',
+            arguments: [],
+            callee: {type: 'Identifier', name: 'Foo'},
+          }},
+        ]},
+        desc: 'new on property without parens',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'new Foo(x, y, z)',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'NewExpression',
+            arguments: [
+              {type: 'Identifier', name: 'x'},
+              {type: 'Identifier', name: 'y'},
+              {type: 'Identifier', name: 'z'},
+            ],
+            callee: {type: 'Identifier', name: 'Foo'},
+          }},
+        ]},
+        desc: 'new on property without parens',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'new Foo.bar',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'NewExpression',
+            arguments: [],
+            callee: {type: 'MemberExpression',
+              object: {type: 'Identifier', name: 'Foo'},
+              property: {type: 'Identifier', name: 'bar'},
+              computed: false,
+            },
+          }},
+        ]},
+        desc: 'new on property without parens',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'new Foo.bar()',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'NewExpression',
+            arguments: [],
+            callee: {type: 'MemberExpression',
+              object: {type: 'Identifier', name: 'Foo'},
+              property: {type: 'Identifier', name: 'bar'},
+              computed: false,
+            },
+          }},
+        ]},
+        desc: 'new on property without parens',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'new Foo.bar(x, y, z)',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'NewExpression',
+            arguments: [
+              {type: 'Identifier', name: 'x'},
+              {type: 'Identifier', name: 'y'},
+              {type: 'Identifier', name: 'z'},
+            ],
+            callee: {type: 'MemberExpression',
+              object: {type: 'Identifier', name: 'Foo'},
+              property: {type: 'Identifier', name: 'bar'},
+              computed: false,
+            },
+          }},
+        ]},
+        desc: 'new on property without parens',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'new Foo().bar',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'NewExpression',
+            arguments: [],
+            callee: {type: 'MemberExpression',
+              object: {type: 'Identifier', name: 'Foo'},
+              property: {type: 'Identifier', name: 'bar'},
+              computed: false,
+            },
+          }},
+        ]},
+        desc: 'new on property with parens',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // new
+    [
+      '  precedent',
+      {
+        code: 'a + b + c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '+',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '+',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: 'same level +',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a * b + c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '*',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '+',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '* is higher than +',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a + b * c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '+',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '*',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '* is higher than +',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a + b * c * d',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '+',
+            right: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'b'},
+                operator: '*',
+                right: {type: 'Identifier', name: 'c'},
+              },
+              operator: '*',
+              right: {type: 'Identifier', name: 'd'},
+            },
+          }},
+        ]},
+        desc: '* is higher than +',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a * b + c * d',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '*',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '+',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'c'},
+              operator: '*',
+              right: {type: 'Identifier', name: 'd'},
+            },
+          }},
+        ]},
+        desc: '* is higher than +',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: '(a * b + c) * d',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'a'},
+                operator: '*',
+                right: {type: 'Identifier', name: 'b'},
+              },
+              operator: '+',
+              right: {type: 'Identifier', name: 'c'},
+            },
+            operator: '*',
+            right: {type: 'Identifier', name: 'd'},
+          }},
+        ]},
+        desc: 'parenthesis override regular precedent (AST doesnt reflect them explicitly)',
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a=b+=c-=d**=e*=f/=g%=h<<=i>>=j>>>=k&=l^=m|=n',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
+          type: 'AssignmentExpression',
+          left: {type: 'Identifier', name: 'a'},
+          operator: '=',
+          right: {type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'b'},
+            operator: '+=',
+            right: {type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'c'},
+              operator: '-=',
+              right: {type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'd'},
+                operator: '**=',
+                right: {type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'e'},
+                  operator: '*=',
+                  right: {type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: 'f'},
+                    operator: '/=',
+                    right: {type: 'AssignmentExpression',
+                      left: {type: 'Identifier', name: 'g'},
+                      operator: '%=',
+                      right: {type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'h'},
+                        operator: '<<=',
+                        right: {type: 'AssignmentExpression',
+                          left: {type: 'Identifier', name: 'i'},
+                          operator: '>>=',
+                          right: {type: 'AssignmentExpression',
+                            left: {type: 'Identifier', name: 'j'},
+                            operator: '>>>=',
+                            right: {type: 'AssignmentExpression',
+                              left: {type: 'Identifier', name: 'k'},
+                              operator: '&=',
+                              right: {type: 'AssignmentExpression',
+                                left: {type: 'Identifier', name: 'l'},
+                                operator: '^=',
+                                right: {type: 'AssignmentExpression',
+                                  left: {type: 'Identifier', name: 'm'},
+                                  operator: '|=',
+                                  right: {type: 'Identifier', name: 'n'},
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}]},
+        desc: 'assignment precedent test 1/2 (should all chain to the right)',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a|=b^=c&=d>>>=e>>=f<<=g%=h/=i*=j**=k-=l+=m=n',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
+          left: {type: 'Identifier', name: 'a'},
+          operator: '|=',
+          right: {type: 'AssignmentExpression',
+            left: {type: 'Identifier', name: 'b'},
+            operator: '^=',
+            right: {type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'c'},
+              operator: '&=',
+              right: {type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'd'},
+                operator: '>>>=',
+                right: {type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'e'},
+                  operator: '>>=',
+                  right: {type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: 'f'},
+                    operator: '<<=',
+                    right: {type: 'AssignmentExpression',
+                      left: {type: 'Identifier', name: 'g'},
+                      operator: '%=',
+                      right: {type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'h'},
+                        operator: '/=',
+                        right: {type: 'AssignmentExpression',
+                          left: {type: 'Identifier', name: 'i'},
+                          operator: '*=',
+                          right: {type: 'AssignmentExpression',
+                            left: {type: 'Identifier', name: 'j'},
+                            operator: '**=',
+                            right: {type: 'AssignmentExpression',
+                              left: {type: 'Identifier', name: 'k'},
+                              operator: '-=',
+                              right: {type: 'AssignmentExpression',
+                                left: {type: 'Identifier', name: 'l'},
+                                operator: '+=',
+                                right: {
+                                  type: 'AssignmentExpression',
+                                  left: {type: 'Identifier', name: 'm'},
+                                  operator: '=',
+                                  right: {type: 'Identifier', name: 'n'},
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }}]},
+        desc: 'assignment precedent test 2/2 (should all chain to the right)',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a || b || c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'LogicalExpression',
+            left: {
+              type: 'LogicalExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '||',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '||',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '|| should veer to the left',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a && b && c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'LogicalExpression',
+            left: {
+              type: 'LogicalExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '&&',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '&&',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '&& should veer to the left',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a && b || c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'LogicalExpression',
+            left: {
+              type: 'LogicalExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '&&',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '||',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '&& || precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a || b && c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'LogicalExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '||',
+            right: {
+              type: 'LogicalExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '&&',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '&& || precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a | b && c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'LogicalExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '|',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '&&',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '&& | precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a && b | c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'LogicalExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '&&',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '|',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '&& | precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a ^ b | c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '^',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '|',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '| ^ precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a | b ^ c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '|',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '^',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '| ^ precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a & b ^ c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '&',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '^',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '^ & precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a ^ b & c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '^',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '&',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '^ & precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a == b & c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '==',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '&',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '& == precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a & b == c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '&',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '==',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '& == precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a == b != c === d !== e',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'a'},
+                  operator: '==',
+                  right: {type: 'Identifier', name: 'b'},
+                },
+                operator: '!=',
+                right: {type: 'Identifier', name: 'c'},
+              },
+              operator: '===',
+              right: {type: 'Identifier', name: 'd'},
+            },
+            operator: '!==',
+            right: {type: 'Identifier', name: 'e'},
+          }},
+        ]},
+        desc: 'equality precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a !== b === c != d == e',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'a'},
+                  operator: '!==',
+                  right: {type: 'Identifier', name: 'b'},
+                },
+                operator: '===',
+                right: {type: 'Identifier', name: 'c'},
+              },
+              operator: '!=',
+              right: {type: 'Identifier', name: 'd'},
+            },
+            operator: '==',
+            right: {type: 'Identifier', name: 'e'},
+          }},
+        ]},
+        desc: 'equality precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a == b & c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '==',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '&',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '& == precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a & b == c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '&',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '==',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '& == precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a < b == c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '<',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '==',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '== < precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a == b < c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '==',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '<',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '== < precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a < b <= c > d >= e in f instanceof g',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'BinaryExpression',
+                  left: {type: 'BinaryExpression',
+                    left: {type: 'BinaryExpression',
+                      left: {type: 'Identifier', name: 'a'},
+                      operator: '<',
+                      right: {type: 'Identifier', name: 'b'},
+                    },
+                    operator: '<=',
+                    right: {type: 'Identifier', name: 'c'},
+                  },
+                  operator: '>',
+                  right: {type: 'Identifier', name: 'd'},
+                },
+                operator: '>=',
+                right: {type: 'Identifier', name: 'e'},
+              },
+              operator: 'in',
+              right: {type: 'Identifier', name: 'f'},
+            },
+            operator: 'instanceof',
+            right: {type: 'Identifier', name: 'g'},
+          }},
+        ]},
+        desc: 'comparison precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $IDENT, $ASI],
+      },
+      {
+        code: 'a instanceof b in c >= d > e <= f < g',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'BinaryExpression',
+                  left: {type: 'BinaryExpression',
+                    left: {type: 'BinaryExpression',
+                      left: {type: 'Identifier', name: 'a'},
+                      operator: 'instanceof',
+                      right: {type: 'Identifier', name: 'b'},
+                    },
+                    operator: 'in',
+                    right: {type: 'Identifier', name: 'c'},
+                  },
+                  operator: '>=',
+                  right: {type: 'Identifier', name: 'd'},
+                },
+                operator: '>',
+                right: {type: 'Identifier', name: 'e'},
+              },
+              operator: '<=',
+              right: {type: 'Identifier', name: 'f'},
+            },
+            operator: '<',
+            right: {type: 'Identifier', name: 'g'},
+          }},
+        ]},
+        desc: 'comparison precedent test 2/2',
+        tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a << b < c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '<<',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '<',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '< << precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a < b << c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '<',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '<<',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '< << precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a << b >> c >>> d',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'a'},
+                operator: '<<',
+                right: {type: 'Identifier', name: 'b'},
+              },
+              operator: '>>',
+              right: {type: 'Identifier', name: 'c'},
+            },
+            operator: '>>>',
+            right: {type: 'Identifier', name: 'd'},
+          }},
+        ]},
+        desc: 'bit shift precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a >>> b >> c << d',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'a'},
+                operator: '>>>',
+                right: {type: 'Identifier', name: 'b'},
+              },
+              operator: '>>',
+              right: {type: 'Identifier', name: 'c'},
+            },
+            operator: '<<',
+            right: {type: 'Identifier', name: 'd'},
+          }},
+        ]},
+        desc: 'comparison precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a + b << c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '+',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '<<',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '<< + precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a << b + c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '<<',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '+',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '<< + precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a + b - c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '+',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '-',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: 'addition/subtraction precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a - b + c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '-',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '+',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: 'addition/subtraction precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a * b + c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '*',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '+',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '+ * precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a + b * c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '+',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '*',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '+ * precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a * b / c % d',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'a'},
+                operator: '*',
+                right: {type: 'Identifier', name: 'b'},
+              },
+              operator: '/',
+              right: {type: 'Identifier', name: 'c'},
+            },
+            operator: '%',
+            right: {type: 'Identifier', name: 'd'},
+          }},
+        ]},
+        desc: 'mul precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a % b / c * d',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+            left: {type: 'BinaryExpression',
+              left: {type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'a'},
+                operator: '%',
+                right: {type: 'Identifier', name: 'b'},
+              },
+              operator: '/',
+              right: {type: 'Identifier', name: 'c'},
+            },
+            operator: '*',
+            right: {type: 'Identifier', name: 'd'},
+          }},
+        ]},
+        desc: 'mul precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a ** b * c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '**',
+              right: {type: 'Identifier', name: 'b'},
+            },
+            operator: '*',
+            right: {type: 'Identifier', name: 'c'},
+          }},
+        ]},
+        desc: '* ** precedent test 1/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a * b ** c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '*',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '**',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '* ** precedent test 2/2',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+      {
+        code: 'a ** b ** c',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'a'},
+            operator: '**',
+            right: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'b'},
+              operator: '**',
+              right: {type: 'Identifier', name: 'c'},
+            },
+          }},
+        ]},
+        desc: '** right-associative',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    ], // precedent
   ], // expression
 ];
 
@@ -3583,7 +5646,7 @@ function one({code, ast, desc, tokens}) {
 function _one(testSuffix, code, ast, desc, tokens) {
   let prefix = testi + testSuffix;
 
-                                                                                            //if (parseInt(prefix,10) !== 119) return;
+                                                                                            //if (parseInt(prefix,10) !== 291) return;
 
   try {
     var obj = ZeParser(code, undefined, COLLECT_TOKENS_SOLID);

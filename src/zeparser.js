@@ -349,6 +349,10 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     }
   }
 
+  function sansFlag(flags, flag) {
+    return (flags | flag) ^ flag;
+  }
+
   function init() {
     do {
       skip(INITIAL_LEXER_FLAGS);
@@ -384,8 +388,10 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
   function skipOrDieSingleChar(chr, lexerFlags) {
     ASSERT(arguments.length === 2, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-    if (curc !== chr) ERROR;
-    else {
+    if (curc !== chr) {
+      console.log('error token:', curtok);
+      ERROR;
+    } else {
       ASSERT(curtok.str.length === 1, 'should be len=1');
       skip(lexerFlags);
     }
@@ -410,7 +416,9 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
   }
 
   function parseTopLevels(lexerFlags) {
+    let len = _path.length;
     parseBodyParts(lexerFlags);
+    ASSERT(_path.length === len, 'should close all that was opened');
   }
 
   function parseBodyParts(lexerFlags) {
@@ -813,6 +821,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     let assignable = false;
     let wasNotDecl = false;
     let emptyInit = false;
+    let startedWithPattern = false;
     if (curtype === $IDENT) {
       switch (curtok.str) {
         case 'var':
@@ -831,7 +840,9 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     } else if (curc === $$SEMI_3B) {
       emptyInit = true;
     } else {
+      startedWithPattern = curc === $$PAREN_L_28;
       assignable = parseValue(lexerFlags, astProp);
+      wasNotDecl = true;
     }
 
     // in all cases either; parse a var, let, const, or assignment expression
@@ -861,10 +872,10 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       SET('init', null);
     } else {
       WRAP_CLOSED(astProp, 'ForStatement', 'init');
-
       // we are still in the `init` part of a classic for. keep parsing from the current expression value.
-      if (wasNotDecl) _parseExpression(lexerFlags, assignable, 'init');
+      if (wasNotDecl) parseExpressionFromOp(lexerFlags, assignable, startedWithPattern, 'init');
     }
+
     skipOrDieSingleChar($$SEMI_3B, lexerFlags);
     if (curc === $$SEMI_3B) {
       SET('test', null);
@@ -1026,7 +1037,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       CLOSE();
     } else {
       OPEN(astProp, 'ExpressionStatement');
-      parseValueFromIdent(lexerFlags, identToken, 'expression'); // TODO: could do the ident manually, skips some checks.
+      parseExpressionAfterIdentifier(lexerFlags, identToken, 'expression');
       CLOSE();
       parseSemiOrAsi(lexerFlags);
     }
@@ -1176,36 +1187,72 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
   function parseExpression(lexerFlags, astProp) {
     ASSERT(arguments.length === 2, 'args count', arguments);
-    /*
-    if (curc === $$PLUS_2B) {
-      ASSERT_skip('+', lexerFlags);
-      parseExpression();
-    }
-    */
 
+    let wasParen = curc === $$PAREN_L_28;
     let assignable = parseValue(lexerFlags, astProp);
-    return _parseExpression(lexerFlags, assignable, astProp);
+    return parseExpressionFromOp(lexerFlags, assignable, wasParen, astProp);
   }
   function parseExpressionAfterLiteral(lexerFlags, astProp) {
     // assume we just parsed and skipped a literal (string/number/regex)
     let assignable = parseValueTail(lexerFlags, false, astProp);
-    return _parseExpression(lexerFlags, assignable, astProp);
+    return parseExpressionFromOp(lexerFlags, assignable, false, astProp);
   }
-  function _parseExpression(lexerFlags, assignable, astProp) {
-    while (assignable && isAssignBinOp()) {
+  function parseExpressionAfterIdentifier(lexerFlags, identToken, astProp) {
+    // identToken is a parsed, skipped, and validated value identifier (including the valueless `null`)
+    let assignable = parseValueHeadBodyIdent(lexerFlags, identToken, astProp);
+    assignable = parseValueTail(lexerFlags, assignable, astProp);
+    return parseExpressionFromOp(lexerFlags, assignable, false, astProp);
+  }
+  function parseExpressionFromOp(lexerFlags, assignable, lhsWasParenStart, astProp) {
+    ASSERT(arguments.length === 4, 'arg count');
+
+    if (assignable && isAssignBinOp()) {
       WRAP_CLOSED(astProp, 'AssignmentExpression', 'left');
       SET('operator', curtok.str);
       skip(lexerFlags);
-      assignable = parseValue(lexerFlags, 'right');
+      assignable = parseExpression(lexerFlags, 'right');
       CLOSE();
+    } else {
+      let initialAstProp = astProp;
+      while (isNonAssignBinOp() || curc === $$QMARK_3F) {
+        // to maintain operator precedent we need to take special care of the AST here if the
+        // current op is stronger than the previous op _currently_ at the top of the path
+        let prev = _path[_path.length-1][astProp];
+        let swapped = false;
+        if (prev && !lhsWasParenStart && (prev.type === 'BinaryExpression' || prev.type === 'LogicalExpression')) {
+          let sl = getStrenght(curtok.str);
+          let sr = getStrenght(prev.operator);
+          swapped =  sl > sr || (sl === sr && curtok.str === '**'); // `**` is the right-associative exception here
+          if (swapped) {
+            _path.push(prev);
+            astProp = 'right';
+          }
+        }
+
+        if (curc === $$QMARK_3F) {
+          WRAP_CLOSED(astProp, 'ConditionalExpression', 'test');
+          ASSERT_skip('?', lexerFlags);
+          parseExpression(lexerFlags, 'consequent');
+          skipOrDieSingleChar($$COLON_3A, lexerFlags);
+          parseExpression(lexerFlags, 'alternate');
+          CLOSE();
+        } else {
+          WRAP_CLOSED(astProp, (curtok.str === '&&' || curtok.str === '||') ? 'LogicalExpression' : 'BinaryExpression', 'left');
+          SET('operator', curtok.str);
+          skip(lexerFlags);
+          lhsWasParenStart = curc === $$PAREN_L_28; // heuristic for determining groups
+          parseValue(lexerFlags, 'right');
+          CLOSE();
+        }
+
+        if (swapped) { // restore swap
+          _path.pop(prev);
+          astProp = initialAstProp;
+        }
+        lhsWasParenStart = curc === $$PAREN_L_28; // heuristic for determining groups
+      }
     }
-    while (isNonAssignBinOp()) {
-      WRAP_CLOSED(astProp, 'BinaryExpression', 'left');
-      SET('operator', curtok.str);
-      skip(lexerFlags);
-      parseValue(lexerFlags, 'right');
-      CLOSE();
-    }
+
     return assignable;
   }
 
@@ -1245,6 +1292,14 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       case '&':
       case '|':
       case '^':
+      case '==':
+      case '!=':
+      case '===':
+      case '!==':
+      case '<':
+      case '<=':
+      case '>':
+      case '>=':
       case '<<':
       case '>>':
       case '>>>':
@@ -1254,6 +1309,40 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
         return true;
     }
     return false;
+  }
+
+  function getStrenght(str) {
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
+    // the spec is super implicit about operator precedent. you can only discover it by tracing the grammar.
+    // note: this function doesnt contain all things that have precedent. most of them are also implicitly
+    // determined by parsing mechanisms. stuff here is mostly about disambiguating binary ops.
+    switch (str) {
+      case '**': return 15;
+      case '*': return 14;
+      case '/': return 14;
+      case '%': return 14;
+      case '+': return 13;
+      case '-': return 13;
+      case '<<': return 12;
+      case '>>': return 12;
+      case '>>>': return 12;
+      case '<': return 11;
+      case '<=': return 11;
+      case '>': return 11;
+      case '>=': return 11;
+      case 'in': return 11;
+      case 'instanceof': return 11;
+      case '==': return 10;
+      case '!=': return 10;
+      case '===': return 10;
+      case '!==': return 10;
+      case '&': return 9;
+      case '^': return 8;
+      case '|': return 7;
+      case '&&': return 6;
+      case '||': return 5;
+      default: ERROR; // other ops should not be handled by this function
+    }
   }
 
   function parseValue(lexerFlags, astProp) {
@@ -1275,17 +1364,17 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
     if (curtype === $IDENT) {
       let identToken = curtok;
-      ASSERT_skip($IDENT, lexerFlags);
+      ASSERT_skip($IDENT, sansFlag(lexerFlags, FOR_REGEX));
       return parseValueHeadBodyIdent(lexerFlags, identToken, astProp);
     } else if (curtype & ($NUMBER|$STRING|$REGEX)) {
       OPEN(astProp, 'Literal');
       SET('value', '<TODO>');
       SET('raw', curtok.str);
-      skip(lexerFlags);
+      skip(sansFlag(lexerFlags, FOR_REGEX));
       CLOSE();
       return false;
-    } else if (curtype & $TICK) { TODO
-      parseTick(lexerFlags, astProp);
+    } else if (curtype & $TICK) {
+      parseTickExpression(lexerFlags, astProp);
       return false;
     } else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
@@ -1299,7 +1388,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       } else if (curtok.str === '++' || curtok.str === '--') {
         OPEN(astProp, 'UpdateExpression');
         SET('operator', curtok.str);
-        ASSERT_skip($PUNCTUATOR, lexerFlags);
+        ASSERT_skip($PUNCTUATOR, sansFlag(lexerFlags, FOR_REGEX));
         SET('prefix', true);
         parseValueHeadBody(lexerFlags, 'argument');
         CLOSE();
@@ -1307,14 +1396,14 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       } else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
         OPEN(astProp, 'UnaryExpression');
         SET('operator', curtok.str);
-        ASSERT_skip($PUNCTUATOR, lexerFlags);
+        ASSERT_skip($PUNCTUATOR, sansFlag(lexerFlags, FOR_REGEX));
         SET('prefix', true);
         parseValueHeadBody(lexerFlags, 'argument');
         CLOSE();
         return false;
       } else if (curc === $$DOT_2E && curtok.str === '...') {
         OPEN(astProp, 'SpreadElement');
-        ASSERT_skip($PUNCTUATOR, lexerFlags);
+        ASSERT_skip($PUNCTUATOR, sansFlag(lexerFlags, FOR_REGEX));
         parseValue(lexerFlags, 'argument');
         CLOSE();
         return false;
@@ -1356,9 +1445,9 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
         CLOSE();
         return false;
       case 'new':
-        TODO // new foo AND new.target
         OPEN(astProp, 'NewExpression');
-        parseValue(lexerFlags, 'expression');
+        SET('arguments', []);
+        parseValue(lexerFlags, 'callee');
         CLOSE();
         return false;
       case 'this':
@@ -1412,22 +1501,14 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     SET('expressions', []);
     SET('quasis', []);
 
-    let isTail = curtype === $TICK_TAIL || curtype === $TICK_PURE;
-    OPEN('quasis', 'TemplateElement');
-    SET('tail', isTail);
-    SET('value', {
-      raw: curtok.str,
-      cooked: '<TODO>',
-    });
-    ASSERT_skip(curtok.str, lexerFlags);
-    CLOSE();
+    if (curtype === $TICK_PURE) {
+      parseQuasiPart(lexerFlags, true, astProp);
+    } else if (curtype === $TICK_HEAD) {
+      parseQuasiPart(lexerFlags | IN_TEMPLATE, false, astProp);
 
-    if (isTail) {
-      ASSERT(curtype !== $TICK_BODY && curtype !== $TICK_TAIL, 'should not encounter tick body/tail without seeing head first', debug_toktype(curtype));
-    } else {
       // keep parsing expression+tick until tick-tail
       do {
-        parseExpression(lexerFlags & IN_TEMPLATE, 'expressions');
+        parseExpression(lexerFlags | IN_TEMPLATE, 'expressions');
 
         OPEN('quasis', 'TemplateElement');
         SET('tail', curtype === $TICK_TAIL);
@@ -1435,18 +1516,36 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
           raw: curtok.str,
           cooked: '<TODO>',
         });
-        ASSERT_skip(curtok.str, lexerFlags);
         CLOSE();
-      } while (curtype === $TICK_BODY);
-
-      if (curtype !== $TICK_TAIL) ERROR
-      skip(lexerFlags);
-
+        if (curtype === $TICK_BODY) {
+          ASSERT_skip(curtok.str, lexerFlags | IN_TEMPLATE);
+        } else  if (curtype === $TICK_TAIL) {
+          ASSERT_skip(curtok.str, lexerFlags);
+          break;
+        } else {
+          ERROR
+        }
+      } while (true);
+    } else {
+      ERROR
     }
+
+    CLOSE(); // TemplateLiteral
 
     // assume we just parsed and skipped a literal (string/number/regex)
     let assignable = parseValueTail(lexerFlags, true, astProp);
-    return _parseExpression(lexerFlags, assignable, astProp);
+    return parseExpressionFromOp(lexerFlags, assignable, false, astProp);
+  }
+
+  function parseQuasiPart(lexerFlags, tail, astProp) {
+    OPEN('quasis', 'TemplateElement');
+    SET('tail', tail);
+    SET('value', {
+      raw: curtok.str,
+      cooked: '<TODO>',
+    });
+    ASSERT_skip(curtok.str, lexerFlags); // note: dont set IN_TEMPLATE here because a pure template wont want it
+    CLOSE();
   }
 
   function parseObjectLitOrDestruc(lexerFlags, fromParam, astProp) {
@@ -1487,10 +1586,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
     OPEN(astProp, 'ObjectExpression');
     SET('properties', []);
-    ASSERT_skip('{', lexerFlags);
+    let lexerFlagsNoTemplate = sansFlag(lexerFlags, IN_TEMPLATE);
+    ASSERT_skip('{', lexerFlagsNoTemplate);
     do {
-      parseObjLitProperty(lexerFlags, 'properties'); // also consumes comma
-      if (curc === $$COMMA_2C) ASSERT_skip(',', lexerFlags);
+      parseObjLitProperty(lexerFlagsNoTemplate, 'properties'); // also consumes comma
+      if (curc === $$COMMA_2C) ASSERT_skip(',', lexerFlagsNoTemplate);
       else break;
     } while(curc !== $$CURLY_R_7D && curtype !== $EOF);
     skipOrDieSingleChar($$CURLY_R_7D, lexerFlags);
@@ -1731,8 +1831,9 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
         parseElisions(lexerFlags, 'elements');
         if (fromParam) {
           // prevent parsing further assignments
+          let wasParen = curc === $$PAREN_L_28;
           parseValue(lexerFlags, 'elements');
-          _parseExpression(lexerFlags, false, 'elements');
+          parseExpressionFromOp(lexerFlags, false, wasParen, 'elements');
           if (curc === $$IS_3D && curtok.str === '=') {
             ASSERT_skip('=', lexerFlags);
             parseArgDefault(lexerFlags, 'elements');
@@ -1785,35 +1886,30 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     } else if (curc === $$PAREN_L_28) {
       ASSERT(curtype === $PUNCTUATOR && curtok.str === '(');
       ASSERT_skip('(', lexerFlags);
-      WRAP_CLOSED(astProp, 'CallExpression', 'callee');
-      SET('arguments', []);
-      parseCallArgs(lexerFlags, 'arguments');
-      CLOSE();
+      if (astProp === 'callee') { // exception for `new`
+        parseCallArgs(lexerFlags, 'arguments');
+      } else {
+        WRAP_CLOSED(astProp, 'CallExpression', 'callee');
+        SET('arguments', []);
+        parseCallArgs(lexerFlags, 'arguments');
+        CLOSE();
+      }
       assignable = parseValueTail(lexerFlags, false, astProp);
     } else if (curc === $$TICK_60) { TODO
       ASSERT((curtype & $TICK) === $TICK);
-      WRAP_OPENED(astProp, 'MemberExpression', 'object');
+      WRAP_CLOSED(astProp, 'MemberExpression', 'object');
       OPEN('property', 'Identifier');
       SET('name', curtok.str);
       ASSERT_skip($IDENT, lexerFlags);
       CLOSE();
       assignable = parseValueTail(lexerFlags, false, astProp);
-    } else if (curc === $$PLUS_2B && curtok === '++') { TODO
+    } else if ((curc === $$PLUS_2B && curtok.str === '++') || (curc === $$DASH_2D && curtok.str === '--')) {
       ASSERT(curtype === $PUNCTUATOR);
-      WRAP_OPENED(astProp, 'UnaryExpression', 'argument');
+      WRAP_CLOSED(astProp, 'UpdateExpression', 'argument');
       SET('operator', curtok.str);
       SET('prefix', false);
-      parseValueHeadBody(lexerFlags, 'argument');
+      ASSERT_skip(curtok.str, lexerFlags);
       CLOSE();
-      assignable = parseValueTail(lexerFlags, false, astProp);
-    } else if (curc === $$DASH_2D && curtok === '--') { TODO
-      ASSERT(curtype === $PUNCTUATOR);
-      WRAP_OPENED(astProp, 'UnaryExpression', 'argument');
-      SET('operator', curtok.str);
-      SET('prefix', false);
-      parseValueHeadBody(lexerFlags, 'argument');
-      CLOSE();
-      assignable = parseValueTail(lexerFlags, false, astProp);
     }
     return assignable;
   }
@@ -1873,6 +1969,13 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     }
 
     return assignable;
+  }
+
+  function logPath() {
+    console.log('Path: ' + _path.map(o=>o.type).join(' '))
+  }
+  function logTree() {
+    console.log('Tree: ' + require('util').inspect(_tree, false, null))
   }
 
   init();
