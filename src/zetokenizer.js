@@ -1099,10 +1099,12 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     if (c === $$FWDSLASH_2F) {
       // must be single comment
       ASSERT_skip($$FWDSLASH_2F); // //
+      wasWhite = true;
       return parseSingleComment();
     } else if (c === $$STAR_2A) {
       // must be multi comment
       ASSERT_skip($$STAR_2A); // /*
+      wasWhite = true;
       return parseMultiComment();
     } else {
       return parseSingleFwdSlash(lexerFlags, c);

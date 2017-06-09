@@ -17,6 +17,10 @@ Are these regexes valid?  /a|/  /|a/  /|/
 What's wrong here? `do foo while (bar);`
 What punctuators could follow this code such that it could end up valid? `[a, {[b]: c}]` meh
 Destructuring puzzles; valid? ({foo=bar})
+Can you use `let` as a var name? Can you call a method with property access? `let.foo();` and `let[foo]();`? https://tc39.github.io/ecma262/#prod-ExpressionStatement
+The "ambiguity" of the forward slash (`/`) is well-known. Besides the start of a comment, it can either be the start of a regular expression or just the division operator (but never ever both). Can you name the character for which ES6 introduced this problem as well?
+To which `if` does the `else` bind? `if (a); if (b); else c;`
+Is this multiplication of a generator or x square? `x**function(){ return 2}()`
 
 
 function f(a,b){ b=5; console.log(arguments[1]); } f(); f(1); f(1,2); f(1, undefined); // implicit arguments bind

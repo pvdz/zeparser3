@@ -870,7 +870,7 @@ let tests = [
         desc: 'empty function decl',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
-    ],
+    ], // decl
     [
       '  function args',
       {
@@ -1044,7 +1044,7 @@ let tests = [
         desc: 'regular arg and an array destructuring arg',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
-    ],
+    ], // args
     [
       '  function body',
       {
@@ -1068,7 +1068,7 @@ let tests = [
         desc: 'function decl, no args, two stmts',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
       },
-    ],
+    ], // body
     [
       '  async function',
       {
@@ -1079,7 +1079,7 @@ let tests = [
         desc: 'empty async function',
         tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
-    ],
+    ], // async
     [
       '  generator function',
       {
@@ -1090,7 +1090,7 @@ let tests = [
         desc: 'empty async function',
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
-    ],
+    ], // generator
   ], // functions
   [
     'if statement',
@@ -1262,8 +1262,61 @@ let tests = [
             {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
           ]},
         ]},
-        desc: 'let, one var, no init, semi',
+        desc: 'let, destructured array with one var, no init, semi',
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      },
+      {
+        code: 'let [,,,foo] = arr;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [
+              null,
+              null,
+              null,
+              {type: 'Identifier', name: 'foo'},
+            ]}, init: {type: 'Identifier', name: 'arr'}},
+          ]},
+        ]},
+        desc: 'let, destructuring with leading elisions, no init, semi',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      },
+      {
+        code: 'let [foo,,,] = arr;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [
+              {type: 'Identifier', name: 'foo'},
+              null,
+              null,
+            ]}, init: {type: 'Identifier', name: 'arr'}},
+          ]},
+        ]},
+        desc: 'let, destructuring with trailing elisions, no init, semi',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      },
+      {
+        code: 'let {foo} = arr;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: [
+              {type: 'Identifier', name: 'foo'},
+            ]}, init: {type: 'Identifier', name: 'arr'}},
+          ]},
+        ]},
+        desc: 'let, destructuring obj with shorthand, no init, semi',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      },
+      {
+        code: 'let {foo,} = arr;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: [
+              {type: 'Identifier', name: 'foo'},
+            ]}, init: {type: 'Identifier', name: 'arr'}},
+          ]},
+        ]},
+        desc: 'let, destructuring obj with shorthand and trailing comma, no init, semi',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       },
     ],
     //[
@@ -1652,6 +1705,837 @@ let tests = [
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     },
   ], // with statement
+  [
+    'import',
+    {
+      code: 'import x from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportDefaultSpecifier',
+            local: {type: 'Identifier', name: 'x'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $IDENT, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import x from \'y\'',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportDefaultSpecifier',
+            local: {type: 'Identifier', name: 'x'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '\'y\'',
+        },
+      }]},
+      desc: 'simple import of a default with single string',
+      tokens: [$IDENT, $IDENT, $IDENT, $STRING_SINGLE],
+    },
+    {
+      code: 'import * as a from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportNamespaceSpecifier',
+            local: {type: 'Identifier', name: 'a'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of an aliased default',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import x, * as a from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportDefaultSpecifier',
+            local: {type: 'Identifier', name: 'x'},
+          },
+          {type: 'ImportNamespaceSpecifier',
+            local: {type: 'Identifier', name: 'a'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of an aliased default',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'x'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x,} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'x'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x as z} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'z'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x as z,} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'z'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x, z} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'x'},
+          },
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'z'},
+            local: {type: 'Identifier', name: 'z'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x, z,} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'x'},
+          },
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'z'},
+            local: {type: 'Identifier', name: 'z'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x as a, z} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'a'},
+          },
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'z'},
+            local: {type: 'Identifier', name: 'z'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x, z as b} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'x'},
+          },
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'z'},
+            local: {type: 'Identifier', name: 'b'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x as a, z as b} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'a'},
+          },
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'z'},
+            local: {type: 'Identifier', name: 'b'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+    {
+      code: 'import {x as a, z as b,} from "y"',
+      ast: {type: 'Program', body: [{
+        type: 'ImportDeclaration',
+        specifiers: [
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'x'},
+            local: {type: 'Identifier', name: 'a'},
+          },
+          {type: 'ImportSpecifier',
+            imported: {type: 'Identifier', name: 'z'},
+            local: {type: 'Identifier', name: 'b'},
+          },
+        ],
+        source: {
+          type: 'Literal',
+          value: '<TODO>',
+          raw: '"y"',
+        },
+      }]},
+      desc: 'simple import of a default with double string',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+    },
+  ], // import
+  [
+    'export',
+    {
+      code: 'export * from "foo"',
+      ast: {type: 'Program', body: [
+        {type: 'ExportAllDeclaration', source: {type: 'Literal', value: '<TODO>', raw: '"foo"'}},
+      ]},
+      desc: 're-export everything from another module (double string)',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
+    },
+    {
+      code: `export * from 'foo'`,
+      ast: {type: 'Program', body: [
+        {type: 'ExportAllDeclaration', source: {type: 'Literal', value: '<TODO>', raw: '\'foo\''}},
+      ]},
+      desc: 're-export everything from another module (single string)',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $ASI],
+    },
+    {
+      code: 'export {}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'empty export',
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export {x}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}},
+          ],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'export one key',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export {x as a}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}},
+          ],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'export one key aliased',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export {x,}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}},
+          ],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'export one key, trailing comma',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export {x} from "foo"',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}},
+          ],
+          declaration: null,
+          source: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+        },
+      ]},
+      desc: 're-export one key',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
+    },
+    {
+      code: 'export {x as a} from "foo"',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}},
+          ],
+          declaration: null,
+          source: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+        },
+      ]},
+      desc: 're-export one key aliased',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
+    },
+    {
+      code: 'export {x,} from "foo"',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}},
+          ],
+          declaration: null,
+          source: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+        },
+      ]},
+      desc: 're-export one key, trailing comma',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
+    },
+    {
+      code: 'export {x as a,}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}},
+          ],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'export one key aliased, trailing comma',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export {x, y}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}},
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'y'}, exported: {type: 'Identifier', name: 'y'}},
+          ],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'export two keys',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export {x as a, y as b}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}},
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'y'}, exported: {type: 'Identifier', name: 'b'}},
+          ],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'export two keys aliased',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export {x, y,}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}},
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'y'}, exported: {type: 'Identifier', name: 'y'}},
+          ],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'export two keys, trailing comma',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export {x as a, y as b,}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}},
+            {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'y'}, exported: {type: 'Identifier', name: 'b'}},
+          ],
+          declaration: null,
+          source: null,
+        },
+      ]},
+      desc: 'export two keys aliased, trailing comma',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export var x',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export var statement, one var',
+      tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+    },
+    {
+      code: 'export var x, y',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: null},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export var statement, two vars',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    },
+    {
+      code: 'export var x = 10, y = 20',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: {type: 'Literal', value: '<TODO>', raw: '10'}},
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: {type: 'Literal', value: '<TODO>', raw: '20'}},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export var statement, two vars, with init',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
+    },
+    {
+      code: 'export let x',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export let statement, one var',
+      tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+    },
+    {
+      code: 'export let x, y',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: null},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export let statement, two vars',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    },
+    {
+      code: 'export let x = 10, y = 20',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: {type: 'Literal', value: '<TODO>', raw: '10'}},
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: {type: 'Literal', value: '<TODO>', raw: '20'}},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export let statement, two vars, with init',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
+    },
+    {
+      code: 'export const x',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'const',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export const statement, one var',
+      tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+    },
+    {
+      code: 'export const x, y',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'const',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: null},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export const statement, two vars',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    },
+    {
+      code: 'export const x = 10, y = 20',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'VariableDeclaration',
+            kind: 'const',
+            declarations: [
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: {type: 'Literal', value: '<TODO>', raw: '10'}},
+              {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: {type: 'Literal', value: '<TODO>', raw: '20'}},
+            ],
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export const statement, two vars, with init',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
+    },
+    {
+      code: 'export function f(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export a named function',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export async function f(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export a named async function',
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export function* f(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportNamedDeclaration',
+          specifiers: [],
+          declaration: {type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+          source: null,
+        },
+      ]},
+      desc: 'export a named generator function',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export default function f(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportDefaultDeclaration',
+          declaration: {type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+        },
+      ]},
+      desc: 'default export a named function',
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export default async function f(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportDefaultDeclaration',
+          declaration: {type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+        },
+      ]},
+      desc: 'default export a named async function',
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export default function* f(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportDefaultDeclaration',
+          declaration: {type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+        },
+      ]},
+      desc: 'default export a named generator function',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export default function(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportDefaultDeclaration',
+          declaration: {type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: null,
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+        },
+      ]},
+      desc: 'default export an anonymous function',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export default async function(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportDefaultDeclaration',
+          declaration: {type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            expression: false,
+            id: null,
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+        },
+      ]},
+      desc: 'default export an anonymous async function',
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    {
+      code: 'export default function*(){}',
+      ast: {type: 'Program', body: [
+        {type: 'ExportDefaultDeclaration',
+          declaration: {type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: null,
+            params: [],
+            body: {type: 'BlockStatement', body: []},
+          },
+        },
+      ]},
+      desc: 'default export an anonymous generator function',
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+
+
+    // export class ...
+    // export default class ...
+  ], // export
 
   [
     'expression',
@@ -1952,6 +2836,19 @@ let tests = [
           desc: 'destructuring array as call arg',
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         },
+        {
+          code: '([foo]) = arr;',
+          ast: {type: 'Program', body: [
+            {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
+              left: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]},
+              operator: '=',
+              right: {type: 'Identifier', name: 'arr'},
+            }},
+          ]},
+          desc: 'parenthesis should not matter for destructuring ast',
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        },
+        // (a=/i/) = /i/   -> error (invalid lhs)
         // [a,b=[x,y]] = z  -> should not transform the inner array to a arraydestruct
       ], // destructuring
     ], // array
@@ -3283,6 +4180,70 @@ let tests = [
       },
     ], // mixed
     [
+      '  functions',
+      {
+        code: 'foo(function(){})',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
+            {type: 'FunctionExpression', generator: false, async: false, expression: true, id: null, params: [], body: {type: 'BlockStatement', body: []}},
+          ]}},
+        ]},
+        desc: 'simpelest anonymous function expression',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'foo(function f(){})',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
+            {type: 'FunctionExpression', generator: false, async: false, expression: true, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
+          ]}},
+        ]},
+        desc: 'simpelest named function expression',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'foo(function*(){})',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
+            {type: 'FunctionExpression', generator: true, async: false, expression: true, id: null, params: [], body: {type: 'BlockStatement', body: []}},
+          ]}},
+        ]},
+        desc: 'simpelest anonymous generator expression',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'foo(function* f(){})',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
+            {type: 'FunctionExpression', generator: true, async: false, expression: true, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
+          ]}},
+        ]},
+        desc: 'simpelest named generator expression',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'foo(async function(){})',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
+            {type: 'FunctionExpression', generator: false, async: true, expression: true, id: null, params: [], body: {type: 'BlockStatement', body: []}},
+          ]}},
+        ]},
+        desc: 'simpelest anonymous async function expression',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      },
+      {
+        code: 'foo(async function f(){})',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
+            {type: 'FunctionExpression', generator: false, async: true, expression: true, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
+          ]}},
+        ]},
+        desc: 'simpelest async named function expression',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      },
+      // error for generator AND async
+    ], // functions
+    [
       '  group/arrow',
       [
         '    group',
@@ -3500,6 +4461,39 @@ let tests = [
       [
         '    arrow',
         {
+          code: 'x=>x;',
+          ast: {type: 'Program', body: [
+            {type: 'ExpressionStatement', expression: {
+              type: 'ArrowFunctionExpression',
+              params: [
+                {type: 'Identifier', name: 'x'},
+              ],
+              id: null,
+              generator: false,
+              expression: true,
+              body: {type: 'Identifier', name: 'x'},
+            }},
+          ]},
+          desc: 'arrow, one arg without parens, expr',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        },
+        {
+          code: '()=>x;',
+          ast: {type: 'Program', body: [
+            {type: 'ExpressionStatement', expression: {
+              type: 'ArrowFunctionExpression',
+              params: [
+              ],
+              id: null,
+              generator: false,
+              expression: true,
+              body: {type: 'Identifier', name: 'x'},
+            }},
+          ]},
+          desc: 'arrow, no args, expr',
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        },
+        {
           code: '(x)=>x;',
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {
@@ -3515,6 +4509,42 @@ let tests = [
           ]},
           desc: 'arrow, one arg, expr',
           tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        },
+        {
+          code: '(x)=>{x}',
+          ast: {type: 'Program', body: [
+            {type: 'ExpressionStatement', expression: {
+              type: 'ArrowFunctionExpression',
+              params: [
+                {type: 'Identifier', name: 'x'},
+              ],
+              id: null,
+              generator: false,
+              expression: false,
+              body: {type: 'BlockStatement', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}]},
+            }},
+          ]},
+          desc: 'arrow, one arg, block',
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $ASI],
+        },
+        {
+          code: '(x)=>{/x/}',
+          ast: {type: 'Program', body: [
+            {type: 'ExpressionStatement', expression: {
+              type: 'ArrowFunctionExpression',
+              params: [
+                {type: 'Identifier', name: 'x'},
+              ],
+              id: null,
+              generator: false,
+              expression: false,
+              body: {type: 'BlockStatement', body: [
+                {type: 'ExpressionStatement', expression: {type: 'Literal', value: '<TODO>', raw: '/x/'}},
+              ]},
+            }},
+          ]},
+          desc: 'arrow, one arg, block with a regex literal',
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI, $PUNCTUATOR, $ASI],
         },
         {
           code: '(x, y)=>x;',
@@ -3534,9 +4564,6 @@ let tests = [
           desc: 'arrow, one arg, expr',
           tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         },
-
-
-
         //{ error
         //  code: '((x)) => x;',
         //  ast: {type: 'Program', body: [
@@ -3611,8 +4638,84 @@ let tests = [
         //  desc: 'assignment to a wrapped property, silly but valid',
         //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
         //},
-
-      ],
+        //{ error
+        //  code: '/i/ * ()=>j',
+        //  ast: {type: 'Program', body: [
+        //    {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+        //      left: {type: 'Literal', value: '<TODO>', raw: '/i/'},
+        //      operator: '*',
+        //      right: {type: 'ArrowFunctionExpression',
+        //        params: [],
+        //        id: null,
+        //      }
+        //    }},
+        //  ]},
+        //  desc: 'this is invalid because you cannot match an arrow (in the grammar) on the rhs of a non-assignment operator',
+        //  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        //}
+        {
+          code: 'var a = (b) => c;',
+          ast: {
+            type: 'Program', body: [{
+              type: 'VariableDeclaration',
+              kind: 'var',
+              declarations: [
+                {type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'a'},
+                  init: {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'b'}],
+                    id: null,
+                    generator: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'c'},
+                  },
+                },
+              ],
+            }],
+          },
+          desc: 'group of some two assignments',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        },
+        {
+          code: 'f(async ()=>{})',
+          ast: {type: 'Program', body: [
+            {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
+              {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'b'}],
+                id: null,
+                generator: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'c'},
+              },
+            ]}},
+          ]},
+          desc: 'async arrow',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        },
+        {
+          code: 'f(async ())',
+          ast: {type: 'Program', body: [
+            {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
+              {type: 'CallExpression', callee: {type: 'Identifier', name: 'asyn'}, arguments: []},
+            ]}},
+          ]},
+          desc: 'calling async as a function (so not an async function but async as a var name)',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT],
+        },
+        {
+          code: 'f(async)',
+          ast: {type: 'Program', body: [
+            {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
+              {type: 'Identifier', name: 'async'},
+            ]}},
+          ]},
+          desc: 'using async a regular var name instead of keyword',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        },
+        // need to test invalid async arrows
+      ], // arrow
     ], // group/arrow
     [
       '  literals',
@@ -3988,6 +5091,80 @@ let tests = [
         ]},
         desc: 'block wrapped 3-part template to check disambiguation',
         tokens: [$PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $IDENT, $TICK_TAIL, $TICK_TAIL, $ASI, $PUNCTUATOR],
+      },
+      {
+        code: '`a ${function(){}} b`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: true,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []},
+              },
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'function body disambiguation inside template',
+        tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
+      },
+      {
+        code: '`a ${()=>{}} b`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {type: 'ArrowFunctionExpression',
+                params: [],
+                id: null,
+                generator: false,
+                expression: false,
+                body: {type: 'BlockStatement', body: []},
+              },
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'empty arrow with block body disambiguation inside template',
+        tokens: [$TICK_HEAD, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
+      },
+      {
+        code: '`a ${(k)=>{x}} b`',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {
+            type: 'TemplateLiteral',
+            expressions: [
+              {type: 'ArrowFunctionExpression',
+                params: [
+                  {type: 'Identifier', name: 'k'},
+                ],
+                id: null,
+                generator: false,
+                expression: false,
+                body: {type: 'BlockStatement', body: [
+                  {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}},
+                ]},
+              },
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}},
+            ],
+          }},
+        ]},
+        desc: 'arrow with block body disambiguation inside template',
+        tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $TICK_TAIL, $ASI],
       },
       // empty template `${}`
     ], // template
@@ -5624,8 +6801,18 @@ let tests = [
       },
     ], // precedent
   ], // expression
-];
 
+  // async arrow https://tc39.github.io/ecma262/#prod-AsyncArrowHead
+  // (new) regular expression edge cases. in particular with destructuring patterns and asi
+  // `[]\n/x` (division)
+  // `[]\n/x/` (Error)
+  // `[]\n/x/g` (division)
+  // (x)/y
+  // (x)=>/y/
+  // for (/x/ in y); (Illegal lhs)
+  // x => {} / y  (Illegal; {} is a body statement, has no value. no prod parses it)
+
+];
 
 function all(tests) {
   for (let test of tests) {
@@ -5634,19 +6821,19 @@ function all(tests) {
     else one(test);
   }
 }
-function one({code, ast, desc, tokens}) {
+function one({code, ast, desc, tokens, stop}) {
   ++testi;
-  if (_one('   ', code, ast, desc, tokens)) {
-    _one('[a]', '\n' + code, ast, desc, tokens);
-    _one('[b]', code + '\n', ast, desc, tokens);
-    _one('[c]', ' ' + code, ast, desc, tokens);
-    _one('[d]', code + ' ', ast, desc, tokens);
+  if (_one('   ', code, ast, desc, tokens, stop)) {
+    _one('[a]', '\n' + code, ast, desc, tokens, stop);
+    _one('[b]', code + '\n', ast, desc, tokens, stop);
+    _one('[c]', ' ' + code, ast, desc, tokens, stop);
+    _one('[d]', code + ' ', ast, desc, tokens, stop);
   }
 }
-function _one(testSuffix, code, ast, desc, tokens) {
+function _one(testSuffix, code, ast, desc, tokens, stop=false) {
   let prefix = testi + testSuffix;
 
-                                                                                            //if (parseInt(prefix,10) !== 291) return;
+                                                          //if (parseInt(testi,10) !== 154) return;
 
   try {
     var obj = ZeParser(code, undefined, COLLECT_TOKENS_SOLID);
@@ -5689,6 +6876,7 @@ function _one(testSuffix, code, ast, desc, tokens) {
     passed = true;
   }
 
+  if (stop) throw 'stop';
   return passed;
 }
 
@@ -5696,8 +6884,11 @@ let pass = 0;
 let fail = 0;
 let crash = 0;
 let testi = 0;
-all(tests);
-console.log(`
-#####
-passed: ${pass}, crashed: ${crash}, failed: ${fail-crash}
-`);
+try {
+  all(tests);
+} finally {
+  console.log(`
+  #####
+  passed: ${pass}, crashed: ${crash}, failed: ${fail-crash}
+  `);
+}
