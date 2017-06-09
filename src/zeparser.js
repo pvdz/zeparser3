@@ -666,7 +666,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
         break;
 
       case 'class':
-        parseClassDeclaration(lexerFlags, astProp);
+        parseClass(lexerFlags, false, astProp);
         break;
 
       case 'const':
@@ -804,6 +804,158 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     CLOSE();
   }
 
+  function parseClass(lexerFlags, optionalIdent, astProp) {
+    // Note: all class code is always strict mode implicitly
+    // class x {}
+    // class x extends <lhs expr> {}
+    // class x {;}
+    // class x {[static] <method>[]}
+
+    let oflags = lexerFlags; // could already have strict mode flag set and we need to know this for the last skip of this function
+    lexerFlags |= STRICT_MODE;
+
+    OPEN(astProp, 'ClassDeclaration');
+    ASSERT_skipAny('class', lexerFlags);
+
+    // note: default exports has optional ident but should still not skip `extends` here
+    // but it is not a valid class name anyways (which is superseded by a generic keyword check)
+    if (curtype === $IDENT && curtok.str !== 'extends') {
+    // TODO: verify keyword
+      OPEN('id', 'Identifier');
+      SET('name', curtok.str);
+      ASSERT_skipAny($IDENT, lexerFlags);
+      CLOSE();
+    } else if (!optionalIdent) {
+      ERROR
+    } else {
+      SET('id', null);
+    }
+
+    if (curtype === $IDENT && curtok.str === 'extends') {
+      ASSERT_skipRex('extends', lexerFlags);
+      parseValue(lexerFlags, 'superClass');
+    } else {
+      SET('superClass', null);
+    }
+
+    skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlags);
+
+    // parse method, static method, or emptystatement
+
+    OPEN('body', 'ClassBody');
+    SET('body', []);
+    while (parseClassMethod(lexerFlags, 'body') === true);
+    CLOSE(); // ClassBody
+
+    skipRexOrDie($$CURLY_R_7D, '}', oflags);
+    CLOSE(); // ClassDeclaration
+  }
+
+  function parseClassMethod(lexerFlags) {
+    // everything from objlit that is a method optionally prefixed by `static`, and an empty statement
+    return _parseClassMethod(lexerFlags, false);
+  }
+  function _parseClassMethod(lexerFlags, isStatic) {
+    ASSERT(arguments.length === _parseClassMethod.length, 'arg count');
+
+    if (curtype === $IDENT) {
+      let identToken = curtok;
+      ASSERT_skipAny($IDENT, lexerFlags);
+      // getter, setter, async, or ident method
+      switch (identToken.str) {
+        case 'static':
+          if (isStatic) {
+            return TODO // this is a regular method named `static` which seems to be okay.
+          } else {
+            return _parseClassMethod(lexerFlags, true);
+          }
+        case 'async':
+          if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
+            // async function
+            parseMethod(lexerFlags, true, false, false, false, isStatic);
+            return true;
+          }
+          // method named "async"
+          break;
+        case 'get':
+          if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
+            // getter function
+            parseMethod(lexerFlags, false, true, false, false, isStatic);
+            return true;
+          }
+          // method named "get"
+          break;
+        case 'set':
+          if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
+            // setter function
+            parseMethod(lexerFlags, false, false, true, false, isStatic);
+            return true;
+          }
+          // method named "set"
+          break;
+        default:
+      }
+      parseMethodIdent(lexerFlags, false, false, false, false, isStatic, identToken);
+    } else if (curc === $$SQUARE_L_5B) {
+      // dynamic property
+      parseMethodDynamic(lexerFlags, false, false, false, false, isStatic);
+    } else if (curc === $$STAR_2A) {
+      // generator method
+      ASSERT_skipAny('*', lexerFlags);
+      parseMethod(lexerFlags, false, false, false, true, isStatic);
+    } else if (curc === $$SEMI_3B) {
+      // this empty statement is not part of the AST
+      ASSERT_skipAny(';', lexerFlags);
+    } else {
+      return false;
+    }
+    return true;
+  }
+
+  function parseMethod(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic) {
+    ASSERT(arguments.length === parseMethod.length, 'arg count');
+
+    if (curtype === $IDENT) {
+      let identToken = curtok;
+      ASSERT_skipAny($IDENT, lexerFlags);
+      parseMethodIdent(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic, identToken);
+    } else if (curc === $$SQUARE_L_5B) {
+      parseMethodDynamic(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic)
+    } else {
+      console.log('error token:', curtok)
+      ERROR
+    }
+  }
+  function parseMethodIdent(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic, identToken) {
+    ASSERT(arguments.length === parseMethodIdent.length, 'arg count');
+
+    // TODO: validate given ident token value
+    OPEN('body', 'MethodDefinition');
+    SET('static', isStatic);
+    SET('computed', false);
+    SET('kind', (!isStatic && identToken.str === 'constructor') ? 'constructor' : isGetter ? 'get' : isSetter ? 'set' : 'method');
+    OPEN('key', 'Identifier');
+    SET('name', identToken.str);
+    CLOSE();
+    if (curc !== $$PAREN_L_28) ERROR; // must explicitly check here
+    parseFunctionFromIdent(lexerFlags, false, false, isGenerator, isAsync, true, 'value');
+    CLOSE(); // MethodDefinition
+  }
+  function parseMethodDynamic(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic) {
+    ASSERT(arguments.length === parseMethodDynamic.length, 'arg count');
+
+    OPEN('body', 'MethodDefinition');
+    SET('static', isStatic);
+    SET('computed', true);
+    SET('kind', isGetter ? 'get' : isSetter ? 'set' : 'method');
+    ASSERT_skipRex('[', lexerFlags);
+    parseExpression(lexerFlags, 'key');
+    skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
+    if (curc !== $$PAREN_L_28) ERROR; // must explicitly check here
+    parseFunctionFromIdent(lexerFlags, false, false, isGenerator, isAsync, true, 'value');
+    CLOSE(); // MethodDefinition
+  }
+
   function parseConstStatement(lexerFlags, astProp) {
     _parseAnyVarStatement(lexerFlags, 'const', astProp);
   }
@@ -870,7 +1022,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
       if (curtok.str === 'class') {
         // export class ...
-        parseClassStatement(lexerFlags, 'declaration');
+        parseClass(lexerFlags, true, 'declaration');
       } else if (curc === $$F_66 && curtok.str === 'function') {
         // export default function f(){}
         // export default function* f(){}
@@ -929,7 +1081,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
           _parseAnyVarDecls(lexerFlags, 'const', 'declaration');
         } else if (curtok.str === 'class') {
           // export class ...
-          parseClassStatement(lexerFlags, 'declaration');
+          parseClass(lexerFlags, false, 'declaration');
         } else {
           ERROR
         }
@@ -1784,8 +1936,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
         CLOSE();
         return false;
       case 'class':
-        TODO
-        parseClass(lexerFlags, astProp);
+        parseClass(lexerFlags, true, astProp);
         return false;
       case 'function':
         parseFunctionExpression(lexerFlags, false, astProp);

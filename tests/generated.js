@@ -45,6 +45,7 @@ let prefab = {
     'try { EXPR } catch(e) { EXPR } finally { EXPR }',
     'while (EXPR) EXPR',
     'with (EXPR) EXPR',
+    'CLASS',
 
     // expression stuff
     '`a ${XPORFN} b`',
@@ -59,6 +60,7 @@ let prefab = {
     'foo(XPORFN)',
     'f(ARG)',
     'f(ARG,ARG)',
+    //'foo(CLASS)', // todo...
 
     // destructuring
     'DESTR', // destructuring patterns should be valid toplevels. the obj patterns become block statements tho.
@@ -80,8 +82,32 @@ let prefab = {
     'export FUNCDECL',
     'export default FUNCDECL',
     'export default EXPR',
-    //'export CLASS',
+    'export CLASS',
     //'export default CLASS',
+  ],
+  CLASS: [
+    'class c {}',
+    'class c extends value {}',
+    'class c { METHOD METHOD }',
+  ],
+  METHOD: [
+    '',
+    ';',
+    'METHEAD(){}',
+  ],
+  METHEAD: [
+    'foo',
+    '[foo]',
+    'static foo',
+    'static [foo]',
+    'async foo',
+    'async [foo]',
+    'static async foo',
+    'static async [foo]',
+    '*foo',
+    '*[foo]',
+    'static *foo',
+    'static *[foo]',
   ],
   STRING: [
     `"xyz"`,
