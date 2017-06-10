@@ -16,7 +16,7 @@ Tokenizer has about 2 weeks of work, parser about 3 weeks of work in it.
 ./tests/fuzz_tokens.js
 
 # Parser tests
-./tests/partest.js
+./tests/zeparser.spec.js
 
 # Generated combinator non-crash tests
 ./tests/generated
