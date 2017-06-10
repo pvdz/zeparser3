@@ -2,8 +2,8 @@
 let {
   USE_SLOPPY_MODE,
   USE_STRICT_MODE,
-} = require('../utils');
-//} from '../utils';
+} = require('../../utils');
+//} from '../../utils';
 
 //import ZeTokenizer, {
 let {
@@ -13,8 +13,8 @@ let {
   $NUMBER_BIN,
   $NUMBER_OCT,
   $NUMBER_OLD,
-} = require('../../src/zetokenizer');
-//} from '../../src/zetokenizer';
+} = require('../../../src/zetokenizer');
+//} from '../../../src/zetokenizer';
 
 let numbers = [
   // "The SourceCharacter immediately following a NumericLiteral must not be an IdentifierStart or DecimalDigit."

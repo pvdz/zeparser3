@@ -1,15 +1,15 @@
 //import {
 let {
   PARSE_MODE_DIV,
-} = require('../utils');
-//} from './utils';
+} = require('../../utils');
+//} from '../../utils';
 
 //import ZeTokenizer, {
 let {
   $ERROR,
   $PUNCTUATOR,
-} = require('../../src/zetokenizer');
-//} from '../../src/zetokenizer';
+} = require('../../../src/zetokenizer');
+//} from '../../../src/zetokenizer';
 
 let punctuators = [
   [`{`, $PUNCTUATOR],
@@ -36,7 +36,7 @@ let punctuators = [
   ['=>', $PUNCTUATOR],
   ['==', $PUNCTUATOR],
   ['===', $PUNCTUATOR],
-  ['!', $ERROR],
+  ['!', $PUNCTUATOR],
   ['!=', $PUNCTUATOR],
   ['!==', $PUNCTUATOR],
   ['+', $PUNCTUATOR],

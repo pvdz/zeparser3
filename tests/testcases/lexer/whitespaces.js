@@ -5,8 +5,8 @@ let {
   $SPACE,
   $TAB,
   $WHITE,
-} = require('../../src/zetokenizer');
-//} from '../../src/zetokenizer';
+} = require('../../../src/zetokenizer');
+//} from '../../../src/zetokenizer';
 
 let whitespaces = [
   [' ', $SPACE],

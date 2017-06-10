@@ -7,7 +7,8 @@ let { ZeTokenizer,
   $STRING_SINGLE, // will be replaced with other types (double/tick)
 
   debug_toktype,
-  } = require('../../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+} = require('../../../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+//} from '../../../src/zetokenizer';
 // these cases are "unboxed" string test cases. that means these tests are only
 // bodies that still need a single quote, double quote, or backtick wrapper.
 // this way we can generate the same series of tests for six different situations
@@ -24,8 +25,8 @@ let {
   USE_STRICT_MODE,
   PARSE_MODE_DIV,
   PARSE_MODE_REGEX,
-} = require('../utils');
-//} from '../src/zetokenizer';
+} = require('../../utils');
+//} from '../../utils';
 
 let string_body = [
   // all string test should cover the same tests so the delimiter (single quote, double quote, etc) are marked

@@ -2,8 +2,8 @@
 let {
   $ERROR,
   $IDENT,
-} = require('../../src/zetokenizer');
-//} from '../../src/zetokenizer';
+} = require('../../../src/zetokenizer');
+//} from '../../../src/zetokenizer';
 
 let identifiers = [
   [['foo', 'bar'], $IDENT],

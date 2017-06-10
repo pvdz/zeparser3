@@ -1,15 +1,15 @@
 //import {
 let {
   PARSE_MODE_REGEX,
-} = require('../utils');
-//} from './utils';
+} = require('../../utils');
+//} from '../../utils';
 
 //import ZeTokenizer, {
 let {
   $ERROR,
   $REGEX,
-} = require('../../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from '../src/zetokenizer';
+} = require('../../../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+//} from '../../../src/zetokenizer';
 
 let regexesn = [
   [`/abc/`, $REGEX, PARSE_MODE_REGEX],
