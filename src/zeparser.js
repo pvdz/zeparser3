@@ -627,8 +627,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT_skipAny($IDENT, lexerFlags);
       CLOSE();
     } else if (curtype === $PUNCTUATOR) {
-      if (curc === $$PAREN_L_28) parseGroupOrArrow(lexerFlags, astProp);
-      else if (curc === $$CURLY_L_7B) parseObjectLitOrDestruc(lexerFlags, true, astProp);
+      if (curc === $$CURLY_L_7B) parseObjectLitOrDestruc(lexerFlags, true, astProp);
       else if (curc === $$SQUARE_L_5B) parseArrayLitOrDestruc(lexerFlags, true, astProp);
       else TODO;
     } else { // ?
