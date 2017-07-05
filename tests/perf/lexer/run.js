@@ -3,40 +3,12 @@
 
 //import ZeTokenizer, {
 let { default: ZeTokenizer,
-  $ASI,
-  $COMMENT,
-  $COMMENT_SINGLE,
-  $COMMENT_MULTI,
-  $CRLF,
   $EOF,
   $ERROR,
-  $IDENT,
-  $NL,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
-  $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
-  $WHITE,
 
   STRICT_MODE,
   FOR_REGEX,
   IN_TEMPLATE,
-
-  debug_toktype,
 } = require('../../../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from '../src/zetokenizer';
 
@@ -60,6 +32,9 @@ function run() {
     if (last.type === $ERROR) ++errors;
   } while (last.type !== $EOF);
   console.timeEnd('finished');
+
+  //tok.deopt();
+
   console.log('Parsed', code.length, 'bytes into', count, 'tokens, found', errors, 'errors');
 }
 run();

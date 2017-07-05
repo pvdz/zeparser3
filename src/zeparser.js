@@ -156,6 +156,8 @@ let { default: ZeTokenizer,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from '../src/zetokenizer';
 
+// <BODY>
+
 function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
   let tok = ZeTokenizer(code, false, collectTokens);
 
@@ -186,7 +188,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     } else if (node[prop] === undefined || fromWrap) {
       node[prop] = newnode;
     } else {
-      ASSERT(false, 'bad tree? node[prop] should be undefined but wasnt', 'child=', node, 'prop=', prop, 'type=', type, 'node[prop]=', node[prop]);
+      THROW('bad tree? node[prop] should be undefined but wasnt', 'child=', node, 'prop=', prop, 'type=', type, 'node[prop]=', node[prop]);
     }
     _path.push(newnode);
   }
@@ -399,6 +401,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     // skip a token and if the next token starts with a forward slash, search for a regular expression literal
     ASSERT(arguments.length === 2, 'should get all params', arguments);
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
+    ASSERT(typeof what === 'number' || typeof what === 'string', 'what number/string');
     if (typeof what === 'string') ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', curtok.str);
     else ASSERT(curtype === what, 'expecting to skip token with certain type', 'expect:', debug_toktype(what), 'actual:', debug_toktype(curtype));
     skipRex(lexerFlags);
@@ -407,6 +410,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     // skip a token and if the next token starts with a forward slash, search for a division punctuator
     ASSERT(arguments.length === 2, 'should get all params', arguments);
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
+    ASSERT(typeof what === 'number' || typeof what === 'string', 'what number/string');
     if (typeof what === 'string') ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', curtok.str);
     else ASSERT(curtype === what, 'expecting to skip token with certain type', 'expect:', debug_toktype(what), 'actual:', debug_toktype(curtype));
     skipDiv(lexerFlags);
@@ -2493,6 +2497,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
   init();
   parseTopLevels(sansFlag(INITIAL_LEXER_FLAGS, FOR_REGEX));
 
+  //tok.deopt();
+
   return {
     ast: _tree,
     tokens: tok.tokens,
@@ -2515,6 +2521,7 @@ function getGenericTokenType(type) {
   return flag;
 }
 
+// </BODY>
 
 //export default ZeParser;
 //export {

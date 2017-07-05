@@ -1,3 +1,5 @@
+// <BODY>
+
 const $$A_61 = 0x61;
 const $$A_UC_41 = 0x41;
 const $$B_62 = 0x62;
@@ -114,6 +116,8 @@ function THROW(str, ...rest) {
   console.log('error args:', require('util').inspect(rest, false, null));
   throw new Error(str + ' [' + require('util').inspect(rest, false, null) + ']');
 }
+
+// </BODY>
 
 //export {
 require['__./utils'] = module.exports = {

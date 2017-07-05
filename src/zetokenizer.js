@@ -115,6 +115,8 @@ let {
 } = require('./utils'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from 'utils';
 
+// <BODY>
+
 // note: cannot use more than 32 flags...
 
 // TODO: collapse the dynamic initializations to static numbers
@@ -266,6 +268,100 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     nextToken.tokens = tokens; // probably will want to find a better way..
   }
 
+  //let funcs = [
+  //  //[peek, 'peek'],
+  //  //[peekd, 'peekd',],
+  //  //[peeky, 'peeky',],
+  //  //[peekyd, 'peekyd',],
+  //  //[slice, 'slice',],
+  //  //[peekSkip, 'peekSkip',],
+  //  //[skipPeek, 'skipPeek',],
+  //  //[skip, 'skip',],
+  //  //[eof, 'eof',],
+  //  //[eofd, 'eofd',],
+  //  //[neof, 'neof',],
+  //  //[neofd, 'neofd',],
+  //  //[ASSERT_skip, 'ASSERT_skip',],
+  //  //[nextToken, 'nextToken',],
+  //  //[addAsi, 'addAsi',],
+  //  //[createToken, 'createToken',],
+  //  //[next, 'next',],
+  //  [parseLeadingDot, 'parseLeadingDot',],
+  //  //[parseCR, 'parseCR',],
+  //  //[parseSingleString, 'parseSingleString',],
+  //  //[parseDoubleString, 'parseDoubleString',],
+  //  //[parseAnyString, 'parseAnyString',],
+  //  //[parseStringEscape, 'parseStringEscape',],
+  //  //[parseIdentOrStringEscapeUnicode, 'parseIdentOrStringEscapeUnicode',],
+  //  //[parseStringEscapeUnicodeQuad, 'parseStringEscapeUnicodeQuad',],
+  //  //[parseStringEscapeUnicodeVary, 'parseStringEscapeUnicodeVary',],
+  //  //[skipZeroes, 'skipZeroes',],
+  //  //[parseStringEscapeHex, 'parseStringEscapeHex',],
+  //  //[parseStringEscapeOctal, 'parseStringEscapeOctal',],
+  //  //[parseSameOrCompound, 'parseSameOrCompound',],
+  //  //[parseTemplateString, 'parseTemplateString',],
+  //  //[parseLeadingZero, 'parseLeadingZero',],
+  //  //[parseDecimal, 'parseDecimal',],
+  //  //[skipDigits, 'skipDigits',],
+  //  //[parseExponentMaybe, 'parseExponentMaybe',],
+  //  //[parseFromFractionDot, 'parseFromFractionDot',],
+  //  //[parseHex, 'parseHex',],
+  //  //[isHex, 'isHex',],
+  //  //[parseOctal, 'parseOctal',],
+  //  //[isOctal, 'isOctal',],
+  //  //[parseBinary, 'parseBinary',],
+  //  //[parseExcl, 'parseExcl',],
+  //  //[parseStar, 'parseStar',],
+  //  //[parseIdentifierRest, 'parseIdentifierRest',],
+  //  //[_parseIdentifierRest, '_parseIdentifierRest',],
+  //  //[parseIdentFromUnicodeEscape, 'parseIdentFromUnicodeEscape',],
+  //  //[isIdentStart, 'isIdentStart',],
+  //  //[isIdentRestChr, 'isIdentRestChr',],
+  //  //[isAsciiLetter, 'isAsciiLetter',],
+  //  //[isAsciiNumber, 'isAsciiNumber',],
+  //  //[parseCompoundAssignment, 'parseCompoundAssignment',],
+  //  //[parseFwdSlash, 'parseFwdSlash',],
+  //  //[parseSingleFwdSlash, 'parseSingleFwdSlash',],
+  //  //[parseSingleComment, 'parseSingleComment',],
+  //  //[parseMultiComment, 'parseMultiComment',],
+  //  //[parseEqual, 'parseEqual',],
+  //  //[parseLtPunctuator, 'parseLtPunctuator',],
+  //  //[parseGtPunctuator, 'parseGtPunctuator',],
+  //  //[parseNewline, 'parseNewline',],
+  //  //[parseBackslash, 'parseBackslash',],
+  //  //[parseRegex, 'parseRegex',],
+  //  //[parseRegexBody, 'parseRegexBody',],
+  //  //[_parseRegexBody, '_parseRegexBody',],
+  //  //[parseRegexAtomEscape, 'parseRegexAtomEscape',],
+  //  //[parseBackReference, 'parseBackReference',],
+  //  //[parseRegexUnicodeEscape, 'parseRegexUnicodeEscape',],
+  //  //[parseRegexUnicodeEscapeQuad, 'parseRegexUnicodeEscapeQuad',],
+  //  //[parseRegexUnicodeEscapeVary, 'parseRegexUnicodeEscapeVary',],
+  //  //[parseRegexCharClass, 'parseRegexCharClass',],
+  //  //[parseClassCharEscape, 'parseClassCharEscape',],
+  //  //[hexToNum, 'hexToNum',],
+  //  //[parseRegexFlags, 'parseRegexFlags',],
+  //  //[parseRegexCurlyQuantifier, 'parseRegexCurlyQuantifier',],
+  //  //[isSurrogateLead, 'isSurrogateLead',],
+  //  //[isSurrogateTail, 'isSurrogateTail',],
+  //  //[getSurrogate, 'getSurrogate',],
+  //  //[parseRegexUnicodeEscape2, 'parseRegexUnicodeEscape2',],
+  //  //[parseRegexUnicodeEscapeQuad2, 'parseRegexUnicodeEscapeQuad2',],
+  //  //[parseRegexUnicodeEscapeVary2, 'parseRegexUnicodeEscapeVary2',],
+  //  //[parseOtherUnicode, 'parseOtherUnicode',],
+  //  //[THROW, 'THROW',],
+  //  //[isLfPsLs, 'isLfPsLs',],
+  //  //[debug_toktype, 'debug_toktype',],
+  //];
+
+  //(function(){
+  //  try {
+  //    funcs.forEach(([f]) => eval('%OptimizeFunctionOnNextCall(f);'))
+  //  } catch(e) {
+  //    console.log('the eval on %OptimizeFunctionOnNextCall crashed');
+  //  }
+  //})();
+
   function peek() {
     ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
@@ -350,7 +446,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
     ASSERT(!finished, 'should not next() after eof token');
 
-    if (goal === GOAL_MODULE) lexerFlags |= STRICT_MODE;
+    if (goal === GOAL_MODULE) lexerFlags = lexerFlags | STRICT_MODE; // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
     consumedNewline = false;
 
     let token;
@@ -505,24 +601,32 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     if (eof()) return $PUNCTUATOR; // will lead to an error in the parser
 
     let c = peek();
+
     if (c === $$DOT_2E) {
-      if (peekd(1) === $$DOT_2E) {
-        ASSERT_skip($$DOT_2E);
-        ASSERT_skip($$DOT_2E);
-      } // the else will ultimately lead to an error in the parser
-      return $PUNCTUATOR;
+      return parseTripleDot();
     }
 
     if (isAsciiNumber(c)) {
-      ASSERT_skip(c);
-      if (neof()) {
-        c = skipDigits();
-        parseExponentMaybe(c);
-      }
-      return $NUMBER_DEC;
+      return parseNumberFromDot(c);
     }
 
     return $PUNCTUATOR;
+  }
+  function parseTripleDot() {
+    // we just parsed a dot
+    if (peekd(1) === $$DOT_2E) {
+      ASSERT_skip($$DOT_2E);
+      ASSERT_skip($$DOT_2E);
+    } // the else will ultimately lead to an error in the parser
+    return $PUNCTUATOR;
+  }
+  function parseNumberFromDot(c) {
+    ASSERT_skip(c);
+    if (neof()) {
+      let d = skipDigits();
+      parseExponentMaybe(d);
+    }
+    return $NUMBER_DEC;
   }
 
   function parseCR() {
@@ -1594,7 +1698,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
         if (isIdentRestChr(c)) return ALWAYS_BAD;
         return GOOD_SANS_U_FLAG; // TODO: verify that UnicodeIDContinue thing for other characters within ascii range and add specific tests for them
     }
-    ASSERT(false, 'dis be dead code');
+    THROW('dis be dead code');
   }
   function parseBackReference(c) {
     // https://www.ecma-international.org/ecma-262/7.0/#sec-decimalescape :
@@ -1677,6 +1781,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     if (!isHex(a)) return BAD_ESCAPE; // first one is mandatory
     ASSERT_skip(a);
 
+    return _parseRegexUnicodeEscapeVary(a);
+  }
+  function _parseRegexUnicodeEscapeVary(a) {
     // skip leading zeroes if there are any
     if (a === $$0_30) {
       if (eof()) return BAD_ESCAPE;
@@ -1687,42 +1794,54 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       }
       ASSERT_skip(a);
     }
-
+    return ___parseRegexUnicodeEscapeVary(a);
+  }
+  function ___parseRegexUnicodeEscapeVary(a) {
     if (eof()) return BAD_ESCAPE;
     let b = peek();
     if (!isHex(b)) {
       return b === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(b);
-
+    return ____parseRegexUnicodeEscapeVary(a, b);
+  }
+  function ____parseRegexUnicodeEscapeVary(a, b) {
     if (eof()) return BAD_ESCAPE;
     let c = peek();
     if (!isHex(c)) {
       return c === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(c);
-
+    return _____parseRegexUnicodeEscapeVary(a, b, c);
+  }
+  function _____parseRegexUnicodeEscapeVary(a, b, c) {
     if (eof()) return BAD_ESCAPE;
     let d = peek();
     if (!isHex(d)) {
       return d === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(d);
-
+    return ______parseRegexUnicodeEscapeVary(a, b, c, d);
+  }
+  function ______parseRegexUnicodeEscapeVary(a, b, c, d) {
     if (eof()) return BAD_ESCAPE;
     let e = peek();
     if (!isHex(e)) {
       return e === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(e);
-
+    return _______parseRegexUnicodeEscapeVary(a, b, c, d, e);
+  }
+  function _______parseRegexUnicodeEscapeVary(a, b, c, d, e) {
     if (eof()) return BAD_ESCAPE;
     let f = peek();
     if (!isHex(f)) {
       return f === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
     }
     ASSERT_skip(f);
-
+    return ________parseRegexUnicodeEscapeVary(a, b, c, d, e, f);
+  }
+  function ________parseRegexUnicodeEscapeVary(a, b, c, d, e, f) {
     let codePoint = hexToNum(a) << 20 | hexToNum(b) << 16 | hexToNum(c) << 12 | hexToNum(d) << 8 | hexToNum(e) << 4 | hexToNum(f);
     // the total may not exceed 0x10ffff
     if (codePoint > 0x10ffff) return BAD_ESCAPE;
@@ -1761,7 +1880,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
 
     if (eof()) return ALWAYS_BAD;
     let c = peek();
-    if (c === $$XOR_5E) {
+    if (c === $$XOR_5E) { // the separate inverting caret check is important for surrogate range checks in super edge cases (there's a test)
       ASSERT_skip($$XOR_5E);
       if (eof()) return ALWAYS_BAD;
       c = peek();
@@ -1770,47 +1889,31 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     let n = 0;
     while (true) {
 //console.log(n, 'pointer=',pointer,': c=',c, 'x=', c.toString(16), ' [' + String.fromCharCode(c) + '], flag:',flagState)
-      switch (c) {
-        case $$SQUARE_R_5D:
-          ASSERT_skip($$SQUARE_R_5D);
 
-          // code point range may be open if the rhs was a surrogate head.
-          // that's the only range case that needs to be checked here.
-          if (urangeOpen && wasSurrogateHead && (urangeLeft === CHARCLASS_BAD_RANGE || prev === CHARCLASS_BAD_RANGE || urangeLeft > prev)) {
-            if (flagState === GOOD_WITH_U_FLAG) return ALWAYS_BAD;
-            if (flagState === ALWAYS_BAD) return ALWAYS_BAD;
-            return GOOD_SANS_U_FLAG;
-          }
+      if (c === $$SQUARE_R_5D) {
+        return parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState);
+      } else if (c === $$BACKSLASH_5C) {
+        ASSERT_skip($$BACKSLASH_5C);
+        c = parseClassCharEscape(); // note: this may lead to c being >0xffff !!
 
-          return flagState;
-
-        case $$BACKSLASH_5C:
-          ASSERT_skip($$BACKSLASH_5C);
-          c = parseClassCharEscape(); // note: this may lead to c being >0xffff !!
-
-          if (c === CHARCLASS_BAD) {
-            flagState = ALWAYS_BAD;
-          } else if (c & CHARCLASS_BADN) {
-            c ^= CHARCLASS_BADN; // remove the badn flag
-            ASSERT(c <= 0x110000, 'c should now be valid unicode range or one above for error');
-            if (c === CHARCLASS_BAD) flagState = ALWAYS_BAD;
-            else if (flagState === ALWAYS_GOOD) flagState = GOOD_WITH_U_FLAG;
-            else if (flagState === GOOD_SANS_U_FLAG) flagState = ALWAYS_BAD;
+        if (c === CHARCLASS_BAD) {
+          flagState = ALWAYS_BAD;
+        } else if (c & CHARCLASS_BADN) {
+          c = c ^ CHARCLASS_BADN; // remove the badn flag (dont use ^= because that deopts... atm; https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean )
+          ASSERT(c <= 0x110000, 'c should now be valid unicode range or one above for error');
+          if (c === CHARCLASS_BAD) flagState = ALWAYS_BAD;
+          else if (flagState === ALWAYS_GOOD) flagState = GOOD_WITH_U_FLAG;
+          else if (flagState === GOOD_SANS_U_FLAG) flagState = ALWAYS_BAD;
           //} else if (c === CHARCLASS_BAD_RANGE) { // check at range time
           //  console.log('got a class escape that is only bad in range')
-          }
+        }
 //console.log(' - escaped; c=',c, ', flagState=',flagState)
-          break;
-
-        case $$CR_0D:
-        case $$LF_0A:
-        case $$PS_2028:
-        case $$LS_2029:
-          return ALWAYS_BAD; // same as end of input
-
-        default:
-          ASSERT_skip(c);
+      } else if (c === $$CR_0D || c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
+        return ALWAYS_BAD; // same as end of input
+      } else {
+        ASSERT_skip(c);
       }
+
 
       if (wasSurrogateHead && isSurrogateTail(c)) {
         isSurrogate = true;
@@ -2132,6 +2235,18 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     // "A sequence of two code units, where the first code unit c1 is in the range 0xD800 to 0xDBFF and the second code unit c2 is in the range 0xDC00 to 0xDFFF, is a surrogate pair and is interpreted as a code point with the value (c1 - 0xD800) × 0x400 + (c2 - 0xDC00) + 0x10000. (See 10.1.2)
     return (c1 - 0xD800) * 0x400 + (c2 - 0xDC00) + 0x10000;
   }
+  function parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState) {
+    ASSERT_skip($$SQUARE_R_5D);
+
+    // code point range may be open if the rhs was a surrogate head.
+    // that's the only range case that needs to be checked here.
+    if (urangeOpen && wasSurrogateHead && (urangeLeft === CHARCLASS_BAD_RANGE || prev === CHARCLASS_BAD_RANGE || urangeLeft > prev)) {
+      if (flagState === GOOD_WITH_U_FLAG) return ALWAYS_BAD;
+      if (flagState === ALWAYS_BAD) return ALWAYS_BAD;
+      return GOOD_SANS_U_FLAG;
+    }
+    return flagState;
+  }
 
   function parseRegexUnicodeEscape2() {
     // only if unicode flag
@@ -2187,6 +2302,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     if (!isHex(a)) return CHARCLASS_BAD; // first one is mandatory
     ASSERT_skip(a);
 
+    return _parseRegexUnicodeEscapeVary2(a);
+  }
+  function _parseRegexUnicodeEscapeVary2(a) {
     // skip leading zeroes if there are any
     if (a === $$0_30) {
       if (eof()) return CHARCLASS_BAD;
@@ -2198,6 +2316,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT_skip(a);
     }
 
+    return __parseRegexUnicodeEscapeVary2(a);
+  }
+  function __parseRegexUnicodeEscapeVary2(a) {
     if (eof()) return CHARCLASS_BAD;
     let b = peek();
     if (!isHex(b)) {
@@ -2206,6 +2327,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     }
     ASSERT_skip(b);
 
+    return ___parseRegexUnicodeEscapeVary2(a, b);
+  }
+  function ___parseRegexUnicodeEscapeVary2(a, b) {
     if (eof()) return CHARCLASS_BAD;
     let c = peek();
     if (!isHex(c)) {
@@ -2214,6 +2338,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     }
     ASSERT_skip(c);
 
+    return ____parseRegexUnicodeEscapeVary2(a, b, c);
+  }
+  function ____parseRegexUnicodeEscapeVary2(a, b, c) {
     if (eof()) return CHARCLASS_BAD;
     let d = peek();
     if (!isHex(d)) {
@@ -2222,6 +2349,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     }
     ASSERT_skip(d);
 
+    return _____parseRegexUnicodeEscapeVary2(a, b, c, d);
+  }
+  function _____parseRegexUnicodeEscapeVary2(a, b, c, d) {
     if (eof()) return CHARCLASS_BAD;
     let e = peek();
     if (!isHex(e)) {
@@ -2230,6 +2360,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     }
     ASSERT_skip(e);
 
+    return ______parseRegexUnicodeEscapeVary2(a, b, c, d, e);
+  }
+  function ______parseRegexUnicodeEscapeVary2(a, b, c, d, e) {
     if (eof()) return CHARCLASS_BAD;
     let f = peek();
     if (!isHex(f)) {
@@ -2269,6 +2402,8 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
   }
 
   nextToken.asi = addAsi;
+  //nextToken.deopt = () => funcs.forEach(([f,n]) => printStatus(f,n));
+
   return nextToken;
 }
 
@@ -2307,9 +2442,33 @@ function debug_toktype(type) {
     case $TICK_PURE: return 'TICK_PURE';
     case $TICK_TAIL: return 'TICK_TAIL';
     case $WHITE: return 'WHITE';
-    default: return 'UNKNOWN[' + type + ']';
+    default:
+      THROW('debug_toktype:UNKNOWN[' + type + ']')
+      return 'UNKNOWN[' + type + ']';
   }
 }
+
+// conditional compilation
+//let printStatus = new function(){ // such hacks.
+//  try {
+//    return Function('fn', 'name', `
+//      let s = %GetOptimizationStatus(fn);
+//      switch(s) {
+//        case 1: console.log('Function '+name+' is 1: optimized'); break;
+//        case 2: console.log('Function '+name+' is 2: not optimized'); break;
+//        case 3: console.log('Function '+name+' is 3: always optimized'); break;
+//        case 4: console.log('Function '+name+' is 4: never optimized'); break;
+//        case 6: console.log('Function '+name+' is 6: maybe deoptimized'); break;
+//        case 7: console.log('Function '+name+' is 7: optimized by TurboFan'); break;
+//        default: console.log('Unknown optimization status for '+name); break;
+//      }
+//    `);
+//  } catch(e) {
+//    return function(){};
+//  }
+//};
+
+// </BODY>
 
 //export default ZeTokenizer;
 //export {
