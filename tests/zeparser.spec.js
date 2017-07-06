@@ -13,8 +13,10 @@ let { default: ZeParser,
 } = require('../src/zeparser'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from '../src/zeparser';
 
-//import ZeTokenizer, {
-let { default: ZeTokenizer,
+let ZeParserBuild = require('../build/build.js').default;
+
+//import {
+let {
   $EOF,
 
   debug_toktype,
@@ -105,29 +107,31 @@ let tests = [
 
 ];
 
-function all(tests) {
+let checkAST = true;
+let parserDesc = '';
+function all(parser, tests) {
   for (let test of tests) {
     if (typeof test === 'string') console.log(' --- ' + test + ' --- ');
-    else if (Array.isArray(test)) all(test);
-    else one(test);
+    else if (Array.isArray(test)) all(parser, test);
+    else one(parser, test);
   }
 }
-function one({code, ast, desc, tokens, stop}) {
+function one(parser, {code, ast, desc, tokens, stop}) {
   ++testi;
-  if (_one('   ', code, ast, desc, tokens, stop)) {
-    _one('[a]', '\n' + code, ast, desc, tokens, stop);
-    _one('[b]', code + '\n', ast, desc, tokens, stop);
-    _one('[c]', ' ' + code, ast, desc, tokens, stop);
-    _one('[d]', code + ' ', ast, desc, tokens, stop);
+  if (_one(parser, '   ', code, ast, desc, tokens, stop)) {
+    _one(parser, '[a]', '\n' + code, ast, desc, tokens, stop);
+    _one(parser, '[b]', code + '\n', ast, desc, tokens, stop);
+    _one(parser, '[c]', ' ' + code, ast, desc, tokens, stop);
+    _one(parser, '[d]', code + ' ', ast, desc, tokens, stop);
   }
 }
-function _one(testSuffix, code, ast, desc, tokens, stop=false) {
-  let prefix = testi + testSuffix;
+function _one(Parser, testSuffix, code, ast, desc, tokens, stop=false) {
+  let prefix = parserDesc + ': ' + testi + testSuffix;
 
                                                           //if (parseInt(testi,10) !== 154) return;
 
   try {
-    var obj = ZeParser(code, undefined, COLLECT_TOKENS_SOLID);
+    var obj = Parser(code, undefined, COLLECT_TOKENS_SOLID);
   } catch(e) {
     ++crash;
     var obj = '' + e.stack;
@@ -138,7 +142,7 @@ function _one(testSuffix, code, ast, desc, tokens, stop=false) {
     console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: crash`);
     console.log('Stack:', obj);
     ++fail;
-  } else if (JSON.stringify(ast) !== JSON.stringify(obj.ast)) {
+  } else if (checkAST && JSON.stringify(ast) !== JSON.stringify(obj.ast)) {
     console.log(`${prefix} FAIL: \`${toPrint(code)}\` :: AST mismatch`);
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
 
@@ -176,7 +180,14 @@ let fail = 0;
 let crash = 0;
 let testi = 0;
 try {
-  all(tests);
+  [
+    [ZeParser, true, 'dev build'],
+    [ZeParserBuild, false, 'prod build'],
+  ].forEach(([parser, hasAst, desc],i) => {
+    checkAST = hasAst;
+    parserDesc = desc;
+    all(parser, tests);
+  });
 } finally {
   console.log(`
   #####

@@ -433,6 +433,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
     return pointer < len - d;
   }
 
+  // <SCRUB AST>
   function ASSERT_skip(chr) { // these calls are replaced with skip() in a build step
     // note: consider this `skip()` in prod
     ASSERT(neof(), 'should not be oob before the skip');
@@ -441,6 +442,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
 
     skip();
   }
+  // </SCRUB AST>
 
   function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=false) {
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
@@ -2402,6 +2404,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
   }
 
   nextToken.asi = addAsi;
+  nextToken.throw = THROW;
   //nextToken.deopt = () => funcs.forEach(([f,n]) => printStatus(f,n));
 
   return nextToken;
