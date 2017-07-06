@@ -2022,10 +2022,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
         OPEN('quasis', 'TemplateElement');
         SET('tail', curtype === $TICK_TAIL);
-        SET('value', {
-          raw: curtok.str,
-          cooked: '<TODO>',
-        });
+        SET('value', {raw: curtok.str, cooked: '<TODO>'});
         CLOSE();
         if (curtype === $TICK_BODY) {
           ASSERT_skipRex(curtok.str, lexerFlags | IN_TEMPLATE); // first token in template expression can be regex
@@ -2050,10 +2047,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
   function parseQuasiPart(lexerFlags, tail, astProp) {
     OPEN('quasis', 'TemplateElement');
     SET('tail', tail);
-    SET('value', {
-      raw: curtok.str,
-      cooked: '<TODO>',
-    });
+    SET('value', {raw: curtok.str, cooked: '<TODO>'});
     if (curtype === $TICK_PURE) {
       ASSERT_skipDiv(curtok.str, lexerFlags);
     } else {

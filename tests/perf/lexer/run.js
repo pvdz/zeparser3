@@ -14,7 +14,7 @@ let { default: ZeTokenizer,
 
 
 function run() {
-  let code = require('fs').readFileSync(__dirname + '/fuzzed.js').toString();
+  let code = require('fs').readFileSync(__dirname + '/../sources/fuzzed-tokens.js').toString();
   let tok = ZeTokenizer(code, false);
 
   console.log('running...');
