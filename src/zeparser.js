@@ -212,6 +212,23 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     ASSERT(_path[_path.length - 1][prop] === undefined, 'dont clobber');
     _path[_path.length - 1][prop] = value;
   }
+  function SET_IDENT(astProp, token) {
+    ASSERT(typeof astProp === 'string', 'prop is string');
+    ASSERT(typeof token === 'object', 'token is obj');
+
+    OPEN(astProp, 'Identifier');
+    SET('name', token.str);
+    CLOSE();
+  }
+  function SET_LITERAL(astProp, token) {
+    ASSERT(typeof astProp === 'string', 'prop is string');
+    ASSERT(typeof token === 'object', 'token is obj');
+
+    OPEN(astProp, 'Literal');
+    SET('value', '<TODO>');
+    SET('raw', token.str);
+    CLOSE();
+  }
   function ADD(prop, value) {
     if (traceast) {
       console.log('ADD', prop, value);
@@ -415,7 +432,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     if (typeof what === 'string') {
       ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', curtok.str);
     } else {
-      ASSERT(curtype === what, 'expecting to skip token with certain type', 'expect:', debug_toktype(what), 'actual:', debug_toktype(curtype));
+      ASSERT((curtype & what) === what, 'expecting to skip token with certain type', 'expect:'
+        // <SCRUB DEV>
+        , debug_toktype(what), 'actual:', debug_toktype(curtype)
+        // </SCRUB DEV>
+      );
     }
     skipRex(lexerFlags);
   }
@@ -427,7 +448,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     if (typeof what === 'string') {
       ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', curtok.str);
     } else {
-      ASSERT(curtype === what, 'expecting to skip token with certain type', 'expect:', debug_toktype(what), 'actual:', debug_toktype(curtype));
+      ASSERT((curtype & what) === what, 'expecting to skip token with certain type', 'expect:'
+        // <SCRUB DEV>
+        , debug_toktype(what), 'actual:', debug_toktype(curtype)
+        // </SCRUB DEV>
+      );
     }
     skipDiv(lexerFlags);
   }
@@ -458,7 +483,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     if (curc !== chr) {
       console.log('error token:', curtok);
-      THROW('Next ord should be [' + chr + '] but was [' + curc + ']');
+      THROW('Next ord should be ' + chr + ' (' + String.fromCharCode(chr) + ') but was ' + curc + ' (' + String.fromCharCode(curc) + ')');
     } else {
       ASSERT(curtok.str.length === 1, 'should be len=1');
       skipRex(lexerFlags);
@@ -565,7 +590,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
         parseFromLiteralStatement(lexerFlags, astProp);
         break;
       default:
-        THROW('unexpected token', curtok, debug_toktype(curtype), debug_toktype(getGenericTokenType(curtype)));
+        THROW('unexpected token', curtok
+          // <SCRUB DEV>
+          ,debug_toktype(curtype), debug_toktype(getGenericTokenType(curtype))
+          // </SCRUB DEV>
+        );
     }
   }
 
@@ -619,10 +648,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
     if (curtype === $IDENT) {
       // TODO: verify identifier
-      OPEN('id', 'Identifier');
-      SET('name', curtok.str);
+      SET_IDENT('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
-      CLOSE();
     } else if (isFuncDecl && !isIdentOptional) {
       THROW('Function decl missing required ident');
     } else {
@@ -651,10 +678,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
   }
   function parseFuncArgument(lexerFlags, astProp) {
     if (curtype === $IDENT) {
-      OPEN(astProp, 'Identifier');
-      SET('name', curtok.str);
+      SET_IDENT(astProp, curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
-      CLOSE();
     } else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) parseObjectLitOrDestruc(lexerFlags, true, astProp);
       else if (curc === $$SQUARE_L_5B) parseArrayLitOrDestruc(lexerFlags, true, astProp);
@@ -777,11 +802,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
   function parseFromLiteralStatement(lexerFlags, astProp) {
     OPEN(astProp, 'ExpressionStatement');
-    OPEN('expression', 'Literal');
-    SET('value', '<TODO>');
-    SET('raw', curtok.str);
+    SET_LITERAL('expression', curtok);
     skipDiv(lexerFlags);
-    CLOSE();
     parseExpressionAfterLiteral(lexerFlags, 'expression');
     CLOSE();
     parseSemiOrAsi(lexerFlags);
@@ -819,9 +841,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
     if (curtype === $IDENT && !curtok.nl) {
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
-      OPEN('label', 'Identifier');
-      SET('name', curtok.str);
-      CLOSE();
+      SET_IDENT('label', curtok);
 
       ASSERT_skipRex($IDENT, lexerFlags);
     } else {
@@ -849,10 +869,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     // but it is not a valid class name anyways (which is superseded by a generic keyword check)
     if (curtype === $IDENT && curtok.str !== 'extends') {
     // TODO: verify keyword
-      OPEN('id', 'Identifier');
-      SET('name', curtok.str);
+      SET_IDENT('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
-      CLOSE();
     } else if (!optionalIdent) {
       THROW('Class decl missing required ident');
     } else {
@@ -962,9 +980,9 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     SET('static', isStatic);
     SET('computed', false);
     SET('kind', (!isStatic && identToken.str === 'constructor') ? 'constructor' : isGetter ? 'get' : isSetter ? 'set' : 'method');
-    OPEN('key', 'Identifier');
-    SET('name', identToken.str);
-    CLOSE();
+
+    SET_IDENT('key', identToken);
+
     if (curc !== $$PAREN_L_28) THROW('Missing method arg parens'); // must explicitly check here
     parseFunctionFromIdent(lexerFlags, false, false, isGenerator, isAsync, true, 'value');
     CLOSE(); // MethodDefinition
@@ -997,9 +1015,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
     if (curtype === $IDENT && !curtok.nl) {
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
-      OPEN('label', 'Identifier');
-      SET('name', curtok.str);
-      CLOSE();
+
+      SET_IDENT('label', curtok);
 
       ASSERT_skipRex($IDENT, lexerFlags);
     } else {
@@ -1071,11 +1088,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       OPEN(astProp, 'ExportAllDeclaration');
       ASSERT_skipAny('*', lexerFlags);
       skipAnyOrDie($$F_66, 'from', lexerFlags);
-      OPEN('source', 'Literal');
-      SET('value', '<TODO>');
-      SET('raw', curtok.str);
+      SET_LITERAL('source', curtok);
       skipRex(lexerFlags);
-      CLOSE(); // source
       CLOSE(); // ExportAllDeclaration
     } else {
       OPEN(astProp, 'ExportNamedDeclaration');
@@ -1087,11 +1101,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
         parseExportObject(lexerFlags);
         if (skipAnyIf('from', lexerFlags)) {
           if ((curtype & $STRING) !== $STRING) THROW('Export source must be a string');
-          OPEN('source', 'Literal');
-          SET('value', '<TODO>');
-          SET('raw', curtok.str);
+          SET_LITERAL('source', curtok);
           skipRex(lexerFlags);
-          CLOSE();
         } else {
           SET('source', null);
         }
@@ -1137,21 +1148,18 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     ASSERT_skipAny('{', lexerFlags);
     while (curtype === $IDENT) {
       OPEN('specifiers', 'ExportSpecifier');
-      let name = curtok.str;
-      OPEN('local', 'Identifier');
-      SET('name', name);
+      let nameToken = curtok;
+
+      SET_IDENT('local', nameToken);
       skipAny(lexerFlags);
-      CLOSE(); // local
-      OPEN('exported', 'Identifier');
       if (curtok.str === 'as') {
         ASSERT_skipAny('as', lexerFlags);
         if (curtype !== $IDENT) THROW('Can only use ident to indicate alias');
-        SET('name', curtok.str);
+        SET_IDENT('exported', curtok);
         skipAny(lexerFlags);
       } else {
-        SET('name', name);
+        SET_IDENT('exported', nameToken);
       }
-      CLOSE(); // exported
       if (curc === $$COMMA_2C) skipAny(lexerFlags);
       CLOSE(); // specifiers
     }
@@ -1334,21 +1342,16 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     // `import 'foo'` is valid but otherwise this is an error
     if ((curtype & $STRING) !== $STRING) THROW('Export source must be string');
 
-    OPEN('source', 'Literal');
-    SET('value', '<TODO>');
-    SET('raw', curtok.str);
+    SET_LITERAL('source', curtok);
     skipRex(lexerFlags);
-    CLOSE(); // source
 
     CLOSE(); // import
   }
   function parseImportDefault(lexerFlags) {
     // import x[ as y][, * as m | , {...}] from 'z'
     OPEN('specifiers', 'ImportDefaultSpecifier');
-    OPEN('local', 'Identifier');
-    SET('name', curtok.str);
+    SET_IDENT('local', curtok);
     ASSERT_skipAny($IDENT, lexerFlags); // next must be `as` comma or `from`
-    CLOSE(); // local
     CLOSE(); // specifiers
   }
   function parseImportObject(lexerFlags) {
@@ -1356,21 +1359,21 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     ASSERT_skipAny('{', lexerFlags);
     while (curtype === $IDENT) {
       OPEN('specifiers', 'ImportSpecifier');
-      let name = curtok.str;
-      OPEN('imported', 'Identifier');
-      SET('name', name);
+
+      let nameToken = curtok;
+      SET_IDENT('imported', nameToken);
       skipAny(lexerFlags);
-      CLOSE(); // imported
-      OPEN('local', 'Identifier');
+
       if (curtok.str === 'as') {
         ASSERT_skipAny('as', lexerFlags);
         if (curtype !== $IDENT) THROW('Alias must be an ident');
-        SET('name', curtok.str);
+
+        SET_IDENT('local', curtok);
         skipAny(lexerFlags);
       } else {
-        SET('name', name);
+        SET_IDENT('local', nameToken);
       }
-      CLOSE(); // local
+
       if (curc === $$COMMA_2C) skipAny(lexerFlags);
       CLOSE(); // specifiers
     }
@@ -1385,10 +1388,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     skipAnyOrDie($$A_61, 'as', lexerFlags);
 
     OPEN('specifiers', 'ImportNamespaceSpecifier');
-    OPEN('local', 'Identifier');
-    SET('name', curtok.str);
+    SET_IDENT('local', curtok);
     ASSERT_skipAny($IDENT, lexerFlags); // next must be `as` comma or `from`
-    CLOSE(); // local
     CLOSE(); // specifiers
 
     if (curtok.str !== 'from') THROW('Missing export source');
@@ -1474,10 +1475,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT_skipAny('catch', lexerFlags); // TODO: optimize; next must be (
       skipAnyOrDieSingleChar($$PAREN_L_28, lexerFlags); // TODO: optimize; next must be ident (maybe destructuring?)
       if (curtype === $IDENT) {
-        OPEN('param', 'Identifier');
-        SET('name', curtok.str);
+        SET_IDENT('param', curtok);
         ASSERT_skipAny($IDENT, lexerFlags); // TODO: optimize; next must be ) and maybe comma or ident
-        CLOSE();
       } else if (curc === $$PAREN_L_28 || curc === $$SQUARE_L_5B) {
         TODO // destructuring is valid here
       } else {
@@ -1520,9 +1519,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     ASSERT_skipDiv($IDENT, lexerFlags);
     if (curc === $$COLON_3A) {
       OPEN(astProp, 'LabeledStatement');
-      OPEN('label', 'Identifier');
-      SET('name', identToken.str);
-      CLOSE();
+      SET_IDENT('label', identToken);
       ASSERT_skipRex(':', lexerFlags);
       parseBodyPart(lexerFlags, 'body');
       CLOSE();
@@ -1603,10 +1600,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       // normal
       // TODO: verify ident is valid here
 
-      OPEN('id', 'Identifier');
-      SET('name', curtok.str);
+      SET_IDENT('id', curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
-      CLOSE();
     } else if (curc === $$CURLY_L_7B) {
       // destructure object
       // keep parsing binding patterns separated by at least one comma
@@ -1651,10 +1646,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       // normal
       // TODO: verify ident is valid here
 
-      OPEN(astProp, 'Identifier');
-      SET('name', curtok.str);
+      SET_IDENT(astProp, curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if end of decl, next line can start with regex
-      CLOSE();
     } else if (curc === $$CURLY_L_7B) {
       // destructure object
       // keep parsing binding patterns separated by at least one comma
@@ -1884,11 +1877,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT_skipDiv($IDENT, lexerFlags);
       return parseValueHeadBodyIdent(lexerFlags, identToken, astProp);
     } else if (curtype & ($NUMBER|$STRING|$REGEX)) {
-      OPEN(astProp, 'Literal');
-      SET('value', '<TODO>');
-      SET('raw', curtok.str);
+      SET_LITERAL(astProp, curtok);
       skipDiv(lexerFlags);
-      CLOSE();
       return false;
     } else if (curtype & $TICK) {
       parseTickExpression(lexerFlags, astProp);
@@ -1925,7 +1915,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       }
     }
 
-    console.log(curtok)
+    console.log('Error token:', curtok)
     THROW('Expected to parse a value');
   }
   function parseValueHeadBodyIdent(lexerFlags, identToken, astProp) {
@@ -1979,9 +1969,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
           parseFunctionExpression(lexerFlags, true, astProp);
         } else {
           // TODO: reject in cases where async is considered a keyword
-          OPEN(astProp, 'Identifier');
-          SET('name', 'async');
-          CLOSE();
+          SET_IDENT(astProp, identToken);
         }
         return false;
       case 'delete':
@@ -2007,9 +1995,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
           OPEN(astProp, 'ArrowFunctionExpression');
           SET('params', []);
-          OPEN('params', 'Identifier');
-          SET('name', identToken.str);
-          CLOSE();
+          SET_IDENT('params', identToken);
           ASSERT_skipRex('=>', lexerFlags);
           SET('id', null);
           SET('generator', false);
@@ -2018,9 +2004,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
           CLOSE();
         } else {
           // TODO: verify identifier (note: can be value keywords)
-          OPEN(astProp, 'Identifier');
-          SET('name', identName);
-          CLOSE();
+          SET_IDENT(astProp, identToken);
         }
 
         return true;
@@ -2095,18 +2079,35 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     // {'a':b=x}
     // {"a":b}
     // {"a":b=x}
+    // {10:b}
+    // {10:b=x}
     // {get a(){}}
+    // {get 'a'(){}}
+    // {get "a"(){}}
+    // {get 10(){}}
     // {get [a](){}}
     // {set a(x){}}
+    // {set 'a'(x){}}
+    // {set "a"(x){}}
+    // {set 10(x){}}
     // {set [a](x){}}
     // {a(){}}
+    // {'a'(){}}
+    // {"a"(){}}
+    // {10(){}}
     // {[a](){}}
     // {async a(){}}
+    // {async 'a'(){}}
+    // {async "a"(){}}
+    // {async 10(){}}
     // {async [a](){}}
     // {*a(){}}
+    // {*'a'(){}}
+    // {*"a"(){}}
+    // {*10(){}}
     // {*[a](){}}
 
-    // only syntactical restriction for destructuring is; no methods
+    // only syntactical restriction for destructuring is; no methods, only idents can be shorthand
     //({
     //  a,
     //  a:b,
@@ -2117,229 +2118,175 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     //  'a':b=x,
     //  "a":b,
     //  "a":b=x,
+    //  10:b,
+    //  10:b=x,
     //}=arr);
 
     OPEN(astProp, 'ObjectExpression');
     SET('properties', []);
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, IN_TEMPLATE);
     ASSERT_skipAny('{', lexerFlagsNoTemplate); // TODO: optimize; next token cannot start with fwd slash
-    do {
+    while(curc !== $$CURLY_R_7D && curtype !== $EOF) {
       parseObjLitProperty(lexerFlagsNoTemplate, 'properties'); // also consumes comma
       if (curc === $$COMMA_2C) ASSERT_skipRex(',', lexerFlagsNoTemplate); // TODO: optimize; next token cannot start with fwd slash
       else break;
-    } while(curc !== $$CURLY_R_7D && curtype !== $EOF);
+    }
     skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
     CLOSE();
 
     return true; // TODO: properly reflect whether this array can be a destructuring pattern
   }
   function parseObjLitProperty(lexerFlags, astProp) {
-    // shorthand, classic, classic with assign, dynamic, dynamic with assign,
-    // quoted, quoted with assign, getter, setter, method, async, generator
+    // shorthand, classic, dynamic, quoted, numbered, any of those with assign
+    // method, getter, setter, async, generator
 
-    if (curtype === $IDENT) {
+    ASSERT(curc !== $$CURLY_R_7D, 'Caller should prevent } here');
+
+    OPEN(astProp, 'Property');
+    astProp = 'Property';
+
+    let startToken = curtok;
+    let startType = curtype;
+    let startC = curc;
+    skipAny(lexerFlags); // TODO: optimize; next token must be ident, number, string, comma, }, (, [
+
+    if (startType === $IDENT) {
       // property name, shorthand, getter, setter, method, async
       // note that `async`, `get`, and `set` are valid prop names as well as method modifiers (=> prefixes)
-      let identToken = curtok;
 
-      if (identToken.str === 'get') {
-        ASSERT_skipAny('get', lexerFlags); // TODO: optimize; next token must be ident, (, or :
-        if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
-          parseObjLitGetter(lexerFlags, astProp);
-          return;
-        }
-      } else if (identToken.str === 'set') {
-        ASSERT_skipAny('set', lexerFlags); // TODO: optimize; next token must be ident, (, or :
-        if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
-          parseObjLitSetter(lexerFlags, astProp);
-          return;
-        }
-      } else if (identToken.str === 'async') {
-        ASSERT_skipAny('async', lexerFlags); // TODO: optimize; next token must be ident, (, or :
-        if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
-          parseObjLitAsync(lexerFlags, astProp);
-          return;
-        }
+      if (startToken.str === 'get') {
+        parseObjLitMethodAfterModifier(lexerFlags, startToken, true, false, false, astProp);
+      } else if (startToken.str === 'set') {
+        parseObjLitMethodAfterModifier(lexerFlags, startToken, false, true, false, astProp);
+      } else if (startToken.str === 'async') {
+        parseObjLitMethodAfterModifier(lexerFlags, startToken, false, false, true, astProp);
+      } else if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
+        parseObjLitValueAfterIdentShorthand(lexerFlags, startToken, astProp);
+      } else if (curc === $$IS_3D && curtok.str === '=') {
+        // TODO: only valid in destructuring context
+        parseObjLitValueAfterIdentShorthand(lexerFlags, startToken, astProp);
       } else {
-        ASSERT_skipAny($IDENT, lexerFlags); // TODO: optimize; next token must be (, or :
+        // TODO: what about `true`, `false`, and `null`? are they idents or literals in the ast? (looks like idents...)
+        SET_IDENT('key', startToken);
+        parseObjLitAnyFromLitKey(lexerFlags, false, astProp);
       }
-      // this call includes cases where the property name is get, set, or async.
-      parseObjLitPropertyFromIdentKey(lexerFlags, identToken, astProp);
-    } else if (curc === $$STAR_2A) {
+    } else if (startC === $$STAR_2A) {
       // generator
-      ASSERT_skipAny('*', lexerFlags); // TODO: optimize; next token must be ident
       parseObjLitGenerator(lexerFlags, astProp);
-    } else if (curtype & $STRING) {
-      parseObjLitQuotedProperty(lexerFlags, astProp);
-    } else if (curc === $$SQUARE_L_5B) {
-      parseObjLitComputedProperty(lexerFlags, astProp);
-    } else if (curc !== $$CURLY_R_7D) {
-      THROW('Unknown property name declaration');
-    }
-  }
-  function parseObjLitIdentOrComputedKey(lexerFlags) {
-    if (curtype === $IDENT) {
-      parseObjLitIdentKey(lexerFlags);
-    } else if (curc === $$SQUARE_L_5B) {
-      parseObjLitComputedKey(lexerFlags);
+    } else if ((startType & $STRING) === $STRING || (startType & $NUMBER) === $NUMBER) {
+      SET_LITERAL('key', startToken);
+      parseObjLitAnyFromLitKey(lexerFlags, false, astProp);
+    } else if (startC === $$SQUARE_L_5B) {
+      parseExpression(lexerFlags, 'key');
+      skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
+      parseObjLitAnyFromLitKey(lexerFlags, true, astProp);
     } else {
-      THROW('Unknown property name declaration');
+      console.log('Next error:', startToken);
+      THROW('Unknown property name declaration in previous token'); // position will be slightly off :(
     }
-  }
-  function parseObjLitIdentKey(lexerFlags) {
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    // get, set, and async are valid key names here but not considered special
-    SET('computed', false);
-    OPEN('key', 'Identifier');
-    SET('name', curtok.str);
-    ASSERT_skipAny($IDENT, lexerFlags); // TODO: optimize; next token must be :
-    CLOSE();
+    CLOSE(); // Property
   }
-  function parseObjLitKeyFromIdent(lexerFlags, identToken, astProp) {
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    // get, set, and async are valid key names here but not considered special
-    OPEN(astProp, 'Identifier');
-    SET('name', identToken.str);
-    CLOSE();
-  }
-  function parseObjLitComputedKey(lexerFlags) {
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-
-    // computed property name
-    SET('computed', true);
-    ASSERT_skipRex('[', lexerFlags);
-    parseExpression(lexerFlags, 'key');
-    skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: optimize; next token must be (, or :
-  }
-  function parseObjLitGetter(lexerFlags, astProp) {
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-
-    OPEN(astProp, 'Property');
-    SET('kind', 'get');
-    SET('method', false);
-    SET('shorthand', false); // yes but always no.
-    parseObjLitIdentOrComputedKey(lexerFlags);
-    parseFunctionFromIdent(lexerFlags, false, false, false, false, false, 'value');
-    CLOSE();
-  }
-  function parseObjLitSetter(lexerFlags, astProp) {
-    OPEN(astProp, 'Property');
-    SET('kind', 'set');
-    SET('method', false);
-    SET('shorthand', false); // yes but always no.
-    parseObjLitIdentOrComputedKey(lexerFlags);
-    parseFunctionFromIdent(lexerFlags, false, false, false, false, false, 'value');
-    CLOSE();
-  }
-  function parseObjLitAsync(lexerFlags, astProp) {
-    OPEN(astProp, 'Property');
-    SET('kind', 'init'); // only getters/setters get special value here
-    SET('method', true);
-    SET('shorthand', false); // yes but always no.
-    parseObjLitIdentOrComputedKey(lexerFlags);
-    parseFunctionFromIdent(lexerFlags, false, false, false, true, false, 'value');
-    CLOSE();
+  function parseObjLitMethodAfterModifier(lexerFlags, token, wasGet, wasSet, wasAsync, astProp) {
+    ASSERT(wasGet || wasSet || wasAsync, 'should be called for one of the ident modifiers');
+    if (curc === $$PAREN_L_28) {
+      SET_IDENT('key', token);
+      parseObjLitMethodAfterKey(lexerFlags, false, false, false, false, false, astProp);
+    } else if (curc === $$COLON_3A) {
+      SET_IDENT('key', token);
+      ASSERT_skipRex(':', lexerFlags);
+      parseObjLitValueAfterKeyColon(lexerFlags, false, astProp);
+    } else if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
+      // rare edge case:  x={get}  x={set}  x={async}
+      parseObjLitValueAfterIdentShorthand(lexerFlags, token, astProp);
+    } else if (curc === $$SQUARE_L_5B) {
+      ASSERT_skipRex('[', lexerFlags);
+      parseExpression(lexerFlags, 'key');
+      skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
+      parseObjLitMethodAfterKey(lexerFlags, true, wasGet, wasSet, wasAsync, false, astProp);
+    } else if (curtype === $IDENT) {
+      SET_IDENT('key', curtok);
+      ASSERT_skipAny($IDENT, lexerFlags); // should find (
+      parseObjLitMethodAfterKey(lexerFlags, false, wasGet, wasSet, wasAsync, false, astProp);
+    } else if ((curtype & $STRING) === $STRING || (curtype & $NUMBER) === $NUMBER) {
+      SET_LITERAL('key', curtok);
+      skipAny(lexerFlags); // should find (
+      parseObjLitMethodAfterKey(lexerFlags, false, wasGet, wasSet, wasAsync, false, astProp);
+    } else {
+      THROW('Bad objlit property');
+    }
   }
   function parseObjLitGenerator(lexerFlags, astProp) {
-    OPEN(astProp, 'Property');
-    SET('kind', 'init'); // only getters/setters get special value here
-    SET('method', true);
-    SET('shorthand', false); // yes but always no.
-    parseObjLitIdentOrComputedKey(lexerFlags);
-    parseFunctionFromIdent(lexerFlags, false, false, true, false, false, 'value');
-    CLOSE();
+    let isComputed = false;
+    if (curtype === $IDENT) {
+      SET_IDENT('key', curtok);
+      ASSERT_skipAny($IDENT, lexerFlags); // should find (
+    } else if ((curtype & $STRING) === $STRING || (curtype & $NUMBER) === $NUMBER) {
+      SET_LITERAL('key', curtok);
+      skipAny(lexerFlags); // should find (
+    } else if (curc === $$SQUARE_L_5B) {
+      isComputed = true;
+      ASSERT_skipRex('[', lexerFlags);
+      parseExpression(lexerFlags, 'key');
+      skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // should find (
+    } else {
+      THROW('Generator method missing name')
+    }
+    ASSERT(curc === $$PAREN_L_28, 'should be at the start of the params');
+    parseObjLitMethodAfterKey(lexerFlags, isComputed, false, false, false, true, astProp);
   }
-  function parseObjLitPropertyFromIdentKey(lexerFlags, identToken, astProp) {
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-
+  function parseObjLitAnyFromLitKey(lexerFlags, isComputed, astProp) {
     if (curc === $$PAREN_L_28) {
-      parseObjLitRegularMethod(lexerFlags, identToken, astProp);
-    } else {
-      parseObjLitIdentPair(lexerFlags, identToken, astProp);
-    }
-  }
-  function parseObjLitRegularMethod(lexerFlags, identToken, astProp) {
-    OPEN(astProp, 'Property');
-    SET('kind', 'init'); // only getters/setters get special value here
-    SET('method', true);
-    SET('shorthand', false); // yes but always no.
-    SET('computed', false);
-    parseObjLitKeyFromIdent(lexerFlags, identToken, 'key');
-    parseFunctionFromIdent(lexerFlags, false, false, false, false, false, 'value');
-    CLOSE();
-  }
-  function parseObjLitIdentPair(lexerFlags, identToken, astProp) {
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-
-    OPEN(astProp, 'Property');
-    SET('kind', 'init'); // methods are "init" too
-    SET('method', false);
-    SET('shorthand', curc !== $$COLON_3A);
-    SET('computed', false);
-
-    parseObjLitKeyFromIdent(lexerFlags, identToken, 'key');
-    if (curc === $$COLON_3A) {
+      parseObjLitMethodAfterKey(lexerFlags, isComputed, false, false, false, false, astProp);
+    } else if (curc === $$COLON_3A) {
       ASSERT_skipRex(':', lexerFlags);
-      parseExpression(lexerFlags, 'value');
+      parseObjLitValueAfterKeyColon(lexerFlags, isComputed, astProp);
     } else {
-      // shorthand uses key as value as well
-      parseObjLitKeyFromIdent(lexerFlags, identToken, 'value');
-
-      // if there is an assignment here this "object" is _only_ valid when destructuring
-      if (curc === $$IS_3D && curtok.str === '=') {
-        ASSERT_skipRex('=', lexerFlags);
-        WRAP_CLOSED('value', 'AssignmentExpression', 'left');
-        SET('operator', '=');
-        parseExpression(lexerFlags, 'right');
-        CLOSE();
-      }
+      console.log('Error token:', curtok);
+      THROW('Invalid object property key');
     }
-
-    CLOSE();
   }
-  function parseObjLitQuotedProperty(lexerFlags, astProp) {
-    OPEN(astProp, 'Property');
-    SET('kind', 'init');
+
+  function parseObjLitValueAfterKeyColon(lexerFlags, isComputed, astProp) {
+    SET('kind', 'init'); // only getters/setters get special value here
     SET('method', false);
     SET('shorthand', false);
-    SET('computed', false);
-    OPEN('key', 'Literal');
-    SET('value', '<TODO>');
-    SET('raw', curtok.str);
-    ASSERT(curtype & $STRING);
-    skipAny(lexerFlags); // TODO: optimize; next token must be :
-    CLOSE();
-    skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
+    SET('computed', isComputed);
     parseExpression(lexerFlags, 'value');
-    CLOSE();
   }
-  function parseObjLitComputedProperty(lexerFlags, astProp) {
-    ASSERT_skipRex('[', lexerFlags);
-    parseExpression(lexerFlags, astProp);
-    skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: optimize; next token must be (, or :
+  function parseObjLitValueAfterIdentShorthand(lexerFlags, identToken, astProp) {
+    SET_IDENT('key', identToken);
+    SET('kind', 'init'); // only getters/setters get special value here
+    SET('method', false);
+    SET('shorthand', true);
+    SET('computed', false);
 
-    // note: the wraps will cause the `key` property to "appear" earlier than in other parses. annoying but can only be helped by more code complexity. which is not worth it.
-    // one path we could decide on is to put `key` first in all cases. maybe.
-    if (curc === $$PAREN_L_28) {
-      WRAP_CLOSED(astProp, 'Property', 'key');
-      SET('kind', 'init'); // only getters/setters get special value here
-      SET('method', true);
-      SET('shorthand', false); // yes but always no.
-      SET('computed', true);
-      parseFunctionFromIdent(lexerFlags, false, false, false, false, false, 'value');
-      CLOSE();
-    } else {
-      WRAP_CLOSED(astProp, 'Property', 'key');
-      SET('kind', 'init');
-      SET('method', false);
-      SET('shorthand', false);
-      SET('computed', true);
-      skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
-      parseExpression(lexerFlags, 'value');
+    // if there is an assignment here this "object" is _only_ valid when destructuring
+    SET_IDENT('value', identToken);
+    if (curc === $$IS_3D && curtok.str === '=') {
+      ASSERT_skipRex('=', lexerFlags);
+      WRAP_CLOSED('value', 'AssignmentExpression', 'left');
+      SET('operator', '=');
+      parseExpression(lexerFlags, 'right');
       CLOSE();
     }
+  }
+  function parseObjLitMethodAfterKey(lexerFlags, isComputed, wasGet, wasSet, isAsync, isGenerator, astProp) {
+    ASSERT(curc === $$PAREN_L_28, 'should be at the start of the params');
+
+    SET('kind', wasGet ? 'get' : wasSet ? 'set' : 'init'); // only getters/setters get special value here
+    SET('method', wasGet || wasSet ? false : true); // getters and setters arent methods...
+    SET('shorthand', false); // yes but always no.
+    SET('computed', isComputed);
+
+    OPEN('value', 'FunctionExpression'); // ast expects this (even though the prop is false below)
+    SET('generator', isGenerator);
+    SET('async', isAsync);
+    SET('expression', false);
+    SET('id', null);
+    parseFunctionFromParams(lexerFlags, false, isAsync, isGenerator, 'value');
+    CLOSE(); // FunctionExpression
   }
 
   function parseArrayLitOrDestruc(lexerFlags, fromParam, astProp) {
@@ -2381,10 +2328,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT_skipAny('.', lexerFlags); // TODO: optimize; next must be identifier
       if (curtype !== $IDENT) THROW('Dot property must be an identifier');
       WRAP_CLOSED(astProp, 'MemberExpression', 'object');
-      OPEN('property', 'Identifier');
-      SET('name', curtok.str);
+      SET_IDENT('property', curtok);
       ASSERT_skipDiv($IDENT, lexerFlags); // x.y / z is division
-      CLOSE();
       SET('computed', false);
       CLOSE();
       assignable = parseValueTail(lexerFlags, true, astProp);
@@ -2412,10 +2357,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       // tagged template is like a call but slightly special
       ASSERT((curtype & $TICK) === $TICK);
       WRAP_CLOSED(astProp, 'MemberExpression', 'object');
-      OPEN('property', 'Identifier');
-      SET('name', curtok.str);
+      SET_IDENT('property', curtok);
       ASSERT_skipDiv($TICK, lexerFlags);
-      CLOSE();
       assignable = parseValueTail(lexerFlags, false, astProp);
     } else if ((curc === $$PLUS_2B && curtok.str === '++') || (curc === $$DASH_2D && curtok.str === '--')) {
       ASSERT(curtype === $PUNCTUATOR);

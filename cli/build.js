@@ -46,6 +46,7 @@ function scrub(s) {
   s = s
     .toString('utf-8')
     .match(/\/\/ <BODY>([\s\S]*)\/\/ <\/BODY>/)[1]
+    .replace(/\/\/ <SCRUB DEV>([\s\S]*?)\/\/ <\/SCRUB DEV>/g, '// scrubbed dev\n')
   ;
   if (!ASSERTS) {
     s = s

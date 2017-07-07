@@ -485,7 +485,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
 
     return {
       type,
+      // <SCRUB DEV>
       _t: debug_toktype(type),
+      // </SCRUB DEV>
       ws, // is this token considered whitespace? (space, tab, newline, comment)
       nl, // was there a newline between the start of the previous relevant token and this one?
       start,
@@ -2397,9 +2399,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
   }
 
   function THROW(str) {
-    console.log('Tokenizer error at #|# ```');
-    console.log(slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, pointer + 20));
-    console.log('```');
+    console.log('Tokenizer error! at #|# ```\n', slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)), '\n```');
     throw new Error(str);
   }
 

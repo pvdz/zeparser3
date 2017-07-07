@@ -116,16 +116,16 @@ function all(parser, tests) {
     else one(parser, test);
   }
 }
-function one(parser, {code, ast, desc, tokens, stop}) {
+function one(parser, {code, ast, desc, tokens}) {
   ++testi;
-  if (_one(parser, '   ', code, ast, desc, tokens, stop)) {
-    _one(parser, '[a]', '\n' + code, ast, desc, tokens, stop);
-    _one(parser, '[b]', code + '\n', ast, desc, tokens, stop);
-    _one(parser, '[c]', ' ' + code, ast, desc, tokens, stop);
-    _one(parser, '[d]', code + ' ', ast, desc, tokens, stop);
+  if (_one(parser, '   ', code, ast, desc, tokens)) {
+    _one(parser, '[a]', '\n' + code, ast, desc, tokens);
+    _one(parser, '[b]', code + '\n', ast, desc, tokens);
+    _one(parser, '[c]', ' ' + code, ast, desc, tokens);
+    _one(parser, '[d]', code + ' ', ast, desc, tokens);
   }
 }
-function _one(Parser, testSuffix, code, ast, desc, tokens, stop=false) {
+function _one(Parser, testSuffix, code, ast, desc, tokens) {
   let prefix = parserDesc + ': ' + testi + testSuffix;
 
                                                           //if (parseInt(testi,10) !== 154) return;
@@ -171,10 +171,11 @@ function _one(Parser, testSuffix, code, ast, desc, tokens, stop=false) {
     passed = true;
   }
 
-  if (stop) throw 'stop';
+  if (STOP_AFTER_FAIL && fail) throw 'stopped';
   return passed;
 }
 
+const STOP_AFTER_FAIL = false;
 let pass = 0;
 let fail = 0;
 let crash = 0;

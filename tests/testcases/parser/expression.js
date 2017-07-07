@@ -396,7 +396,7 @@ let tests = [
           code: 'wrap({a});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'a'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
             ]},
           ]}}]},
           desc: 'object with one shorthand',
@@ -406,7 +406,7 @@ let tests = [
           code: 'wrap({a:b});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
             ]},
           ]}}]},
           desc: 'object with one classic property',
@@ -416,8 +416,8 @@ let tests = [
           code: 'wrap({a, b});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'a'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'b'}, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'b'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'b'}},
             ]},
           ]}}]},
           desc: 'object with two shorthand',
@@ -427,8 +427,8 @@ let tests = [
           code: 'wrap({a:b, c:d});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'd'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
             ]},
           ]}}]},
           desc: 'object with two classic properties',
@@ -438,8 +438,8 @@ let tests = [
           code: 'wrap({a, c:d});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'a'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'd'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
             ]},
           ]}}]},
           desc: 'object with a shorthand and a classic property',
@@ -449,8 +449,8 @@ let tests = [
           code: 'wrap({a:b, c});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'c'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'c'}},
             ]},
           ]}}]},
           desc: 'object with a classic property and a shorthand',
@@ -461,11 +461,11 @@ let tests = [
         //  ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
         //    {type: 'ObjectExpression', properties: [
         //      {type: 'Property',
+        //        key: {type: 'Identifier', name: 'a'},
         //        kind: 'init',
         //        method: false,
         //        shorthand: true,
         //        computed: false,
-        //        key: {type: 'Identifier', name: 'a'},
         //        value: {
         //          type: 'AssignmentExpression',
         //          left: {type: 'Identifier', name: 'a'}, // same token as above
@@ -479,33 +479,72 @@ let tests = [
         //},
       ], // ident props
       [
-        '    string properties',
+        '    number properties',
         {
-          code: 'wrap({a:b});',
+          code: 'wrap({15:b});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '15'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+            ]},
+          ]}}]},
+          desc: 'object with one number property',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({.9:a, 0x84:b, 0b1:c, 0o27:d, 1e234:e});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '.9'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'a'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0x84'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0b1'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'c'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0o27'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '1e234'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'e'}},
+            ]},
+          ]}}]},
+          desc: 'object with one number property',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_HEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_BIN, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_OCT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({1:b, 0:d});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '1'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
+            ]},
+          ]}}]},
+          desc: 'object with two number properties',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        // error with number as shorthand
+      ], // number props
+      [
+        '    string properties',
+        {
+          code: 'wrap({"a":b});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"a"'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
             ]},
           ]}}]},
           desc: 'object with one double quoted property',
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         },
         {
-          code: 'wrap({a:b, c:d});',
+          code: 'wrap({"a":b, "c":d});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'd'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"a"'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"c"'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
             ]},
           ]}}]},
           desc: 'object with two double quoted properties',
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         },
         {
           code: 'wrap({\'a\':b});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
             ]},
           ]}}]},
           desc: 'object with one double quoted property',
@@ -515,8 +554,8 @@ let tests = [
           code: 'wrap({\'a\':b, \'c\':d});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, value: {type: 'Identifier', name: 'b'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, value: {type: 'Identifier', name: 'd'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
             ]},
           ]}}]},
           desc: 'object with two double quoted properties',
@@ -526,23 +565,23 @@ let tests = [
           code: 'wrap({\'a\':b, c:d});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, value: {type: 'Identifier', name: 'b'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'd'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
             ]},
           ]}}]},
           desc: 'object with two double quoted properties',
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         },
         {
-          code: 'wrap({a:b, \'c\':d});',
+          code: 'wrap({"a":b, \'c\':d});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, value: {type: 'Identifier', name: 'd'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"a"'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
             ]},
           ]}}]},
-          desc: 'object with two double quoted properties',
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          desc: 'object with a single and a double quoted property',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         },
       ], // string props
       [
@@ -577,7 +616,7 @@ let tests = [
           code: 'wrap({foo(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -595,7 +634,7 @@ let tests = [
           code: 'wrap({foo(){}, bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -604,7 +643,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -622,7 +661,7 @@ let tests = [
           code: 'wrap({foo(a,b,c){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -642,12 +681,126 @@ let tests = [
         },
       ], // ident method
       [
+        '    number method',
+        {
+          code: 'wrap({0(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({.9(){}, 0x84(){}, 0b1(){}, 0o27(){}, 1e234(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '.9'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0x84'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0b1'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0o27'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '1e234'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with two methods',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_HEX, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_BIN, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_OCT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+      ], // number method
+      [
+        '    string method',
+        {
+          code: 'wrap({"foo"(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"foo"'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one double string keyed method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({\'foo\'(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'foo\''}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one single string keyed method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+      ], // string method
+      [
         '    async method',
         {
           code: 'wrap({async foo(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: true,
@@ -662,10 +815,64 @@ let tests = [
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         },
         {
+          code: 'wrap({async "foo"(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"foo"'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: true,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async dstring method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({async \'foo\'(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'foo\''}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: true,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async sstring method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({async 100(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '100'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: true,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async number method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
           code: 'wrap({async [foo](){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: true,
@@ -683,7 +890,7 @@ let tests = [
           code: 'wrap({async foo(){}, async bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: true,
@@ -692,7 +899,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: true,
@@ -710,7 +917,7 @@ let tests = [
           code: 'wrap({async foo(){}, bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: true,
@@ -719,7 +926,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -737,7 +944,7 @@ let tests = [
           code: 'wrap({foo(){}, async bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -746,7 +953,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: true,
@@ -767,7 +974,7 @@ let tests = [
           code: 'wrap({*foo(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: true,
                 async: false,
@@ -782,10 +989,64 @@ let tests = [
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         },
         {
+          code: 'wrap({*"foo"(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"foo"'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: true,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({*\'foo\'(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'foo\''}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: true,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({*123(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '123'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: true,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
           code: 'wrap({*[foo](){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: true,
                 async: false,
@@ -803,7 +1064,7 @@ let tests = [
           code: 'wrap({* foo(){},*bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: true,
                 async: false,
@@ -812,7 +1073,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: true,
                 async: false,
@@ -830,7 +1091,7 @@ let tests = [
           code: 'wrap({* foo(){}, bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: true,
                 async: false,
@@ -839,7 +1100,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -857,7 +1118,7 @@ let tests = [
           code: 'wrap({foo(){}, *bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -866,7 +1127,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: true,
                 async: false,
@@ -887,7 +1148,7 @@ let tests = [
           code: 'wrap({get foo(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'get', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -905,7 +1166,7 @@ let tests = [
           code: 'wrap({get foo(){}, get bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'get', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -914,7 +1175,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'get', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -932,7 +1193,7 @@ let tests = [
           code: 'wrap({get foo(){}, bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'get', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -941,7 +1202,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -959,7 +1220,7 @@ let tests = [
           code: 'wrap({foo(){}, get bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -968,7 +1229,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'get', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -987,7 +1248,7 @@ let tests = [
           code: 'wrap({get [foo](){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'get', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1005,7 +1266,7 @@ let tests = [
           code: 'wrap({get [foo](){}, get [bar](){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'get', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1014,7 +1275,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'get', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1032,7 +1293,7 @@ let tests = [
           code: 'wrap({get [foo](){}, [bar](){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'get', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1068,7 +1329,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'get', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'get', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1082,6 +1343,61 @@ let tests = [
           desc: 'object with an async method and an ident method',
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         },
+        '    getters (rest)',
+        {
+          code: 'wrap({get \'foo\'(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'foo\''}, kind: 'get', method: false, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({get "foo"(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"foo"'}, kind: 'get', method: false, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({get 123(){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '123'}, kind: 'get', method: false, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
       ], // getters
       [
         '    setters (ident)',
@@ -1089,7 +1405,7 @@ let tests = [
           code: 'wrap({set foo(a){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'set', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1107,7 +1423,7 @@ let tests = [
           code: 'wrap({set foo(b){}, set bar(d){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'set', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1116,7 +1432,7 @@ let tests = [
                 params: [{type: 'Identifier', name: 'b'}],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'set', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1134,7 +1450,7 @@ let tests = [
           code: 'wrap({set foo(c){}, bar(){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'set', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1143,7 +1459,7 @@ let tests = [
                 params: [{type: 'Identifier', name: 'c'}],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1161,7 +1477,7 @@ let tests = [
           code: 'wrap({foo(){}, set bar(e){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: true, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1170,7 +1486,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'set', method: false, shorthand: false, computed: false, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1189,7 +1505,7 @@ let tests = [
           code: 'wrap({set [foo](a){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'set', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1207,7 +1523,7 @@ let tests = [
           code: 'wrap({set [foo](b){}, set [bar](d){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'set', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1216,7 +1532,7 @@ let tests = [
                 params: [{type: 'Identifier', name: 'b'}],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'set', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1234,7 +1550,7 @@ let tests = [
           code: 'wrap({set [foo](c){}, [bar](){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'set', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1270,7 +1586,7 @@ let tests = [
                 params: [],
                 body: {type: 'BlockStatement', body: []}
               }},
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'bar'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'bar'}, kind: 'set', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1289,7 +1605,7 @@ let tests = [
           code: 'wrap({set [foo]([a, b]){}});',
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'set', method: false, shorthand: false, computed: true, key: {type: 'Identifier', name: 'foo'}, value: {
+              {type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'set', method: false, shorthand: false, computed: true, value: {
                 type: 'FunctionExpression',
                 generator: false,
                 async: false,
@@ -1303,12 +1619,69 @@ let tests = [
           desc: 'object with one async method',
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         },
+        '    setters (rest)',
+        {
+          code: 'wrap({set \'foo\'(a){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'foo\''}, kind: 'set', method: false, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [{type: 'Identifier', name: 'a'}],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({set "foo"(a){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"foo"'}, kind: 'set', method: false, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [{type: 'Identifier', name: 'a'}],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+        {
+          code: 'wrap({set 123(a){}});',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+            {type: 'ObjectExpression', properties: [
+              {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '123'}, kind: 'set', method: false, shorthand: false, computed: false, value: {
+                type: 'FunctionExpression',
+                generator: false,
+                async: false,
+                expression: false,
+                id: null,
+                params: [{type: 'Identifier', name: 'a'}],
+                body: {type: 'BlockStatement', body: []}
+              }},
+            ]},
+          ]}}]},
+          desc: 'object with one async method',
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        },
+
       ], // setters
 
       // call({[x]}) is illegal; dynamic properties can not be shorthand
       // can not use async/generators on getters/setters ({async get foo(){}})
       // getters with non-zero param count
       // setters with not-one param count
+      // shorthand get, set, async
     ], // literal
     [
       '    destructuring',
@@ -1331,7 +1704,7 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'a'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1345,7 +1718,7 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1359,8 +1732,8 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'a'}},
-                {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'b'}, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'b'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'b'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1374,8 +1747,8 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'd'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1389,8 +1762,8 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'a'}},
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'd'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1404,8 +1777,8 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
-                {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'c'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'c'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1419,8 +1792,7 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false,
-                  key: {type: 'Identifier', name: 'a'},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false,
                   value: {
                     type: 'AssignmentPattern',
                     left: {type: 'Identifier', name: 'a'}, // same token as above
@@ -1441,8 +1813,7 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false,
-                  key: {type: 'Identifier', name: 'a'},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false,
                   value: {
                     type: 'AssignmentPattern',
                     left: {type: 'Identifier', name: 'v'},
@@ -1467,7 +1838,7 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1481,8 +1852,8 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'd'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1496,7 +1867,7 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1510,8 +1881,8 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, value: {type: 'Identifier', name: 'b'}},
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, value: {type: 'Identifier', name: 'd'}},
+                {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1525,8 +1896,8 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, value: {type: 'Identifier', name: 'b'}},
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'c'}, value: {type: 'Identifier', name: 'd'}},
+                {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1540,8 +1911,8 @@ let tests = [
           ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
             {type: 'AssignmentExpression',
               left: {type: 'ObjectPattern', properties: [
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'b'}},
-                {type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, value: {type: 'Identifier', name: 'd'}},
+                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+                {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
               ]},
               operator: '=',
               right: {type: 'Identifier', name: 'obj'},
@@ -1598,11 +1969,11 @@ let tests = [
             {type: 'ObjectPattern', properties: [
               {
                 type: 'Property',
+                key: {type: 'Identifier', name: 'b'},
                 kind: 'init',
                 method: false,
                 shorthand: true,
                 computed: false,
-                key: {type: 'Identifier', name: 'b'},
                 value: {type: 'Identifier', name: 'b'},
               },
             ]},
@@ -1624,11 +1995,11 @@ let tests = [
             {type: 'ObjectPattern', properties: [
               {
                 type: 'Property',
+                key: {type: 'Identifier', name: 'b'},
                 kind: 'init',
                 method: false,
                 shorthand: false,
                 computed: false,
-                key: {type: 'Identifier', name: 'b'},
                 value: {type: 'Identifier', name: 'd'},
               },
             ]},
@@ -1726,7 +2097,7 @@ let tests = [
               {
                 type: 'AssignmentExpression',
                 left: {type: 'ObjectPattern', properties: [{
-                  type: 'Property', kind: 'init', method: false, shorthand: false, computed: false, key: {type: 'Identifier', name: 'foo'}, value: {
+                  type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: false, shorthand: false, computed: false, value: {
                     type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}],
                   },
                 }]},
@@ -2558,8 +2929,8 @@ let tests = [
           type: 'TemplateLiteral',
           expressions: [
             {type: 'ObjectExpression', properties: [
-              {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'a'}, value: {type: 'Identifier', name: 'a'}},
-              {type: 'Property', kind: 'init', method: false, shorthand: true, computed: false, key: {type: 'Identifier', name: 'b'}, value: {type: 'Identifier', name: 'b'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
+              {type: 'Property', key: {type: 'Identifier', name: 'b'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'b'}},
             ]},
           ],
           quasis: [
