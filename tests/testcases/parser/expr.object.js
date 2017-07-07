@@ -51,6 +51,36 @@ let objects = [
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
+        code: 'wrap({get});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'get'}},
+          ]},
+        ]}}]},
+        desc: 'get can be special but can also be shorthand',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({set});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'set'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'set'}},
+          ]},
+        ]}}]},
+        desc: 'set can be special but can also be shorthand',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({async});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'async'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'async'}},
+          ]},
+        ]}}]},
+        desc: 'async can be special but can also be shorthand',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
         code: 'wrap({a:b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -58,6 +88,36 @@ let objects = [
           ]},
         ]}}]},
         desc: 'object with one classic property',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({get:b});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+          ]},
+        ]}}]},
+        desc: 'object with one classic property get',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({set:b});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'set'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+          ]},
+        ]}}]},
+        desc: 'object with one classic property set',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({async:b});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'async'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
+          ]},
+        ]}}]},
+        desc: 'object with one classic property async',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -279,6 +339,60 @@ let objects = [
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
+        code: 'wrap({get(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: false,
+              async: false,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one method get',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({set(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'set'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: false,
+              async: false,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one method set',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({async(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'async'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: false,
+              async: false,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one method async',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
         code: 'wrap({foo(){}, bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -463,6 +577,60 @@ let objects = [
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
+        code: 'wrap({async get(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: false,
+              async: true,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one async method get',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({async set(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'set'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: false,
+              async: true,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one async method set',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({async async(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'async'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: false,
+              async: true,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one async method async',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
         code: 'wrap({async "foo"(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -637,6 +805,60 @@ let objects = [
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
+        code: 'wrap({*get(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: true,
+              async: false,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one async method get',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({*set(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'set'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: true,
+              async: false,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one async method set',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({*async(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'async'}, kind: 'init', method: true, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: true,
+              async: false,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one async method async',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
         code: 'wrap({*"foo"(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -807,7 +1029,25 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one getter method',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({get get(){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'get', method: false, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: false,
+              async: false,
+              expression: false,
+              id: null,
+              params: [],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one getter method get',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -834,7 +1074,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two async methods',
+        desc: 'object with two getter methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -861,7 +1101,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
+        desc: 'object with an getter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -888,7 +1128,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
+        desc: 'object with an getter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       '    getters (computed)',
@@ -907,7 +1147,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -934,7 +1174,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two async methods',
+        desc: 'object with two getter methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -961,7 +1201,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
+        desc: 'object with an getter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -988,7 +1228,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
+        desc: 'object with an getter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       '    getters (rest)',
@@ -1007,7 +1247,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1025,7 +1265,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1043,7 +1283,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
     ], // getters
@@ -1064,7 +1304,25 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one setter method',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+      {
+        code: 'wrap({set get(a){}});',
+        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
+          {type: 'ObjectExpression', properties: [
+            {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'set', method: false, shorthand: false, computed: false, value: {
+              type: 'FunctionExpression',
+              generator: false,
+              async: false,
+              expression: false,
+              id: null,
+              params: [{type: 'Identifier', name: 'a'}],
+              body: {type: 'BlockStatement', body: []}
+            }},
+          ]},
+        ]}}]},
+        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1091,7 +1349,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two async methods',
+        desc: 'object with two setter methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1118,7 +1376,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
+        desc: 'object with an setter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1145,7 +1403,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
+        desc: 'object with an setter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       '    setters (computed)',
@@ -1164,7 +1422,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1191,7 +1449,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two async methods',
+        desc: 'object with two setter methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1218,7 +1476,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
+        desc: 'object with an setter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1245,7 +1503,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
+        desc: 'object with an setter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       '    setters (destruct arg)',
@@ -1264,7 +1522,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       '    setters (rest)',
@@ -1283,7 +1541,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1301,7 +1559,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
       {
@@ -1319,7 +1577,7 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
+        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
 
@@ -1329,7 +1587,6 @@ let objects = [
     // can not use async/generators on getters/setters ({async get foo(){}})
     // getters with non-zero param count
     // setters with not-one param count
-    // shorthand get, set, async
   ], // literal
   [
     '    destructuring',
