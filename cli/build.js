@@ -59,7 +59,7 @@ function scrub(s) {
   if (!AST) {
     s = s
       .replace(/\/\/ <SCRUB AST>([\s\S]*?)\/\/ <\/SCRUB AST>/g, '0x004')
-      .replace(/^\s*(?:OPEN|CLOSE|SET|ADD|WRAP_OPENED|WRAP_CLOSED|WRAP_CLOSED_ARRAY|DECONSTRUCT).*/mg, '0x002')
+      .replace(/^\s*AST_.*/mg, '0x002')
     ;
   }
 
