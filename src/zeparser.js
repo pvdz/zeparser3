@@ -152,18 +152,23 @@ let { default: ZeTokenizer,
   IN_TEMPLATE,
   INITIAL_LEXER_FLAGS,
 
+  WEB_COMPAT_OFF,
+  WEB_COMPAT_ON,
+
   debug_toktype,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from '../src/zetokenizer';
 
 // <BODY>
 
-function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
+function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON) {
   let tok = ZeTokenizer(code, false, collectTokens);
 
   let curtok = null;
   let curtype = 0;
   let curc = 0;
+
+  let webModeWarnings = []; // when parsing anything that is only accepted because of annex B in the spec <token, desc>
 
   let traceast = false;
 

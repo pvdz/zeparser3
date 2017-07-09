@@ -7,6 +7,8 @@ let USE_STRICT_MODE = 2;
 let PARSE_MODE_DIV = 0;
 let PARSE_MODE_REGEX = 4;
 let PARSE_MODE_TICK = 8;
+let WEB_COMPAT_ALWAYS = 16;
+let WEB_COMPAT_NEVER = 32;
 
 function LOG(...args) {
   let pre = args[0].slice(0, 4);
@@ -40,6 +42,8 @@ module.exports = {
   PARSE_MODE_DIV,
   PARSE_MODE_REGEX,
   PARSE_MODE_TICK,
+  WEB_COMPAT_ALWAYS,
+  WEB_COMPAT_NEVER,
 
   LOG,
   toPrint,

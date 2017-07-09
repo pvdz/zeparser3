@@ -18,6 +18,8 @@ let {
   PARSE_MODE_DIV,
   PARSE_MODE_REGEX,
   PARSE_MODE_TICK,
+  WEB_COMPAT_ALWAYS,
+  WEB_COMPAT_NEVER,
 
   LOG,
 } = require('./utils');
@@ -36,6 +38,9 @@ let { default: ZeTokenizer,
   STRICT_MODE,
   FOR_REGEX,
   IN_TEMPLATE,
+
+  WEB_COMPAT_OFF,
+  WEB_COMPAT_ON,
 
   debug_toktype,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
@@ -99,122 +104,130 @@ for (let [input, output, modi, desc, skip] of all) {
   if (!(modi instanceof Array)) modi = [modi];
 
   for (let outerCode of input) {
-    for (let mode of modi) {
-      let orifailed = false;
-      let varieties = ['original', '- prefixsp', '- suffixsp', '- prefixnl', '- suffixls', '- suffixcr', '- suffcrlf'];
-      if (mode & PARSE_MODE_TICK) {
-        // suffixes causing too much noise on automated template tests
-        varieties = ['original', '- prefixsp', '- prefixnl'];
-        if (outerCode[0] === '`') mode ^= PARSE_MODE_TICK; // remove tick mode which actually assumes you parse from }
-      }
-      for (let testVariety of varieties) {
-        ++testIndex;
-        if (orifailed) {
-          LOG('SKIP: ' + testIndex + ' (original failed)');
-          continue;
+    for (let _mode of modi) {
+      // parse in web compat mode and without that mode unless the test explicitly opts in to either
+      let webi = [];
+      if ((_mode & WEB_COMPAT_NEVER) === WEB_COMPAT_NEVER) webi.push(WEB_COMPAT_OFF);
+      if ((_mode & WEB_COMPAT_ALWAYS) === WEB_COMPAT_ALWAYS) webi.push(WEB_COMPAT_ON);
+      if (webi.length === 0) webi.push(WEB_COMPAT_OFF, WEB_COMPAT_ON);
+      for (let webMode of webi) {
+        let mode = _mode;
+        let orifailed = false;
+        let varieties = ['original', '- prefixsp', '- suffixsp', '- prefixnl', '- suffixls', '- suffixcr', '- suffcrlf'];
+        if (mode & PARSE_MODE_TICK) {
+          // suffixes causing too much noise on automated template tests
+          varieties = ['original', '- prefixsp', '- prefixnl'];
+          if (outerCode[0] === '`') mode ^= PARSE_MODE_TICK; // remove tick mode which actually assumes you parse from }
         }
-
-        //if (testIndex !== 17123) continue;
-
-        let code = outerCode;
-        let outs = output.slice(0);
-        switch (testVariety) {
-          case '- prefixnl':
-            if (skip.indexOf('prefixnl') >= 0) {
-              LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
-              continue;
-            } else {
-              code = '\u2028' + code; // use 2028 to prevent cr <> crlf problems. parser should be fine with this.
-              outs.unshift($NL);
-            }
-            break;
-          case '- suffixls':
-            if (skip.indexOf('suffixls') >= 0) {
-              LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
-              continue;
-            } else {
-              code = code + '\u2028';
-              outs.push($NL);
-            }
-            break;
-          case '- suffixcr':
-            if (skip.indexOf('suffixcr') >= 0) {
-              LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
-              continue;
-            } else {
-              code = code + '\r';
-              outs.push($NL);
-            }
-            break;
-          case '- suffcrlf':
-            if (skip.indexOf('suffcrlf') >= 0) {
-              LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
-              continue;
-            } else {
-              code = code + '\r\n';
-              outs.push($CRLF);
-            }
-            break;
-          case '- prefixsp':
-            if (skip.indexOf('prefixsp') >= 0) {
-              LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
-              continue;
-            } else {
-              code = ' ' + code;
-              outs.unshift($SPACE);
-            }
-            break;
-          case '- suffixsp':
-            if (skip.indexOf('suffixsp') >= 0) {
-              LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
-              continue;
-            } else {
-              code = code + ' ';
-              outs.push($SPACE);
-            }
-            break;
-        }
-
-        outs.push($EOF);
-
-        let collects = [];
-        let lexerFlags = 0;
-        if (mode & PARSE_MODE_REGEX) lexerFlags |= FOR_REGEX;
-        if (mode & USE_STRICT_MODE) lexerFlags |= STRICT_MODE;
-        if (mode & PARSE_MODE_TICK) lexerFlags |= IN_TEMPLATE;
-        let asModule = (mode & MODE_MODULE) ? GOAL_MODULE : GOAL_SCRIPT;
-
-        try {
-          let tok = ZeTokenizer(code, asModule);
-
-          let failed = false;
-          let token;
-          for (let exp of outs) {
-            token = tok(lexerFlags, true);
-            collects.push(token.type);
-            if (token.type !== exp) LOG('(1) failed=', failed = true, 'because', debug_toktype(token.type), '!==', debug_toktype(exp));
-            if (token.type === $EOF) break;
+        for (let testVariety of varieties) {
+          ++testIndex;
+          if (orifailed) {
+            LOG('SKIP: ' + testIndex + ' (original failed)');
+            continue;
           }
 
-          // keep parsing even if it failed. EOF must always be emitted, even if
-          // an error occurred, and it must mean the pointer is beyond the input
-          if (!failed && token.type !== $EOF) {
-            failed = true;
-            LOG('FAIL (2) because last token wasnt EOF');
-            do {
+          //if (testIndex !== 17123) continue;
+
+          let code = outerCode;
+          let outs = output.slice(0);
+          switch (testVariety) {
+            case '- prefixnl':
+              if (skip.indexOf('prefixnl') >= 0) {
+                LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
+                continue;
+              } else {
+                code = '\u2028' + code; // use 2028 to prevent cr <> crlf problems. parser should be fine with this.
+                outs.unshift($NL);
+              }
+              break;
+            case '- suffixls':
+              if (skip.indexOf('suffixls') >= 0) {
+                LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
+                continue;
+              } else {
+                code = code + '\u2028';
+                outs.push($NL);
+              }
+              break;
+            case '- suffixcr':
+              if (skip.indexOf('suffixcr') >= 0) {
+                LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
+                continue;
+              } else {
+                code = code + '\r';
+                outs.push($NL);
+              }
+              break;
+            case '- suffcrlf':
+              if (skip.indexOf('suffcrlf') >= 0) {
+                LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
+                continue;
+              } else {
+                code = code + '\r\n';
+                outs.push($CRLF);
+              }
+              break;
+            case '- prefixsp':
+              if (skip.indexOf('prefixsp') >= 0) {
+                LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
+                continue;
+              } else {
+                code = ' ' + code;
+                outs.unshift($SPACE);
+              }
+              break;
+            case '- suffixsp':
+              if (skip.indexOf('suffixsp') >= 0) {
+                LOG('SKIP: ' + testIndex + ' (' + testVariety + ')');
+                continue;
+              } else {
+                code = code + ' ';
+                outs.push($SPACE);
+              }
+              break;
+          }
+
+          outs.push($EOF);
+
+          let collects = [];
+          let lexerFlags = 0;
+          if (mode & PARSE_MODE_REGEX) lexerFlags |= FOR_REGEX;
+          if (mode & USE_STRICT_MODE) lexerFlags |= STRICT_MODE;
+          if (mode & PARSE_MODE_TICK) lexerFlags |= IN_TEMPLATE;
+          let asModule = (mode & MODE_MODULE) ? GOAL_MODULE : GOAL_SCRIPT;
+
+          try {
+            let tok = ZeTokenizer(code, asModule, undefined, webMode);
+
+            let failed = false;
+            let token;
+            for (let exp of outs) {
               token = tok(lexerFlags, true);
               collects.push(token.type);
-            } while (token.type !== $EOF);
-          }
+              if (token.type !== exp) LOG('(1) failed=', failed = true, 'because', debug_toktype(token.type), '!==', debug_toktype(exp));
+              if (token.type === $EOF) break;
+            }
 
-          LOG((failed ? 'FAIL: ' : 'PASS: ') + testIndex + ' (' + ((mode & STRICT_MODE) ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + (mode & PARSE_MODE_REGEX) + (mode & PARSE_MODE_TICK) + asModule + ']: ', [toPrint(code)], '  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype) + (!failed ? '' : ' => ' + desc));
-          if (failed) {
-            ++fails;
-            if (testVariety === 'original') orifailed = true;
+            // keep parsing even if it failed. EOF must always be emitted, even if
+            // an error occurred, and it must mean the pointer is beyond the input
+            if (!failed && token.type !== $EOF) {
+              failed = true;
+              LOG('FAIL (2) because last token wasnt EOF');
+              do {
+                token = tok(lexerFlags, true);
+                collects.push(token.type);
+              } while (token.type !== $EOF);
+            }
+
+            LOG((failed ? 'FAIL: ' : 'PASS: ') + testIndex + ' (' + ((mode & STRICT_MODE) ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + (mode & PARSE_MODE_REGEX) + (mode & PARSE_MODE_TICK) + asModule + ']['+(webMode===WEB_COMPAT_ALWAYS?'WEB':'NOR')+']: ', [toPrint(code)], '  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype) + (!failed ? '' : ' => ' + desc));
+            if (failed) {
+              ++fails;
+              if (testVariety === 'original') orifailed = true;
+            }
+          } catch (rethrow) {
+            LOG('ERROR: ' + testIndex + ' (' + ((mode & STRICT_MODE) ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + (mode & PARSE_MODE_REGEX) + (mode & PARSE_MODE_TICK) + asModule + ']['+(webMode===WEB_COMPAT_ALWAYS?'WEB':'NOR')+']: `' + toPrint(code) + '`  -->  ' + outs.map(debug_toktype) + ', was so far; ' + collects.map(debug_toktype) + ' => ' + desc);
+            throw rethrow;
           }
-        } catch (rethrow) {
-          LOG('ERROR: ' + testIndex + ' (' + ((mode & STRICT_MODE) ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + (mode & PARSE_MODE_REGEX) + (mode & PARSE_MODE_TICK) + asModule + ']: `' + toPrint(code) + '`  -->  ' + outs.map(debug_toktype) + ', was so far; ' + collects.map(debug_toktype) + ' => ' + desc);
-          throw rethrow;
         }
       }
     }

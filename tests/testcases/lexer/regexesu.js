@@ -183,7 +183,7 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   ['/[^---]/ug', $REGEXU, PARSE_MODE_REGEX, 'triple dash with invert'],
   // character class escapes (pretty much a repeat of the previous wrapped in [] ...)
   [[`/[\\b]/u`, `/[a\\bc]/u`, `/[\\bc]/u`, `/[a\\bb]/u`], $REGEXU, PARSE_MODE_REGEX, 'class escape b'],
-  [[`/[\\-]/u`, `/[a\\-c]/u`, `/[\\-c]/u`, `/[a\\-b]/u`], $REGEXU, PARSE_MODE_REGEX, 'class escape dash with valid ranges is still illegal without u flag'],
+  [[`/[\\-]/u`, `/[a\\-c]/u`, `/[\\-c]/u`, `/[a\\-b]/u`], $REGEXU, PARSE_MODE_REGEX, 'class escape dash valid with u-flag'],
   [`/[b\\-a]/u`, $ERROR, PARSE_MODE_REGEX, 'class escape dash with invalid ranges is illegal'],
   // back references in char class
   [['/[\\0]/u', '/[a\\0]/u', '/[\\0b]/u', '/[a\\0b]/u', '/[0\\0b]/u', '/[1\\0b]/u'], $REGEXU, PARSE_MODE_REGEX, 'NUL escape is ok in char class'],

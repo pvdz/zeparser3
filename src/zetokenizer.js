@@ -249,7 +249,10 @@ const COLLECT_TOKENS_NONE = 0;
 const COLLECT_TOKENS_SOLID = 1; // non-whitespace
 const COLLECT_TOKENS_ALL = 2;
 
-function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
+const WEB_COMPAT_OFF = false;
+const WEB_COMPAT_ON = true;
+
+function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(typeof goal === 'boolean', 'goal boolean');
 
@@ -261,6 +264,8 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
   let finished = false; // generated an $EOF?
 
   let cache = input.charCodeAt(0);
+
+  let webModeWarnings = []; // when parsing anything that is only accepted because of annex B in the spec <token, desc>
 
   let tokens = null;
   if (collectTokens !== COLLECT_TOKENS_NONE) {
@@ -2100,8 +2105,13 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE) {
 
       case $$DASH_2D:
         ASSERT_skip($$DASH_2D);
-        // only valid with u-flag!
-        return $$DASH_2D | CHARCLASS_BADN;
+        if (webCompat === WEB_COMPAT_ON) {
+          webModeWarnings.push([pointer, 'Escaping dash in char class']);
+          return $$DASH_2D;
+        } else {
+          // only valid with u-flag!
+          return $$DASH_2D | CHARCLASS_BADN;
+        }
     }
 
     // bad escapes
@@ -2517,6 +2527,9 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   FOR_REGEX,
   IN_TEMPLATE,
   INITIAL_LEXER_FLAGS,
+
+  WEB_COMPAT_OFF,
+  WEB_COMPAT_ON,
 
   debug_toktype,
 };

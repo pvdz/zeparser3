@@ -43,6 +43,7 @@ let news = require('./expr.new');
 let objects = require('./expr.object');
 let precedents = require('./expr.precedent');
 let relationals = require('./expr.relational');
+let regexes = require('./expr.regexes');
 let templates = require('./expr.template');
 let ternaries = require('./expr.ternary');
 let unaries = require('./expr.unary');
@@ -65,6 +66,7 @@ let tests = [
   ...news,
   ...objects,
   ...precedents,
+  ...regexes,
   ...relationals,
   ...templates,
   ...ternaries,

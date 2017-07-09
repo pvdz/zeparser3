@@ -1,6 +1,8 @@
 //import {
 let {
   PARSE_MODE_REGEX,
+  WEB_COMPAT_ALWAYS,
+  WEB_COMPAT_NEVER,
 } = require('../../utils');
 //} from '../../utils';
 
@@ -207,7 +209,8 @@ let regexesn = [
   ['/[^---]/g', $REGEX, PARSE_MODE_REGEX, 'triple dash with invert'],
   // character class escapes (pretty much a repeat of the previous wrapped in [] ...)
   [[`/[\\b]/`, `/[a\\bc]/`, `/[\\bc]/`, `/[a\\bb]/`], $REGEX, PARSE_MODE_REGEX, 'class escape b'],
-  [[`/[\\-]/`, `/[a\\-c]/`, `/[\\-c]/`, `/[a\\-b]/`], $ERROR, PARSE_MODE_REGEX, 'class escape dash with valid ranges is still illegal without u flag'],
+  [[`/[\\-]/`, `/[a\\-c]/`, `/[\\-c]/`, `/[a\\-b]/`], $ERROR, PARSE_MODE_REGEX | WEB_COMPAT_NEVER, 'escaped dash in char class is only valid with u flag or in web-compat mode'],
+  [[`/[\\-]/`, `/[a\\-c]/`, `/[\\-c]/`, `/[a\\-b]/`], $REGEX, PARSE_MODE_REGEX | WEB_COMPAT_ALWAYS, 'escaped dash in char class is only valid with u flag or in web-compat mode'],
   [`/[b\\-a]/`, $ERROR, PARSE_MODE_REGEX, 'class escape dash with invalid ranges is illegal'],
   // back references in char class
   [['/[\\0]/', '/[a\\0]/', '/[\\0b]/', '/[a\\0b]/', '/[0\\0b]/', '/[1\\0b]/'], $REGEX, PARSE_MODE_REGEX, 'NUL escape is ok in char class'],
@@ -448,6 +451,9 @@ let regexesn = [
   ['/x{,', $ERROR, PARSE_MODE_REGEX, 'invalid curly quantifier', 'suffixsp'],
   ['/[+9]\\uD83D\\uDE07q\\uD83D(?:q??)\\uDE07\\uDE07\\', $ERROR, PARSE_MODE_REGEX, 'trailing backslash', ['suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
 
+  ['/\\%([0-9]*)\\[(\\^)?(\\]?[^\\]]*)\\]/', $REGEX, PARSE_MODE_REGEX, 'regression'],
+  ['/\\%([0-9]*)\\[(\\^)?\\]/', $REGEX, PARSE_MODE_REGEX, 'regression'],
+  ['/(\\]?[^\\]]*)\\]/', $REGEX, PARSE_MODE_REGEX, 'regression'],
 ];
 // exhaustive set of lead/tail/non surrogate combos, with one to three chars on each side of the dash (so (4**4)*(3**2)=2304 tests with a few dupes due to the empty case)
 ['', 'B', 'L', 'T'].forEach(a => ['', 'B', 'L', 'T'].forEach(b => ['B', 'L', 'T'].forEach(c => ['B', 'L', 'T'].forEach(d => ['', 'B', 'L', 'T'].forEach(e => ['', 'B', 'L', 'T'].forEach(f => {

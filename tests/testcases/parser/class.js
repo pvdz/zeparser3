@@ -61,7 +61,7 @@ let tests = [
         }
       },
     ]},
-    desc: 'empty class with an object because i had to be smart about it',
+    desc: 'empty class extending an empty object because i had to be smart about it',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
   },
   [
@@ -730,6 +730,24 @@ let tests = [
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     },
   ], // dynamic methods
+
+  /*
+  // string and numeric keys are also valid
+class f {
+  "foo"(){}
+  'bar'(){}
+  15(){}
+  [x](){}
+}
+
+// shorthand checks
+class f {
+  get,
+  set,
+  async,
+}
+
+   */
 
   // export default class extends F {}
   // class extends {} {}
