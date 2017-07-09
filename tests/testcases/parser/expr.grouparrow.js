@@ -253,6 +253,7 @@ let ga = [
           ],
           id: null,
           generator: false,
+          async: false,
           expression: true,
           body: {type: 'Identifier', name: 'x'},
         }},
@@ -265,10 +266,10 @@ let ga = [
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'ArrowFunctionExpression',
-          params: [
-          ],
+          params: [],
           id: null,
           generator: false,
+          async: false,
           expression: true,
           body: {type: 'Identifier', name: 'x'},
         }},
@@ -286,6 +287,7 @@ let ga = [
           ],
           id: null,
           generator: false,
+          async: false,
           expression: true,
           body: {type: 'Identifier', name: 'x'},
         }},
@@ -303,6 +305,7 @@ let ga = [
           ],
           id: null,
           generator: false,
+          async: false,
           expression: false,
           body: {type: 'BlockStatement', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}]},
         }},
@@ -320,6 +323,7 @@ let ga = [
           ],
           id: null,
           generator: false,
+          async: false,
           expression: false,
           body: {type: 'BlockStatement', body: [
             {type: 'ExpressionStatement', expression: {type: 'Literal', value: '<TODO>', raw: '/x/'}},
@@ -340,6 +344,7 @@ let ga = [
           ],
           id: null,
           generator: false,
+          async: false,
           expression: true,
           body: {type: 'Identifier', name: 'x'},
         }},
@@ -390,7 +395,7 @@ let ga = [
                 operator: '=',
                 right: {type: 'Literal', value: '<TODO>', raw: '2'}
               },
-            ], id: null, generator: false, expression: true, body: {type: 'Identifier', name: 'x'},
+            ], id: null, generator: false, async: false, expression: true, body: {type: 'Identifier', name: 'x'},
           },
         }],
       },
@@ -450,6 +455,7 @@ let ga = [
                 params: [{type: 'Identifier', name: 'b'}],
                 id: null,
                 generator: false,
+                async: false,
                 expression: true,
                 body: {type: 'Identifier', name: 'c'},
               },
@@ -460,44 +466,6 @@ let ga = [
       desc: 'group of some two assignments',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     },
-    {
-      code: 'f(async ()=>{})',
-      ast: {type: 'Program', body: [
-        {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
-          {
-            type: 'ArrowFunctionExpression',
-            params: [{type: 'Identifier', name: 'b'}],
-            id: null,
-            generator: false,
-            expression: true,
-            body: {type: 'Identifier', name: 'c'},
-          },
-        ]}},
-      ]},
-      desc: 'async arrow',
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-    },
-    {
-      code: 'f(async ())',
-      ast: {type: 'Program', body: [
-        {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
-          {type: 'CallExpression', callee: {type: 'Identifier', name: 'asyn'}, arguments: []},
-        ]}},
-      ]},
-      desc: 'calling async as a function (so not an async function but async as a var name)',
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT],
-    },
-    {
-      code: 'f(async)',
-      ast: {type: 'Program', body: [
-        {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
-          {type: 'Identifier', name: 'async'},
-        ]}},
-      ]},
-      desc: 'using async a regular var name instead of keyword',
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-    },
-    // need to test invalid async arrows
   ], // arrow
 ];
 

@@ -78,6 +78,15 @@ let tests = [
     desc: 'return, no value, semi',
     tokens: [$IDENT, $NUMBER_DEC, $PUNCTUATOR],
   },
+  {
+    code: 'return \n foo;',
+    ast: {type: 'Program', body: [
+      {type: 'ReturnStatement', argument: null},
+      {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}},
+    ]},
+    desc: 'return, asi check',
+    tokens: [$IDENT, $ASI, $IDENT, $PUNCTUATOR],
+  },
 ];
 
 //export default tests;

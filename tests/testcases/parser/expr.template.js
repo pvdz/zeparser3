@@ -292,6 +292,7 @@ let templates = [
             params: [],
             id: null,
             generator: false,
+            async: false,
             expression: false,
             body: {type: 'BlockStatement', body: []},
           },
@@ -317,6 +318,7 @@ let templates = [
             ],
             id: null,
             generator: false,
+            async: false,
             expression: false,
             body: {type: 'BlockStatement', body: [
               {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}},

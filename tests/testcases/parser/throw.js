@@ -44,6 +44,7 @@ let tests = [
     desc: 'throw, eof',
     tokens: [$IDENT, $IDENT, $ASI],
   },
+  // `throw \n foo` should throw an error since the throw rhs is mandatory
 ];
 
 //export default tests;

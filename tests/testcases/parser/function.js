@@ -227,6 +227,7 @@ let tests = [
       desc: 'empty async function',
       tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     },
+    // test error when doing `async \n function` or even without function (asi causes error)
   ], // async
   [
     '  generator function',

@@ -237,9 +237,9 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     ASSERT(Array.isArray(_path[_path.length - 1][prop]), 'expecting to add to an existing array');
     _path[_path.length - 1][prop].push(value);
   }
-  function AST_wrapOpened(prop, value, newProp) {
+  function AST_wrapOpened(prop, newNodeType, newProp) {
     if (traceast) {
-      console.log('AST_wrapOpened', prop, value, newProp)
+      console.log('AST_wrapOpened', prop, newNodeType, newProp)
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before:', require('util').inspect(_tree, false, null))
     }
@@ -260,7 +260,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       ASSERT(node === parent[prop], 'top should be parent[prop]');
     }
 
-    AST_open(prop, value, true);
+    AST_open(prop, newNodeType, true);
     // set it as child of new node
     AST_set(newProp, node);
     _path.push(node);
@@ -268,9 +268,9 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       console.log('- tree after:', require('util').inspect(_tree, false, null))
     }
   }
-  function AST_wrapClosed(prop, value, newProp) {
+  function AST_wrapClosed(prop, newNodeType, newProp) {
     if (traceast) {
-      console.log('AST_wrapClosed', prop, value, newProp)
+      console.log('AST_wrapClosed', prop, newNodeType, newProp)
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before:', require('util').inspect(_tree, false, null))
     }
@@ -291,13 +291,38 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     if (traceast) console.log(' - child:', child);
     ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
-    AST_open(prop, value, true);
+    AST_open(prop, newNodeType, true);
     // set it as child of new node
     // TODO: what if array?
     AST_set(newProp, child);
     if (traceast) {
       console.log('- tree after:', require('util').inspect(_tree, false, null))
     }
+  }
+  function AST_replaceOpened(prop, oldNodeType, newNodeType) {
+    if (traceast) {
+      console.log('AST_replaceOpened', prop, newNodeType, newNodeType)
+      console.log('- path:', _path.map(o => o.type).join(' - '));
+      console.log('- tree before:', require('util').inspect(_tree, false, null))
+    }
+
+    // replace the node at given prop with a new node
+    // of given type. return the old node.
+
+    let oldNode = _path.pop();
+    let parent = _path[_path.length - 1];
+
+    ASSERT(oldNode.type === oldNodeType, 'expecting to replace a certain node');
+    ASSERT((Array.isArray(parent[prop]) ? parent[prop][parent[prop].length-1]:parent[prop]) === oldNode, 'should be the target node');
+
+    if (Array.isArray(parent[prop])) parent[prop].pop(); // the OPEN below will only append if array
+
+    AST_open(prop, newNodeType, true);
+    if (traceast) {
+      console.log('- tree after:', require('util').inspect(_tree, false, null))
+    }
+
+    return oldNode;
   }
   function AST_wrapClosedArray(prop, value, newProp) {
     if (traceast) {
@@ -505,27 +530,20 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     // next token cant start with forward slash (may be optimizable)
     skipRexOrDieSingleChar(chr, lexerFlags);
   }
-  function skipRexIf(what, lexerFlags) {
-    // skip a token and if the next token starts with a forward slash, search for a regular expression literal
+  function skipRexIf(str, lexerFlags) {
+    // if current token matches str, skip to next token
+    // in that case if the next token starts with a forward slash, search for a regular expression literal
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
+    ASSERT(typeof str === 'string', 'string matches, for now');
 
-    if (typeof what === 'string') {
-      if (curtok.str === what) {
-        skipRex(lexerFlags);
-        return true;
-      }
-      return false;
-    }
-    ASSERT(typeof what === 'number');
-    if (curtype === what) {
+    if (curtok.str === str) {
       skipRex(lexerFlags);
       return true;
     }
     return false;
   }
-  function skipAnyIf(what, lexerFlags) {
-    // the next token cant start with a forward slash (can be optimized)
-    return skipRexIf(what, lexerFlags);
+  function skipAnyIf(str, lexerFlags) {
+    return skipRexIf(str, lexerFlags);
   }
 
   function parseTopLevels(lexerFlags) {
@@ -600,9 +618,16 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
   // ### functions
 
-  function parseAsyncFunction(lexerFlags, optionalIdent, astProp) {
+  function parseAsyncFunctionDecl(lexerFlags, optionalIdent, astProp) {
     ASSERT_skipAny('async', lexerFlags);
-    return parseFunction(lexerFlags, true, true, optionalIdent, astProp);
+
+    if (curtok.nl || curtype === $EOF || curc === $$SEMI_3B) {
+      THROW('Function for async must follow the keyword immediately'); // "async;" as an expr stmt is illegal
+    } else if (curtok.str !== 'function') { // must do this check before calling `parseFunction`, anyways
+      THROW('Async declaration must be for function (not arrow)');
+    } else {
+      parseFunction(lexerFlags, true, true, optionalIdent, astProp);
+    }
   }
   function parseFunction(lexerFlags, funcDecl, isAsync, optionalIdent, astProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerflags number');
@@ -711,7 +736,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
 
     switch (curtok.str) {
       case 'async':
-        parseAsyncFunction(lexerFlags, false, astProp);
+        parseAsyncFunctionDecl(lexerFlags, false, astProp);
         break;
 
       case 'break':
@@ -1077,7 +1102,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
         // export async function(){}
-        parseAsyncFunction(lexerFlags, true, 'declaration');
+        parseAsyncFunctionDecl(lexerFlags, true, 'declaration');
       } else {
         // any expression is exported as is (but is not a live binding)
         parseExpression(lexerFlags, 'declaration');
@@ -1133,7 +1158,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
         AST_set('source', null);
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
-        parseAsyncFunction(lexerFlags, false, 'declaration');
+        parseAsyncFunctionDecl(lexerFlags, false, 'declaration');
         AST_set('source', null);
       } else {
         THROW('Unknown export type [' + curtok.str +  ']');
@@ -1456,7 +1481,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
   function parseThrowStatement(lexerFlags, astProp) {
     AST_open(astProp, 'ThrowStatement');
     ASSERT_skipRex('throw', lexerFlags);
-    parseExpression(lexerFlags, 'argument');
+    if (!curtok.nl && curtype !== $EOF && curc !== $$SEMI_3B) {
+      parseExpression(lexerFlags, 'argument');
+    } else {
+      AST_set('argument', null);
+    }
     parseSemiOrAsi(lexerFlags);
     AST_close();
   }
@@ -1963,15 +1992,62 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       case 'async':
         // either function call (so `async();`), async function expression, or async arrow
         if (curc === $$PAREN_L_28) {
-          TODO
+          // async () => x;
+          // async();
+
+          // special case! `async` is the only identifier that may preceed an arrow
+          // to make matters worse, it may still be a regular function call.
+
+          ASSERT_skipRex('(', lexerFlags);
+
+          // the "group" will either be a 'param' or 'arguments'
+          // if arguments, some expressions may have to be renamed to pattern
+
+          AST_open(astProp, 'CallExpression');
+          AST_setIdent('callee', identToken);
+
+          AST_set('arguments', []);
+          if (curc !== $$PAREN_R_29) {
+            // TODO: validate call args (arbitrary expressions) vs arrow head (destructuring patterns)
+            do {
+              parseExpression(lexerFlags, 'arguments');
+            } while (curc === $$COMMA_2C);
+          }
+          skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
+
+          if (curc === $$IS_3D && curtok.str === '=>') {
+            // this is probably the only case where we throw away a node rather than recycle it
+            // the problem is that the current callexpression node as "arguments" but for
+            // an arrow that must be "params" and we can't perf-safely rename a prop. so we swap.
+
+            // take the node in `astProp`
+            // cache the node.params
+            // overwrite the value in `astProp` forcefully
+            // set the cached node to `params`
+            // move on as nothing has happened
+
+            let callNode = AST_replaceOpened(astProp, 'CallExpression', 'ArrowFunctionExpression');
+            AST_set('params', callNode.arguments);
+            parseArrowFromPunc(lexerFlags, true);
+            AST_close(); // CallExpression / ArrowFunctionExpression
+          } else {
+            AST_close(); // CallExpression / ArrowFunctionExpression
+            parseValueTail(lexerFlags, false, astProp);
+          }
+
+
+          return false;
         } else if (curtok.str === 'function') {
+          // async function(){};
           ASSERT_skipAny('function', lexerFlags); // TODO: optimize; next must be * or ( or IDENT
           parseFunctionExpression(lexerFlags, true, astProp);
+          return false;
         } else {
+          // async;
           // TODO: reject in cases where async is considered a keyword
           AST_setIdent(astProp, identToken);
+          return true;
         }
-        return false;
       case 'delete':
       case 'typeof':
       case 'void':
@@ -1996,11 +2072,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
           AST_open(astProp, 'ArrowFunctionExpression');
           AST_set('params', []);
           AST_setIdent('params', identToken);
-          ASSERT_skipRex('=>', lexerFlags);
-          AST_set('id', null);
-          AST_set('generator', false);
-          AST_set('expression', true);
-          parseExpression(lexerFlags, 'body');
+          parseArrowFromPunc(lexerFlags, false);
           AST_close();
         } else {
           // TODO: verify identifier (note: can be value keywords)
@@ -2392,14 +2464,14 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
     ASSERT_skipRex('(', lexerFlags);
 
     if (curc === $$PAREN_R_29) {
-      // the _only_ place where `()` is valid is an arrow header, so;
+      // (the only place where `()` is valid is an arrow header or call parens)
 
       ASSERT_skipAny(')', lexerFlags); // TODO: optimize; must be =>
       if (curtok.str !== '=>') THROW('Empty group must indicate an arrow');
 
       AST_open(astProp, 'ArrowFunctionExpression');
       AST_set('params', []);
-      parseArrowFromPunc(lexerFlags);
+      parseArrowFromPunc(lexerFlags, false);
       AST_close();
       return false;
     }
@@ -2432,22 +2504,23 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE) {
       else if (!Array.isArray(node.params)) node.params = [node.params];
       // </SCRUB AST>
 
-      parseArrowFromPunc(lexerFlags);
+      parseArrowFromPunc(lexerFlags, false);
 
       AST_close();
     }
 
     return assignable;
   }
-  function parseArrowFromPunc(lexerFlags) {
+  function parseArrowFromPunc(lexerFlags, isAsync) {
     ASSERT_skipRex('=>', lexerFlags);
     AST_set('id', null);
     AST_set('generator', false);
+    AST_set('async', isAsync);
     if (curc === $$CURLY_L_7B) {
-      AST_set('expression', false);
+      AST_set('expression', false); // "body of arrow is block"
       parseBlockStatement(lexerFlags, 'body');
     } else {
-      AST_set('expression', true);
+      AST_set('expression', true); // "body of arrow is expr"
       parseExpression(lexerFlags, 'body');
     }
   }

@@ -23,6 +23,8 @@ let {
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from '../src/zetokenizer';
 
+//import asyncTests from './testcases/parser/async';
+let asyncTests = require('./testcases/parser/async');
 //import blockTests from './testcases/parser/block';
 let blockTests = require('./testcases/parser/block');
 //import breakTests from './testcases/parser/break';
@@ -71,6 +73,7 @@ let whileTests = require('./testcases/parser/while');
 let withTests = require('./testcases/parser/with');
 
 let tests = [
+  ...asyncTests,
   ...blockTests,
   ...breakTests,
   ...continueTests,
@@ -95,7 +98,6 @@ let tests = [
   ...whileTests,
   ...withTests,
 
-  // async arrow https://tc39.github.io/ecma262/#prod-AsyncArrowHead
   // (new) regular expression edge cases. in particular with destructuring patterns and asi
   // `[]\n/x` (division)
   // `[]\n/x/` (Error)
@@ -175,7 +177,7 @@ function _one(Parser, testSuffix, code, ast, desc, tokens) {
   return passed;
 }
 
-const STOP_AFTER_FAIL = false;
+const STOP_AFTER_FAIL = true;
 let pass = 0;
 let fail = 0;
 let crash = 0;
@@ -183,7 +185,7 @@ let testi = 0;
 try {
   [
     [ZeParser, true, 'dev build'],
-    [ZeParserBuild, false, 'prod build'],
+    //[ZeParserBuild, false, 'prod build'],
   ].forEach(([parser, hasAst, desc],i) => {
     checkAST = hasAst;
     parserDesc = desc;
