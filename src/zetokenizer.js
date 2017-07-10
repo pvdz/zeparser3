@@ -460,13 +460,13 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
 
     let token;
     do {
+      ++anyTokenCount;
       if (neof()) {
         let cstart = cache;
         let start = pointer;
         wasWhite = false;
         let consumedTokenType = next(lexerFlags);
         token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite, cstart);
-        ++anyTokenCount;
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
         token = createToken($EOF, pointer, pointer, consumedNewline, true, 0);
