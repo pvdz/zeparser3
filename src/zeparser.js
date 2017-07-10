@@ -152,6 +152,9 @@ let { default: ZeTokenizer,
   IN_TEMPLATE,
   INITIAL_LEXER_FLAGS,
 
+  RETURN_ANY_TOKENS,
+  RETURN_SOLID_TOKENS,
+
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
 
@@ -160,6 +163,33 @@ let { default: ZeTokenizer,
 //} from '../src/zetokenizer';
 
 // <BODY>
+
+const LHS_NOT_PAREN_START = false;
+const INSIDE_PARAM_DECL = true;
+const NOT_DESTRUCTURING = false;
+const WAS_GET = true;
+const NOT_GET = false;
+const WAS_SET = true;
+const NOT_SET = false;
+const WAS_ASYNC = true;
+const NOT_ASYNC = false;
+const WAS_GENERATOR = true;
+const NOT_GENERATOR = false;
+const WAS_COMPUTED = true;
+const NOT_COMPUTED = false;
+const CALLED_FROM_WRAPPER = true;
+const CONVERT_ASSIGNMENTS_TOO = true;
+const DONT_CONVERT_ASSIGNMENTS = false;
+const IS_FUNC_DECL = true;
+const NOT_FUNC_DECL = false;
+const IDENT_OPTIONAL = true;
+const IDENT_REQUIRED = false;
+const IS_REALLY_FUNCEXPR = true;
+const NOT_FUNCEXPR = false;
+const IS_ASSIGNABLE = true;
+const NOT_ASSIGNABLE = false;
+const HAS_STATIC_MODIFIER = true;
+const NO_STATIC_MODIFIER = false;
 
 function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON) {
   let tok = ZeTokenizer(code, false, collectTokens);
@@ -265,7 +295,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       ASSERT(node === parent[prop], 'top should be parent[prop]');
     }
 
-    AST_open(prop, newNodeType, true);
+    AST_open(prop, newNodeType, CALLED_FROM_WRAPPER);
     // set it as child of new node
     AST_set(newProp, node);
     _path.push(node);
@@ -296,7 +326,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     if (traceast) console.log(' - child:', child);
     ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
-    AST_open(prop, newNodeType, true);
+    AST_open(prop, newNodeType, CALLED_FROM_WRAPPER);
     // set it as child of new node
     // TODO: what if array?
     AST_set(newProp, child);
@@ -322,7 +352,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
 
     if (Array.isArray(parent[prop])) parent[prop].pop(); // the OPEN below will only append if array
 
-    AST_open(prop, newNodeType, true);
+    AST_open(prop, newNodeType, CALLED_FROM_WRAPPER);
     if (traceast) {
       console.log('- tree after:', require('util').inspect(_tree, false, null))
     }
@@ -349,7 +379,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     if (traceast) console.log(' - child:', child);
     ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
-    AST_open(prop, value, true);
+    AST_open(prop, value, CALLED_FROM_WRAPPER);
     // set the node as the first child of the property as an array
     AST_set(newProp, [child]);
     if (traceast) {
@@ -380,7 +410,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     ASSERT(node, 'should have this node');
     ASSERT(assignmentsToo || node.type === 'ArrayExpression' || node.type === 'ObjectExpression', 'should start at an object or array literal');
 
-    AST__destruct(node, true); // TODO: remove the arg.
+    AST__destruct(node, CONVERT_ASSIGNMENTS_TOO); // TODO: remove the arg.
     if (traceast) {
       console.log('- tree after destruct:', require('util').inspect(_tree, false, null))
     }
@@ -404,7 +434,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     } else if (node.type === 'AssignmentExpression') {
       if (assignmentsToo) node.type = 'AssignmentPattern';
       // walk the left of the assignment only
-      AST__destruct(node.left, false);
+      AST__destruct(node.left, DONT_CONVERT_ASSIGNMENTS);
     }
   }
 
@@ -429,7 +459,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT((lexerFlags & FOR_REGEX) === 0, 'regex flag should not be set anywhere');
 
-    curtok = tok(lexerFlags | FOR_REGEX, false);
+    curtok = tok(lexerFlags | FOR_REGEX, RETURN_SOLID_TOKENS);
     curtype = curtok.type;
     curc = curtok.c;
 
@@ -442,7 +472,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT((lexerFlags & FOR_REGEX) === 0, 'regex flag should not be set anywhere');
 
-    curtok = tok(lexerFlags, false);
+    curtok = tok(lexerFlags, RETURN_SOLID_TOKENS);
     curtype = curtok.type;
     curc = curtok.c;
 
@@ -631,7 +661,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     } else if (curtok.str !== 'function') { // must do this check before calling `parseFunction`, anyways
       THROW('Async declaration must be for function (not arrow)');
     } else {
-      parseFunction(lexerFlags, true, true, optionalIdent, astProp);
+      parseFunction(lexerFlags, IS_FUNC_DECL, WAS_ASYNC, optionalIdent, astProp);
     }
   }
   function parseFunction(lexerFlags, funcDecl, isAsync, optionalIdent, astProp) {
@@ -658,14 +688,14 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     if (!isAsync && skipAnyIf('*', lexerFlags)) {
       isGenerator = true;
     }
-    parseFunctionFromIdent(lexerFlags, funcDecl, false, isGenerator, isAsync, optionalIdent, astProp);
+    parseFunctionFromIdent(lexerFlags, funcDecl, NOT_FUNCEXPR, isGenerator, isAsync, optionalIdent, astProp);
   }
   function parseFunctionExpression(lexerFlags, isAsync, astProp) {
     let isGenerator = false;
     if (!isAsync && skipAnyIf('*', lexerFlags)) {
       isGenerator = true;
     }
-    parseFunctionFromIdent(lexerFlags, false, true, isGenerator, isAsync, false, astProp);
+    parseFunctionFromIdent(lexerFlags, NOT_FUNC_DECL, IS_REALLY_FUNCEXPR, isGenerator, isAsync, IDENT_REQUIRED, astProp);
   }
   function parseFunctionFromIdent(lexerFlags, isFuncDecl, isRealExpr, isGenerator, isAsync, isIdentOptional, astProp) {
     ASSERT(arguments.length === 7, 'arg count');
@@ -686,10 +716,10 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       AST_set('id', null);
     }
 
-    parseFunctionFromParams(lexerFlags, isFuncDecl, isAsync, isGenerator, astProp);
+    parseFunctionFromParams(lexerFlags);
     AST_close();
   }
-  function parseFunctionFromParams(lexerFlags, funcDecl, isAsync, isGenerator, astProp) {
+  function parseFunctionFromParams(lexerFlags) {
     AST_set('params', []);
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
     if (curc !== $$PAREN_R_29) {
@@ -711,8 +741,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       AST_setIdent(astProp, curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (curtype === $PUNCTUATOR) {
-      if (curc === $$CURLY_L_7B) parseObjectLitOrDestruc(lexerFlags, true, astProp);
-      else if (curc === $$SQUARE_L_5B) parseArrayLitOrDestruc(lexerFlags, true, astProp);
+      if (curc === $$CURLY_L_7B) parseObjectLitOrDestruc(lexerFlags, INSIDE_PARAM_DECL, astProp);
+      else if (curc === $$SQUARE_L_5B) parseArrayLitOrDestruc(lexerFlags, INSIDE_PARAM_DECL, astProp);
       else TODO;
     } else { // ?
       TODO
@@ -741,7 +771,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
 
     switch (curtok.str) {
       case 'async':
-        parseAsyncFunctionDecl(lexerFlags, false, astProp);
+        parseAsyncFunctionDecl(lexerFlags, IDENT_REQUIRED, astProp);
         break;
 
       case 'break':
@@ -749,7 +779,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         break;
 
       case 'class':
-        parseClass(lexerFlags, false, astProp);
+        parseClass(lexerFlags, IDENT_REQUIRED, astProp);
         break;
 
       case 'const':
@@ -777,7 +807,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         break;
 
       case 'function':
-        parseFunction(lexerFlags, true, false, false, astProp);
+        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_REQUIRED, astProp);
         break;
 
       case 'if':
@@ -929,7 +959,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
 
   function parseClassMethod(lexerFlags) {
     // everything from objlit that is a method optionally prefixed by `static`, and an empty statement
-    return _parseClassMethod(lexerFlags, false);
+    return _parseClassMethod(lexerFlags, NO_STATIC_MODIFIER);
   }
   function _parseClassMethod(lexerFlags, isStatic) {
     ASSERT(arguments.length === _parseClassMethod.length, 'arg count');
@@ -943,12 +973,12 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
           if (isStatic) {
             return TODO // this is a regular method named `static` which seems to be okay.
           } else {
-            return _parseClassMethod(lexerFlags, true);
+            return _parseClassMethod(lexerFlags, HAS_STATIC_MODIFIER);
           }
         case 'async':
           if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
             // async function
-            parseMethod(lexerFlags, true, false, false, false, isStatic);
+            parseMethod(lexerFlags, WAS_ASYNC, NOT_GET, NOT_SET, NOT_GENERATOR, isStatic);
             return true;
           }
           // method named "async"
@@ -956,7 +986,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         case 'get':
           if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
             // getter function
-            parseMethod(lexerFlags, false, true, false, false, isStatic);
+            parseMethod(lexerFlags, NOT_ASYNC, WAS_GET, NOT_SET, NOT_GENERATOR, isStatic);
             return true;
           }
           // method named "get"
@@ -964,21 +994,21 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         case 'set':
           if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
             // setter function
-            parseMethod(lexerFlags, false, false, true, false, isStatic);
+            parseMethod(lexerFlags, NOT_ASYNC, NOT_GET, WAS_SET, NOT_GENERATOR, isStatic);
             return true;
           }
           // method named "set"
           break;
         default:
       }
-      parseMethodIdent(lexerFlags, false, false, false, false, isStatic, identToken);
+      parseMethodIdent(lexerFlags, NOT_ASYNC, NOT_GET, NOT_SET, NOT_GENERATOR, isStatic, identToken);
     } else if (curc === $$SQUARE_L_5B) {
       // dynamic property
-      parseMethodDynamic(lexerFlags, false, false, false, false, isStatic);
+      parseMethodDynamic(lexerFlags, NOT_ASYNC, NOT_SET, NOT_GET, NOT_GENERATOR, isStatic);
     } else if (curc === $$STAR_2A) {
       // generator method
       ASSERT_skipAny('*', lexerFlags);
-      parseMethod(lexerFlags, false, false, false, true, isStatic);
+      parseMethod(lexerFlags, NOT_ASYNC, NOT_GET, NOT_SET, WAS_GENERATOR, isStatic);
     } else if (curc === $$SEMI_3B) {
       // this empty statement is not part of the AST
       ASSERT_skipAny(';', lexerFlags);
@@ -1014,7 +1044,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     AST_setIdent('key', identToken);
 
     if (curc !== $$PAREN_L_28) THROW('Missing method arg parens'); // must explicitly check here
-    parseFunctionFromIdent(lexerFlags, false, false, isGenerator, isAsync, true, 'value');
+    parseFunctionFromIdent(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator, isAsync, IDENT_OPTIONAL, 'value');
     AST_close(); // MethodDefinition
   }
   function parseMethodDynamic(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic) {
@@ -1028,7 +1058,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     parseExpression(lexerFlags, 'key');
     skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
     if (curc !== $$PAREN_L_28) THROW('Missing method arg parens'); // must explicitly check here
-    parseFunctionFromIdent(lexerFlags, false, false, isGenerator, isAsync, true, 'value');
+    parseFunctionFromIdent(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator, isAsync, IDENT_OPTIONAL, 'value');
     AST_close(); // MethodDefinition
   }
 
@@ -1097,17 +1127,17 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
 
       if (curtok.str === 'class') {
         // export class ...
-        parseClass(lexerFlags, true, 'declaration');
+        parseClass(lexerFlags, IDENT_OPTIONAL, 'declaration');
       } else if (curc === $$F_66 && curtok.str === 'function') {
         // export default function f(){}
         // export default function* f(){}
         // export default function(){}
         // export default function* (){}
-        parseFunction(lexerFlags, true, false, true, 'declaration');
+        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_OPTIONAL, 'declaration');
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
         // export async function(){}
-        parseAsyncFunctionDecl(lexerFlags, true, 'declaration');
+        parseAsyncFunctionDecl(lexerFlags, IDENT_OPTIONAL, 'declaration');
       } else {
         // any expression is exported as is (but is not a live binding)
         parseExpression(lexerFlags, 'declaration');
@@ -1150,7 +1180,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
           _parseAnyVarDecls(lexerFlags, 'const', 'declaration');
         } else if (curtok.str === 'class') {
           // export class ...
-          parseClass(lexerFlags, false, 'declaration');
+          parseClass(lexerFlags, IDENT_REQUIRED, 'declaration');
         } else {
           THROW('Unknown export type [' + curtok.str +  ']');
         }
@@ -1159,11 +1189,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         // export function f(){}
         // export function* f(){}
         // (anonymous should not be allowed but parsers seem to do it anyways)
-        parseFunction(lexerFlags, true, false, false, 'declaration');
+        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_REQUIRED, 'declaration');
         AST_set('source', null);
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
-        parseAsyncFunctionDecl(lexerFlags, false, 'declaration');
+        parseAsyncFunctionDecl(lexerFlags, IDENT_REQUIRED, 'declaration');
         AST_set('source', null);
       } else {
         THROW('Unknown export type [' + curtok.str +  ']');
@@ -1724,14 +1754,14 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
   }
   function parseExpressionAfterLiteral(lexerFlags, astProp) {
     // assume we just parsed and skipped a literal (string/number/regex)
-    let assignable = parseValueTail(lexerFlags, false, astProp);
-    return parseExpressionFromOp(lexerFlags, assignable, false, astProp);
+    let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, astProp);
+    return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
   }
   function parseExpressionAfterIdentifier(lexerFlags, identToken, astProp) {
     // identToken is a parsed, skipped, and validated value identifier (including the valueless `null`)
     let assignable = parseValueHeadBodyIdent(lexerFlags, identToken, astProp);
     assignable = parseValueTail(lexerFlags, assignable, astProp);
-    return parseExpressionFromOp(lexerFlags, assignable, false, astProp);
+    return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
   }
   function parseExpressionFromOp(lexerFlags, assignable, lhsWasParenStart, astProp) {
     ASSERT(arguments.length === 4, 'arg count');
@@ -1760,7 +1790,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         // current op is stronger than the previous op _currently_ at the top of the path
         let prev = _path[_path.length-1][astProp];
         let swapped = false;
-        if (prev && !lhsWasParenStart && (prev.type === 'BinaryExpression' || prev.type === 'LogicalExpression')) {
+        if (prev && lhsWasParenStart === LHS_NOT_PAREN_START && (prev.type === 'BinaryExpression' || prev.type === 'LogicalExpression')) {
           let sl = getStrenght(curtok.str);
           let sr = getStrenght(prev.operator);
           swapped =  sl > sr || (sl === sr && curtok.str === '**'); // `**` is the right-associative exception here
@@ -1919,9 +1949,9 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       return false;
     } else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
-        return parseObjectLitOrDestruc(lexerFlags, false, astProp);
+        return parseObjectLitOrDestruc(lexerFlags, NOT_DESTRUCTURING, astProp); // TODO: is that true? is this never a destructuring context?
       } else if (curc === $$SQUARE_L_5B) {
-        return parseArrayLitOrDestruc(lexerFlags, false, astProp);
+        return parseArrayLitOrDestruc(lexerFlags, NOT_DESTRUCTURING, astProp);
       } else if (curc === $$PAREN_L_28) {
         return parseGroupOrArrow(lexerFlags, astProp);
       } else if (curtok.str === '++' || curtok.str === '--') {
@@ -1989,10 +2019,10 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         AST_close();
         return false;
       case 'class':
-        parseClass(lexerFlags, true, astProp);
+        parseClass(lexerFlags, IDENT_OPTIONAL, astProp);
         return false;
       case 'function':
-        parseFunctionExpression(lexerFlags, false, astProp);
+        parseFunctionExpression(lexerFlags, NOT_ASYNC, astProp);
         return false;
       case 'async':
         // either function call (so `async();`), async function expression, or async arrow
@@ -2033,11 +2063,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
 
             let callNode = AST_replaceOpened(astProp, 'CallExpression', 'ArrowFunctionExpression');
             AST_set('params', callNode.arguments);
-            parseArrowFromPunc(lexerFlags, true);
+            parseArrowFromPunc(lexerFlags, WAS_ASYNC);
             AST_close(); // CallExpression / ArrowFunctionExpression
           } else {
             AST_close(); // CallExpression / ArrowFunctionExpression
-            parseValueTail(lexerFlags, false, astProp);
+            parseValueTail(lexerFlags, NOT_ASSIGNABLE, astProp);
           }
 
 
@@ -2045,7 +2075,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         } else if (curtok.str === 'function') {
           // async function(){};
           ASSERT_skipAny('function', lexerFlags); // TODO: optimize; next must be * or ( or IDENT
-          parseFunctionExpression(lexerFlags, true, astProp);
+          parseFunctionExpression(lexerFlags, WAS_ASYNC, astProp);
           return false;
         } else {
           // async;
@@ -2077,7 +2107,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
           AST_open(astProp, 'ArrowFunctionExpression');
           AST_set('params', []);
           AST_setIdent('params', identToken);
-          parseArrowFromPunc(lexerFlags, false);
+          parseArrowFromPunc(lexerFlags, NOT_ASYNC);
           AST_close();
         } else {
           // TODO: verify identifier (note: can be value keywords)
@@ -2127,8 +2157,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     AST_close(); // TemplateLiteral
 
     // assume we just parsed and skipped a literal (string/number/regex)
-    let assignable = parseValueTail(lexerFlags, true, astProp);
-    return parseExpressionFromOp(lexerFlags, assignable, false, astProp);
+    let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, astProp);
+    return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
   }
 
   function parseQuasiPart(lexerFlags, tail, astProp) {
@@ -2232,11 +2262,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       // note that `async`, `get`, and `set` are valid prop names as well as method modifiers (=> prefixes)
 
       if (startToken.str === 'get') {
-        parseObjLitMethodAfterModifier(lexerFlags, startToken, true, false, false, astProp);
+        parseObjLitMethodAfterModifier(lexerFlags, startToken, WAS_GET, NOT_SET, NOT_ASYNC, astProp);
       } else if (startToken.str === 'set') {
-        parseObjLitMethodAfterModifier(lexerFlags, startToken, false, true, false, astProp);
+        parseObjLitMethodAfterModifier(lexerFlags, startToken, NOT_GET, WAS_SET, NOT_ASYNC, astProp);
       } else if (startToken.str === 'async') {
-        parseObjLitMethodAfterModifier(lexerFlags, startToken, false, false, true, astProp);
+        parseObjLitMethodAfterModifier(lexerFlags, startToken, NOT_GET, NOT_SET, WAS_ASYNC, astProp);
       } else if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
         parseObjLitValueAfterIdentShorthand(lexerFlags, startToken, astProp);
       } else if (curc === $$IS_3D && curtok.str === '=') {
@@ -2245,18 +2275,18 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       } else {
         // TODO: what about `true`, `false`, and `null`? are they idents or literals in the ast? (looks like idents...)
         AST_setIdent('key', startToken);
-        parseObjLitAnyFromLitKey(lexerFlags, false, astProp);
+        parseObjLitAnyFromLitKey(lexerFlags, NOT_COMPUTED, astProp);
       }
     } else if (startC === $$STAR_2A) {
       // generator
       parseObjLitGenerator(lexerFlags, astProp);
     } else if ((startType & $STRING) === $STRING || (startType & $NUMBER) === $NUMBER) {
       AST_setLiteral('key', startToken);
-      parseObjLitAnyFromLitKey(lexerFlags, false, astProp);
+      parseObjLitAnyFromLitKey(lexerFlags, NOT_COMPUTED, astProp);
     } else if (startC === $$SQUARE_L_5B) {
       parseExpression(lexerFlags, 'key');
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
-      parseObjLitAnyFromLitKey(lexerFlags, true, astProp);
+      parseObjLitAnyFromLitKey(lexerFlags, WAS_COMPUTED, astProp);
     } else {
       console.log('Next error:', startToken);
       THROW('Unknown property name declaration in previous token'); // position will be slightly off :(
@@ -2269,11 +2299,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     ASSERT(wasGet || wasSet || wasAsync, 'should be called for one of the ident modifiers');
     if (curc === $$PAREN_L_28) {
       AST_setIdent('key', token);
-      parseObjLitMethodAfterKey(lexerFlags, false, false, false, false, false, astProp);
+      parseObjLitMethodAfterKey(lexerFlags, NOT_COMPUTED, NOT_GET, NOT_SET, NOT_ASYNC, NOT_GENERATOR, astProp);
     } else if (curc === $$COLON_3A) {
       AST_setIdent('key', token);
       ASSERT_skipRex(':', lexerFlags);
-      parseObjLitValueAfterKeyColon(lexerFlags, false, astProp);
+      parseObjLitValueAfterKeyColon(lexerFlags, NOT_COMPUTED, astProp);
     } else if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
       // rare edge case:  x={get}  x={set}  x={async}
       parseObjLitValueAfterIdentShorthand(lexerFlags, token, astProp);
@@ -2281,15 +2311,15 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       ASSERT_skipRex('[', lexerFlags);
       parseExpression(lexerFlags, 'key');
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
-      parseObjLitMethodAfterKey(lexerFlags, true, wasGet, wasSet, wasAsync, false, astProp);
+      parseObjLitMethodAfterKey(lexerFlags, WAS_COMPUTED, wasGet, wasSet, wasAsync, NOT_GENERATOR, astProp);
     } else if (curtype === $IDENT) {
       AST_setIdent('key', curtok);
       ASSERT_skipAny($IDENT, lexerFlags); // should find (
-      parseObjLitMethodAfterKey(lexerFlags, false, wasGet, wasSet, wasAsync, false, astProp);
+      parseObjLitMethodAfterKey(lexerFlags, NOT_COMPUTED, wasGet, wasSet, wasAsync, NOT_GENERATOR, astProp);
     } else if ((curtype & $STRING) === $STRING || (curtype & $NUMBER) === $NUMBER) {
       AST_setLiteral('key', curtok);
       skipAny(lexerFlags); // should find (
-      parseObjLitMethodAfterKey(lexerFlags, false, wasGet, wasSet, wasAsync, false, astProp);
+      parseObjLitMethodAfterKey(lexerFlags, NOT_COMPUTED, wasGet, wasSet, wasAsync, NOT_GENERATOR, astProp);
     } else {
       THROW('Bad objlit property');
     }
@@ -2311,11 +2341,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       THROW('Generator method missing name')
     }
     ASSERT(curc === $$PAREN_L_28, 'should be at the start of the params');
-    parseObjLitMethodAfterKey(lexerFlags, isComputed, false, false, false, true, astProp);
+    parseObjLitMethodAfterKey(lexerFlags, isComputed, NOT_GET, NOT_SET, NOT_ASYNC, WAS_GENERATOR, astProp);
   }
   function parseObjLitAnyFromLitKey(lexerFlags, isComputed, astProp) {
     if (curc === $$PAREN_L_28) {
-      parseObjLitMethodAfterKey(lexerFlags, isComputed, false, false, false, false, astProp);
+      parseObjLitMethodAfterKey(lexerFlags, isComputed, NOT_GET, NOT_SET, NOT_ASYNC, NOT_GENERATOR, astProp);
     } else if (curc === $$COLON_3A) {
       ASSERT_skipRex(':', lexerFlags);
       parseObjLitValueAfterKeyColon(lexerFlags, isComputed, astProp);
@@ -2362,11 +2392,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     AST_set('async', isAsync);
     AST_set('expression', false);
     AST_set('id', null);
-    parseFunctionFromParams(lexerFlags, false, isAsync, isGenerator, 'value');
+    parseFunctionFromParams(lexerFlags);
     AST_close(); // FunctionExpression
   }
 
-  function parseArrayLitOrDestruc(lexerFlags, fromParam, astProp) {
+  function parseArrayLitOrDestruc(lexerFlags, canDestruct, astProp) {
     // [a]       -> array literal
     // [a] = b   -> array destructuring
 
@@ -2378,11 +2408,11 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     } else {
       while (true) {
         parseElisions(lexerFlags, 'elements');
-        if (fromParam) {
+        if (canDestruct) {
           // prevent parsing further assignments
           let wasParen = curc === $$PAREN_L_28;
           parseValue(lexerFlags, 'elements');
-          parseExpressionFromOp(lexerFlags, false, wasParen, 'elements');
+          parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, wasParen, 'elements');
           if (curc === $$IS_3D && curtok.str === '=') {
             ASSERT_skipRex('=', lexerFlags);
             parseArgDefault(lexerFlags, 'elements');
@@ -2409,7 +2439,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       ASSERT_skipDiv($IDENT, lexerFlags); // x.y / z is division
       AST_set('computed', false);
       AST_close();
-      assignable = parseValueTail(lexerFlags, true, astProp);
+      assignable = parseValueTail(lexerFlags, IS_ASSIGNABLE, astProp);
     } else if (curc === $$SQUARE_L_5B) {
       AST_wrapClosed(astProp, 'MemberExpression', 'object');
       ASSERT_skipRex('[', lexerFlags);
@@ -2417,7 +2447,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
       AST_set('computed', true);
       AST_close();
-      assignable = parseValueTail(lexerFlags, true, astProp);
+      assignable = parseValueTail(lexerFlags, IS_ASSIGNABLE, astProp);
     } else if (curc === $$PAREN_L_28) {
       ASSERT(curtype === $PUNCTUATOR && curtok.str === '(');
       ASSERT_skipRex('(', lexerFlags);
@@ -2429,14 +2459,14 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
         parseCallArgs(lexerFlags, 'arguments');
         AST_close();
       }
-      assignable = parseValueTail(lexerFlags, false, astProp);
+      assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, astProp);
     } else if (curc === $$TICK_60) { TODO
       // tagged template is like a call but slightly special
       ASSERT((curtype & $TICK) === $TICK);
       AST_wrapClosed(astProp, 'MemberExpression', 'object');
       AST_setIdent('property', curtok);
       ASSERT_skipDiv($TICK, lexerFlags);
-      assignable = parseValueTail(lexerFlags, false, astProp);
+      assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, astProp);
     } else if ((curc === $$PLUS_2B && curtok.str === '++') || (curc === $$DASH_2D && curtok.str === '--')) {
       ASSERT(curtype === $PUNCTUATOR);
       AST_wrapClosed(astProp, 'UpdateExpression', 'argument');
@@ -2476,7 +2506,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
 
       AST_open(astProp, 'ArrowFunctionExpression');
       AST_set('params', []);
-      parseArrowFromPunc(lexerFlags, false);
+      parseArrowFromPunc(lexerFlags, NOT_ASYNC);
       AST_close();
       return false;
     }
@@ -2509,7 +2539,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
       else if (!Array.isArray(node.params)) node.params = [node.params];
       // </SCRUB AST>
 
-      parseArrowFromPunc(lexerFlags, false);
+      parseArrowFromPunc(lexerFlags, NOT_ASYNC);
 
       AST_close();
     }

@@ -252,6 +252,9 @@ const COLLECT_TOKENS_ALL = 2;
 const WEB_COMPAT_OFF = false;
 const WEB_COMPAT_ON = true;
 
+const RETURN_ANY_TOKENS = true;
+const RETURN_SOLID_TOKENS = false;
+
 function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(typeof goal === 'boolean', 'goal boolean');
@@ -451,7 +454,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   }
   // </SCRUB AST>
 
-  function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=false) {
+  function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=RETURN_SOLID_TOKENS) {
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
     ASSERT(!finished, 'should not next() after eof token');
 
@@ -473,7 +476,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         finished = true;
         break;
       }
-    } while (wasWhite && !_returnAny);
+    } while (wasWhite && _returnAny === RETURN_SOLID_TOKENS);
     ++solidTokenCount;
     if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
 
@@ -2535,6 +2538,9 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   FOR_REGEX,
   IN_TEMPLATE,
   INITIAL_LEXER_FLAGS,
+
+  RETURN_ANY_TOKENS,
+  RETURN_SOLID_TOKENS,
 
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
