@@ -255,6 +255,12 @@ const WEB_COMPAT_ON = true;
 const RETURN_ANY_TOKENS = true;
 const RETURN_SOLID_TOKENS = false;
 
+const WHITESPACE_TOKEN = true;
+const SOLID_TOKEN = false;
+
+const PARSING_FROM_TICK = true;
+const PARSING_SANS_TICK = false;
+
 function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(typeof goal === 'boolean', 'goal boolean');
@@ -472,7 +478,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite, cstart);
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
-        token = createToken($EOF, pointer, pointer, consumedNewline, true, 0);
+        token = createToken($EOF, pointer, pointer, consumedNewline, WHITESPACE_TOKEN, 0);
         finished = true;
         break;
       }
@@ -484,7 +490,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   }
 
   function addAsi() {
-    let token = createToken($ASI, pointer, pointer, false, false, $$SEMI_3B);
+    let token = createToken($ASI, pointer, pointer, consumedNewline, SOLID_TOKEN, $$SEMI_3B);
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
     if (collectTokens !== COLLECT_TOKENS_NONE) tokens.push(token, tokens.pop());
@@ -544,7 +550,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       case $$PLUS_2B:
         return parseSameOrCompound(c); // + ++ +=
       case $$TICK_60:
-        return parseTemplateString(lexerFlags, true);
+        return parseTemplateString(lexerFlags, PARSING_FROM_TICK);
       case $$0_30:
         return parseLeadingZero(lexerFlags);
       case $$1_31:
@@ -584,7 +590,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       case $$CURLY_L_7B:
         return $PUNCTUATOR;
       case $$CURLY_R_7D:
-        if ((lexerFlags & IN_TEMPLATE) === IN_TEMPLATE) return parseTemplateString(lexerFlags, false);
+        if ((lexerFlags & IN_TEMPLATE) === IN_TEMPLATE) return parseTemplateString(lexerFlags, PARSING_SANS_TICK);
         return $PUNCTUATOR;
       case $$SQUARE_L_5B:
         return $PUNCTUATOR;
