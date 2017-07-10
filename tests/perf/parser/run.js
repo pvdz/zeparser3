@@ -9,18 +9,19 @@ let {
   COLLECT_TOKENS_NONE,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
-} = require('../../../build/build.js'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+//} = require('../../../src/zeparser.js');
+} = require('../../../build/build.js');
 
 function run() {
   let code = require('fs').readFileSync(__dirname + '/../../../../zeparser3shadow/webkit.npm.1.0.0.js').toString(); // not included in git. (and out of proj root so IDE doesnt crash on it... ugh)
 
   console.log('running...');
   console.time('finished');
-  let out = ZeParser(code, undefined, COLLECT_TOKENS_SOLID);
+  let out = ZeParser(code, undefined, COLLECT_TOKENS_NONE);
   console.timeEnd('finished');
 
   //tok.deopt();
 
-  console.log('Parsed', code.length, 'bytes');
+  console.log('Parsed', code.length, 'bytes into', out.tokenCountSolid, 'tokens');
 }
 run();

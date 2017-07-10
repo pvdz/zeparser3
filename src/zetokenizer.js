@@ -268,6 +268,8 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   let webModeWarnings = []; // when parsing anything that is only accepted because of annex B in the spec <token, desc>
 
   let tokens = null;
+  let anyTokenCount = 0;
+  let solidTokenCount = 0;
   if (collectTokens !== COLLECT_TOKENS_NONE) {
     tokens = [];
     nextToken.tokens = tokens; // probably will want to find a better way..
@@ -464,6 +466,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         wasWhite = false;
         let consumedTokenType = next(lexerFlags);
         token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite, cstart);
+        ++anyTokenCount;
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
         token = createToken($EOF, pointer, pointer, consumedNewline, true, 0);
@@ -471,6 +474,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         break;
       }
     } while (wasWhite && !_returnAny);
+    ++solidTokenCount;
     if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
 
     return token;
@@ -480,7 +484,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     let token = createToken($ASI, pointer, pointer, false, false, $$SEMI_3B);
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
-    tokens.push(token, tokens.pop());
+    if (collectTokens !== COLLECT_TOKENS_NONE) tokens.push(token, tokens.pop());
+    ++anyTokenCount;
+    ++solidTokenCount; // eh... i guess.
   }
 
   function createToken(type, start, stop, nl, ws, c) {
@@ -2416,6 +2422,8 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   nextToken.asi = addAsi;
   nextToken.throw = THROW;
   //nextToken.deopt = () => funcs.forEach(([f,n]) => printStatus(f,n));
+  nextToken.getTokenCountAny = () => anyTokenCount;
+  nextToken.getTokenCountSolid = () => solidTokenCount;
 
   return nextToken;
 }

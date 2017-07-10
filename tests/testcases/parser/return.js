@@ -87,6 +87,27 @@ let tests = [
     desc: 'return, asi check',
     tokens: [$IDENT, $ASI, $IDENT, $PUNCTUATOR],
   },
+  {
+    code: '{return \n foo}',
+    ast: {type: 'Program', body: [
+      {type: 'BlockStatement', body: [
+        {type: 'ReturnStatement', argument: null},
+        {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}},
+      ]},
+    ]},
+    desc: 'return, asi check, wrapped in curly',
+    tokens: [$PUNCTUATOR, $IDENT, $ASI, $IDENT, $ASI, $PUNCTUATOR],
+  },
+  {
+    code: '{return}',
+    ast: {type: 'Program', body: [
+      {type: 'BlockStatement', body: [
+        {type: 'ReturnStatement', argument: null},
+      ]},
+    ]},
+    desc: 'return, confirm curly acts as asi',
+    tokens: [$PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
+  },
 ];
 
 //export default tests;

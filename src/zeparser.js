@@ -1434,7 +1434,7 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     AST_open(astProp, 'ReturnStatement');
     ASSERT_skipRex('return', lexerFlags);
 
-    if (!curtok.nl && curtype !== $EOF && curc !== $$SEMI_3B) {
+    if (!curtok.nl && curtype !== $EOF && curc !== $$SEMI_3B && curc !== $$CURLY_R_7D) {
       parseExpression(lexerFlags, 'argument');
     } else {
       AST_set('argument', null);
@@ -2551,6 +2551,8 @@ function ZeParser(code, mode, collectTokens = COLLECT_TOKENS_NONE, webCompat = W
     // </SCRUB AST>
     ,
     tokens: tok.tokens,
+    tokenCountSolid: tok.getTokenCountAny(),
+    tokenCountAny: tok.getTokenCountSolid(),
   }
 }
 
