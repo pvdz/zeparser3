@@ -6,9 +6,9 @@
 
 let {
   default: ZeParser,
-  COLLECT_TOKENS_NONE,
-  COLLECT_TOKENS_SOLID,
-  COLLECT_TOKENS_ALL,
+  COLLECT_TOKENS_NONE,  // dont retain tokens
+  COLLECT_TOKENS_SOLID, // retain only non-whitespace tokens
+  COLLECT_TOKENS_ALL,   // retain all tokens (spaces, newlines, etc too)
 //} = require('../../../src/zeparser.js');
 } = require('../../../build/build.js');
 
