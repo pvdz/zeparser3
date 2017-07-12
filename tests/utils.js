@@ -1,7 +1,7 @@
 let PASS = true;
 let FAIL = false;
-let MODE_MODULE = 0;
-let MODE_SCRIPT = 1;
+let MODE_MODULE = true; // see zetokenizer.js
+let MODE_SCRIPT = false; // see zetokenizer.js
 let USE_SLOPPY_MODE = 0;
 let USE_STRICT_MODE = 2;
 let PARSE_MODE_DIV = 0;

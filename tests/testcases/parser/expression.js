@@ -27,6 +27,7 @@ let {
 //} from '../../../src/zetokenizer';
 
 let arrays = require('./expr.array');
+let awaits = require('./expr.await');
 let assigns = require('./expr.assign');
 let bitwises = require('./expr.bitwise');
 let calls = require('./expr.call');
@@ -51,6 +52,7 @@ let unaries = require('./expr.unary');
 let tests = [
   'expression statement',
   ...arrays,
+  ...awaits,
   ...assigns,
   ...bitwises,
   ...calls,

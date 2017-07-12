@@ -466,6 +466,92 @@ let ga = [
       desc: 'group of some two assignments',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     },
+    {
+      code: '`X${a => b}Y`',
+      ast: {
+        type: 'Program', body: [{
+          type: 'ExpressionStatement',
+          expression: {type: 'TemplateLiteral',
+            expressions: [
+              {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'a'}],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'b'},
+              }
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}},
+            ],
+          },
+        }]
+      },
+      desc: 'arrow inside template disambiguation test 1',
+      tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
+    },
+    {
+      code: '`X${a => b + c}Y`',
+      ast: {
+        type: 'Program', body: [{
+          type: 'ExpressionStatement',
+          expression: {type: 'TemplateLiteral',
+            expressions: [
+              {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'a'}],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'BinaryExpression', left: {type: 'Identifier', name: 'b'}, operator: '+', right: {type: 'Identifier', name: 'c'}},
+              }
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}},
+            ],
+          },
+        }]
+      },
+      desc: 'arrow inside template disambiguation test 1',
+      tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
+    },
+    {
+      code: '`X${a => b + {}}Y`',
+      ast: {
+        type: 'Program', body: [{
+          type: 'ExpressionStatement',
+          expression: {type: 'TemplateLiteral',
+            expressions: [
+              {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'a'}],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'b'},
+                  operator: '+',
+                  right: {type: 'ObjectExpression', properties: []},
+                },
+              }
+            ],
+            quasis: [
+              {type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}},
+              {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}},
+            ],
+          },
+        }]
+      },
+      desc: 'arrow inside template disambiguation test 2; regular curlies in the arrow',
+      tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
+    },
+    // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
   ], // arrow
 ];
 

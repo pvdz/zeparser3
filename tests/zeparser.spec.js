@@ -2,6 +2,9 @@
 
 //import {
 let {
+  MODE_MODULE,
+  MODE_SCRIPT,
+
   toPrint,
 } = require('./utils.js');
 //} from './utils';
@@ -118,22 +121,30 @@ function all(parser, tests) {
     else one(parser, test);
   }
 }
-function one(parser, {code, ast, desc, tokens}) {
+function one(parser, {code, ast, desc, mode, tokens}) {
   ++testi;
-  if (_one(parser, '   ', code, ast, desc, tokens)) {
-    _one(parser, '[a]', '\n' + code, ast, desc, tokens);
-    _one(parser, '[b]', code + '\n', ast, desc, tokens);
-    _one(parser, '[c]', ' ' + code, ast, desc, tokens);
-    _one(parser, '[d]', code + ' ', ast, desc, tokens);
+  if (_one(parser, '   ', code, ast, desc, mode, tokens)) {
+    _one(parser, '[a]', '\n' + code, ast, desc, mode, tokens);
+    _one(parser, '[b]', code + '\n', ast, desc, mode, tokens);
+    _one(parser, '[c]', ' ' + code, ast, desc, mode, tokens);
+    _one(parser, '[d]', code + ' ', ast, desc, mode, tokens);
   }
 }
-function _one(Parser, testSuffix, code, ast, desc, tokens) {
+function _one(Parser, testSuffix, code, ast, desc, mode, tokens) {
+  // by default test both module and script parsing modes
+  // if overridden, only parse that mode
+  if (mode !== undefined && mode !== MODE_SCRIPT && mode !== MODE_MODULE) throw new Error('test setup problem: invalid mode');
+  if (mode !== undefined) mode = [mode];
+  else mode = [MODE_SCRIPT, MODE_MODULE];
+  mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'S' : 'M') + ']', code, ast, desc, m, tokens));
+}
+function __one(Parser, testSuffix, code, ast, desc, mode, tokens) {
   let prefix = parserDesc + ': ' + testi + testSuffix;
 
                                                           //if (parseInt(testi,10) !== 154) return;
 
   try {
-    var obj = Parser(code, undefined, COLLECT_TOKENS_SOLID);
+    var obj = Parser(code, mode, COLLECT_TOKENS_SOLID);
   } catch(e) {
     ++crash;
     var obj = '' + e.stack;
@@ -155,8 +166,11 @@ function _one(Parser, testSuffix, code, ast, desc, tokens) {
     let step = 200;
     let steps = 0;
     while (n < max) {
-      console.log('want['+steps+']:', s1.slice(Math.min(n, s1.length), Math.min(n + step, s1.length)));
-      console.log('real['+steps+']:', s2.slice(Math.min(n, s2.length), Math.min(n + step, s2.length)));
+      let x1 = s1.slice(Math.min(n, s1.length), Math.min(n + step, s1.length));
+      let x2 = s2.slice(Math.min(n, s2.length), Math.min(n + step, s2.length));
+
+      console.log('want['+steps+']:', x1===x2?'SAME':'DIFF', x1);
+      console.log('real['+steps+']:', x1===x2?'SAME':'DIFF', x2);
       n += step;
       ++steps;
     }

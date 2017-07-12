@@ -218,14 +218,17 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 const GOAL_MODULE = true;
 const GOAL_SCRIPT = false;
 
-const STRICT_MODE = 1 << 1;
-const FOR_REGEX = 1 << 2;
-const IN_TEMPLATE = 1 << 3;
+const LF_STRICT_MODE = 1 << 1;
+const LF_FOR_REGEX = 1 << 2;
+const LF_IN_TEMPLATE = 1 << 3;
+const LF_IN_ASYNC = 1 << 4;
+const LF_IN_GENERATOR = 1 << 5;
+const LF_IN_FUNC_ARGS = 1 << 6; // throws for await expression
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
 // - sloppy mode until proven otherwise
-const INITIAL_LEXER_FLAGS = FOR_REGEX;
+const INITIAL_LEXER_FLAGS = LF_FOR_REGEX;
 
 const BAD_ESCAPE = true;
 const GOOD_ESCAPE = false;
@@ -464,7 +467,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
     ASSERT(!finished, 'should not next() after eof token');
 
-    if (goal === GOAL_MODULE) lexerFlags = lexerFlags | STRICT_MODE; // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
+    if (goal === GOAL_MODULE) lexerFlags = lexerFlags | LF_STRICT_MODE; // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
     consumedNewline = false;
 
     let token;
@@ -590,7 +593,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       case $$CURLY_L_7B:
         return $PUNCTUATOR;
       case $$CURLY_R_7D:
-        if ((lexerFlags & IN_TEMPLATE) === IN_TEMPLATE) return parseTemplateString(lexerFlags, PARSING_SANS_TICK);
+        if ((lexerFlags & LF_IN_TEMPLATE) === LF_IN_TEMPLATE) return parseTemplateString(lexerFlags, PARSING_SANS_TICK);
         return $PUNCTUATOR;
       case $$SQUARE_L_5B:
         return $PUNCTUATOR;
@@ -862,7 +865,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     ASSERT(typeof a === 'number', 'first digit ord');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    if ((lexerFlags & STRICT_MODE) === STRICT_MODE) {
+    if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
       if (a === $$0_30) {
         if (eof()) return GOOD_ESCAPE; // will still lead to an error later for the next token
         let b = peek();
@@ -977,7 +980,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       skip();
       if (neof()) skipDigits();
       // this is an "illegal" octal escape in strict mode
-      if ((lexerFlags & STRICT_MODE) === STRICT_MODE) return $ERROR;
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) return $ERROR;
       return $NUMBER_OLD;
     } else if (c === $$DOT_2E) {
       parseFromFractionDot();
@@ -1239,7 +1242,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     }
   }
   function parseSingleFwdSlash(lexerFlags, c) {
-    if ((lexerFlags & FOR_REGEX) === FOR_REGEX) {
+    if ((lexerFlags & LF_FOR_REGEX) === LF_FOR_REGEX) {
       // parse a regex. use the c
       return parseRegex(c);
     } else {
@@ -2540,9 +2543,12 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   GOAL_MODULE,
   GOAL_SCRIPT,
 
-  STRICT_MODE,
-  FOR_REGEX,
-  IN_TEMPLATE,
+  LF_FOR_REGEX,
+  LF_IN_ASYNC,
+  LF_IN_TEMPLATE,
+  LF_IN_FUNC_ARGS,
+  LF_IN_GENERATOR,
+  LF_STRICT_MODE,
   INITIAL_LEXER_FLAGS,
 
   RETURN_ANY_TOKENS,
