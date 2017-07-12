@@ -92,6 +92,12 @@ let awaits = [
     tokens: [$IDENT, $ASI],
   },
   {
+    code: 'await',
+    throws: 'Cannot use await here',
+    mode: MODE_MODULE,
+    desc: 'await is an invalid identifier in module mode',
+  },
+  {
     code: 'call(await)',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [{type: 'Identifier', name: 'await'}]}},

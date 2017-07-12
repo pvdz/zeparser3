@@ -121,40 +121,48 @@ function all(parser, tests) {
     else one(parser, test);
   }
 }
-function one(parser, {code, ast, desc, mode, tokens}) {
+function one(parser, {code, ast, throws, desc, mode, tokens}) {
   ++testi;
-  if (_one(parser, '   ', code, ast, desc, mode, tokens)) {
-    _one(parser, '[a]', '\n' + code, ast, desc, mode, tokens);
-    _one(parser, '[b]', code + '\n', ast, desc, mode, tokens);
-    _one(parser, '[c]', ' ' + code, ast, desc, mode, tokens);
-    _one(parser, '[d]', code + ' ', ast, desc, mode, tokens);
+  if (_one(parser, '   ', code, ast, throws, desc, mode, tokens)) {
+    _one(parser, '[a]', '\n' + code, ast, throws, desc, mode, tokens);
+    _one(parser, '[b]', code + '\n', ast, throws, desc, mode, tokens);
+    _one(parser, '[c]', ' ' + code, ast, throws, desc, mode, tokens);
+    _one(parser, '[d]', code + ' ', ast, throws, desc, mode, tokens);
   }
 }
-function _one(Parser, testSuffix, code, ast, desc, mode, tokens) {
+function _one(Parser, testSuffix, code, ast, throws, desc, mode, tokens) {
   // by default test both module and script parsing modes
   // if overridden, only parse that mode
   if (mode !== undefined && mode !== MODE_SCRIPT && mode !== MODE_MODULE) throw new Error('test setup problem: invalid mode');
   if (mode !== undefined) mode = [mode];
   else mode = [MODE_SCRIPT, MODE_MODULE];
-  mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'S' : 'M') + ']', code, ast, desc, m, tokens));
+  mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'S' : 'M') + ']', code, ast, throws, desc, m, tokens));
 }
-function __one(Parser, testSuffix, code, ast, desc, mode, tokens) {
+function __one(Parser, testSuffix, code, ast, throws, desc, mode, tokens) {
   let prefix = parserDesc + ': ' + testi + testSuffix;
 
                                                           //if (parseInt(testi,10) !== 154) return;
 
+  let wasError = '';
   try {
     var obj = Parser(code, mode, COLLECT_TOKENS_SOLID);
   } catch(e) {
     ++crash;
+    wasError = e.message;
     var obj = '' + e.stack;
   }
 
   let passed = false;
   if (typeof obj === 'string') {
-    console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: crash`);
-    console.log('Stack:', obj);
-    ++fail;
+    if (wasError && wasError.indexOf(throws) >= 0) {
+      console.log(`${prefix} PASS (properly throws): \`${toPrint(code)}\``);
+      ++pass;
+      passed = true;
+    } else {
+      console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: crash`);
+      console.log('Stack:', obj);
+      ++fail;
+    }
   } else if (checkAST && JSON.stringify(ast) !== JSON.stringify(obj.ast)) {
     console.log(`${prefix} FAIL: \`${toPrint(code)}\` :: AST mismatch`);
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
