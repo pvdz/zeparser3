@@ -558,7 +558,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     if (curc !== chr) {
       console.log('error token:', curtok);
-      THROW('Next ord should be [' + chr + '] but was [' + curc + ']');
+      THROW('Next ord should be ' + chr + ' (' + String.fromCharCode(chr) + ') but was ' + curc + ' (' + String.fromCharCode(curc) + ')');
     } else {
       ASSERT(curtok.str.length === 1, 'should be len=1');
       skipDiv(lexerFlags);
@@ -733,7 +733,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // reset lexer flag states that dont carry accross function boundary
     lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
     lexerFlags = sansFlag(lexerFlags, LF_IN_ASYNC);
-    lexerFlags = sansFlag(lexerFlags, LF_IN_FUNC_ARGS);
+    lexerFlags = sansFlag(lexerFlags, LF_IN_FUNC_ARGS); // not likely to be useful but the right thing to do (tm)
     // dont remove the template flag here! let curly pair structures deal with this individually (fixes arrows)
     if (isGenerator) lexerFlags = lexerFlags | LF_IN_GENERATOR;
     if (isAsync) lexerFlags = lexerFlags | LF_IN_ASYNC;
@@ -756,6 +756,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       // TODO: optimize; next must be curly_R or otherwise it is an error
+
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
     } else {
       ASSERT_skipRex(')', lexerFlags);
@@ -763,6 +764,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseFuncArgument(lexerFlags, astProp) {
     if (curtype === $IDENT) {
+      // TODO: proper keyword checks
+      if (curtok.str === 'await') {
+        if (goalMode === GOAL_MODULE) THROW('Await is illegal outside of async body');
+        if ((lexerFlags & LF_IN_ASYNC) === LF_IN_ASYNC) THROW('Await not allowed here');
+      }
+
       AST_setIdent(astProp, curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (curtype === $PUNCTUATOR) {
@@ -943,10 +950,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_open(astProp, 'AwaitExpression');
       parseExpression(lexerFlags, 'argument'); // never optional inside async func
       AST_close(); // AwaitExpression
+      return false; // an await should gobble all assignments so this is not assignable
     } else if ((lexerFlags & LF_IN_GENERATOR) === LF_IN_GENERATOR) {
       THROW('Cannot use `await` in a generator');
     } else if (goalMode === GOAL_SCRIPT) {
-      parseAfterVarName(lexerFlags, asyncIdentToken, astProp);
+      // consider `await` a regular var name, not a keyword
+      // should throw an error if used as an await anyways
+      return parseAfterVarName(lexerFlags, asyncIdentToken, astProp);
     } else {
       THROW('Cannot use await here');
     }
@@ -1433,7 +1443,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // import {a as c,b} from 'x'
     // import {a,b,} from 'x'
     // import x, {...} from 'x'
-    // (cannot created a var named `yield` or `await` this way)
+    // (cannot create a var named `yield` or `await` this way)
 
     ASSERT_skipAny('import', lexerFlags);
 
@@ -1997,6 +2007,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - ident (a var, true, false, null, super, new <value>, new.target, this, class, function, async func, generator func)
     // - literal (number, string, regex, object, array, template)
     // - arrow or group
+    // - await expression (TODO: is await an expression or statement keyword?)
 
     // do not include the suffix (property, call, etc)
 
@@ -2161,8 +2172,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'await':
         // in module: only if lexerFlags allow await (inside async code)
         // in script: same as module but also as regular var names (only) outside of async code
-        parseAwaitExpression(lexerFlags, identToken, astProp);
-        break;
+        // (await when not a keyword is assignable)
+        return parseAwaitExpression(lexerFlags, identToken, astProp);
       case 'yield':
         TODO
         AST_open(astProp, 'YieldExpression');
@@ -2186,8 +2197,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_setIdent('params', identToken);
       parseArrowFromPunc(lexerFlags, NOT_ASYNC);
       AST_close();
+      return false; // non-assignable
     } else {
       AST_setIdent(astProp, identToken);
+      return true; // assignable
     }
   }
 

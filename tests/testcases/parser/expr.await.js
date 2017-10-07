@@ -84,85 +84,130 @@ let awaits = [
   },
   {
     code: 'await',
-    ast: {type: 'Program', body: [
-      {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'await'}},
-    ]},
-    mode: MODE_SCRIPT,
+    SCRIPT: {
+      ast: {type: 'Program', body: [
+        {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'await'}},
+      ]},
+      tokens: [$IDENT, $ASI],
+    },
+    MODULE: {
+      throws: 'Cannot use await here',
+    },
     desc: 'await is a valid identifier in script mode',
-    tokens: [$IDENT, $ASI],
-  },
-  {
-    code: 'await',
-    throws: 'Cannot use await here',
-    mode: MODE_MODULE,
-    desc: 'await is an invalid identifier in module mode',
   },
   {
     code: 'call(await)',
-    ast: {type: 'Program', body: [
-      {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [{type: 'Identifier', name: 'await'}]}},
-    ]},
-    mode: MODE_SCRIPT,
+    SCRIPT: {
+      ast: {type: 'Program', body: [
+        {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [{type: 'Identifier', name: 'await'}]}},
+      ]},
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    },
+    MODULE: {
+      throws: 'Cannot use await here',
+    },
     desc: 'await is a valid identifier in script mode',
-    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
   },
   {
     code: 'call(await())',
-    ast: {type: 'Program', body: [
-      {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [
-        {type: 'CallExpression', callee: {type: 'Identifier', name: 'await'}, arguments: []},
-      ]}},
-    ]},
-    mode: MODE_SCRIPT,
+    SCRIPT: {
+      ast: {type: 'Program', body: [
+        {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [
+          {type: 'CallExpression', callee: {type: 'Identifier', name: 'await'}, arguments: []},
+        ]}},
+      ]},
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    MODULE: {
+      throws: 'Cannot use await here',
+    },
     desc: 'await is a valid identifier in script mode',
-    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   },
   {
     code: 'call(await.foo)',
-    ast: {type: 'Program', body: [
-      {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [
-        {type: 'MemberExpression', object: {type: 'Identifier', name: 'await'}, property: {type: 'Identifier', name: 'foo'}, computed: false},
-      ]}},
-    ]},
-    mode: MODE_SCRIPT,
+    SCRIPT: {
+      ast: {type: 'Program', body: [
+        {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [
+          {type: 'MemberExpression', object: {type: 'Identifier', name: 'await'}, property: {type: 'Identifier', name: 'foo'}, computed: false},
+        ]}},
+      ]},
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    },
+    MODULE: {
+      throws: 'Cannot use await here',
+    },
     desc: 'await is a valid identifier in script mode',
-    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
   },
   {
     code: 'function call(await){}',
-    ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
-      generator: false,
-      async: false,
-      expression: false,
-      id: {type: 'Identifier', name: 'call'},
-      params: [{type: 'Identifier', name: 'await'}],
-      body: {type: 'BlockStatement', body: []},
-    }]},
-    mode: MODE_SCRIPT,
+    SCRIPT: {
+      ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
+        generator: false,
+        async: false,
+        expression: false,
+        id: {type: 'Identifier', name: 'call'},
+        params: [{type: 'Identifier', name: 'await'}],
+        body: {type: 'BlockStatement', body: []},
+      }]},
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    },
+    MODULE: {
+      throws: 'Await is illegal outside of async body',
+    },
     desc: 'dont throw for await as param name in script mode',
-    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
   },
   {
     code: 'function call(foo=await){}',
-    ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
-      generator: false,
-      async: false,
-      expression: false,
-      id: {type: 'Identifier', name: 'call'},
-      params: [{type: 'AssignmentPattern',
-        left: {type: 'Identifier', name: 'foo'},
-        right: {type: 'Identifier', name: 'await'}
-      }],
-      body: {type: 'BlockStatement', body: []},
-    }]},
-    mode: MODE_SCRIPT,
+    SCRIPT: {
+      ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
+        generator: false,
+        async: false,
+        expression: false,
+        id: {type: 'Identifier', name: 'call'},
+        params: [{type: 'AssignmentPattern',
+          left: {type: 'Identifier', name: 'foo'},
+          right: {type: 'Identifier', name: 'await'}
+        }],
+        body: {type: 'BlockStatement', body: []},
+      }]},
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    },
+    MODULE: {
+      throws: 'Cannot use await here',
+    },
     desc: 'dont throw for await in param default value if not an actual await expression and in script mode',
-    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+  },
+  {
+    code: 'function call(foo=await bar){}',
+    MODULE: {
+      throws: 'Cannot use await here',
+    },
+    SCRIPT: {
+      throws: 'Next ord should be 41 ()) but was 98 (b)', // it's by far too much effort to proc a nice message here
+    },
+    desc: 'can never use await expression as default arg value',
+  },
+  {
+    code: 'function call(foo=await bar=10){}',
+    MODULE: {
+      throws: 'Cannot use await here',
+    },
+    SCRIPT: {
+      throws: 'Next ord should be 41 ()) but was 98 (b)', // it's by far too much effort to proc a nice message here
+    },
+    desc: 'arg with default that is awaitable that is an assignment (tests assignability check of an await expr)',
+  },
+  {
+    code: 'function call(foo= 5 + (await bar())){}',
+    MODULE: {
+      throws: 'Cannot use await here',
+    },
+    SCRIPT: {
+      throws: 'Next ord should be 41 ()) but was 98 (b)', // it's by far too much effort to proc a nice message here
+    },
+    desc: 'can never use await expression as default arg value (slightly more complex)',
   },
 
-  // error:
-  // - await without arg in module code or inside async func args/body
-  // - await outside of async body in module code
 ];
 
 module.exports = awaits;

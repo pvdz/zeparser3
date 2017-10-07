@@ -121,48 +121,71 @@ function all(parser, tests) {
     else one(parser, test);
   }
 }
-function one(parser, {code, ast, throws, desc, mode, tokens}) {
+function one(parser, testObj) {
+  let {code} = testObj;
   ++testi;
-  if (_one(parser, '   ', code, ast, throws, desc, mode, tokens)) {
-    _one(parser, '[a]', '\n' + code, ast, throws, desc, mode, tokens);
-    _one(parser, '[b]', code + '\n', ast, throws, desc, mode, tokens);
-    _one(parser, '[c]', ' ' + code, ast, throws, desc, mode, tokens);
-    _one(parser, '[d]', code + ' ', ast, throws, desc, mode, tokens);
+  if (_one(parser, '   ', code, testObj)) {
+    _one(parser, '[a]', '\n' + code, testObj);
+    _one(parser, '[b]', code + '\n', testObj);
+    _one(parser, '[c]', ' ' + code, testObj);
+    _one(parser, '[d]', code + ' ', testObj);
   }
 }
-function _one(Parser, testSuffix, code, ast, throws, desc, mode, tokens) {
+function _one(Parser, testSuffix, code, testObj) {
+  let {mode} = testObj;
   // by default test both module and script parsing modes
   // if overridden, only parse that mode
   if (mode !== undefined && mode !== MODE_SCRIPT && mode !== MODE_MODULE) throw new Error('test setup problem: invalid mode');
   if (mode !== undefined) mode = [mode];
   else mode = [MODE_SCRIPT, MODE_MODULE];
-  mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'S' : 'M') + ']', code, ast, throws, desc, m, tokens));
+  mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, testObj));
 }
-function __one(Parser, testSuffix, code, ast, throws, desc, mode, tokens) {
-  let prefix = parserDesc + ': ' + testi + testSuffix;
+function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODULE: moduleModeObj, throws, desc, tokens}) {
 
-                                                          //if (parseInt(testi,10) !== 154) return;
+                                                          //if (parseInt(testi,10) !== 122) return;
+
+  // goal specific overrides
+  if (mode === MODE_SCRIPT && scriptModeObj) {
+    if (scriptModeObj.throws) throws = scriptModeObj.throws;
+    if (scriptModeObj.ast) ast = scriptModeObj.ast;
+    if (scriptModeObj.tokens) tokens = scriptModeObj.tokens;
+  }
+  if (mode === MODE_MODULE && moduleModeObj) {
+    if (moduleModeObj.throws) throws = moduleModeObj.throws;
+    if (moduleModeObj.ast) ast = moduleModeObj.ast;
+    if (moduleModeObj.tokens) tokens = moduleModeObj.tokens;
+  }
+
+  let prefix = parserDesc + ': ' + testi + testSuffix;
 
   let wasError = '';
   try {
     var obj = Parser(code, mode, COLLECT_TOKENS_SOLID);
   } catch(e) {
-    ++crash;
     wasError = e.message;
     var obj = '' + e.stack;
   }
 
   let passed = false;
   if (typeof obj === 'string') {
-    if (wasError && wasError.indexOf(throws) >= 0) {
-      console.log(`${prefix} PASS (properly throws): \`${toPrint(code)}\``);
-      ++pass;
-      passed = true;
-    } else {
+    if (!throws && wasError) {
       console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: crash`);
       console.log('Stack:', obj);
       ++fail;
+      ++crash;
+    } else if (wasError && wasError.indexOf(throws) >= 0) {
+      console.log(`${prefix} PASS (properly throws): \`${toPrint(code)}\``);
+      ++pass;
+      passed = true;
+    } else if (wasError) {
+      console.log(`${prefix} ERROR (throw message mismatch): \`${toPrint(code)}\` :: incorrect error message`);
+      console.log('Expected error message to contain: "' + throws + '"');
+      console.log('Stack:', obj);
+      ++fail;
     }
+  } else if (throws) {
+    console.log(`${prefix} ERROR (_failed_ to throw): \`${toPrint(code)}\` :: should crash but didnt`);
+    ++fail;
   } else if (checkAST && JSON.stringify(ast) !== JSON.stringify(obj.ast)) {
     console.log(`${prefix} FAIL: \`${toPrint(code)}\` :: AST mismatch`);
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
@@ -210,7 +233,7 @@ try {
     //[ZeParserBuild, false, 'prod build'],
   ].forEach(([parser, hasAst, desc],i) => {
     checkAST = hasAst;
-    parserDesc = desc;
+    parserDesc = '## ' + desc;
     all(parser, tests);
   });
 } finally {

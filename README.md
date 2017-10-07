@@ -53,9 +53,8 @@ See above for configuring the build script. In the perf script you can adjust th
 
 Well, finish it, of course. Besides that;
 
-- Tigher integration between parser and tokenizer of pre-known tokens
+- Tighter integration between parser and tokenizer of pre-known tokens
   - This ties into enforcing reserved keyword checks
 - Make build dir automatically
-- Support `await` (slipped my mind)
 - Sync `class` with the exotic ways of building an object literal (already supported for objlits)
 - Find more things that I've overlooked. Clamp down on the over-accepting.
