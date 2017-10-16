@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// use https://astexplorer.net/ for ast comparisons
+
 //import {
 let {
   MODE_MODULE,
@@ -141,8 +143,10 @@ function _one(Parser, testSuffix, code, testObj) {
   mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, testObj));
 }
 function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODULE: moduleModeObj, throws, desc, tokens}) {
+  ++testj;
 
-                                                          //if (parseInt(testi,10) !== 122) return;
+                                                          //if (testj !== 313) return;
+  testSuffix += '['+testj+']';
 
   // goal specific overrides
   if (mode === MODE_SCRIPT && scriptModeObj) {
@@ -167,24 +171,26 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
   }
 
   let passed = false;
-  if (typeof obj === 'string') {
+  if (!tokens || (!throws && !ast)) {
+    throw new Error(`Bad tst case: Missing expected token list, or ast|throws for: \`${toPrint(code)}\``);
+  } else if (typeof obj === 'string') {
     if (!throws && wasError) {
       console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: crash`);
       console.log('Stack:', obj);
       ++fail;
       ++crash;
     } else if (wasError && wasError.indexOf(throws) >= 0) {
-      console.log(`${prefix} PASS (properly throws): \`${toPrint(code)}\``);
+      console.log(`${prefix} PASS: \`${toPrint(code)}\` :: (properly throws)`);
       ++pass;
       passed = true;
     } else if (wasError) {
-      console.log(`${prefix} ERROR (throw message mismatch): \`${toPrint(code)}\` :: incorrect error message`);
+      console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: (thrown message mismatch)`);
       console.log('Expected error message to contain: "' + throws + '"');
       console.log('Stack:', obj);
       ++fail;
     }
   } else if (throws) {
-    console.log(`${prefix} ERROR (_failed_ to throw): \`${toPrint(code)}\` :: should crash but didnt`);
+    console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: _failed_ to throw`);
     ++fail;
   } else if (checkAST && JSON.stringify(ast) !== JSON.stringify(obj.ast)) {
     console.log(`${prefix} FAIL: \`${toPrint(code)}\` :: AST mismatch`);
@@ -200,8 +206,8 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
       let x1 = s1.slice(Math.min(n, s1.length), Math.min(n + step, s1.length));
       let x2 = s2.slice(Math.min(n, s2.length), Math.min(n + step, s2.length));
 
-      console.log('want['+steps+']:', x1===x2?'SAME':'DIFF', x1);
-      console.log('real['+steps+']:', x1===x2?'SAME':'DIFF', x2);
+      console.log('want[' + steps + ']:', x1 === x2 ? 'SAME' : 'DIFF', x1);
+      console.log('real[' + steps + ']:', x1 === x2 ? 'SAME' : 'DIFF', x2);
       n += step;
       ++steps;
     }
@@ -227,6 +233,7 @@ let pass = 0;
 let fail = 0;
 let crash = 0;
 let testi = 0;
+let testj = 0;
 try {
   [
     [ZeParser, true, 'dev build'],

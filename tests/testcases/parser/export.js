@@ -412,6 +412,23 @@ let tests = [
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   },
   {
+    code: 'export async function(){}',
+    MODULE: {
+      throws: 'missing required ident',
+    },
+    SCRIPT: {
+      throws: 'missing required ident',
+    },
+    desc: 'non-default export of an anonymous async function is illegal',
+    tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+  },
+  {
+    code: 'export async',
+    throws: 'Can only export async functions',
+    desc: 'legacy meaning of `async` cant save this export from failing in SCRIPT mode',
+    tokens: [$IDENT, $IDENT, $ASI],
+  },
+  {
     code: 'export function* f(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -451,7 +468,8 @@ let tests = [
     code: 'export default async function f(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
-        declaration: {type: 'FunctionDeclaration',
+        declaration: {
+          type: 'FunctionDeclaration',
           generator: false,
           async: true,
           expression: false,

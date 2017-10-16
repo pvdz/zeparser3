@@ -32,7 +32,15 @@ let functions = [
     code: 'foo(function(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
-        {type: 'FunctionExpression', generator: false, async: false, expression: true, id: null, params: [], body: {type: 'BlockStatement', body: []}},
+        {
+          type: 'FunctionExpression',
+          generator: false,
+          async: false,
+          expression: false,
+          id: null,
+          params: [],
+          body: {type: 'BlockStatement', body: []},
+        },
       ]}},
     ]},
     desc: 'simpelest anonymous function expression',
@@ -42,7 +50,7 @@ let functions = [
     code: 'foo(function f(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
-        {type: 'FunctionExpression', generator: false, async: false, expression: true, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
+        {type: 'FunctionExpression', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
     desc: 'simpelest named function expression',
@@ -52,7 +60,7 @@ let functions = [
     code: 'foo(function*(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
-        {type: 'FunctionExpression', generator: true, async: false, expression: true, id: null, params: [], body: {type: 'BlockStatement', body: []}},
+        {type: 'FunctionExpression', generator: true, async: false, expression: false, id: null, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
     desc: 'simpelest anonymous generator expression',
@@ -62,7 +70,7 @@ let functions = [
     code: 'foo(function* f(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
-        {type: 'FunctionExpression', generator: true, async: false, expression: true, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
+        {type: 'FunctionExpression', generator: true, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
     desc: 'simpelest named generator expression',
@@ -72,7 +80,7 @@ let functions = [
     code: 'foo(async function(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
-        {type: 'FunctionExpression', generator: false, async: true, expression: true, id: null, params: [], body: {type: 'BlockStatement', body: []}},
+        {type: 'FunctionExpression', generator: false, async: true, expression: false, id: null, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
     desc: 'simpelest anonymous async function expression',
@@ -82,7 +90,7 @@ let functions = [
     code: 'foo(async function f(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
-        {type: 'FunctionExpression', generator: false, async: true, expression: true, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
+        {type: 'FunctionExpression', generator: false, async: true, expression: false, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
     desc: 'simpelest async named function expression',

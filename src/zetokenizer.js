@@ -2430,12 +2430,16 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     console.log('Tokenizer error! at #|# ```\n', slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)), '\n```');
     throw new Error(str);
   }
+  function DEBUG() {
+    return 'Tokenizer at #|# ```\n' + slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
+  }
 
   nextToken.asi = addAsi;
   nextToken.throw = THROW;
   //nextToken.deopt = () => funcs.forEach(([f,n]) => printStatus(f,n));
   nextToken.getTokenCountAny = () => anyTokenCount;
   nextToken.getTokenCountSolid = () => solidTokenCount;
+  nextToken.DEBUG = DEBUG;
 
   return nextToken;
 }

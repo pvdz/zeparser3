@@ -267,7 +267,7 @@ let templates = [
           {type: 'FunctionExpression',
             generator: false,
             async: false,
-            expression: true,
+            expression: false,
             id: null,
             params: [],
             body: {type: 'BlockStatement', body: []},
