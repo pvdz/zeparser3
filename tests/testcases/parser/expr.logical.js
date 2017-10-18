@@ -1,34 +1,13 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let logicals = [
-  '  logic',
-  {
+
+module.exports = (describe, test) => describe('logical ops', _ => {
+
+  test('logical &&',{
     code: 'a&&b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -38,10 +17,10 @@ let logicals = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'logical &&',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('logical ||',{
     code: 'a||b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -51,9 +30,6 @@ let logicals = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'logical ||',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-];
-
-module.exports = logicals;
+  });
+});

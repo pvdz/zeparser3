@@ -1,36 +1,35 @@
-//import ZeTokenizer, {
 let {
   $ASI,
   $IDENT,
   $PUNCTUATOR,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests = [
-  'const statement',
-  [
-    '  regular vars',
-    {
+
+module.exports = (describe, test) => describe('const statement', _ => {
+
+  describe('regular vars', _ => {
+
+    test('const, one var, no init, semi',{
       code: 'const foo;',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
         ]},
       ]},
-      desc: 'const, one var, no init, semi',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+    
+    test('const, one var, no init, eof',{
       code: 'const foo',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
         ]}
       ]},
-      desc: 'const, one var, no init, eof',
       tokens: [$IDENT, $IDENT, $ASI],
-    },
-    {
+    });
+    
+    test('const, two vars, no init, semi',{
       code: 'const foo, bar;',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
@@ -38,10 +37,10 @@ let tests = [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null},
         ]},
       ]},
-      desc: 'const, two vars, no init, semi',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+    
+    test('const, two vars, no init, eof',{
       code: 'const foo, bar',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
@@ -49,30 +48,30 @@ let tests = [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null},
         ]},
       ]},
-      desc: 'const, two vars, no init, eof',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-    },
-    {
+    });
+    
+    test('const, var with init, semi',{
       code: 'const foo = bar;',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
         ]},
       ]},
-      desc: 'const, var with init, semi',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+    
+    test('const, var with init, eof',{
       code: 'const foo = bar',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
         ]},
       ]},
-      desc: 'const, var with init, eof',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-    },
-    {
+    });
+    
+    test('const, var with init, asi',{
       code: 'const foo = bar\nconst zoo;',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
@@ -82,10 +81,10 @@ let tests = [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: null},
         ]},
       ]},
-      desc: 'const, var with init, asi',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+    
+    test('const, two vars with both init, semi',{
       code: 'const foo = bar, zoo = boo;',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
@@ -93,10 +92,10 @@ let tests = [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: {type: 'Identifier', name: 'boo'}},
         ]},
       ]},
-      desc: 'const, two vars with both init, semi',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+    
+    test('const, two vars with both init, asi',{
       code: 'const foo = bar, zoo = boo',
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration', kind: 'const', declarations: [
@@ -104,10 +103,10 @@ let tests = [
           {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: {type: 'Identifier', name: 'boo'}},
         ]},
       ]},
-      desc: 'const, two vars with both init, asi',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-    },
-  ],
+    });
+  });
+
   //[
   //  '  array destructuring',
   //  {
@@ -134,7 +133,4 @@ let tests = [
   //    tokens: [$IDENT, $IDENT, $PUNCTUATOR],
   //  },
   //],
-];
-
-//export default tests;
-module.exports = tests;
+});

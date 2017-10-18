@@ -1,34 +1,12 @@
-//import ZeTokenizer, {
 let {
-  $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests = [
-  'try statement',
-  {
+
+module.exports = (describe, test) => describe('try statement', _ => {
+
+  test('empty try/catch',{
     code: 'try {} catch(e) {}',
     ast: {type: 'Program', body: [
       {type: 'TryStatement',
@@ -37,10 +15,10 @@ let tests = [
         finalizer: null,
       },
     ]},
-    desc: 'empty try/catch',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('empty try/finally',{
     code: 'try {} finally {}',
     ast: {type: 'Program', body: [
       {type: 'TryStatement',
@@ -49,10 +27,10 @@ let tests = [
         finalizer: {type: 'BlockStatement', body: []},
       },
     ]},
-    desc: 'empty try/finally',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('empty try/catch/finally',{
     code: 'try {} catch(e) {} finally {}',
     ast: {type: 'Program', body: [
       {type: 'TryStatement',
@@ -61,10 +39,6 @@ let tests = [
         finalizer: {type: 'BlockStatement', body: []},
       },
     ]},
-    desc: 'empty try/catch/finally',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-];
-
-//export default tests;
-module.exports = tests;
+  });
+});

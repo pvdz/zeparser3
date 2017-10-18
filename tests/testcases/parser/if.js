@@ -1,14 +1,12 @@
-//import ZeTokenizer, {
 let {
-  $ASI,
   $IDENT,
   $PUNCTUATOR,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests = [
-  'if statement',
-  {
+
+module.exports = (describe, test) => describe('if statement', _ => {
+
+  test('simple if without else',{
     code: 'if (foo) bar;',
     ast: {type: 'Program', body: [
       {type: 'IfStatement',
@@ -17,10 +15,10 @@ let tests = [
         alternate: null,
       },
     ]},
-    desc: 'simple if without else',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('simple if without else',{
     code: 'if (foo) bar; else doo;',
     ast: {type: 'Program', body: [
       {type: 'IfStatement',
@@ -29,10 +27,10 @@ let tests = [
         alternate: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'doo'}},
       },
     ]},
-    desc: 'simple if without else',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('simple if without else',{
     code: 'if (foo) a; if (bar) b; else c;',
     ast: {type: 'Program', body: [
       {type: 'IfStatement',
@@ -46,10 +44,6 @@ let tests = [
         alternate: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'c'}},
       }
     ]},
-    desc: 'simple if without else',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
-  },
-];
-
-//export default tests;
-module.exports = tests;
+  });
+});

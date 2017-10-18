@@ -1,126 +1,110 @@
-//import ZeTokenizer, {
 let {
-  $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
   $NUMBER_HEX,
   $NUMBER_DEC,
   $NUMBER_BIN,
   $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
   $STRING_DOUBLE,
   $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let objects = [
-  '  object', // must be wrapped because block, using call wrapper, safer than group because of arrow syntax
-  [
-    '    literal',
-    {
+
+module.exports = (describe, test) => describe('objects', _ => {
+
+  describe('literals', _ => {
+    
+    test('empty object',{
       code: 'wrap({});',
       ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
         {type: 'ObjectExpression', properties: []},
       ]}}]},
-      desc: 'empty object',
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    [
-      '    identifier properties',
-      {
+    });
+  
+    describe('identifier properties', _ => {
+
+      test('object with one shorthand',{
         code: 'wrap({a});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
           ]},
         ]}}]},
-        desc: 'object with one shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('get can be special but can also be shorthand',{
         code: 'wrap({get});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'get'}},
           ]},
         ]}}]},
-        desc: 'get can be special but can also be shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('set can be special but can also be shorthand',{
         code: 'wrap({set});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'set'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'set'}},
           ]},
         ]}}]},
-        desc: 'set can be special but can also be shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('async can be special but can also be shorthand',{
         code: 'wrap({async});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'async'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'async'}},
           ]},
         ]}}]},
-        desc: 'async can be special but can also be shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one classic property',{
         code: 'wrap({a:b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object with one classic property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one classic property get',{
         code: 'wrap({get:b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'get'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object with one classic property get',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one classic property set',{
         code: 'wrap({set:b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'set'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object with one classic property set',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one classic property async',{
         code: 'wrap({async:b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'async'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object with one classic property async',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two shorthand',{
         code: 'wrap({a, b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -128,10 +112,10 @@ let objects = [
             {type: 'Property', key: {type: 'Identifier', name: 'b'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object with two shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two classic properties',{
         code: 'wrap({a:b, c:d});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -139,10 +123,10 @@ let objects = [
             {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
           ]},
         ]}}]},
-        desc: 'object with two classic properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with a shorthand and a classic property',{
         code: 'wrap({a, c:d});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -150,10 +134,10 @@ let objects = [
             {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
           ]},
         ]}}]},
-        desc: 'object with a shorthand and a classic property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with a classic property and a shorthand',{
         code: 'wrap({a:b, c});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -161,10 +145,10 @@ let objects = [
             {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'c'}},
           ]},
         ]}}]},
-        desc: 'object with a classic property and a shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      //{ error without the "outer" assignment, can only init shorthand when destructuring
+      });
+
+      //test('object with one shorthand',{ error without the "outer" assignment, can only init shorthand when destructuring
       //  code: 'wrap({a=b});',
       //  ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
       //    {type: 'ObjectExpression', properties: [
@@ -182,23 +166,23 @@ let objects = [
       //      },
       //    ]},
       //  ]}}]},
-      //  desc: 'object with one shorthand',
       //  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       //},
-    ], // ident props
-    [
-      '    number properties',
-      {
+    });
+
+    describe('number properties', _ => {
+
+      test('object with one number property',{
         code: 'wrap({15:b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '15'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object with one number property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one number property',{
         code: 'wrap({.9:a, 0x84:b, 0b1:c, 0o27:d, 1e234:e});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -209,10 +193,10 @@ let objects = [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '1e234'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'e'}},
           ]},
         ]}}]},
-        desc: 'object with one number property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_HEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_BIN, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_OCT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two number properties',{
         code: 'wrap({1:b, 0:d});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -220,24 +204,24 @@ let objects = [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '0'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
           ]},
         ]}}]},
-        desc: 'object with two number properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
+      });
       // error with number as shorthand
-    ], // number props
-    [
-      '    string properties',
-      {
+    });
+
+    describe('string properties', _ => {
+
+      test('object with one double quoted property',{
         code: 'wrap({"a":b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"a"'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object with one double quoted property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two double quoted properties',{
         code: 'wrap({"a":b, "c":d});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -245,20 +229,20 @@ let objects = [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '"c"'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
           ]},
         ]}}]},
-        desc: 'object with two double quoted properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one double quoted property',{
         code: 'wrap({\'a\':b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'a\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object with one double quoted property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two double quoted properties',{
         code: 'wrap({\'a\':b, \'c\':d});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -266,10 +250,10 @@ let objects = [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
           ]},
         ]}}]},
-        desc: 'object with two double quoted properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two double quoted properties',{
         code: 'wrap({\'a\':b, c:d});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -277,10 +261,10 @@ let objects = [
             {type: 'Property', key: {type: 'Identifier', name: 'c'}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
           ]},
         ]}}]},
-        desc: 'object with two double quoted properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with a single and a double quoted property',{
         code: 'wrap({"a":b, \'c\':d});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -288,23 +272,23 @@ let objects = [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '\'c\''}, kind: 'init', method: false, shorthand: false, computed: false, value: {type: 'Identifier', name: 'd'}},
           ]},
         ]}}]},
-        desc: 'object with a single and a double quoted property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-    ], // string props
-    [
-      '      computed properties',
-      {
+      });
+    });
+
+    describe('computed properties', _ => {
+
+      test('object literal, one computed property',{
         code: 'wrap({[a]:b});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
             {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: true, value: {type: 'Identifier', name: 'b'}},
           ]},
         ]}}]},
-        desc: 'object literal, one computed property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object literal, one computed property',{
         code: 'wrap({[a]:b, [15]:d});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -312,15 +296,15 @@ let objects = [
             {type: 'Property', key: {type: 'Literal', value: '<TODO>', raw: '15'}, kind: 'init', method: false, shorthand: false, computed: true, value: {type: 'Identifier', name: 'd'}},
           ]},
         ]}}]},
-        desc: 'object literal, one computed property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
+      });
 
       // computed property that is a comma expression
-    ], // computed props
-    [
-      '    identifier method',
-      {
+    });
+
+    describe('identifier method', _ => {
+
+      test('object with one method',{
         code: 'wrap({foo(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -335,10 +319,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one method get',{
         code: 'wrap({get(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -353,10 +337,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one method get',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one method set',{
         code: 'wrap({set(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -371,10 +355,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one method set',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one method async',{
         code: 'wrap({async(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -389,10 +373,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one method async',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two methods',{
         code: 'wrap({foo(){}, bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -416,10 +400,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one method with params',{
         code: 'wrap({foo(a,b,c){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -438,13 +422,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one method with params',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-    ], // ident method
-    [
-      '    number method',
-      {
+      });
+    });
+
+    describe('number method', _ => {
+
+      test('object with one method',{
         code: 'wrap({0(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -459,10 +443,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two methods',{
         code: 'wrap({.9(){}, 0x84(){}, 0b1(){}, 0o27(){}, 1e234(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -513,13 +497,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_HEX, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_BIN, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_OCT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-    ], // number method
-    [
-      '    string method',
-      {
+      });
+    });
+
+    describe('string method', _ => {
+
+      test('object with one double string keyed method',{
         code: 'wrap({"foo"(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -534,10 +518,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one double string keyed method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one single string keyed method',{
         code: 'wrap({\'foo\'(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -552,13 +536,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one single string keyed method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-    ], // string method
-    [
-      '    async method',
-      {
+      });
+    });
+
+    describe('async method', _ => {
+
+      test('object with one async method',{
         code: 'wrap({async foo(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -573,10 +557,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method get',{
         code: 'wrap({async get(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -591,10 +575,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method get',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method set',{
         code: 'wrap({async set(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -609,10 +593,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method set',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method async',{
         code: 'wrap({async async(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -627,10 +611,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method async',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async dstring method',{
         code: 'wrap({async "foo"(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -645,10 +629,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async dstring method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async sstring method',{
         code: 'wrap({async \'foo\'(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -663,10 +647,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async sstring method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async number method',{
         code: 'wrap({async 100(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -681,10 +665,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async number method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method',{
         code: 'wrap({async [foo](){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -699,10 +683,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two async methods',{
         code: 'wrap({async foo(){}, async bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -726,10 +710,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two async methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an async method and an ident method',{
         code: 'wrap({async foo(){}, bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -753,10 +737,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an async method and an ident method',{
         code: 'wrap({foo(){}, async bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -780,13 +764,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-    ], // async method
-    [
-      '    generator method',
-      {
+      });
+    });
+
+    describe('generator method', _ => {
+
+      test('object with one async method',{
         code: 'wrap({*foo(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -801,10 +785,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method get',{
         code: 'wrap({*get(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -819,10 +803,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method get',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method set',{
         code: 'wrap({*set(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -837,10 +821,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method set',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method async',{
         code: 'wrap({*async(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -855,10 +839,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method async',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method',{
         code: 'wrap({*"foo"(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -873,10 +857,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method',{
         code: 'wrap({*\'foo\'(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -891,10 +875,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one async method',{
         code: 'wrap({*123(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -909,10 +893,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one async method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one computed generator method',{
         code: 'wrap({*[foo](){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -927,10 +911,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one computed generator method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two async methods',{
         code: 'wrap({* foo(){},*bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -954,10 +938,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two async methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an async method and an ident method',{
         code: 'wrap({* foo(){}, bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -981,10 +965,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an async method and an ident method',{
         code: 'wrap({foo(){}, *bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1008,13 +992,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an async method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-    ], // generator method
-    [
-      '    getters (ident)',
-      {
+      });
+    });
+
+    describe('getters (ident)', _ => {
+
+      test('object with one getter method',{
         code: 'wrap({get foo(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1029,10 +1013,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one getter method get',{
         code: 'wrap({get get(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1047,10 +1031,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one getter method get',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two getter methods',{
         code: 'wrap({get foo(){}, get bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1074,10 +1058,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two getter methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an getter method and an ident method',{
         code: 'wrap({get foo(){}, bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1101,10 +1085,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an getter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an getter method and an ident method',{
         code: 'wrap({foo(){}, get bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1128,11 +1112,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an getter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      '    getters (computed)',
-      {
+      });
+    });
+
+    describe('getters (computed)', _ => {
+
+      test('object with one getter method',{
         code: 'wrap({get [foo](){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1147,10 +1133,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two getter methods',{
         code: 'wrap({get [foo](){}, get [bar](){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1174,10 +1160,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two getter methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an getter method and an ident method',{
         code: 'wrap({get [foo](){}, [bar](){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1201,10 +1187,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an getter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an getter method and an ident method',{
         code: 'wrap({[foo](){}, get [bar](){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1228,11 +1214,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an getter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      '    getters (rest)',
-      {
+      });
+    });
+
+    describe('getters (rest)', _ => {
+
+      test('object with one getter method',{
         code: 'wrap({get \'foo\'(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1247,10 +1235,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one getter method',{
         code: 'wrap({get "foo"(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1265,10 +1253,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one getter method',{
         code: 'wrap({get 123(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1283,13 +1271,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one getter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-    ], // getters
-    [
-      '    setters (ident)',
-      {
+      });
+    });
+
+    describe('setters (ident)', _ => {
+
+      test('object with one setter method',{
         code: 'wrap({set foo(a){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1304,10 +1292,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one setter method',{
         code: 'wrap({set get(a){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1322,10 +1310,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two setter methods',{
         code: 'wrap({set foo(b){}, set bar(d){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1349,10 +1337,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two setter methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an setter method and an ident method',{
         code: 'wrap({set foo(c){}, bar(){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1376,10 +1364,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an setter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an setter method and an ident method',{
         code: 'wrap({foo(){}, set bar(e){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1403,11 +1391,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an setter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      '    setters (computed)',
-      {
+      });
+    });
+
+    describe('setters (computed)', _ => {
+
+      test('object with one setter method',{
         code: 'wrap({set [foo](a){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1422,10 +1412,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two setter methods',{
         code: 'wrap({set [foo](b){}, set [bar](d){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1449,10 +1439,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with two setter methods',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an setter method and an ident method',{
         code: 'wrap({set [foo](c){}, [bar](){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1476,10 +1466,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an setter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with an setter method and an ident method',{
         code: 'wrap({[foo](){}, set [bar](e){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1503,11 +1493,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with an setter method and an ident method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      '    setters (destruct arg)',
-      {
+      });
+    });
+
+    describe('setters (destruct arg)', _ => {
+
+      test('object with one setter method',{
         code: 'wrap({set [foo]([a, b]){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1522,11 +1514,13 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      '    setters (rest)',
-      {
+      });
+    });
+
+    describe('setters (rest)', _ => {
+
+      test('object with one setter method',{
         code: 'wrap({set \'foo\'(a){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1541,10 +1535,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one setter method',{
         code: 'wrap({set "foo"(a){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1559,10 +1553,10 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one setter method',{
         code: 'wrap({set 123(a){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'ObjectExpression', properties: [
@@ -1577,20 +1571,19 @@ let objects = [
             }},
           ]},
         ]}}]},
-        desc: 'object with one setter method',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      },
-
-    ], // setters
+      });
+    });
 
     // call({[x]}) is illegal; dynamic properties can not be shorthand
     // can not use async/generators on getters/setters ({async get foo(){}})
     // getters with non-zero param count
     // setters with not-one param count
-  ], // literal
-  [
-    '    destructuring',
-    {
+  });
+
+  describe('destructuring', _ => {
+
+    test('empty object destruct',{
       code: 'wrap({}=obj);',
       ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
         {type: 'AssignmentExpression',
@@ -1599,12 +1592,12 @@ let objects = [
           right: {type: 'Identifier', name: 'obj'},
         },
       ]}}]},
-      desc: 'empty object destruct',
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    [
-      '    identifier properties',
-      {
+    });
+
+    describe('identifier properties', _ => {
+
+      test('object destruct with one shorthand',{
         code: 'wrap({a}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1615,10 +1608,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object destruct with one shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object destruct with one classic property',{
         code: 'wrap({a:b}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1629,10 +1622,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object destruct with one classic property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object destruct with two shorthand',{
         code: 'wrap({a, b}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1644,10 +1637,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object destruct with two shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object destruct with two classic properties',{
         code: 'wrap({a:b, c:d}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1659,10 +1652,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object destruct with two classic properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object destruct with a shorthand and a classic property',{
         code: 'wrap({a, c:d}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1674,10 +1667,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object destruct with a shorthand and a classic property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object destruct with a classic property and a shorthand',{
         code: 'wrap({a:b, c}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1689,10 +1682,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object destruct with a classic property and a shorthand',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object destruct with one shorthand with initializer, invalid when not destructuring',{
         code: 'wrap({a=b}=c);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1710,10 +1703,10 @@ let objects = [
             right: {type: 'Identifier', name: 'c'},
           },
         ]}}]},
-        desc: 'object destruct with one shorthand with initializer, invalid when not destructuring',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object destruct with one pair with initializer',{
         code: 'wrap({a:v=b}=c);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1731,14 +1724,15 @@ let objects = [
             right: {type: 'Identifier', name: 'c'},
           },
         ]}}]},
-        desc: 'object destruct with one pair with initializer',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
+      });
+
       // wrap({a:b=x}=y);
-    ], // ident props
-    [
-      '    string properties',
-      {
+    });
+
+    describe('string properties', _ => {
+
+      test('object with one double quoted property',{
         code: 'wrap({a:b}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1749,10 +1743,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object with one double quoted property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two double quoted properties',{
         code: 'wrap({a:b, c:d}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1764,10 +1758,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object with two double quoted properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with one double quoted property',{
         code: 'wrap({\'a\':b}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1778,10 +1772,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object with one double quoted property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two double quoted properties',{
         code: 'wrap({\'a\':b, \'c\':d}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1793,10 +1787,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object with two double quoted properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two double quoted properties',{
         code: 'wrap({\'a\':b, c:d}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1808,10 +1802,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object with two double quoted properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object with two double quoted properties',{
         code: 'wrap({a:b, \'c\':d}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1823,13 +1817,13 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object with two double quoted properties',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-    ], // string props
-    [
-      '      computed properties',
-      {
+      });
+    });
+
+    describe('computed properties', _ => {
+
+      test('object literal, one computed property',{
         code: 'wrap({[a]:b}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1840,10 +1834,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object literal, one computed property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
-      {
+      });
+
+      test('object literal, one computed property',{
         code: 'wrap({[a]:b, [15]:d}=obj);',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
           {type: 'AssignmentExpression',
@@ -1855,13 +1849,10 @@ let objects = [
             right: {type: 'Identifier', name: 'obj'},
           },
         ]}}]},
-        desc: 'object literal, one computed property',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      },
+      });
 
       // computed property that is a comma expression
-    ], // computed props
-  ], // destructuring
-];
-
-module.exports = objects;
+    });
+  });
+});

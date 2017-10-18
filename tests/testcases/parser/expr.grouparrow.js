@@ -1,60 +1,44 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
   $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
   $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
   $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
   $TICK_HEAD,
-  $TICK_PURE,
   $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let ga = [
-  '  group/arrow',
-  [
-    '    group',
-    {
+
+module.exports = (describe, test) => describe('parens', _ => {
+
+  describe('group', _ => {
+    
+    test('silly group',{
       code: '(x);',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}},
       ]},
-      desc: 'silly group',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('silly double group',{
       code: '((x));',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}},
       ]},
-      desc: 'silly double group',
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('oh come on',{
       code: '((((((((((x))))))))));',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}},
       ]},
-      desc: 'oh come on',
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('group of two vars',{
       code: '(a, b);',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'SequenceExpression', expressions: [
@@ -62,10 +46,10 @@ let ga = [
           {type: 'Identifier', name: 'b'},
         ]}},
       ]},
-      desc: 'group of two vars',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('group of some simple values',{
       code: '(a, 1, "c", d, e, f);',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'SequenceExpression', expressions: [
@@ -77,10 +61,10 @@ let ga = [
           {type: 'Identifier', name: 'f'},
         ]}},
       ]},
-      desc: 'group of some simple values',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('group of some two assignments',{
       code: '(a = 1, b = 2);',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'SequenceExpression', expressions: [
@@ -88,10 +72,11 @@ let ga = [
           {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'b'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '2'}},
         ]}},
       ]},
-      desc: 'group of some two assignments',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    { // https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget
+    });
+
+    test('assignment to a wrapped identifier, silly but valid',{
+      // https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget
       code: '(a) = 1;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -100,10 +85,10 @@ let ga = [
           right: {type: 'Literal', value: '<TODO>', raw: '1'},
         }},
       ]},
-      desc: 'assignment to a wrapped identifier, silly but valid',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('assignment to a wrapped property, silly but valid',{
       code: '(a.b) = 1;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -112,10 +97,10 @@ let ga = [
           right: {type: 'Literal', value: '<TODO>', raw: '1'},
         }},
       ]},
-      desc: 'assignment to a wrapped property, silly but valid',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('assignment to a wrapped property, silly but valid',{
       code: '(a[b]) = 1;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -124,10 +109,10 @@ let ga = [
           right: {type: 'Literal', value: '<TODO>', raw: '1'},
         }},
       ]},
-      desc: 'assignment to a wrapped property, silly but valid',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('assignment to a wrapped complex value that ends in a property, silly but valid',{
       code: '(a.b().c().d) = 1;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
@@ -161,10 +146,10 @@ let ga = [
           },
         },
       ]},
-      desc: 'assignment to a wrapped complex value that ends in a property, silly but valid',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('assignment to a wrapped super property, silly but valid',{
       code: '(super.a) = 1;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression:
@@ -179,10 +164,10 @@ let ga = [
           },
         },
       ]},
-      desc: 'assignment to a wrapped super property, silly but valid',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('assignment to a wrapped super property, silly but valid',{
       code: '(super[a]) = 1;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -196,10 +181,10 @@ let ga = [
           },
         },
       ]},
-      desc: 'assignment to a wrapped super property, silly but valid',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('assignment to a wrapped this property, silly but valid',{
       code: '(this.a) = 1;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -213,10 +198,10 @@ let ga = [
           },
         },
       ]},
-      desc: 'assignment to a wrapped this property, silly but valid',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('assignment to a wrapped this property, silly but valid',{
       code: '(this[b]) = 1;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -230,9 +215,8 @@ let ga = [
           },
         },
       ]},
-      desc: 'assignment to a wrapped this property, silly but valid',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    },
+    });
 
 
     // (); (empty group is error)
@@ -240,10 +224,11 @@ let ga = [
     // assignment to eval and arguments in strict mode should throw (even wrapped)
     // assignment to `yield` and `await` is valid (even wrapped)
     // wrapped reserved words are still a syntax error
-  ], // group
-  [
-    '    arrow',
-    {
+  });
+
+  describe('arrow', _ => {
+
+    test('arrow, one arg without parens, expr',{
       code: 'x=>x;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
@@ -258,10 +243,10 @@ let ga = [
           body: {type: 'Identifier', name: 'x'},
         }},
       ]},
-      desc: 'arrow, one arg without parens, expr',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('arrow, no args, expr',{
       code: '()=>x;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
@@ -274,10 +259,10 @@ let ga = [
           body: {type: 'Identifier', name: 'x'},
         }},
       ]},
-      desc: 'arrow, no args, expr',
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('arrow, one arg, expr',{
       code: '(x)=>x;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
@@ -292,10 +277,10 @@ let ga = [
           body: {type: 'Identifier', name: 'x'},
         }},
       ]},
-      desc: 'arrow, one arg, expr',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('arrow, one arg, block',{
       code: '(x)=>{x}',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
@@ -310,10 +295,10 @@ let ga = [
           body: {type: 'BlockStatement', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}]},
         }},
       ]},
-      desc: 'arrow, one arg, block',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $ASI],
-    },
-    {
+    });
+
+    test('arrow, one arg, block with a regex literal',{
       code: '(x)=>{/x/}',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
@@ -330,10 +315,10 @@ let ga = [
           ]},
         }},
       ]},
-      desc: 'arrow, one arg, block with a regex literal',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI, $PUNCTUATOR, $ASI],
-    },
-    {
+    });
+
+    test('arrow, one arg, expr',{
       code: '(x, y)=>x;',
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
@@ -349,9 +334,9 @@ let ga = [
           body: {type: 'Identifier', name: 'x'},
         }},
       ]},
-      desc: 'arrow, one arg, expr',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
+    });
+
     //{ error
     //  code: '((x)) => x;',
     //  ast: {type: 'Program', body: [
@@ -374,8 +359,9 @@ let ga = [
     //  ]},
     //  desc: 'group of some simple values',
     //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    //},
-    {
+    //});
+
+    test('group of some two assignments',{
       code: '(a = 1, b = 2) => x;',
       ast: {
         type: 'Program', body: [{
@@ -399,9 +385,9 @@ let ga = [
           },
         }],
       },
-      desc: 'group of some two assignments',
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
+    });
+
     //{ error
     //  code: '(a.b) => x;',
     //  ast: {type: 'Program', body: [
@@ -441,7 +427,8 @@ let ga = [
     //  desc: 'this is invalid because you cannot match an arrow (in the grammar) on the rhs of a non-assignment operator',
     //  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     //}
-    {
+
+    test('group of some two assignments',{
       code: 'var a = (b) => c;',
       ast: {
         type: 'Program', body: [{
@@ -463,10 +450,10 @@ let ga = [
           ],
         }],
       },
-      desc: 'group of some two assignments',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('arrow inside template disambiguation test 1',{
       code: '`X${a => b}Y`',
       ast: {
         type: 'Program', body: [{
@@ -490,10 +477,10 @@ let ga = [
           },
         }]
       },
-      desc: 'arrow inside template disambiguation test 1',
       tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
-    },
-    {
+    });
+
+    test('arrow inside template disambiguation test 1',{
       code: '`X${a => b + c}Y`',
       ast: {
         type: 'Program', body: [{
@@ -517,10 +504,10 @@ let ga = [
           },
         }]
       },
-      desc: 'arrow inside template disambiguation test 1',
       tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
-    },
-    {
+    });
+
+    test('arrow inside template disambiguation test 2; regular curlies in the arrow',{
       code: '`X${a => b + {}}Y`',
       ast: {
         type: 'Program', body: [{
@@ -548,11 +535,9 @@ let ga = [
           },
         }]
       },
-      desc: 'arrow inside template disambiguation test 2; regular curlies in the arrow',
       tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
-    },
-    // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
-  ], // arrow
-];
+    });
 
-module.exports = ga;
+    // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
+  });
+});

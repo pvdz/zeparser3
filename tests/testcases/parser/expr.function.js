@@ -1,34 +1,13 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let functions = [
-  '  functions',
-  {
+
+module.exports = (describe, test) => describe('functions', _ => {
+
+  test('simpelest anonymous function expression',{
     code: 'foo(function(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
@@ -43,60 +22,58 @@ let functions = [
         },
       ]}},
     ]},
-    desc: 'simpelest anonymous function expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('simpelest named function expression',{
     code: 'foo(function f(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
         {type: 'FunctionExpression', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
-    desc: 'simpelest named function expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('simpelest anonymous generator expression',{
     code: 'foo(function*(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
         {type: 'FunctionExpression', generator: true, async: false, expression: false, id: null, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
-    desc: 'simpelest anonymous generator expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('simpelest named generator expression',{
     code: 'foo(function* f(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
         {type: 'FunctionExpression', generator: true, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
-    desc: 'simpelest named generator expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('simpelest anonymous async function expression',{
     code: 'foo(async function(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
         {type: 'FunctionExpression', generator: false, async: true, expression: false, id: null, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
-    desc: 'simpelest anonymous async function expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('simpelest async named function expression',{
     code: 'foo(async function f(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
         {type: 'FunctionExpression', generator: false, async: true, expression: false, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
       ]}},
     ]},
-    desc: 'simpelest async named function expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  // error for generator AND async
-];
+  });
 
-module.exports = functions;
+  // error for generator AND async
+});

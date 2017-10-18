@@ -1,93 +1,73 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
   $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests = [
-  'return statement',
-  {
+
+module.exports = (describe, test) => describe('return statement', _ => {
+
+  test('return, no value, semi',{
     code: 'return;',
     ast: {type: 'Program', body: [
       {type: 'ReturnStatement', argument: null},
     ]},
-    desc: 'return, no value, semi',
     tokens: [$IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('return, no value, eof',{
     code: 'return',
     ast: {type: 'Program', body: [
       {type: 'ReturnStatement', argument: null},
     ]},
-    desc: 'return, no value, eof',
     tokens: [$IDENT, $ASI],
-  },
-  {
+  });
+
+  test('double return, no value, semi',{
     code: 'return;return;',
     ast: {type: 'Program', body: [
       {type: 'ReturnStatement', argument: null},
       {type: 'ReturnStatement', argument: null},
     ]},
-    desc: 'double return, no value, semi',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('double return, no value, eof',{
     code: 'return\nreturn',
     ast: {type: 'Program', body: [
       {type: 'ReturnStatement', argument: null},
       {type: 'ReturnStatement', argument: null},
     ]},
-    desc: 'double return, no value, eof',
     tokens: [$IDENT, $ASI, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('return, no value, semi',{
     code: 'return foo;',
     ast: {type: 'Program', body: [
       {type: 'ReturnStatement', argument: {type: 'Identifier', name: 'foo'}},
     ]},
-    desc: 'return, no value, semi',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('return, no value, semi',{
     code: 'return 15;',
     ast: {type: 'Program', body: [
       {type: 'ReturnStatement', argument: {type: 'Literal', value: '<TODO>', raw: '15'}},
     ]},
-    desc: 'return, no value, semi',
     tokens: [$IDENT, $NUMBER_DEC, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('return, asi check',{
     code: 'return \n foo;',
     ast: {type: 'Program', body: [
       {type: 'ReturnStatement', argument: null},
       {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}},
     ]},
-    desc: 'return, asi check',
     tokens: [$IDENT, $ASI, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('return, asi check, wrapped in curly',{
     code: '{return \n foo}',
     ast: {type: 'Program', body: [
       {type: 'BlockStatement', body: [
@@ -95,20 +75,16 @@ let tests = [
         {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}},
       ]},
     ]},
-    desc: 'return, asi check, wrapped in curly',
     tokens: [$PUNCTUATOR, $IDENT, $ASI, $IDENT, $ASI, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('return, confirm curly acts as asi',{
     code: '{return}',
     ast: {type: 'Program', body: [
       {type: 'BlockStatement', body: [
         {type: 'ReturnStatement', argument: null},
       ]},
     ]},
-    desc: 'return, confirm curly acts as asi',
     tokens: [$PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
-  },
-];
-
-//export default tests;
-module.exports = tests;
+  });
+});

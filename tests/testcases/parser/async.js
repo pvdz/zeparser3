@@ -1,4 +1,3 @@
-//import ZeTokenizer, {
 let {
   $ASI,
   $IDENT,
@@ -7,11 +6,10 @@ let {
   $TICK_HEAD,
   $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests =   [
-  'async related edge cases',
-  {
+module.exports = (describe, test) => describe('async keyword', _ => {
+
+  test('async is callable as long as it isnt the statement expression itself', {
     code: 'foo(async())',
     MODULE: {
       throws: 'must be followed by a function',
@@ -23,10 +21,10 @@ let tests =   [
         ]}},
       ]},
     },
-    desc: 'async is callable as long as it isnt the statement expression itself',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async can be just a value', {
     code: 'foo(async[x])',
     MODULE: {
       throws: 'must be followed by a function',
@@ -38,10 +36,10 @@ let tests =   [
         ]}},
       ]},
     },
-    desc: 'async can be just a value',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('reminder to myself that dynamic property access must have at least some expression', {
     code: 'foo(async[])',
     MODULE: {
       throws: 'must be followed by a function',
@@ -49,10 +47,10 @@ let tests =   [
     SCRIPT: {
       throws: 'Expected to parse a value',
     },
-    desc: 'reminder to myself that dynamic property access must have at least some expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async is callable as long as it isnt the statement expression itself',{
     code: 'foo(async)',
     MODULE: {
       throws: 'must be followed by a function',
@@ -64,10 +62,10 @@ let tests =   [
         ]}},
       ]},
     },
-    desc: 'async is callable as long as it isnt the statement expression itself',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async is callable as long as it isnt the statement expression itself',{
     code: 'foo(async.foo)',
     MODULE: {
       throws: 'must be followed by a function',
@@ -79,10 +77,10 @@ let tests =   [
         ]}},
       ]},
     },
-    desc: 'async is callable as long as it isnt the statement expression itself',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('valid async arrow expression with parens',{
     code: 'f(async ()=>c)',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
@@ -97,10 +95,10 @@ let tests =   [
         },
       ]}},
     ]},
-    desc: 'valid async arrow expression with parens',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('valid async arrow expression with no parens', {
     code: 'f(async foo=>c)',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
@@ -115,10 +113,10 @@ let tests =   [
         },
       ]}},
     ]},
-    desc: 'valid async arrow expression with no parens',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('valid async function expression', {
     code: 'f(async function(){})',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
@@ -133,10 +131,10 @@ let tests =   [
         },
       ]}},
     ]},
-    desc: 'valid async function expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('illegal async arrow expression with paren because of newline',{
     code: 'f(async\n()=>c)',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -144,10 +142,10 @@ let tests =   [
     SCRIPT: {
       throws: 'Next ord should be 41',
     },
-    desc: 'illegal async arrow expression with paren because of newline',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('illegal async arrow expression without paren because of newline',{
     code: 'f(async\nfoo=>c)',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -155,10 +153,10 @@ let tests =   [
     SCRIPT: {
       throws: 'Next ord should be 41',
     },
-    desc: 'illegal async arrow expression without paren because of newline',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('illegal async function expression because of newline',{
     code: 'f(async\nfunction(){})',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -166,10 +164,10 @@ let tests =   [
     SCRIPT: {
       throws: 'Next ord should be 41',
     },
-    desc: 'illegal async function expression because of newline',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('calling async as a function (so not an async function but async as a var name)',{
     code: 'f(async ())',
     MODULE: {
       throws: 'must be followed by a function',
@@ -181,10 +179,10 @@ let tests =   [
         ]}},
       ]},
     },
-    desc: 'calling async as a function (so not an async function but async as a var name)',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('using async a regular var name instead of keyword',{
     code: 'f(async)',
     MODULE: {
       throws: 'must be followed by a function',
@@ -196,10 +194,10 @@ let tests =   [
         ]}},
       ]},
     },
-    desc: 'using async a regular var name instead of keyword',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async as the arrow argument, weird but I suppose valid in SCRIPT mode',{
     code: 'f(async => x)',
     MODULE: {
       throws: 'must be followed by a function',
@@ -219,10 +217,10 @@ let tests =   [
         ]}},
       ]},
     },
-    desc: 'async as the arrow argument, weird but I suppose valid in SCRIPT mode',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('empty arrow with block body disambiguation inside template',{
     code: '`a ${async ()=>{}} b`',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -243,10 +241,10 @@ let tests =   [
         ],
       }},
     ]},
-    desc: 'empty arrow with block body disambiguation inside template',
     tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
-  },
-  {
+  });
+
+  test('empty arrow with block body disambiguation inside template',{
     code: '`a ${async ()=>x} b`',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -267,10 +265,10 @@ let tests =   [
         ],
       }},
     ]},
-    desc: 'empty arrow with block body disambiguation inside template',
     tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
-  },
-  {
+  });
+
+  test('async can be a label type in script mode',{
     code: 'async: function f(){}',
     MODULE: {
       throws: 'cannot be used as a label',
@@ -291,10 +289,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async can be a label type in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('confirming that async with newline doesnt stop the identifier statement parsing',{
     code: 'async\n: function f(){}',
     MODULE: {
       throws: 'cannot be used as a label',
@@ -315,10 +313,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'confirming that async with newline doesnt stop the identifier statement parsing',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async can not have line terminator after it; should throw before function decl',{
     code: 'async\nfunction f(){}',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -340,10 +338,10 @@ let tests =   [
         }
       ]},
     },
-    desc: 'async can not have line terminator after it; should throw before function decl',
     tokens: [$IDENT, $ASI, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async as a var name called in global',{
     code: 'async();',
     MODULE: {
       throws: 'must be followed by a function',
@@ -355,10 +353,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async as a var name called in global',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async statement with newline should still be parseable as legacy expression',{
     code: 'async\n();',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -370,10 +368,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async statement with newline should still be parseable as legacy expression',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async statement with newline should still be parseable as legacy expression too',{
     code: 'async\n(2);',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -385,10 +383,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async statement with newline should still be parseable as legacy expression too',
     tokens: [$IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async as a var name with property access',{
     code: 'async[x];',
     MODULE: {
       throws: 'must be followed by a function',
@@ -403,10 +401,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async as a var name with property access',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async should be assignable',{
     code: 'async = 5 + 5;',
     MODULE: {
       throws: 'must be followed by a function',
@@ -426,10 +424,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async should be assignable',
     tokens: [$IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async should still parse properly wn',{
     code: 'async + 10;',
     MODULE: {
       throws: 'must be followed by a function',
@@ -444,10 +442,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async should still parse properly wn',
     tokens: [$IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async var name statement that has an immediate eof',{
     code: 'async',
     MODULE: {
       throws: 'must be followed by a function',
@@ -460,10 +458,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async var name statement that has an immediate eof',
     tokens: [$IDENT, $ASI],
-  },
-  {
+  });
+
+  test('async var name expression that has an immediate eof',{
     code: 'x + async',
     MODULE: {
       throws: 'must be followed by a function',
@@ -478,10 +476,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async var name expression that has an immediate eof',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('async arrow statement (useless but valid?) without parens',{
     code: 'async foo => bar;',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -494,10 +492,10 @@ let tests =   [
         body: {type: 'Identifier', name: 'bar'},
       }},
     ]},
-    desc: 'async arrow statement (useless but valid?) without parens',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async arrow statement (useless but valid?) with parens and zero args',{
     code: 'async () => bar;',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -510,10 +508,10 @@ let tests =   [
         body: {type: 'Identifier', name: 'bar'},
       }},
     ]},
-    desc: 'async arrow statement (useless but valid?) with parens and zero args',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async arrow statement (useless but valid?) with parens and one arg',{
     code: 'async (foo) => bar;',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -526,10 +524,10 @@ let tests =   [
         body: {type: 'Identifier', name: 'bar'},
       }},
     ]},
-    desc: 'async arrow statement (useless but valid?) with parens and one arg',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async can not have line terminator after it; the await is invalid',{
     code: 'async\nfunction f(){await x}',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -537,10 +535,10 @@ let tests =   [
     SCRIPT: {
       throws: 'Unable to ASI',
     },
-    desc: 'async can not have line terminator after it; the await is invalid',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('regular async arrow let statement without newline',{
     code: 'let f = async function g(){}',
     ast: {type: 'Program', body: [
       {type: 'VariableDeclaration',
@@ -563,10 +561,10 @@ let tests =   [
         }],
       },
     ]},
-    desc: 'regular async arrow let statement without newline',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async can not have line terminator after it; should work but not generate an async function',{
     code: 'let f = async\nfunction g(){}',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -595,10 +593,10 @@ let tests =   [
         }
       ]},
     },
-    desc: 'async can not have line terminator after it; should work but not generate an async function',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('async with newline breaking an expression mid-air',{
     code: 'let f = a + b + async\nfunction g(){} + d',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -637,10 +635,10 @@ let tests =   [
         {type: 'ExpressionStatement', expression: {type: 'UnaryExpression', operator: '+', prefix: true, argument: {type: 'Identifier', name: 'd'}}},
       ]},
     },
-    desc: 'async with newline breaking an expression mid-air',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('async arrow to test ast',{
     code: 'let f = a + b + async()=>d',
     ast: {type: 'Program', body: [{
       type: 'VariableDeclaration',
@@ -669,10 +667,10 @@ let tests =   [
         },
       }]},
     ]},
-    desc: 'async arrow to test ast',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('async testing ast without newline', {
     code: 'let f = a + b + async() + d',
     MODULE: {
       throws: 'must be followed by a function',
@@ -703,10 +701,10 @@ let tests =   [
         }]},
       ]},
     },
-    desc: 'async testing ast without newline',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('async legacy ast should be same as if without the newline',{
     code: 'let f = a + b + async\n() + d',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -737,10 +735,10 @@ let tests =   [
         }]},
       ]},
     },
-    desc: 'async legacy ast should be same as if without the newline',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('async can not have line terminator after it; the await is invalid and should throw',{
     code: 'let f = async\nfunction g(){await x}',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -748,10 +746,10 @@ let tests =   [
     SCRIPT: {
       throws: 'Unable to ASI', // because `await x` requires a semi between now
     },
-    desc: 'async can not have line terminator after it; the await is invalid and should throw',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async can not have line terminator after it; arrow expression wont be async',{
     code: 'let f = async\ng => g',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -778,10 +776,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async can not have line terminator after it; arrow expression wont be async',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('async can not have line terminator after it; should throw at await because arrow expression wont be async',{
     code: 'let f = async\ng => await g',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -789,10 +787,10 @@ let tests =   [
     SCRIPT: {
       throws: 'Unable to ASI', // because `await g` is illegal, it espects a semi
     },
-    desc: 'async can not have line terminator after it; should throw at await because arrow expression wont be async',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async can not have line terminator after it; SCRIPT mode will throw after pasing the `async()` as a regular call',{
     code: 'let f = async\n(g) => g',
     MODULE: {
       throws: 'cannot be followed by a newline',
@@ -800,10 +798,10 @@ let tests =   [
     SCRIPT: {
       throws: 'Unable to ASI', // this one is ugly, but the problem occurs after parsing `let f=async()` at the arrow
     },
-    desc: 'async can not have line terminator after it; SCRIPT mode will throw after pasing the `async()` as a regular call',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('not pretty but this should be legal in SCRIPT mode, `in` is edge case to single-param arrow functions',{
     code: 'async in {}',
     MODULE: {
       throws: 'cannot be followed by',
@@ -818,10 +816,10 @@ let tests =   [
         }}
       ]},
     },
-    desc: 'not pretty but this should be legal in SCRIPT mode, `in` is edge case to single-param arrow functions',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('not pretty but this should be legal in SCRIPT mode, `instanceof` is edge case to single-param arrow functions',{
     code: 'async instanceof {}',
     MODULE: {
       throws: 'cannot be followed by',
@@ -836,10 +834,10 @@ let tests =   [
         }}
       ]},
     },
-    desc: 'not pretty but this should be legal in SCRIPT mode, `instanceof` is edge case to single-param arrow functions',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async `in` check as expression',{
     code: 'f(async in {})',
     MODULE: {
       throws: 'cannot be followed by',
@@ -858,10 +856,10 @@ let tests =   [
         }}
       ]},
     },
-    desc: 'async `in` check as expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async `instanceof` check as expression',{
     code: 'f(async instanceof {})',
     MODULE: {
       throws: 'cannot be followed by',
@@ -880,10 +878,10 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async `instanceof` check as expression',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async `in` check as expression for operator precedence',{
     code: 'f(a + async in b)',
     MODULE: {
       throws: 'cannot be followed by',
@@ -907,10 +905,10 @@ let tests =   [
         }}
       ]},
     },
-    desc: 'async `in` check as expression for operator precedence',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('async `instanceof` check as expression for operator precedence',{
     code: 'f(a + async instanceof b)',
     MODULE: {
       throws: 'cannot be followed by',
@@ -934,10 +932,6 @@ let tests =   [
         }},
       ]},
     },
-    desc: 'async `instanceof` check as expression for operator precedence',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
-  },
-];
-
-//export default tests;
-module.exports = tests;
+  });
+});

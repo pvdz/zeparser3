@@ -1,34 +1,13 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-module.exports = [
-  '  member',
-  {
+
+module.exports = (describe, test) => describe('member expression', _ => {
+
+  test('function call, no args',{
     code: 'foo.bar',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -38,7 +17,6 @@ module.exports = [
         computed: false,
       }},
     ]},
-    desc: 'function call, no args',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-];
+  });
+});

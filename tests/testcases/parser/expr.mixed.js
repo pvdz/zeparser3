@@ -1,34 +1,13 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let mixed = [
-  '    mixed array/object destructuring',
-  {
+
+module.exports = (describe, test) => describe('mixed array/object destructuring', _ => {
+
+  test('object with shorthand inside array',{
     code: '[a, {b}, c] = obj',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -51,10 +30,10 @@ let mixed = [
         right: {type: 'Identifier', name: 'obj'},
       }},
     ]},
-    desc: 'object with shorthand inside array',
     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('object with property pair inside array',{
     code: '[a, {b:d}, c] = obj',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -77,10 +56,10 @@ let mixed = [
         right: {type: 'Identifier', name: 'obj'},
       }},
     ]},
-    desc: 'object with property pair inside array',
     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('object with computed property inside array',{
     code: '[a, {[b]:d}, c] = obj',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -103,10 +82,10 @@ let mixed = [
         right: {type: 'Identifier', name: 'obj'},
       }},
     ]},
-    desc: 'object with computed property inside array',
     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('horrible addition. this could also be a valid array without the assignment suffixed',{
     code: '[please, {[make]: it}, stop] = bwahahahaha',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -121,10 +100,10 @@ let mixed = [
         right: {type: 'Identifier', name: 'bwahahahaha'},
       }},
     ]},
-    desc: 'horrible addition. this could also be a valid array without the assignment suffixed',
     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('double assignment in first deconstruction',{
     code: '[pweeze = [pretty] = please, {[make]: it}, stop] = bwahahahaha',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -149,10 +128,10 @@ let mixed = [
         right: {type: 'Identifier', name: 'bwahahahaha'},
       }},
     ]},
-    desc: 'double assignment in first deconstruction',
     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('horrible addition. this could also be a valid array without the assignment suffixed',{
     code: 'log({foo: [bar]} = obj);',
 
     ast: {type: 'Program', body: [
@@ -176,9 +155,6 @@ let mixed = [
         },
       }],
     },
-    desc: 'horrible addition. this could also be a valid array without the assignment suffixed',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-];
-
-module.exports = mixed;
+  });
+});

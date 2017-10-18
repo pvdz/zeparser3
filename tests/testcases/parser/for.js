@@ -1,81 +1,79 @@
-//import ZeTokenizer, {
 let {
-  $ASI,
   $IDENT,
   $NUMBER_DEC,
   $PUNCTUATOR,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests = [
-  'for statement',
-  [
-    '  for-classic',
-    {
+
+module.exports = (describe, test) => describe('for statement', _ => {
+
+  describe('for-loop', _ => {
+
+    test('empty for-classic',{
       code: 'for (;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement', init: null, test: null, update: null, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'empty for-classic',
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, only init, empty body',{
       code: 'for (a;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement', init: {type: 'Identifier', name: 'a'}, test: null, update: null, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, only init, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, only test, empty body',{
       code: 'for (;b;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement', init: null, test: {type: 'Identifier', name: 'b'}, update: null, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, only test, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, only update, empty body',{
       code: 'for (;;c);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement', init: null, test: null, update: {type: 'Identifier', name: 'c'}, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, only update, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, only init and test, empty body',{
       code: 'for (a;b;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement', init: {type: 'Identifier', name: 'a'}, test: {type: 'Identifier', name: 'b'}, update: null, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, only init and test, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, only init and update, empty body',{
       code: 'for (a;;c);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement', init: {type: 'Identifier', name: 'a'}, test: null, update: {type: 'Identifier', name: 'c'}, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, only init and update, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, only test and update, empty body',{
       code: 'for (;b;c);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement', init: null, test: {type: 'Identifier', name: 'b'}, update: {type: 'Identifier', name: 'c'}, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, only test and update, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, init and test and update, empty body',{
       code: 'for (a;b;c);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement', init: {type: 'Identifier', name: 'a'}, test: {type: 'Identifier', name: 'b'}, update: {type: 'Identifier', name: 'c'}, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, init and test and update, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, init and test and update, empty body',{
       code: 'for (a + b * c * d;b;c);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -99,10 +97,10 @@ let tests = [
           update: {type: 'Identifier', name: 'c'},
           body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, init and test and update, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, init and test and update, empty body',{
       code: 'for (a * b + c * d;b;c);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -126,10 +124,10 @@ let tests = [
           update: {type: 'Identifier', name: 'c'},
           body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, init and test and update, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, expression disambiguation test',{
       code: 'for ((a * b + c) * d;b;c);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -151,11 +149,13 @@ let tests = [
           update: {type: 'Identifier', name: 'c'},
           body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'for-classic, expression disambiguation test',
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    '    var decls',
-    {
+    });
+  });
+
+  describe('var decls', _ => {
+
+    test('for-classic, one var, empty body',{
       code: 'for (var a;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -165,10 +165,10 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, one var, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, three vars, empty body',{
       code: 'for (var a,b,c;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -182,10 +182,10 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, three vars, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, one let, empty body',{
       code: 'for (let a;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -195,10 +195,10 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, one let, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, three lets, empty body',{
       code: 'for (let a,b,c;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -212,10 +212,10 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, three lets, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, only init, empty body',{
       code: 'for (const a;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -225,10 +225,10 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, only init, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, three consts, empty body',{
       code: 'for (const a,b,c;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -242,11 +242,13 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, three consts, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    '    vars with initializers',
-    {
+    });
+  });
+
+  describe('vars with initializers', _ => {
+
+    test('for-classic, one var with init, empty body',{
       code: 'for (var a=1;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -258,10 +260,10 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, one var with init, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, two vars only first has init, empty body',{
       code: 'for (var a=1, b;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -274,10 +276,10 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, two vars only first has init, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, two vars only second has init, empty body',{
       code: 'for (var a, b=1;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -290,10 +292,10 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, two vars only second has init, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('for-classic, two vars both have init, empty body',{
       code: 'for (var a=1, b=2;;);',
       ast: {type: 'Program', body: [
         {type: 'ForStatement',
@@ -306,21 +308,21 @@ let tests = [
           body: {type: 'EmptyStatement'}
         },
       ]},
-      desc: 'for-classic, two vars both have init, empty body',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-  ],
-  [
-    '  for-in',
-    {
+    });
+  });
+
+  describe('for-in', _ => {
+
+    test('empty for-in',{
       code: 'for (a in b);',
       ast: {type: 'Program', body: [
         {type: 'ForInStatement', left: {type: 'Identifier', name: 'a'}, right: {type: 'Identifier', name: 'b'}, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'empty for-in',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('empty for-in',{
       code: 'for (var a in b);',
       ast: {type: 'Program', body: [
         {type: 'ForInStatement',
@@ -329,10 +331,10 @@ let tests = [
           body: {type: 'EmptyStatement'},
         },
       ]},
-      desc: 'empty for-in',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('empty for-in',{
       code: 'for (let a in b);',
       ast: {type: 'Program', body: [
         {type: 'ForInStatement',
@@ -341,10 +343,10 @@ let tests = [
           body: {type: 'EmptyStatement'},
         },
       ]},
-      desc: 'empty for-in',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('empty for-in',{
       code: 'for (const a in b);',
       ast: {type: 'Program', body: [
         {type: 'ForInStatement',
@@ -353,21 +355,21 @@ let tests = [
           body: {type: 'EmptyStatement'},
         },
       ]},
-      desc: 'empty for-in',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-  ],
-  [
-    '  for-of',
-    {
+    });
+  });
+
+  describe('for-of', _ => {
+
+    test('empty for-of',{
       code: 'for (a of b);',
       ast: {type: 'Program', body: [
         {type: 'ForOfStatement', left: {type: 'Identifier', name: 'a'}, right: {type: 'Identifier', name: 'b'}, body: {type: 'EmptyStatement'}},
       ]},
-      desc: 'empty for-of',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('empty for-of',{
       code: 'for (var a of b);',
       ast: {type: 'Program', body: [
         {type: 'ForOfStatement',
@@ -376,10 +378,10 @@ let tests = [
           body: {type: 'EmptyStatement'},
         },
       ]},
-      desc: 'empty for-of',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('empty for-of',{
       code: 'for (let a of b);',
       ast: {type: 'Program', body: [
         {type: 'ForOfStatement',
@@ -388,10 +390,10 @@ let tests = [
           body: {type: 'EmptyStatement'},
         },
       ]},
-      desc: 'empty for-of',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('empty for-of',{
       code: 'for (const a of b);',
       ast: {type: 'Program', body: [
         {type: 'ForOfStatement',
@@ -400,11 +402,7 @@ let tests = [
           body: {type: 'EmptyStatement'},
         },
       ]},
-      desc: 'empty for-of',
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    },
-  ],
-];
-
-//export default tests;
-module.exports = tests;
+    });
+  });
+});

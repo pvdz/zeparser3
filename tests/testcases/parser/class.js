@@ -1,14 +1,12 @@
-//import ZeTokenizer, {
 let {
-  $ASI,
   $IDENT,
   $PUNCTUATOR,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests = [
-  'class statement',
-  {
+
+module.exports = (describe, test) => describe('class statement', _ => {
+
+  test('empty class',{
     code: 'class A {}',
     ast: {type: 'Program', body: [
       {type: 'ClassDeclaration',
@@ -19,10 +17,10 @@ let tests = [
         }
       },
     ]},
-    desc: 'empty class',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+  
+  test('empty class with trivial extends',{
     code: 'class A extends B {}',
     ast: {type: 'Program', body: [
       {type: 'ClassDeclaration',
@@ -33,10 +31,10 @@ let tests = [
         }
       },
     ]},
-    desc: 'empty class with trivial extends',
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('empty class that extends an expression',{
     code: 'class A extends foo() {}',
     ast: {type: 'Program', body: [
       {type: 'ClassDeclaration',
@@ -47,10 +45,10 @@ let tests = [
         }
       },
     ]},
-    desc: 'empty class that extends an expression',
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('empty class extending an empty object because i had to be smart about it',{
     code: 'class A extends {} {}',
     ast: {type: 'Program', body: [
       {type: 'ClassDeclaration',
@@ -61,12 +59,12 @@ let tests = [
         }
       },
     ]},
-    desc: 'empty class extending an empty object because i had to be smart about it',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  [
-    '  ident methods',
-    {
+  });
+
+  describe('ident methods', _ => {
+
+    test('class with simple ident method',{
       code: 'class A {a(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -93,10 +91,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with simple ident method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with simple ident method',{
       code: 'class A {static a(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -123,10 +121,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with simple ident method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with special constructor method',{
       code: 'class A {constructor(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -153,10 +151,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with special constructor method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with not-so-special static constructor method',{
       code: 'class A {static constructor(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -183,10 +181,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with not-so-special static constructor method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with async method',{
       code: 'class A {async foo(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -213,10 +211,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with async method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with generator method',{
       code: 'class A {*foo(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -243,10 +241,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with generator method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with getter method',{
       code: 'class A {get foo(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -273,10 +271,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with getter method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with static getter method because why not',{
       code: 'class A {static get foo(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -303,10 +301,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with static getter method because why not',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with setter method',{
       code: 'class A {set foo(x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -333,10 +331,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with setter method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with setter method',{
       code: 'class A {static set foo(x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -363,10 +361,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with setter method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with setter named get',{
       code: 'class A {set get(x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -393,10 +391,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with setter named get',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with getter named set',{
       code: 'class A {get set(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -423,10 +421,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with getter named set',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+
+    test('class with non-special method named get, set, and async',{
       code: 'class A {set(){} get(){} async(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -483,13 +481,13 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with non-special method named get, set, and async',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-  ], // ident methods
-  [
-    '  dynamic methods',
-    {
+    });
+  });
+
+  describe('dynamic methods', _ => {
+
+    test('class with simple ident method',{
       code: 'class A {[a](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -516,10 +514,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with simple ident method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+  
+    test('class with simple ident method',{
       code: 'class A {static [a](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -546,10 +544,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with simple ident method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+  
+    test('class with async method',{
       code: 'class A {async [foo](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -576,10 +574,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with async method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+  
+    test('class with generator method',{
       code: 'class A {*[foo](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -606,10 +604,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with generator method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+  
+    test('class with getter method',{
       code: 'class A {get [foo](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -636,10 +634,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with getter method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+  
+    test('class with static getter method because why not',{
       code: 'class A {static get [foo](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -666,10 +664,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with static getter method because why not',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+  
+    test('class with setter method',{
       code: 'class A {set [foo](x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -696,10 +694,10 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with setter method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-    {
+    });
+  
+    test('class with setter method',{
       code: 'class A {static set [foo](x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -726,10 +724,9 @@ let tests = [
           }
         },
       ]},
-      desc: 'class with setter method',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    },
-  ], // dynamic methods
+    });
+  });
 
   /*
   // string and numeric keys are also valid
@@ -752,7 +749,4 @@ class f {
   // export default class extends F {}
   // class extends {} {}
   // async constructor ?
-];
-
-//export default tests;
-module.exports = tests;
+});

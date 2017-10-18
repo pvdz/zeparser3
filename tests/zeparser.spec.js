@@ -2,117 +2,55 @@
 
 // use https://astexplorer.net/ for ast comparisons
 
-//import {
+let fs = require('fs');
+
 let {
   MODE_MODULE,
   MODE_SCRIPT,
 
   toPrint,
 } = require('./utils.js');
-//} from './utils';
-//import ZeParser, {
 let { default: ZeParser,
   COLLECT_TOKENS_NONE,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
 } = require('../src/zeparser'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from '../src/zeparser';
 
 let ZeParserBuild = require('../build/build.js').default;
 
-//import {
 let {
   $EOF,
 
   debug_toktype,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from '../src/zetokenizer';
 
-//import asyncTests from './testcases/parser/async';
-let asyncTests = require('./testcases/parser/async');
-//import blockTests from './testcases/parser/block';
-let blockTests = require('./testcases/parser/block');
-//import breakTests from './testcases/parser/break';
-let breakTests = require('./testcases/parser/break');
-//import continueTests from './testcases/parser/continue';
-let continueTests = require('./testcases/parser/continue');
-//import constTests from './testcases/parser/const';
-let constTests = require('./testcases/parser/const');
-//import classTests from './testcases/parser/class';
-let classTests = require('./testcases/parser/class');
-//import debuggerTests from './testcases/parser/debugger';
-let debuggerTests = require('./testcases/parser/debugger');
-//import doTests from './testcases/parser/do';
-let doTests = require('./testcases/parser/do');
-//import emptyTests from './testcases/parser/empty';
-let emptyTests = require('./testcases/parser/empty');
-//import expressionTests from './testcases/parser/expression';
-let expressionTests = require('./testcases/parser/expression');
-//import exportTests from './testcases/parser/export';
-let exportTests = require('./testcases/parser/export');
-//import forTests from './testcases/parser/for';
-let forTests = require('./testcases/parser/for');
-//import functionTests from './testcases/parser/function';
-let functionTests = require('./testcases/parser/function');
-//import ifTests from './testcases/parser/if';
-let ifTests = require('./testcases/parser/if');
-//import importTests from './testcases/parser/import';
-let importTests = require('./testcases/parser/import');
-//import labelTests from './testcases/parser/label';
-let labelTests = require('./testcases/parser/label');
-//import letTests from './testcases/parser/let';
-let letTests = require('./testcases/parser/let');
-//import returnTests from './testcases/parser/return';
-let returnTests = require('./testcases/parser/return');
-//import switchTests from './testcases/parser/switch';
-let switchTests = require('./testcases/parser/switch');
-//import throwTests from './testcases/parser/throw';
-let throwTests = require('./testcases/parser/throw');
-//import tryTests from './testcases/parser/try';
-let tryTests = require('./testcases/parser/try');
-//import varTests from './testcases/parser/var';
-let varTests = require('./testcases/parser/var');
-//import whileTests from './testcases/parser/while';
-let whileTests = require('./testcases/parser/while');
-//import withTests from './testcases/parser/with';
-let withTests = require('./testcases/parser/with');
+let dir = __dirname + '/testcases/parser';
+let files = [];
+function df(path, file) {
+  if (fs.statSync(path + file).isFile(path + file)) files.push(path + file);
+  else fs.readdirSync(path).forEach(s => df(path + file, s));
+}
+df(dir, '/');
 
-let tests = [
-  ...asyncTests,
-  ...blockTests,
-  ...breakTests,
-  ...continueTests,
-  ...constTests,
-  ...classTests,
-  ...debuggerTests,
-  ...doTests,
-  ...emptyTests,
-  ...exportTests,
-  ...expressionTests,
-  ...forTests,
-  ...functionTests,
-  ...ifTests,
-  ...importTests,
-  ...labelTests,
-  ...letTests,
-  ...returnTests,
-  ...switchTests,
-  ...throwTests,
-  ...tryTests,
-  ...varTests,
-  ...whileTests,
-  ...withTests,
 
-  // (new) regular expression edge cases. in particular with destructuring patterns and asi
-  // `[]\n/x` (division)
-  // `[]\n/x/` (Error)
-  // `[]\n/x/g` (division)
-  // (x)/y
-  // (x)=>/y/
-  // for (/x/ in y); (Illegal lhs)
-  // x => {} / y  (Illegal; {} is a body statement, has no value. no prod parses it)
+let describes = files.map(require);
 
-];
+let cases = [];
+let X = (desc, f) => f(X, Y);
+let Y = (desc, f) => cases.push(f);
+describes.forEach(X.bind(undefined, ''));
+
+// todo
+
+// (new) regular expression edge cases. in particular with destructuring patterns and asi
+// `[]\n/x` (division)
+// `[]\n/x/` (Error)
+// `[]\n/x/g` (division)
+// (x)/y
+// (x)=>/y/
+// for (/x/ in y); (Illegal lhs)
+// x => {} / y  (Illegal; {} is a body statement, has no value. no prod parses it)
+
 
 let checkAST = true;
 let parserDesc = '';
@@ -241,7 +179,7 @@ try {
   ].forEach(([parser, hasAst, desc],i) => {
     checkAST = hasAst;
     parserDesc = '## ' + desc;
-    all(parser, tests);
+    all(parser, cases);
   });
 } finally {
   console.log(`

@@ -1,31 +1,8 @@
 let {
-  MODE_MODULE,
-  MODE_SCRIPT,
-} = require('../../utils.js');
-let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
   $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
 
 // https://tc39.github.io/ecma262/#prod-AwaitExpression
@@ -40,9 +17,9 @@ let {
 //
 // Note that `async` can have no line terminator between itself and the next token when it declares a function async
 
-let awaits = [
-  '  await',
-  {
+module.exports = (describe, test) => describe('await', _ => {
+
+  test('simplest await',{
     code: 'async function f(){ await foo; }',
     ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
       generator: false,
@@ -58,10 +35,10 @@ let awaits = [
         }}],
       },
     }]},
-    desc: 'simplest await',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('nested await',{
     code: 'async function f(){ await await foo; }',
     ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
       generator: false,
@@ -80,18 +57,18 @@ let awaits = [
         }}],
       },
     }]},
-    desc: 'nested await',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('show that the non-keyword is fine here',{
     code: 'awaiting',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'awaiting'}},
     ]},
-    desc: 'show that the non-keyword is fine here',
     tokens: [$IDENT, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'await',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -101,10 +78,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'await()',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -118,10 +95,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'await[x]',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -136,10 +113,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'await = 16',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -154,10 +131,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'await - 25',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -172,10 +149,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'call(await)',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -185,10 +162,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'call(await())',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -200,10 +177,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'call(await[1])',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -220,10 +197,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('await is a valid identifier in script mode',{
     code: 'call(await.foo)',
     SCRIPT: {
       ast: {type: 'Program', body: [
@@ -235,10 +212,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'await is a valid identifier in script mode',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('dont throw for await as param name in script mode',{
     code: 'function call(await){}',
     SCRIPT: {
       ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
@@ -253,10 +230,10 @@ let awaits = [
     MODULE: {
       throws: 'Await is illegal outside of async body',
     },
-    desc: 'dont throw for await as param name in script mode',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('dont throw for await in param default value if not an actual await expression and in script mode',{
     code: 'function call(foo=await){}',
     SCRIPT: {
       ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
@@ -274,10 +251,10 @@ let awaits = [
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
     },
-    desc: 'dont throw for await in param default value if not an actual await expression and in script mode',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('can never use await expression as default arg value',{
     code: 'function call(foo=await bar){}',
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
@@ -285,10 +262,10 @@ let awaits = [
     SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
-    desc: 'can never use await expression as default arg value',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('arg with default that is awaitable that is an assignment (tests assignability check of an await expr)',{
     code: 'function call(foo=await bar=10){}',
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
@@ -296,10 +273,10 @@ let awaits = [
     SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
-    desc: 'arg with default that is awaitable that is an assignment (tests assignability check of an await expr)',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('can never use await expression as default arg value (slightly more complex)',{
     code: 'function call(foo= 5 + (await bar())){}',
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
@@ -307,10 +284,10 @@ let awaits = [
     SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
-    desc: 'can never use await expression as default arg value (slightly more complex)',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('make failing code is inside async function, should still fail for being in parameter head',{
     code: 'async function x(){ function y(s=await foo){}}',
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
@@ -318,10 +295,10 @@ let awaits = [
     SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
-    desc: 'make failing code is inside async function, should still fail for being in parameter head',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('the async property is not inherited from parent functions',{
     code: 'async function f(){ let y = x => await x; }',
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
@@ -329,10 +306,10 @@ let awaits = [
     SCRIPT: {
       throws: 'Unable to ASI',
     },
-    desc: 'the async property is not inherited from parent functions',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('using await inside the arg header of a function inside async should always fail',{
     code: 'let f = () => (y=await foo) => y;',
     MODULE: {
       throws: 'Cannot use `await` outside of `async` functions',
@@ -340,10 +317,10 @@ let awaits = [
     SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
-    desc: 'using await inside the arg header of a function inside async should always fail',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('an arrow can also be async',{
     code: 'let y = async x => await x',
     ast: {type: 'Program', body: [
       {type: 'VariableDeclaration',
@@ -366,10 +343,10 @@ let awaits = [
         }],
       },
     ]},
-    desc: 'an arrow can also be async',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('await in a body of an async arrow',{
     code: 'let y = async x => { await x; }',
     ast: {type: 'Program', body: [
       {type: 'VariableDeclaration',
@@ -394,10 +371,6 @@ let awaits = [
         }],
       },
     ]},
-    desc: 'await in a body of an async arrow',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-
-];
-
-module.exports = awaits;
+  });
+});

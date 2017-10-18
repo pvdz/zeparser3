@@ -1,44 +1,39 @@
-//import ZeTokenizer, {
 let {
   $ASI,
   $IDENT,
   $PUNCTUATOR,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests =   [
-  'block statement',
-  {
+
+module.exports = (describe, test) => describe('block statement', _ => {
+
+  test('empty block', {
     code: '{}',
     ast: {type: 'Program', body: [{type: 'BlockStatement', body: []}]},
-    desc: 'empty block',
     tokens: [$PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('block with debugger and semi', {
     code: '{debugger;}',
     ast: {type: 'Program', body: [{type: 'BlockStatement', body: [
       {type: 'DebuggerStatement'},
     ]}]},
-    desc: 'block with debugger and semi',
     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('block with debugger and semi with newlines', {
     code: '{\n  debugger;\n}',
     ast: {type: 'Program', body: [{type: 'BlockStatement', body: [
       {type: 'DebuggerStatement'},
     ]}]},
-    desc: 'block with debugger and semi with newlines',
     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('block with debugger and asi', {
     code: '{debugger}',
     ast: {type: 'Program', body: [{type: 'BlockStatement', body: [
       {type: 'DebuggerStatement'},
     ]}]},
-    desc: 'block with debugger and asi',
     tokens: [$PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
-  },
-];
-
-//export default tests;
-module.exports = tests;
+  });
+});

@@ -1,34 +1,13 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let assigns = [
-  '  assigns',
-  {
+
+module.exports = (describe, test) => describe('assigns', _ => {
+  
+  test('bin *=',{
     code: 'a *= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -38,10 +17,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin *=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin /=',{
     code: 'a /= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -51,10 +30,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin /=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin %=',{
     code: 'a %= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -64,10 +43,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin %=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin +=',{
     code: 'a += b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -77,10 +56,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin +=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin -=',{
     code: 'a -= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -90,10 +69,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin -=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin <<=',{
     code: 'a <<= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -103,10 +82,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin <<=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin >>=',{
     code: 'a >>= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -116,10 +95,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin >>=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin >>>=',{
     code: 'a >>>= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -129,10 +108,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin >>>=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin &=',{
     code: 'a &= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -142,10 +121,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin &=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin |=',{
     code: 'a |= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -155,10 +134,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin |=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin ^=',{
     code: 'a ^= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -168,10 +147,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin ^=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin |=',{
     code: 'a |= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -181,10 +160,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin |=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('bin **=',{
     code: 'a **= b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -194,10 +173,10 @@ let assigns = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin **=',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('triple eq chain',{
     code: 'a = b = c',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -210,10 +189,10 @@ let assigns = [
         },
       }},
     ]},
-    desc: 'triple eq chain',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('quad eq chain',{
     code: 'a = b = c = d',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
@@ -230,9 +209,6 @@ let assigns = [
         },
       }},
     ]},
-    desc: 'quad eq chain',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-];
-
-module.exports = assigns;
+  });
+});

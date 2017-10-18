@@ -1,34 +1,13 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let news = [
-  '  new',
-  {
+
+module.exports = (describe, test) => describe('new keyword', _ => {
+
+  test('new on property without parens',{
     code: 'new Foo()',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'NewExpression',
@@ -36,10 +15,10 @@ let news = [
         callee: {type: 'Identifier', name: 'Foo'},
       }},
     ]},
-    desc: 'new on property without parens',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('new on property without parens',{
     code: 'new Foo(x, y, z)',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'NewExpression',
@@ -51,10 +30,10 @@ let news = [
         callee: {type: 'Identifier', name: 'Foo'},
       }},
     ]},
-    desc: 'new on property without parens',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('new on property without parens',{
     code: 'new Foo.bar',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'NewExpression',
@@ -66,10 +45,10 @@ let news = [
         },
       }},
     ]},
-    desc: 'new on property without parens',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+
+  test('new on property without parens',{
     code: 'new Foo.bar()',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'NewExpression',
@@ -81,10 +60,10 @@ let news = [
         },
       }},
     ]},
-    desc: 'new on property without parens',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('new on property without parens',{
     code: 'new Foo.bar(x, y, z)',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'NewExpression',
@@ -100,10 +79,10 @@ let news = [
         },
       }},
     ]},
-    desc: 'new on property without parens',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+
+  test('new on property with parens',{
     code: 'new Foo().bar',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {type: 'NewExpression',
@@ -115,9 +94,6 @@ let news = [
         },
       }},
     ]},
-    desc: 'new on property with parens',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-  },
-];
-
-module.exports = news;
+  });
+});

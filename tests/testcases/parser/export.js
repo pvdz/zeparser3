@@ -1,50 +1,32 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
   $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
   $STRING_DOUBLE,
   $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests = [
-  'export',
-  {
+
+module.exports = (describe, test) => describe('export declaration', _ => {
+
+  test('re-export everything from another module (double string)',{
     code: 'export * from "foo"',
     ast: {type: 'Program', body: [
       {type: 'ExportAllDeclaration', source: {type: 'Literal', value: '<TODO>', raw: '"foo"'}},
     ]},
-    desc: 're-export everything from another module (double string)',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
-  },
-  {
+  });
+  
+  test('re-export everything from another module (single string)',{
     code: `export * from 'foo'`,
     ast: {type: 'Program', body: [
       {type: 'ExportAllDeclaration', source: {type: 'Literal', value: '<TODO>', raw: '\'foo\''}},
     ]},
-    desc: 're-export everything from another module (single string)',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $STRING_SINGLE, $ASI],
-  },
-  {
+  });
+  
+  test('empty export',{
     code: 'export {}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -53,10 +35,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'empty export',
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export one key',{
     code: 'export {x}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -67,10 +49,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export one key',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export one key aliased',{
     code: 'export {x as a}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -81,10 +63,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export one key aliased',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export one key, trailing comma',{
     code: 'export {x,}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -95,10 +77,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export one key, trailing comma',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('re-export one key',{
     code: 'export {x} from "foo"',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -109,10 +91,10 @@ let tests = [
         source: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
       },
     ]},
-    desc: 're-export one key',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
-  },
-  {
+  });
+  
+  test('re-export one key aliased',{
     code: 'export {x as a} from "foo"',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -123,10 +105,10 @@ let tests = [
         source: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
       },
     ]},
-    desc: 're-export one key aliased',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
-  },
-  {
+  });
+  
+  test('re-export one key, trailing comma',{
     code: 'export {x,} from "foo"',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -137,10 +119,10 @@ let tests = [
         source: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
       },
     ]},
-    desc: 're-export one key, trailing comma',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
-  },
-  {
+  });
+  
+  test('export one key aliased, trailing comma',{
     code: 'export {x as a,}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -151,10 +133,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export one key aliased, trailing comma',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export two keys',{
     code: 'export {x, y}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -166,10 +148,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export two keys',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export two keys aliased',{
     code: 'export {x as a, y as b}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -181,10 +163,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export two keys aliased',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export two keys, trailing comma',{
     code: 'export {x, y,}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -196,10 +178,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export two keys, trailing comma',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export two keys aliased, trailing comma',{
     code: 'export {x as a, y as b,}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -211,10 +193,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export two keys aliased, trailing comma',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export var statement, one var',{
     code: 'export var x',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -228,10 +210,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export var statement, one var',
     tokens: [$IDENT, $IDENT, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('export var statement, two vars',{
     code: 'export var x, y',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -246,10 +228,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export var statement, two vars',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('export var statement, two vars, with init',{
     code: 'export var x = 10, y = 20',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -264,10 +246,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export var statement, two vars, with init',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
-  },
-  {
+  });
+  
+  test('export let statement, one var',{
     code: 'export let x',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -281,10 +263,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export let statement, one var',
     tokens: [$IDENT, $IDENT, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('export let statement, two vars',{
     code: 'export let x, y',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -299,10 +281,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export let statement, two vars',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('export let statement, two vars, with init',{
     code: 'export let x = 10, y = 20',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -317,10 +299,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export let statement, two vars, with init',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
-  },
-  {
+  });
+  
+  test('export const statement, one var',{
     code: 'export const x',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -334,10 +316,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export const statement, one var',
     tokens: [$IDENT, $IDENT, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('export const statement, two vars',{
     code: 'export const x, y',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -352,10 +334,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export const statement, two vars',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('export const statement, two vars, with init',{
     code: 'export const x = 10, y = 20',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -370,10 +352,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export const statement, two vars, with init',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
-  },
-  {
+  });
+  
+  test('export a named function',{
     code: 'export function f(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -389,10 +371,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export a named function',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('export a named async function',{
     code: 'export async function f(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -408,10 +390,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export a named async function',
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('non-default export of an anonymous async function is illegal',{
     code: 'export async function(){}',
     MODULE: {
       throws: 'missing required ident',
@@ -419,16 +401,16 @@ let tests = [
     SCRIPT: {
       throws: 'missing required ident',
     },
-    desc: 'non-default export of an anonymous async function is illegal',
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('legacy meaning of `async` cant save this export from failing in SCRIPT mode',{
     code: 'export async',
     throws: 'Can only export async functions',
-    desc: 'legacy meaning of `async` cant save this export from failing in SCRIPT mode',
     tokens: [$IDENT, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('export a named generator function',{
     code: 'export function* f(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
@@ -444,10 +426,10 @@ let tests = [
         source: null,
       },
     ]},
-    desc: 'export a named generator function',
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('default export a named function',{
     code: 'export default function f(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
@@ -461,10 +443,10 @@ let tests = [
         },
       },
     ]},
-    desc: 'default export a named function',
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('default export a named async function',{
     code: 'export default async function f(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
@@ -479,10 +461,10 @@ let tests = [
         },
       },
     ]},
-    desc: 'default export a named async function',
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('default export a named generator function',{
     code: 'export default function* f(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
@@ -496,10 +478,10 @@ let tests = [
         },
       },
     ]},
-    desc: 'default export a named generator function',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('default export an anonymous function',{
     code: 'export default function(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
@@ -513,10 +495,10 @@ let tests = [
         },
       },
     ]},
-    desc: 'default export an anonymous function',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('default export an anonymous async function',{
     code: 'export default async function(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
@@ -530,10 +512,10 @@ let tests = [
         },
       },
     ]},
-    desc: 'default export an anonymous async function',
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('default export an anonymous generator function',{
     code: 'export default function*(){}',
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
@@ -547,14 +529,9 @@ let tests = [
         },
       },
     ]},
-    desc: 'default export an anonymous generator function',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-  },
-
+  });
 
   // export class ...
   // export default class ...
-];
-
-//export default tests;
-module.exports = tests;
+});

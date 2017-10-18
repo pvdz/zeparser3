@@ -1,34 +1,13 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let unaries = [
-  '  unary',
-  {
+
+module.exports = (describe, test) => describe('unary ops', _ => {
+
+  test('positive prefix',{
     code: '+a',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -38,10 +17,10 @@ let unaries = [
         argument: {type: 'Identifier', name: 'a'},
       }},
     ]},
-    desc: 'positive prefix',
     tokens: [$PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('negative prefix',{
     code: '-a',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -51,10 +30,10 @@ let unaries = [
         argument: {type: 'Identifier', name: 'a'},
       }},
     ]},
-    desc: 'negative prefix',
     tokens: [$PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('bitwise invert',{
     code: '~a',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -64,10 +43,10 @@ let unaries = [
         argument: {type: 'Identifier', name: 'a'},
       }},
     ]},
-    desc: 'bitwise invert',
     tokens: [$PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('incremental prefix',{
     code: '++a',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -77,10 +56,10 @@ let unaries = [
         argument: {type: 'Identifier', name: 'a'},
       }},
     ]},
-    desc: 'incremental prefix',
     tokens: [$PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('decremental prefix',{
     code: '--a',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -90,10 +69,10 @@ let unaries = [
         argument: {type: 'Identifier', name: 'a'},
       }},
     ]},
-    desc: 'decremental prefix',
     tokens: [$PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('incremental suffix',{
     code: 'a++',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -103,10 +82,10 @@ let unaries = [
         prefix: false,
       }},
     ]},
-    desc: 'incremental suffix',
     tokens: [$IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('decremental suffix',{
     code: 'a--',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -116,10 +95,10 @@ let unaries = [
         prefix: false,
       }},
     ]},
-    desc: 'decremental suffix',
     tokens: [$IDENT, $PUNCTUATOR, $ASI],
-  },
-  {
+  });
+  
+  test('boolean invert',{
     code: '!a',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -129,9 +108,6 @@ let unaries = [
         argument: {type: 'Identifier', name: 'a'},
       }},
     ]},
-    desc: 'boolean invert',
     tokens: [$PUNCTUATOR, $IDENT, $ASI],
-  },
-];
-
-module.exports = unaries;
+  });
+});

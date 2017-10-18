@@ -1,42 +1,20 @@
-//import ZeTokenizer, {
 let {
-  $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let tests = [
-  'switch statement',
-  {
+
+module.exports = (describe, test) => describe('return statement', _ => {
+  
+  test('empty switch',{
     code: 'switch (foo) {}',
     ast: {type: 'Program', body: [
       {type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'foo'}, cases: []},
     ]},
-    desc: 'empty switch',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('switch with a simple case',{
     code: 'switch (A) {case B: C;}',
     ast: {type: 'Program', body: [
       {type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'A'}, cases: [
@@ -45,10 +23,10 @@ let tests = [
         ]},
       ]},
     ]},
-    desc: 'switch with a simple case',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('switch with a simple default',{
     code: 'switch (A) {default: B;}',
     ast: {type: 'Program', body: [
       {type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'A'}, cases: [
@@ -57,10 +35,10 @@ let tests = [
         ]},
       ]},
     ]},
-    desc: 'switch with a simple default',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('switch with a simple case and default',{
     code: 'switch (A) {case B: C; default: D;}',
     ast: {type: 'Program', body: [
       {type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'A'}, cases: [
@@ -72,10 +50,10 @@ let tests = [
         ]},
       ]},
     ]},
-    desc: 'switch with a simple case and default',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('switch with a simple default and case',{
     code: 'switch (A) {default: D; case B: C; }',
     ast: {type: 'Program', body: [
       {type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'A'}, cases: [
@@ -87,10 +65,10 @@ let tests = [
         ]},
       ]},
     ]},
-    desc: 'switch with a simple default and case',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('switch with a two cases',{
     code: 'switch (A) {case B: C; case D: E;}',
     ast: {type: 'Program', body: [
       {type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'A'}, cases: [
@@ -102,10 +80,10 @@ let tests = [
         ]},
       ]},
     ]},
-    desc: 'switch with a two cases',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('switch with a two cases',{
     code: 'switch (A) {case B: C; break; case D: E; break;}',
     ast: {type: 'Program', body: [
       {type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'A'}, cases: [
@@ -119,10 +97,10 @@ let tests = [
         ]},
       ]},
     ]},
-    desc: 'switch with a two cases',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-  {
+  });
+
+  test('switch with a simple default and break',{
     code: 'switch (A) {default: B; break;}',
     ast: {type: 'Program', body: [
       {type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'A'}, cases: [
@@ -132,10 +110,6 @@ let tests = [
         ]},
       ]},
     ]},
-    desc: 'switch with a simple default and break',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  },
-];
-
-//export default tests;
-module.exports = tests;
+  });
+});

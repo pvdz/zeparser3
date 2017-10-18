@@ -1,34 +1,13 @@
-//import ZeTokenizer, {
 let {
   $ASI,
-  $EOF,
-  $ERROR,
   $IDENT,
-  $NUMBER,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
   $PUNCTUATOR,
-  $REGEX,
-  $REGEXU,
-  $SPACE,
-  $STRING,
-  $STRING_DOUBLE,
-  $STRING_SINGLE,
-  $TAB,
-  $TICK,
-  $TICK_BODY,
-  $TICK_HEAD,
-  $TICK_PURE,
-  $TICK_TAIL,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-let bitwises = [
-  '  bitwise',
-  {
+
+module.exports = (describe, test) => describe('bitwise', _ => {
+
+  test('bin or',{
     code: 'a|b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -38,10 +17,10 @@ let bitwises = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin or',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('bin &',{
     code: 'a&b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -51,10 +30,10 @@ let bitwises = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin &',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('bin or',{
     code: 'a^b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -64,10 +43,10 @@ let bitwises = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'bin or',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('una ~',{
     code: '~a',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -77,10 +56,10 @@ let bitwises = [
         argument: {type: 'Identifier', name: 'a'},
       }},
     ]},
-    desc: 'una ~',
     tokens: [$PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('rel <<',{
     code: 'a<<b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -90,10 +69,10 @@ let bitwises = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'rel <<',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('rel >>',{
     code: 'a>>b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -103,10 +82,10 @@ let bitwises = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'rel >>',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-  {
+  });
+  
+  test('rel >>>',{
     code: 'a>>>b',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -116,9 +95,6 @@ let bitwises = [
         right: {type: 'Identifier', name: 'b'},
       }},
     ]},
-    desc: 'rel >>>',
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
-  },
-];
-
-module.exports = bitwises;
+  });
+});
