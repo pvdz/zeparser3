@@ -49,7 +49,7 @@ module.exports = (describe, test) => describe('arrays', _ => {
           left: {type: 'ArrayPattern', elements: [
             {type: 'AssignmentPattern',
               left: {type: 'Identifier', name: 'foo'},
-              operator: '=', // innocent artifact because the AssignmentPattern was an AssignmentExpression before
+              //operator: '=', // innocent artifact because the AssignmentPattern was an AssignmentExpression before
               right: {type: 'Identifier', name: 'A'},
             },
           ]},
@@ -80,8 +80,8 @@ module.exports = (describe, test) => describe('arrays', _ => {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
           left: {type: 'ArrayPattern', elements: [
-            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, operator: '=',right: {type: 'Identifier', name: 'A'}},
-            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, operator: '=',right: {type: 'Identifier', name: 'B'}},
+            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, /*operator: '=',*/ right: {type: 'Identifier', name: 'A'}},
+            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, /*operator: '=',*/ right: {type: 'Identifier', name: 'B'}},
           ]},
           operator: '=',
           right: {type: 'Identifier', name: 'arr'},
@@ -101,7 +101,7 @@ module.exports = (describe, test) => describe('arrays', _ => {
               {type: 'Identifier', name: 'y'},
               {type: 'Identifier', name: 'z'},
             ]},
-            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
+            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, /*operator: '=',*/ right: {type: 'Identifier', name: 'B'}},
           ]},
           operator: '=',
           right: {type: 'Identifier', name: 'arr'},
@@ -145,7 +145,7 @@ module.exports = (describe, test) => describe('arrays', _ => {
                 ]},
               ]},
             ]},
-            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
+            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, /*operator: '=',*/ right: {type: 'Identifier', name: 'B'}},
           ]},
           operator: '=',
           right: {type: 'Identifier', name: 'arr'},
@@ -162,10 +162,10 @@ module.exports = (describe, test) => describe('arrays', _ => {
             {type: 'Identifier', name: 'foo'},
             {type: 'ArrayPattern', elements: [
               {type: 'Identifier', name: 'x'},
-              {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '20'}},
+              {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, /*operator: '=',*/ right: {type: 'Literal', value: '<TODO>', raw: '20'}},
               {type: 'Identifier', name: 'z'},
             ]},
-            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, operator: '=', right: {type: 'Identifier', name: 'B'}},
+            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, /*operator: '=',*/ right: {type: 'Identifier', name: 'B'}},
           ]},
           operator: '=',
           right: {type: 'Identifier', name: 'arr'},
@@ -204,6 +204,50 @@ module.exports = (describe, test) => describe('arrays', _ => {
     });
 
     // (a=/i/) = /i/   -> error (invalid lhs)
-    // [a,b=[x,y]] = z  -> should not transform the inner array to a arraydestruct
+
+    describe('edge cases', _ => {
+
+      test('should not transform the inner array to a arraydestruct', {
+        code: '[a,b=[x,y]] = z',
+        ast: { type: 'Program', body: [{
+          type: 'ExpressionStatement', expression: {
+            type: 'AssignmentExpression',
+            left: {
+              type: 'ArrayPattern',
+              elements: [
+                {type: 'Identifier', name: 'a'},
+                {
+                  type: 'AssignmentPattern',
+                  left: { type: 'Identifier', name: 'b'},
+                  //operator: '=', NO!
+                  right: {
+                    type: 'ArrayExpression',
+                    elements: [
+                      {type: 'Identifier', name: 'x'},
+                      {type: 'Identifier', name: 'y'},
+                    ],
+                  },
+                },
+              ],
+            },
+            operator: '=',
+            right: {type: 'Identifier', name: 'z'},
+          },
+        }]},
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      })
+
+      test('assignment pattern can only have regular assignments 1', {
+        code: '[a,b^=[x,y]] = z',
+        throws: 'regular assignment',
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('assignment pattern can only have regular assignments 2', {
+        code: '[a,b+=[x,y]] = z',
+        throws: 'regular assignment',
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+    });
   });
 });

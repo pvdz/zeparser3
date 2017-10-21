@@ -1694,7 +1694,7 @@ module.exports = (describe, test) => describe('objects', _ => {
                 value: {
                   type: 'AssignmentPattern',
                   left: {type: 'Identifier', name: 'a'}, // same token as above
-                  operator: '=',
+                  //operator: '=', // no
                   right: {type: 'Identifier', name: 'b'},
                 },
               },
@@ -1715,7 +1715,7 @@ module.exports = (describe, test) => describe('objects', _ => {
                 value: {
                   type: 'AssignmentPattern',
                   left: {type: 'Identifier', name: 'v'},
-                  operator: '=',
+                  //operator: '=', // no
                   right: {type: 'Identifier', name: 'b'},
                 },
               },

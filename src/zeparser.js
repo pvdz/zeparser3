@@ -440,7 +440,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST__destruct(property.value, assignmentsToo);
       }
     } else if (node.type === 'AssignmentExpression') {
-      if (assignmentsToo) node.type = 'AssignmentPattern';
+      if (assignmentsToo) {
+        node.type = 'AssignmentPattern';
+        if (node.operator !== '=') THROW('The destruturing assignment should be a regular assignment');
+        delete node.operator;
+      }
       // walk the left of the assignment only
       AST__destruct(node.left, DONT_CONVERT_ASSIGNMENTS);
     }

@@ -110,7 +110,7 @@ module.exports = (describe, test) => describe('mixed array/object destructuring'
         left: {type: 'ArrayPattern', elements: [
           {type: 'AssignmentPattern',
             left: {type: 'Identifier', name: 'pweeze'},
-            operator: '=',
+            //operator: '=', // no
             right: {type: 'AssignmentExpression',
               left: {type: 'ArrayPattern', elements: [
                 {type: 'Identifier', name: 'pretty'},

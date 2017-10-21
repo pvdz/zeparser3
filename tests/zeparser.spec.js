@@ -26,19 +26,19 @@ let {
 
 let dir = __dirname + '/testcases/parser';
 let files = [];
-function df(path, file) {
+function rdr(path, file) {
   if (fs.statSync(path + file).isFile(path + file)) files.push(path + file);
-  else fs.readdirSync(path).forEach(s => df(path + file, s));
+  else fs.readdirSync(path).forEach(s => rdr(path + file, s));
 }
-df(dir, '/');
+rdr(dir, '/');
 
 
-let describes = files.map(require);
+let describes = files.map(path => ({from:path, describe:require(path)}));
 
 let cases = [];
-let X = (desc, f) => f(X, Y);
-let Y = (desc, f) => cases.push(f);
-describes.forEach(X.bind(undefined, ''));
+let X = (parentDesc, from, desc, func) => func(X.bind(undefined, parentDesc + ' | ' + desc, from), Y.bind(undefined, parentDesc + ' | ' + desc, from));
+let Y = (parentDesc, from, desc, obj) => cases.push({desc: parentDesc + ' |> ' + desc, from, obj});
+describes.forEach(({from, describe}) => X('', from, '', describe));
 
 // todo
 
@@ -55,7 +55,7 @@ describes.forEach(X.bind(undefined, ''));
 let checkAST = true;
 let parserDesc = '';
 function all(parser, tests) {
-  for (let test of tests) {
+  for (let {desc, from, obj:test} of tests) {
     if (typeof test === 'string') console.log(' --- ' + test + ' --- ');
     else if (Array.isArray(test)) all(parser, test);
     else one(parser, test);
@@ -83,7 +83,7 @@ function _one(Parser, testSuffix, code, testObj) {
 function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODULE: moduleModeObj, throws, desc, tokens}) {
   ++testj;
 
-                                                          //if (testj !== 313) return;
+                                                          //if (testj !== 309) return;
   testSuffix += '['+testj+']';
 
   // goal specific overrides
@@ -101,20 +101,24 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
   let prefix = parserDesc + ': ' + testi + testSuffix;
 
   let wasError = '';
+  let stack;
   try {
     var obj = Parser(code, mode, COLLECT_TOKENS_SOLID);
+    e = new Error();
   } catch(e) {
     wasError = e.message;
     var obj = '' + e.stack;
+    e = stack;
   }
+  stack = e.stack;
 
   let passed = false;
   if (!tokens || (!throws && !ast)) {
     throw new Error(`Bad tst case: Missing expected token list, or ast|throws for: \`${toPrint(code)}\``);
   } else if (typeof obj === 'string') {
     if (!throws && wasError) {
-      console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: crash`);
-      console.log('Stack:', obj);
+      THROW(prefix, 'unexpected CRASH', code, stack);
+      console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
     } else if (wasError && wasError.indexOf(throws) >= 0) {
@@ -122,16 +126,18 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
       ++pass;
       passed = true;
     } else if (wasError) {
-      console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: (thrown message mismatch)`);
+      THROW(prefix, 'thrown message mismatch', code, stack);
+      console.log('Thrown error:', wasError);
       console.log('Expected error message to contain: "' + throws + '"');
-      console.log('Stack:', obj);
       ++fail;
     }
   } else if (throws) {
-    console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: _failed_ to throw`);
+    THROW(prefix, '_failed_ to throw', code, stack);
+    console.log('Expected error message to contain: "' + throws + '"');
     ++fail;
   } else if (checkAST && JSON.stringify(ast) !== JSON.stringify(obj.ast)) {
-    console.log(`${prefix} FAIL: \`${toPrint(code)}\` :: AST mismatch`);
+    THROW(prefix, 'AST mismatch', code, stack);
+
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
 
     let s1 = JSON.stringify(ast);
@@ -152,7 +158,8 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
 
     ++fail;
   } else if (obj.tokens.map(t => t.type).join(' ') !== [...tokens, $EOF].join(' ')) {
-    console.log(`${prefix} FAIL: \`${toPrint(code)}\` :: token mismatch`);
+    THROW(prefix, 'TOKEN mismatch', code, stack);
+
     console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
     console.log('Wanted tokens:', [...tokens, $EOF].map(debug_toktype).join(' '));
     ++fail;
@@ -164,6 +171,11 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
 
   if (STOP_AFTER_FAIL && fail) throw 'stopped';
   return passed;
+}
+
+function THROW(prefix, errmsg, code, stack) {
+  console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
+  console.log('Stack:', stack);
 }
 
 const STOP_AFTER_FAIL = true;
