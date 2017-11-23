@@ -26,12 +26,23 @@ let {
 
 let dir = __dirname + '/testcases/parser';
 let files = [];
-function rdr(path, file) {
-  if (fs.statSync(path + file).isFile(path + file)) files.push(path + file);
-  else fs.readdirSync(path).forEach(s => rdr(path + file, s));
+function read(path, file) {
+  let combo = path + file;
+  console.log([path, file], combo)
+  if (fs.statSync(combo).isFile()) files.push(combo);
+  else fs.readdirSync(combo + '/').forEach(s => read(combo + '/', s));
 }
-rdr(dir, '/');
+read(dir, '');
 
+files.sort((a,b) => {
+  // push test262 to the back so our own unit tests can find problems first
+  if (a.indexOf('test262') >= 0) return 1;
+  if (b.indexOf('test262') >= 0) return -1;
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+});
+files = files.filter(s => s.indexOf('test262') < 0);
 
 let describes = files.map(path => ({from:path, describe:require(path)}));
 
@@ -57,67 +68,68 @@ let parserDesc = '';
 function all(parser, tests) {
   for (let {desc, from, obj:test} of tests) {
     if (typeof test === 'string') console.log(' --- ' + test + ' --- ');
-    else if (Array.isArray(test)) all(parser, test);
-    else one(parser, test);
+    else if (Array.isArray(test)) throw 'deprecated?'; // all(parser, test);
+    else one(parser, test, desc, from);
   }
 }
-function one(parser, testObj) {
+function one(parser, testObj, desc, from) {
   let {code} = testObj;
   ++testi;
-  if (_one(parser, '   ', code, testObj)) {
-    _one(parser, '[a]', '\n' + code, testObj);
-    _one(parser, '[b]', code + '\n', testObj);
-    _one(parser, '[c]', ' ' + code, testObj);
-    _one(parser, '[d]', code + ' ', testObj);
+  if (_one(parser, '   ', code, testObj, desc, from)) {
+    _one(parser, '[a]', '\n' + code, testObj, desc, from);
+    _one(parser, '[b]', code + '\n', testObj, desc, from);
+    _one(parser, '[c]', ' ' + code, testObj, desc, from);
+    _one(parser, '[d]', code + ' ', testObj, desc, from);
   }
 }
-function _one(Parser, testSuffix, code, testObj) {
+function _one(Parser, testSuffix, code, testObj, desc, from) {
   let {mode} = testObj;
   // by default test both module and script parsing modes
   // if overridden, only parse that mode
   if (mode !== undefined && mode !== MODE_SCRIPT && mode !== MODE_MODULE) throw new Error('test setup problem: invalid mode');
   if (mode !== undefined) mode = [mode];
   else mode = [MODE_SCRIPT, MODE_MODULE];
-  mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, testObj));
+  mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, testObj, desc, from));
 }
-function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODULE: moduleModeObj, throws, desc, tokens}) {
+function __one(Parser, testSuffix, code, mode, {ast: expectedAst, SCRIPT: scriptModeObj, MODULE: moduleModeObj, throws, tokens: expectedTokens, debug: _debug}, desc, from) {
   ++testj;
 
-                                                          //if (testj !== 309) return;
+                                                          //if (testj !== 560) return;
   testSuffix += '['+testj+']';
 
   // goal specific overrides
   if (mode === MODE_SCRIPT && scriptModeObj) {
     if (scriptModeObj.throws) throws = scriptModeObj.throws;
-    if (scriptModeObj.ast) ast = scriptModeObj.ast;
-    if (scriptModeObj.tokens) tokens = scriptModeObj.tokens;
+    if (scriptModeObj.ast) expectedAst = scriptModeObj.ast;
+    if (scriptModeObj.tokens) expectedTokens = scriptModeObj.tokens;
   }
   if (mode === MODE_MODULE && moduleModeObj) {
     if (moduleModeObj.throws) throws = moduleModeObj.throws;
-    if (moduleModeObj.ast) ast = moduleModeObj.ast;
-    if (moduleModeObj.tokens) tokens = moduleModeObj.tokens;
+    if (moduleModeObj.ast) expectedAst = moduleModeObj.ast;
+    if (moduleModeObj.tokens) expectedTokens = moduleModeObj.tokens;
   }
 
   let prefix = parserDesc + ': ' + testi + testSuffix;
 
   let wasError = '';
   let stack;
+  let e;
   try {
     var obj = Parser(code, mode, COLLECT_TOKENS_SOLID);
-    e = new Error();
-  } catch(e) {
-    wasError = e.message;
-    var obj = '' + e.stack;
-    e = stack;
+    e = new Error(); // for stack
+  } catch(f) {
+    wasError = f.message;
+    var obj = '' + f.stack;
+    e = f;
   }
   stack = e.stack;
 
   let passed = false;
-  if (!tokens || (!throws && !ast)) {
+  if (!expectedTokens || (!throws && !expectedAst)) {
     throw new Error(`Bad tst case: Missing expected token list, or ast|throws for: \`${toPrint(code)}\``);
   } else if (typeof obj === 'string') {
     if (!throws && wasError) {
-      THROW(prefix, 'unexpected CRASH', code, stack);
+      THROW(prefix, 'unexpected CRASH', code, stack, desc);
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
@@ -126,21 +138,21 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
       ++pass;
       passed = true;
     } else if (wasError) {
-      THROW(prefix, 'thrown message mismatch', code, stack);
+      THROW(prefix, 'thrown message mismatch', code, stack, desc);
       console.log('Thrown error:', wasError);
       console.log('Expected error message to contain: "' + throws + '"');
       ++fail;
     }
   } else if (throws) {
-    THROW(prefix, '_failed_ to throw', code, stack);
+    THROW(prefix, '_failed_ to throw', code, stack, desc);
     console.log('Expected error message to contain: "' + throws + '"');
     ++fail;
-  } else if (checkAST && JSON.stringify(ast) !== JSON.stringify(obj.ast)) {
-    THROW(prefix, 'AST mismatch', code, stack);
+  } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
+    THROW(prefix, 'AST mismatch', code, stack, desc);
 
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
 
-    let s1 = JSON.stringify(ast);
+    let s1 = JSON.stringify(expectedAst);
     let s2 = JSON.stringify(obj.ast);
     let max = Math.max(s1.length, s2.length);
     let n = 0;
@@ -157,11 +169,11 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
     }
 
     ++fail;
-  } else if (obj.tokens.map(t => t.type).join(' ') !== [...tokens, $EOF].join(' ')) {
-    THROW(prefix, 'TOKEN mismatch', code, stack);
+  } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
+    THROW(prefix, 'TOKEN mismatch', code, stack, desc);
 
     console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
-    console.log('Wanted tokens:', [...tokens, $EOF].map(debug_toktype).join(' '));
+    console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
     ++fail;
   } else {
     console.log(`${prefix} PASS: \`${toPrint(code)}\``);
@@ -171,11 +183,14 @@ function __one(Parser, testSuffix, code, mode, {ast, SCRIPT: scriptModeObj, MODU
 
   if (STOP_AFTER_FAIL && fail) throw 'stopped';
   return passed;
-}
 
-function THROW(prefix, errmsg, code, stack) {
-  console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
-  console.log('Stack:', stack);
+  function THROW(prefix, errmsg, code, stack, desc) {
+    console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
+    console.log('Stack:', stack);
+    console.log('Description:', desc);
+    console.log('From:', from);
+    if (_debug) console.log('Debug:', _debug);
+  }
 }
 
 const STOP_AFTER_FAIL = true;

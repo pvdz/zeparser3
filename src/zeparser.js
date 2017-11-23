@@ -194,6 +194,11 @@ const IS_ASSIGNABLE = true;
 const NOT_ASSIGNABLE = false;
 const HAS_STATIC_MODIFIER = true;
 const NO_STATIC_MODIFIER = false;
+const PARSE_VALUE_MAYBE = true;
+const PARSE_VALUE_MUST = false;
+const YIELD_WITHOUT_VALUE = 0;
+const WITH_ASSIGNABLE = 1;
+const WITH_NON_ASSIGNABLE = 2;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON) {
   let tok = ZeTokenizer(code, false, collectTokens);
@@ -208,6 +213,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function THROW(desc) {
     console.log('Error in parser:', desc);
+    console.log('Error token:', curtok);
     tok.throw(desc);
   }
 
@@ -251,7 +257,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- AST:', require('util').inspect(_tree, false, null))
     }
-    ASSERT(_path[_path.length - 1][prop] === undefined, 'dont clobber');
+    ASSERT(_path[_path.length - 1][prop] === undefined, 'dont clobber, prop=' + prop + ', val=' + value);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
     _path[_path.length - 1][prop] = value;
   }
   function AST_setIdent(astProp, token) {
@@ -539,7 +545,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === 3, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     if (curc !== chr || str !== curtok.str) {
-      console.log('error token:', curtok);
       THROW('Next char should be [' + str + '] but was [' + curtok.str + ']');
     } else {
       skipRex(lexerFlags);
@@ -554,7 +559,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === 2, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     if (curc !== chr || curtok.str.length !== 1) {
-      console.log('error token:', curtok);
       THROW('Next ord should be ' + chr + ' (' + String.fromCharCode(chr) + ') but was ' + curc + ' (curc: `' + String.fromCharCode(curc) + '`, token: `'+curtok.str+'`)');
     } else {
       ASSERT(curtok.str.length === 1, 'should be len=1');
@@ -566,7 +570,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === 2, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     if (curc !== chr || curtok.str.length !== 1) {
-      console.log('error token:', curtok);
       THROW('Next ord should be ' + chr + ' (' + String.fromCharCode(chr) + ') but was ' + curc + ' (curc: `' + String.fromCharCode(curc) + '`, token: `'+curtok.str+'`)');
     } else {
       ASSERT(curtok.str.length === 1, 'should be len=1');
@@ -591,6 +594,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function skipAnyIf(str, lexerFlags) {
     return skipRexIf(str, lexerFlags);
+  }
+
+  function isStatementLineEnd() {
+    // this is for restricted productions where newlines are significant (return, throw, continue, etc)
+    // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
+
+    // this is basically the ASI rule + newline check
+    return curtok.nl || curtype === $EOF || curc === $$SEMI || curc === $$CURLY_R_7D;
   }
 
   function parseTopLevels(lexerFlags) {
@@ -623,6 +634,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseSemiOrAsi(lexerFlags) {
     if (curc === $$SEMI_3B) {
       ASSERT_skipRex(';', lexerFlags);
+      // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
     } else if (curc === $$CURLY_R_7D || curtok.nl || curtype === $EOF) {
       tok.asi();
     } else {
@@ -797,7 +809,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseIdentStatement(lexerFlags, astProp) {
     // all statement starting keywords;
 
-    // (async), break, class, const, continue, debugger, do, export, for, function, if, import, let, loop, return, switch, throw, try, var, while, with, yield,
+    // (async), break, class, const, continue, debugger, do, export, for, function, if, import, let, loop, return, switch, throw, try, var, while, with
 
     switch (curtok.str) {
       case 'await':
@@ -878,11 +890,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       case 'with':
         parseWithStatement(lexerFlags, astProp);
-        break;
-
-      case 'yield':
-        TODO
-        parseYieldStatement(lexerFlags, astProp);
         break;
 
       default:
@@ -1132,7 +1139,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // a break may be followed by another identifier which must then be a valid label.
     // otherwise it's just a break to the nearest breakable (most likely).
 
-    if (curtype === $IDENT && !curtok.nl) {
+    // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
+    if (curtype === $IDENT && !(curtok.nl || curtype === $EOF || curtok.value === ';')) {
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
       AST_setIdent('label', curtok);
 
@@ -1262,7 +1270,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (curc === $$SQUARE_L_5B) {
       parseMethodDynamic(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic)
     } else {
-      console.log('error token:', curtok)
       THROW('Method must have an ident or dynamic name');
     }
   }
@@ -1307,7 +1314,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // a continue may be followed by another identifier which must then be a valid label.
     // otherwise it's just a continue to the nearest loop (most likely).
 
-    if (curtype === $IDENT && !curtok.nl) {
+    // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
+    if (curtype === $IDENT && !(curtok.nl || curtype === $EOF || curtok.value === ';')) {
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
 
       AST_setIdent('label', curtok);
@@ -1767,11 +1775,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseThrowStatement(lexerFlags, astProp) {
     AST_open(astProp, 'ThrowStatement');
     ASSERT_skipRex('throw', lexerFlags);
-    if (!curtok.nl && curtype !== $EOF && curc !== $$SEMI_3B) {
-      parseExpression(lexerFlags, 'argument');
-    } else {
-      AST_set('argument', null);
-    }
+    if (curtok.nl) THROW('Premature newline');
+    parseExpression(lexerFlags, 'argument'); // mandatory1
     parseSemiOrAsi(lexerFlags);
     AST_close();
   }
@@ -1990,7 +1995,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close();
     } else if (curc !== $$SQUARE_R_5D && curc !== $$CURLY_R_7D) {
-      console.log('error token:', curtok)
       THROW('Expecting nested ident or destructuring pattern');
     }
 
@@ -2189,14 +2193,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseValue(lexerFlags, astProp) {
-    let assignable = parseValueHeadBody(lexerFlags, astProp);
+    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, astProp);
     return parseValueTail(lexerFlags, assignable, astProp);
+  }
+  function parseYieldValueMaybe(lexerFlags, astProp) {
+    // TODO: how to properly solve this when there are no tokens? can we even do that?
+    let startok = curtok;
+    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MAYBE, astProp);
+    if (curtok === startok) return YIELD_WITHOUT_VALUE;
+    assignable = parseValueTail(lexerFlags, assignable, astProp);
+    if (assignable) return WITH_ASSIGNABLE;
+    return WITH_NON_ASSIGNABLE;
   }
   function parseValueFromIdent(lexerFlags, identToken, astProp) {
     let assignable = parseValueHeadBodyIdent(lexerFlags, identToken, astProp);
     return parseValueTail(lexerFlags, assignable, astProp);
   }
-  function parseValueHeadBody(lexerFlags, astProp) {
+  function parseValueHeadBody(lexerFlags, maybe, astProp) {
     // - ident (a var, true, false, null, super, new <value>, new.target, this, class, function, async func, generator func)
     // - literal (number, string, regex, object, array, template)
     // - arrow or group
@@ -2229,7 +2242,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('operator', curtok.str);
         ASSERT_skipAny($PUNCTUATOR, lexerFlags); // TODO: optimize; next token can not start with a fwd slash
         AST_set('prefix', true);
-        parseValueHeadBody(lexerFlags, 'argument');
+        parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, 'argument');
         AST_close();
         return false;
       } else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
@@ -2237,7 +2250,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('operator', curtok.str);
         ASSERT_skipRex($PUNCTUATOR, lexerFlags);
         AST_set('prefix', true);
-        parseValueHeadBody(lexerFlags, 'argument');
+        parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, 'argument');
         AST_close();
         return false;
       } else if (curc === $$DOT_2E && curtok.str === '...') {
@@ -2249,8 +2262,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
 
-    console.log('Error token:', curtok)
-    THROW('Expected to parse a value');
+    if (!maybe) THROW('Expected to parse a value');
+    return true; // ignored
   }
   function parseValueHeadBodyIdent(lexerFlags, identToken, astProp) {
     // note: ident token has been skipped prior to this call. curtok is the one after identToken.
@@ -2302,7 +2315,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'UnaryExpression');
         AST_set('operator', identName);
         AST_set('prefix', true);
-        parseValue(lexerFlags, 'argument');
+        parseExpression(lexerFlags, 'argument');
         AST_close();
         return false;
       case 'await':
@@ -2311,10 +2324,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // (await when not a keyword is assignable)
         return parseAwaitExpression(lexerFlags, identToken, astProp);
       case 'yield':
-        TODO
         AST_open(astProp, 'YieldExpression');
         AST_set('delegate', false); // TODO ??
-        parseValue(lexerFlags, 'argument');
+        parseYieldArgument(lexerFlags, 'argument');
         AST_close();
         return false;
       default:
@@ -2337,6 +2349,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       AST_setIdent(astProp, identToken);
       return true; // assignable
+    }
+  }
+  function parseYieldArgument(lexerFlags, astProp) {
+    let wasParen = curc === $$PAREN_L_28;
+    let hadValue = parseYieldValueMaybe(lexerFlags, astProp);
+    if (hadValue === YIELD_WITHOUT_VALUE) {
+      AST_set(astProp, null);
+    } else {
+      parseExpressionFromOp(lexerFlags, hadValue === WITH_ASSIGNABLE, wasParen, astProp);
     }
   }
 
@@ -2572,7 +2593,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex(':', lexerFlags);
       parseObjLitValueAfterKeyColon(lexerFlags, isComputed, astProp);
     } else {
-      console.log('Error token:', curtok);
       THROW('Invalid object property key');
     }
   }
