@@ -114,7 +114,7 @@ function ASSERT(bool, desc, ...rest) {
 
 function THROW(str, ...rest) {
   console.log('error args:', require('util').inspect(rest, false, null));
-  throw new Error(str + ' [' + require('util').inspect(rest, false, null) + ']');
+  throw new Error(`Parser error! ${str} [${require('util').inspect(rest, false, null)}]`);
 }
 
 // </BODY>

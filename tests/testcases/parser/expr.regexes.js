@@ -9,7 +9,7 @@ let {
 // note: Most regex tests can be found in the tokenizer. Tests in here mainly test the "div or regex" disambiguation.
 module.exports = (describe, test) => describe('regular expression disambiguation', _ => {
 
-  test('empty array',{
+  test('char class with escaped backslash and trailing dash',{
     code: `middleDashMatch = /[\\-]/.exec`,
     ast: {type: 'Program', body: [{
       type: 'ExpressionStatement', expression: {
@@ -24,5 +24,12 @@ module.exports = (describe, test) => describe('regular expression disambiguation
       },
     }]},
     tokens: [$IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $ASI],
+    desc: 'the dash should not be considered a range and the backslash should not change this either way',
   });
+
+  //test('named back reference', {
+  //  code: `match(/(?x.).\kx/u)`,
+  //  throws: 'xxx',
+  //  tokens: [$IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+  //});
 });

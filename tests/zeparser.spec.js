@@ -28,11 +28,17 @@ let dir = __dirname + '/testcases/parser';
 let files = [];
 function read(path, file) {
   let combo = path + file;
-  console.log([path, file], combo)
-  if (fs.statSync(combo).isFile()) files.push(combo);
-  else fs.readdirSync(combo + '/').forEach(s => read(combo + '/', s));
+  //console.log([path, file], combo)
+  console.log('read:', path + file);
+  if (fs.statSync(combo).isFile()) {
+    files.push(combo);
+  } else {
+    fs.readdirSync(combo + '/').forEach(s => read(combo + '/', s));
+  }
 }
 read(dir, '');
+
+files = files.filter(f => !(f.indexOf('test262') >= 0));
 
 files.sort((a,b) => {
   // push test262 to the back so our own unit tests can find problems first
@@ -42,13 +48,14 @@ files.sort((a,b) => {
   if (a > b) return 1;
   return 0;
 });
-files = files.filter(s => s.indexOf('test262') < 0);
+console.log(files);
 
 let describes = files.map(path => ({from:path, describe:require(path)}));
+//describe.forEach(({from, describe:func}) => typeof func !== 'function' && console.log('file did not produce proper describe function:', from, func));
 
 let cases = [];
 let X = (parentDesc, from, desc, func) => func(X.bind(undefined, parentDesc + ' | ' + desc, from), Y.bind(undefined, parentDesc + ' | ' + desc, from));
-let Y = (parentDesc, from, desc, obj) => cases.push({desc: parentDesc + ' |> ' + desc, from, obj});
+let Y = (parentDesc, from, desc, obj) => cases.push({desc: parentDesc + ' ||> ' + desc, from, obj});
 describes.forEach(({from, describe}) => X('', from, '', describe));
 
 // todo
@@ -127,28 +134,33 @@ function __one(Parser, testSuffix, code, mode, {ast: expectedAst, SCRIPT: script
   let passed = false;
   if (!expectedTokens || (!throws && !expectedAst)) {
     throw new Error(`Bad tst case: Missing expected token list, or ast|throws for: \`${toPrint(code)}\``);
-  } else if (typeof obj === 'string') {
-    if (!throws && wasError) {
-      THROW(prefix, 'unexpected CRASH', code, stack, desc);
+  } else if (wasError) {
+    if (!throws) {
+      LOG_THROW(prefix, 'unexpected CRASH', code, stack, desc);
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
-    } else if (wasError && wasError.indexOf(throws) >= 0) {
+    } else if (wasError.indexOf('Parser error') !== 0 && wasError.indexOf('Tokenizer error') !== 0) {
+      LOG_THROW(prefix, 'Unhandled exception path', code, stack, desc);
+      console.log('Thrown error:', wasError);
+      ++fail;
+      ++crash;
+    } else if (throws === true || wasError.indexOf(throws) >= 0) {
       console.log(`${prefix} PASS: \`${toPrint(code)}\` :: (properly throws)`);
       ++pass;
       passed = true;
-    } else if (wasError) {
-      THROW(prefix, 'thrown message mismatch', code, stack, desc);
+    } else {
+      LOG_THROW(prefix, 'thrown message mismatch', code, stack, desc);
       console.log('Thrown error:', wasError);
       console.log('Expected error message to contain: "' + throws + '"');
       ++fail;
     }
   } else if (throws) {
-    THROW(prefix, '_failed_ to throw', code, stack, desc);
+    LOG_THROW(prefix, '_failed_ to throw', code, stack, desc);
     console.log('Expected error message to contain: "' + throws + '"');
     ++fail;
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
-    THROW(prefix, 'AST mismatch', code, stack, desc);
+    LOG_THROW(prefix, 'AST mismatch', code, stack, desc);
 
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
 
@@ -170,7 +182,7 @@ function __one(Parser, testSuffix, code, mode, {ast: expectedAst, SCRIPT: script
 
     ++fail;
   } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-    THROW(prefix, 'TOKEN mismatch', code, stack, desc);
+    LOG_THROW(prefix, 'TOKEN mismatch', code, stack, desc);
 
     console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
     console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
@@ -184,7 +196,7 @@ function __one(Parser, testSuffix, code, mode, {ast: expectedAst, SCRIPT: script
   if (STOP_AFTER_FAIL && fail) throw 'stopped';
   return passed;
 
-  function THROW(prefix, errmsg, code, stack, desc) {
+  function LOG_THROW(prefix, errmsg, code, stack, desc) {
     console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
     console.log('Stack:', stack);
     console.log('Description:', desc);

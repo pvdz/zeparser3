@@ -1,3 +1,4 @@
+console.log('verdergaan met asi dingesen. was ook bezig om expressions in eigen bestand te zetten enzo')
 
 //import {
 let {
@@ -239,7 +240,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (node[prop] === undefined || fromWrap) {
       node[prop] = newnode;
     } else {
-      THROW('bad tree? node[prop] should be undefined but wasnt', 'child=', node, 'prop=', prop, 'type=', type, 'node[prop]=', node[prop]);
+      THROW('bad tree? node[prop] (prop='+prop+') should be undefined but wasnt (child=' + node + ', prop='+ prop+ ', type='+ type+ ', node[prop]='+ node[prop]+')');
     }
     _path.push(newnode);
   }
@@ -610,7 +611,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // </SCRUB AST>
     parseBodyParts(lexerFlags);
     // <SCRUB AST>
-    ASSERT(_path.length === len, 'should close all that was opened');
+    ASSERT(_path.length === len, 'should close all that was opened: ' + JSON.stringify(_path));
     // </SCRUB AST>
   }
 
@@ -2661,7 +2662,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // slash would be division
     }
-    AST_close();
+    AST_close(); // ArrayExpression
 
     return true; // TODO: properly validate whether this is a valid destructuring pattern
   }
@@ -2674,7 +2675,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_setIdent('property', curtok);
       ASSERT_skipDiv($IDENT, lexerFlags); // x.y / z is division
       AST_set('computed', false);
-      AST_close();
+      AST_close(); // MemberExpression
       assignable = parseValueTail(lexerFlags, IS_ASSIGNABLE, astProp);
     } else if (curc === $$SQUARE_L_5B) {
       AST_wrapClosed(astProp, 'MemberExpression', 'object');
@@ -2682,7 +2683,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpression(lexerFlags, 'property');
       skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
       AST_set('computed', true);
-      AST_close();
+      AST_close(); // MemberExpression
       assignable = parseValueTail(lexerFlags, IS_ASSIGNABLE, astProp);
     } else if (curc === $$PAREN_L_28) {
       ASSERT(curtype === $PUNCTUATOR && curtok.str === '(');
@@ -2693,15 +2694,42 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_wrapClosed(astProp, 'CallExpression', 'callee');
         AST_set('arguments', []);
         parseCallArgs(lexerFlags, 'arguments');
-        AST_close();
+        AST_close(); // CallExpression
       }
       assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, astProp);
-    } else if (curc === $$TICK_60) { TODO
-      // tagged template is like a call but slightly special
+    } else if (curc === $$TICK_60) {
+      // tagged template is like a call but slightly special (and a very particular AST)
       ASSERT((curtype & $TICK) === $TICK);
-      AST_wrapClosed(astProp, 'MemberExpression', 'object');
-      AST_setIdent('property', curtok);
-      ASSERT_skipDiv($TICK, lexerFlags);
+      AST_wrapClosed(astProp, 'TaggedTemplateExpression', 'tag');
+
+      AST_open('quasi', 'TemplateLiteral');
+      AST_set('expressions', []);
+      AST_set('quasis', []);
+
+      AST_open('quasis', 'TemplateElement');
+      AST_set('value', {raw: curtok.str.slice(1, (curtype === $TICK_PURE) ? -1 : -2), cooked: '<TODO>'});
+      AST_set('tail', curtype === $TICK_PURE);
+      // curtok skipped in loop or afterwards if loop is skipped
+      AST_close(); // TemplateElement
+
+      if (curtype === $TICK_HEAD) {
+        let lfbak = lexerFlags;
+        lexerFlags = lexerFlags | LF_IN_TEMPLATE; // tell tokenizer to interpret `}` as template
+        do {
+          ASSERT_skipRex($TICK, lexerFlags); // f`x${/foo/}y`
+          parseExpression(lexerFlags, 'expressions');
+
+          AST_open('quasis', 'TemplateElement');
+          AST_set('value', {raw: curtok.str.slice(1, (curtype === $TICK_TAIL) ? -1 : -2), cooked: '<TODO>'});
+          AST_set('tail', curtype === $TICK_TAIL);
+          AST_close(); // TemplateElement
+          if (curtype === $TICK_TAIL) lexerFlags = lfbak; // should happen only once and always
+        } while (curtype !== $TICK_TAIL); // also fixes $EOF check so no infi loop
+      }
+      ASSERT_skipRex($TICK, lexerFlags); // f`x`\n/foo/
+      AST_close(); // TemplateLiteral
+      AST_close(); // TaggedTemplateExpression
+
       assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, astProp);
     } else if ((curc === $$PLUS_2B && curtok.str === '++') || (curc === $$DASH_2D && curtok.str === '--')) {
       ASSERT(curtype === $PUNCTUATOR);
@@ -2709,7 +2737,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('operator', curtok.str);
       AST_set('prefix', false);
       ASSERT_skipDiv(curtok.str, lexerFlags);
-      AST_close();
+      AST_close(); // UpdateExpression
     }
     return assignable;
   }

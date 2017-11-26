@@ -6,60 +6,93 @@ let {
 
 module.exports = (describe, test) => describe('class statement', _ => {
 
-  test('empty class',{
-    code: 'class A {}',
-    ast: {type: 'Program', body: [
-      {type: 'ClassDeclaration',
-        id: {type: 'Identifier', name: 'A'},
-        superClass: null,
-        body: {type: 'ClassBody',
-          body: [],
-        }
-      },
-    ]},
-    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-  });
-  
-  test('empty class with trivial extends',{
-    code: 'class A extends B {}',
-    ast: {type: 'Program', body: [
-      {type: 'ClassDeclaration',
-        id: {type: 'Identifier', name: 'A'},
-        superClass: {type: 'Identifier', name: 'B'},
-        body: {type: 'ClassBody',
-          body: [],
-        }
-      },
-    ]},
-    tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+  describe('empty classes', _ => {
+
+    test('base case empty class',{
+      code: 'class A {}',
+      ast: {type: 'Program', body: [
+        {type: 'ClassDeclaration',
+          id: {type: 'Identifier', name: 'A'},
+          superClass: null,
+          body: {type: 'ClassBody',
+            body: [],
+          }
+        },
+      ]},
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('semi in an empty class',{
+      code: 'class A {;}',
+      ast: {type: 'Program', body: [
+        {type: 'ClassDeclaration',
+          id: {type: 'Identifier', name: 'A'},
+          superClass: null,
+          body: {type: 'ClassBody',
+            body: [],
+          }
+        },
+      ]},
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('semis in an empty class',{
+      code: 'class A {; ;; ;}',
+      ast: {type: 'Program', body: [
+        {type: 'ClassDeclaration',
+          id: {type: 'Identifier', name: 'A'},
+          superClass: null,
+          body: {type: 'ClassBody',
+            body: [],
+          }
+        },
+      ]},
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
   });
 
-  test('empty class that extends an expression',{
-    code: 'class A extends foo() {}',
-    ast: {type: 'Program', body: [
-      {type: 'ClassDeclaration',
-        id: {type: 'Identifier', name: 'A'},
-        superClass: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: []},
-        body: {type: 'ClassBody',
-          body: [],
-        }
-      },
-    ]},
-    tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-  });
+  describe('extending', _ => {
+    test('empty class with trivial extends',{
+      code: 'class A extends B {}',
+      ast: {type: 'Program', body: [
+        {type: 'ClassDeclaration',
+          id: {type: 'Identifier', name: 'A'},
+          superClass: {type: 'Identifier', name: 'B'},
+          body: {type: 'ClassBody',
+            body: [],
+          }
+        },
+      ]},
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
 
-  test('empty class extending an empty object because i had to be smart about it',{
-    code: 'class A extends {} {}',
-    ast: {type: 'Program', body: [
-      {type: 'ClassDeclaration',
-        id: {type: 'Identifier', name: 'A'},
-        superClass: {type: 'ObjectExpression', properties: []},
-        body: {type: 'ClassBody',
-          body: [],
-        }
-      },
-    ]},
-    tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    test('empty class that extends an expression',{
+      code: 'class A extends foo() {}',
+      ast: {type: 'Program', body: [
+        {type: 'ClassDeclaration',
+          id: {type: 'Identifier', name: 'A'},
+          superClass: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: []},
+          body: {type: 'ClassBody',
+            body: [],
+          }
+        },
+      ]},
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('empty class extending an empty object because i had to be smart about it',{
+      code: 'class A extends {} {}',
+      ast: {type: 'Program', body: [
+        {type: 'ClassDeclaration',
+          id: {type: 'Identifier', name: 'A'},
+          superClass: {type: 'ObjectExpression', properties: []},
+          body: {type: 'ClassBody',
+            body: [],
+          }
+        },
+      ]},
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
   });
 
   describe('ident methods', _ => {
@@ -94,7 +127,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with simple ident method',{
+    test('static ident method',{
       code: 'class A {static a(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -124,7 +157,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with special constructor method',{
+    test('regular constructor',{
       code: 'class A {constructor(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -154,7 +187,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with not-so-special static constructor method',{
+    test('static constructor',{
       code: 'class A {static constructor(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -184,7 +217,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with async method',{
+    test('async method',{
       code: 'class A {async foo(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -214,7 +247,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with generator method',{
+    test('generator method',{
       code: 'class A {*foo(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -244,7 +277,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with getter method',{
+    test('getter method',{
       code: 'class A {get foo(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -274,7 +307,37 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with static getter method because why not',{
+    test('getter named set',{
+      code: 'class A {get set(){}}',
+      ast: {type: 'Program', body: [
+        {type: 'ClassDeclaration',
+          id: {type: 'Identifier', name: 'A'},
+          superClass: null,
+          body: {type: 'ClassBody',
+            body: [
+              {type: 'MethodDefinition',
+                static: false,
+                computed: false,
+                kind: 'get',
+                key: {type: 'Identifier', name: 'set'},
+                value: {
+                  type: 'FunctionExpression',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: null,
+                  params: [],
+                  body: {type: 'BlockStatement', body: []}
+                },
+              },
+            ],
+          }
+        },
+      ]},
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('static getter',{
       code: 'class A {static get foo(){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -304,7 +367,21 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with setter method',{
+    test('async getter method',{
+      code: 'class A {async get foo(){}}',
+      throws: 'Missing method arg parens',
+      desc: 'setters dont syntactically support async/generator modifiers',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('generator getter method',{
+      code: 'class A {* get foo(){}}',
+      throws: 'Missing method arg parens',
+      desc: 'setters dont syntactically support async/generator modifiers',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('setter method',{
       code: 'class A {set foo(x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -334,37 +411,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with setter method',{
-      code: 'class A {static set foo(x){}}',
-      ast: {type: 'Program', body: [
-        {type: 'ClassDeclaration',
-          id: {type: 'Identifier', name: 'A'},
-          superClass: null,
-          body: {type: 'ClassBody',
-            body: [
-              {type: 'MethodDefinition',
-                static: true,
-                computed: false,
-                kind: 'set',
-                key: {type: 'Identifier', name: 'foo'},
-                value: {
-                  type: 'FunctionExpression',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: null,
-                  params: [{type: 'Identifier', name: 'x'}],
-                  body: {type: 'BlockStatement', body: []}
-                },
-              },
-            ],
-          }
-        },
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('class with setter named get',{
+    test('setter named get',{
       code: 'class A {set get(x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -394,8 +441,8 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('class with getter named set',{
-      code: 'class A {get set(){}}',
+    test('static setter method',{
+      code: 'class A {static set foo(x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
           id: {type: 'Identifier', name: 'A'},
@@ -403,17 +450,17 @@ module.exports = (describe, test) => describe('class statement', _ => {
           body: {type: 'ClassBody',
             body: [
               {type: 'MethodDefinition',
-                static: false,
+                static: true,
                 computed: false,
-                kind: 'get',
-                key: {type: 'Identifier', name: 'set'},
+                kind: 'set',
+                key: {type: 'Identifier', name: 'foo'},
                 value: {
                   type: 'FunctionExpression',
                   generator: false,
                   async: false,
                   expression: false,
                   id: null,
-                  params: [],
+                  params: [{type: 'Identifier', name: 'x'}],
                   body: {type: 'BlockStatement', body: []}
                 },
               },
@@ -421,7 +468,21 @@ module.exports = (describe, test) => describe('class statement', _ => {
           }
         },
       ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('async setter method',{
+      code: 'class A {async set foo(x){}}',
+      throws: 'Missing method arg parens',
+      desc: 'setters dont syntactically support async/generator modifiers',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('generator setter method',{
+      code: 'class A {* set foo(x){}}',
+      throws: 'Missing method arg parens',
+      desc: 'setters dont syntactically support async/generator modifiers',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('class with non-special method named get, set, and async',{
@@ -487,7 +548,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
 
   describe('dynamic methods', _ => {
 
-    test('class with simple ident method',{
+    test('without modifier',{
       code: 'class A {[a](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -517,7 +578,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
   
-    test('class with simple ident method',{
+    test('static member',{
       code: 'class A {static [a](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -547,7 +608,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
   
-    test('class with async method',{
+    test('async member',{
       code: 'class A {async [foo](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -577,7 +638,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
   
-    test('class with generator method',{
+    test('generator member',{
       code: 'class A {*[foo](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -607,7 +668,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
   
-    test('class with getter method',{
+    test('getter member',{
       code: 'class A {get [foo](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -637,7 +698,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
   
-    test('class with static getter method because why not',{
+    test('static getter member',{
       code: 'class A {static get [foo](){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -666,8 +727,22 @@ module.exports = (describe, test) => describe('class statement', _ => {
       ]},
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
-  
-    test('class with setter method',{
+
+    test('generator setter member', {
+      code: 'class A {* get [x](){}}',
+      throws: 'Missing method arg parens',
+      desc: 'setters dont syntactically support async/generator modifiers',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('async getter member',{
+      code: 'class A {async get [x](){}}',
+      throws: 'Missing method arg parens',
+      desc: 'setters dont syntactically support async/generator modifiers',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('setter member', {
       code: 'class A {set [foo](x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -696,8 +771,8 @@ module.exports = (describe, test) => describe('class statement', _ => {
       ]},
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
-  
-    test('class with setter method',{
+
+    test('static setter member',{
       code: 'class A {static set [foo](x){}}',
       ast: {type: 'Program', body: [
         {type: 'ClassDeclaration',
@@ -726,7 +801,44 @@ module.exports = (describe, test) => describe('class statement', _ => {
       ]},
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
+
+    test('generator setter member', {
+      code: 'class A {* set [foo](x){}}',
+      throws: 'Missing method arg parens',
+      desc: 'setters dont syntactically support async/generator modifiers',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('async getter member',{
+      code: 'class A {async get [foo](){}}',
+      throws: 'Missing method arg parens',
+      desc: 'setters dont syntactically support async/generator modifiers',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
   });
+
+  describe('literal members', _ => {
+
+    // https://github.com/tc39/test262/blob/8213224280e94ea4b7949c085cb9bf8e99bf0df6/test/language/expressions/class/fields-after-same-line-gen-string-literal-names.js
+    // https://github.com/tc39/test262/blob/master/src/class-fields/string-literal-names.case
+
+    //test('string without value', {
+    //  code: `
+    //    class C {
+    //      *m() { return 42; }
+    //      'a';
+    //      "b";
+    //      'c' = 39;
+    //      "d" = 42;
+    //    }
+    //  `,
+    //  ast: null,
+    //  tokens: [],
+    //});
+
+  });
+
+
 
   /*
   // string and numeric keys are also valid
@@ -749,4 +861,6 @@ class f {
   // export default class extends F {}
   // class extends {} {}
   // async constructor ?
+
+  // class is always strict mode (note below https://tc39.github.io/ecma262/#prod-ClassBody )
 });

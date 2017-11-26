@@ -4,36 +4,56 @@
 let fs = require('fs');
 let path = require('path');
 
-const PATH262 = process.env.HOME + '/apps/test262/src';
+const PATH262 = process.env.HOME + '/apps/test262/test';
 
 if (!fs.statSync(PATH262).isDirectory()) {
   module.exports = () => undefined;
 } else {
   let files = {};
   function read(obj, path, file) {
-    if (files[file]) throw 'not sure this should happen [key='+file+']'; // this would mean there is a file with same name as dir
     let combo = path + file;
     if (fs.statSync(combo).isFile()) {
-      if (file.slice(-5) === '.case') obj[file] = {path: combo, contents: fs.readFileSync(combo)};
+      if (file.slice(-3) === '.js') {
+        if (
+          file.indexOf('for-await') < 0 && // for await is not final yet
+          file.indexOf('this-val-regexp') < 0 && // new regex flags
+          file.indexOf('unicode-reference') < 0 // named back references are not final yet
+        ) {
+          obj[combo] = {path: combo, contents: fs.readFileSync(combo)};
+        }
+      }
     } else {
       fs.readdirSync(combo).forEach(s => read(files['#' + file] = {}, combo  + '/', s));
     }
   }
-  read(files, PATH262, '/');
+  read(files, PATH262, '');
 
   module.exports = function f(describe, test, list = files) {
     for (let key in list) {
+      console.log('->', key)
       let obj = list[key];
       if (key[0] === '#') {
         describe(key.slice(1), f.bind(undefined, describe, test, obj))
       } else {
         let code = obj.contents.toString();
-        test(key, {
-          code: code.slice(code.indexOf('---*/') + '---*/'.length), // dont care so much about the (mandatory) header
-          ast: true,
-          tokens: true,
-          debug: 'test6262 file path: ' + obj.path,
-        });
+        // some 262 tests target stuff still in staging. simply start those lines with ZIGNORE to exclude them.
+        if (code.indexOf('ZIGNORE') !== 0) {
+          if (code.indexOf('negative:') >= 0) {
+            test(key, {
+              code: code.slice(code.indexOf('---*/') + '---*/'.length), // dont care so much about the (mandatory) header
+              throws: true, // for now, let's not care about the actual error too much (must still be a handled path)
+              tokens: true,
+              debug: 'test6262 file path: ' + obj.path,
+            });
+          } else {
+            test(key, {
+              code: code.slice(code.indexOf('---*/') + '---*/'.length), // dont care so much about the (mandatory) header
+              ast: true,
+              tokens: true,
+              debug: 'test6262 file path: ' + obj.path,
+            });
+          }
+        }
       }
     }
   };

@@ -28,6 +28,7 @@ function f(a,b){ b=5; console.log(arguments[1]); } f(); f(1); f(1,2); f(1, undef
 
 s=new Set(); s.add(NaN); s.add(NaN); log(s.size); // NaN == NaN
 
+will this run, fail at compile time, fail at runtime? x```y```z (in MD style)
 
 https://twitter.com/bmeurer/status/866339039200325632
 

@@ -405,4 +405,17 @@ module.exports = (describe, test) => describe('for statement', _ => {
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
   });
+
+  describe('async for', _ => {
+    // https://github.com/tc39/proposal-async-iteration
+
+    //test('base case', {
+    //  code: `
+    //    async function * fn() {
+    //      for await (x of y) {
+    //      }
+    //    }
+    //  `,
+    //});
+  })
 });
