@@ -169,9 +169,11 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
       ++fail;
     }
   } else if (throws) {
-    LOG_THROW(prefix, '_failed_ to throw', code, stack, desc);
-    console.log('Expected error message to contain: "' + throws + '"');
     ++fail;
+    LOG_THROW(prefix, '_failed_ to throw ANY error', code, stack, desc);
+    if (throws !== true) {
+      console.log('Expected an error message containing: "' + throws + '"');
+    }
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
     LOG_THROW(prefix, 'AST mismatch', code, stack, desc);
 
