@@ -201,8 +201,13 @@ const YIELD_WITHOUT_VALUE = 0;
 const WITH_ASSIGNABLE = 1;
 const WITH_NON_ASSIGNABLE = 2;
 
-function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON) {
-  let tok = ZeTokenizer(code, false, collectTokens);
+function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
+  let {
+    webCompat: options_webCompat = WEB_COMPAT_ON,
+    strictMode: options_strictMode = false,
+  } = options;
+
+  let tok = ZeTokenizer(code, false, collectTokens, options_webCompat);
 
   let curtok = null;
   let curtype = 0;
@@ -213,6 +218,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let traceast = false;
 
   function THROW(desc) {
+    console.log('\n');
     console.log('Error in parser:', desc);
     console.log('Error token:', curtok);
     tok.throw(desc);
@@ -1843,6 +1849,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (identToken.str === 'async' && goalMode === GOAL_MODULE) {
         THROW('The `async` keyword cannot be used as a label');
       }
+      if (identToken.str === 'yield' && ((lexerFlags & LF_IN_GENERATOR) === LF_IN_GENERATOR || (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE)) {
+        THROW('The `yield` keyword cannot be used as a label in strict mode or in a generator');
+      }
       AST_open(astProp, 'LabeledStatement');
       AST_setIdent('label', identToken);
       ASSERT_skipRex(':', lexerFlags);
@@ -1961,13 +1970,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close();
   }
   function parseBindingPatternsNested(lexerFlags, astProp) {
+    parseElisions(lexerFlags, astProp);
     do {
-      parseElisions(lexerFlags, astProp);
       parseBindingPatternNested(lexerFlags, astProp);
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipRex(',', lexerFlags); // TODO: can next be fwd slash?
+      parseElisions(lexerFlags, astProp);
     } while (true);
-    parseElisions(lexerFlags, astProp);
   }
   function parseBindingPatternNested(lexerFlags, astProp) {
     if (curtype === $IDENT) {
@@ -2325,6 +2334,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // (await when not a keyword is assignable)
         return parseAwaitExpression(lexerFlags, identToken, astProp);
       case 'yield':
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE && (lexerFlags & LF_IN_GENERATOR) !== LF_IN_GENERATOR) {
+          THROW('Cannot use `yield` outside of generator functions when in strict mode');
+        }
         AST_open(astProp, 'YieldExpression');
         AST_set('delegate', false); // TODO ??
         parseYieldArgument(lexerFlags, 'argument');
@@ -2645,6 +2657,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       while (true) {
         parseElisions(lexerFlags, 'elements');
+        if (curc === $$SQUARE_R_5D) {
+          // `[]` and `[expr,]` and `[expr,,,,,]`
+          break;
+        }
         if (canDestruct) {
           // prevent parsing further assignments
           let wasParen = curc === $$PAREN_L_28;
@@ -2853,7 +2869,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   // </SCRUB AST>
 
   init();
-  parseTopLevels(sansFlag(INITIAL_LEXER_FLAGS, LF_FOR_REGEX));
+  parseTopLevels(sansFlag(INITIAL_LEXER_FLAGS | (options_strictMode ? LF_STRICT_MODE : 0), LF_FOR_REGEX));
 
   //tok.deopt();
 

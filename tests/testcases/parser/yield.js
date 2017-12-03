@@ -241,4 +241,49 @@ assert.sameValue(log.length, 11, "log.length");
     ast: true,
     tokens: true,
   });
+
+  test('complex args', {
+    code: 'call(yield x + y)',
+    ast: {type: 'Program', body: [
+      {type: 'ExpressionStatement', expression: {type: 'CallExpression',
+        callee: {type: 'Identifier', name: 'call'},
+        arguments: [{
+          type: 'YieldExpression',
+          delegate: false,
+          argument: {
+            type: 'BinaryExpression',
+            left: {type: 'Identifier', name: 'x'},
+            operator: '+',
+            right: {type: 'Identifier', name: 'y'},
+          },
+        }],
+      }},
+    ]},
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+  });
+
+  test('proper test', {
+    code: 'function *f(x){ return yield x; }',
+    ast: {type: 'Program', body: [
+      {
+        type: 'FunctionDeclaration',
+        generator: true,
+        async: false,
+        expression: false,
+        id: {type: 'Identifier', name: 'f'},
+        params: [{type: 'Identifier', name: 'x'}],
+        body: {
+          type: 'BlockStatement', body: [{
+            type: 'ReturnStatement', argument: {
+              type: 'YieldExpression',
+              delegate: false,
+              argument: {type: 'Identifier', name: 'x'},
+            },
+          }],
+        },
+      }
+    ]},
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR]
+  });
+
 });

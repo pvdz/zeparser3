@@ -98,22 +98,35 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
   else mode = [MODE_SCRIPT, MODE_MODULE];
   mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, testObj, desc, from));
 }
-function __one(Parser, testSuffix, code, mode, {ast: expectedAst, SCRIPT: scriptModeObj, MODULE: moduleModeObj, throws, tokens: expectedTokens, debug: _debug}, desc, from) {
+function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
+  let {
+    ast: expectedAst,
+    SCRIPT: scriptModeObj,
+    MODULE: moduleModeObj,
+    throws,
+    tokens: expectedTokens,
+    startInStrictMode,
+    debug: _debug
+  } = testDetails;
+
   ++testj;
 
                                                           //if (testj !== 560) return;
-  testSuffix += '['+testj+']';
+  testSuffix += '[' + (startInStrictMode ? 'strict' : 'sloppy') + ']';
+  testSuffix += '[' + testj + ']';
 
   // goal specific overrides
   if (mode === MODE_SCRIPT && scriptModeObj) {
     if (scriptModeObj.throws) throws = scriptModeObj.throws;
     if (scriptModeObj.ast) expectedAst = scriptModeObj.ast;
     if (scriptModeObj.tokens) expectedTokens = scriptModeObj.tokens;
+    if (scriptModeObj.startInStrictMode !== undefined) startInStrictMode = scriptModeObj.startInStrictMode;
   }
   if (mode === MODE_MODULE && moduleModeObj) {
     if (moduleModeObj.throws) throws = moduleModeObj.throws;
     if (moduleModeObj.ast) expectedAst = moduleModeObj.ast;
     if (moduleModeObj.tokens) expectedTokens = moduleModeObj.tokens;
+    if (moduleModeObj.startInStrictMode !== undefined) startInStrictMode = moduleModeObj.startInStrictMode;
   }
 
   let prefix = parserDesc + ': ' + testi + testSuffix;
@@ -122,7 +135,7 @@ function __one(Parser, testSuffix, code, mode, {ast: expectedAst, SCRIPT: script
   let stack;
   let e;
   try {
-    var obj = Parser(code, mode, COLLECT_TOKENS_SOLID);
+    var obj = Parser(code, mode, COLLECT_TOKENS_SOLID, {strictMode: startInStrictMode});
     e = new Error(); // for stack
   } catch(f) {
     wasError = f.message;

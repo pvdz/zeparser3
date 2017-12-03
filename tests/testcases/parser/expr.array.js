@@ -26,6 +26,103 @@ module.exports = (describe, test) => describe('arrays', _ => {
       ]},
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
     });
+
+    test('array empty 1 elision', {
+      code: `[,]`,
+      ast: { type: 'Program', body: [{
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'ArrayExpression',
+          elements: [null],
+        },
+      }]},
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    test('array empty 2 elisions', {
+      code: `[,,]`,
+      ast: { type: 'Program', body: [{
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'ArrayExpression',
+          elements: [null, null],
+        },
+      }]},
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    test('array empty 3 elisions', {
+      code: `[,,,]`,
+      ast: { type: 'Program', body: [{
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'ArrayExpression',
+          elements: [null, null, null],
+        },
+      }]},
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    test('array with x and trailing comma', {
+      code: `[x,]`,
+      ast: { type: 'Program', body: [{
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'ArrayExpression',
+          elements: [{type: 'Identifier', name: 'x'}],
+        },
+      }]},
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    test('array with x and elisions', {
+      code: `[x,,,]`,
+      ast: { type: 'Program', body: [{
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'ArrayExpression',
+          elements: [{type: 'Identifier', name: 'x'}, null, null],
+        },
+      }]},
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    test('array with x and leading comma', {
+      code: `[,x]`,
+      ast: { type: 'Program', body: [{
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'ArrayExpression',
+          elements: [null, {type: 'Identifier', name: 'x'}],
+        },
+      }]},
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test('array with x and two leading commas', {
+      code: `[,,x]`,
+      ast: { type: 'Program', body: [{
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'ArrayExpression',
+          elements: [null, null, {type: 'Identifier', name: 'x'}],
+        },
+      }]},
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test('array with middle elisions', {
+      code: `[x,,y]`,
+      ast: { type: 'Program', body: [{
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'ArrayExpression',
+          elements: [{type: 'Identifier', name: 'x'}, null, {type: 'Identifier', name: 'y'}],
+        },
+      }]},
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
   });
 
   describe('destructuring', _ => {

@@ -2427,6 +2427,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   }
 
   function THROW(str) {
+    console.log('\n');
     console.log('Tokenizer error! at #|# ```\n', slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)), '\n```');
     throw new Error('Tokenizer error!' + str);
   }

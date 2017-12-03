@@ -15,9 +15,13 @@ if (!fs.statSync(PATH262).isDirectory()) {
     if (fs.statSync(combo).isFile()) {
       if (file.slice(-3) === '.js') {
         if (
-          file.indexOf('for-await') < 0 && // for await is not final yet
+          combo.indexOf('for-await') < 0 && // for await is not final yet
           file.indexOf('this-val-regexp') < 0 && // new regex flags
-          file.indexOf('unicode-reference') < 0 // named back references are not final yet
+          file.indexOf('unicode-reference') < 0 && // named back references are not final yet
+          combo.indexOf('regexp/y-') < 0 && // y-flag in regexes
+          combo.indexOf('BigInt') < 0 && // adds new number syntax
+          combo.indexOf('lookBehind') < 0 && // regex ?<= lookbehind https://github.com/tc39/proposal-regexp-lookbehind
+          combo.indexOf('property-escapes') < 0 // regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         ) {
           obj[combo] = {path: combo, contents: fs.readFileSync(combo)};
         }
@@ -44,6 +48,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
               throws: true, // for now, let's not care about the actual error too much (must still be a handled path)
               tokens: true,
               debug: 'test6262 file path: ' + obj.path,
+              startInStrictMode: code.indexOf('[onlyStrict]') >= 0,
             });
           } else {
             test(key, {
@@ -51,6 +56,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
               ast: true,
               tokens: true,
               debug: 'test6262 file path: ' + obj.path,
+              startInStrictMode: code.indexOf('[onlyStrict]') >= 0,
             });
           }
         }
