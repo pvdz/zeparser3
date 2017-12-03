@@ -224,6 +224,7 @@ const LF_IN_TEMPLATE = 1 << 3;
 const LF_IN_ASYNC = 1 << 4;
 const LF_IN_GENERATOR = 1 << 5;
 const LF_IN_FUNC_ARGS = 1 << 6; // throws for await expression
+const LF_NO_FUNC_DECL = 1 << 7; // currently nesting inside at least one statement that is not a block/body
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
@@ -2427,16 +2428,19 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   }
 
   function THROW(str) {
+    _THROW('Tokenizer error! ' + str);
+  }
+  function _THROW(str) {
     console.log('\n');
-    console.log('Tokenizer error! at #|# ```\n', slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)), '\n```');
-    throw new Error('Tokenizer error!' + str);
+    console.log('Error at #|# ```\n', slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)), '\n```');
+    throw new Error(str);
   }
   function DEBUG() {
     return 'Tokenizer at #|# ```\n' + slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
   }
 
   nextToken.asi = addAsi;
-  nextToken.throw = THROW;
+  nextToken.throw = _THROW;
   //nextToken.deopt = () => funcs.forEach(([f,n]) => printStatus(f,n));
   nextToken.getTokenCountAny = () => anyTokenCount;
   nextToken.getTokenCountSolid = () => solidTokenCount;
@@ -2553,6 +2557,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_IN_TEMPLATE,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
+  LF_NO_FUNC_DECL,
   LF_STRICT_MODE,
   INITIAL_LEXER_FLAGS,
 

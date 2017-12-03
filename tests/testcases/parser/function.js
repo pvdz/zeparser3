@@ -16,6 +16,188 @@ module.exports = (describe, test) => describe('functions', _ => {
       ]},
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
+
+    describe('illegal statements in strict mode', _ => {
+
+      test('inside while', {
+        code: `while (false) function g() {}`,
+        startInStrictMode: true,
+        throws: 'Function statement',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('inside if', {
+        code: `if (false) function g() {}`,
+        startInStrictMode: true,
+        throws: 'Function statement',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('inside else', {
+        code: `if (false) foo; else function g() {}`,
+        startInStrictMode: true,
+        throws: 'Function statement',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('inside for', {
+        code: `for (a in b) function g() {}`,
+        startInStrictMode: true,
+        throws: 'Function statement',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('inside do', {
+        code: `do function g() {} while (false)`,
+        startInStrictMode: true,
+        throws: 'Function statement',
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('inside label', {
+        code: `foo: function g() {}`,
+        startInStrictMode: true,
+        throws: 'Function statement',
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('deep nested', {
+        code: `if (x) if (x) if (x) if (x) if (x) if (x) function g() {}`,
+        startInStrictMode: true,
+        throws: 'Function statement',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('inside block', {
+        code: `{ function g() {} }`,
+        startInStrictMode: true,
+        ast: { type: 'Program', body: [{type: 'BlockStatement', body: [{
+          type: 'FunctionDeclaration',
+          generator: false,
+          async: false,
+          expression: false,
+          id: { type: 'Identifier', name: 'g' },
+          params: [],
+          body: {
+            type: 'BlockStatement', body: [],
+          },
+        }]}]},
+        tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('inside nested block', {
+        code: `{{{ function g() {} }}}`,
+        startInStrictMode: true,
+        ast: {
+          type: 'Program', body: [
+            {type: 'BlockStatement', body: [{type: 'BlockStatement', body: [{type: 'BlockStatement', body: [{
+              type: 'FunctionDeclaration',
+              generator: false,
+              async: false,
+              expression: false,
+              id: { type: 'Identifier', name: 'g' },
+              params: [],
+              body: {
+                type: 'BlockStatement', body: [],
+              },
+            }]}]}]}],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        desc: 'make sure lexerflags get reset on block boundary'
+      });
+
+      test('preceded by other statement in a block', {
+        code: `
+          {
+            if (x) y;
+            function g() {}
+          }
+        `,
+        startInStrictMode: true,
+        ast: {type: 'Program', body: [{
+          type: 'BlockStatement',
+          body: [{
+            type: 'IfStatement',
+            test: {type: 'Identifier', name: 'x'},
+            consequent: {
+              type: 'ExpressionStatement',
+              expression: {type: 'Identifier', name: 'y'},
+            },
+            alternate: null,
+          }, {
+            type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'g' },
+            params: [],
+            body: { type: 'BlockStatement', body: []},
+          }],
+        }]},
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        desc: 'slightly redundant but lexerflags should not flow over from previous statement',
+      });
+
+      test('nested inside block', {
+        code: `if (x) { function g() {} }`,
+        startInStrictMode: true,
+        ast: {type: 'Program', body: [{
+          type: 'IfStatement',
+          test: { type: 'Identifier', name: 'x' },
+          consequent: {
+            type: 'BlockStatement',
+            body: [{
+              type: 'FunctionDeclaration',
+              generator: false,
+              async: false,
+              expression: false,
+              id: { type: 'Identifier', name: 'g' },
+              params: [],
+              body: { type: 'BlockStatement', body: []},
+            }],
+          },
+          alternate: null,
+        }]},
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        desc: 'block should reset lexerflags',
+      });
+
+      test('preceded by other statement in a nested block', {
+        code: `
+          if (z) {
+            if (x) y;
+            function g() {}
+          }
+        `,
+        startInStrictMode: true,
+        ast: { type: 'Program', body: [{
+          type: 'IfStatement',
+          test: { type: 'Identifier', name: 'z' },
+          consequent: {
+            type: 'BlockStatement',
+            body: [{
+              type: 'IfStatement',
+              test: { type: 'Identifier', name: 'x' },
+              consequent: {
+                type: 'ExpressionStatement',
+                expression: { type: 'Identifier', name: 'y' },
+              },
+              alternate: null,
+            }, {
+              type: 'FunctionDeclaration',
+              generator: false,
+              async: false,
+              expression: false,
+              id: {type: 'Identifier', name: 'g'},
+              params: [],
+              body: {type: 'BlockStatement', body: []},
+            }]},
+            alternate: null,
+        }]},
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        desc: 'make sure lexerflags get reset on block boundary',
+      });
+    });
   });
 
   describe('function args', _ => {

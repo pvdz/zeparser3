@@ -154,6 +154,7 @@ let { default: ZeTokenizer,
   LF_IN_ASYNC,
   LF_IN_GENERATOR,
   LF_IN_FUNC_ARGS,
+  LF_NO_FUNC_DECL,
   INITIAL_LEXER_FLAGS,
 
   RETURN_ANY_TOKENS,
@@ -221,7 +222,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     console.log('\n');
     console.log('Error in parser:', desc);
     console.log('Error token:', curtok);
-    tok.throw(desc);
+    tok.throw('Parser error! ' + desc);
   }
 
   // https://github.com/estree/estree
@@ -651,6 +652,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
+  function parseNestedBodyPart(lexerFlags, astProp) {
+    // nested statements like that of if, while, for, try, etc
+    return parseBodyPart(lexerFlags | LF_NO_FUNC_DECL, astProp);
+  }
+
   function parseBodyPart(lexerFlags, astProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(!(curtype & ($ERROR | $EOF)), 'should not have error or eof at this point');
@@ -856,6 +862,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         break;
 
       case 'function':
+        if ((lexerFlags & (LF_NO_FUNC_DECL|LF_STRICT_MODE)) === (LF_NO_FUNC_DECL|LF_STRICT_MODE)) THROW('Function statement is illegal in strict mode');
         parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_REQUIRED, astProp);
         break;
 
@@ -927,7 +934,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseBlockStatement(lexerFlags, astProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
+    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL);
 
     AST_open(astProp, 'BlockStatement');
     AST_set('body', []);
@@ -1346,7 +1353,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseDoStatement(lexerFlags, astProp) {
     AST_open(astProp, 'DoWhileStatement');
     ASSERT_skipRex('do', lexerFlags);
-    parseBodyPart(lexerFlags, 'body');
+    parseNestedBodyPart(lexerFlags, 'body');
     skipAnyOrDie($$W_77, 'while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
     parseSemiOrAsi(lexerFlags);
@@ -1531,7 +1538,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
     parseForHeader(lexerFlags, astProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
-    parseBodyPart(lexerFlags, 'body');
+    parseNestedBodyPart(lexerFlags, 'body');
     AST_close();
   }
   function parseForHeader(lexerFlags, astProp) {
@@ -1612,10 +1619,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'IfStatement');
     ASSERT_skipAny('if', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
-    parseBodyPart(lexerFlags, 'consequent');
+    parseNestedBodyPart(lexerFlags, 'consequent');
     if (curtype === $IDENT && curtok.str === 'else') {
       ASSERT_skipRex('else', lexerFlags);
-      parseBodyPart(lexerFlags, 'alternate');
+      parseNestedBodyPart(lexerFlags, 'alternate');
     } else {
       AST_set('alternate', null);
     }
@@ -1757,7 +1764,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc !== $$COLON_3A) THROW('Missing colon after case expr');
         ASSERT_skipRex(':', lexerFlagsNoTemplate);
         while (curtype !== $EOF && curc !== $$CURLY_R_7D && (curtype !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) {
-          parseBodyPart(lexerFlagsNoTemplate, 'consequent');
+          parseNestedBodyPart(lexerFlagsNoTemplate, 'consequent');
         }
 
         AST_close();
@@ -1769,7 +1776,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipRex(':', lexerFlagsNoTemplate);
         AST_set('test', null);
         AST_set('consequent', []);
-        while (curtype !== $EOF && curc !== $$CURLY_R_7D && (curtype !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) parseBodyPart(lexerFlagsNoTemplate, 'consequent');
+        while (curtype !== $EOF && curc !== $$CURLY_R_7D && (curtype !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) parseNestedBodyPart(lexerFlagsNoTemplate, 'consequent');
         AST_close();
       } else {
         break;
@@ -1837,7 +1844,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'WhileStatement');
     ASSERT_skipAny('while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
-    parseBodyPart(lexerFlags, 'body');
+    parseNestedBodyPart(lexerFlags, 'body');
     AST_close();
   }
 
@@ -1855,7 +1862,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_open(astProp, 'LabeledStatement');
       AST_setIdent('label', identToken);
       ASSERT_skipRex(':', lexerFlags);
-      parseBodyPart(lexerFlags, 'body');
+      parseNestedBodyPart(lexerFlags, 'body');
       AST_close();
     } else if (identToken.str === 'async') {
       parseAsyncStatement(lexerFlags, identToken, astProp);
@@ -1893,7 +1900,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'WithStatement');
     ASSERT_skipAny('with', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'object');
-    parseBodyPart(lexerFlags, 'body');
+    parseNestedBodyPart(lexerFlags, 'body');
     AST_close();
   }
 

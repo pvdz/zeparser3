@@ -38,7 +38,7 @@ function read(path, file) {
 }
 read(dir, '');
 
-files = files.filter(f => !(f.indexOf('test262') >= 0));
+files = files.filter(f =>! (f.indexOf('test262') >= 0));
 
 files.sort((a,b) => {
   // push test262 to the back so our own unit tests can find problems first
@@ -170,12 +170,12 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
     }
   } else if (throws) {
     ++fail;
-    LOG_THROW(prefix, '_failed_ to throw ANY error', code, stack, desc);
+    LOG_THROW(prefix, '_failed_ to throw ANY error', code, '', desc);
     if (throws !== true) {
       console.log('Expected an error message containing: "' + throws + '"');
     }
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
-    LOG_THROW(prefix, 'AST mismatch', code, stack, desc);
+    LOG_THROW(prefix, 'AST mismatch', code, '', desc);
 
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
 
@@ -197,7 +197,7 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
 
     ++fail;
   } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-    LOG_THROW(prefix, 'TOKEN mismatch', code, stack, desc);
+    LOG_THROW(prefix, 'TOKEN mismatch', code, '', desc);
 
     console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
     console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
@@ -212,8 +212,9 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
   return passed;
 
   function LOG_THROW(prefix, errmsg, code, stack, desc) {
+    console.log('\n');
     console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
-    console.log('Stack:', stack);
+    if (stack) console.log('Stack:', stack);
     console.log('Description:', desc);
     console.log('From:', from);
     if (_debug) console.log('Debug:', _debug);
