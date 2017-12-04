@@ -635,7 +635,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseStatementHeader(lexerFlags, headProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerflags number');
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
-    parseExpression(lexerFlags, headProp);
+    parseExpressions(lexerFlags, headProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
   }
 
@@ -1579,14 +1579,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_wrapClosed(astProp, 'ForInStatement', 'left');
         if (!assignable) THROW('Left part of for-in must be assignable');
         ASSERT_skipRex('in', lexerFlags);
-        parseExpression(lexerFlags, 'right');
+        parseExpressions(lexerFlags, 'right');
         return;
       }
       if (curtok.str === 'of') {
         AST_wrapClosed(astProp, 'ForOfStatement', 'left');
         if (!assignable) THROW('Left part of for-of must be assignable');
         ASSERT_skipRex('of', lexerFlags);
-        parseExpression(lexerFlags, 'right');
+        parseExpressions(lexerFlags, 'right');
         return;
       }
       ASSERT(curtok.str === 'instanceof', 'the only other valid identifier here is the instanceof op'); // very unlikely case tho
@@ -1601,17 +1601,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (wasNotDecl) parseExpressionFromOp(lexerFlags, assignable, startedWithParen, 'init');
     }
 
-    skipRexOrDieSingleChar($$SEMI_3B, lexerFlags);
+    let hadComma = curc === $$COMMA_2C;
+    if (hadComma) _parseExpressions(lexerFlags, 'init');
+    if (curc !== $$SEMI_3B) {
+      // note: `x in y` is valid so `for(a,x in y)` will parse up to the `)`. since `of` is not an op it stops at `of`.
+      if (hadComma && (curtok.str === 'of' || ')')) THROW('Comma not allowed in left side of `for-in`/`for-of` header');
+      // not a comma error; this will throw as we asserted
+      skipRexOrDieSingleChar($$SEMI_3B, lexerFlags);
+    }
+    ASSERT_skipRex(';', lexerFlags);
+
     if (curc === $$SEMI_3B) {
       AST_set('test', null);
     } else {
-      parseExpression(lexerFlags, 'test');
+      parseExpressions(lexerFlags, 'test');
     }
     skipRexOrDieSingleChar($$SEMI_3B, lexerFlags);
     if (curc === $$PAREN_R_29) {
       AST_set('update', null);
     } else {
-      parseExpression(lexerFlags, 'update');
+      parseExpressions(lexerFlags, 'update');
     }
   }
 
@@ -1737,7 +1746,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex('return', lexerFlags);
 
     if (!curtok.nl && curtype !== $EOF && curc !== $$SEMI_3B && curc !== $$CURLY_R_7D) {
-      parseExpression(lexerFlags, 'argument');
+      parseExpressions(lexerFlags, 'argument');
     } else {
       AST_set('argument', null);
     }
@@ -1759,7 +1768,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.str === 'case') {
         AST_open('cases', 'SwitchCase');
         ASSERT_skipRex('case', lexerFlagsNoTemplate);
-        parseExpression(lexerFlagsNoTemplate, 'test');
+        parseExpressions(lexerFlagsNoTemplate, 'test');
         AST_set('consequent', []);
         if (curc !== $$COLON_3A) THROW('Missing colon after case expr');
         ASSERT_skipRex(':', lexerFlagsNoTemplate);
@@ -1790,7 +1799,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ThrowStatement');
     ASSERT_skipRex('throw', lexerFlags);
     if (curtok.nl) THROW('Premature newline');
-    parseExpression(lexerFlags, 'argument'); // mandatory1
+    parseExpressions(lexerFlags, 'argument'); // mandatory1
     parseSemiOrAsi(lexerFlags);
     AST_close();
   }
@@ -1869,6 +1878,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       AST_open(astProp, 'ExpressionStatement');
       parseExpressionAfterIdentifier(lexerFlags, identToken, 'expression');
+      if (curc === $$COMMA_2C) {
+        _parseExpressions(lexerFlags, 'expression');
+      }
       AST_close();
       parseSemiOrAsi(lexerFlags);
     }
@@ -2095,7 +2107,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_wrapClosed(astProp, 'ConditionalExpression', 'test');
           ASSERT_skipRex('?', lexerFlags);
           parseExpression(lexerFlags, 'consequent');
-          skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
+          if (curc !== $$COLON_3A) {
+            if (curc === $$COMMA_2C) THROW('Can not use comma inside ternary expressions');
+            THROW('Unexpected character inside ternary');
+          }
+          ASSERT_skipRex(':', lexerFlags);
           parseExpression(lexerFlags, 'alternate');
           AST_close();
         } else {
@@ -2118,6 +2134,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     return assignable;
+  }
+  function parseExpressions(lexerFlags, astProp) {
+    parseExpression(lexerFlags, astProp);
+    if (curc === $$COMMA_2C) _parseExpressions(lexerFlags, astProp);
+  }
+  function _parseExpressions(lexerFlags, astProp) {
+    ASSERT(curc === $$COMMA_2C, 'confirm at callsite');
+    AST_wrapClosedArray(astProp, 'SequenceExpression', 'expressions');
+    do {
+      ASSERT_skipRex(',', lexerFlags);
+      parseExpression(lexerFlags, 'expressions');
+    } while (curc === $$COMMA_2C);
+    AST_close(); // SequenceExpression
   }
 
   function isAssignBinOp() {
@@ -2379,6 +2408,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       parseExpressionFromOp(lexerFlags, hadValue === WITH_ASSIGNABLE, wasParen, astProp);
     }
+    if (curc === $$COMMA_2C) {
+      _parseExpressions(lexerFlags, astProp);
+    }
   }
 
   function parseTickExpression(lexerFlags, astProp) {
@@ -2398,7 +2430,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // keep parsing expression+tick until tick-tail
       do {
-        parseExpression(lexerFlags | LF_IN_TEMPLATE, 'expressions');
+        parseExpressions(lexerFlags | LF_IN_TEMPLATE, 'expressions');
 
         AST_open('quasis', 'TemplateElement');
         AST_set('tail', curtype === $TICK_TAIL);
@@ -2638,7 +2670,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_wrapClosed('value', 'AssignmentExpression', 'left');
       AST_set('operator', '=');
       parseExpression(lexerFlags, 'right');
-      AST_close();
+      AST_close(); // AssignmentExpression
     }
   }
   function parseObjLitMethodAfterKey(lexerFlags, isComputed, wasGet, wasSet, isAsync, isGenerator, astProp) {
@@ -2819,15 +2851,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let assignable = parseExpression(lexerFlags, astProp);
 
     if (curc === $$COMMA_2C) {
-      AST_wrapClosedArray(astProp, 'SequenceExpression', 'expressions');
-      ASSERT_skipRex(',', lexerFlags);
+      // NOTE! this can become an ARROW HEADER! (in fact, this is most likely the case)
+      _parseExpressions(lexerFlags, astProp);
       assignable = NOT_ASSIGNABLE; // in all cases
-      do {
-        parseExpression(lexerFlags, 'expressions');
-        if (curc !== $$COMMA_2C) break;
-        ASSERT_skipRex(',', lexerFlags);
-      } while (true);
-      AST_close();
     }
 
     skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
