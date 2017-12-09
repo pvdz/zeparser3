@@ -96,7 +96,17 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
   if (mode !== undefined && mode !== MODE_SCRIPT && mode !== MODE_MODULE) throw new Error('test setup problem: invalid mode');
   if (mode !== undefined) mode = [mode];
   else mode = [MODE_SCRIPT, MODE_MODULE];
-  mode.forEach(m => __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, testObj, desc, from));
+  mode.forEach(m => {
+    if (testObj.STRICT) {
+      __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, Object.assign({startInStrictMode:true}, testObj, testObj.STRICT), desc, from);
+    }
+    if (testObj.SLOPPY) {
+      __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, Object.assign({startInStrictMode:false}, testObj, testObj.SLOPPY), desc, from);
+    }
+    if (!testObj.STRICT && !testObj.SLOPPY) {
+      __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, testObj, desc, from);
+    }
+  });
 }
 function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
   let {

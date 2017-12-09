@@ -155,6 +155,7 @@ let { default: ZeTokenizer,
   LF_IN_GENERATOR,
   LF_IN_FUNC_ARGS,
   LF_NO_FUNC_DECL,
+  LF_NO_YIELD,
   INITIAL_LEXER_FLAGS,
 
   RETURN_ANY_TOKENS,
@@ -210,6 +211,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   let tok = ZeTokenizer(code, false, collectTokens, options_webCompat);
 
+  let prevtok = null;
   let curtok = null;
   let curtype = 0;
   let curc = 0;
@@ -485,9 +487,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT((lexerFlags & LF_FOR_REGEX) === 0, 'regex flag should not be set anywhere');
 
-    curtok = tok(lexerFlags | LF_FOR_REGEX, RETURN_SOLID_TOKENS);
-    curtype = curtok.type;
-    curc = curtok.c;
+    updateToken(tok(lexerFlags | LF_FOR_REGEX, RETURN_SOLID_TOKENS));
 
     ASSERT(typeof curtype === 'number' && curtype >= 0);
     ASSERT(typeof curc === 'number' && curc >= 0 && curc <= 0x10ffff, 'valid c', JSON.stringify(curtok));
@@ -498,12 +498,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT((lexerFlags & LF_FOR_REGEX) === 0, 'regex flag should not be set anywhere');
 
-    curtok = tok(lexerFlags, RETURN_SOLID_TOKENS);
-    curtype = curtok.type;
-    curc = curtok.c;
+    updateToken(tok(lexerFlags, RETURN_SOLID_TOKENS));
 
     ASSERT(typeof curtype === 'number' && curtype >= 0);
     ASSERT(typeof curc === 'number' && curc >= 0 && curc <= 0x10ffff, 'valid c', JSON.stringify(curtok));
+  }
+  function updateToken(token) {
+    prevtok = curtok;
+    curtok = token;
+    curtype = curtok.type;
+    curc = curtok.c;
   }
   function skipAny(lexerFlags) {
     skipRex(lexerFlags); // TODO: optimize; in this case the next token is very restricted but at least no slash
@@ -648,7 +652,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       console.log('parse error at curc', curc, String.fromCharCode(curc), curtok.str);
       console.log('current token:', curtok);
-      THROW('Unable to ASI');
+      THROW('Unable to ASI' + (((lexerFlags & LF_NO_YIELD) === LF_NO_YIELD) ? ' (note: yield is probably considered a var name here!' : ''));
     }
   }
 
@@ -2093,8 +2097,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let prev = _path[_path.length-1][astProp];
         let swapped = false;
         if (prev && lhsWasParenStart === LHS_NOT_PAREN_START && (prev.type === 'BinaryExpression' || prev.type === 'LogicalExpression')) {
-          let sl = getStrenght(curtok.str);
-          let sr = getStrenght(prev.operator);
+          let sl = getStrength(curtok.str);
+          let sr = getStrength(prev.operator);
           swapped =  sl > sr || (sl === sr && curtok.str === '**'); // `**` is the right-associative exception here
           if (swapped) {
             _path.push(prev);
@@ -2119,8 +2123,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_set('operator', curtok.str);
           skipRex(lexerFlags);
           lhsWasParenStart = curc === $$PAREN_L_28; // heuristic for determining groups
-          parseValue(lexerFlags, 'right');
+          console.log('is this yield?', curtok)
+          parseValue(lexerFlags | LF_NO_YIELD, 'right');
           AST_close();
+        }
+
+        if (curc === $$IS_3D && curtok.str === '=') {
+          THROW('Cannot have assignment after non-assignment operator');
         }
 
         // <SCRUB AST>
@@ -2204,7 +2213,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return false;
   }
 
-  function getStrenght(str) {
+  function getStrength(str) {
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
     // the spec is super implicit about operator precedent. you can only discover it by tracing the grammar.
     // note: this function doesnt contain all things that have precedent. most of them are also implicitly
@@ -2370,8 +2379,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // (await when not a keyword is assignable)
         return parseAwaitExpression(lexerFlags, identToken, astProp);
       case 'yield':
-        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE && (lexerFlags & LF_IN_GENERATOR) !== LF_IN_GENERATOR) {
-          THROW('Cannot use `yield` outside of generator functions when in strict mode');
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+          if ((lexerFlags & LF_IN_GENERATOR) !== LF_IN_GENERATOR) {
+            THROW('Cannot use `yield` outside of generator functions when in strict mode');
+          }
+          if ((lexerFlags & LF_NO_YIELD) === LF_NO_YIELD) {
+            THROW('Using `yield` after non-operator makes it a var name (illegal in strict mode)');
+          }
+        } else if ((lexerFlags & LF_NO_YIELD) === LF_NO_YIELD) {
+          // considering `yield` a regular var name here. That's okay in sloppy mode.
+          parseAfterVarName(lexerFlags, identToken, astProp);
+          return true;
         }
         AST_open(astProp, 'YieldExpression');
         AST_set('delegate', false); // TODO ??

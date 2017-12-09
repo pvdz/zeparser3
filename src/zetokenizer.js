@@ -225,6 +225,7 @@ const LF_IN_ASYNC = 1 << 4;
 const LF_IN_GENERATOR = 1 << 5;
 const LF_IN_FUNC_ARGS = 1 << 6; // throws for await expression
 const LF_NO_FUNC_DECL = 1 << 7; // currently nesting inside at least one statement that is not a block/body
+const LF_NO_YIELD = 1 << 8; // yield is not allowed after a non-assignment-op
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
@@ -2558,6 +2559,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
   LF_NO_FUNC_DECL,
+  LF_NO_YIELD,
   LF_STRICT_MODE,
   INITIAL_LEXER_FLAGS,
 

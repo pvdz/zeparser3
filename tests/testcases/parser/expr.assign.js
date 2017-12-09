@@ -211,4 +211,10 @@ module.exports = (describe, test) => describe('assigns', _ => {
     ]},
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
   });
+
+  test('assign plus assign', {
+    code: 'a = b + c = d',
+    throws: 'assignment after',
+    tokens: [$IDENT, $PUNCTUATOR,$IDENT, $PUNCTUATOR,$IDENT, $PUNCTUATOR,$IDENT,$ASI],
+  });
 });

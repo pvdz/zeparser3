@@ -14,14 +14,19 @@ if (!fs.statSync(PATH262).isDirectory()) {
     let combo = path + file;
     if (fs.statSync(combo).isFile()) {
       if (file.slice(-3) === '.js') {
+        let lcname = combo.toLowerCase();
         if (
-          combo.indexOf('for-await') < 0 && // for await is not final yet
-          file.indexOf('this-val-regexp') < 0 && // new regex flags
-          file.indexOf('unicode-reference') < 0 && // named back references are not final yet
-          combo.indexOf('regexp/y-') < 0 && // y-flag in regexes
-          combo.indexOf('BigInt') < 0 && // adds new number syntax
-          combo.indexOf('lookBehind') < 0 && // regex ?<= lookbehind https://github.com/tc39/proposal-regexp-lookbehind
-          combo.indexOf('property-escapes') < 0 // regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
+          lcname.indexOf('for-await') < 0 && // for await is not final yet
+          lcname.indexOf('this-val-regexp') < 0 && // new regex flags
+          lcname.indexOf('unicode-reference') < 0 && // named back references are not final yet
+          lcname.indexOf('regexp/y-') < 0 && // y-flag in regexes
+          lcname.indexOf('bigint') < 0 && // adds new number syntax
+          lcname.indexOf('lookbehind') < 0 && // regex ?<= lookbehind https://github.com/tc39/proposal-regexp-lookbehind
+          lcname.indexOf('spread-sngl-obj') < 0 && // object spread is es8 or something, to do
+          lcname.indexOf('class-definition-evaluation-scriptbody-duplicate-binding') < 0 && // TODO duplicate bindings are early error
+          lcname.indexOf('yield-star-sync-throw') < 0 && // async generators are part of the `for await` proposal
+          lcname.indexOf('use-strict-with-non-simple-param') < 0 && // wtf even. TODO. I guess.
+          lcname.indexOf('property-escapes') < 0 // regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         ) {
           obj[combo] = {path: combo, contents: fs.readFileSync(combo)};
         }
@@ -48,7 +53,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
               throws: true, // for now, let's not care about the actual error too much (must still be a handled path)
               tokens: true,
               debug: 'test6262 file path: ' + obj.path,
-              startInStrictMode: code.indexOf('[onlyStrict]') >= 0,
+              startInStrictMode: code.indexOf('[onlyStrict]') >= 0 ? true : code.indexOf('[noStrict]') >= 0 ? false : undefined,
             });
           } else {
             test(key, {
@@ -56,7 +61,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
               ast: true,
               tokens: true,
               debug: 'test6262 file path: ' + obj.path,
-              startInStrictMode: code.indexOf('[onlyStrict]') >= 0,
+              startInStrictMode: code.indexOf('[onlyStrict]') >= 0 ? true : code.indexOf('[noStrict]') >= 0 ? false : undefined,
             });
           }
         }

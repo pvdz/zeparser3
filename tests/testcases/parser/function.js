@@ -11,9 +11,17 @@ module.exports = (describe, test) => describe('functions', _ => {
 
     test('empty function decl',{
       code: 'function f(){}',
-      ast: {type: 'Program', body: [
-        {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [], body: {type: 'BlockStatement', body: []}},
-      ]},
+      ast: {type: 'Program', body: [{
+        type: 'FunctionDeclaration',
+        generator: false,
+        async: false,
+        expression: false,
+        id: {type: 'Identifier', name: 'f'},
+        params: [],
+        body: {
+          type: 'BlockStatement', body: [],
+        },
+      }]},
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
