@@ -36,6 +36,9 @@ module.exports = (describe, test) => describe('regular expression disambiguation
   // for (/x/ in y); (Illegal lhs)
   // x => {} / y  (Illegal; {} is a body statement, has no value. no prod parses it)
 
+  // new/x/g
+  // new\n/x/g
+
   //describe('tokenizer hints', _ => {
   //
   //  describe('new', _ => {

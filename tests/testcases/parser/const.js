@@ -107,30 +107,36 @@ module.exports = (describe, test) => describe('const statement', _ => {
     });
   });
 
-  //[
-  //  '  array destructuring',
-  //  {
-  //    code: 'const [foo] = arr;',
-  //    ast: {type: 'Program', body: [
-  //      {type: 'VariableDeclaration', kind: 'const', declarations: [
-  //        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
-  //      ]},
-  //    ]},
-  //    desc: 'const, one var, no init, semi',
-  //    tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-  //  },
-  //],
-  //[
-  //  '  object destructuring',
-  //  {
-  //    code: 'const {foo} = arr;',
-  //    ast: {type: 'Program', body: [
-  //      {type: 'VariableDeclaration', kind: 'const', declarations: [
-  //        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
-  //      ]},
-  //    ]},
-  //    desc: 'const, one var, no init, semi',
-  //    tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-  //  },
-  //],
+  describe('destructurnig', _ => {
+
+    test('array', {
+      code: 'const [foo] = arr;',
+      ast: {type: 'Program', body: [{
+        type: 'VariableDeclaration',
+        kind: 'const',
+        declarations: [{
+          type: 'VariableDeclarator',
+          id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]},
+          init: {type: 'Identifier', name: 'arr'}},
+        ]},
+      ]},
+      desc: 'const, one var, no init, semi',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+    });
+
+    test('object', {
+      code: 'const {foo} = arr;',
+      ast: {type: 'Program', body: [{
+        type: 'VariableDeclaration',
+        kind: 'const',
+        declarations: [{
+          type: 'VariableDeclarator',
+          id: {type: 'ObjectPattern', properties: [{type: 'Identifier', name: 'foo'}]},
+          init: {type: 'Identifier', name: 'arr'}},
+        ]},
+      ]},
+      desc: 'const, one var, no init, semi',
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+    });
+  });
 });
