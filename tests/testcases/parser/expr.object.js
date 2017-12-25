@@ -1856,3 +1856,5 @@ module.exports = (describe, test) => describe('objects', _ => {
     });
   });
 });
+
+// todo: confirm static keyword cant be used in objlit

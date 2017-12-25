@@ -861,6 +861,14 @@ class f {
   // export default class extends F {}
   // class extends {} {}
   // async constructor ?
+  // expression classes: (class X{})
+  //class x{static(){}}
+  //class x{static static(){}}
+  //class x{async static(){}}
+  //class x{async static static(){}}
+  //class x{*static(){}}
+  //class x{static *static(){}}
+  // confirm multiple usages of same member modifier is prevented (async async, static async static, etc)
 
   // class is always strict mode (note below https://tc39.github.io/ecma262/#prod-ClassBody )
 });

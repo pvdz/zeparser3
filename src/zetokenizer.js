@@ -226,11 +226,59 @@ const LF_IN_GENERATOR = 1 << 5;
 const LF_IN_FUNC_ARGS = 1 << 6; // throws for await expression
 const LF_NO_FUNC_DECL = 1 << 7; // currently nesting inside at least one statement that is not a block/body
 const LF_NO_YIELD = 1 << 8; // yield is not allowed after a non-assignment-op
+const LF_CAN_NEW_TARGET = 1 << 9; // current scope is inside at least one regular (non-arrow) function
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
 // - sloppy mode until proven otherwise
 const INITIAL_LEXER_FLAGS = LF_FOR_REGEX;
+
+function LF_DEBUG(flags) {
+  let s = [];
+  if (!flags) {
+    s.push('NO_FLAGS');
+  }
+  if (flags & LF_STRICT_MODE) {
+    flags ^= LF_STRICT_MODE;
+    s.push('LF_STRICT_MODE');
+  }
+  if (flags & LF_FOR_REGEX) {
+    flags ^= LF_FOR_REGEX;
+    s.push('LF_FOR_REGEX');
+  }
+  if (flags & LF_IN_TEMPLATE) {
+    flags ^= LF_IN_TEMPLATE;
+    s.push('LF_IN_TEMPLATE');
+  }
+  if (flags & LF_IN_ASYNC) {
+    flags ^= LF_IN_ASYNC;
+    s.push('LF_IN_ASYNC');
+  }
+  if (flags & LF_IN_GENERATOR) {
+    flags ^= LF_IN_GENERATOR;
+    s.push('LF_IN_GENERATOR');
+  }
+  if (flags & LF_IN_FUNC_ARGS) {
+    flags ^= LF_IN_FUNC_ARGS;
+    s.push('LF_IN_FUNC_ARGS');
+  }
+  if (flags & LF_NO_FUNC_DECL) {
+    flags ^= LF_NO_FUNC_DECL;
+    s.push('LF_NO_FUNC_DECL');
+  }
+  if (flags & LF_NO_YIELD) {
+    flags ^= LF_NO_YIELD;
+    s.push('LF_NO_YIELD');
+  }
+  if (flags & LF_CAN_NEW_TARGET) {
+    flags ^= LF_CAN_NEW_TARGET;
+    s.push('LF_CAN_NEW_TARGET');
+  }
+  if (flags) {
+    THROW('UNKNOWN_FLAGS: ' + flags.toString(2));
+  }
+  return s.join('|');
+}
 
 const BAD_ESCAPE = true;
 const GOOD_ESCAPE = false;
@@ -2553,6 +2601,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   GOAL_MODULE,
   GOAL_SCRIPT,
 
+  LF_CAN_NEW_TARGET,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
   LF_IN_TEMPLATE,
@@ -2562,6 +2611,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_NO_YIELD,
   LF_STRICT_MODE,
   INITIAL_LEXER_FLAGS,
+  LF_DEBUG,
 
   RETURN_ANY_TOKENS,
   RETURN_SOLID_TOKENS,

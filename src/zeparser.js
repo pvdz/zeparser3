@@ -148,6 +148,7 @@ let { default: ZeTokenizer,
   GOAL_MODULE,
   GOAL_SCRIPT,
 
+  LF_CAN_NEW_TARGET,
   LF_STRICT_MODE,
   LF_FOR_REGEX,
   LF_IN_TEMPLATE,
@@ -157,6 +158,7 @@ let { default: ZeTokenizer,
   LF_NO_FUNC_DECL,
   LF_NO_YIELD,
   INITIAL_LEXER_FLAGS,
+  LF_DEBUG,
 
   RETURN_ANY_TOKENS,
   RETURN_SOLID_TOKENS,
@@ -202,6 +204,10 @@ const PARSE_VALUE_MUST = false;
 const YIELD_WITHOUT_VALUE = 0;
 const WITH_ASSIGNABLE = 1;
 const WITH_NON_ASSIGNABLE = 2;
+const NOT_NEW_TARGET = false;
+const CHECK_NEW_TARGET = true;
+const IS_ARROW = true;
+const NOT_ARROW = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -235,6 +241,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     type: 'Program',
   };
   let _path = [_tree];
+  let _pnames = [];
   function AST_open(prop, type, fromWrap = false) {
     if (traceast) {
       console.log('AST_open; write type='+type+' to prop=' + prop, fromWrap);
@@ -252,6 +259,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('bad tree? node[prop] (prop='+prop+') should be undefined but wasnt (child=' + node + ', prop='+ prop+ ', type='+ type+ ', node[prop]='+ node[prop]+')');
     }
     _path.push(newnode);
+    _pnames.push(prop);
   }
   function AST_close() {
     if (traceast) {
@@ -260,6 +268,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       console.log('- AST:', require('util').inspect(_tree, false, null))
     }
     _path.pop();
+    _pnames.pop();
   }
   function AST_set(prop, value) {
     if (traceast) {
@@ -308,6 +317,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // a(x:b) -> a(x:c(y:b))
 
     let node = _path.pop();
+    _pnames.pop();
     let parent = _path[_path.length-1];
 
     if (traceast) console.log(' - node to wrap:', node, ', prop:', prop, ', parent:', parent);
@@ -323,6 +333,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // set it as child of new node
     AST_set(newProp, node);
     _path.push(node);
+    _pnames.push(newProp);
     if (traceast) {
       console.log('- tree after:', require('util').inspect(_tree, false, null))
     }
@@ -358,25 +369,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       console.log('- tree after:', require('util').inspect(_tree, false, null))
     }
   }
-  function AST_replaceOpened(prop, oldNodeType, newNodeType) {
+  function AST_replaceParent(newNodeType, oldNodeType) {
     if (traceast) {
-      console.log('AST_replaceOpened', prop, newNodeType, newNodeType)
+      console.log('AST_replaceParent', prop, newNodeType, newNodeType)
+      console.log('- path:', _pnames.join(' - '));
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before:', require('util').inspect(_tree, false, null))
     }
 
-    // replace the node at given prop with a new node
-    // of given type. return the old node.
+    // this is used to replace the parent node with a new node
+    // for example: when parsing `new` a `NewExpression` is pushed but when parsing its `callee` when it encounters
+    // `.target` it must replace the whole `NewExpression` with a `MetaProperty` node. That's what this does.
 
-    let oldNode = _path.pop();
-    let parent = _path[_path.length - 1];
+    let oldNode = _path.pop(); // "NewExpression", the current leaf node to fully replace
+    let parentNode = _path[_path.length - 1];
+    let prevProp = _pnames.pop(); // name where oldNode was stored in parentNode (parentNode[prevProp]===oldNode)
 
     ASSERT(oldNode.type === oldNodeType, 'expecting to replace a certain node');
-    ASSERT((Array.isArray(parent[prop]) ? parent[prop][parent[prop].length-1]:parent[prop]) === oldNode, 'should be the target node');
+    ASSERT((Array.isArray(parentNode[prevProp]) ? parentNode[prevProp][parentNode[prevProp].length-1] : parentNode[prevProp]) === oldNode, 'should be the target node');
+    if (Array.isArray(parentNode[prevProp])) parentNode[prevProp].pop(); // the OPEN below will only append if array
+    AST_open(prevProp, newNodeType, CALLED_FROM_WRAPPER);
 
-    if (Array.isArray(parent[prop])) parent[prop].pop(); // the OPEN below will only append if array
-
-    AST_open(prop, newNodeType, CALLED_FROM_WRAPPER);
     if (traceast) {
       console.log('- tree after:', require('util').inspect(_tree, false, null))
     }
@@ -738,6 +751,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       // TODO: verify identifier
+      // TODO: there are cases where an identifier cannot exist here (like methods)
       AST_setIdent('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (isFuncDecl && !isIdentOptional) {
@@ -747,15 +761,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     // reset the async and generator lexer flags. they don't cross function boundaries
+    // make sure the LF_CAN_NEW_TARGET flag is set from here on out, this enables new.target (is allowed in arg default)
     // note: we dont reset the template lexer flag here. instead we do it at any place where we parse curly pairs
     //       this fixes the problem of parsing arrow functions where we can't tell whether the next token is part
     //       of the arrow expression until after parsing and processing that token. that needs curly pair checks.
-    lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, isGenerator);
+    lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, isGenerator, NOT_ARROW);
 
     parseFunctionFromParams(lexerFlags);
     AST_close();
   }
-  function resetLexerFlagsForFunction(lexerFlags, isAsync, isGenerator) {
+  function resetLexerFlagsForFunction(lexerFlags, isAsync, isGenerator, funcType) {
     ASSERT(!isGenerator || !isAsync, 'cant be both generator and async'); // should this be a THROW? don't think so...
     // reset lexer flag states that dont carry accross function boundary
     lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
@@ -764,6 +779,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // dont remove the template flag here! let curly pair structures deal with this individually (fixes arrows)
     if (isGenerator) lexerFlags = lexerFlags | LF_IN_GENERATOR;
     if (isAsync) lexerFlags = lexerFlags | LF_IN_ASYNC;
+    if (funcType === NOT_ARROW) lexerFlags = lexerFlags | LF_CAN_NEW_TARGET;
     return lexerFlags;
   }
   function parseFunctionFromParams(lexerFlags) {
@@ -1230,14 +1246,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // getter, setter, async, or ident method
       switch (identToken.str) {
         case 'static':
-          if (isStatic) {
-            return TODO // this is a regular method named `static` which seems to be okay.
-          } else {
+          if (!isStatic && curc !== $$PAREN_L_28) {
+            //class x{static(){}}
+            //class x{static static(){}}
+            //class x{async static(){}}
+            //class x{async static static(){}}
+            //class x{*static(){}}
+            //class x{static *static(){}}
             return _parseClassMethod(lexerFlags, HAS_STATIC_MODIFIER);
           }
+          break; // this is a method named `static` which seems to be okay.
         case 'async':
           if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
-            // async function
+            // async method / static async member
             parseMethod(lexerFlags, WAS_ASYNC, NOT_GET, NOT_SET, NOT_GENERATOR, isStatic);
             return true;
           }
@@ -2123,13 +2144,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_set('operator', curtok.str);
           skipRex(lexerFlags);
           lhsWasParenStart = curc === $$PAREN_L_28; // heuristic for determining groups
-          console.log('is this yield?', curtok)
           parseValue(lexerFlags | LF_NO_YIELD, 'right');
           AST_close();
         }
 
+        // note: this is for `5+5=10`
         if (curc === $$IS_3D && curtok.str === '=') {
-          THROW('Cannot have assignment after non-assignment operator');
+          THROW('Cannot assign a value to non-assignable value');
         }
 
         // <SCRUB AST>
@@ -2139,6 +2160,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
         // </SCRUB AST>
         lhsWasParenStart = curc === $$PAREN_L_28; // heuristic for determining groups
+        assignable = false; // not sure where this is still relevant but it is
       }
     }
 
@@ -2248,13 +2270,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseValue(lexerFlags, astProp) {
-    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, astProp);
+    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, astProp);
+    return parseValueTail(lexerFlags, assignable, astProp);
+  }
+  function parseValueFromNew(lexerFlags, astProp) {
+    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, CHECK_NEW_TARGET, astProp);
     return parseValueTail(lexerFlags, assignable, astProp);
   }
   function parseYieldValueMaybe(lexerFlags, astProp) {
     // TODO: how to properly solve this when there are no tokens? can we even do that?
     let startok = curtok;
-    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MAYBE, astProp);
+    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MAYBE, NOT_NEW_TARGET, astProp);
     if (curtok === startok) return YIELD_WITHOUT_VALUE;
     assignable = parseValueTail(lexerFlags, assignable, astProp);
     if (assignable) return WITH_ASSIGNABLE;
@@ -2264,7 +2290,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let assignable = parseValueHeadBodyIdent(lexerFlags, identToken, astProp);
     return parseValueTail(lexerFlags, assignable, astProp);
   }
-  function parseValueHeadBody(lexerFlags, maybe, astProp) {
+  function parseValueHeadBody(lexerFlags, maybe, checkNewTarget, astProp) {
     // - ident (a var, true, false, null, super, new <value>, new.target, this, class, function, async func, generator func)
     // - literal (number, string, regex, object, array, template)
     // - arrow or group
@@ -2281,10 +2307,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (curtype & ($NUMBER|$STRING|$REGEX)) {
       AST_setLiteral(astProp, curtok);
       skipDiv(lexerFlags);
-      return false;
+      return NOT_ASSIGNABLE;
     } else if (curtype & $TICK) {
       parseTickExpression(lexerFlags, astProp);
-      return false;
+      return NOT_ASSIGNABLE;
     } else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
         return parseObjectLitOrDestruc(lexerFlags, NOT_DESTRUCTURING, astProp); // TODO: is that true? is this never a destructuring context?
@@ -2297,28 +2323,62 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('operator', curtok.str);
         ASSERT_skipAny($PUNCTUATOR, lexerFlags); // TODO: optimize; next token can not start with a fwd slash
         AST_set('prefix', true);
-        parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, 'argument');
+        let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, 'argument');
+        if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value');
         AST_close();
-        return false;
+        return NOT_ASSIGNABLE;
       } else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
         AST_open(astProp, 'UnaryExpression');
         AST_set('operator', curtok.str);
         ASSERT_skipRex($PUNCTUATOR, lexerFlags);
         AST_set('prefix', true);
-        parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, 'argument');
+        parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, 'argument');
         AST_close();
-        return false;
-      } else if (curc === $$DOT_2E && curtok.str === '...') {
-        AST_open(astProp, 'SpreadElement');
-        ASSERT_skipAny($PUNCTUATOR, lexerFlags); // TODO: optimize; next token can not start with a fwd slash
-        parseValue(lexerFlags, 'argument');
-        AST_close();
-        return false;
+        return NOT_ASSIGNABLE;
+      } else if (curc === $$DOT_2E) {
+        if (curtok.str === '...') {
+          AST_open(astProp, 'SpreadElement');
+          ASSERT_skipAny($PUNCTUATOR, lexerFlags); // TODO: optimize; next token can not start with a fwd slash
+          parseValue(lexerFlags, 'argument');
+          AST_close();
+          return NOT_ASSIGNABLE;
+        } else {
+          // TODO: (random but kind of relevant here): add tests that put `.5` in any place here a leading-dot-token is expected
+          if (checkNewTarget === CHECK_NEW_TARGET && curtok.str === '.') {
+            // new.target
+            // only valid if at least one scope in the scope tree is a regular function
+            if ((lexerFlags & LF_CAN_NEW_TARGET) !== LF_CAN_NEW_TARGET) THROW('Must be inside/nested a regular function to use `new.target`');
+
+            // top should currently be this node:
+            // {type: 'NewExpression', arguments: [], callee: WE_ARE_HERE}
+            // we will want it to completely replace this with:
+            // {type: 'MetaProperty', meta: {type: 'Identifier', name: 'new'}, property: {type: 'Identifier', name: 'target'}}
+            AST_replaceParent('MetaProperty', 'NewExpression')
+
+            ASSERT_skipAny('.', lexerFlags); // must be dot
+            if (curtok.str !== 'target') THROW('Can only read `new.target`, no other "properties" from `new`');
+            AST_open('meta', 'Identifier');
+            AST_set('name', 'new');
+            AST_close(); // Identifier
+            AST_open('property', 'Identifier');
+            AST_set('name', 'target');
+            AST_close(); // Identifier
+            ASSERT_skipDiv('target', lexerFlags);
+
+            // note: this is some minor "sugar" for `new.target=10`, not further checking for compound ops...
+            if (curc === $$IS_3D && curtok.str === '=') {
+              THROW('Cannot assign a value to non-assignable value');
+            }
+
+            return NOT_ASSIGNABLE;
+          }
+        }
       }
     }
 
     if (!maybe) THROW('Expected to parse a value');
-    return true; // ignored
+    // currently all callsites that have mayb=true will ignore the return value
+    return true;
   }
   function parseValueHeadBodyIdent(lexerFlags, identToken, astProp) {
     // note: ident token has been skipped prior to this call. curtok is the one after identToken.
@@ -2349,8 +2409,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'new':
         AST_open(astProp, 'NewExpression');
         AST_set('arguments', []);
-        parseValue(lexerFlags, 'callee');
-        AST_close();
+        parseValueFromNew(lexerFlags, 'callee');
+        AST_close(); // NewExpression
         return false;
       case 'this':
         AST_open(astProp, 'ThisExpression');
@@ -2900,7 +2960,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('id', null);
     AST_set('generator', false);
     AST_set('async', isAsync);
-    lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, NOT_GENERATOR);
+    lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, NOT_GENERATOR, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
       AST_set('expression', BODY_IS_BLOCK); // "body of arrow is block"
       parseBlockStatement(lexerFlags, 'body');

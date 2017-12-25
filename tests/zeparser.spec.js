@@ -50,13 +50,23 @@ files.sort((a,b) => {
 });
 console.log(files);
 
-let describes = files.map(path => ({from:path, describe:require(path)}));
+let describesFromFiles = files.map(path => ({filePath:path, moduleExports:require(path)}));
 //describe.forEach(({from, describe:func}) => typeof func !== 'function' && console.log('file did not produce proper describe function:', from, func));
 
 let cases = [];
-let X = (parentDesc, from, desc, func) => func(X.bind(undefined, parentDesc + ' | ' + desc, from), Y.bind(undefined, parentDesc + ' | ' + desc, from));
-let Y = (parentDesc, from, desc, obj) => cases.push({desc: parentDesc + ' ||> ' + desc, from, obj});
-describes.forEach(({from, describe}) => X('', from, '', describe));
+let descStack = [];
+describesFromFiles.forEach(({filePath, moduleExports}) => {
+  moduleExports(
+    (desc, callback) => {
+      descStack.push(desc);
+      callback();
+      descStack.pop();
+    },
+    (desc, obj) => {
+      cases.push({desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + desc + ' \u2B88', from: filePath, obj})
+    }
+  );
+});
 
 // todo
 
@@ -121,7 +131,7 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
 
   ++testj;
 
-                                                          //if (testj !== 560) return;
+                                                          //if (testj !== 1069) return;
   testSuffix += '[' + (startInStrictMode ? 'strict' : 'sloppy') + ']';
   testSuffix += '[' + testj + ']';
 

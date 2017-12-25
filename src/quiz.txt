@@ -23,6 +23,13 @@ To which `if` does the `else` bind? `if (a); if (b); else c;`
 Is this multiplication of a generator or x square? `x**function(){ return 2}()`
 parseInt('1e10'), parseFloat('1e10'), Number('1e10')
 Can you use numbers as method names in object literals or classes or both or neither?
+What does `new.target` refer to in
+ - a regular function?
+ - an arrow function?
+ - a nested arrow in a nested function?
+ - global scope?
+What does this do? `new/foo/g.bar();`
+Can you use new.target as function arg defaults?
 
 function f(a,b){ b=5; console.log(arguments[1]); } f(); f(1); f(1,2); f(1, undefined); // implicit arguments bind
 
