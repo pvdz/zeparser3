@@ -50,12 +50,10 @@ files.sort((a,b) => {
 });
 console.log(files);
 
-let describesFromFiles = files.map(path => ({filePath:path, moduleExports:require(path)}));
-//describe.forEach(({from, describe:func}) => typeof func !== 'function' && console.log('file did not produce proper describe function:', from, func));
-
 let cases = [];
 let descStack = [];
-describesFromFiles.forEach(({filePath, moduleExports}) => {
+files.map(path => {
+  let moduleExports = require(path);
   moduleExports(
     (desc, callback) => {
       descStack.push(desc);
@@ -63,22 +61,10 @@ describesFromFiles.forEach(({filePath, moduleExports}) => {
       descStack.pop();
     },
     (desc, obj) => {
-      cases.push({desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + desc + ' \u2B88', from: filePath, obj})
+      cases.push({desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + desc + ' \u2B88', from: path, obj})
     }
   );
 });
-
-// todo
-
-// (new) regular expression edge cases. in particular with destructuring patterns and asi
-// `[]\n/x` (division)
-// `[]\n/x/` (Error)
-// `[]\n/x/g` (division)
-// (x)/y
-// (x)=>/y/
-// for (/x/ in y); (Illegal lhs)
-// x => {} / y  (Illegal; {} is a body statement, has no value. no prod parses it)
-
 
 let checkAST = true;
 let parserDesc = '';

@@ -27,6 +27,15 @@ module.exports = (describe, test) => describe('regular expression disambiguation
     desc: 'the dash should not be considered a range and the backslash should not change this either way',
   });
 
+  // (new) regular expression edge cases. in particular with destructuring patterns and asi
+  // `[]\n/x` (division)
+  // `[]\n/x/` (Error)
+  // `[]\n/x/g` (division)
+  // (x)/y
+  // (x)=>/y/
+  // for (/x/ in y); (Illegal lhs)
+  // x => {} / y  (Illegal; {} is a body statement, has no value. no prod parses it)
+
   //describe('tokenizer hints', _ => {
   //
   //  describe('new', _ => {
