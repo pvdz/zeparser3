@@ -162,14 +162,84 @@ module.exports = (describe, test) => describe('let statement', _ => {
     
     test('let, destructuring obj with shorthand and trailing comma, no init, semi', {
       code: 'let {foo,} = arr;',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: [
-            {type: 'Identifier', name: 'foo'},
-          ]}, init: {type: 'Identifier', name: 'arr'}},
-        ]},
-      ]},
+      ast: {type: 'Program', body: [{
+        type: 'VariableDeclaration',
+        kind: 'let',
+        declarations: [{
+          type: 'VariableDeclarator',
+          id: {type: 'ObjectPattern', properties: [{type: 'Identifier', name: 'foo'}]},
+          init: {type: 'Identifier', name: 'arr'},
+        }],
+      }]},
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+    });
+
+    false && describe('let as identifier in sloppy mode', _ => {
+
+      // these tests must run in module mode and in explicit strict mode toggles
+      // (note: the spec doesn't explicitly allow `let` as a var name but rather forbids
+      // it under certain situations. For example: in strict mode and as let/const names)
+
+      describe('let as var name', _ => {
+
+        test('var decl', {
+          code: 'var let;',
+          throws: 'var name in strict',
+          SLOPPY: {SCRIPT: {
+            desc: 'let as a var name is only allowed in (non-module) sloppy mode to support pre-es6-code',
+            ast: {type: 'Program', body: [{
+              type: 'VariableDeclaration',
+              kind: 'var',
+              declarations: [{
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'let'},
+                init: null,
+              }],
+            }]},
+          }},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+        });
+      });
+
+      describe('statement start', _ => {
+
+        // A statement can not start with dynamic property access on `let` (`let[foo]=bar`)
+        // because it would be ambiguous with let destructuring. See note in
+        // https://tc39.github.io/ecma262/#prod-ExpressionStatement
+
+        test('in global', {
+          code: 'let[foo];',
+          throws: 'xxx',
+          tokens: [],
+        });
+
+        test('in regular function', {
+          code: 'function f(){ let[foo]; }',
+          throws: 'xxx',
+          tokens: [],
+        });
+
+        test('in arrow expr body', {
+          code: '_ => let[foo];',
+          throws: 'xxx',
+          desc: '(arrows are not strict by default) the non-block arrow body is an expression',
+          tokens: [],
+        });
+
+        test('in arrow stmt body', {
+          code: '_ => { let[foo]; }',
+          throws: 'xxx',
+          desc: '(arrows are not strict by default) the non-block arrow body is a statement block',
+          tokens: [],
+        });
+
+        test('in classes', {
+          code: 'class x { foo() { let[foo]; }}',
+          throws: 'xxx',
+          tokens: [],
+          desc: 'classes are implicitly always strict',
+        });
+      });
     });
   });
 

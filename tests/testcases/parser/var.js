@@ -134,3 +134,5 @@ module.exports = (describe, test) => describe('var statement', _ => {
   //  },
   //],
 });
+
+// forbid "let" and "static" only in strict mode

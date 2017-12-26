@@ -207,11 +207,11 @@ module.exports = (describe, test) => describe('comma', _ => {
   });
 
   test('in a yield arg', {
-    code: 'async function f(){ yield a,b; }',
+    code: 'function *f(){ yield a,b; }',
     ast: { type: 'Program', body: [{
       type: 'FunctionDeclaration',
-      generator: false,
-      async: true,
+      generator: true,
+      async: false,
       expression: false,
       id: { type: 'Identifier', name: 'f' },
       params: [],
@@ -229,7 +229,7 @@ module.exports = (describe, test) => describe('comma', _ => {
         },
       }]},
     }]},
-    tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
   });
 
   test('in a group', {

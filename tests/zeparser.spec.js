@@ -70,9 +70,7 @@ let checkAST = true;
 let parserDesc = '';
 function all(parser, tests) {
   for (let {desc, from, obj:test} of tests) {
-    if (typeof test === 'string') console.log(' --- ' + test + ' --- ');
-    else if (Array.isArray(test)) throw 'deprecated?'; // all(parser, test);
-    else one(parser, test, desc, from);
+    one(parser, test, desc, from);
   }
 }
 function one(parser, testObj, desc, from) {
@@ -86,30 +84,37 @@ function one(parser, testObj, desc, from) {
   }
 }
 function _one(Parser, testSuffix, code, testObj, desc, from) {
-  let {mode} = testObj;
-  // by default test both module and script parsing modes
-  // if overridden, only parse that mode
-  if (mode !== undefined && mode !== MODE_SCRIPT && mode !== MODE_MODULE) throw new Error('test setup problem: invalid mode');
-  if (mode !== undefined) mode = [mode];
-  else mode = [MODE_SCRIPT, MODE_MODULE];
-  mode.forEach(m => {
-    if (testObj.STRICT) {
-      __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, Object.assign({startInStrictMode:true}, testObj, testObj.STRICT), desc, from);
-    }
-    if (testObj.SLOPPY) {
-      __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, Object.assign({startInStrictMode:false}, testObj, testObj.SLOPPY), desc, from);
-    }
-    if (!testObj.STRICT && !testObj.SLOPPY) {
-      __one(Parser, testSuffix + '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']', code, m, testObj, desc, from);
-    }
+  // shorthand for just goal_script/sloppy settings (prevents unncessary object wrapping *shrug*)
+  let sloppyScriptOptions = testObj.SLOPPY_SCRIPT;
+  if (sloppyScriptOptions) {
+    delete testObj.SLOPPY_SCRIPT;
+    testObj.SLOPPY = {SCRIPT: sloppyScriptOptions};
+  }
+
+  // test both module and script parsing modes. if a test should have different outcomes between them then it should use
+  // the MODULE_MODE and SCRIPT_MODE properties to override the expectations.
+  [MODE_SCRIPT, MODE_MODULE].forEach(m => {
+    // similarly, run all tests in both sloppy and strict mode. use STRICT and SLOPPY to add exceptions.
+    let ms = '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']';
+    __one(Parser, testSuffix + ms, code, m, override(testObj.STRICT, Object.assign({startInStrictMode:true}, testObj)), desc, from);
+    __one(Parser, testSuffix + ms, code, m, override(testObj.SLOPPY, Object.assign({startInStrictMode:false}, testObj)), desc, from);
   });
+}
+function override(wantObj, baseObj) {
+  if (wantObj) {
+    Object.assign(baseObj, wantObj);
+    // must cleanup if ast/throws is used from wantObj
+    if (wantObj.ast) delete baseObj.throws;
+    if (wantObj.throws) delete baseObj.ast;
+  }
+  return baseObj;
 }
 function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
   let {
     ast: expectedAst,
     SCRIPT: scriptModeObj,
     MODULE: moduleModeObj,
-    throws,
+    throws: expectedThrows,
     tokens: expectedTokens,
     startInStrictMode,
     debug: _debug
@@ -118,22 +123,46 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
   ++testj;
 
                                                           //if (testj !== 1069) return;
-  testSuffix += '[' + (startInStrictMode ? 'strict' : 'sloppy') + ']';
+  testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
   testSuffix += '[' + testj + ']';
 
   // goal specific overrides
+  // (throws override ast and ast overrides throws)
   if (mode === MODE_SCRIPT && scriptModeObj) {
-    if (scriptModeObj.throws) throws = scriptModeObj.throws;
-    if (scriptModeObj.ast) expectedAst = scriptModeObj.ast;
+    if (scriptModeObj.STRICT || scriptModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
+    if (scriptModeObj.throws) {
+      expectedAst = undefined;
+      expectedThrows = scriptModeObj.throws;
+    }
+    if (scriptModeObj.ast) {
+      expectedThrows = undefined;
+      expectedAst = scriptModeObj.ast;
+    }
     if (scriptModeObj.tokens) expectedTokens = scriptModeObj.tokens;
     if (scriptModeObj.startInStrictMode !== undefined) startInStrictMode = scriptModeObj.startInStrictMode;
   }
   if (mode === MODE_MODULE && moduleModeObj) {
-    if (moduleModeObj.throws) throws = moduleModeObj.throws;
-    if (moduleModeObj.ast) expectedAst = moduleModeObj.ast;
+    if (moduleModeObj.STRICT || moduleModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
+    if (moduleModeObj.throws) {
+      expectedAst = undefined;
+      expectedThrows = moduleModeObj.throws;
+    }
+    if (moduleModeObj.ast) {
+      expectedThrows = undefined;
+      expectedAst = moduleModeObj.ast;
+    }
     if (moduleModeObj.tokens) expectedTokens = moduleModeObj.tokens;
     if (moduleModeObj.startInStrictMode !== undefined) startInStrictMode = moduleModeObj.startInStrictMode;
   }
+
+  let finalTestOptions = {
+    code,
+    expectedAst,
+    expectedThrows,
+    expectedTokens,
+    startInStrictMode,
+    _debug
+  };
 
   let prefix = parserDesc + ': ' + testi + testSuffix;
 
@@ -151,10 +180,10 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
   stack = e.stack;
 
   let passed = false;
-  if (!expectedTokens || (!throws && !expectedAst)) {
-    throw new Error(`Bad tst case: Missing expected token list, or ast|throws for: \`${toPrint(code)}\``);
+  if (!expectedTokens || (!expectedThrows && !expectedAst)) {
+    LOG_THROW(prefix, `Bad tst case: Missing expected token list, or ast|throws for: \`${toPrint(code)}\``);
   } else if (wasError) {
-    if (!throws) {
+    if (!expectedThrows) {
       LOG_THROW(prefix, 'unexpected CRASH', code, stack, desc);
       console.log('Thrown error:', wasError);
       ++fail;
@@ -164,21 +193,21 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
-    } else if (throws === true || wasError.indexOf(throws) >= 0) {
+    } else if (expectedThrows === true || wasError.indexOf(expectedThrows) >= 0) {
       console.log(`${prefix} PASS: \`${toPrint(code)}\` :: (properly throws)`);
       ++pass;
       passed = true;
     } else {
       LOG_THROW(prefix, 'thrown message mismatch', code, stack, desc);
       console.log('Thrown error:', wasError);
-      console.log('Expected error message to contain: "' + throws + '"');
+      console.log('Expected error message to contain: "' + expectedThrows + '"');
       ++fail;
     }
-  } else if (throws) {
+  } else if (expectedThrows) {
     ++fail;
     LOG_THROW(prefix, '_failed_ to throw ANY error', code, '', desc);
-    if (throws !== true) {
-      console.log('Expected an error message containing: "' + throws + '"');
+    if (expectedThrows !== true) {
+      console.log('Expected an error message containing: "' + expectedThrows + '"');
     }
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
     LOG_THROW(prefix, 'AST mismatch', code, '', desc);
@@ -221,6 +250,7 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
     console.log('\n');
     console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
     if (stack) console.log('Stack:', stack);
+    //console.log('Final test options:\n', finalTestOptions);
     console.log('Description:', desc);
     console.log('From:', from);
     if (_debug) console.log('Debug:', _debug);

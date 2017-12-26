@@ -11,10 +11,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async is callable as long as it isnt the statement expression itself', {
     code: 'foo(async())',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
           {type: 'CallExpression', callee: {type: 'Identifier', name: 'async'}, arguments: []}
@@ -26,10 +24,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can be just a value', {
     code: 'foo(async[x])',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
           {type: 'MemberExpression', object: {type: 'Identifier', name: 'async'}, property: {type: 'Identifier', name: 'x'}, computed: true},
@@ -41,10 +37,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('reminder to myself that dynamic property access must have at least some expression', {
     code: 'foo(async[])',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       throws: 'Expected to parse a value',
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
@@ -52,10 +46,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async is callable as long as it isnt the statement expression itself',{
     code: 'foo(async)',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
           {type: 'Identifier', name: 'async'},
@@ -67,10 +59,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async is callable as long as it isnt the statement expression itself',{
     code: 'foo(async.foo)',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
           {type: 'MemberExpression', object: {type: 'Identifier', name: 'async'}, property: {type: 'Identifier', name: 'foo'}, computed: false}
@@ -136,10 +126,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('illegal async arrow expression with paren because of newline',{
     code: 'f(async\n()=>c)',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       throws: 'Next ord should be 41',
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
@@ -147,10 +135,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('illegal async arrow expression without paren because of newline',{
     code: 'f(async\nfoo=>c)',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       throws: 'Next ord should be 41',
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
@@ -158,10 +144,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('illegal async function expression because of newline',{
     code: 'f(async\nfunction(){})',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       throws: 'Next ord should be 41',
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
@@ -169,10 +153,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('calling async as a function (so not an async function but async as a var name)',{
     code: 'f(async ())',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
           {type: 'CallExpression', callee: {type: 'Identifier', name: 'async'}, arguments: []},
@@ -184,10 +166,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('using async a regular var name instead of keyword',{
     code: 'f(async)',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
           {type: 'Identifier', name: 'async'},
@@ -199,10 +179,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async as the arrow argument, weird but I suppose valid in SCRIPT mode',{
     code: 'f(async => x)',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'f'}, arguments: [
           {
@@ -270,10 +248,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can be a label type in script mode',{
     code: 'async: function f(){}',
-    MODULE: {
-      throws: 'cannot be used as a label',
-    },
-    SCRIPT: {
+    throws: 'cannot be used as a label',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'LabeledStatement', label: {type: 'Identifier', name: 'async'}, body: {
           type: 'FunctionDeclaration',
@@ -294,10 +270,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('confirming that async with newline doesnt stop the identifier statement parsing',{
     code: 'async\n: function f(){}',
-    MODULE: {
-      throws: 'cannot be used as a label',
-    },
-    SCRIPT: {
+    throws: 'cannot be used as a label',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'LabeledStatement', label: {type: 'Identifier', name: 'async'}, body: {
           type: 'FunctionDeclaration',
@@ -318,10 +292,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can not have line terminator after it; should throw before function decl',{
     code: 'async\nfunction f(){}',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'async'}},
         {
@@ -343,10 +315,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async as a var name called in global',{
     code: 'async();',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'CallExpression', callee: {type: 'Identifier', name: 'async'}, arguments: []
@@ -358,10 +328,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async statement with newline should still be parseable as legacy expression',{
     code: 'async\n();',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'CallExpression', callee: {type: 'Identifier', name: 'async'}, arguments: []
@@ -373,10 +341,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async statement with newline should still be parseable as legacy expression too',{
     code: 'async\n(2);',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'CallExpression', callee: {type: 'Identifier', name: 'async'}, arguments: [{type: 'Literal', value: '<TODO>', raw: '2'}]
@@ -388,10 +354,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async as a var name with property access',{
     code: 'async[x];',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'MemberExpression',
@@ -406,10 +370,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async should be assignable',{
     code: 'async = 5 + 5;',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'AssignmentExpression',
@@ -429,10 +391,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async should still parse properly wn',{
     code: 'async + 10;',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'BinaryExpression',
@@ -447,10 +407,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async var name statement that has an immediate eof',{
     code: 'async',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'Identifier',
@@ -463,10 +421,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async var name expression that has an immediate eof',{
     code: 'x + async',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'BinaryExpression',
@@ -529,10 +485,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can not have line terminator after it; the await is invalid',{
     code: 'async\nfunction f(){await x}',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       throws: 'Unable to ASI',
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
@@ -566,10 +520,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can not have line terminator after it; should work but not generate an async function',{
     code: 'let f = async\nfunction g(){}',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration',
           kind: 'let',
@@ -598,10 +550,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async with newline breaking an expression mid-air',{
     code: 'let f = a + b + async\nfunction g(){} + d',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'VariableDeclaration',
           kind: 'let',
@@ -672,10 +622,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async testing ast without newline', {
     code: 'let f = a + b + async() + d',
-    MODULE: {
-      throws: 'must be followed by a function',
-    },
-    SCRIPT: {
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [{
         type: 'VariableDeclaration',
         kind: 'let',
@@ -706,10 +654,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async legacy ast should be same as if without the newline',{
     code: 'let f = a + b + async\n() + d',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [{
         type: 'VariableDeclaration',
         kind: 'let',
@@ -740,10 +686,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can not have line terminator after it; the await is invalid and should throw',{
     code: 'let f = async\nfunction g(){await x}',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       throws: 'Unable to ASI', // because `await x` requires a semi between now
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
@@ -751,10 +695,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can not have line terminator after it; arrow expression wont be async',{
     code: 'let f = async\ng => g',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {
           type: 'VariableDeclaration',
@@ -781,10 +723,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can not have line terminator after it; should throw at await because arrow expression wont be async',{
     code: 'let f = async\ng => await g',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       throws: 'Unable to ASI', // because `await g` is illegal, it espects a semi
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
@@ -792,10 +732,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async can not have line terminator after it; SCRIPT mode will throw after pasing the `async()` as a regular call',{
     code: 'let f = async\n(g) => g',
-    MODULE: {
-      throws: 'cannot be followed by a newline',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by a newline',
+    SLOPPY_SCRIPT: {
       throws: 'Unable to ASI', // this one is ugly, but the problem occurs after parsing `let f=async()` at the arrow
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
@@ -803,10 +741,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('not pretty but this should be legal in SCRIPT mode, `in` is edge case to single-param arrow functions',{
     code: 'async in {}',
-    MODULE: {
-      throws: 'cannot be followed by',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'BinaryExpression',
@@ -821,10 +757,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('not pretty but this should be legal in SCRIPT mode, `instanceof` is edge case to single-param arrow functions',{
     code: 'async instanceof {}',
-    MODULE: {
-      throws: 'cannot be followed by',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'BinaryExpression',
@@ -839,10 +773,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async `in` check as expression',{
     code: 'f(async in {})',
-    MODULE: {
-      throws: 'cannot be followed by',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'CallExpression',
@@ -861,10 +793,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async `instanceof` check as expression',{
     code: 'f(async instanceof {})',
-    MODULE: {
-      throws: 'cannot be followed by',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'CallExpression',
@@ -883,10 +813,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async `in` check as expression for operator precedence',{
     code: 'f(a + async in b)',
-    MODULE: {
-      throws: 'cannot be followed by',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'CallExpression',
@@ -910,10 +838,8 @@ module.exports = (describe, test) => describe('async keyword', _ => {
 
   test('async `instanceof` check as expression for operator precedence',{
     code: 'f(a + async instanceof b)',
-    MODULE: {
-      throws: 'cannot be followed by',
-    },
-    SCRIPT: {
+    throws: 'cannot be followed by',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'CallExpression',

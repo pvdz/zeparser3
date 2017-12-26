@@ -70,20 +70,19 @@ module.exports = (describe, test) => describe('await', _ => {
 
   test('await is a valid identifier in script mode',{
     code: 'await',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'await'}},
       ]},
-    },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
     },
     tokens: [$IDENT, $ASI],
   });
 
   test('await is a valid identifier in script mode',{
     code: 'await()',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'CallExpression',
@@ -92,15 +91,13 @@ module.exports = (describe, test) => describe('await', _ => {
         }},
       ]},
     },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
 
   test('await is a valid identifier in script mode',{
     code: 'await[x]',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'MemberExpression',
@@ -110,15 +107,13 @@ module.exports = (describe, test) => describe('await', _ => {
         }},
       ]},
     },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
   });
 
   test('await is a valid identifier in script mode',{
     code: 'await = 16',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'AssignmentExpression',
@@ -128,15 +123,13 @@ module.exports = (describe, test) => describe('await', _ => {
         }},
       ]},
     },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
     tokens: [$IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
   });
 
   test('await is a valid identifier in script mode',{
     code: 'await - 25',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {
           type: 'BinaryExpression',
@@ -146,43 +139,37 @@ module.exports = (describe, test) => describe('await', _ => {
         }},
       ]},
     },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
     tokens: [$IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
   });
 
   test('await is a valid identifier in script mode',{
     code: 'call(await)',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [{type: 'Identifier', name: 'await'}]}},
       ]},
-    },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
   });
 
   test('await is a valid identifier in script mode',{
     code: 'call(await())',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [
           {type: 'CallExpression', callee: {type: 'Identifier', name: 'await'}, arguments: []},
         ]}},
       ]},
     },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
 
   test('await is a valid identifier in script mode',{
     code: 'call(await[1])',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [
           {
@@ -194,30 +181,26 @@ module.exports = (describe, test) => describe('await', _ => {
         ]}},
       ]},
     },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
 
   test('await is a valid identifier in script mode',{
     code: 'call(await.foo)',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
         {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'call'}, arguments: [
           {type: 'MemberExpression', object: {type: 'Identifier', name: 'await'}, property: {type: 'Identifier', name: 'foo'}, computed: false},
         ]}},
       ]},
     },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
   });
 
   test('dont throw for await as param name in script mode',{
     code: 'function call(await){}',
-    SCRIPT: {
+    throws: 'Await is illegal outside of async body',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
         generator: false,
         async: false,
@@ -227,15 +210,13 @@ module.exports = (describe, test) => describe('await', _ => {
         body: {type: 'BlockStatement', body: []},
       }]},
     },
-    MODULE: {
-      throws: 'Await is illegal outside of async body',
-    },
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
   });
 
   test('dont throw for await in param default value if not an actual await expression and in script mode',{
     code: 'function call(foo=await){}',
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
         generator: false,
         async: false,
@@ -248,18 +229,13 @@ module.exports = (describe, test) => describe('await', _ => {
         body: {type: 'BlockStatement', body: []},
       }]},
     },
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
   });
 
   test('can never use await expression as default arg value',{
     code: 'function call(foo=await bar){}',
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
@@ -267,10 +243,8 @@ module.exports = (describe, test) => describe('await', _ => {
 
   test('arg with default that is awaitable that is an assignment (tests assignability check of an await expr)',{
     code: 'function call(foo=await bar=10){}',
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
@@ -278,10 +252,8 @@ module.exports = (describe, test) => describe('await', _ => {
 
   test('can never use await expression as default arg value (slightly more complex)',{
     code: 'function call(foo= 5 + (await bar())){}',
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
@@ -289,10 +261,8 @@ module.exports = (describe, test) => describe('await', _ => {
 
   test('make failing code is inside async function, should still fail for being in parameter head',{
     code: 'async function x(){ function y(s=await foo){}}',
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
@@ -300,10 +270,8 @@ module.exports = (describe, test) => describe('await', _ => {
 
   test('the async property is not inherited from parent functions',{
     code: 'async function f(){ let y = x => await x; }',
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       throws: 'Unable to ASI',
     },
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
@@ -311,10 +279,8 @@ module.exports = (describe, test) => describe('await', _ => {
 
   test('using await inside the arg header of a function inside async should always fail',{
     code: 'let f = () => (y=await foo) => y;',
-    MODULE: {
-      throws: 'Cannot use `await` outside of `async` functions',
-    },
-    SCRIPT: {
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],

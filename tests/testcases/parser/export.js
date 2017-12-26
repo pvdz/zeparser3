@@ -575,9 +575,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
     }]},
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
-
-
-
-  // export class ...
-  // export default class ...
 });
+
+// cannot import/export a var named `let` (since module code is strict by default and import/export is module-code-only)
+

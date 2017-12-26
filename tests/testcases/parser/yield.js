@@ -15,7 +15,8 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('sans arg', {
         code: 'yield',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {type: 'YieldExpression',
               delegate: false,
@@ -23,15 +24,13 @@ module.exports = (describe, test) => describe('yield', _ => {
             }},
           ]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $ASI],
       });
 
       test('with arg', {
         code: 'yield x',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {type: 'YieldExpression',
               delegate: false,
@@ -39,15 +38,13 @@ module.exports = (describe, test) => describe('yield', _ => {
             }},
           ]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $IDENT, $ASI],
       });
 
       test('complex arg', {
         code: 'yield x + y',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [{
             type: 'ExpressionStatement', expression: {type: 'YieldExpression',
               delegate: false,
@@ -60,9 +57,6 @@ module.exports = (describe, test) => describe('yield', _ => {
             }},
           ]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
     });
@@ -71,7 +65,8 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('sans args', {
         code: '5 + yield',
-        SLOPPY: {
+        throws: '`yield` outside',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {
               type: 'BinaryExpression',
@@ -81,30 +76,23 @@ module.exports = (describe, test) => describe('yield', _ => {
             }},
           ]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$NUMBER_DEC, $PUNCTUATOR, $IDENT, $ASI],
       });
 
       test('with args', {
         code: '5 + yield x',
-        SLOPPY: {
+        throws: '`yield` outside',
+        SLOPPY_SCRIPT: {
           throws: 'Unable to ASI',
-        },
-        STRICT: {
-          throws: '`yield` outside of generator',
         },
         tokens: [$NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('with complex args', {
         code: '5 + yield x + y',
-        SLOPPY: {
+        throws: '`yield` outside',
+        SLOPPY_SCRIPT: {
           throws: 'Unable to ASI',
-        },
-        STRICT: {
-          throws: '`yield` outside of generator',
         },
         tokens: [$NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
@@ -114,7 +102,8 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('sans args', {
         code: 'call(yield)',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {type: 'CallExpression',
               callee: {type: 'Identifier', name: 'call'},
@@ -125,15 +114,13 @@ module.exports = (describe, test) => describe('yield', _ => {
             }},
           ]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
       });
 
       test('with args', {
         code: 'call(yield x)',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {type: 'CallExpression',
               callee: {type: 'Identifier', name: 'call'},
@@ -144,15 +131,13 @@ module.exports = (describe, test) => describe('yield', _ => {
             }},
           ]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
       });
 
       test('complex args', {
         code: 'call(yield x + y)',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [
             {type: 'ExpressionStatement', expression: {type: 'CallExpression',
               callee: {type: 'Identifier', name: 'call'},
@@ -167,9 +152,6 @@ module.exports = (describe, test) => describe('yield', _ => {
               }],
             }},
           ]},
-        },
-        STRICT: {
-          throws: '`yield` outside of generator',
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
       });
@@ -250,43 +232,42 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('sans args', {
         code: 'function* f(){ 5 + yield }',
-        ast: {type: 'Program', body: [{
-          type: 'FunctionDeclaration',
-          generator: true,
-          async: false,
-          expression: false,
-          id: {type: 'Identifier', name: 'f'},
-          params: [],
-          body: {type: 'BlockStatement', body: [{
-            type: 'ExpressionStatement', expression: {
-              type: 'BinaryExpression',
-              left: {type: 'Literal', value: '<TODO>', raw: '5'},
-              operator: '+',
-              right: {type: 'Identifier', name: 'yield'},
-            },
+        throws: '`yield` after non-operator',
+        SLOPPY_SCRIPT: {
+          ast: {type: 'Program', body: [{
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {type: 'BlockStatement', body: [{
+              type: 'ExpressionStatement', expression: {
+                type: 'BinaryExpression',
+                left: {type: 'Literal', value: '<TODO>', raw: '5'},
+                operator: '+',
+                right: {type: 'Identifier', name: 'yield'},
+              },
+            }]},
           }]},
-        }]},
+        },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
       });
 
       test('with args', {
         code: 'function* f(){ 5 + yield x; }',
-        SLOPPY: {
+        throws: '`yield` after',
+        SLOPPY_SCRIPT: {
           throws: 'Unable to ASI',
-        },
-        STRICT: {
-          throws: '`yield` after',
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR],
       });
 
       test('with complex args', {
         code: 'function* f(){ 5 + yield x + y; }',
-        SLOPPY: {
+        throws: '`yield` after',
+        SLOPPY_SCRIPT: {
           throws: 'Unable to ASI',
-        },
-        STRICT: {
-          throws: '`yield` after',
         },
         tokens: [$NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
@@ -377,7 +358,8 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('sans arg', {
         code: 'function f(){ yield; }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [{
             type: 'FunctionDeclaration',
             generator: false,
@@ -393,15 +375,13 @@ module.exports = (describe, test) => describe('yield', _ => {
             }]},
           }]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('with arg', {
         code: 'function f(){ yield x; }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [{
             type: 'FunctionDeclaration',
             generator: false,
@@ -418,15 +398,13 @@ module.exports = (describe, test) => describe('yield', _ => {
             }]},
           }]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('complex arg', {
         code: 'function f(){ yield x + y; }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [{
             type: 'FunctionDeclaration',
             generator: false,
@@ -448,9 +426,6 @@ module.exports = (describe, test) => describe('yield', _ => {
             }]},
           }]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
@@ -459,7 +434,8 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('sans args', {
         code: 'function f(){ 5 + yield }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [{
             type: 'FunctionDeclaration',
             generator: false,
@@ -477,30 +453,23 @@ module.exports = (describe, test) => describe('yield', _ => {
             }]},
           }]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
       });
 
       test('with args', {
         code: 'function f(){ 5 + yield x; }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           throws: 'Unable to ASI',
-        },
-        STRICT: {
-          throws: '`yield` outside of generator',
         },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR],
       });
 
       test('with complex args', {
         code: 'function f(){ 5 + yield x + y; }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           throws: 'Unable to ASI',
-        },
-        STRICT: {
-          throws: '`yield` outside of generator',
         },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
       });
@@ -510,7 +479,8 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('sans args', {
         code: 'function f(){ call(yield); }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [{
             type: 'FunctionDeclaration',
             generator: false,
@@ -530,15 +500,13 @@ module.exports = (describe, test) => describe('yield', _ => {
             }]},
           }]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('with args', {
         code: 'function f(){ call(yield x); }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [{
             type: 'FunctionDeclaration',
             generator: false,
@@ -558,15 +526,13 @@ module.exports = (describe, test) => describe('yield', _ => {
             }]},
           }]},
         },
-        STRICT: {
-          throws: '`yield` outside of generator',
-        },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('complex args', {
         code: 'function f(){ call(yield x + y); }',
-        SLOPPY: {
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
           ast: {type: 'Program', body: [{
             type: 'FunctionDeclaration',
             generator: false,
@@ -591,9 +557,6 @@ module.exports = (describe, test) => describe('yield', _ => {
               },
             }]},
           }]},
-        },
-        STRICT: {
-          throws: '`yield` outside of generator',
         },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
@@ -687,10 +650,8 @@ module.exports = (describe, test) => describe('yield', _ => {
 
   test('yield after a non-assignment op cannot be parsed as an operator, only as var name so this throws in strict', {
     code: `function* g() { yield 3 + yield; }`,
-    STRICT: {
-      throws: '`yield` after',
-    },
-    SLOPPY: {
+    throws: '`yield` after',
+    SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [{
         type: 'FunctionDeclaration',
         generator: true,
@@ -719,13 +680,39 @@ module.exports = (describe, test) => describe('yield', _ => {
 
   test('yield after a non-assignment op cannot be parsed as an operator, only as var name so this cant work at all', {
     code: `function* g() { yield 3 + yield 4; }`,
-    STRICT: {
-      throws: '`yield` after',
-    },
-    SLOPPY: {
+    throws: '`yield` after',
+    SLOPPY_SCRIPT: {
       throws: 'ASI',
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
     desc: 'AssignmentExpression can go into YieldExpression but not after a ConditionalExpression (which plus ends up belonging to)',
+  });
+
+  test('yield in sloppy mode should still throw without generator', {
+    code: 'async function f(){ yield a,b; }',
+    throws: '`yield` outside of generator',
+    SLOPPY_SCRIPT: {
+      ast: {type: 'Program', body: [{
+        type: 'FunctionDeclaration',
+        generator: false,
+        async: true,
+        expression: false,
+        id: {type: 'Identifier', name: 'f'},
+        params: [],
+        body: {
+          type: 'BlockStatement',
+          body: [{type: 'ExpressionStatement', expression: {
+            type: 'YieldExpression',
+            delegate: false,
+            argument: {
+              type: 'SequenceExpression',
+              expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+            },
+          },
+        }]},
+      }]},
+    },
+    desc: '(all tests are ran 4x per input, in mixes of strict/sloppy and module/script mode)',
+    tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
   });
 });

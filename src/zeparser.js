@@ -809,7 +809,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       // TODO: proper keyword checks
       if (curtok.str === 'await') {
-        if (goalMode === GOAL_MODULE) THROW('Await is illegal outside of async body');
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Await is illegal outside of async body');
         if ((lexerFlags & LF_IN_ASYNC) === LF_IN_ASYNC) THROW('Await not allowed here');
       }
 
@@ -983,7 +983,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // only the `async function ...` form does NOT require a semi. all other forms do.
 
     if (curtok.nl) {
-      if (goalMode === GOAL_MODULE) {
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         THROW('The `async` keyword cannot be followed by a newline');
       }
       AST_open(astProp, 'ExpressionStatement');
@@ -994,7 +994,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (curtype === $EOF) {
-      if (goalMode === GOAL_MODULE) {
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         THROW('The `async` keyword must be followed by a function');
       }
       AST_open(astProp, 'ExpressionStatement');
@@ -1013,7 +1013,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       AST_open(astProp, 'ExpressionStatement');
       if (curc === $$I_69 && (curtok.str === 'instanceof' || curtok.str === 'in')) {
-        if (goalMode === GOAL_MODULE) {
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
           THROW('The `async` keyword cannot be followed by `in` or `instanceof`');
         }
         parseExpressionAfterAsyncAsVarName(lexerFlags, identToken, 'expression');
@@ -1043,7 +1043,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     // no function is following `async` so parse it as a regular var name
-    if (goalMode === GOAL_MODULE) {
+    if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
       THROW('The `async` keyword must be followed by a function');
     }
     // async as a var name
@@ -1070,7 +1070,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: do we properly disallow async+generator modifier combo?
 
     if (curtok.nl) {
-      if (goalMode === GOAL_MODULE) {
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         THROW('The `async` keyword cannot be followed by a newline');
       }
       // the whole thing _cant_ be an async arrow function now, but it may still be valid
@@ -1078,7 +1078,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (curtype === $EOF) {
-      if (goalMode === GOAL_MODULE) {
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         THROW('The `async` keyword must be followed by a function');
       }
       return parseExpressionAfterAsyncAsVarName2(lexerFlags, identToken, astProp);
@@ -1089,7 +1089,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc === $$F_66 && curtok.str === 'function') {
         parseFunction(lexerFlags, considerFunctionDeclaration ? IS_FUNC_DECL : NOT_FUNC_DECL, WAS_ASYNC, IDENT_OPTIONAL, astProp);
       } else if (curc === $$I_69 && (curtok.str === 'instanceof' || curtok.str === 'in')) {
-        if (goalMode === GOAL_MODULE) {
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
           THROW('The `async` keyword cannot be followed by `in` or `instanceof`');
         }
         return parseExpressionAfterAsyncAsVarName2(lexerFlags, identToken, astProp);
@@ -1113,7 +1113,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     // no function is following `async` so parse it as a regular var name
-    if (goalMode === GOAL_MODULE) {
+    if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
       THROW('The `async` keyword must be followed by a function');
     }
     // async as a var name (already added to the AST)
@@ -1130,7 +1130,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // TODO: support cases of await as a var name in SCRIPT mode
       parseAwaitExpression(lexerFlags, identToken, 'expression');
     } else {
-      if (goalMode === GOAL_MODULE) {
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         THROW('Cannot use `await` outside of `async` functions');
       }
       ASSERT_skipRex('await', lexerFlags);
@@ -1145,7 +1145,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseAwaitExpression(lexerFlags, asyncIdentToken, astProp) {
     // in an awaitable context this must always be considered a keyword. outside of it it should never be considered a keyword
 
-    // TODO: lexerFlags should tell us whether we are currently in an async body. goalMode tells us how to handle "no".
+    // TODO: lexerFlags should tell us whether we are currently in an async body. strict mode tells us how to handle "no".
     // TODO: if lexerFlags indicate this is generator code, await is an error
     // TODO: it is an error if goal is Module and await is an identifierreference, bindingidentifier, or labelidentifier
 
@@ -1157,7 +1157,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return false; // an await should gobble all assignments so this is not assignable
     } else if ((lexerFlags & LF_IN_GENERATOR) === LF_IN_GENERATOR) {
       THROW('Cannot use `await` in a generator');
-    } else if (goalMode === GOAL_SCRIPT) {
+    } else if ((lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
       // consider `await` a regular var name, not a keyword
       // should throw an error if used as an await anyways
       return parseAfterVarName(lexerFlags, asyncIdentToken, astProp);
@@ -1887,7 +1887,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipDiv($IDENT, lexerFlags);
 
     if (curc === $$COLON_3A) {
-      if (identToken.str === 'async' && goalMode === GOAL_MODULE) {
+      if (identToken.str === 'async' && (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         THROW('The `async` keyword cannot be used as a label');
       }
       if (identToken.str === 'yield' && ((lexerFlags & LF_IN_GENERATOR) === LF_IN_GENERATOR || (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE)) {
@@ -1947,11 +1947,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseAnyVarDecls(lexerFlags, kind, astProp) {
     // var, let, const. apply additional checks for let/const.
+    // must also track the `let[foo].bar` exception here if kind=="let"
     AST_open(astProp, 'VariableDeclaration');
     AST_set('kind', kind);
     AST_set('declarations', []);
 
-    ASSERT_skipAny(kind, lexerFlags); // TODO: optimize; next must be ident or destructuring
+    ASSERT_skipAny(kind, lexerFlags); // TODO: optimize; next must be ident or destructuring [{
 
     parseBindingPatterns(lexerFlags, 'declarations');
 
@@ -1979,6 +1980,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       // normal
       // TODO: verify ident is valid here
+
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE && curtok.str === 'let') THROW('Can not use `let` as var name in strict mode');
 
       AST_setIdent('id', curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
@@ -2910,7 +2913,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_close();
       } else if (asyncKeywordPrefixed) {
         // `async()` without arrow
-        if (goalMode === GOAL_MODULE) {
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
           THROW('The `async` identifier is a keyword and must be followed by a function');
         }
         AST_setIdent(astProp, asyncKeywordPrefixed);
@@ -2949,7 +2952,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseArrowFromPunc(lexerFlags, asyncness);
 
       AST_close();
-    } else if (asyncKeywordPrefixed && goalMode === GOAL_MODULE) {
+    } else if (asyncKeywordPrefixed && (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
       THROW('The `async` identifier is a keyword and must be followed by a function');
     }
 
@@ -2980,7 +2983,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   // </SCRUB AST>
 
   init();
-  parseTopLevels(sansFlag(INITIAL_LEXER_FLAGS | (options_strictMode ? LF_STRICT_MODE : 0), LF_FOR_REGEX));
+  let initialLexerFlags = sansFlag(INITIAL_LEXER_FLAGS | ((options_strictMode || goalMode === GOAL_MODULE) ? LF_STRICT_MODE : 0), LF_FOR_REGEX);
+  parseTopLevels(initialLexerFlags);
 
   //tok.deopt();
 

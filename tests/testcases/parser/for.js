@@ -419,3 +419,6 @@ module.exports = (describe, test) => describe('for statement', _ => {
     //});
   })
 });
+
+// lhs can not use paren trick to avoid non-assignability (https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors)
+// can not use `for (let[foo] as bar);` to refer to `let` as a varname. Similarly I don't think `for (let[foo].bar` is allowed (although it doesn't get the same explicit exception as statements).
