@@ -93,11 +93,13 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
 
   // test both module and script parsing modes. if a test should have different outcomes between them then it should use
   // the MODULE_MODE and SCRIPT_MODE properties to override the expectations.
-  [MODE_SCRIPT, MODE_MODULE].forEach(m => {
+  [MODE_SCRIPT, MODE_MODULE].forEach(goal => {
     // similarly, run all tests in both sloppy and strict mode. use STRICT and SLOPPY to add exceptions.
-    let ms = '[' + (m === MODE_SCRIPT ? 'Script' : 'Module') + ']';
-    __one(Parser, testSuffix + ms, code, m, override(testObj.STRICT, Object.assign({startInStrictMode:true}, testObj)), desc, from);
-    __one(Parser, testSuffix + ms, code, m, override(testObj.SLOPPY, Object.assign({startInStrictMode:false}, testObj)), desc, from);
+    let ms = '[' + (goal === MODE_SCRIPT ? 'Script' : 'Module') + ']';
+    if (goal !== MODE_MODULE) { // module mode is ALWAYS strict mode anyways
+      __one(Parser, testSuffix + ms, code, goal, override(testObj.STRICT, Object.assign({startInStrictMode:true}, testObj)), desc, from);
+    }
+    __one(Parser, testSuffix + ms, code, goal, override(testObj.SLOPPY, Object.assign({startInStrictMode:false}, testObj)), desc, from);
   });
 }
 function override(wantObj, baseObj) {
