@@ -3,7 +3,7 @@ let {
   $IDENT,
   $NUMBER_DEC,
   $PUNCTUATOR,
-} = require('../../../src/zetokenizer');
+} = require('../../../../src/zetokenizer');
 
 module.exports = (describe, test) => describe('arrays', _ => {
 
