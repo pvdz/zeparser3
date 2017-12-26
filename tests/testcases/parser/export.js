@@ -514,7 +514,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
     ]},
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
-  
+
   test('default export an anonymous generator function',{
     code: 'export default function*(){}',
     ast: {type: 'Program', body: [
@@ -531,6 +531,52 @@ module.exports = (describe, test) => describe('export declaration', _ => {
     ]},
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
+
+  test('export a class',{
+    code: 'export class x {}',
+    ast: {type: 'Program', body: [{
+      type: 'ExportNamedDeclaration',
+      specifiers: [],
+      declaration: {
+        type: 'ClassDeclaration',
+        id: {type: 'Identifier', name: 'x'},
+        superClass: null,
+        body: {type: 'ClassBody', body: []},
+      },
+      source: null,
+    }]},
+    tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+  });
+
+  test('default export a named class',{
+    code: 'export default class x {}',
+    ast: {type: 'Program', body: [{
+      type: 'ExportDefaultDeclaration',
+      declaration: {
+        type: 'ClassDeclaration',
+        id: {type: 'Identifier', name: 'x'},
+        superClass: null,
+        body: {type: 'ClassBody', body: []},
+      },
+    }]},
+    tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+  });
+
+  test('default export an anonymous class',{
+    code: 'export default class {}',
+    ast: {type: 'Program', body: [{
+      type: 'ExportDefaultDeclaration',
+      declaration: {
+        type: 'ClassDeclaration',
+        id: null,
+        superClass: null,
+        body: {type: 'ClassBody', body: []},
+      },
+    }]},
+    tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+  });
+
+
 
   // export class ...
   // export default class ...
