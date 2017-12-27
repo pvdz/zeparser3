@@ -794,9 +794,116 @@ module.exports = (describe, test) => describe('let statement', _ => {
         });
       });
     });
+
+    describe('let asi block', _ => {
+
+      describe('illegal ambiguous cases', _ => {
+
+        // While the spec doesn't mention it explicitly, I'm pretty sure the let-asi-block
+        // is illegal since it's equally ambigous as let-dynamic-prop.
+        // https://tc39.github.io/ecma262/#prod-ExpressionStatement
+
+        test('in global', {
+          code: 'let\n{foo};',
+          throws: 'without an assignment',
+          tokens: [],
+        });
+
+        test('proper case with confusing newline', {
+          code: 'let\n{x} = x;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ObjectPattern', properties: [{type: 'Identifier', name: 'x'}]},
+              init: {type: 'Identifier', name: 'x'},
+            }],
+          }]},
+          desc: 'asi is only applied when the next token would lead to parse error; in this case the [ does not so it cannot parse this as prop-access',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('proper case with less confusing newline', {
+          code: 'let {x}\n= x;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ObjectPattern', properties: [{type: 'Identifier', name: 'x'}]},
+              init: {type: 'Identifier', name: 'x'},
+            }],
+          }]},
+          desc: 'I think this is less confusing and not a super important test',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('in regular function', {
+          code: 'function f(){ let\n{foo}; }',
+          throws: 'without an assignment',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('in arrow expr body', {
+          code: '_ => let\n{foo};',
+          throws: 'strict mode',
+          SLOPPY_SCRIPT: {
+            ast: {
+              type: 'Program',
+              body: [{
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [{type: 'Identifier', name: '_'}],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'let'},
+                },
+              }, {
+                type: 'BlockStatement',
+                body: [{
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'foo'}
+                }]
+              }, {
+                type: 'EmptyStatement',
+              }],
+            },
+          },
+          desc: 'mirror case for array destruct, this version is should be fine because the body is an expression so the let would never be parsed as a decl, the curlies always a block',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('in arrow expr body', {
+          code: '_ => let {foo};',
+          throws: 'strict mode',
+          SLOPPY_SCRIPT: {
+            throws: 'ASI',
+          },
+          desc: 'mirror case for array destruct, this version is interesting because it cannot parse a let decl here',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('in arrow stmt body', {
+          code: '_ => { let\n{foo}; }',
+          throws: 'without an assignment',
+          desc: '(arrows are not strict by default) the non-block arrow body is a statement block',
+          tokens: [],
+        });
+
+        test('in classes', {
+          code: 'class x { foo() { let\n{foo}; }}',
+          throws: 'without an assignment',
+          tokens: [],
+          desc: 'classes are implicitly always strict',
+        });
+      });
+    });
   });
 });
 
 // in exports
 // in for-header
-// let\n{         (ambiguous with object destruct)
