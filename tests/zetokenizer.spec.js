@@ -204,7 +204,7 @@ for (let [input, output, modi, desc, skip] of all) {
             for (let exp of outs) {
               token = tok(lexerFlags, true);
               collects.push(token.type);
-              if (token.type !== exp) LOG('(1) failed=', failed = true, 'because', debug_toktype(token.type), '!==', debug_toktype(exp));
+              if (token.type !== exp) LOG('(1) failed=', failed = true, 'because', debug_toktype(token.type), '!==', debug_toktype(exp.type));
               if (token.type === $EOF) break;
             }
 

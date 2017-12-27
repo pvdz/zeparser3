@@ -699,7 +699,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       default:
         THROW('unexpected token', curtok
           // <SCRUB DEV>
-          ,debug_toktype(curtype), debug_toktype(getGenericTokenType(curtype))
+          , debug_toktype(curtype), debug_toktype(getGenericTokenType(curtype))
           // </SCRUB DEV>
         );
     }
@@ -1952,30 +1952,41 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('kind', kind);
     AST_set('declarations', []);
 
-    ASSERT_skipAny(kind, lexerFlags); // TODO: optimize; next must be ident or destructuring [{
+    ASSERT_skipAny(kind, lexerFlags); // TODO: optimize; next must be ident or destructuring [{, except edge case `let`
 
     parseBindingPatterns(lexerFlags, 'declarations');
 
     AST_close();
   }
   function parseBindingPatterns(lexerFlags, astProp) {
+    // to detect `let[x].foo()` vs `let[.x].foo()` or `let[x,y].foo()`
+    // because prop access does not support elisions :)
+    let canBePropAccess = false;
+
     do {
-      parseElisions(lexerFlags, astProp);
-      parseBindingPattern(lexerFlags, astProp);
+      let hasThem = parseElisions(lexerFlags, astProp);
+      if (hasThem) canBePropAccess = false;
+      parseBindingPatternAndAssignment(lexerFlags, astProp);
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipRex(',', lexerFlags); // TODO: optimize; next must be destructuringly-valid
     } while (true);
-    parseElisions(lexerFlags, astProp);
+
+    return canBePropAccess;
   }
   function parseElisions(lexerFlags, astProp) {
+    let count = 0;
     while(curc === $$COMMA_2C) {
       AST_add(astProp, null);
       ASSERT_skipRex(',', lexerFlags);
+      ++count;
     }
+    return count;
   }
-  function parseBindingPattern(lexerFlags, astProp) {
+  function parseBindingPatternAndAssignment(lexerFlags, astProp) {
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
     AST_open(astProp, 'VariableDeclarator');
+
+    let mustHaveAssignment = false; // destructurings must always be followed by an assignment
 
     if (curtype === $IDENT) {
       // normal
@@ -1988,6 +1999,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (curc === $$CURLY_L_7B) {
       // destructure object
       // keep parsing binding patterns separated by at least one comma
+      mustHaveAssignment = true;
       AST_open('id', 'ObjectPattern');
       let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
       skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // (note: circumvent template body/tail) TODO: optimize; dont think this can ever start with a forward slash
@@ -1998,6 +2010,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (curc === $$SQUARE_L_5B) {
       // destructure array
       // keep parsing binding patterns separated by at least one comma
+      mustHaveAssignment = true;
       AST_open('id', 'ArrayPattern');
       skipRexOrDieSingleChar($$SQUARE_L_5B, lexerFlags); // TODO: optimize; dont think this can ever start with a forward slash
       AST_set('elements', []);
@@ -2011,6 +2024,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$IS_3D && curtok.str === '=') {
       ASSERT_skipRex($PUNCTUATOR, lexerFlags);
       parseExpression(lexerFlags, 'init');
+    } else if (mustHaveAssignment) {
+      THROW('Cannot have `let[...]` here without an assignment');
     } else {
       AST_set('init', null);
     }
@@ -2078,7 +2093,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
   }
   function parseExpressionAfterIdentifier(lexerFlags, identToken, astProp) {
-    // identToken is a parsed, skipped, and validated value identifier (including the valueless `null`)
+    // identToken is a skipped value identifier (including the valueless `null`), partially checked for keywords
     let assignable = parseValueHeadBodyIdent(lexerFlags, identToken, astProp);
     assignable = parseValueTail(lexerFlags, assignable, astProp);
     return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
@@ -2305,6 +2320,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       let identToken = curtok;
+      // TODO: statement keyword exceptions (the rest is done in parseValueHeadBodyIdent)
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE && identToken.str === 'let') {
+        THROW('Cannot have `let[...]` as a var name in strict mode');
+      }
       ASSERT_skipDiv($IDENT, lexerFlags);
       return parseValueHeadBodyIdent(lexerFlags, identToken, astProp);
     } else if (curtype & ($NUMBER|$STRING|$REGEX)) {

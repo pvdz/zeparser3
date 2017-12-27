@@ -2534,7 +2534,7 @@ function debug_toktype(type) {
     case $TICK_TAIL: return 'TICK_TAIL';
     case $WHITE: return 'WHITE';
     default:
-      THROW('debug_toktype:UNKNOWN[' + type + ']')
+      throw new Error('debug_toktype:UNKNOWN[' + JSON.stringify(type) + ']')
       return 'UNKNOWN[' + type + ']';
   }
 }

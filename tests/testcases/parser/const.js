@@ -109,34 +109,92 @@ module.exports = (describe, test) => describe('const statement', _ => {
 
   describe('destructurnig', _ => {
 
-    test('array', {
-      code: 'const [foo] = arr;',
-      ast: {type: 'Program', body: [{
-        type: 'VariableDeclaration',
-        kind: 'const',
-        declarations: [{
-          type: 'VariableDeclarator',
-          id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]},
-          init: {type: 'Identifier', name: 'arr'}},
+    describe('array', _ => {
+
+      // TODO
+      // const [] = x;
+      // const [,] = x;
+      // const [,,] = x;
+      // const [foo] = x;
+      // const [foo,] = x;
+      // const [foo,,] = x;
+      // const [,foo] = x;
+      // const [,,foo] = x;
+      // const [foo,bar] = x;
+      // const [foo,,bar] = x;
+      // const [foo] = x, [foo] = y;
+      // const [foo] = x, b;
+      // const [foo] = x, b = y;
+      // const x, [foo] = y;
+      // const x = y, [foo] = z;
+      // const [foo=a] = c;
+      // const [foo=a,bar] = x;
+      // const [foo,bar=b] = x;
+      // const [foo=a,bar=b] = x;
+      // const [foo];                 // error
+      // const [foo=a];               // error
+      // const [foo], bar;            // error
+      // const foo, [bar];            // error
+
+      test('array', {
+        code: 'const [foo] = arr;',
+        ast: {type: 'Program', body: [{
+          type: 'VariableDeclaration',
+          kind: 'const',
+          declarations: [{
+            type: 'VariableDeclarator',
+            id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]},
+            init: {type: 'Identifier', name: 'arr'}},
+          ]},
         ]},
-      ]},
-      desc: 'const, one var, no init, semi',
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        desc: 'const, one var, no init, semi',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
     });
 
-    test('object', {
-      code: 'const {foo} = arr;',
-      ast: {type: 'Program', body: [{
-        type: 'VariableDeclaration',
-        kind: 'const',
-        declarations: [{
-          type: 'VariableDeclarator',
-          id: {type: 'ObjectPattern', properties: [{type: 'Identifier', name: 'foo'}]},
-          init: {type: 'Identifier', name: 'arr'}},
+    describe('object', _ => {
+
+      // TODO
+      // const {} = x;
+      // const {,} = x;             //?
+      // const {,,} = x;            //?
+      // const {foo} = x;
+      // const {foo,} = x;
+      // const {foo,,} = x;         //?
+      // const {,foo} = x;          //?
+      // const {foo,bar} = x;
+      // const {foo,,bar} = x;      //?
+      // const {foo} = x, {foo} = y;
+      // const {foo} = x, b;
+      // const {foo} = x, b = y;
+      // const x, {foo} = y;
+      // const {foo=a} = x;
+      // const {foo=a,bar} = x;
+      // const {foo,bar=b} = x;
+      // const {foo=a,bar=b} = x;
+      // const {foo:a} = x;
+      // const {foo:a,bar} = x;
+      // const {foo,bar:b} = x;
+      // const {foo:a,bar:b} = x;
+      // const {foo:a,bar:b} = x;
+      // const {foo:a=b} = x;
+      // const {foo:a=b, bar:c=d} = x;
+      // const {foo};                // ERROR
+
+      test('object', {
+        code: 'const {foo} = arr;',
+        ast: {type: 'Program', body: [{
+          type: 'VariableDeclaration',
+          kind: 'const',
+          declarations: [{
+            type: 'VariableDeclarator',
+            id: {type: 'ObjectPattern', properties: [{type: 'Identifier', name: 'foo'}]},
+            init: {type: 'Identifier', name: 'arr'}},
+          ]},
         ]},
-      ]},
-      desc: 'const, one var, no init, semi',
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        desc: 'const, one var, no init, semi',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
     });
   });
 });

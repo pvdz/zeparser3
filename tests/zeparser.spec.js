@@ -238,6 +238,8 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
 
     console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
     console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
+    // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
+    console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
     ++fail;
   } else {
     console.log(`${prefix} PASS: \`${toPrint(code)}\``);

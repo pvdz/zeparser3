@@ -107,6 +107,71 @@ module.exports = (describe, test) => describe('var statement', _ => {
     });
   });
 
+  describe('destructuring', _ => {
+
+    // TIL
+
+    describe('array', _ => {
+
+      // TODO
+      // var [] = x;
+      // var [,] = x;
+      // var [,,] = x;
+      // var [foo] = x;
+      // var [foo,] = x;
+      // var [foo,,] = x;
+      // var [,foo] = x;
+      // var [,,foo] = x;
+      // var [foo,bar] = x;
+      // var [foo,,bar] = x;
+      // var [foo] = x, [foo] = y;
+      // var [foo] = x, b;
+      // var [foo] = x, b = y;
+      // var x, [foo] = y;
+      // var x = y, [foo] = z;
+      // var [foo=a] = c;
+      // var [foo=a,bar] = x;
+      // var [foo,bar=b] = x;
+      // var [foo=a,bar=b] = x;
+      // var [foo];                 // error
+      // var [foo=a];               // error
+      // var [foo], bar;            // error
+      // var foo, [bar];            // error
+
+    });
+
+    describe('object', _ => {
+
+      // TODO
+      // var {} = x;
+      // var {,} = x;             //?
+      // var {,,} = x;            //?
+      // var {foo} = x;
+      // var {foo,} = x;
+      // var {foo,,} = x;         //?
+      // var {,foo} = x;          //?
+      // var {foo,bar} = x;
+      // var {foo,,bar} = x;      //?
+      // var {foo} = x, {foo} = y;
+      // var {foo} = x, b;
+      // var {foo} = x, b = y;
+      // var x, {foo} = y;
+      // var {foo=a} = x;
+      // var {foo=a,bar} = x;
+      // var {foo,bar=b} = x;
+      // var {foo=a,bar=b} = x;
+      // var {foo:a} = x;
+      // var {foo:a,bar} = x;
+      // var {foo,bar:b} = x;
+      // var {foo:a,bar:b} = x;
+      // var {foo:a,bar:b} = x;
+      // var {foo:a=b} = x;
+      // var {foo:a=b, bar:c=d} = x;
+      // var {foo};                // ERROR
+
+    });
+  });
+
   //[
   //  '  array destructuring',
   //  {
