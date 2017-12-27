@@ -109,12 +109,12 @@ const $$PS_2028 = 0x2028; // valid newline
 const $$BOM_FEFF = 0xFEFF; // considered a space
 
 function ASSERT(bool, desc, ...rest) {
-  if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>') + ' [' + require('util').inspect(rest, false, null) + ']');
+  if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>'), ...rest);
 }
 
 function THROW(str, ...rest) {
-  console.log('error args:', require('util').inspect(rest, false, null));
-  throw new Error(`Parser error! ${str} [${require('util').inspect(rest, false, null)}]`);
+  console.log('error args:', rest.length ? require('util').inspect(rest, false, null) : '<none>');
+  throw new Error(`Parser error! ${str} ${rest.length ? require('util').inspect(rest, false, null) : ''}`);
 }
 
 // </BODY>

@@ -572,6 +572,45 @@ module.exports = (describe, test) => describe('let statement', _ => {
         },
         tokens: [$IDENT, $IDENT, $PUNCTUATOR],
       });
+
+      test('prop access as expr stmt', {
+        code: 'let.foo;',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'MemberExpression',
+                object: {type: 'Identifier', name: 'let'},
+                property: {type: 'Identifier', name: 'foo'},
+                computed: false,
+              },
+            }],
+          },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('call as expr stmt', {
+        code: 'let();',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {type: 'Identifier', name: 'let'},
+                arguments: [],
+              },
+            }],
+          },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
     });
 
     describe('dynamic prop on let var', _ => {
@@ -640,3 +679,10 @@ module.exports = (describe, test) => describe('let statement', _ => {
     });
   });
 });
+
+// in exports
+// in for-header
+// let\n[         (asi?)
+// let\n{         (ambiguous with object destruct)
+// let\nfoo       (asi only applied when next token is unparseable which is not the case becuase `let foo` is valid)
+// let\nfoo()     (same as above, no backtracking, the error should be thrown for parens: `let foo()`)

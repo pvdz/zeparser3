@@ -208,6 +208,9 @@ const NOT_NEW_TARGET = false;
 const CHECK_NEW_TARGET = true;
 const IS_ARROW = true;
 const NOT_ARROW = false;
+const CAN_BE_LET_VAR = true;
+const LET_IS_VAR_NAME = true;
+const LET_IS_KEYWORD = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -395,6 +398,33 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     return oldNode;
+  }
+  function AST_popOrClear(astProp, expectedType) {
+    // remove a node at given astProp (pop one if it's an array, set to undefined otherwise)
+    // node that is removed (either way) should be of given type
+    if (traceast) {
+      console.log('AST_popOrClear', astProp, newNodeType, newNodeType)
+      console.log('- path:', _pnames.join(' - '));
+      console.log('- path:', _path.map(o => o.type).join(' - '));
+      console.log('- tree before:', require('util').inspect(_tree, false, null))
+    }
+
+    let parentNode = _path[_path.length - 1];
+    let curval = parentNode[astProp];
+    ASSERT(curval, 'parent node did not have a value in given prop (probably a bug)');
+
+    if (Array.isArray(curval)) {
+      ASSERT(curval.length, 'parent node did not have a value in prop (which was an array) (probably a bug)');
+      let node = curval.pop();
+      ASSERT(node.type === expectedType, 'type of popped node does not meet expectations');
+    } else {
+      ASSERT(parentNode[astProp].type === expectedType, 'type of cleared node does not meet expectations');
+      parentNode[astProp] = undefined;
+    }
+
+    if (traceast) {
+      console.log('- tree after:', require('util').inspect(_tree, false, null))
+    }
   }
   function AST_wrapClosedArray(prop, value, newProp) {
     if (traceast) {
@@ -1885,7 +1915,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseIdentLabelOrExpressionStatement(lexerFlags, astProp) {
     let identToken = curtok;
     ASSERT_skipDiv($IDENT, lexerFlags);
-
+    _parseIdentLabelOrExpressionStatement(lexerFlags, identToken, astProp);
+  }
+  function _parseIdentLabelOrExpressionStatement(lexerFlags, identToken, astProp) {
     if (curc === $$COLON_3A) {
       if (identToken.str === 'async' && (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         THROW('The `async` keyword cannot be used as a label');
@@ -1952,19 +1984,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('kind', kind);
     AST_set('declarations', []);
 
+    let identToken = curtok;
     ASSERT_skipAny(kind, lexerFlags); // TODO: optimize; next must be ident or destructuring [{, except edge case `let`
 
-    parseBindingPatterns(lexerFlags, 'declarations');
+    let letWasName = parseBindingPatterns(lexerFlags, kind, 'declarations');
+    AST_close(); // VariableDeclarator (or ExpressionStatement in case of `let` in sloppy)
 
-    AST_close();
+    if (letWasName === LET_IS_VAR_NAME) {
+      ASSERT((lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE, 'should be sloppy mode');
+      // Turns out that the `let` identifier was a regular var name and not a keyword
+      // This means we must try to parse it as a regular expression
+      // we built up stuff in VariableDeclaration and we have to destroy that now
+      AST_popOrClear(astProp, 'VariableDeclaration');
+      // TODO: this can also occur in a for-header and export declaration so we'll need to improve this bit
+      _parseIdentLabelOrExpressionStatement(lexerFlags, identToken, astProp);
+    }
   }
-  function parseBindingPatterns(lexerFlags, astProp) {
-    do {
-      parseElisions(lexerFlags, astProp);
-      parseBindingPatternAndAssignment(lexerFlags, astProp);
-      if (curc !== $$COMMA_2C) break;
+  function parseBindingPatterns(lexerFlags, kind, astProp) {
+    let letWasName = parseBindingPatternAndAssignment(lexerFlags, kind === 'let' ? CAN_BE_LET_VAR : LET_IS_KEYWORD, astProp);
+    if (letWasName === LET_IS_VAR_NAME) return LET_IS_VAR_NAME;
+
+    while (curc === $$COMMA_2C) {
       ASSERT_skipRex(',', lexerFlags); // TODO: optimize; next must be destructuringly-valid
-    } while (true);
+      parseBindingPatternAndAssignment(lexerFlags, LET_IS_KEYWORD, astProp);
+    }
+
+    return LET_IS_KEYWORD;
   }
   function parseElisions(lexerFlags, astProp) {
     while(curc === $$COMMA_2C) {
@@ -1972,12 +2017,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex(',', lexerFlags);
     }
   }
-  function parseBindingPatternAndAssignment(lexerFlags, astProp) {
+  function parseBindingPatternAndAssignment(lexerFlags, letVarState, astProp) {
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
+
     AST_open(astProp, 'VariableDeclarator');
 
     let mustHaveAssignment = false; // destructurings must always be followed by an assignment
-
     if (curtype === $IDENT) {
       // normal
       // TODO: verify ident is valid here
@@ -1996,7 +2041,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('properties', []);
       parseBindingPatternsNested(lexerFlagsNoTemplate, 'properties');
       skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
-      AST_close();
+      AST_close(); // ObjectPattern
     } else if (curc === $$SQUARE_L_5B) {
       // destructure array
       // keep parsing binding patterns separated by at least one comma
@@ -2006,9 +2051,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('elements', []);
       parseBindingPatternsNested(lexerFlags, 'elements');
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
-      AST_close();
+      AST_close(); // ArrayPattern
+    } else if (letVarState === CAN_BE_LET_VAR && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
+      // `let` as a variable name is okay in sloppy mode
+      // TODO: this structure can also appear inside for-headers and export declarations
+      AST_close(); // VariableDeclarator
+      return LET_IS_VAR_NAME;
     } else {
-      THROW('Expecting ident or destructuring pattern');
+      THROW('Missing ident or destructuring pattern after var/let/const');
     }
 
     if (curc === $$IS_3D && curtok.str === '=') {
@@ -2019,7 +2069,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       AST_set('init', null);
     }
-    AST_close();
+    AST_close(); // VariableDeclarator
+    return LET_IS_KEYWORD;
   }
   function parseBindingPatternsNested(lexerFlags, astProp) {
     parseElisions(lexerFlags, astProp);

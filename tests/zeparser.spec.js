@@ -124,7 +124,7 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
 
   ++testj;
 
-                                                          //if (testj !== 1069) return;
+                                                          //if (testj !== 2000) return;
   testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
   testSuffix += '[' + testj + ']';
 
