@@ -639,18 +639,4 @@ module.exports = (describe, test) => describe('let statement', _ => {
       });
     });
   });
-
-  //[
-  //  '  object destructuring',
-  //  {
-  //    code: 'let {foo} = arr;',
-  //    ast: {type: 'Program', body: [
-  //      {type: 'VariableDeclaration', kind: 'let', declarations: [
-  //        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
-  //      ]},
-  //    ]},
-  //    desc: 'let, one var, no init, semi',
-  //    tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-  //  },
-  //],
 });

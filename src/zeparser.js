@@ -1959,28 +1959,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close();
   }
   function parseBindingPatterns(lexerFlags, astProp) {
-    // to detect `let[x].foo()` vs `let[.x].foo()` or `let[x,y].foo()`
-    // because prop access does not support elisions :)
-    let canBePropAccess = false;
-
     do {
-      let hasThem = parseElisions(lexerFlags, astProp);
-      if (hasThem) canBePropAccess = false;
+      parseElisions(lexerFlags, astProp);
       parseBindingPatternAndAssignment(lexerFlags, astProp);
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipRex(',', lexerFlags); // TODO: optimize; next must be destructuringly-valid
     } while (true);
-
-    return canBePropAccess;
   }
   function parseElisions(lexerFlags, astProp) {
-    let count = 0;
     while(curc === $$COMMA_2C) {
       AST_add(astProp, null);
       ASSERT_skipRex(',', lexerFlags);
-      ++count;
     }
-    return count;
   }
   function parseBindingPatternAndAssignment(lexerFlags, astProp) {
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
