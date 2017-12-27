@@ -10,6 +10,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
 
   test('simple import of a default with double string',{
     code: 'import x from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -28,6 +29,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with single string',{
     code: 'import x from \'y\'',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -46,6 +48,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of an aliased default',{
     code: 'import * as a from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -64,6 +67,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of an aliased default',{
     code: 'import x, * as a from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -85,6 +89,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [],
@@ -99,6 +104,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [],
@@ -113,6 +119,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -132,6 +139,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x,} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -151,6 +159,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x as z} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -170,6 +179,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x as z,} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -189,6 +199,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x, z} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -212,6 +223,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x, z,} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -235,6 +247,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x as a, z} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -258,6 +271,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x, z as b} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -281,6 +295,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x as a, z as b} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [
@@ -304,6 +319,7 @@ module.exports = (describe, test) => describe('import declarations', _ => {
   
   test('simple import of a default with double string',{
     code: 'import {x as a, z as b,} from "y"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ImportDeclaration',
       specifiers: [

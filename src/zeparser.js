@@ -211,6 +211,8 @@ const NOT_ARROW = false;
 const CAN_BE_LET_VAR = true;
 const LET_IS_VAR_NAME = true;
 const LET_IS_KEYWORD = false;
+const FROM_STATEMENT = true;
+const NOT_FROM_STATEMENT = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -1429,6 +1431,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // export with default can do: function, async function, function *, class, and any assignment expression
     // note: the regular function, async function, and class may have no name only with `default`
 
+    if (goalMode !== GOAL_MODULE) THROW('The `export` keyword can only be used with the module goal');
 
     ASSERT_skipAny('export', lexerFlags);
 
@@ -1485,16 +1488,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       } else if (curc === $$V_76 && curtok.str === 'var') {
         // export var <bindings>
-        _parseAnyVarDecls(lexerFlags, 'var', 'declaration');
+        _parseAnyVarDecls(lexerFlags, 'var', NOT_FROM_STATEMENT, 'declaration');
         AST_set('source', null);
       } else if (curc === $$L_6C && curtok.str === 'let') {
         // export let <bindings>
-        _parseAnyVarDecls(lexerFlags, 'let', 'declaration');
+        _parseAnyVarDecls(lexerFlags, 'let', NOT_FROM_STATEMENT, 'declaration');
         AST_set('source', null);
       } else if (curc === $$C_63) {
         if (curtok.str === 'const') {
           // export const <bindings>
-          _parseAnyVarDecls(lexerFlags, 'const', 'declaration');
+          _parseAnyVarDecls(lexerFlags, 'const', NOT_FROM_STATEMENT, 'declaration');
         } else if (curtok.str === 'class') {
           // export class ...
           parseClass(lexerFlags, IDENT_REQUIRED, 'declaration');
@@ -1607,7 +1610,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         case 'var':
         case 'let':
         case 'const':
-          _parseAnyVarDecls(lexerFlags, curtok.str, astProp);
+          _parseAnyVarDecls(lexerFlags, curtok.str, NOT_FROM_STATEMENT, astProp);
           assignable = true; // i think.
           break;
 
@@ -1706,7 +1709,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // import {a as c,b} from 'x'
     // import {a,b,} from 'x'
     // import x, {...} from 'x'
-    // (cannot create a var named `yield` or `await` this way)
+    // (cannot create a var named `yield` or `await` or `let` this way)
+
+    if (goalMode !== GOAL_MODULE) THROW('The `import` keyword can only be used with the module goal');
 
     ASSERT_skipAny('import', lexerFlags);
 
@@ -1974,10 +1979,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function _parseAnyVarStatement(lexerFlags, kind, astProp) {
-    _parseAnyVarDecls(lexerFlags, kind, astProp);
+    _parseAnyVarDecls(lexerFlags, kind, FROM_STATEMENT, astProp);
     parseSemiOrAsi(lexerFlags);
   }
-  function _parseAnyVarDecls(lexerFlags, kind, astProp) {
+  function _parseAnyVarDecls(lexerFlags, kind, from, astProp) {
     // var, let, const. apply additional checks for let/const.
     // must also track the `let[foo].bar` exception here if kind=="let"
     AST_open(astProp, 'VariableDeclaration');
@@ -1996,8 +2001,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // This means we must try to parse it as a regular expression
       // we built up stuff in VariableDeclaration and we have to destroy that now
       AST_popOrClear(astProp, 'VariableDeclaration');
-      // TODO: this can also occur in a for-header and export declaration so we'll need to improve this bit
-      _parseIdentLabelOrExpressionStatement(lexerFlags, identToken, astProp);
+      if (from === FROM_STATEMENT) {
+        _parseIdentLabelOrExpressionStatement(lexerFlags, identToken, astProp);
+      } else {
+        // this has to be a for-header since an export (the only other place where
+        // var/let/const can be used) is per definition module code which is by
+        // default strict mode which would not allow this case.
+        parseValueFromIdent(lexerFlags, identToken, astProp);
+      }
     }
   }
   function parseBindingPatterns(lexerFlags, kind, astProp) {

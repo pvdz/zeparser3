@@ -7,566 +7,1649 @@ let {
 
 module.exports = (describe, test) => describe('let statement', _ => {
 
-  describe('regular vars', _ => {
-    
-    test('let, one var, no init, semi',{
-      code: 'let foo;',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
-        ]},
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-    });
-    
-    test('let, one var, no init, eof',{
-      code: 'let foo',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
-        ]}
-      ]},
-      tokens: [$IDENT, $IDENT, $ASI],
-    });
-    
-    test('let, two vars, no init, semi',{
-      code: 'let foo, bar;',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null},
-        ]},
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-    
-    test('let, two vars, no init, eof',{
-      code: 'let foo, bar',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null},
-        ]},
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-    });
-    
-    test('let, var with init, semi',{
-      code: 'let foo = bar;',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
-        ]},
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-    
-    test('let, var with init, eof',{
-      code: 'let foo = bar',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
-        ]},
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-    });
-    
-    test('let, var with init, asi',{
-      code: 'let foo = bar\nlet zoo;',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
-        ]},
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: null},
-        ]},
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $IDENT, $PUNCTUATOR],
-    });
-    
-    test('let, two vars with both init, semi',{
-      code: 'let foo = bar, zoo = boo;',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: {type: 'Identifier', name: 'boo'}},
-        ]},
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-    
-    test('let, two vars with both init, asi',{
-      code: 'let foo = bar, zoo = boo',
-      ast: {type: 'Program', body: [
-        {type: 'VariableDeclaration', kind: 'let', declarations: [
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
-          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: {type: 'Identifier', name: 'boo'}},
-        ]},
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-    });
+  describe('as a statement', _ => {
 
-    test('var on next line does not trigger asi', {
-      code: 'let\nfoo',
-      ast: {
-        type: 'Program',
-        body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'Identifier', name: 'foo'},
-            init: null
+    describe('regular vars', _ => {
+
+      test('let, one var, no init, semi',{
+        code: 'let foo;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
+          ]},
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let, one var, no init, eof',{
+        code: 'let foo',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
+          ]}
+        ]},
+        tokens: [$IDENT, $IDENT, $ASI],
+      });
+
+      test('let, two vars, no init, semi',{
+        code: 'let foo, bar;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null},
+          ]},
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let, two vars, no init, eof',{
+        code: 'let foo, bar',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null},
+          ]},
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('let, var with init, semi',{
+        code: 'let foo = bar;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
+          ]},
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let, var with init, eof',{
+        code: 'let foo = bar',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
+          ]},
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('let, var with init, asi',{
+        code: 'let foo = bar\nlet zoo;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
+          ]},
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: null},
+          ]},
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let, two vars with both init, semi',{
+        code: 'let foo = bar, zoo = boo;',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: {type: 'Identifier', name: 'boo'}},
+          ]},
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let, two vars with both init, asi',{
+        code: 'let foo = bar, zoo = boo',
+        ast: {type: 'Program', body: [
+          {type: 'VariableDeclaration', kind: 'let', declarations: [
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
+            {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: {type: 'Identifier', name: 'boo'}},
+          ]},
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('var on next line does not trigger asi', {
+        code: 'let\nfoo',
+        ast: {
+          type: 'Program',
+          body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'Identifier', name: 'foo'},
+              init: null
+            }]
           }]
-        }]
-      },
-      tokens: [$IDENT, $IDENT, $ASI],
+        },
+        tokens: [$IDENT, $IDENT, $ASI],
+      });
+
+      test('asi can not trigger if next token is ident', {
+        code: 'let\nfoo()',
+        throws: 'ASI',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
     });
 
-    test('asi can not trigger if next token is ident', {
-      code: 'let\nfoo()',
-      throws: 'ASI',
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-    });
-  });
+    describe('destructuring', _ => {
 
-  describe('destructuring', _ => {
+      describe('array', _ => {
 
-    describe('array', _ => {
+        // TODO
+        // let [] = x;
+        // let [,] = x;
+        // let [,,] = x;
+        // let [foo] = x;
+        // let [foo,] = x;
+        // let [foo,,] = x;
+        // let [,foo] = x;
+        // let [,,foo] = x;
+        // let [foo,bar] = x;
+        // let [foo,,bar] = x;
+        // let [foo] = x, [foo] = y;
+        // let [foo] = x, b;
+        // let [foo] = x, b = y;
+        // let x, [foo] = y;
+        // let x = y, [foo] = z;
+        // let [foo=a] = c;
+        // let [foo=a,bar] = x;
+        // let [foo,bar=b] = x;
+        // let [foo=a,bar=b] = x;
+        // let [foo];                 // error
+        // let [foo=a];               // error
+        // let [foo], bar;            // error
+        // let foo, [bar];            // error
 
-      // TODO
-      // let [] = x;
-      // let [,] = x;
-      // let [,,] = x;
-      // let [foo] = x;
-      // let [foo,] = x;
-      // let [foo,,] = x;
-      // let [,foo] = x;
-      // let [,,foo] = x;
-      // let [foo,bar] = x;
-      // let [foo,,bar] = x;
-      // let [foo] = x, [foo] = y;
-      // let [foo] = x, b;
-      // let [foo] = x, b = y;
-      // let x, [foo] = y;
-      // let x = y, [foo] = z;
-      // let [foo=a] = c;
-      // let [foo=a,bar] = x;
-      // let [foo,bar=b] = x;
-      // let [foo=a,bar=b] = x;
-      // let [foo];                 // error
-      // let [foo=a];               // error
-      // let [foo], bar;            // error
-      // let foo, [bar];            // error
+        test('empty "array" should work', {
+          code: 'let [] = x;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: []},
+              init: {type: 'Identifier', name: 'x'},
+            }],
+          }]},
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
 
-      test('empty "array" should work', {
-        code: 'let [] = x;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: []},
-            init: {type: 'Identifier', name: 'x'},
-          }],
-        }]},
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
+        test('empty array with one comma', {
+          code: 'let [,] = x;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [null]},
+              init: {type: 'Identifier', name: 'x'},
+            }],
+          }]},
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
 
-      test('empty array with one comma', {
-        code: 'let [,] = x;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [null]},
-            init: {type: 'Identifier', name: 'x'},
-          }],
-        }]},
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
+        test('empty array with double comma', {
+          code: 'let [,,] = x;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [null, null]},
+              init: {type: 'Identifier', name: 'x'},
+            }],
+          }]},
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
 
-      test('empty array with double comma', {
-        code: 'let [,,] = x;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [null, null]},
-            init: {type: 'Identifier', name: 'x'},
-          }],
-        }]},
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('with one var, no init, semi', {
-        code: 'let [foo] = arr;',
-        ast: {type: 'Program', body: [
-          {type: 'VariableDeclaration', kind: 'let', declarations: [
-            {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+        test('with one var, no init, semi', {
+          code: 'let [foo] = arr;',
+          ast: {type: 'Program', body: [
+            {type: 'VariableDeclaration', kind: 'let', declarations: [
+              {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+            ]},
           ]},
-        ]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
 
-      test('trailing comma is insignificant', {
-        code: 'let [foo,] = arr;',
-        ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
-          type: 'VariableDeclarator',
-          id: {
-            type: 'ArrayPattern',
-            elements: [
-              {type: 'Identifier', name: 'foo'},
-            ],
-          },
-          init: {type: 'Identifier', name: 'arr'},
-        }]}]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('double trailing comma is significant', {
-        code: 'let [foo,,] = arr;',
-        ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
-          type: 'VariableDeclarator',
-          id: {
-            type: 'ArrayPattern',
-            elements: [
-              {type: 'Identifier', name: 'foo'},
-              null,
-            ],
-          },
-          init: {type: 'Identifier', name: 'arr'},
-        }]}]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('leading comma', {
-        code: 'let [,foo] = arr;',
-        ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
-          type: 'VariableDeclarator',
-          id: {
-            type: 'ArrayPattern',
-            elements: [
-              null,
-              {type: 'Identifier', name: 'foo'},
-            ],
-          },
-          init: {type: 'Identifier', name: 'arr'},
-        }]}]},
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('double leading comma', {
-        code: 'let [,,foo] = arr;',
-        ast: {type: 'Program', body: [
-          {type: 'VariableDeclaration', kind: 'let', declarations: [
-            {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [
-              null,
-              null,
-              {type: 'Identifier', name: 'foo'},
-            ]}, init: {type: 'Identifier', name: 'arr'}},
-          ]},
-        ]},
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('two vars', {
-        code: 'let [foo,bar] = arr;',
-        ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
-          type: 'VariableDeclarator',
-          id: {
-            type: 'ArrayPattern',
-            elements: [
-              {type: 'Identifier', name: 'foo'},
-              {type: 'Identifier', name: 'bar'},
-            ],
-          },
-          init: {type: 'Identifier', name: 'arr'},
-        }]}]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('two vars with eliding comma', {
-        code: 'let [foo,,bar] = arr;',
-        ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
-          type: 'VariableDeclarator',
-          id: {
-            type: 'ArrayPattern',
-            elements: [
-              {type: 'Identifier', name: 'foo'},
-              null,
-              {type: 'Identifier', name: 'bar'},
-            ],
-          },
-          init: {type: 'Identifier', name: 'arr'},
-        }]}]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('double destruct', {
-        code: 'let [foo] = arr, [bar] = arr2;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'Identifier', name: 'foo'},
-            ]},
-            init: {type: 'Identifier', name: 'arr'},
-          }, {
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'Identifier', name: 'bar'},
-            ]},
-            init: {type: 'Identifier', name: 'arr2'},
-          }],
-        }]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('destruct and non-destruct without init', {
-        code: 'let [foo] = arr, bar;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'Identifier', name: 'foo'},
-            ]},
-            init: {type: 'Identifier', name: 'arr'},
-          }, {
-            type: 'VariableDeclarator',
-            id: {type: 'Identifier', name: 'bar'},
-            init: null,
-          }],
-        }]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('destruct and non-destruct with init', {
-        code: 'let [foo] = arr, bar = arr2;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'Identifier', name: 'foo'},
-            ]},
-            init: {type: 'Identifier', name: 'arr'},
-          }, {
-            type: 'VariableDeclarator',
-            id: {type: 'Identifier', name: 'bar'},
-            init: {type: 'Identifier', name: 'arr2'},
-          }],
-        }]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('non-destruct without init and destruct', {
-        code: 'let foo, [bar] = arr2;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'Identifier', name: 'foo'},
-            init: null,
-          }, {
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'Identifier', name: 'bar'},
-            ]},
-            init: {type: 'Identifier', name: 'arr2'},
-          }],
-        }]},
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('non-destruct with init and destruct', {
-        code: 'let foo = arr, [bar] = arr2;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'Identifier', name: 'foo'},
-            init: {type: 'Identifier', name: 'arr'},
-          }, {
-            type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'Identifier', name: 'bar'},
-            ]},
-            init: {type: 'Identifier', name: 'arr2'},
-          }],
-        }]},
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
-
-      test('one var with initializer', {
-        code: 'let [foo=a] = arr;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
+        test('trailing comma is insignificant', {
+          code: 'let [foo,] = arr;',
+          ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
             type: 'VariableDeclarator',
             id: {
               type: 'ArrayPattern',
-              elements: [{
-                type: 'AssignmentPattern',
-                left: {type: 'Identifier', name: 'foo'},
-                right: {type: 'Identifier', name: 'a'},
-              }],
+              elements: [
+                {type: 'Identifier', name: 'foo'},
+              ],
             },
             init: {type: 'Identifier', name: 'arr'},
-          }]},
-        ]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
+          }]}]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
 
-      test('two vars, with and without initializer', {
-        code: 'let [foo=a, bar] = arr;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
+        test('double trailing comma is significant', {
+          code: 'let [foo,,] = arr;',
+          ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
             type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}},
-              {type: 'Identifier', name: 'bar'},
-            ]},
+            id: {
+              type: 'ArrayPattern',
+              elements: [
+                {type: 'Identifier', name: 'foo'},
+                null,
+              ],
+            },
             init: {type: 'Identifier', name: 'arr'},
-          }]},
-        ]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
+          }]}]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
 
-      test('two vars, without and with initializer', {
-        code: 'let [foo, bar=b] = arr;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
+        test('leading comma', {
+          code: 'let [,foo] = arr;',
+          ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
             type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'Identifier', name: 'foo'},
-              {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}},
-            ]},
+            id: {
+              type: 'ArrayPattern',
+              elements: [
+                null,
+                {type: 'Identifier', name: 'foo'},
+              ],
+            },
             init: {type: 'Identifier', name: 'arr'},
-          }]},
-        ]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      });
+          }]}]},
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
 
-      test('two vars, without and with initializer', {
-        code: 'let [foo=a, bar=b] = arr;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
+        test('double leading comma', {
+          code: 'let [,,foo] = arr;',
+          ast: {type: 'Program', body: [
+            {type: 'VariableDeclaration', kind: 'let', declarations: [
+              {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [
+                null,
+                null,
+                {type: 'Identifier', name: 'foo'},
+              ]}, init: {type: 'Identifier', name: 'arr'}},
+            ]},
+          ]},
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('two vars', {
+          code: 'let [foo,bar] = arr;',
+          ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
             type: 'VariableDeclarator',
-            id: {type: 'ArrayPattern', elements: [
-              {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}},
-              {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}},
-            ]},
+            id: {
+              type: 'ArrayPattern',
+              elements: [
+                {type: 'Identifier', name: 'foo'},
+                {type: 'Identifier', name: 'bar'},
+              ],
+            },
             init: {type: 'Identifier', name: 'arr'},
+          }]}]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('two vars with eliding comma', {
+          code: 'let [foo,,bar] = arr;',
+          ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{
+            type: 'VariableDeclarator',
+            id: {
+              type: 'ArrayPattern',
+              elements: [
+                {type: 'Identifier', name: 'foo'},
+                null,
+                {type: 'Identifier', name: 'bar'},
+              ],
+            },
+            init: {type: 'Identifier', name: 'arr'},
+          }]}]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('double destruct', {
+          code: 'let [foo] = arr, [bar] = arr2;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'Identifier', name: 'foo'},
+              ]},
+              init: {type: 'Identifier', name: 'arr'},
+            }, {
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'Identifier', name: 'bar'},
+              ]},
+              init: {type: 'Identifier', name: 'arr2'},
+            }],
           }]},
-        ]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('destruct and non-destruct without init', {
+          code: 'let [foo] = arr, bar;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'Identifier', name: 'foo'},
+              ]},
+              init: {type: 'Identifier', name: 'arr'},
+            }, {
+              type: 'VariableDeclarator',
+              id: {type: 'Identifier', name: 'bar'},
+              init: null,
+            }],
+          }]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('destruct and non-destruct with init', {
+          code: 'let [foo] = arr, bar = arr2;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'Identifier', name: 'foo'},
+              ]},
+              init: {type: 'Identifier', name: 'arr'},
+            }, {
+              type: 'VariableDeclarator',
+              id: {type: 'Identifier', name: 'bar'},
+              init: {type: 'Identifier', name: 'arr2'},
+            }],
+          }]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('non-destruct without init and destruct', {
+          code: 'let foo, [bar] = arr2;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'Identifier', name: 'foo'},
+              init: null,
+            }, {
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'Identifier', name: 'bar'},
+              ]},
+              init: {type: 'Identifier', name: 'arr2'},
+            }],
+          }]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('non-destruct with init and destruct', {
+          code: 'let foo = arr, [bar] = arr2;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'Identifier', name: 'foo'},
+              init: {type: 'Identifier', name: 'arr'},
+            }, {
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'Identifier', name: 'bar'},
+              ]},
+              init: {type: 'Identifier', name: 'arr2'},
+            }],
+          }]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('one var with initializer', {
+          code: 'let [foo=a] = arr;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {
+                type: 'ArrayPattern',
+                elements: [{
+                  type: 'AssignmentPattern',
+                  left: {type: 'Identifier', name: 'foo'},
+                  right: {type: 'Identifier', name: 'a'},
+                }],
+              },
+              init: {type: 'Identifier', name: 'arr'},
+            }]},
+          ]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('two vars, with and without initializer', {
+          code: 'let [foo=a, bar] = arr;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}},
+                {type: 'Identifier', name: 'bar'},
+              ]},
+              init: {type: 'Identifier', name: 'arr'},
+            }]},
+          ]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('two vars, without and with initializer', {
+          code: 'let [foo, bar=b] = arr;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'Identifier', name: 'foo'},
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}},
+              ]},
+              init: {type: 'Identifier', name: 'arr'},
+            }]},
+          ]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('two vars, without and with initializer', {
+          code: 'let [foo=a, bar=b] = arr;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}},
+                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}},
+              ]},
+              init: {type: 'Identifier', name: 'arr'},
+            }]},
+          ]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('no assignment without init', {
+          code: 'let [foo];',
+          throws: 'without an assignment',
+          desc: 'this could be legal in sloppy except not at the start of a statement',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('no assignment with init', {
+          code: 'let [foo = x];',
+          throws: 'without an assignment',
+          desc: 'this could be legal in sloppy except not at the start of a statement',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('no assignment with two declarations first', {
+          code: 'let [foo], bar;',
+          throws: 'without an assignment',
+          desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('no assignment with two declarations second', {
+          code: 'let foo, [bar];',
+          throws: 'without an assignment',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
       });
 
-      test('no assignment without init', {
-        code: 'let [foo];',
-        throws: 'without an assignment',
-        desc: 'this could be legal in sloppy except not at the start of a statement',
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      describe('object', _ => {
+
+        // TODO
+        // let {} = x;
+        // let {,} = x;             //?
+        // let {,,} = x;            //?
+        // let {foo} = x;
+        // let {foo,} = x;
+        // let {foo,,} = x;         //?
+        // let {,foo} = x;          //?
+        // let {,,foo} = x;          //?
+        // let {foo,bar} = x;
+        // let {foo,,bar} = x;      //?
+        // let {foo} = x, {foo} = y;
+        // let {foo} = x, b;
+        // let {foo} = x, b = y;
+        // let x, {foo} = y;
+        // let x = y, {foo} = z;
+        // let {foo=a} = x;
+        // let {foo=a,bar} = x;
+        // let {foo,bar=b} = x;
+        // let {foo=a,bar=b} = x;
+        // let {foo:a} = x;
+        // let {foo:a,bar} = x;
+        // let {foo,bar:b} = x;
+        // let {foo:a,bar:b} = x;
+        // let {foo:a,bar:b} = x;
+        // let {foo:a=b} = x;
+        // let {foo:a=b, bar:c=d} = x;
+        // let {foo};
+        // let {foo=a};
+        // let {foo:a};
+        // let {foo:a=b};
+        // let {foo}, bar;
+        // let foo, {bar};
+
+        test('let, destructuring obj with shorthand, no init, semi',{
+          code: 'let {foo} = arr;',
+          ast: {type: 'Program', body: [
+            {type: 'VariableDeclaration', kind: 'let', declarations: [
+              {type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: [
+                {type: 'Identifier', name: 'foo'},
+              ]}, init: {type: 'Identifier', name: 'arr'}},
+            ]},
+          ]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('let, destructuring obj with shorthand and trailing comma, no init, semi', {
+          code: 'let {foo,} = arr;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ObjectPattern', properties: [{type: 'Identifier', name: 'foo'}]},
+              init: {type: 'Identifier', name: 'arr'},
+            }],
+          }]},
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+      });
+    });
+  });
+
+  describe('in a for-loop-header', _ => {
+
+    describe('regular vars', _ => {
+
+      test('let, one var, no init, semi',{
+        code: 'for (let foo;;);',
+        ast: {
+          type: 'Program',
+          body: [{
+            type: 'ForStatement',
+            init: {
+              type: 'VariableDeclaration',
+              kind: 'let',
+              declarations: [{
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'foo'},
+                init: null
+              }]
+            },
+            test: null,
+            update: null,
+            body: {type: 'EmptyStatement'}
+          }]
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('no assignment with init', {
-        code: 'let [foo = x];',
-        throws: 'without an assignment',
-        desc: 'this could be legal in sloppy except not at the start of a statement',
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      test('let, two vars, no init, semi',{
+        code: 'for (let foo, bar;;);',
+        ast: {
+          type: 'Program',
+          body: [{
+            type: 'ForStatement',
+            init: {
+              type: 'VariableDeclaration',
+              kind: 'let',
+              declarations: [{
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'foo'},
+                init: null
+              }, {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'bar'},
+                init: null
+              }],
+            },
+            test: null,
+            update: null,
+            body: {type: 'EmptyStatement'},
+          }],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('no assignment with two declarations first', {
-        code: 'let [foo], bar;',
-        throws: 'without an assignment',
-        desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      test('let, var with init, semi',{
+        code: 'for (let foo = bar;;);',
+        ast: {
+          type: 'Program',
+          body: [{
+            type: 'ForStatement',
+            init: {
+              type: 'VariableDeclaration',
+              kind: 'let',
+              declarations: [{
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'foo'},
+                init: {type: 'Identifier', name: 'bar'},
+              }],
+            },
+            test: null,
+            update: null,
+            body: {type: 'EmptyStatement'},
+          }],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('no assignment with two declarations second', {
-        code: 'let foo, [bar];',
-        throws: 'without an assignment',
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      test('let, two vars with both init, semi',{
+        code: 'for (let foo = bar, zoo = boo;;);',
+        ast: {
+          type: 'Program',
+          body: [{
+            type: 'ForStatement',
+            init: {
+              type: 'VariableDeclaration',
+              kind: 'let',
+              declarations: [{
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'foo'},
+                init: {type: 'Identifier', name: 'bar'}
+              }, {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'zoo'},
+                init: {type: 'Identifier', name: 'boo'}
+              }],
+            },
+            test: null,
+            update: null,
+            body: {type: 'EmptyStatement'},
+          }],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('var on next line does not trigger asi', {
+        code: 'for (let\nfoo;;);',
+        ast: {
+          type: 'Program',
+          body: [{
+            type: 'ForStatement',
+            init: {
+              type: 'VariableDeclaration',
+              kind: 'let',
+              declarations: [{
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'foo'},
+                init: null,
+              }],
+            },
+            test: null,
+            update: null,
+            body: {type: 'EmptyStatement'},
+          }],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('asi can not trigger if next token is ident', {
+        code: 'for (let\nfoo();;);',
+        throws: '(;)', // expecting for-header semi
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       });
     });
 
-    describe('object', _ => {
+    describe('destructuring', _ => {
 
-      // TODO
-      // let {} = x;
-      // let {,} = x;             //?
-      // let {,,} = x;            //?
-      // let {foo} = x;
-      // let {foo,} = x;
-      // let {foo,,} = x;         //?
-      // let {,foo} = x;          //?
-      // let {,,foo} = x;          //?
-      // let {foo,bar} = x;
-      // let {foo,,bar} = x;      //?
-      // let {foo} = x, {foo} = y;
-      // let {foo} = x, b;
-      // let {foo} = x, b = y;
-      // let x, {foo} = y;
-      // let x = y, {foo} = z;
-      // let {foo=a} = x;
-      // let {foo=a,bar} = x;
-      // let {foo,bar=b} = x;
-      // let {foo=a,bar=b} = x;
-      // let {foo:a} = x;
-      // let {foo:a,bar} = x;
-      // let {foo,bar:b} = x;
-      // let {foo:a,bar:b} = x;
-      // let {foo:a,bar:b} = x;
-      // let {foo:a=b} = x;
-      // let {foo:a=b, bar:c=d} = x;
-      // let {foo};
-      // let {foo=a};
-      // let {foo:a};
-      // let {foo:a=b};
-      // let {foo}, bar;
-      // let foo, {bar};
+      describe('array', _ => {
 
-      test('let, destructuring obj with shorthand, no init, semi',{
-        code: 'let {foo} = arr;',
-        ast: {type: 'Program', body: [
-          {type: 'VariableDeclaration', kind: 'let', declarations: [
-            {type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: [
-              {type: 'Identifier', name: 'foo'},
-            ]}, init: {type: 'Identifier', name: 'arr'}},
-          ]},
-        ]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        // TODO
+        // let [] = x;
+        // let [,] = x;
+        // let [,,] = x;
+        // let [foo] = x;
+        // let [foo,] = x;
+        // let [foo,,] = x;
+        // let [,foo] = x;
+        // let [,,foo] = x;
+        // let [foo,bar] = x;
+        // let [foo,,bar] = x;
+        // let [foo] = x, [foo] = y;
+        // let [foo] = x, b;
+        // let [foo] = x, b = y;
+        // let x, [foo] = y;
+        // let x = y, [foo] = z;
+        // let [foo=a] = c;
+        // let [foo=a,bar] = x;
+        // let [foo,bar=b] = x;
+        // let [foo=a,bar=b] = x;
+        // let [foo];                 // error
+        // let [foo=a];               // error
+        // let [foo], bar;            // error
+        // let foo, [bar];            // error
+
+        test('empty "array" should work', {
+          code: 'for (let [] = x;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'ArrayPattern', elements: [] },
+                      init: { type: 'Identifier', name: 'x' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('empty array with one comma', {
+          code: 'for (let [,] = x;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'ArrayPattern', elements: [ null ] },
+                      init: { type: 'Identifier', name: 'x' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('empty array with double comma', {
+          code: 'for (let [,,] = x;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'ArrayPattern', elements: [ null, null ] },
+                      init: { type: 'Identifier', name: 'x' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('with one var, no init, semi', {
+          code: 'for (let [foo] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('trailing comma is insignificant', {
+          code: 'for (let [foo,] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('double trailing comma is significant', {
+          code: 'for (let [foo,,] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' }, null ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('leading comma', {
+          code: 'for (let [,foo] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ null, { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('double leading comma', {
+          code: 'for (let [,,foo] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ null, null, { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('two vars', {
+          code: 'for (let [foo,bar] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'Identifier', name: 'foo' },
+                            { type: 'Identifier', name: 'bar' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('two vars with eliding comma', {
+          code: 'for (let [foo,,bar] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'Identifier', name: 'foo' },
+                            null,
+                            { type: 'Identifier', name: 'bar' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('double destruct', {
+          code: 'for (let [foo] = arr, [bar] = arr2;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } },
+                      { type: 'VariableDeclarator',
+                        id:
+                        { type: 'ArrayPattern',
+                          elements: [ { type: 'Identifier', name: 'bar' } ] },
+                        init: { type: 'Identifier', name: 'arr2' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('destruct and non-destruct without init', {
+          code: 'for (let [foo] = arr, bar;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } },
+                      { type: 'VariableDeclarator',
+                        id: { type: 'Identifier', name: 'bar' },
+                        init: null } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('destruct and non-destruct with init', {
+          code: 'for (let [foo] = arr, bar = arr2;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } },
+                      { type: 'VariableDeclarator',
+                        id: { type: 'Identifier', name: 'bar' },
+                        init: { type: 'Identifier', name: 'arr2' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('non-destruct without init and destruct', {
+          code: 'for (let foo, [bar] = arr2;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'foo' },
+                      init: null },
+                      { type: 'VariableDeclarator',
+                        id:
+                        { type: 'ArrayPattern',
+                          elements: [ { type: 'Identifier', name: 'bar' } ] },
+                        init: { type: 'Identifier', name: 'arr2' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('non-destruct with init and destruct', {
+          code: 'for (let foo = arr, [bar] = arr2;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'foo' },
+                      init: { type: 'Identifier', name: 'arr' } },
+                      { type: 'VariableDeclarator',
+                        id:
+                        { type: 'ArrayPattern',
+                          elements: [ { type: 'Identifier', name: 'bar' } ] },
+                        init: { type: 'Identifier', name: 'arr2' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('one var with initializer', {
+          code: 'for (let [foo=a] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'AssignmentPattern',
+                            left: { type: 'Identifier', name: 'foo' },
+                            right: { type: 'Identifier', name: 'a' } } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('two vars, with and without initializer', {
+          code: 'for (let [foo=a, bar] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'AssignmentPattern',
+                            left: { type: 'Identifier', name: 'foo' },
+                            right: { type: 'Identifier', name: 'a' } },
+                            { type: 'Identifier', name: 'bar' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('two vars, without and with initializer', {
+          code: 'for (let [foo, bar=b] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'Identifier', name: 'foo' },
+                            { type: 'AssignmentPattern',
+                              left: { type: 'Identifier', name: 'bar' },
+                              right: { type: 'Identifier', name: 'b' } } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('two vars, without and with initializer', {
+          code: 'for (let [foo=a, bar=b] = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'AssignmentPattern',
+                            left: { type: 'Identifier', name: 'foo' },
+                            right: { type: 'Identifier', name: 'a' } },
+                            { type: 'AssignmentPattern',
+                              left: { type: 'Identifier', name: 'bar' },
+                              right: { type: 'Identifier', name: 'b' } } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('no assignment without init', {
+          code: 'for (let [foo];;);',
+          throws: 'without an assignment',
+          desc: 'this could be legal in sloppy except not at the start of a statement',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('no assignment with init', {
+          code: 'for (let [foo = x];;);',
+          throws: 'without an assignment',
+          desc: 'this could be legal in sloppy except not at the start of a statement',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('no assignment with two declarations first', {
+          code: 'for (let [foo], bar;;);',
+          throws: 'without an assignment',
+          desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('no assignment with two declarations second', {
+          code: 'for (let foo, [bar];;);',
+          throws: 'without an assignment',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
       });
 
-      test('let, destructuring obj with shorthand and trailing comma, no init, semi', {
-        code: 'let {foo,} = arr;',
-        ast: {type: 'Program', body: [{
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [{
-            type: 'VariableDeclarator',
-            id: {type: 'ObjectPattern', properties: [{type: 'Identifier', name: 'foo'}]},
-            init: {type: 'Identifier', name: 'arr'},
-          }],
-        }]},
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      describe('object', _ => {
+
+        // TODO
+        // let {} = x;
+        // let {,} = x;             //?
+        // let {,,} = x;            //?
+        // let {foo} = x;
+        // let {foo,} = x;
+        // let {foo,,} = x;         //?
+        // let {,foo} = x;          //?
+        // let {,,foo} = x;          //?
+        // let {foo,bar} = x;
+        // let {foo,,bar} = x;      //?
+        // let {foo} = x, {foo} = y;
+        // let {foo} = x, b;
+        // let {foo} = x, b = y;
+        // let x, {foo} = y;
+        // let x = y, {foo} = z;
+        // let {foo=a} = x;
+        // let {foo=a,bar} = x;
+        // let {foo,bar=b} = x;
+        // let {foo=a,bar=b} = x;
+        // let {foo:a} = x;
+        // let {foo:a,bar} = x;
+        // let {foo,bar:b} = x;
+        // let {foo:a,bar:b} = x;
+        // let {foo:a,bar:b} = x;
+        // let {foo:a=b} = x;
+        // let {foo:a=b, bar:c=d} = x;
+        // let {foo};
+        // let {foo=a};
+        // let {foo:a};
+        // let {foo:a=b};
+        // let {foo}, bar;
+        // let foo, {bar};
+
+        test('let, destructuring obj with shorthand, no init, semi',{
+          code: 'for (let {foo} = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ObjectPattern',
+                        properties: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, destructuring obj with shorthand and trailing comma, no init, semi', {
+          code: 'for (let {foo,} = arr;;);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForStatement',
+                init:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ObjectPattern',
+                        properties: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                test: null,
+                update: null,
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+      });
+    });
+  });
+
+  describe('in export decl', _ => {
+
+    // not an extensive test suite here since it's always strict mode and uses the same parsing mechanisms
+
+    describe('regular vars', _ => {
+
+      test('let, one var, no init, semi',{
+        code: 'export let foo;',
+        SCRIPT: {throws: 'module goal'},
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration:
+              { type: 'VariableDeclaration',
+                kind: 'let',
+                declarations:
+                  [ { type: 'VariableDeclarator',
+                    id: { type: 'Identifier', name: 'foo' },
+                    init: null } ] },
+              source: null } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let, two vars, no init, semi',{
+        code: 'export let foo, bar;',
+        SCRIPT: {throws: 'module goal'},
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration:
+              { type: 'VariableDeclaration',
+                kind: 'let',
+                declarations:
+                  [ { type: 'VariableDeclarator',
+                    id: { type: 'Identifier', name: 'foo' },
+                    init: null },
+                    { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'bar' },
+                      init: null } ] },
+              source: null } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let, var with init, semi',{
+        code: 'export let foo = bar;',
+        SCRIPT: {throws: 'module goal'},
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration:
+              { type: 'VariableDeclaration',
+                kind: 'let',
+                declarations:
+                  [ { type: 'VariableDeclarator',
+                    id: { type: 'Identifier', name: 'foo' },
+                    init: { type: 'Identifier', name: 'bar' } } ] },
+              source: null } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let, two vars with both init, semi',{
+        code: 'export let foo = bar, zoo = boo;',
+        SCRIPT: {throws: 'module goal'},
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration:
+              { type: 'VariableDeclaration',
+                kind: 'let',
+                declarations:
+                  [ { type: 'VariableDeclarator',
+                    id: { type: 'Identifier', name: 'foo' },
+                    init: { type: 'Identifier', name: 'bar' } },
+                    { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'zoo' },
+                      init: { type: 'Identifier', name: 'boo' } } ] },
+              source: null } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('let on next line does not trigger asi', {
+        code: 'export\nlet foo',
+        SCRIPT: {throws: 'module goal'},
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration:
+              { type: 'VariableDeclaration',
+                kind: 'let',
+                declarations:
+                  [ { type: 'VariableDeclarator',
+                    id: { type: 'Identifier', name: 'foo' },
+                    init: null } ] },
+              source: null } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+      });
+
+      test('var on next line does not trigger asi', {
+        code: 'export let\nfoo',
+        SCRIPT: {throws: 'module goal'},
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration:
+              { type: 'VariableDeclaration',
+                kind: 'let',
+                declarations:
+                  [ { type: 'VariableDeclarator',
+                    id: { type: 'Identifier', name: 'foo' },
+                    init: null } ] },
+              source: null } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+      });
+
+      test('asi can not trigger if next token is ident', {
+        code: 'export let\nfoo()',
+        SCRIPT: {throws: 'module goal'},
+        throws: 'ASI',
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+    });
+
+    describe('destructuring', _ => {
+
+      describe('array', _ => {
+
+        // TODO
+        // let [] = x;
+        // let [,] = x;
+        // let [,,] = x;
+        // let [foo] = x;
+        // let [foo,] = x;
+        // let [foo,,] = x;
+        // let [,foo] = x;
+        // let [,,foo] = x;
+        // let [foo,bar] = x;
+        // let [foo,,bar] = x;
+        // let [foo] = x, [foo] = y;
+        // let [foo] = x, b;
+        // let [foo] = x, b = y;
+        // let x, [foo] = y;
+        // let x = y, [foo] = z;
+        // let [foo=a] = c;
+        // let [foo=a,bar] = x;
+        // let [foo,bar=b] = x;
+        // let [foo=a,bar=b] = x;
+        // let [foo];                 // error
+        // let [foo=a];               // error
+        // let [foo], bar;            // error
+        // let foo, [bar];            // error
+
+        test('empty "array" should work even if that does not export anything', {
+          code: 'export let [] = x;',
+          SCRIPT: {throws: 'module goal'},
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExportNamedDeclaration',
+                specifiers: [],
+                declaration:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'ArrayPattern', elements: [] },
+                      init: { type: 'Identifier', name: 'x' } } ] },
+                source: null } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('with one var, no init, semi', {
+          code: 'export let [foo] = arr;',
+          SCRIPT: {throws: 'module goal'},
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExportNamedDeclaration',
+                specifiers: [],
+                declaration:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                source: null } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('double trailing comma is significant', {
+          code: 'export let [foo,,] = arr;',
+          SCRIPT: {throws: 'module goal'},
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExportNamedDeclaration',
+                specifiers: [],
+                declaration:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' }, null ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                source: null } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('two vars', {
+          code: 'export let [foo,bar] = arr;',
+          SCRIPT: {throws: 'module goal'},
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExportNamedDeclaration',
+                specifiers: [],
+                declaration:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'Identifier', name: 'foo' },
+                            { type: 'Identifier', name: 'bar' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                source: null } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('double destruct', {
+          code: 'export let [foo] = arr, [bar] = arr2;',
+          SCRIPT: {throws: 'module goal'},
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExportNamedDeclaration',
+                specifiers: [],
+                declaration:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } },
+                      { type: 'VariableDeclarator',
+                        id:
+                        { type: 'ArrayPattern',
+                          elements: [ { type: 'Identifier', name: 'bar' } ] },
+                        init: { type: 'Identifier', name: 'arr2' } } ] },
+                source: null } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('two vars, with and without initializer', {
+          code: 'export let [foo=a, bar] = arr;',
+          SCRIPT: {throws: 'module goal'},
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExportNamedDeclaration',
+                specifiers: [],
+                declaration:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'AssignmentPattern',
+                            left: { type: 'Identifier', name: 'foo' },
+                            right: { type: 'Identifier', name: 'a' } },
+                            { type: 'Identifier', name: 'bar' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                source: null } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('no assignment without init', {
+          code: 'export let [foo];',
+          SCRIPT: {throws: 'module goal'},
+          throws: 'without an assignment',
+          desc: 'module goal is always strict',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('no assignment with init', {
+          code: 'export let [foo = x];',
+          SCRIPT: {throws: 'module goal'},
+          throws: 'without an assignment',
+          desc: 'module goal is always strict',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('no assignment with two declarations first', {
+          code: 'export let [foo], bar;',
+          SCRIPT: {throws: 'module goal'},
+          throws: 'without an assignment',
+          desc: 'module goal is always strict',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('no assignment with two declarations second', {
+          code: 'export let foo, [bar];',
+          SCRIPT: {throws: 'module goal'},
+          throws: 'without an assignment',
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+      });
+
+      describe('object', _ => {
+
+        // TODO
+        // let {} = x;
+        // let {,} = x;             //?
+        // let {,,} = x;            //?
+        // let {foo} = x;
+        // let {foo,} = x;
+        // let {foo,,} = x;         //?
+        // let {,foo} = x;          //?
+        // let {,,foo} = x;          //?
+        // let {foo,bar} = x;
+        // let {foo,,bar} = x;      //?
+        // let {foo} = x, {foo} = y;
+        // let {foo} = x, b;
+        // let {foo} = x, b = y;
+        // let x, {foo} = y;
+        // let x = y, {foo} = z;
+        // let {foo=a} = x;
+        // let {foo=a,bar} = x;
+        // let {foo,bar=b} = x;
+        // let {foo=a,bar=b} = x;
+        // let {foo:a} = x;
+        // let {foo:a,bar} = x;
+        // let {foo,bar:b} = x;
+        // let {foo:a,bar:b} = x;
+        // let {foo:a,bar:b} = x;
+        // let {foo:a=b} = x;
+        // let {foo:a=b, bar:c=d} = x;
+        // let {foo};
+        // let {foo=a};
+        // let {foo:a};
+        // let {foo:a=b};
+        // let {foo}, bar;
+        // let foo, {bar};
+
+        test('let, destructuring obj with shorthand, no init, semi',{
+          code: 'export let {foo} = arr;',
+          SCRIPT: {throws: 'module goal'},
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExportNamedDeclaration',
+                specifiers: [],
+                declaration:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ObjectPattern',
+                        properties: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                source: null } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('let, destructuring obj with shorthand and trailing comma, no init, semi', {
+          code: 'export let {foo,} = arr;',
+          SCRIPT: {throws: 'module goal'},
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExportNamedDeclaration',
+                specifiers: [],
+                declaration:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id:
+                      { type: 'ObjectPattern',
+                        properties: [ { type: 'Identifier', name: 'foo' } ] },
+                      init: { type: 'Identifier', name: 'arr' } } ] },
+                source: null } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
       });
     });
   });
@@ -578,118 +1661,310 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
     describe('let as var name', _ => {
 
-      test('var decl', {
-        code: 'var let;',
-        throws: 'var name in strict',
-        SLOPPY_SCRIPT: {
-          desc: 'let as a var name is only allowed in (non-module) sloppy mode to support pre-es6-code',
-          ast: {type: 'Program', body: [{
-            type: 'VariableDeclaration',
-            kind: 'var',
-            declarations: [{
-              type: 'VariableDeclarator',
-              id: {type: 'Identifier', name: 'let'},
-              init: null,
-            }],
-          }]},
-        },
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-      });
+      describe('in global', _ => {
 
-      test('let as let name is illegal', {
-        code: 'let let;',
-        throws: 'when binding through',
-        tokens: [$IDENT, $IDENT, $ASI],
-      });
-
-      test('let let does not get asi', {
-        code: 'let\nlet;',
-        throws: 'when binding through',
-        desc: 'and `let` is always an illegal name for const/let bindings',
-        tokens: [$IDENT, $IDENT, $ASI],
-      });
-
-      test('let as name in destructuring is always illegal', {
-        code: 'let [let] = x;',
-        throws: 'when binding through',
-        tokens: [$IDENT, $IDENT, $ASI],
-      });
-
-      test('cannot const let', {
-        code: 'const let',
-        throws: 'when binding through',
-        tokens: [$IDENT, $IDENT, $ASI],
-      });
-
-      test('just let', {
-        code: 'let',
-        throws: true,
-        SLOPPY_SCRIPT: {
-          ast: {
-            type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Identifier', name: 'let'}
-            }]
+        test('var decl', {
+          code: 'var let;',
+          throws: 'var name in strict',
+          SLOPPY_SCRIPT: {
+            desc: 'let as a var name is only allowed in (non-module) sloppy mode to support pre-es6-code',
+            ast: {type: 'Program', body: [{
+              type: 'VariableDeclaration',
+              kind: 'var',
+              declarations: [{
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'let'},
+                init: null,
+              }],
+            }]},
           },
-        },
-        tokens: [$IDENT, $ASI, $ASI], // TODO: the double asi is incorrect because of how we try to correct the path
-                                      // after determining `let` is a var name
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+        });
+
+        test('let as let name is illegal', {
+          code: 'let let;',
+          throws: 'when binding through',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+        });
+
+        test('let let does not get asi', {
+          code: 'let\nlet;',
+          throws: 'when binding through',
+          desc: 'and `let` is always an illegal name for const/let bindings',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+        });
+
+        test('let as name in destructuring is always illegal', {
+          code: 'let [let] = x;',
+          throws: 'when binding through',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+        });
+
+        test('cannot const let', {
+          code: 'const let',
+          throws: 'when binding through',
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('just let', {
+          code: 'let',
+          throws: true,
+          SLOPPY_SCRIPT: {
+            ast: {
+              type: 'Program',
+              body: [{
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'let'}
+              }]
+            },
+          },
+          tokens: [$IDENT, $ASI, $ASI], // TODO: the double asi is incorrect because of how we try to correct the path
+                                        // after determining `let` is a var name
+        });
+
+        test('let with semi', {
+          code: 'let;',
+          throws: true,
+          SLOPPY_SCRIPT: {
+            ast: {
+              type: 'Program',
+              body: [{
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'let'}
+              }]
+            },
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $ASI], // TODO: the double asi is incorrect because of how we try to correct the
+                                               // path after determining `let` is a var name
+        });
+
+        test('prop access as expr stmt', {
+          code: 'let.foo;',
+          throws: 'Missing ident or destructuring',
+          SLOPPY_SCRIPT: {
+            ast: {
+              type: 'Program',
+              body: [{
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'MemberExpression',
+                  object: {type: 'Identifier', name: 'let'},
+                  property: {type: 'Identifier', name: 'foo'},
+                  computed: false,
+                },
+              }],
+            },
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('call as expr stmt', {
+          code: 'let();',
+          throws: 'Missing ident or destructuring',
+          SLOPPY_SCRIPT: {
+            ast: {
+              type: 'Program',
+              body: [{
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'let'},
+                  arguments: [],
+                },
+              }],
+            },
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
       });
 
-      test('let with semi', {
-        code: 'let;',
-        throws: true,
-        SLOPPY_SCRIPT: {
-          ast: {
-            type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Identifier', name: 'let'}
-            }]
+      describe('in for-loop-header', _ => {
+
+        test('var decl', {
+          code: 'for (var let;;);',
+          throws: 'var name in strict',
+          SLOPPY_SCRIPT: {
+            desc: 'let as a var name is only allowed in (non-module) sloppy mode to support pre-es6-code',
+            ast: {
+              type: 'Program',
+              body: [{
+                type: 'ForStatement',
+                init: {
+                  type: 'VariableDeclaration',
+                  kind: 'var',
+                  declarations: [{
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'let'},
+                    init: null,
+                  }],
+                },
+                test: null,
+                update: null,
+                body: {type: 'EmptyStatement'},
+              }],
+            },
           },
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $ASI], // TODO: the double asi is incorrect because of how we try to correct the
-                                             // path after determining `let` is a var name
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let as let name is illegal', {
+          code: 'for (let let;;);',
+          throws: 'when binding through',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('let let does not get asi', {
+          code: 'for (let\nlet;;);',
+          throws: 'when binding through',
+          desc: 'and `let` is always an illegal name for const/let bindings',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('let as name in destructuring is always illegal', {
+          code: 'for (let [let] = x;;);',
+          throws: 'when binding through',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('cannot const let', {
+          code: 'for (const let;;);',
+          throws: 'when binding through',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('just let', {
+          code: 'for (let;;);',
+          throws: true,
+          SLOPPY_SCRIPT: {
+            ast: { type: 'Program',
+              body:
+                [ { type: 'ForStatement',
+                  init: { type: 'Identifier', name: 'let' },
+                  test: null,
+                  update: null,
+                  body: { type: 'EmptyStatement' } } ] },
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let in part 2', {
+          code: 'for (;let;);',
+          throws: true,
+          SLOPPY_SCRIPT: {
+            ast: { type: 'Program',
+              body:
+                [ { type: 'ForStatement',
+                  init: null,
+                  test: { type: 'Identifier', name: 'let' },
+                  update: null,
+                  body: { type: 'EmptyStatement' } } ] },
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let in part 3', {
+          code: 'for (;let;);',
+          throws: true,
+          SLOPPY_SCRIPT: {
+            ast:  { type: 'Program',
+              body:
+                [ { type: 'ForStatement',
+                  init: null,
+                  test: { type: 'Identifier', name: 'let' },
+                  update: null,
+                  body: { type: 'EmptyStatement' } } ] },
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('prop access as expr stmt', {
+          code: 'for (let.foo;;);',
+          throws: 'Missing ident or destructuring',
+          SLOPPY_SCRIPT: {
+            ast: { type: 'Program',
+              body:
+                [ { type: 'ForStatement',
+                  init:
+                  { type: 'MemberExpression',
+                    object: { type: 'Identifier', name: 'let' },
+                    property: { type: 'Identifier', name: 'foo' },
+                    computed: false },
+                  test: null,
+                  update: null,
+                  body: { type: 'EmptyStatement' } } ] },
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('call as expr stmt', {
+          code: 'for (let();;);',
+          throws: 'Missing ident or destructuring',
+          SLOPPY_SCRIPT: {
+            ast: { type: 'Program',
+              body:
+                [ { type: 'ForStatement',
+                  init:
+                  { type: 'CallExpression',
+                    callee: { type: 'Identifier', name: 'let' },
+                    arguments: [] },
+                  test: null,
+                  update: null,
+                  body: { type: 'EmptyStatement' } } ] },
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
       });
 
-      test('prop access as expr stmt', {
-        code: 'let.foo;',
-        throws: 'Missing ident or destructuring',
-        SLOPPY_SCRIPT: {
-          ast: {
-            type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'MemberExpression',
-                object: {type: 'Identifier', name: 'let'},
-                property: {type: 'Identifier', name: 'foo'},
-                computed: false,
-              },
-            }],
-          },
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-      });
+      describe('in export decl (always strict mode)', _ => {
 
-      test('call as expr stmt', {
-        code: 'let();',
-        throws: 'Missing ident or destructuring',
-        SLOPPY_SCRIPT: {
-          ast: {
-            type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'CallExpression',
-                callee: {type: 'Identifier', name: 'let'},
-                arguments: [],
-              },
-            }],
-          },
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        test('var decl', {
+          code: 'export var let;',
+          throws: true,
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let as let name is illegal', {
+          code: 'export let let;',
+          throws: true,
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('let let does not get asi', {
+          code: 'export let\nlet;',
+          throws: true,
+          desc: 'and `let` is always an illegal name for const/let bindings',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('let as name in destructuring is always illegal', {
+          code: 'export let [let] = x;',
+          throws: true,
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('cannot const let', {
+          code: 'export const let;',
+          throws: true,
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('just let', {
+          code: 'export let;',
+          throws: true,
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('prop access as expr stmt', {
+          code: 'export let.foo;',
+          throws: true,
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('call as expr stmt', {
+          code: 'export let();',
+          throws: true,
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
       });
     });
 
@@ -742,6 +2017,12 @@ module.exports = (describe, test) => describe('let statement', _ => {
           throws: 'without an assignment',
           desc: 'the newline is confusing here but since the whole thing could be a valid destructuring the token is not an error itself and by the time the parser realizes it is the ASI is not applied retroactively',
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('in for-loop-header', {
+          code: 'for (let[foo];;);',
+          throws: 'without an assignment',
+          tokens: [],
         });
 
         test('in regular function', {
@@ -904,6 +2185,3 @@ module.exports = (describe, test) => describe('let statement', _ => {
     });
   });
 });
-
-// in exports
-// in for-header

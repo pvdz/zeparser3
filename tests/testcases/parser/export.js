@@ -12,6 +12,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
 
   test('re-export everything from another module (double string)',{
     code: 'export * from "foo"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportAllDeclaration', source: {type: 'Literal', value: '<TODO>', raw: '"foo"'}},
     ]},
@@ -20,6 +21,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('re-export everything from another module (single string)',{
     code: `export * from 'foo'`,
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportAllDeclaration', source: {type: 'Literal', value: '<TODO>', raw: '\'foo\''}},
     ]},
@@ -28,6 +30,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('empty export',{
     code: 'export {}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -40,6 +43,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export one key',{
     code: 'export {x}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -54,6 +58,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export one key aliased',{
     code: 'export {x as a}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -68,6 +73,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export one key, trailing comma',{
     code: 'export {x,}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -82,6 +88,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('re-export one key',{
     code: 'export {x} from "foo"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -96,6 +103,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('re-export one key aliased',{
     code: 'export {x as a} from "foo"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -110,6 +118,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('re-export one key, trailing comma',{
     code: 'export {x,} from "foo"',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -124,6 +133,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export one key aliased, trailing comma',{
     code: 'export {x as a,}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -138,6 +148,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export two keys',{
     code: 'export {x, y}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -153,6 +164,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export two keys aliased',{
     code: 'export {x as a, y as b}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -168,6 +180,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export two keys, trailing comma',{
     code: 'export {x, y,}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -183,6 +196,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export two keys aliased, trailing comma',{
     code: 'export {x as a, y as b,}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [
@@ -198,6 +212,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export var statement, one var',{
     code: 'export var x',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -215,6 +230,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export var statement, two vars',{
     code: 'export var x, y',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -233,6 +249,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export var statement, two vars, with init',{
     code: 'export var x = 10, y = 20',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -251,6 +268,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export let statement, one var',{
     code: 'export let x',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -268,6 +286,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export let statement, two vars',{
     code: 'export let x, y',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -286,6 +305,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export let statement, two vars, with init',{
     code: 'export let x = 10, y = 20',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -304,6 +324,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export const statement, one var',{
     code: 'export const x',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -321,6 +342,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export const statement, two vars',{
     code: 'export const x, y',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -339,6 +361,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export const statement, two vars, with init',{
     code: 'export const x = 10, y = 20',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -357,6 +380,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export a named function',{
     code: 'export function f(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -376,6 +400,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('export a named async function',{
     code: 'export async function f(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -395,23 +420,21 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('non-default export of an anonymous async function is illegal',{
     code: 'export async function(){}',
-    MODULE: {
-      throws: 'missing required ident',
-    },
-    SCRIPT: {
-      throws: 'missing required ident',
-    },
+    MODULE: {throws: 'missing required ident'},
+    SCRIPT: {throws: 'module goal'},
     tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
   
   test('legacy meaning of `async` cant save this export from failing in SCRIPT mode',{
     code: 'export async',
-    throws: 'Can only export async functions',
+    SCRIPT: {throws: 'module goal'},
+    MODULE: {throws: 'Can only export async functions'},
     tokens: [$IDENT, $IDENT, $ASI],
   });
   
   test('export a named generator function',{
     code: 'export function* f(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportNamedDeclaration',
         specifiers: [],
@@ -431,6 +454,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('default export a named function',{
     code: 'export default function f(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
         declaration: {type: 'FunctionDeclaration',
@@ -448,6 +472,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('default export a named async function',{
     code: 'export default async function f(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
         declaration: {
@@ -466,6 +491,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('default export a named generator function',{
     code: 'export default function* f(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
         declaration: {type: 'FunctionDeclaration',
@@ -483,6 +509,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('default export an anonymous function',{
     code: 'export default function(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
         declaration: {type: 'FunctionDeclaration',
@@ -500,6 +527,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
   
   test('default export an anonymous async function',{
     code: 'export default async function(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
         declaration: {type: 'FunctionDeclaration',
@@ -517,6 +545,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
 
   test('default export an anonymous generator function',{
     code: 'export default function*(){}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [
       {type: 'ExportDefaultDeclaration',
         declaration: {type: 'FunctionDeclaration',
@@ -534,6 +563,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
 
   test('export a class',{
     code: 'export class x {}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ExportNamedDeclaration',
       specifiers: [],
@@ -550,6 +580,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
 
   test('default export a named class',{
     code: 'export default class x {}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ExportDefaultDeclaration',
       declaration: {
@@ -564,6 +595,7 @@ module.exports = (describe, test) => describe('export declaration', _ => {
 
   test('default export an anonymous class',{
     code: 'export default class {}',
+    SCRIPT: {throws: 'module goal'},
     ast: {type: 'Program', body: [{
       type: 'ExportDefaultDeclaration',
       declaration: {
