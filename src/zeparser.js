@@ -2001,12 +2001,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function parseBindingPatterns(lexerFlags, kind, astProp) {
-    let letWasName = parseBindingPatternAndAssignment(lexerFlags, kind === 'let' ? CAN_BE_LET_VAR : LET_IS_KEYWORD, astProp);
+    let letWasName = parseBindingPatternAndAssignment(lexerFlags, kind, kind === 'let' ? CAN_BE_LET_VAR : LET_IS_KEYWORD, astProp);
     if (letWasName === LET_IS_VAR_NAME) return LET_IS_VAR_NAME;
 
     while (curc === $$COMMA_2C) {
       ASSERT_skipRex(',', lexerFlags); // TODO: optimize; next must be destructuringly-valid
-      parseBindingPatternAndAssignment(lexerFlags, LET_IS_KEYWORD, astProp);
+      parseBindingPatternAndAssignment(lexerFlags, kind, LET_IS_KEYWORD, astProp);
     }
 
     return LET_IS_KEYWORD;
@@ -2017,9 +2017,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex(',', lexerFlags);
     }
   }
-  function parseBindingPatternAndAssignment(lexerFlags, letVarState, astProp) {
+  function parseBindingPatternAndAssignment(lexerFlags, bindingKind, letVarState, astProp) {
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
 
+    ASSERT(bindingKind === 'var' || bindingKind === 'let' || bindingKind === 'const', 'if kind changes checks below may need to be updated');
     AST_open(astProp, 'VariableDeclarator');
 
     let mustHaveAssignment = false; // destructurings must always be followed by an assignment
@@ -2027,7 +2028,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // normal
       // TODO: verify ident is valid here
 
-      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE && curtok.str === 'let') THROW('Can not use `let` as var name in strict mode');
+      if (curtok.str === 'let') {
+        if (bindingKind !== 'var') THROW('Can not use `let` when binding through `let` or `const`');
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Can not use `let` as var name in strict mode');
+      }
 
       AST_setIdent('id', curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
@@ -2039,7 +2043,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
       skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // (note: circumvent template body/tail) TODO: optimize; dont think this can ever start with a forward slash
       AST_set('properties', []);
-      parseBindingPatternsNested(lexerFlagsNoTemplate, 'properties');
+      parseBindingPatternsNested(lexerFlagsNoTemplate, bindingKind, 'properties');
       skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close(); // ObjectPattern
     } else if (curc === $$SQUARE_L_5B) {
@@ -2049,7 +2053,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_open('id', 'ArrayPattern');
       skipRexOrDieSingleChar($$SQUARE_L_5B, lexerFlags); // TODO: optimize; dont think this can ever start with a forward slash
       AST_set('elements', []);
-      parseBindingPatternsNested(lexerFlags, 'elements');
+      parseBindingPatternsNested(lexerFlags, bindingKind, 'elements');
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close(); // ArrayPattern
     } else if (letVarState === CAN_BE_LET_VAR && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
@@ -2072,19 +2076,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close(); // VariableDeclarator
     return LET_IS_KEYWORD;
   }
-  function parseBindingPatternsNested(lexerFlags, astProp) {
-    parseElisions(lexerFlags, astProp);
+  function parseBindingPatternsNested(lexerFlags, bindingKind, astProp) {
     do {
-      parseBindingPatternNested(lexerFlags, astProp);
+      parseElisions(lexerFlags, astProp);
+      parseBindingPatternNested(lexerFlags, bindingKind, astProp);
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipRex(',', lexerFlags); // TODO: can next be fwd slash?
-      parseElisions(lexerFlags, astProp);
     } while (true);
   }
-  function parseBindingPatternNested(lexerFlags, astProp) {
+  function parseBindingPatternNested(lexerFlags, bindingKind, astProp) {
     if (curtype === $IDENT) {
-      // normal
+      // var name, so this is the foo inside the array (or in any nested level) of `let [foo] = bar`
       // TODO: verify ident is valid here
+
+      if (bindingKind !== 'var' && curtok.str === 'let') THROW('Can not use `let` when binding through `let` or `const`');
 
       AST_setIdent(astProp, curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if end of decl, next line can start with regex
@@ -2095,7 +2100,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
       skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // (note: circumvent template body/tail) TODO: optimize; dont think this can ever start with a forward slash
       AST_set('properties', []);
-      parseBindingPatternsNested(lexerFlagsNoTemplate, 'properties');
+      parseBindingPatternsNested(lexerFlagsNoTemplate, bindingKind, 'properties');
       skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close();
     } else if (curc === $$SQUARE_L_5B) {
@@ -2104,7 +2109,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_open(astProp, 'ArrayPattern');
       skipRexOrDieSingleChar($$SQUARE_L_5B, lexerFlags); // TODO: dont think next line can start with fwd slash
       AST_set('elements', []);
-      parseBindingPatternsNested(lexerFlags, 'elements');
+      parseBindingPatternsNested(lexerFlags, bindingKind, 'elements');
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close();
     } else if (curc !== $$SQUARE_R_5D && curc !== $$CURLY_R_7D) {

@@ -105,6 +105,29 @@ module.exports = (describe, test) => describe('let statement', _ => {
       ]},
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
+
+    test('var on next line does not trigger asi', {
+      code: 'let\nfoo',
+      ast: {
+        type: 'Program',
+        body: [{
+          type: 'VariableDeclaration',
+          kind: 'let',
+          declarations: [{
+            type: 'VariableDeclarator',
+            id: {type: 'Identifier', name: 'foo'},
+            init: null
+          }]
+        }]
+      },
+      tokens: [$IDENT, $IDENT, $ASI],
+    });
+
+    test('asi can not trigger if next token is ident', {
+      code: 'let\nfoo()',
+      throws: 'ASI',
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
   });
 
   describe('destructuring', _ => {
@@ -573,6 +596,63 @@ module.exports = (describe, test) => describe('let statement', _ => {
         tokens: [$IDENT, $IDENT, $PUNCTUATOR],
       });
 
+      test('let as let name is illegal', {
+        code: 'let let;',
+        throws: 'when binding through',
+        tokens: [$IDENT, $IDENT, $ASI],
+      });
+
+      test('let let does not get asi', {
+        code: 'let\nlet;',
+        throws: 'when binding through',
+        desc: 'and `let` is always an illegal name for const/let bindings',
+        tokens: [$IDENT, $IDENT, $ASI],
+      });
+
+      test('let as name in destructuring is always illegal', {
+        code: 'let [let] = x;',
+        throws: 'when binding through',
+        tokens: [$IDENT, $IDENT, $ASI],
+      });
+
+      test('cannot const let', {
+        code: 'const let',
+        throws: 'when binding through',
+        tokens: [$IDENT, $IDENT, $ASI],
+      });
+
+      test('just let', {
+        code: 'let',
+        throws: true,
+        SLOPPY_SCRIPT: {
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ExpressionStatement',
+              expression: {type: 'Identifier', name: 'let'}
+            }]
+          },
+        },
+        tokens: [$IDENT, $ASI, $ASI], // TODO: the double asi is incorrect because of how we try to correct the path
+                                      // after determining `let` is a var name
+      });
+
+      test('let with semi', {
+        code: 'let;',
+        throws: true,
+        SLOPPY_SCRIPT: {
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ExpressionStatement',
+              expression: {type: 'Identifier', name: 'let'}
+            }]
+          },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $ASI], // TODO: the double asi is incorrect because of how we try to correct the
+                                             // path after determining `let` is a var name
+      });
+
       test('prop access as expr stmt', {
         code: 'let.foo;',
         throws: 'Missing ident or destructuring',
@@ -627,10 +707,47 @@ module.exports = (describe, test) => describe('let statement', _ => {
           tokens: [],
         });
 
+        test('proper case with confusing newline', {
+          code: 'let\n[x] = x;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}]},
+              init: {type: 'Identifier', name: 'x'},
+            }],
+          }]},
+          desc: 'asi is only applied when the next token would lead to parse error; in this case the [ does not so it cannot parse this as prop-access',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('proper case with less confusing newline', {
+          code: 'let [x]\n= x;',
+          ast: {type: 'Program', body: [{
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [{
+              type: 'VariableDeclarator',
+              id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}]},
+              init: {type: 'Identifier', name: 'x'},
+            }],
+          }]},
+          desc: 'I think this is less confusing and not a super important test',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('bad confusing newline', {
+          code: 'let\n[foo];',
+          throws: 'without an assignment',
+          desc: 'the newline is confusing here but since the whole thing could be a valid destructuring the token is not an error itself and by the time the parser realizes it is the ASI is not applied retroactively',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
         test('in regular function', {
           code: 'function f(){ let[foo]; }',
           throws: 'without an assignment',
-          tokens: [],
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('in arrow expr body', {
@@ -682,7 +799,4 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
 // in exports
 // in for-header
-// let\n[         (asi?)
 // let\n{         (ambiguous with object destruct)
-// let\nfoo       (asi only applied when next token is unparseable which is not the case becuase `let foo` is valid)
-// let\nfoo()     (same as above, no backtracking, the error should be thrown for parens: `let foo()`)
