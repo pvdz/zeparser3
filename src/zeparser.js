@@ -211,6 +211,8 @@ const NOT_ARROW = false;
 const CAN_BE_LET_VAR = true;
 const LET_IS_VAR_NAME = true;
 const LET_IS_KEYWORD = false;
+const WAS_VAR_NAME = true;
+const WAS_KEYWORD = false;
 const FROM_STATEMENT = true;
 const NOT_FROM_STATEMENT = false;
 
@@ -1979,8 +1981,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function _parseAnyVarStatement(lexerFlags, kind, astProp) {
-    _parseAnyVarDecls(lexerFlags, kind, FROM_STATEMENT, astProp);
-    parseSemiOrAsi(lexerFlags);
+    // note: the `let` statement may turn out to be a regular expression statement with `let` being a var name
+    // in that case an expression statement is parsed, which may still also be a labeled statement. Either will
+    // lead to the semi already being parsed so we want to skip that here to prevent double checks (and tokens).
+    let nameOrKeyword = _parseAnyVarDecls(lexerFlags, kind, FROM_STATEMENT, astProp);
+    if (nameOrKeyword === WAS_KEYWORD) parseSemiOrAsi(lexerFlags);
   }
   function _parseAnyVarDecls(lexerFlags, kind, from, astProp) {
     // var, let, const. apply additional checks for let/const.
@@ -2009,7 +2014,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // default strict mode which would not allow this case.
         parseValueFromIdent(lexerFlags, identToken, astProp);
       }
+      return WAS_VAR_NAME;
     }
+    return WAS_KEYWORD;
   }
   function parseBindingPatterns(lexerFlags, kind, astProp) {
     let letWasName = parseBindingPatternAndAssignment(lexerFlags, kind, kind === 'let' ? CAN_BE_LET_VAR : LET_IS_KEYWORD, astProp);

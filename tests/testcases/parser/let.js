@@ -1718,8 +1718,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
               }]
             },
           },
-          tokens: [$IDENT, $ASI, $ASI], // TODO: the double asi is incorrect because of how we try to correct the path
-                                        // after determining `let` is a var name
+          tokens: [$IDENT, $ASI],
         });
 
         test('let with semi', {
@@ -1734,8 +1733,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
               }]
             },
           },
-          tokens: [$IDENT, $PUNCTUATOR, $ASI], // TODO: the double asi is incorrect because of how we try to correct the
-                                               // path after determining `let` is a var name
+          tokens: [$IDENT, $PUNCTUATOR],
         });
 
         test('prop access as expr stmt', {
@@ -1755,7 +1753,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
               }],
             },
           },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
 
         test('call as expr stmt', {
@@ -1774,7 +1772,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
               }],
             },
           },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
 
@@ -2181,6 +2179,162 @@ module.exports = (describe, test) => describe('let statement', _ => {
           tokens: [],
           desc: 'classes are implicitly always strict',
         });
+      });
+    });
+
+    describe('as a label', _ => {
+
+      test('in global', {
+        code: 'let: foo;',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'LabeledStatement',
+                label: { type: 'Identifier', name: 'let' },
+                body:
+                { type: 'ExpressionStatement',
+                  expression: { type: 'Identifier', name: 'foo' } } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR ],
+      });
+
+      test('in function', {
+        code: 'function f(){ let: foo; }',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                expression: false,
+                id: { type: 'Identifier', name: 'f' },
+                params: [],
+                body:
+                { type: 'BlockStatement',
+                  body:
+                    [ { type: 'LabeledStatement',
+                      label: { type: 'Identifier', name: 'let' },
+                      body:
+                      { type: 'ExpressionStatement',
+                        expression: { type: 'Identifier', name: 'foo' } } } ] } } ] },
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('as continue arg', {
+        code: 'while (true) let: continue let;',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'WhileStatement',
+                test: { type: 'Literal', value: true, raw: 'true' },
+                body:
+                { type: 'LabeledStatement',
+                  label: { type: 'Identifier', name: 'let' },
+                  body:
+                  { type: 'ContinueStatement',
+                    label: { type: 'Identifier', name: 'let' } } } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
+      });
+
+      test('as sub-statement statement', {
+        code: 'if (x) let: y;',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'IfStatement',
+                test: { type: 'Identifier', name: 'x' },
+                consequent:
+                { type: 'LabeledStatement',
+                  label: { type: 'Identifier', name: 'let' },
+                  body:
+                  { type: 'ExpressionStatement',
+                    expression: { type: 'Identifier', name: 'y' } } },
+                alternate: null } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('as nested label', {
+        code: 'foo: let: y;',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'LabeledStatement',
+                label: { type: 'Identifier', name: 'foo' },
+                body:
+                { type: 'LabeledStatement',
+                  label: { type: 'Identifier', name: 'let' },
+                  body:
+                  { type: 'ExpressionStatement',
+                    expression: { type: 'Identifier', name: 'y' } } } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('as continue arg', {
+        code: 'while (true) let: continue let;',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'WhileStatement',
+                test: { type: 'Literal', value: true, raw: 'true' },
+                body:
+                { type: 'LabeledStatement',
+                  label: { type: 'Identifier', name: 'let' },
+                  body:
+                  { type: 'ContinueStatement',
+                    label: { type: 'Identifier', name: 'let' } } } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
+      });
+
+      test('in arrow', {
+        code: '_ => { let: foo; }',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExpressionStatement',
+                expression:
+                { type: 'ArrowFunctionExpression',
+                  params: [ { type: 'Identifier', name: '_' } ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  body:
+                  { type: 'BlockStatement',
+                    body:
+                      [ { type: 'LabeledStatement',
+                        label: { type: 'Identifier', name: 'let' },
+                        body:
+                        { type: 'ExpressionStatement',
+                          expression: { type: 'Identifier', name: 'foo' } } } ] } } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('as label and var name', {
+        code: 'let: let;',
+        throws: 'Missing ident or destructuring',
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'LabeledStatement',
+                label: { type: 'Identifier', name: 'let' },
+                body:
+                { type: 'ExpressionStatement',
+                  expression: { type: 'Identifier', name: 'let' } } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
     });
   });
