@@ -38,32 +38,40 @@ if (!fs.statSync(PATH262).isDirectory()) {
   read(files, PATH262, '');
 
   module.exports = function f(describe, test, list = files) {
-    for (let key in list) {
+    for (let key in list) if (list.hasOwnProperty(key)) {
       console.log('->', key)
       let obj = list[key];
       if (key[0] === '#') {
         describe(key.slice(1), f.bind(undefined, describe, test, obj))
       } else {
         let code = obj.contents.toString();
+        let headerEndMarker = '---*/';
+        let headerEnd = code.indexOf(headerEndMarker);
+        if (headerEnd < 0) throw new Error('test262: file missing header: ' + key);
+
         // some 262 tests target stuff still in staging. simply start those lines with ZIGNORE to exclude them.
         if (code.indexOf('ZIGNORE') !== 0) {
-          if (code.indexOf('negative:') >= 0) {
-            test(key, {
-              code: code.slice(code.indexOf('---*/') + '---*/'.length), // dont care so much about the (mandatory) header
-              throws: true, // for now, let's not care about the actual error too much (must still be a handled path)
-              tokens: true,
-              debug: 'test6262 file path: ' + obj.path,
-              startInStrictMode: code.indexOf('[onlyStrict]') >= 0 ? true : code.indexOf('[noStrict]') >= 0 ? false : undefined,
-            });
-          } else {
-            test(key, {
-              code: code.slice(code.indexOf('---*/') + '---*/'.length), // dont care so much about the (mandatory) header
-              ast: true,
-              tokens: true,
-              debug: 'test6262 file path: ' + obj.path,
-              startInStrictMode: code.indexOf('[onlyStrict]') >= 0 ? true : code.indexOf('[noStrict]') >= 0 ? false : undefined,
-            });
+          let testObj = {
+            code: code.slice(headerEnd + headerEndMarker.length), // dont care so much about the (mandatory) header
+            tokens: true,
+            debug: 'test6262 file path: ' + obj.path,
+          };
+
+          // TODO: can we make this check the opposite instead? throw/pass when that's not expected
+          if (code.indexOf('[noStrict]')) {
+            testObj.STRICT = {SKIP:true};
+            testObj.MODULE = {SKIP:true};
           }
+          if (code.indexOf('[onlyStrict]') >= 0) testObj.SLOPPY = {SKIP:true};
+
+          if (code.indexOf('negative:') >= 0) {
+            // "negative:" means the test is expected to throw
+            testObj.throws = true;
+          } else {
+            testObj.ast = true;
+          }
+
+          test(key, testObj);
         }
       }
     }

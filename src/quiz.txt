@@ -31,6 +31,7 @@ What does `new.target` refer to in
 What does this do? `new/foo/g.bar();`
 Can you use new.target as function arg defaults?
 `let [foo].bar;` is bad. Is `let\n[foo].bar;` allowed because ASI?
+Can you have a for-in or for-of loop without a key? `for (let [] in {a:1, b:2, c:3}) console.log('x');`
 
 function f(a,b){ b=5; console.log(arguments[1]); } f(); f(1); f(1,2); f(1, undefined); // implicit arguments bind
 

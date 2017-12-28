@@ -111,7 +111,7 @@ function override(wantObj, baseObj) {
   }
   return baseObj;
 }
-function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
+function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   let {
     ast: expectedAst,
     SCRIPT: scriptModeObj,
@@ -119,7 +119,8 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
     throws: expectedThrows,
     tokens: expectedTokens,
     startInStrictMode,
-    debug: _debug
+    debug: _debug,
+    SKIP,
   } = testDetails;
 
   ++testj;
@@ -136,6 +137,7 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
       expectedAst = undefined;
       expectedThrows = scriptModeObj.throws;
     }
+    if ('SKIP' in scriptModeObj) SKIP = scriptModeObj.SKIP;
     if (scriptModeObj.ast) {
       expectedThrows = undefined;
       expectedAst = scriptModeObj.ast;
@@ -144,6 +146,7 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
     if (scriptModeObj.startInStrictMode !== undefined) startInStrictMode = scriptModeObj.startInStrictMode;
   }
   if (mode === MODE_MODULE && moduleModeObj) {
+    if ('SKIP' in moduleModeObj) SKIP = moduleModeObj.SKIP;
     if (moduleModeObj.STRICT || moduleModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
     if (moduleModeObj.throws) {
       expectedAst = undefined;
@@ -163,27 +166,32 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
     expectedThrows,
     expectedTokens,
     startInStrictMode,
-    _debug
+    _debug,
+    SKIP,
   };
 
   let prefix = parserDesc + ': ' + testi + testSuffix;
 
+  if (SKIP) {
+    console.log(`${prefix} SKIP: \`${toPrint(code)}\``);
+    return;
+  }
+
   let wasError = '';
   let stack;
-  let e;
   try {
     var obj = Parser(code, mode, COLLECT_TOKENS_SOLID, {strictMode: startInStrictMode});
-    e = new Error(); // for stack
   } catch(f) {
     wasError = f.message;
     var obj = '' + f.stack;
-    e = f;
+    stack = f.stack;
   }
-  stack = e.stack;
 
-  let passed = false;
   if (!expectedTokens || (!expectedThrows && !expectedAst)) {
-    LOG_THROW(prefix, `Bad tst case: Missing expected token list, or ast|throws for: \`${toPrint(code)}\``);
+    LOG_THROW(prefix, `Bad tst case: Missing ${!expectedTokens ? 'expected token list' : 'ast|throws'} for: \`${toPrint(code)}\``, code, stack, desc);
+    console.log('testDetails:', testDetails);
+    console.log('finalTestOptions:', finalTestOptions);
+    ++fail;
   } else if (wasError) {
     if (!expectedThrows) {
       LOG_THROW(prefix, 'unexpected CRASH', code, stack, desc);
@@ -198,7 +206,6 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
     } else if (expectedThrows === true || wasError.indexOf(expectedThrows) >= 0) {
       console.log(`${prefix} PASS: \`${toPrint(code)}\` :: (properly throws)`);
       ++pass;
-      passed = true;
     } else {
       LOG_THROW(prefix, 'thrown message mismatch', code, stack, desc);
       console.log('Thrown error:', wasError);
@@ -244,13 +251,11 @@ function __one(Parser, testSuffix, code, mode, testDetails, desc, from) {
   } else {
     console.log(`${prefix} PASS: \`${toPrint(code)}\``);
     ++pass;
-    passed = true;
   }
 
   if (STOP_AFTER_FAIL && fail) throw 'stopped';
-  return passed;
 
-  function LOG_THROW(prefix, errmsg, code, stack, desc) {
+  function LOG_THROW(prefix, errmsg, code, stack = new Error(errmsg).stack, desc) {
     console.log('\n');
     console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
     if (stack) console.log('Stack:', stack);

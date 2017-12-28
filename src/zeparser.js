@@ -213,8 +213,10 @@ const LET_IS_VAR_NAME = true;
 const LET_IS_KEYWORD = false;
 const WAS_VAR_NAME = true;
 const WAS_KEYWORD = false;
-const FROM_STATEMENT = true;
-const NOT_FROM_STATEMENT = false;
+const FROM_STATEMENT_START = 1;
+const FROM_FOR_HEADER_FIRST_DECL = 2;
+const FROM_EXPORT_DECL = 3;
+const FROM_FOR_HEADER_MULTI_DECL = 4; // parsing more than one declaration inside a for-header means it can't be in/of
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -1490,16 +1492,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       } else if (curc === $$V_76 && curtok.str === 'var') {
         // export var <bindings>
-        _parseAnyVarDecls(lexerFlags, 'var', NOT_FROM_STATEMENT, 'declaration');
+        _parseAnyVarDecls(lexerFlags, 'var', FROM_EXPORT_DECL, 'declaration');
         AST_set('source', null);
       } else if (curc === $$L_6C && curtok.str === 'let') {
         // export let <bindings>
-        _parseAnyVarDecls(lexerFlags, 'let', NOT_FROM_STATEMENT, 'declaration');
+        _parseAnyVarDecls(lexerFlags, 'let', FROM_EXPORT_DECL, 'declaration');
         AST_set('source', null);
       } else if (curc === $$C_63) {
         if (curtok.str === 'const') {
           // export const <bindings>
-          _parseAnyVarDecls(lexerFlags, 'const', NOT_FROM_STATEMENT, 'declaration');
+          _parseAnyVarDecls(lexerFlags, 'const', FROM_EXPORT_DECL, 'declaration');
         } else if (curtok.str === 'class') {
           // export class ...
           parseClass(lexerFlags, IDENT_REQUIRED, 'declaration');
@@ -1612,7 +1614,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         case 'var':
         case 'let':
         case 'const':
-          _parseAnyVarDecls(lexerFlags, curtok.str, NOT_FROM_STATEMENT, astProp);
+          _parseAnyVarDecls(lexerFlags, curtok.str, FROM_FOR_HEADER_FIRST_DECL, astProp);
           assignable = true; // i think.
           break;
 
@@ -1984,7 +1986,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // note: the `let` statement may turn out to be a regular expression statement with `let` being a var name
     // in that case an expression statement is parsed, which may still also be a labeled statement. Either will
     // lead to the semi already being parsed so we want to skip that here to prevent double checks (and tokens).
-    let nameOrKeyword = _parseAnyVarDecls(lexerFlags, kind, FROM_STATEMENT, astProp);
+    let nameOrKeyword = _parseAnyVarDecls(lexerFlags, kind, FROM_STATEMENT_START, astProp);
     if (nameOrKeyword === WAS_KEYWORD) parseSemiOrAsi(lexerFlags);
   }
   function _parseAnyVarDecls(lexerFlags, kind, from, astProp) {
@@ -1997,7 +1999,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let identToken = curtok;
     ASSERT_skipAny(kind, lexerFlags); // TODO: optimize; next must be ident or destructuring [{, except edge case `let`
 
-    let letWasName = parseBindingPatterns(lexerFlags, kind, 'declarations');
+    let letWasName = parseBindingPatterns(lexerFlags, kind, from, 'declarations');
     AST_close(); // VariableDeclarator (or ExpressionStatement in case of `let` in sloppy)
 
     if (letWasName === LET_IS_VAR_NAME) {
@@ -2006,7 +2008,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // This means we must try to parse it as a regular expression
       // we built up stuff in VariableDeclaration and we have to destroy that now
       AST_popOrClear(astProp, 'VariableDeclaration');
-      if (from === FROM_STATEMENT) {
+      if (from === FROM_STATEMENT_START) {
         _parseIdentLabelOrExpressionStatement(lexerFlags, identToken, astProp);
       } else {
         // this has to be a for-header since an export (the only other place where
@@ -2018,13 +2020,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return WAS_KEYWORD;
   }
-  function parseBindingPatterns(lexerFlags, kind, astProp) {
-    let letWasName = parseBindingPatternAndAssignment(lexerFlags, kind, kind === 'let' ? CAN_BE_LET_VAR : LET_IS_KEYWORD, astProp);
+  function parseBindingPatterns(lexerFlags, kind, from, astProp) {
+    let letWasName = parseBindingPatternAndAssignment(lexerFlags, kind, kind === 'let' ? CAN_BE_LET_VAR : LET_IS_KEYWORD, from, astProp);
     if (letWasName === LET_IS_VAR_NAME) return LET_IS_VAR_NAME;
 
+    // TODO: we can do logic better in this function :/
     while (curc === $$COMMA_2C) {
+      if (from === FROM_FOR_HEADER_FIRST_DECL) from = FROM_FOR_HEADER_MULTI_DECL; // no longer allow in/of as the `=`
       ASSERT_skipRex(',', lexerFlags); // TODO: optimize; next must be destructuringly-valid
-      parseBindingPatternAndAssignment(lexerFlags, kind, LET_IS_KEYWORD, astProp);
+      parseBindingPatternAndAssignment(lexerFlags, kind, LET_IS_KEYWORD, from, astProp);
+    }
+    if (from === FROM_FOR_HEADER_MULTI_DECL && (curtok.str === 'in' || curtok.str === 'of')) {
+      THROW('For-in/of can only have one var binding');
     }
 
     return LET_IS_KEYWORD;
@@ -2035,7 +2042,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex(',', lexerFlags);
     }
   }
-  function parseBindingPatternAndAssignment(lexerFlags, bindingKind, letVarState, astProp) {
+  function parseBindingPatternAndAssignment(lexerFlags, bindingKind, letVarState, from, astProp) {
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
 
     ASSERT(bindingKind === 'var' || bindingKind === 'let' || bindingKind === 'const', 'if kind changes checks below may need to be updated');
@@ -2087,8 +2094,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex($PUNCTUATOR, lexerFlags);
       parseExpression(lexerFlags, 'init');
     } else if (mustHaveAssignment) {
-      THROW('Cannot have `let[...]` here without an assignment');
+      if (from === FROM_FOR_HEADER_FIRST_DECL) {
+        // for-loop, for-in, for-of. already confirmed it wasn't `=` so we must find `in` or `of` here.
+        if (curtok.str === 'of' || curtok.str === 'in') {
+          AST_set('init', null);
+        } else {
+          THROW('In a for-header `let [...]` destructuring must be followed by `=`, `in`, or `of`, it was `' + curtok.str + '`');
+        }
+      } else {
+        THROW('Cannot have `let [...]` destructuring here without an assignment');
+      }
     } else {
+      ASSERT(!mustHaveAssignment || (from !== FROM_FOR_HEADER_FIRST_DECL && (curtok.str === 'of' || curtok.str === 'in')), 'do I need to make this an active check? in a for-header a destructuring must have an assignment, `of`, or `in` keyword following it');
+      // cases where init is null:
+      //   `let foo, bar` (non-destructuring without init)
+      //   `for (let [foo] in bar);
+      //   `for (let [foo] of bar);
       AST_set('init', null);
     }
     AST_close(); // VariableDeclarator
