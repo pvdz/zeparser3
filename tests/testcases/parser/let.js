@@ -578,133 +578,298 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
     describe('regular vars', _ => {
 
-      test('let, one var, no init, semi',{
-        code: 'for (let foo;;);',
-        ast: {
-          type: 'Program',
-          body: [{
-            type: 'ForStatement',
-            init: {
-              type: 'VariableDeclaration',
-              kind: 'let',
-              declarations: [{
-                type: 'VariableDeclarator',
-                id: {type: 'Identifier', name: 'foo'},
-                init: null
-              }]
-            },
-            test: null,
-            update: null,
-            body: {type: 'EmptyStatement'}
-          }]
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      describe('regular for-loop', _ => {
+
+        test('let, one var, no init, semi',{
+          code: 'for (let foo;;);',
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ForStatement',
+              init: {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [{
+                  type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'foo'},
+                  init: null
+                }]
+              },
+              test: null,
+              update: null,
+              body: {type: 'EmptyStatement'}
+            }]
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, two vars, no init, semi',{
+          code: 'for (let foo, bar;;);',
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ForStatement',
+              init: {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [{
+                  type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'foo'},
+                  init: null
+                }, {
+                  type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'bar'},
+                  init: null
+                }],
+              },
+              test: null,
+              update: null,
+              body: {type: 'EmptyStatement'},
+            }],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, var with init, semi',{
+          code: 'for (let foo = bar;;);',
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ForStatement',
+              init: {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [{
+                  type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'foo'},
+                  init: {type: 'Identifier', name: 'bar'},
+                }],
+              },
+              test: null,
+              update: null,
+              body: {type: 'EmptyStatement'},
+            }],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, two vars with both init, semi',{
+          code: 'for (let foo = bar, zoo = boo;;);',
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ForStatement',
+              init: {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [{
+                  type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'foo'},
+                  init: {type: 'Identifier', name: 'bar'}
+                }, {
+                  type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'zoo'},
+                  init: {type: 'Identifier', name: 'boo'}
+                }],
+              },
+              test: null,
+              update: null,
+              body: {type: 'EmptyStatement'},
+            }],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('var on next line does not trigger asi', {
+          code: 'for (let\nfoo;;);',
+          ast: {
+            type: 'Program',
+            body: [{
+              type: 'ForStatement',
+              init: {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [{
+                  type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'foo'},
+                  init: null,
+                }],
+              },
+              test: null,
+              update: null,
+              body: {type: 'EmptyStatement'},
+            }],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('asi can not trigger if next token is ident', {
+          code: 'for (let\nfoo();;);',
+          throws: '(;)', // expecting for-header semi
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
       });
 
-      test('let, two vars, no init, semi',{
-        code: 'for (let foo, bar;;);',
-        ast: {
-          type: 'Program',
-          body: [{
-            type: 'ForStatement',
-            init: {
-              type: 'VariableDeclaration',
-              kind: 'let',
-              declarations: [{
-                type: 'VariableDeclarator',
-                id: {type: 'Identifier', name: 'foo'},
-                init: null
-              }, {
-                type: 'VariableDeclarator',
-                id: {type: 'Identifier', name: 'bar'},
-                init: null
-              }],
-            },
-            test: null,
-            update: null,
-            body: {type: 'EmptyStatement'},
-          }],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      describe('invalid colorless for statement', _ => {
+
+        test('let, one var, no init, semi',{
+          code: 'for (let foo);',
+          throws: '(;)',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, two vars, no init, semi',{
+          code: 'for (let foo, bar);',
+          throws: '(;)',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, var with init, semi',{
+          code: 'for (let foo = bar);',
+          throws: '(;)',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, two vars with both init, semi',{
+          code: 'for (let foo = bar, zoo = boo);',
+          throws: '(;)',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('var on next line does not trigger asi', {
+          code: 'for (let\nfoo);',
+          throws: '(;)',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('asi can not trigger if next token is ident', {
+          code: 'for (let\nfoo());',
+          throws: '(;)', // expecting for-header semi
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
       });
 
-      test('let, var with init, semi',{
-        code: 'for (let foo = bar;;);',
-        ast: {
-          type: 'Program',
-          body: [{
-            type: 'ForStatement',
-            init: {
-              type: 'VariableDeclaration',
-              kind: 'let',
-              declarations: [{
-                type: 'VariableDeclarator',
-                id: {type: 'Identifier', name: 'foo'},
-                init: {type: 'Identifier', name: 'bar'},
-              }],
-            },
-            test: null,
-            update: null,
-            body: {type: 'EmptyStatement'},
-          }],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      describe('for-in', _ => {
+
+        test('let, one var, no init, semi',{
+          code: 'for (let foo in x);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForInStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'foo' },
+                      init: null } ] },
+                right: { type: 'Identifier', name: 'x' },
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, two vars, no init, semi',{
+          code: 'for (let foo, bar in x);',
+          throws: 'can only have one var binding',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, var with init, semi',{
+          code: 'for (let foo = bar in x);',
+          throws: '(;)',
+          desc: 'for some reason, it is not the "cannot have an init" one, probably because `in` is an op while `of` is not',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, two vars with both init, semi',{
+          code: 'for (let foo = bar, zoo = boo in x);',
+          throws: '(;)',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('var on next line does not trigger asi', {
+          code: 'for (let\nfoo in x);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForInStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'foo' },
+                      init: null } ] },
+                right: { type: 'Identifier', name: 'x' },
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('asi can not trigger if next token is ident', {
+          code: 'for (let\nfoo() in x);',
+          throws: '(;)', // expecting for-header semi
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
       });
 
-      test('let, two vars with both init, semi',{
-        code: 'for (let foo = bar, zoo = boo;;);',
-        ast: {
-          type: 'Program',
-          body: [{
-            type: 'ForStatement',
-            init: {
-              type: 'VariableDeclaration',
-              kind: 'let',
-              declarations: [{
-                type: 'VariableDeclarator',
-                id: {type: 'Identifier', name: 'foo'},
-                init: {type: 'Identifier', name: 'bar'}
-              }, {
-                type: 'VariableDeclarator',
-                id: {type: 'Identifier', name: 'zoo'},
-                init: {type: 'Identifier', name: 'boo'}
-              }],
-            },
-            test: null,
-            update: null,
-            body: {type: 'EmptyStatement'},
-          }],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
+      describe('for-of', _ => {
 
-      test('var on next line does not trigger asi', {
-        code: 'for (let\nfoo;;);',
-        ast: {
-          type: 'Program',
-          body: [{
-            type: 'ForStatement',
-            init: {
-              type: 'VariableDeclaration',
-              kind: 'let',
-              declarations: [{
-                type: 'VariableDeclarator',
-                id: {type: 'Identifier', name: 'foo'},
-                init: null,
-              }],
-            },
-            test: null,
-            update: null,
-            body: {type: 'EmptyStatement'},
-          }],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
+        test('let, one var, no init, semi',{
+          code: 'for (let foo of x);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForOfStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'foo' },
+                      init: null } ] },
+                right: { type: 'Identifier', name: 'x' },
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
 
-      test('asi can not trigger if next token is ident', {
-        code: 'for (let\nfoo();;);',
-        throws: '(;)', // expecting for-header semi
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        test('let, two vars, no init, semi',{
+          code: 'for (let foo, bar of x);',
+          throws: 'can only have one var binding',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, var with init, semi',{
+          code: 'for (let foo = bar of x);',
+          throws: 'cannot have an init',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('let, two vars with both init, semi',{
+          code: 'for (let foo = bar, zoo = boo of x);',
+          throws: 'cannot have an init',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('var on next line does not trigger asi', {
+          code: 'for (let\nfoo of x);',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForOfStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'foo' },
+                      init: null } ] },
+                right: { type: 'Identifier', name: 'x' },
+                body: { type: 'EmptyStatement' } } ] },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('asi can not trigger if next token is ident', {
+          code: 'for (let\nfoo() of x);',
+          throws: '(;)', // expecting for-header semi
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
       });
     });
 

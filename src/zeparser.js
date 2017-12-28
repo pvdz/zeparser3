@@ -2093,6 +2093,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$IS_3D && curtok.str === '=') {
       ASSERT_skipRex($PUNCTUATOR, lexerFlags);
       parseExpression(lexerFlags, 'init');
+      if (curtok.str === 'of' || curtok.str === 'in') {
+        THROW('The binding cannot have an init inside a for-in or for-of statement');
+      }
     } else if (mustHaveAssignment) {
       if (from === FROM_FOR_HEADER_FIRST_DECL) {
         // for-loop, for-in, for-of. already confirmed it wasn't `=` so we must find `in` or `of` here.
@@ -2358,6 +2361,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case '>': return 11;
       case '>=': return 11;
       case 'in': return 11;
+      case 'of': return 11;
       case 'instanceof': return 11;
       case '==': return 10;
       case '!=': return 10;
