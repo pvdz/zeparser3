@@ -6,7 +6,7 @@ let {
   $TICK_HEAD,
   $TICK_PURE,
   $TICK_TAIL,
-} = require('../../../src/zetokenizer');
+} = require('../../../../src/zetokenizer');
 
 
 module.exports = (describe, test) => describe('templates', _ => {

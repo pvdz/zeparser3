@@ -2,7 +2,7 @@ let {
   $ASI,
   $IDENT,
   $PUNCTUATOR,
-} = require('../../../src/zetokenizer');
+} = require('../../../../src/zetokenizer');
 
 
 module.exports = (describe, test) => describe('functions', _ => {

@@ -7,7 +7,7 @@ let {
   $STRING_DOUBLE,
   $TICK_HEAD,
   $TICK_TAIL,
-} = require('../../../src/zetokenizer');
+} = require('../../../../src/zetokenizer');
 
 
 module.exports = (describe, test) => describe('parens', _ => {

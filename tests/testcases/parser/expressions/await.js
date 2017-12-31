@@ -3,7 +3,7 @@ let {
   $IDENT,
   $NUMBER_DEC,
   $PUNCTUATOR,
-} = require('../../../src/zetokenizer');
+} = require('../../../../src/zetokenizer');
 
 // https://tc39.github.io/ecma262/#prod-AwaitExpression
 // await is parsed as an AwaitExpression when the [Await] parameter is present. The [Await] parameter is present in the following contexts:

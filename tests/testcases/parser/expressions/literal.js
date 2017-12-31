@@ -8,7 +8,7 @@ let {
   $NUMBER_OLD,
   $STRING_DOUBLE,
   $STRING_SINGLE,
-} = require('../../../src/zetokenizer');
+} = require('../../../../src/zetokenizer');
 
 
 module.exports = (describe, test) => describe('literals', _ => {

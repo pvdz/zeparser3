@@ -1,7 +1,7 @@
 let {
   $ASI,
   $IDENT,
-} = require('../../../src/zetokenizer');
+} = require('../../../../src/zetokenizer');
 
 
 module.exports = (describe, test) => describe('in and instanceof', _ => {

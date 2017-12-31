@@ -3,7 +3,7 @@ let {
   $IDENT,
   $PUNCTUATOR,
   $REGEX,
-} = require('../../../src/zetokenizer');
+} = require('../../../../src/zetokenizer');
 
 
 // note: Most regex tests can be found in the tokenizer. Tests in here mainly test the "div or regex" disambiguation.
