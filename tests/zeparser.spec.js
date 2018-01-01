@@ -48,7 +48,7 @@ files.sort((a,b) => {
   if (a > b) return 1;
   return 0;
 });
-console.log(files);
+//console.log(files);
 
 let cases = [];
 let descStack = [];
@@ -174,6 +174,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   if (SKIP) {
     console.log(`${prefix} SKIP: \`${toPrint(code)}\``);
+    ++skips;
     return;
   }
 
@@ -272,6 +273,7 @@ let fail = 0;
 let crash = 0;
 let testi = 0;
 let testj = 0;
+let skips = 0;
 try {
   [
     [ZeParser, true, 'dev build'],
@@ -284,6 +286,6 @@ try {
 } finally {
   console.log(`
   #####
-  passed: ${pass}, crashed: ${crash}, failed: ${fail-crash}
+  passed: ${pass}, crashed: ${crash}, failed: ${fail-crash}, skipped: ${skips}
   `);
 }
