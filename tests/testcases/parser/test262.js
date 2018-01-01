@@ -76,8 +76,9 @@ if (!fs.statSync(PATH262).isDirectory()) {
           if (code.indexOf('[onlyStrict]') >= 0) testObj.SLOPPY = {SKIP:true};
           if (code.indexOf('[module]') >= 0) testObj.SCRIPT = {SKIP:true};
 
-          if (code.indexOf('negative:') >= 0) {
+          if (code.indexOf('negative:') >= 0 && code.indexOf('  phase: runtime') < 0) {
             // "negative:" means the test is expected to throw
+            // "  phase: runtime" means the error is a runtime error and we're expected to parse it properly
             testObj.throws = true;
           } else {
             testObj.ast = true;

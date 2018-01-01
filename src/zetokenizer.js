@@ -624,6 +624,8 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       case $$AND_26:
         return parseSameOrCompound(c); // & && &=
       case $$DASH_2D:
+        // TODO: only support this under the webcompat flag
+        // TODO: and properly parse this, not like the duplicate hack it is now
         if (!eofd(1) && peek() === $$DASH_2D && peekd(1) === $$GT_3E) {
           parseSingleComment();
           wasWhite = true;
@@ -664,6 +666,14 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       case $$QMARK_3F:
         return $PUNCTUATOR;
       case $$LT_3C:
+        if (!eofd(3) && peek() === $$EXCL_21 && peekd(1) === $$DASH_2D && peekd(2) === $$DASH_2D) {
+          // This is the starting html comment, the spec defines it as the start of a single line JS comment
+          // TODO: hide this under the web compat flag
+          // TODO: and clean the check up already
+          parseSingleComment();
+          wasWhite = true;
+          return $COMMENT_HTML;
+        }
         return parseLtPunctuator(); // < << <= <<=
       case $$GT_3E:
         return parseGtPunctuator(); // > >> >>> >= >>= >>>=
