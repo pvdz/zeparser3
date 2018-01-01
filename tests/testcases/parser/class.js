@@ -93,6 +93,20 @@ module.exports = (describe, test) => describe('class statement', _ => {
       ]},
       tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
+
+    test('extend expression also inherits the strict mode from class', {
+      code: 'class X extends function(){ with(obj); } {}',
+      throws: 'strict mode',
+      desc: 'anything from the class keyword onwards is strict mode regardless of goal/sloppy state',
+      tokens: [],
+    });
+
+    test('extend expression also inherits the strict mode from class', {
+      code: 'class let {}',
+      throws: 'strict mode',
+      desc: 'the name of the function is also considered strict mode so `let` is outlawed',
+      tokens: [],
+    })
   });
 
   describe('ident methods', _ => {

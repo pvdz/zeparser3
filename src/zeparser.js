@@ -968,19 +968,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseSemiOrAsi(lexerFlags);
   }
 
-  function parseBlockStatement(lexerFlags, astProp) {
-    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-
-    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL);
-
-    AST_open(astProp, 'BlockStatement');
-    AST_set('body', []);
-    ASSERT_skipRex('{', lexerFlagsNoTemplate);
-    _parseBodyParts(lexerFlagsNoTemplate, 'body');
-    skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
-    AST_close();
-  }
-
   function parseAsyncStatement(lexerFlags, identToken, astProp) {
     // an async statement is almost the same as an expression but it needs to know whether it was in fact
     // an expression or not so it knows how to apply the statement semi/asi.
@@ -1183,6 +1170,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
+  function parseBlockStatement(lexerFlags, astProp) {
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
+
+    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL);
+
+    AST_open(astProp, 'BlockStatement');
+    AST_set('body', []);
+    ASSERT_skipRex('{', lexerFlagsNoTemplate);
+    _parseBodyParts(lexerFlagsNoTemplate, 'body');
+    skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
+    AST_close();
+  }
+
   function parseBreakStatement(lexerFlags, astProp) {
     AST_open(astProp, 'BreakStatement');
     // break is only valid inside a breakable, fenced by functions
@@ -1220,7 +1220,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // note: default exports has optional ident but should still not skip `extends` here
     // but it is not a valid class name anyways (which is superseded by a generic keyword check)
     if (curtype === $IDENT && curtok.str !== 'extends') {
-    // TODO: verify keyword
+      bindingIdentCheck(curtok, 'class', lexerFlags);
       AST_setIdent('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (!optionalIdent) {
@@ -1249,7 +1249,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipRexOrDie($$CURLY_R_7D, '}', outsideLexerFlags);
     AST_close(); // ClassDeclaration
   }
-
   function parseClassMethod(lexerFlags) {
     // everything from objlit that is a method optionally prefixed by `static`, and an empty statement
     return _parseClassMethod(lexerFlags, NO_STATIC_MODIFIER);
@@ -1956,6 +1955,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseWithStatement(lexerFlags, astProp) {
+    if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('The `with` statement is not allowed in strict mode');
+
     AST_open(astProp, 'WithStatement');
     ASSERT_skipAny('with', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'object');
@@ -2040,7 +2041,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       // normal
-      destructorIdentCheck(curtok, 'arg', lexerFlags);
+      bindingIdentCheck(curtok, 'arg', lexerFlags);
       AST_setIdent(astProp, curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
     } else if (curc === $$CURLY_L_7B) {
@@ -2076,7 +2077,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc !== $$PAREN_R_29) THROW('Can not have more destructuring parts follow a rest, not even a trailing comma', curtok.str);
     } else {
       // `let` as a variable name is okay in sloppy mode
-      destructorIdentCheck(curtok, 'arg', lexerFlags);
+      bindingIdentCheck(curtok, 'arg', lexerFlags);
       AST_setIdent(astProp, curtok);
       return;
     }
@@ -2129,7 +2130,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // now propToken is the property being destructured and identToken is the variable
         // name under which the value of that property is bound, they are often the same.
-        destructorIdentCheck(identToken, 'arg', lexerFlags);
+        bindingIdentCheck(identToken, 'arg', lexerFlags);
         AST_setIdent('value', identToken);
         // we need to put the AssignmentPattern node on `value` of the `Property` node so don't close it yet
         assignmentOnValue = true;
@@ -2137,7 +2138,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // Note: we don't close Property yet because we need to check the assignment
       } else {
         if (curc === $$COLON_3A) THROW('Cannot rename like in obj destruct (array indexes have no name)');
-        destructorIdentCheck(identToken, 'arg', lexerFlags);
+        bindingIdentCheck(identToken, 'arg', lexerFlags);
         AST_setIdent(astProp, identToken);
       }
     } else if (curc === $$CURLY_L_7B) {
@@ -2224,7 +2225,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
-
   function parseBindingPatternAndAssignment(lexerFlags, bindingKind, letVarState, from, astProp) {
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
 
@@ -2234,7 +2234,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let mustHaveAssignment = false; // destructurings must always be followed by an assignment
     if (curtype === $IDENT) {
       // normal
-      destructorIdentCheck(curtok, bindingKind, lexerFlags);
+      bindingIdentCheck(curtok, bindingKind, lexerFlags);
       AST_setIdent('id', curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
     } else if (curc === $$CURLY_L_7B) {
@@ -2329,7 +2329,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // now propToken is the property being destructured and identToken is the variable
         // name under which the value of that property is bound, they are often the same.
-        destructorIdentCheck(identToken, bindingKind, lexerFlags);
+        bindingIdentCheck(identToken, bindingKind, lexerFlags);
         AST_setIdent('value', identToken);
         // we need to put the AssignmentPattern node on `value` of the `Property` node so don't close it yet
         assignmentOnValue = true;
@@ -2337,7 +2337,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // Note: we don't close Property yet because we need to check the assignment
       } else {
         if (curc === $$COLON_3A) THROW('Cannot rename like in obj destruct (array indexes have no name)');
-        destructorIdentCheck(identToken, bindingKind, lexerFlags);
+        bindingIdentCheck(identToken, bindingKind, lexerFlags);
         AST_setIdent(astProp, identToken);
       }
     } else if (curc === $$CURLY_L_7B) {
@@ -2423,9 +2423,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close(); // Property
     }
   }
-  function destructorIdentCheck(identToken, bindingKind, lexerFlags) {
+  function bindingIdentCheck(identToken, bindingKind, lexerFlags) {
     if (identToken.str === 'let') {
-      if (bindingKind !== 'var') THROW('Can not use `let` when binding through `let` or `const`');
+      if (bindingKind === 'let' || bindingKind === 'const') THROW('Can not use `let` when binding through `let` or `const`');
       if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Can not use `let` as var name in strict mode');
     }
     if (identToken.str === 'await') {

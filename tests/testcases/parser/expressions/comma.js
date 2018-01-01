@@ -559,17 +559,20 @@ module.exports = (describe, test) => describe('comma', _ => {
 
   test('in a with', {
     code: 'with (a,b) c;',
-    ast: { type: 'Program', body: [{
-      type: 'WithStatement',
-      object: {
-        type: 'SequenceExpression',
-        expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-      },
-      body: {
-        type: 'ExpressionStatement',
-        expression: {type: 'Identifier', name: 'c'},
-      },
-    }]},
+    throws: 'strict mode',
+    SLOPPY_SCRIPT: {
+      ast: { type: 'Program', body: [{
+        type: 'WithStatement',
+        object: {
+          type: 'SequenceExpression',
+          expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+        },
+        body: {
+          type: 'ExpressionStatement',
+          expression: {type: 'Identifier', name: 'c'},
+        },
+      }]},
+    },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     desc: 'comma is stronger than ternary'
   });
