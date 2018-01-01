@@ -50,6 +50,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
     // const [...,] = obj;          // error
     // const [.x] = obj;            // error
     // const [..x] = obj;           // error
+    // const [a=[...b], ...c] = obj;
 
     // and these are the object versions:
     // const {} = x;
@@ -609,20 +610,20 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
             test('rest followed by an ident', {
               code: 'const [...foo, bar] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               tokens: [],
             });
 
             test('rest followed by a trailing comma', {
               code: 'const [...foo,] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('rest followed by two commas', {
               code: 'const [...foo,,] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               tokens: [],
             });
 
@@ -649,13 +650,13 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
             test('trailing comma after rest on a nested destruct', {
               code: 'const [...[foo, bar],] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double trailing comma after rest on a nested destruct', {
               code: 'const [...[foo, bar],,] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               tokens: [],
             });
 
@@ -681,41 +682,66 @@ module.exports = (describe, test) => describe('let statement', _ => {
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
-            test('spread with default', {
+            test('rest with default', {
               code: 'const [...bar = foo] = obj;',
               throws: 'a rest value',
               desc: 'rest cannot get a default in var decls but they can as func args',
               tokens: [],
             });
 
-            test('spread with default', {
+            test('double rest / spread rest', {
               code: 'const [... ...foo] = obj;',
-              throws: 'Can not spread twice',
+              throws: 'Can not rest twice',
               tokens: [],
             });
 
-            test('spread with default', {
+            test('rest without value', {
               code: 'const [...] = obj;',
               throws: 'missing an ident or destruct',
               tokens: [],
             });
 
-            test('spread with default', {
+            test('rest with comma without value', {
               code: 'const [...,] = obj;',
               throws: 'missing an ident or destruct',
               tokens: [],
             });
 
-            test('spread with default', {
+            test('single dot vs rest', {
               code: 'const [.x] = obj;',
               throws: 'Expecting nested ident or destructuring pattern',
               tokens: [],
             });
 
-            test('spread with default', {
+            test('double dot vs rest', {
               code: 'const [..x] = obj;',
               throws: 'Expecting nested ident or destructuring pattern',
               tokens: [],
+            });
+
+            test('spread vs rest', {
+              code: 'const [a=[...b], ...c] = obj;',
+              ast: { type: 'Program',
+                body:
+                  [ { type: 'VariableDeclaration',
+                    kind: 'const',
+                    declarations:
+                      [ { type: 'VariableDeclarator',
+                        id:
+                        { type: 'ArrayPattern',
+                          elements:
+                            [ { type: 'AssignmentPattern',
+                              left: { type: 'Identifier', name: 'a' },
+                              right:
+                              { type: 'ArrayExpression',
+                                elements:
+                                  [ { type: 'SpreadElement',
+                                    argument: { type: 'Identifier', name: 'b' } } ] } },
+                              { type: 'RestElement',
+                                argument: { type: 'Identifier', name: 'c' } } ] },
+                        init: { type: 'Identifier', name: 'obj' } } ] } ] },
+              desc: 'expecting both a rest and spread node in the ast',
+              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
           });
         });
@@ -2272,19 +2298,19 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
               test('rest followed by an ident', {
                 code: 'for (const [...foo, bar] = obj;;);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
               test('rest followed by a trailing comma', {
                 code: 'for (const [...foo,] = obj;;);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('rest followed by two commas', {
                 code: 'for (const [...foo,,] = obj;;);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
@@ -2316,13 +2342,13 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
               test('trailing comma after rest on a nested destruct', {
                 code: 'for (const [...[foo, bar],] = obj;;);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double trailing comma after rest on a nested destruct', {
                 code: 'for (const [...[foo, bar],,] = obj;;);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
@@ -2353,41 +2379,70 @@ module.exports = (describe, test) => describe('let statement', _ => {
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
-              test('spread with default', {
+              test('rest with default', {
                 code: 'for (const [...bar = foo] = obj;;);',
                 throws: 'a rest value',
                 desc: 'rest cannot get a default in var decls but they can as func args',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('double rest / spread rest', {
                 code: 'for (const [... ...foo] = obj;;);',
-                throws: 'Can not spread twice',
+                throws: 'Can not rest twice',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('rest without value', {
                 code: 'for (const [...] = obj;;);',
                 throws: 'missing an ident or destruct',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('rest with comma without value', {
                 code: 'for (const [...,] = obj;;);',
                 throws: 'missing an ident or destruct',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('single dot vs rest', {
                 code: 'for (const [.x] = obj;;);',
                 throws: 'Expecting nested ident or destructuring pattern',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('double dot vs rest', {
                 code: 'for (const [..x] = obj;;);',
                 throws: 'Expecting nested ident or destructuring pattern',
                 tokens: [],
+              });
+
+              test('spread and rest', {
+                code: 'for (const [a=[...b], ...c] = obj;;);',
+                ast: { type: 'Program',
+                  body:
+                    [ { type: 'ForStatement',
+                      init:
+                      { type: 'VariableDeclaration',
+                        kind: 'const',
+                        declarations:
+                          [ { type: 'VariableDeclarator',
+                            id:
+                            { type: 'ArrayPattern',
+                              elements:
+                                [ { type: 'AssignmentPattern',
+                                  left: { type: 'Identifier', name: 'a' },
+                                  right:
+                                  { type: 'ArrayExpression',
+                                    elements:
+                                      [ { type: 'SpreadElement',
+                                        argument: { type: 'Identifier', name: 'b' } } ] } },
+                                  { type: 'RestElement',
+                                    argument: { type: 'Identifier', name: 'c' } } ] },
+                            init: { type: 'Identifier', name: 'obj' } } ] },
+                      test: null,
+                      update: null,
+                      body: { type: 'EmptyStatement' } } ] },
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
             });
           });
@@ -3421,19 +3476,19 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
               test('rest followed by an ident', {
                 code: 'for (const [...foo, bar] = obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
               test('rest followed by a trailing comma', {
                 code: 'for (const [...foo,] = obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('rest followed by two commas', {
                 code: 'for (const [...foo,,] = obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
@@ -3445,13 +3500,13 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
               test('trailing comma after rest on a nested destruct', {
                 code: 'for (const [...[foo, bar],] = obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double trailing comma after rest on a nested destruct', {
                 code: 'for (const [...[foo, bar],,] = obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
@@ -3461,40 +3516,46 @@ module.exports = (describe, test) => describe('let statement', _ => {
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
-              test('spread with default', {
+              test('rest with default', {
                 code: 'for (const [...bar = foo] = obj);',
                 throws: 'a rest value',
                 desc: 'rest cannot get a default in var decls but they can as func args',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('double rest / spread rest', {
                 code: 'for (const [... ...foo] = obj);',
-                throws: 'Can not spread twice',
+                throws: 'Can not rest twice',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('rest without value', {
                 code: 'for (const [...] = obj);',
                 throws: 'missing an ident or destruct',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('rest with comma without value', {
                 code: 'for (const [...,] = obj);',
                 throws: 'missing an ident or destruct',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('single dot vs rest', {
                 code: 'for (const [.x] = obj);',
                 throws: 'Expecting nested ident or destructuring pattern',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('double dot vs rest', {
                 code: 'for (const [..x] = obj);',
                 throws: 'Expecting nested ident or destructuring pattern',
+                tokens: [],
+              });
+
+              test('spread and rest', {
+                code: 'for (const [a=[...b], ...c] = obj);',
+                throws: 'Missing required initializer',
                 tokens: [],
               });
             });
@@ -4182,19 +4243,19 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
               test('rest followed by an ident', {
                 code: 'for (const [...foo, bar] in obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
               test('rest followed by a trailing comma', {
                 code: 'for (const [...foo,] in obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('rest followed by two commas', {
                 code: 'for (const [...foo,,] in obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
@@ -4225,13 +4286,13 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
               test('trailing comma after rest on a nested destruct', {
                 code: 'for (const [...[foo, bar],] in obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double trailing comma after rest on a nested destruct', {
                 code: 'for (const [...[foo, bar],,] in obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
@@ -4261,41 +4322,69 @@ module.exports = (describe, test) => describe('let statement', _ => {
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
-              test('spread with default', {
+              test('rest with default', {
                 code: 'for (const [...bar = foo] in obj);',
                 throws: 'a rest value',
                 desc: 'rest cannot get a default in var decls but they can as func args',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('double rest / spread rest', {
                 code: 'for (const [... ...foo] in obj);',
-                throws: 'Can not spread twice',
+                throws: 'Can not rest twice',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('rest without value', {
                 code: 'for (const [...] in obj);',
                 throws: 'missing an ident or destruct',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('rest with comma without value', {
                 code: 'for (const [...,] in obj);',
                 throws: 'missing an ident or destruct',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('single dot vs rest', {
                 code: 'for (const [.x] in obj);',
                 throws: 'Expecting nested ident or destructuring pattern',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('double dot vs rest', {
                 code: 'for (const [..x] in obj);',
                 throws: 'Expecting nested ident or destructuring pattern',
                 tokens: [],
+              });
+
+              test('spread and rest', {
+                code: 'for (const [a=[...b], ...c] in obj);',
+                ast: { type: 'Program',
+                  body:
+                    [ { type: 'ForInStatement',
+                      left:
+                      { type: 'VariableDeclaration',
+                        kind: 'const',
+                        declarations:
+                          [ { type: 'VariableDeclarator',
+                            id:
+                            { type: 'ArrayPattern',
+                              elements:
+                                [ { type: 'AssignmentPattern',
+                                  left: { type: 'Identifier', name: 'a' },
+                                  right:
+                                  { type: 'ArrayExpression',
+                                    elements:
+                                      [ { type: 'SpreadElement',
+                                        argument: { type: 'Identifier', name: 'b' } } ] } },
+                                  { type: 'RestElement',
+                                    argument: { type: 'Identifier', name: 'c' } } ] },
+                            init: null } ] },
+                      right: { type: 'Identifier', name: 'obj' },
+                      body: { type: 'EmptyStatement' } } ] },
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
             });
           });
@@ -5397,19 +5486,19 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
               test('rest followed by an ident', {
                 code: 'for (const [...foo, bar] of obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
               test('rest followed by a trailing comma', {
                 code: 'for (const [...foo,] of obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('rest followed by two commas', {
                 code: 'for (const [...foo,,] of obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
@@ -5440,13 +5529,13 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
               test('trailing comma after rest on a nested destruct', {
                 code: 'for (const [...[foo, bar],] of obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double trailing comma after rest on a nested destruct', {
                 code: 'for (const [...[foo, bar],,] of obj);',
-                throws: 'follow a spread',
+                throws: 'follow a rest',
                 tokens: [],
               });
 
@@ -5476,41 +5565,69 @@ module.exports = (describe, test) => describe('let statement', _ => {
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
-              test('spread with default', {
+              test('rest with default', {
                 code: 'for (const [...bar = foo] of obj);',
                 throws: 'a rest value',
                 desc: 'rest cannot get a default of var decls but they can as func args',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('double rest / spread rest', {
                 code: 'for (const [... ...foo] of obj);',
-                throws: 'Can not spread twice',
+                throws: 'Can not rest twice',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('rest without value', {
                 code: 'for (const [...] of obj);',
                 throws: 'missing an ident or destruct',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('rest with comma without value', {
                 code: 'for (const [...,] of obj);',
                 throws: 'missing an ident or destruct',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('single dot vs rest', {
                 code: 'for (const [.x] of obj);',
                 throws: 'Expecting nested ident or destructuring pattern',
                 tokens: [],
               });
 
-              test('spread with default', {
+              test('double dot vs rest', {
                 code: 'for (const [..x] of obj);',
                 throws: 'Expecting nested ident or destructuring pattern',
                 tokens: [],
+              });
+
+              test('spread and rest', {
+                code: 'for (const [a=[...b], ...c] of obj);',
+                ast: { type: 'Program',
+                  body:
+                    [ { type: 'ForOfStatement',
+                      left:
+                      { type: 'VariableDeclaration',
+                        kind: 'const',
+                        declarations:
+                          [ { type: 'VariableDeclarator',
+                            id:
+                            { type: 'ArrayPattern',
+                              elements:
+                                [ { type: 'AssignmentPattern',
+                                  left: { type: 'Identifier', name: 'a' },
+                                  right:
+                                  { type: 'ArrayExpression',
+                                    elements:
+                                      [ { type: 'SpreadElement',
+                                        argument: { type: 'Identifier', name: 'b' } } ] } },
+                                  { type: 'RestElement',
+                                    argument: { type: 'Identifier', name: 'c' } } ] },
+                            init: null } ] },
+                      right: { type: 'Identifier', name: 'obj' },
+                      body: { type: 'EmptyStatement' } } ] },
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
             });
           });
@@ -6554,14 +6671,14 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
             test('rest followed by an ident', {
               code: 'export const [...foo, bar] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
 
             test('rest followed by a trailing comma', {
               code: 'export const [...foo,] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
@@ -6569,7 +6686,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
             test('rest followed by two commas', {
               code: 'export const [...foo,,] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
@@ -6602,14 +6719,14 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
             test('trailing comma after rest on a nested destruct', {
               code: 'export const [...[foo, bar],] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               SCRIPT: {throws: 'module goal'},
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double trailing comma after rest on a nested destruct', {
               code: 'export const [...[foo, bar],,] = obj;',
-              throws: 'follow a spread',
+              throws: 'follow a rest',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
@@ -6641,7 +6758,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
-            test('spread with default', {
+            test('rest with default', {
               code: 'export const [...bar = foo] = obj;',
               throws: 'a rest value',
               desc: 'rest cannot get a default in var decls but they can as func args',
@@ -6649,39 +6766,68 @@ module.exports = (describe, test) => describe('let statement', _ => {
               tokens: [],
             });
 
-            test('spread with default', {
+            test('double rest / spread rest', {
               code: 'export const [... ...foo] = obj;',
-              throws: 'Can not spread twice',
+              throws: 'Can not rest twice',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
 
-            test('spread with default', {
+            test('rest without value', {
               code: 'export const [...] = obj;',
               throws: 'missing an ident or destruct',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
 
-            test('spread with default', {
+            test('rest with comma without value', {
               code: 'export const [...,] = obj;',
               throws: 'missing an ident or destruct',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
 
-            test('spread with default', {
+            test('single dot vs rest', {
               code: 'export const [.x] = obj;',
               throws: 'Expecting nested ident or destructuring pattern',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
 
-            test('spread with default', {
+            test('double dot vs rest', {
               code: 'export const [..x] = obj;',
               throws: 'Expecting nested ident or destructuring pattern',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
+            });
+
+            test('spread and rest', {
+              code: 'export const [a=[...b], ...c] = obj;',
+              ast: { type: 'Program',
+                body:
+                  [ { type: 'ExportNamedDeclaration',
+                    specifiers: [],
+                    declaration:
+                    { type: 'VariableDeclaration',
+                      kind: 'const',
+                      declarations:
+                        [ { type: 'VariableDeclarator',
+                          id:
+                          { type: 'ArrayPattern',
+                            elements:
+                              [ { type: 'AssignmentPattern',
+                                left: { type: 'Identifier', name: 'a' },
+                                right:
+                                { type: 'ArrayExpression',
+                                  elements:
+                                    [ { type: 'SpreadElement',
+                                      argument: { type: 'Identifier', name: 'b' } } ] } },
+                                { type: 'RestElement',
+                                  argument: { type: 'Identifier', name: 'c' } } ] },
+                          init: { type: 'Identifier', name: 'obj' } } ] },
+                    source: null } ] },
+              SCRIPT: {throws: 'the module goal'},
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
           });
         });

@@ -314,6 +314,21 @@ module.exports = (describe, test) => describe('functions', _ => {
       // function f([foo,bar=b] = x){}
       // function f([foo=a,bar=b]){}
       // function f([foo=a,bar=b] = x){}
+      // function f([...bar] = obj){}
+      // function f([foo, ...bar] = obj){}
+      // function f([...foo, bar] = obj){}   // error
+      // function f([...foo,] = obj){}       // ok!
+      // function f([...foo,,] = obj){}      // error
+      // function f([...[a, b]] = obj){}
+      // function f([...[a, b],] = obj){}    // ok!
+      // function f([...[a, b],,] = obj){}   // error
+      // function f([x, ...[a, b]] = obj){}
+      // function f([...bar = foo] = obj){}  // error (TODO: except in funcs, arrows, and maybe `for`?)
+      // function f([... ...foo] = obj){}    // error
+      // function f([...] = obj){}           // error
+      // function f([...,] = obj){}          // error
+      // function f([.x] = obj){}            // error
+      // function f([..x] = obj){}           // error
 
       // and these are the object versions:
       // function f({} = x){}
@@ -1130,7 +1145,6 @@ module.exports = (describe, test) => describe('functions', _ => {
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-
         test('ident with default that is an assignment sans default', {
           code: 'function f([a=b=c]){}',
           ast: {type: 'Program', body: [
@@ -1190,6 +1204,358 @@ module.exports = (describe, test) => describe('functions', _ => {
           ]},
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
+
+        describe('rest operator', _ => {
+
+          test('simple rest arg sans default', {
+            code: 'function f([...bar]){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'ArrayPattern',
+                      elements:
+                        [ { type: 'RestElement',
+                          argument: { type: 'Identifier', name: 'bar' } } ] } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('simple rest arg with default', {
+            code: 'function f([...bar] = obj){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'AssignmentPattern',
+                      left:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'RestElement',
+                            argument: { type: 'Identifier', name: 'bar' } } ] },
+                      right: { type: 'Identifier', name: 'obj' } } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('rest as second part sans default', {
+            code: 'function f([foo, ...bar]){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'ArrayPattern',
+                      elements:
+                        [ { type: 'Identifier', name: 'foo' },
+                          { type: 'RestElement',
+                            argument: { type: 'Identifier', name: 'bar' } } ] } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('rest as second part with default', {
+            code: 'function f([foo, ...bar] = obj){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'AssignmentPattern',
+                      left:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'Identifier', name: 'foo' },
+                            { type: 'RestElement',
+                              argument: { type: 'Identifier', name: 'bar' } } ] },
+                      right: { type: 'Identifier', name: 'obj' } } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('rest with arg after it sans default', {
+            code: 'function f([...foo, bar]){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with arg after it with default', {
+            code: 'function f([...foo, bar] = obj){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with trailing comma sans default', {
+            code: 'function f([...foo,]){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with trailing comma with default', {
+            code: 'function f([...foo,] = obj){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with double trailing comma sans default', {
+            code: 'function f([...foo,,]){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with double trailing comma with default', {
+            code: 'function f([...foo,,] = obj){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with destruct with two ident sans default', {
+            code: 'function f([...[a, b]]){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'ArrayPattern',
+                      elements:
+                        [ { type: 'RestElement',
+                          argument:
+                          { type: 'ArrayPattern',
+                            elements:
+                              [ { type: 'Identifier', name: 'a' },
+                                { type: 'Identifier', name: 'b' } ] } } ] } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('rest with destruct with two ident with default', {
+            code: 'function f([...[a, b]] = obj){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'AssignmentPattern',
+                      left:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'RestElement',
+                            argument:
+                            { type: 'ArrayPattern',
+                              elements:
+                                [ { type: 'Identifier', name: 'a' },
+                                  { type: 'Identifier', name: 'b' } ] } } ] },
+                      right: { type: 'Identifier', name: 'obj' } } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('rest with destruct with two ident with trailing comma sans default', {
+            code: 'function f([...[a, b],]){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with destruct with two ident with trailing comma with default', {
+            code: 'function f([...[a, b],] = obj){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with destruct with two ident with double trailing comma sans default', {
+            code: 'function f([...[a, b],,] = obj){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('rest with destruct with two ident with double trailing comma with default', {
+            code: 'function f([...[a, b],,] = obj){}',
+            throws: 'follow a rest',
+            tokens: [],
+          });
+
+          test('nested rest as second sans default', {
+            code: 'function f([x, ...[a, b]]){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'ArrayPattern',
+                      elements:
+                        [ { type: 'Identifier', name: 'x' },
+                          { type: 'RestElement',
+                            argument:
+                            { type: 'ArrayPattern',
+                              elements:
+                                [ { type: 'Identifier', name: 'a' },
+                                  { type: 'Identifier', name: 'b' } ] } } ] } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('nested rest as second with default', {
+            code: 'function f([x, ...[a, b]] = obj){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'AssignmentPattern',
+                      left:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'Identifier', name: 'x' },
+                            { type: 'RestElement',
+                              argument:
+                              { type: 'ArrayPattern',
+                                elements:
+                                  [ { type: 'Identifier', name: 'a' },
+                                    { type: 'Identifier', name: 'b' } ] } } ] },
+                      right: { type: 'Identifier', name: 'obj' } } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('rest with local default sans default', {
+            code: 'function f([...bar = foo]){}',
+            throws: 'Cannot set a default on a rest value',
+            tokens: [],
+          });
+
+          test('rest with local default with default', {
+            code: 'function f([...bar = foo] = obj){}',
+            throws: 'Cannot set a default on a rest value',
+            tokens: [],
+          });
+
+          test('double rest sans default', {
+            code: 'function f([... ...foo]){}',
+            throws: 'Can not rest twice',
+            tokens: [],
+          });
+
+          test('double rest with default', {
+            code: 'function f([... ...foo] = obj){}',
+            throws: 'Can not rest twice',
+            tokens: [],
+          });
+
+          test('missing rest value sans default', {
+            code: 'function f([...]){}',
+            throws: 'Rest missing an ident or destruct',
+            tokens: [],
+          });
+
+          test('missing rest value with default', {
+            code: 'function f([...] = obj){}',
+            throws: 'Rest missing an ident or destruct',
+            tokens: [],
+          });
+
+          test('missing rest value with comma sans default', {
+            code: 'function f([...,]){}',
+            throws: 'Rest missing an ident or destruct',
+            tokens: [],
+          });
+
+          test('missing rest value with comma with default', {
+            code: 'function f([...,] = obj){}',
+            throws: 'Rest missing an ident or destruct',
+            tokens: [],
+          });
+
+          test('single dot not a rest', {
+            code: 'function f([.x]){}',
+            throws: 'Expecting nested ident or destructuring pattern',
+            tokens: [],
+          });
+
+          test('double dot vs rest', {
+            code: 'function f([..x]){}',
+            throws: 'Expecting nested ident or destructuring pattern',
+            tokens: [],
+          });
+
+          test('spread and rest sans default', {
+            code: 'function f( [a=[...b], ...c]){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'ArrayPattern',
+                      elements:
+                        [ { type: 'AssignmentPattern',
+                          left: { type: 'Identifier', name: 'a' },
+                          right:
+                          { type: 'ArrayExpression',
+                            elements:
+                              [ { type: 'SpreadElement',
+                                argument: { type: 'Identifier', name: 'b' } } ] } },
+                          { type: 'RestElement',
+                            argument: { type: 'Identifier', name: 'c' } } ] } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('spread and rest with default', {
+            code: 'function f( [a=[...b], ...c] = obj){}',
+            ast: { type: 'Program',
+              body:
+                [ { type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: { type: 'Identifier', name: 'f' },
+                  params:
+                    [ { type: 'AssignmentPattern',
+                      left:
+                      { type: 'ArrayPattern',
+                        elements:
+                          [ { type: 'AssignmentPattern',
+                            left: { type: 'Identifier', name: 'a' },
+                            right:
+                            { type: 'ArrayExpression',
+                              elements:
+                                [ { type: 'SpreadElement',
+                                  argument: { type: 'Identifier', name: 'b' } } ] } },
+                            { type: 'RestElement',
+                              argument: { type: 'Identifier', name: 'c' } } ] },
+                      right: { type: 'Identifier', name: 'obj' } } ],
+                  body: { type: 'BlockStatement', body: [] } } ] },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+        });
       });
     });
   });
@@ -1243,4 +1609,4 @@ module.exports = (describe, test) => describe('functions', _ => {
   });
 });
 
-// TODO: destruct [a, ...b]
+// TODO: mirror tests for all functions (regular, expr, arrow, objlit method, class method)

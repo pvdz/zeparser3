@@ -217,10 +217,11 @@ const FROM_STATEMENT_START = 1;
 const FROM_FOR_HEADER_FIRST_DECL = 2;
 const FROM_EXPORT_DECL = 3;
 const FROM_FOR_HEADER_MULTI_DECL = 4; // parsing more than one declaration inside a for-header means it can't be in/of
+const FROM_FUNC_ARG = 5;
 const IS_OBJECT_DESTRUCT = false;
 const IS_ARRAY_DESTRUCT = true;
-const INCLUDE_DEFAULT = true;
-const EXCLUDE_DEFAULT = false;
+const EXCLUDE_DEFAULT = true;
+const INCLUDE_DEFAULT = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -836,49 +837,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = lexerFlags | LF_IN_FUNC_ARGS; // prevents await expression as default arg
     AST_set('params', []);
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
-    if (curc !== $$PAREN_R_29) {
-      while (true) {
-        parseFuncArgument(lexerFlags, 'params');
-        if (curc !== $$COMMA_2C) break;
-        ASSERT_skipRex(',', lexerFlags);
-      }
+    if (curc === $$PAREN_R_29) {
+      ASSERT_skipRex(')', lexerFlags);
+    } else {
+
+      parseArgBindings(lexerFlags, 'params');
 
       // TODO: optimize; next must be curly_R or otherwise it is an error
-
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
-    } else {
-      ASSERT_skipRex(')', lexerFlags);
     }
-  }
-  function parseFuncArgument(lexerFlags, astProp) {
-    if (curtype === $IDENT) {
-      // TODO: proper keyword checks
-      if (curtok.str === 'await') {
-        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Await is illegal outside of async body');
-        if ((lexerFlags & LF_IN_ASYNC) === LF_IN_ASYNC) THROW('Await not allowed here');
-      }
-
-      AST_setIdent(astProp, curtok);
-      ASSERT_skipAny($IDENT, lexerFlags);
-    } else if (curtype === $PUNCTUATOR) {
-      if (curc === $$CURLY_L_7B) parseObjectLitOrDestruc(lexerFlags, INSIDE_PARAM_DECL, astProp);
-      else if (curc === $$SQUARE_L_5B) parseArrayLitOrDestruc(lexerFlags, INSIDE_PARAM_DECL, astProp);
-      else if (curc === $$DOT_2E && curtok.str === '...') parseSpread(lexerFlags, astProp);
-      else TODO;
-    } else { // ?
-      TODO
-    }
-
-    AST_destruct(astProp, true);
-
-    // default value
-    if (skipRexIf('=', lexerFlags)) {
-      parseArgDefault(lexerFlags, astProp)
-    }
-  }
-
-  function parseSpread(lexerFlags, astProp) {
-
   }
 
   function parseArgDefault(lexerFlags, astProp) {
@@ -2059,6 +2026,205 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex(',', lexerFlags);
     }
   }
+
+  function parseArgBindings(lexerFlags, astProp) {
+    // TODO: dedupe the binding code with that of let/const binding. it's copy/pasta because the similarity wasnt obvious at first. we need to cut this func into small funcs and share those
+    do {
+      parseArgBinding(lexerFlags, astProp);
+      if (curc !== $$COMMA_2C) break;
+      ASSERT_skipAny(',', lexerFlags); // TODO: next must be ident or [{.
+    } while (true);
+  }
+  function parseArgBinding(lexerFlags, astProp) {
+    // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
+
+    if (curtype === $IDENT) {
+      // normal
+      destructorIdentCheck(curtok, 'arg', lexerFlags);
+      AST_setIdent(astProp, curtok);
+      ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
+    } else if (curc === $$CURLY_L_7B) {
+      // destructure object
+      // keep parsing binding patterns separated by at least one comma
+      AST_open(astProp, 'ObjectPattern');
+      let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
+      skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // (note: circumvent template body/tail) TODO: optimize; dont think this can ever start with a forward slash
+      AST_set('properties', []);
+      parseArgBindingsNested(lexerFlagsNoTemplate, IS_OBJECT_DESTRUCT, INCLUDE_DEFAULT, 'properties');
+      skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
+      AST_close(); // ObjectPattern
+    } else if (curc === $$SQUARE_L_5B) {
+      // destructure array
+      // keep parsing binding patterns separated by at least one comma
+      AST_open(astProp, 'ArrayPattern');
+      skipRexOrDieSingleChar($$SQUARE_L_5B, lexerFlags); // TODO: optimize; dont think this can ever start with a forward slash
+      AST_set('elements', []);
+      parseArgBindingsNested(lexerFlags, IS_ARRAY_DESTRUCT, INCLUDE_DEFAULT, 'elements');
+      skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
+      AST_close(); // ArrayPattern
+    } else if (curc === $$DOT_2E && curtok.str === '...') {
+      // specific to function args
+      ASSERT_skipAny('...', lexerFlags); // TODO: next is ident or [{
+      if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not rest twice');
+      if (curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B && curtype !== $IDENT) {
+        THROW('Rest missing an ident or destruct');
+      }
+      AST_open(astProp, 'RestElement');
+      parseArgBinding(lexerFlags, 'argument');
+      AST_close(); // RestElement
+      if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
+      if (curc !== $$PAREN_R_29) THROW('Can not have more destructuring parts follow a rest, not even a trailing comma', curtok.str);
+    } else {
+      // `let` as a variable name is okay in sloppy mode
+      destructorIdentCheck(curtok, 'arg', lexerFlags);
+      AST_setIdent(astProp, curtok);
+      return;
+    }
+
+    // arg defaults
+    if (curc === $$IS_3D && curtok.str === '=') {
+      AST_wrapClosed(astProp, 'AssignmentPattern', 'left');
+      ASSERT_skipRex($PUNCTUATOR, lexerFlags);
+      parseExpression(lexerFlags, 'right');
+      AST_close(); // AssignmentPattern
+    }
+  }
+  function parseArgBindingsNested(lexerFlags, destructType, skipDefaultForRest, astProp) {
+    ASSERT(typeof lexerFlags === 'number', 'lexerflags = number');
+    ASSERT(typeof destructType === 'boolean', 'destructType = boolean');
+    ASSERT(typeof skipDefaultForRest === 'boolean', 'skipDefaultForRest = boolean');
+    ASSERT(typeof astProp === 'string', 'astProp = string');
+
+    do {
+      if (destructType === IS_ARRAY_DESTRUCT) parseElisions(lexerFlags, astProp);
+      parseArgBindingNested(lexerFlags, destructType, skipDefaultForRest, astProp);
+      if (curc !== $$COMMA_2C) break;
+      ASSERT_skipRex(',', lexerFlags); // TODO: can next be fwd slash?
+    } while (true); // TODO: refactor this loop and check for ]} here instead of the nesting parse func
+  }
+  function parseArgBindingNested(lexerFlags, destructType, skipDefaultForRest, astProp) {
+    let assignmentOnValue = false;
+    if (curtype === $IDENT) {
+      let propToken = curtok;
+      let identToken = curtok;
+      ASSERT_skipAny($IDENT, lexerFlags); // TODO: next can be a bunch of puncs (=:,}]) but not a value
+
+      if (destructType === IS_OBJECT_DESTRUCT) {
+        if (curc === $$COLON_3A) {
+          ASSERT_skipAny(':', lexerFlags); // TODO: next must be ident
+          if (curtype !== $IDENT) THROW('Destructuring property alias must be an identifier');
+          identToken = curtok;
+          ASSERT_skipAny($IDENT, lexerFlags); // TODO: next can be a bunch of puncs (=,}]) but not a value
+        }
+
+        // must check for rename (`let {foo: rename} = bar`, same for array)
+        // note that this is already nesting so it can't be "toplevel" like `let a:b = c` which is bad
+        AST_open(astProp, 'Property');
+
+        AST_set('computed', false);
+        AST_set('kind', 'init');
+        AST_set('method', false);
+        AST_set('shorthand', false);
+        AST_setIdent('key', propToken);
+
+        // now propToken is the property being destructured and identToken is the variable
+        // name under which the value of that property is bound, they are often the same.
+        destructorIdentCheck(identToken, 'arg', lexerFlags);
+        AST_setIdent('value', identToken);
+        // we need to put the AssignmentPattern node on `value` of the `Property` node so don't close it yet
+        assignmentOnValue = true;
+
+        // Note: we don't close Property yet because we need to check the assignment
+      } else {
+        if (curc === $$COLON_3A) THROW('Cannot rename like in obj destruct (array indexes have no name)');
+        destructorIdentCheck(identToken, 'arg', lexerFlags);
+        AST_setIdent(astProp, identToken);
+      }
+    } else if (curc === $$CURLY_L_7B) {
+      ASSERT(destructType === IS_ARRAY_DESTRUCT, 'just two options');
+      // destructure object
+      // keep parsing binding patterns separated by at least one comma
+      AST_open(astProp, 'ObjectPattern');
+      let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
+      skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // (note: circumvent template body/tail) TODO: optimize; dont think this can ever start with a forward slash
+      AST_set('properties', []);
+      parseArgBindingsNested(lexerFlagsNoTemplate, IS_OBJECT_DESTRUCT, INCLUDE_DEFAULT, 'properties');
+      skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
+      AST_close(); // ObjectPattern
+    } else if (curc === $$SQUARE_L_5B) {
+      // if inside array then destructuring an array, if inside object then dynamic property
+      if (destructType === IS_ARRAY_DESTRUCT) {
+        // destructure array
+        // keep parsing binding patterns separated by at least one comma
+
+        ASSERT_skipAny('[', lexerFlags); // TODO: next is ident or { or [ or ]
+
+        AST_open(astProp, 'ArrayPattern');
+        AST_set('elements', []);
+        parseArgBindingsNested(lexerFlags, IS_ARRAY_DESTRUCT, INCLUDE_DEFAULT, 'elements');
+        skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
+        AST_close(); // ArrayPattern
+      } else {
+        ASSERT(destructType === IS_OBJECT_DESTRUCT, 'only two modes?', destructType);
+        // dynamic property of an object destructuring (rare)
+        // let {[foo]: bar} = obj;
+
+        ASSERT_skipRex('[', lexerFlags); // TODO: next is regex/expression
+
+        AST_open(astProp, 'Property');
+
+        AST_set('computed', true); // !
+        AST_set('kind', 'init');
+        AST_set('method', false);
+        AST_set('shorthand', false);
+
+        parseExpression(lexerFlags, 'key');
+        skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
+        skipAnyOrDieSingleChar($$COLON_3A, lexerFlags);
+        AST_setIdent('value', curtok);
+        ASSERT_skipAny(curtok.str, lexerFlags); // TODO: next is ,[]{}
+
+        // we need to put the AssignmentPattern node on `value` of the `Property` node so don't close it yet
+        assignmentOnValue = true;
+      }
+    } else if (curc === $$DOT_2E && curtok.str === '...') {
+      if (destructType === IS_OBJECT_DESTRUCT) TODO;
+      ASSERT_skipAny('...', lexerFlags); // TODO: next is ident or [{
+      if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not rest twice');
+      if (curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B && curtype !== $IDENT) {
+        THROW('Rest missing an ident or destruct');
+      }
+      AST_open(astProp, 'RestElement');
+      parseArgBindingNested(lexerFlags, destructType, EXCLUDE_DEFAULT, 'argument');
+      AST_close(); // RestElement
+      if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
+      if (curc !== $$SQUARE_R_5D) THROW('Can not have more destructuring parts follow a rest, not even a trailing comma', curtok.str);
+    } else if (curc !== $$SQUARE_R_5D && curc !== $$CURLY_R_7D) {
+      if (destructType === IS_OBJECT_DESTRUCT && curc === $$COMMA_2C) THROW('Object destructuring does not support elided commas');
+      THROW('Expecting nested ident or destructuring pattern');
+    }
+
+    if (skipDefaultForRest === INCLUDE_DEFAULT && curc === $$IS_3D && curtok.str === '=') {
+      if (assignmentOnValue) {
+        AST_wrapClosed('value', 'AssignmentPattern', 'left');
+        ASSERT_skipRex($PUNCTUATOR, lexerFlags);
+        parseExpression(lexerFlags, 'right');
+        AST_close(); // AssignmentPattern
+      } else {
+        AST_wrapClosed(astProp, 'AssignmentPattern', 'left');
+        ASSERT_skipRex($PUNCTUATOR, lexerFlags);
+        parseExpression(lexerFlags, 'right');
+        AST_close(); // AssignmentPattern
+      }
+    }
+
+    if (assignmentOnValue) {
+      // we didn't close this yet
+      AST_close(); // Property
+    }
+  }
+
+
   function parseBindingPatternAndAssignment(lexerFlags, bindingKind, letVarState, from, astProp) {
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
 
@@ -2068,13 +2234,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let mustHaveAssignment = false; // destructurings must always be followed by an assignment
     if (curtype === $IDENT) {
       // normal
-      // TODO: verify ident is valid here
-
-      if (curtok.str === 'let') {
-        if (bindingKind !== 'var') THROW('Can not use `let` when binding through `let` or `const`');
-        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Can not use `let` as var name in strict mode');
-      }
-
+      destructorIdentCheck(curtok, bindingKind, lexerFlags);
       AST_setIdent('id', curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
     } else if (curc === $$CURLY_L_7B) {
@@ -2100,7 +2260,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close(); // ArrayPattern
     } else if (letVarState === CAN_BE_LET_VAR && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
       // `let` as a variable name is okay in sloppy mode
-      // TODO: this structure can also appear inside for-headers and export declarations
       AST_close(); // VariableDeclarator
       return LET_IS_VAR_NAME;
     } else {
@@ -2170,7 +2329,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // now propToken is the property being destructured and identToken is the variable
         // name under which the value of that property is bound, they are often the same.
-        // TODO: verify the name of identToken is valid here as a local variable
+        destructorIdentCheck(identToken, bindingKind, lexerFlags);
         AST_setIdent('value', identToken);
         // we need to put the AssignmentPattern node on `value` of the `Property` node so don't close it yet
         assignmentOnValue = true;
@@ -2178,9 +2337,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // Note: we don't close Property yet because we need to check the assignment
       } else {
         if (curc === $$COLON_3A) THROW('Cannot rename like in obj destruct (array indexes have no name)');
+        destructorIdentCheck(identToken, bindingKind, lexerFlags);
         AST_setIdent(astProp, identToken);
       }
-      if (bindingKind !== 'var' && identToken.str === 'let') THROW('Can not use `let` when binding through `let` or `const`');
     } else if (curc === $$CURLY_L_7B) {
       ASSERT(destructType === IS_ARRAY_DESTRUCT, 'just two options');
       // destructure object
@@ -2206,7 +2365,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
         AST_close(); // ArrayPattern
       } else {
-        ASSERT(destructType === IS_OBJECT_DESTRUCT, 'only two modes?');
+        ASSERT(destructType === IS_OBJECT_DESTRUCT, 'only two modes?', destructType);
         // dynamic property of an object destructuring (rare)
         // let {[foo]: bar} = obj;
 
@@ -2231,15 +2390,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (curc === $$DOT_2E && curtok.str === '...') {
       if (destructType === IS_OBJECT_DESTRUCT) TODO;
       ASSERT_skipAny('...', lexerFlags); // TODO: next is ident or [{
-      if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not spread twice');
+      if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not rest twice');
       if (curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B && curtype !== $IDENT) {
-        THROW('Spread missing an ident or destruct');
+        THROW('Rest missing an ident or destruct');
       }
       AST_open(astProp, 'RestElement');
       parseBindingPatternNested(lexerFlags, bindingKind, destructType, EXCLUDE_DEFAULT, 'argument');
       AST_close(); // RestElement
       if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
-      if (curc === $$COMMA_2C) THROW('Can not have more destructuring parts follow a spread, not even a trailing comma');
+      if (curc === $$COMMA_2C) THROW('Can not have more destructuring parts follow a rest, not even a trailing comma');
     } else if (curc !== $$SQUARE_R_5D && curc !== $$CURLY_R_7D) {
       if (destructType === IS_OBJECT_DESTRUCT && curc === $$COMMA_2C) THROW('Object destructuring does not support elided commas');
       THROW('Expecting nested ident or destructuring pattern');
@@ -2262,6 +2421,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (assignmentOnValue) {
       // we didn't close this yet
       AST_close(); // Property
+    }
+  }
+  function destructorIdentCheck(identToken, bindingKind, lexerFlags) {
+    if (identToken.str === 'let') {
+      if (bindingKind !== 'var') THROW('Can not use `let` when binding through `let` or `const`');
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Can not use `let` as var name in strict mode');
+    }
+    if (identToken.str === 'await') {
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Await is illegal outside of async body');
+      if ((lexerFlags & LF_IN_ASYNC) === LF_IN_ASYNC) THROW('Await not allowed here');
     }
   }
 
