@@ -219,6 +219,8 @@ const FROM_EXPORT_DECL = 3;
 const FROM_FOR_HEADER_MULTI_DECL = 4; // parsing more than one declaration inside a for-header means it can't be in/of
 const IS_OBJECT_DESTRUCT = false;
 const IS_ARRAY_DESTRUCT = true;
+const INCLUDE_DEFAULT = true;
+const EXCLUDE_DEFAULT = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -2136,13 +2138,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseBindingPatternsNested(lexerFlags, bindingKind, destructType, astProp) {
     do {
       if (destructType === IS_ARRAY_DESTRUCT) parseElisions(lexerFlags, astProp);
-      parseBindingPatternNested(lexerFlags, bindingKind, destructType, astProp);
+      parseBindingPatternNested(lexerFlags, bindingKind, destructType, INCLUDE_DEFAULT, astProp);
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipRex(',', lexerFlags); // TODO: can next be fwd slash?
-    } while (true);
+    } while (true); // TODO: refactor this loop and check for ]} here instead of the nesting parse func
   }
-  function parseBindingPatternNested(lexerFlags, bindingKind, destructType, astProp) {
-    // TODO: check for others
+  function parseBindingPatternNested(lexerFlags, bindingKind, destructType, whatAboutDefault, astProp) {
     let assignmentOnValue = false;
     if (curtype === $IDENT) {
       let propToken = curtok;
@@ -2227,12 +2228,24 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // we need to put the AssignmentPattern node on `value` of the `Property` node so don't close it yet
         assignmentOnValue = true;
       }
+    } else if (curc === $$DOT_2E && curtok.str === '...') {
+      if (destructType === IS_OBJECT_DESTRUCT) TODO;
+      ASSERT_skipAny('...', lexerFlags); // TODO: next is ident or [{
+      if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not spread twice');
+      if (curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B && curtype !== $IDENT) {
+        THROW('Spread missing an ident or destruct');
+      }
+      AST_open(astProp, 'RestElement');
+      parseBindingPatternNested(lexerFlags, bindingKind, destructType, EXCLUDE_DEFAULT, 'argument');
+      AST_close(); // RestElement
+      if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
+      if (curc === $$COMMA_2C) THROW('Can not have more destructuring parts follow a spread, not even a trailing comma');
     } else if (curc !== $$SQUARE_R_5D && curc !== $$CURLY_R_7D) {
       if (destructType === IS_OBJECT_DESTRUCT && curc === $$COMMA_2C) THROW('Object destructuring does not support elided commas');
       THROW('Expecting nested ident or destructuring pattern');
     }
 
-    if (curc === $$IS_3D && curtok.str === '=') {
+    if (whatAboutDefault === INCLUDE_DEFAULT && curc === $$IS_3D && curtok.str === '=') {
       if (assignmentOnValue) {
         AST_wrapClosed('value', 'AssignmentPattern', 'left');
         ASSERT_skipRex($PUNCTUATOR, lexerFlags);

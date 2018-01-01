@@ -1242,3 +1242,5 @@ module.exports = (describe, test) => describe('functions', _ => {
     });
   });
 });
+
+// TODO: destruct [a, ...b]
