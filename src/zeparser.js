@@ -464,7 +464,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function AST_destruct(prop, assignmentsToo) {
     ASSERT(arguments.length === 2, 'arg count');
     // rename object and array literal nodes to patterns to match the AST spec
-    // this happens when either literal type was parsed (possibly nested) and
+    // this happens when arr/obj literal was parsed (possibly nested) and
     // then a destructuring assignment was encountered
 
     // recursively walk the tree from the prop in open node and visit
@@ -497,8 +497,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (node.type === 'ArrayExpression') {
       node.type = 'ArrayPattern';
-      for (let i = 0, n = node.elements.length; i < n; ++i) {
-        AST__destruct(node.elements[i], assignmentsToo);
+      let els = node.elements;
+      for (let i = 0, n = els.length; i < n; ++i) {
+        let child = els[i];
+        // note: children can be null (elided array destruct) but not undefined
+        if (child !== null) {
+          AST__destruct(child, assignmentsToo);
+        }
       }
     } else if (node.type === 'ObjectExpression') {
       node.type = 'ObjectPattern';
@@ -507,10 +512,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST__destruct(property.value, assignmentsToo);
       }
     } else if (node.type === 'AssignmentExpression') {
-      if (assignmentsToo) {
+      if (assignmentsToo === CONVERT_ASSIGNMENTS_TOO) {
         node.type = 'AssignmentPattern';
         if (node.operator !== '=') THROW('The destruturing assignment should be a regular assignment');
-        delete node.operator;
+        delete node.operator; // TODO: find a better way, this action probably causes a perf DEOPT
       }
       // walk the left of the assignment only
       AST__destruct(node.left, DONT_CONVERT_ASSIGNMENTS);
@@ -856,6 +861,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) parseObjectLitOrDestruc(lexerFlags, INSIDE_PARAM_DECL, astProp);
       else if (curc === $$SQUARE_L_5B) parseArrayLitOrDestruc(lexerFlags, INSIDE_PARAM_DECL, astProp);
+      else if (curc === $$DOT_2E && curtok.str === '...') parseSpread(lexerFlags, astProp);
       else TODO;
     } else { // ?
       TODO
@@ -867,6 +873,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (skipRexIf('=', lexerFlags)) {
       parseArgDefault(lexerFlags, astProp)
     }
+  }
+
+  function parseSpread(lexerFlags, astProp) {
+
   }
 
   function parseArgDefault(lexerFlags, astProp) {

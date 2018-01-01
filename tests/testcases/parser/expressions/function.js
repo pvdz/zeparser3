@@ -7,6 +7,8 @@ let {
 
 module.exports = (describe, test) => describe('functions', _ => {
 
+  // note: this file is about function _expressions_. Don't put generic function stuff here.
+
   test('simpelest anonymous function expression',{
     code: 'foo(function(){})',
     ast: {type: 'Program', body: [

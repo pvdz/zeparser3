@@ -26,6 +26,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
           lcname.indexOf('class-definition-evaluation-scriptbody-duplicate-binding') < 0 && // TODO duplicate bindings are early error
           lcname.indexOf('yield-star-sync-throw') < 0 && // async generators are part of the `for await` proposal
           lcname.indexOf('use-strict-with-non-simple-param') < 0 && // wtf even. TODO. I guess.
+          lcname.indexOf('vals-rus') < 0 && // TODO: non-ascii idents
           lcname.indexOf('property-escapes') < 0 // regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         ) {
           obj[combo] = {path: combo, contents: fs.readFileSync(combo)};
@@ -63,6 +64,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
             testObj.MODULE = {SKIP:true};
           }
           if (code.indexOf('[onlyStrict]') >= 0) testObj.SLOPPY = {SKIP:true};
+          if (code.indexOf('[module]') >= 0) testObj.SCRIPT = {SKIP:true};
 
           if (code.indexOf('negative:') >= 0) {
             // "negative:" means the test is expected to throw
