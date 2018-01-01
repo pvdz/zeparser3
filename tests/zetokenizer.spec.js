@@ -88,7 +88,7 @@ let all = [
   ...strings_template_head,
   ...strings_template_body,
   ...strings_template_tail,
-  ];
+];
 
 LOG('### Running...');
 let fails = 0;
@@ -204,7 +204,7 @@ for (let [input, output, modi, desc, skip] of all) {
             for (let exp of outs) {
               token = tok(lexerFlags, true);
               collects.push(token.type);
-              if (token.type !== exp) LOG('(1) failed=', failed = true, 'because', debug_toktype(token.type), '!==', debug_toktype(exp.type));
+              if (token.type !== exp) LOG('(1) failed=', failed = true, 'because', debug_toktype(token.type || 0), '!==', debug_toktype(exp.type || 0), 'token:', token, 'exp:', exp);
               if (token.type === $EOF) break;
             }
 

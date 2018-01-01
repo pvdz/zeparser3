@@ -27,6 +27,44 @@ module.exports = (describe, test) => describe('regular expression disambiguation
     desc: 'the dash should not be considered a range and the backslash should not change this either way',
   });
 
+  test('calling a method as expression statement sans flag', {
+    code: '/foo/.bar();',
+    ast: { type: 'Program',
+      body:
+        [ { type: 'ExpressionStatement',
+          expression:
+          { type: 'CallExpression',
+            callee:
+            { type: 'MemberExpression',
+              object: { type: 'Literal', value: '<TODO>', raw: '/foo/' },
+              property: { type: 'Identifier', name: 'bar' },
+              computed: false },
+            arguments: [] } } ] },
+    tokens: [$REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+  });
+
+  test('calling a method as expression statement with flag', {
+    code: '/foo/g.bar();',
+    ast: { type: 'Program',
+      body:
+        [ { type: 'ExpressionStatement',
+          expression:
+          { type: 'CallExpression',
+            callee:
+            { type: 'MemberExpression',
+              object: { type: 'Literal', value: '<TODO>', raw: '/foo/g' },
+              property: { type: 'Identifier', name: 'bar' },
+              computed: false },
+            arguments: [] } } ] },
+    tokens: [$REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+  });
+
+  //test('decimal escapes (annex B.4.1)', {
+  //  code: '/[\\12-\\14]/',
+  //  ast: {},
+  //  tokens: [$REGEX],
+  //});
+
   // (new) regular expression edge cases. in particular with destructuring patterns and asi
   // `[]\n/x` (division)
   // `[]\n/x/` (Error)

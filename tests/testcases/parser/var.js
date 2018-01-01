@@ -7699,6 +7699,25 @@ module.exports = (describe, test) => describe('var statement', _ => {
       });
     });
   });
+
+  test('html comment close marks start of single line comment', {
+    code: 'var foo = [23]\n-\->[0];',
+    ast: { type: 'Program',
+      body:
+        [ { type: 'VariableDeclaration',
+          kind: 'var',
+          declarations:
+            [ { type: 'VariableDeclarator',
+              id: { type: 'Identifier', name: 'foo' },
+              init: {
+                type: 'ArrayExpression',
+                elements: [
+                  { type: 'Literal', value: '<TODO>', raw: '23' }
+                ] },
+            } ] } ] },
+    desc: 'source: test262/test/annexB/language/comments/single-line-html-close-asi.js (the html comment acts as // and the rest is ignored)',
+    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $ASI],
+  });
 });
 
 // forbid "let" and "static" only in strict mode

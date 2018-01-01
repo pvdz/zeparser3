@@ -131,6 +131,7 @@ const $CRLF = (1 << ++$flag) | $WHITE | $NL;
 const $COMMENT = (1 << ++$flag) | $WHITE;
 const $COMMENT_SINGLE = (1 << ++$flag) | $WHITE | $COMMENT;
 const $COMMENT_MULTI = (1 << ++$flag) | $WHITE | $COMMENT;
+const $COMMENT_HTML = (1 << ++$flag) | $WHITE | $COMMENT;
 const $NUMBER = 1 << ++$flag;
 const $NUMBER_HEX = (1 << ++$flag) | $NUMBER;
 const $NUMBER_DEC = (1 << ++$flag) | $NUMBER;
@@ -623,6 +624,11 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       case $$AND_26:
         return parseSameOrCompound(c); // & && &=
       case $$DASH_2D:
+        if (!eofd(1) && peek() === $$DASH_2D && peekd(1) === $$GT_3E) {
+          parseSingleComment();
+          wasWhite = true;
+          return $COMMENT_HTML;
+        }
         return parseSameOrCompound(c); // - -- -=
       case $$SQUOTE_27:
         return parseSingleString(lexerFlags);
@@ -1405,8 +1411,14 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     let ustatusBody = parseRegexBody(c);
     if (nCapturingParens < largestBackReference) ustatusBody = ALWAYS_BAD;
     let ustatusFlags = parseRegexFlags();
-    if (ustatusBody === ALWAYS_BAD || ustatusFlags === ALWAYS_BAD) {
+    if (ustatusBody === ALWAYS_BAD) {
+      // body had bad escape
+      THROW('Regex body had bad escape sequence');
+      return $ERROR;
+    }
+    if (ustatusFlags === ALWAYS_BAD) {
       // body had bad escape or flags occurred twice
+      THROW('Regex had duplicate regex flag');
       return $ERROR;
     }
 
@@ -1414,6 +1426,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       // body had an escape that is only valid with an u flag
       if (ustatusFlags === GOOD_WITH_U_FLAG) return $REGEXU;
       // in this case the body had syntax that's only valid with a u flag and the flag was not present
+      THROW('Regex had syntax that is only valid with the u-flag');
       return $ERROR;
     }
 
@@ -1421,6 +1434,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       // body had an escape or char class range that is invalid with a u flag
       if (ustatusFlags !== GOOD_WITH_U_FLAG) return $REGEX;
       // in this case the body had syntax that's invalid with a u flag and the flag was present anyways
+      THROW('Regex had syntax that is invalid with u-flag');
       return $ERROR;
     }
     ASSERT(ustatusBody === ALWAYS_GOOD, 'the body had no syntax depending on a u flag so is always good');
@@ -2503,11 +2517,13 @@ function isLfPsLs(c) {
 }
 
 function debug_toktype(type) {
+  ASSERT(typeof type === 'number', 'expecting valid type');
   switch (type) {
     case $ASI: return 'ASI';
     case $COMMENT: return 'COMMENT';
     case $COMMENT_SINGLE: return 'COMMENT_SINGLE';
     case $COMMENT_MULTI: return 'COMMENT_MULTI';
+    case $COMMENT_HTML: return 'COMMENT_HTML';
     case $CRLF: return 'CRLF';
     case $EOF: return 'EOF';
     case $ERROR: return 'ERROR';
@@ -2534,7 +2550,7 @@ function debug_toktype(type) {
     case $TICK_TAIL: return 'TICK_TAIL';
     case $WHITE: return 'WHITE';
     default:
-      throw new Error('debug_toktype:UNKNOWN[' + JSON.stringify(type) + ']')
+      throw new Error('debug_toktype: UNKNOWN[' + JSON.stringify(type) + ']')
       return 'UNKNOWN[' + type + ']';
   }
 }

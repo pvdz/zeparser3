@@ -17,8 +17,12 @@ if (!fs.statSync(PATH262).isDirectory()) {
         let lcname = combo.toLowerCase();
         files[combo] = {path: combo, contents: fs.readFileSync(combo), skip: !(
           lcname.indexOf('for-await') < 0 && // TODO: for await is not final yet
+          lcname.indexOf('decimal-escape') < 0 && // TODO: web compat: decimal escape classes in regex
+          lcname.indexOf('leading-escape') < 0 && // TODO: edge case escape char in regex
+          lcname.indexOf('trailing-escape') < 0 && // TODO: edge case escape char in regex
           lcname.indexOf('this-val-regexp') < 0 && // TODO: new regex flags
           lcname.indexOf('unicode-reference') < 0 && // TODO: named back references are not final yet
+          lcname.indexOf('named-groups') < 0 && // TODO: named groups are not final yet
           lcname.indexOf('regexp/y-') < 0 && // TODO: y-flag in regexes
           lcname.indexOf('bigint') < 0 && // TODO: adds new number syntax
           lcname.indexOf('lookbehind') < 0 && // TODO: regex ?<= lookbehind https://github.com/tc39/proposal-regexp-lookbehind

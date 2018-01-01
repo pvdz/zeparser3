@@ -532,12 +532,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function init() {
     do {
       skipRex(sansFlag(INITIAL_LEXER_FLAGS, LF_FOR_REGEX));
-      if (curtype === $ERROR) softError(curtok);
+      if (curtype === $ERROR) softError();
     } while (curtype === $ERROR);
   }
 
   function softError() {
-
+    THROW('Tokenizer error: ' + require('util').inspect(curtok, false, null))
   }
 
   function skipRex(lexerFlags) {
@@ -743,10 +743,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseFromLiteralStatement(lexerFlags, astProp);
         break;
       default:
-        THROW('unexpected token', curtok
+        THROW('Unexpected token'
           // <SCRUB DEV>
-          , debug_toktype(curtype), debug_toktype(getGenericTokenType(curtype))
+          + ': ' + debug_toktype(curtype), debug_toktype(getGenericTokenType(curtype))
           // </SCRUB DEV>
+          , curtok
         );
     }
   }
@@ -950,6 +951,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseFromLiteralStatement(lexerFlags, astProp) {
+    console.log('here')
     AST_open(astProp, 'ExpressionStatement');
     AST_setLiteral('expression', curtok);
     skipDiv(lexerFlags);
