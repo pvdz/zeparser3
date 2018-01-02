@@ -1,6 +1,7 @@
 let {
   $ASI,
   $IDENT,
+  $NUMBER_DEC,
   $PUNCTUATOR,
 } = require('../../../src/zetokenizer');
 

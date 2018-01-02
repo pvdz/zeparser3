@@ -32,7 +32,7 @@ What does this do? `new/foo/g.bar();`
 Can you use new.target as function arg defaults?
 `let [foo].bar;` is bad. Is `let\n[foo].bar;` allowed because ASI?
 Can you have a for-in or for-of loop without a key? `for (let [] in {a:1, b:2, c:3}) console.log('x');`
-
+How can you create multiple variables with the catch clause parameter? (`try {} catch (HERE) {}`)
 function f(a,b){ b=5; console.log(arguments[1]); } f(); f(1); f(1,2); f(1, undefined); // implicit arguments bind
 
 s=new Set(); s.add(NaN); s.add(NaN); log(s.size); // NaN == NaN

@@ -31,6 +31,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
           lcname.indexOf('yield-star-sync-throw') < 0 && // TODO: async generators are part of the `for await` proposal
           lcname.indexOf('use-strict-with-non-simple-param') < 0 && // wtf even. TODO. I guess.
           lcname.indexOf('vals-rus') < 0 && // TODO: non-ascii idents
+          lcname.indexOf('__proto__-dup') < 0 && // TODO: enable once we check duplicate objlit keys
           lcname.indexOf('property-escapes') < 0 // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         )};
       }

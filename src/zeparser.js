@@ -1862,15 +1862,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       hasEither = true;
       AST_open('handler', 'CatchClause');
       ASSERT_skipAny('catch', lexerFlags); // TODO: optimize; next must be (
-      skipAnyOrDieSingleChar($$PAREN_L_28, lexerFlags); // TODO: optimize; next must be ident (maybe destructuring?)
-      if (curtype === $IDENT) {
-        AST_setIdent('param', curtok);
-        ASSERT_skipAny($IDENT, lexerFlags); // TODO: optimize; next must be ) and maybe comma or ident
-      } else if (curc === $$PAREN_L_28 || curc === $$SQUARE_L_5B) {
-        TODO // destructuring is valid here
-      } else {
-        THROW('Missing catch var');
-      }
+      skipAnyOrDieSingleChar($$PAREN_L_28, lexerFlags); // TODO: optimize; next MUST be one arg (ident/destructuring)
+
+      if (curc === $$PAREN_R_29) THROW('Missing catch clause parameter');
+      parseArgBinding(lexerFlags, EXCLUDE_DEFAULT, 'param');
+      if (curc === $$COMMA_2C) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
+      if (curc === $$IS_3D && curtok.str === '=') THROW('Catch clause parameter does not support default values');
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags); // TODO: optimize; next must be {
       parseBlockStatement(lexerFlags, 'body');
       AST_close(); // CatchClause
@@ -2033,12 +2030,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseArgBindings(lexerFlags, astProp) {
     // TODO: dedupe the binding code with that of let/const binding. it's copy/pasta because the similarity wasnt obvious at first. we need to cut this func into small funcs and share those
     do {
-      parseArgBinding(lexerFlags, astProp);
+      parseArgBinding(lexerFlags, INCLUDE_DEFAULT, astProp);
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipAny(',', lexerFlags); // TODO: next must be ident or [{.
     } while (true);
   }
-  function parseArgBinding(lexerFlags, astProp) {
+  function parseArgBinding(lexerFlags, defaultsOption, astProp) {
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
 
     if (curtype === $IDENT) {
@@ -2073,7 +2070,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('Rest missing an ident or destruct');
       }
       AST_open(astProp, 'RestElement');
-      parseArgBinding(lexerFlags, 'argument');
+      parseArgBinding(lexerFlags, INCLUDE_DEFAULT, 'argument');
       AST_close(); // RestElement
       if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
       if (curc !== $$PAREN_R_29) THROW('Can not have more destructuring parts follow a rest, not even a trailing comma', curtok.str);
@@ -2085,7 +2082,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     // arg defaults
-    if (curc === $$IS_3D && curtok.str === '=') {
+    if (defaultsOption === INCLUDE_DEFAULT && curc === $$IS_3D && curtok.str === '=') {
       AST_wrapClosed(astProp, 'AssignmentPattern', 'left');
       ASSERT_skipRex($PUNCTUATOR, lexerFlags);
       parseExpression(lexerFlags, 'right');
