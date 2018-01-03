@@ -15,11 +15,9 @@ if (!fs.statSync(PATH262).isDirectory()) {
     if (fs.statSync(combo).isFile()) {
       if (file.slice(-3) === '.js') {
         let lcname = combo.toLowerCase();
-        files[combo] = {path: combo, contents: fs.readFileSync(combo), skip: !(
+        files[combo] = {path: combo, contents: fs.readFileSync(combo), annexb: lcname.indexOf('annexb') >= 0,skip: !(
           lcname.indexOf('for-await') < 0 && // TODO: for await is not final yet
-          lcname.indexOf('decimal-escape') < 0 && // TODO: web compat: decimal escape classes in regex
-          lcname.indexOf('leading-escape') < 0 && // TODO: edge case escape char in regex
-          lcname.indexOf('trailing-escape') < 0 && // TODO: edge case escape char in regex
+          (lcname.indexOf('annexb') < 0 || lcname.indexOf('regexp') < 0) && // TODO: web compat: lots of regex cruft to support
           lcname.indexOf('this-val-regexp') < 0 && // TODO: new regex flags
           lcname.indexOf('unicode-reference') < 0 && // TODO: named back references are not final yet
           lcname.indexOf('named-groups') < 0 && // TODO: named groups are not final yet
@@ -76,6 +74,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
           }
           if (code.indexOf('[onlyStrict]') >= 0) testObj.SLOPPY = {SKIP:true};
           if (code.indexOf('[module]') >= 0) testObj.SCRIPT = {SKIP:true};
+          testObj.WEB = obj.annexb;
 
           if (code.indexOf('negative:') >= 0 && code.indexOf('  phase: runtime') < 0) {
             // "negative:" means the test is expected to throw

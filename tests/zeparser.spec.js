@@ -85,6 +85,11 @@ function one(parser, testObj, desc, from) {
 }
 function _one(Parser, testSuffix, code, testObj, desc, from) {
   // shorthand for just goal_script/sloppy settings (prevents unncessary object wrapping *shrug*)
+  if (testObj.WEB) {
+    // TODO: run sloppy mode tests with and without the web compat flag instead of targeting them explicitly
+    testObj.SLOPPY_SCRIPT = testObj.WEB;
+    testObj.WEB = true;
+  }
   let sloppyScriptOptions = testObj.SLOPPY_SCRIPT;
   if (sloppyScriptOptions) {
     delete testObj.SLOPPY_SCRIPT;
@@ -121,6 +126,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     startInStrictMode,
     debug: _debug,
     SKIP,
+    WEB,
   } = testDetails;
 
   ++testj;
@@ -128,6 +134,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
                                                           //if (testj !== 3103) return;
   testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
   testSuffix += '[' + testj + ']';
+  if (WEB) testSuffix += '[WEB]';
 
   // goal specific overrides
   // (throws override ast and ast overrides throws)
@@ -181,7 +188,10 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   let wasError = '';
   let stack;
   try {
-    var obj = Parser(code, mode, COLLECT_TOKENS_SOLID, {strictMode: startInStrictMode});
+    var obj = Parser(code, mode, COLLECT_TOKENS_SOLID, {
+      strictMode: startInStrictMode,
+      webCompat: !!WEB,
+    });
   } catch(f) {
     wasError = f.message;
     var obj = '' + f.stack;

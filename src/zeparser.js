@@ -157,6 +157,7 @@ let { default: ZeTokenizer,
   LF_IN_FUNC_ARGS,
   LF_NO_FUNC_DECL,
   LF_NO_YIELD,
+  LF_NO_IN,
   INITIAL_LEXER_FLAGS,
   LF_DEBUG,
 
@@ -951,7 +952,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseFromLiteralStatement(lexerFlags, astProp) {
-    console.log('here')
     AST_open(astProp, 'ExpressionStatement');
     AST_setLiteral('expression', curtok);
     skipDiv(lexerFlags);
@@ -1596,7 +1596,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         case 'var':
         case 'let':
         case 'const':
-          _parseAnyVarDecls(lexerFlags, curtok.str, FROM_FOR_HEADER_FIRST_DECL, astProp);
+          _parseAnyVarDecls(lexerFlags | LF_NO_IN, curtok.str, FROM_FOR_HEADER_FIRST_DECL, astProp);
           assignable = true; // i think.
           break;
 
@@ -1610,7 +1610,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       emptyInit = true;
     } else {
       startedWithParen = curc === $$PAREN_L_28;
-      assignable = parseValue(lexerFlags, astProp);
+      assignable = parseValue(lexerFlags | LF_NO_IN, astProp);
       wasNotDecl = true;
     }
 
@@ -1621,7 +1621,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       if (curtok.str === 'in') {
         AST_wrapClosed(astProp, 'ForInStatement', 'left');
-        if (!assignable) THROW('Left part of for-in must be assignable');
+        if (!assignable) {
+          // certain cases were possible in legacy mode
+          if (options_webCompat === WEB_COMPAT_ON && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
+            // TODO: do we need to verify these patterns first...? or is any assignment okay here
+          } else {
+            THROW('Left part of for-in must be assignable');
+          }
+        }
         ASSERT_skipRex('in', lexerFlags);
         parseExpressions(lexerFlags, 'right');
         return;
@@ -2004,7 +2011,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseBindingPatterns(lexerFlags, kind, from, astProp) {
     let letWasName = parseBindingPatternAndAssignment(lexerFlags, kind, kind === 'let' ? CAN_BE_LET_VAR : LET_IS_KEYWORD, from, astProp);
     if (letWasName === LET_IS_VAR_NAME) return LET_IS_VAR_NAME;
-
     // TODO: we can do logic better in this function :/
     while (curc === $$COMMA_2C) {
       if (from === FROM_FOR_HEADER_FIRST_DECL) from = FROM_FOR_HEADER_MULTI_DECL; // no longer allow in/of as the `=`
@@ -2014,7 +2020,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (from === FROM_FOR_HEADER_MULTI_DECL && (curtok.str === 'in' || curtok.str === 'of')) {
       THROW('For-in/of can only have one var binding');
     }
-    if ((from === FROM_FOR_HEADER_FIRST_DECL || from === FROM_FOR_HEADER_MULTI_DECL) && curtok.str === ')') {
+    if ((from === FROM_FOR_HEADER_FIRST_DECL || from === FROM_FOR_HEADER_MULTI_DECL) && curc === $$PAREN_R_29) {
       THROW('Missing required initializer in the `for`-header');
     }
 
@@ -2241,10 +2247,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // keep parsing binding patterns separated by at least one comma
       mustHaveAssignment = true;
       AST_open('id', 'ObjectPattern');
-      let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
-      skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // (note: circumvent template body/tail) TODO: optimize; dont think this can ever start with a forward slash
+      let lexerFlagsInsideDestruct = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_IN);
+      skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsInsideDestruct); // (note: circumvent template body/tail) TODO: optimize; dont think this can ever start with a forward slash
       AST_set('properties', []);
-      parseBindingPatternsNested(lexerFlagsNoTemplate, bindingKind, IS_OBJECT_DESTRUCT, 'properties');
+      parseBindingPatternsNested(lexerFlagsInsideDestruct, bindingKind, IS_OBJECT_DESTRUCT, 'properties');
       skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close(); // ObjectPattern
     } else if (curc === $$SQUARE_L_5B) {
@@ -2253,8 +2259,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       mustHaveAssignment = true;
       AST_open('id', 'ArrayPattern');
       skipRexOrDieSingleChar($$SQUARE_L_5B, lexerFlags); // TODO: optimize; dont think this can ever start with a forward slash
+      let lexerFlagsInsideDestruct = sansFlag(lexerFlags, LF_NO_IN);
       AST_set('elements', []);
-      parseBindingPatternsNested(lexerFlags, bindingKind, IS_ARRAY_DESTRUCT, 'elements');
+      parseBindingPatternsNested(lexerFlagsInsideDestruct, bindingKind, IS_ARRAY_DESTRUCT, 'elements');
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close(); // ArrayPattern
     } else if (letVarState === CAN_BE_LET_VAR && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
@@ -2268,8 +2275,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$IS_3D && curtok.str === '=') {
       ASSERT_skipRex($PUNCTUATOR, lexerFlags);
       parseExpression(lexerFlags, 'init');
-      if (curtok.str === 'of' || curtok.str === 'in') {
-        THROW('The binding cannot have an init inside a for-in or for-of statement');
+      if (curtok.str === 'in') {
+        // certain cases were possible in legacy mode
+        if (options_webCompat === WEB_COMPAT_ON && bindingKind === 'var' && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
+          // TODO: do we need to verify this further?
+        } else {
+          THROW('The binding cannot have an init inside a for-in statement');
+        }
+      } else if (curtok.str === 'of') {
+        THROW('The binding cannot have an init inside a for-of statement');
       }
     } else if (mustHaveAssignment) {
       if (from === FROM_FOR_HEADER_FIRST_DECL) {
@@ -2484,7 +2498,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close();
     } else {
       let initialAstProp = astProp;
-      while (isNonAssignBinOp() || curc === $$QMARK_3F) {
+      while (isNonAssignBinOp(lexerFlags) || curc === $$QMARK_3F) {
         // <SCRUB AST>
         // to maintain operator precedent we need to take special care of the AST here if the
         // current op is stronger than the previous op _currently_ at the top of the path
@@ -2577,7 +2591,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return false;
   }
-  function isNonAssignBinOp() {
+  function isNonAssignBinOp(lexerFlags) {
     switch (curtok.str) {
       case '&&':
       case '||':
@@ -2601,9 +2615,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case '>>':
       case '>>>':
       case '%':
-      case 'in':
       case 'instanceof':
         return true;
+      case 'in':
+        return (lexerFlags & LF_NO_IN) !== LF_NO_IN;
     }
     return false;
   }
@@ -2928,6 +2943,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseObjectLitOrDestruc(lexerFlags, fromParam, astProp) {
     // (only a trailing comma is allowed, no elisions)
 
+    lexerFlags = sansFlag(lexerFlags, LF_NO_IN); // we can parse `in` inside the object literal
+
     // {a}
     // {a:b}
     // {a:b=x}
@@ -3143,6 +3160,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseArrayLitOrDestruc(lexerFlags, canDestruct, astProp) {
     // [a]       -> array literal
     // [a] = b   -> array destructuring
+
+    lexerFlags = sansFlag(lexerFlags, LF_NO_IN); // we can parse `in` inside the array literal
 
     AST_open(astProp, 'ArrayExpression');
     ASSERT_skipRex('[', lexerFlags); // note: should be verified by caller

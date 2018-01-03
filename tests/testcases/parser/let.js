@@ -1697,14 +1697,14 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
           test('let, var with init, semi', {
             code: 'for (let foo = bar in x);',
-            throws: 'Missing required initializer',
+            throws: 'cannot have an init',
             desc: 'for some reason, it is not the "cannot have an init" one, probably because `in` is an op while `of` is not',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('let, two vars with both init, semi', {
             code: 'for (let foo = bar, zoo = boo in x);',
-            throws: 'Missing required initializer',
+            throws: 'cannot have an init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 

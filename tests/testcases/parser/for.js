@@ -357,6 +357,226 @@ module.exports = (describe, test) => describe('for statement', _ => {
       ]},
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
+
+    describe('web compat', _ => {
+
+      // https://tc39.github.io/ecma262/#sec-iteration-statements
+      //   for ( var ForBinding[?Yield, ?Await] in Expression[+In, ?Yield, ?Await] )
+      //     Statement[?Yield, ?Await, ?Return]
+      // https://tc39.github.io/ecma262/#sec-initializers-in-forin-statement-heads
+      // The following augments the IterationStatement;
+      //   IterationStatement[Yield, Await, Return]:
+      //     for ( var BindingIdentifier[?Yield, ?Await] Initializer[~In, ?Yield, ?Await] in Expression[+In, ?Yield, ?Await] )
+      //       Statement[?Yield, ?Await, ?Return]
+      // (note that Expression also has comma-expression, there is no "Expressions" production)
+
+      test('var with init left of `in`', {
+        code: 'for (var a = b in c);',
+        throws: 'cannot have an init',
+        WEB: { // this is an annexB web compat thing and only valid in sloppy mode
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForInStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'var',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'a' },
+                      init: { type: 'Identifier', name: 'b' } } ] },
+                right: { type: 'Identifier', name: 'c' },
+                body: { type: 'EmptyStatement' } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('incremental in var init left of `in`', {
+        code: 'for (var a = ++b in c);',
+        throws: 'cannot have an init',
+        WEB: { // this is an annexB web compat thing
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForInStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'var',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'a' },
+                      init:
+                      { type: 'UpdateExpression',
+                        operator: '++',
+                        prefix: true,
+                        argument: { type: 'Identifier', name: 'b' } } } ] },
+                right: { type: 'Identifier', name: 'c' },
+                body: { type: 'EmptyStatement' } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('var with init left and assignment right of `in`', {
+        code: 'for (var a = 0 in stored = a, {});',
+        throws: 'cannot have an init',
+        WEB: { // this is an annexB web compat thing
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForInStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'var',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'a' },
+                      init: { type: 'Literal', value: '<TODO>', raw: '0' } } ] },
+                right:
+                { type: 'SequenceExpression',
+                  expressions:
+                    [ { type: 'AssignmentExpression',
+                      left: { type: 'Identifier', name: 'stored' },
+                      operator: '=',
+                      right: { type: 'Identifier', name: 'a' } },
+                      { type: 'ObjectExpression', properties: [] } ] },
+                body: { type: 'EmptyStatement' } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('grouped init left of `in`', {
+        code: 'for (var a = (++effects, -1) in x);',
+        throws: 'cannot have an init',
+        WEB: { // this is an annexB web compat thing
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForInStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'var',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'a' },
+                      init:
+                      { type: 'SequenceExpression',
+                        expressions:
+                          [ { type: 'UpdateExpression',
+                            operator: '++',
+                            prefix: true,
+                            argument: { type: 'Identifier', name: 'effects' } },
+                            { type: 'UnaryExpression',
+                              operator: '-',
+                              prefix: true,
+                              argument: { type: 'Literal', value: '<TODO>', raw: '1' } } ] } } ] },
+                right: { type: 'Identifier', name: 'x' },
+                body: { type: 'EmptyStatement' } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('comma expression right of `in`', {
+        code: 'for (var a in stored = a, {a: 0, b: 1, c: 2});',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ForInStatement',
+              left:
+              { type: 'VariableDeclaration',
+                kind: 'var',
+                declarations:
+                  [ { type: 'VariableDeclarator',
+                    id: { type: 'Identifier', name: 'a' },
+                    init: null } ] },
+              right:
+              { type: 'SequenceExpression',
+                expressions:
+                  [ { type: 'AssignmentExpression',
+                    left: { type: 'Identifier', name: 'stored' },
+                    operator: '=',
+                    right: { type: 'Identifier', name: 'a' } },
+                    { type: 'ObjectExpression',
+                      properties:
+                        [ { type: 'Property',
+                          key: { type: 'Identifier', name: 'a' },
+                          kind: 'init',
+                          method: false,
+                          shorthand: false,
+                          computed: false,
+                          value: { type: 'Literal', value: '<TODO>', raw: '0' } },
+                          { type: 'Property',
+                            key: { type: 'Identifier', name: 'b' },
+                            kind: 'init',
+                            method: false,
+                            shorthand: false,
+                            computed: false,
+                            value: { type: 'Literal', value: '<TODO>', raw: '1' } },
+                          { type: 'Property',
+                            key: { type: 'Identifier', name: 'c' },
+                            kind: 'init',
+                            method: false,
+                            shorthand: false,
+                            computed: false,
+                            value: { type: 'Literal', value: '<TODO>', raw: '2' } } ] } ] },
+              body: { type: 'EmptyStatement' } } ] },
+        desc: '(not legacy but sanity check in this set. the rhs of `for-in` is a regular Expression node which have a comma)',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('combination of last two tests', {
+        code: 'for (var a = (++effects, -1) in stored = a, {a: 0, b: 1, c: 2});',
+        throws: 'cannot have an init',
+        WEB: { // this is an annexB web compat thing
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ForInStatement',
+                left:
+                { type: 'VariableDeclaration',
+                  kind: 'var',
+                  declarations:
+                    [ { type: 'VariableDeclarator',
+                      id: { type: 'Identifier', name: 'a' },
+                      init:
+                      { type: 'SequenceExpression',
+                        expressions:
+                          [ { type: 'UpdateExpression',
+                            operator: '++',
+                            prefix: true,
+                            argument: { type: 'Identifier', name: 'effects' } },
+                            { type: 'UnaryExpression',
+                              operator: '-',
+                              prefix: true,
+                              argument: { type: 'Literal', value: '<TODO>', raw: '1' } } ] } } ] },
+                right:
+                { type: 'SequenceExpression',
+                  expressions:
+                    [ { type: 'AssignmentExpression',
+                      left: { type: 'Identifier', name: 'stored' },
+                      operator: '=',
+                      right: { type: 'Identifier', name: 'a' } },
+                      { type: 'ObjectExpression',
+                        properties:
+                          [ { type: 'Property',
+                            key: { type: 'Identifier', name: 'a' },
+                            kind: 'init',
+                            method: false,
+                            shorthand: false,
+                            computed: false,
+                            value: { type: 'Literal', value: '<TODO>', raw: '0' } },
+                            { type: 'Property',
+                              key: { type: 'Identifier', name: 'b' },
+                              kind: 'init',
+                              method: false,
+                              shorthand: false,
+                              computed: false,
+                              value: { type: 'Literal', value: '<TODO>', raw: '1' } },
+                            { type: 'Property',
+                              key: { type: 'Identifier', name: 'c' },
+                              kind: 'init',
+                              method: false,
+                              shorthand: false,
+                              computed: false,
+                              value: { type: 'Literal', value: '<TODO>', raw: '2' } } ] } ] },
+                body: { type: 'EmptyStatement' } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+    });
   });
 
   describe('for-of', _ => {

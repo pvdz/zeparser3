@@ -228,6 +228,7 @@ const LF_IN_FUNC_ARGS = 1 << 6; // throws for await expression
 const LF_NO_FUNC_DECL = 1 << 7; // currently nesting inside at least one statement that is not a block/body
 const LF_NO_YIELD = 1 << 8; // yield is not allowed after a non-assignment-op
 const LF_CAN_NEW_TARGET = 1 << 9; // current scope is inside at least one regular (non-arrow) function
+const LF_NO_IN = 1 << 10; // inside the initial part of a for-header, prevents `in` being parsed as a generic expression
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
@@ -274,6 +275,10 @@ function LF_DEBUG(flags) {
   if (flags & LF_CAN_NEW_TARGET) {
     flags ^= LF_CAN_NEW_TARGET;
     s.push('LF_CAN_NEW_TARGET');
+  }
+  if (flags & LF_NO_IN) {
+    flags ^= LF_NO_IN;
+    s.push('LF_NO_IN');
   }
   if (flags) {
     THROW('UNKNOWN_FLAGS: ' + flags.toString(2));
@@ -2635,6 +2640,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_IN_GENERATOR,
   LF_NO_FUNC_DECL,
   LF_NO_YIELD,
+  LF_NO_IN,
   LF_STRICT_MODE,
   INITIAL_LEXER_FLAGS,
   LF_DEBUG,
