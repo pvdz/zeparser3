@@ -576,6 +576,16 @@ module.exports = (describe, test) => describe('for statement', _ => {
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      test('destructuring with init is always illegal', {
+        code: 'for (var [a] = 0 in {});',
+        throws: 'cannot have an init',
+        WEB: {
+          throws: 'cannot have an init',
+          desc: 'this is important; it should also throw in web-compat mode',
+        },
+        tokens: [],
+      });
     });
   });
 

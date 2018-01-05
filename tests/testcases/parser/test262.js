@@ -17,7 +17,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
         let lcname = combo.toLowerCase();
         files[combo] = {path: combo, contents: fs.readFileSync(combo), annexb: lcname.indexOf('annexb') >= 0,skip: !(
           lcname.indexOf('for-await') < 0 && // TODO: for await is not final yet
-          (lcname.indexOf('annexb') < 0 || lcname.indexOf('regexp') < 0) && // TODO: web compat: lots of regex cruft to support
+          (lcname.indexOf('annexb') < 0 || (lcname.indexOf('regexp') < 0 && lcname.indexOf('escape') < 0)) && // TODO: web compat: lots of regex/escape cruft to support
           lcname.indexOf('this-val-regexp') < 0 && // TODO: new regex flags
           lcname.indexOf('unicode-reference') < 0 && // TODO: named back references are not final yet
           lcname.indexOf('named-groups') < 0 && // TODO: named groups are not final yet

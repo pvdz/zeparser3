@@ -38,7 +38,7 @@ function read(path, file) {
 }
 read(dir, '');
 
-files = files.filter(f =>! (f.indexOf('test262') >= 0));
+files = files.filter(f =>!   (f.indexOf('test262') >= 0));
 
 files.sort((a,b) => {
   // push test262 to the back so our own unit tests can find problems first
@@ -85,7 +85,7 @@ function one(parser, testObj, desc, from) {
 }
 function _one(Parser, testSuffix, code, testObj, desc, from) {
   // shorthand for just goal_script/sloppy settings (prevents unncessary object wrapping *shrug*)
-  if (testObj.WEB) {
+  if (testObj.WEB && testObj.WEB !== true) {
     // TODO: run sloppy mode tests with and without the web compat flag instead of targeting them explicitly
     testObj.SLOPPY_SCRIPT = testObj.WEB;
     testObj.WEB = true;
@@ -101,10 +101,12 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
   [MODE_SCRIPT, MODE_MODULE].forEach(goal => {
     // similarly, run all tests in both sloppy and strict mode. use STRICT and SLOPPY to add exceptions.
     let ms = '[' + (goal === MODE_SCRIPT ? 'Script' : 'Module') + ']';
-    if (goal !== MODE_MODULE) { // module mode is ALWAYS strict mode anyways
+    if (goal !== MODE_MODULE && (!testObj.STRICT || !testObj.STRICT.SKIP)) { // module mode is ALWAYS strict mode anyways
       __one(Parser, testSuffix + ms, code, goal, override(testObj.STRICT, Object.assign({startInStrictMode:true}, testObj)), desc, from);
     }
-    __one(Parser, testSuffix + ms, code, goal, override(testObj.SLOPPY, Object.assign({startInStrictMode:false}, testObj)), desc, from);
+    if (!testObj.SLOPPY || !testObj.SLOPPY.SKIP) {
+      __one(Parser, testSuffix + ms, code, goal, override(testObj.SLOPPY, Object.assign({startInStrictMode:false}, testObj)), desc, from);
+    }
   });
 }
 function override(wantObj, baseObj) {
@@ -144,7 +146,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       expectedAst = undefined;
       expectedThrows = scriptModeObj.throws;
     }
-    if ('SKIP' in scriptModeObj) SKIP = scriptModeObj.SKIP;
+    if (scriptModeObj.SKIP !== undefined) SKIP = scriptModeObj.SKIP;
     if (scriptModeObj.ast) {
       expectedThrows = undefined;
       expectedAst = scriptModeObj.ast;
@@ -153,7 +155,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (scriptModeObj.startInStrictMode !== undefined) startInStrictMode = scriptModeObj.startInStrictMode;
   }
   if (mode === MODE_MODULE && moduleModeObj) {
-    if ('SKIP' in moduleModeObj) SKIP = moduleModeObj.SKIP;
+    if (moduleModeObj.SKIP !== undefined) SKIP = moduleModeObj.SKIP;
     if (moduleModeObj.STRICT || moduleModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
     if (moduleModeObj.throws) {
       expectedAst = undefined;

@@ -2237,6 +2237,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'VariableDeclarator');
 
     let mustHaveAssignment = false; // destructurings must always be followed by an assignment
+    let wasDestruct = false;
     if (curtype === $IDENT) {
       // normal
       bindingIdentCheck(curtok, bindingKind, lexerFlags);
@@ -2253,6 +2254,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseBindingPatternsNested(lexerFlagsInsideDestruct, bindingKind, IS_OBJECT_DESTRUCT, 'properties');
       skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close(); // ObjectPattern
+      wasDestruct = true;
     } else if (curc === $$SQUARE_L_5B) {
       // destructure array
       // keep parsing binding patterns separated by at least one comma
@@ -2264,6 +2266,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseBindingPatternsNested(lexerFlagsInsideDestruct, bindingKind, IS_ARRAY_DESTRUCT, 'elements');
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: the end is followed by a punctuator but not a div
       AST_close(); // ArrayPattern
+      wasDestruct = true;
     } else if (letVarState === CAN_BE_LET_VAR && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
       // `let` as a variable name is okay in sloppy mode
       AST_close(); // VariableDeclarator
@@ -2277,7 +2280,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpression(lexerFlags, 'init');
       if (curtok.str === 'in') {
         // certain cases were possible in legacy mode
-        if (options_webCompat === WEB_COMPAT_ON && bindingKind === 'var' && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
+        if (!wasDestruct && options_webCompat === WEB_COMPAT_ON && bindingKind === 'var' && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
+          // destructurings dont count for this rule. in web compat mode, for-in lhs assignments are allowed.
           // TODO: do we need to verify this further?
         } else {
           THROW('The binding cannot have an init inside a for-in statement');
