@@ -2658,7 +2658,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case '|': return 7;
       case '&&': return 6;
       case '||': return 5;
-      default: THROW('Unknown operator'); // other ops should not be handled by this function. dont think this should be possible in prod (it means tokenizer allowed a new op)
+      case '?': return 4;
+      default: THROW('Unknown operator ['+str+']'); // other ops should not be handled by this function. dont think this should be possible in prod (it means tokenizer allowed a new op)
     }
   }
 

@@ -7,7 +7,7 @@ let {
 
 module.exports = (describe, test) => describe('ternary', _ => {
 
-  test('function call, no args',{
+  test('base case',{
     code: 'a?b:c',
     ast: {type: 'Program', body: [
       {type: 'ExpressionStatement', expression: {
@@ -18,5 +18,26 @@ module.exports = (describe, test) => describe('ternary', _ => {
       }},
     ]},
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+  });
+
+  test('precedence case', {
+    code: 'a === b ? c : d % e;',
+    ast: { type: 'Program',
+      body:
+        [ { type: 'ExpressionStatement',
+          expression:
+          { type: 'ConditionalExpression',
+            test:
+            { type: 'BinaryExpression',
+              left: { type: 'Identifier', name: 'a' },
+              operator: '===',
+              right: { type: 'Identifier', name: 'b' } },
+            consequent: { type: 'Identifier', name: 'c' },
+            alternate:
+            { type: 'BinaryExpression',
+              left: { type: 'Identifier', name: 'd' },
+              operator: '%',
+              right: { type: 'Identifier', name: 'e' } } } } ] },
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
   });
 });
