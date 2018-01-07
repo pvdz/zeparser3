@@ -30,6 +30,8 @@ if (!fs.statSync(PATH262).isDirectory()) {
           lcname.indexOf('use-strict-with-non-simple-param') < 0 && // wtf even. TODO. I guess.
           lcname.indexOf('vals-rus') < 0 && // TODO: non-ascii idents
           lcname.indexOf('__proto__-dup') < 0 && // TODO: enable once we check duplicate objlit keys
+          lcname.indexOf('asyncgenerator') < 0 && // TODO: this is a stage proposal, we'll probably add this soon
+          lcname.indexOf('async-generator') < 0 && // TODO: this is a stage proposal, we'll probably add this soon
           lcname.indexOf('property-escapes') < 0 // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         )};
       }

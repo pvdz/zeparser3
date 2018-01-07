@@ -873,7 +873,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         break;
 
       case 'class':
-        parseClass(lexerFlags, IDENT_REQUIRED, astProp);
+        parseClassDeclaration(lexerFlags, IDENT_REQUIRED, astProp);
         break;
 
       case 'const':
@@ -1206,18 +1206,33 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close();
   }
 
-  function parseClass(lexerFlags, optionalIdent, astProp) {
-    // Note: all class code is always strict mode implicitly
+  function parseClassDeclaration(lexerFlags, optionalIdent, astProp) {
     // class x {}
     // class x extends <lhs expr> {}
     // class x {;}
     // class x {[static] <method>[]}
 
+    ASSERT_skipAny('class', lexerFlags); // TODO: valid varname, `extends`, or `{`
+    AST_open(astProp, 'ClassDeclaration');
+    _parseClass(lexerFlags, optionalIdent);
+    AST_close(); // ClassDeclaration
+  }
+  function parseClassExpression(lexerFlags, optionalIdent, astProp) {
+    // Note: all class code is always strict mode implicitly
+    // x = class x {}
+    // x = class x extends <lhs expr> {}
+    // x = class x {;}
+    // x = class x {[static] <method>[]}
+
+    AST_open(astProp, 'ClassExpression');
+    _parseClass(lexerFlags, optionalIdent);
+    AST_close(); // ClassExpression
+  }
+  function _parseClass(lexerFlags, optionalIdent) {
+    // Note: all class code is always strict mode implicitly
+
     let outsideLexerFlags = lexerFlags; // could already have strict mode flag set and we need to know this for the last skip of this function
     lexerFlags = lexerFlags | LF_STRICT_MODE;
-
-    AST_open(astProp, 'ClassDeclaration');
-    ASSERT_skipAny('class', lexerFlags);
 
     // note: default exports has optional ident but should still not skip `extends` here
     // but it is not a valid class name anyways (which is superseded by a generic keyword check)
@@ -1249,7 +1264,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close(); // ClassBody
 
     skipRexOrDie($$CURLY_R_7D, '}', outsideLexerFlags);
-    AST_close(); // ClassDeclaration
   }
   function parseClassMethod(lexerFlags) {
     // everything from objlit that is a method optionally prefixed by `static`, and an empty statement
@@ -1427,7 +1441,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       if (curtok.str === 'class') {
         // export class ...
-        parseClass(lexerFlags, IDENT_OPTIONAL, 'declaration');
+        parseClassDeclaration(lexerFlags, IDENT_OPTIONAL, 'declaration');
       } else if (curc === $$F_66 && curtok.str === 'function') {
         // export default function f(){}
         // export default function* f(){}
@@ -1486,7 +1500,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           _parseAnyVarDecls(lexerFlags, 'const', FROM_EXPORT_DECL, 'declaration');
         } else if (curtok.str === 'class') {
           // export class ...
-          parseClass(lexerFlags, IDENT_REQUIRED, 'declaration');
+          parseClassDeclaration(lexerFlags, IDENT_REQUIRED, 'declaration');
         } else {
           THROW('Unknown export type [' + curtok.str +  ']');
         }
@@ -2815,7 +2829,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_close();
         return false;
       case 'class':
-        parseClass(lexerFlags, IDENT_OPTIONAL, astProp);
+        parseClassExpression(lexerFlags, IDENT_OPTIONAL, astProp);
         return false;
       case 'function':
         parseFunctionExpression(lexerFlags, NOT_ASYNC, astProp);

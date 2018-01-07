@@ -8,46 +8,72 @@ module.exports = (describe, test) => describe('class statement', _ => {
 
   describe('empty classes', _ => {
 
-    test('base case empty class',{
-      code: 'class A {}',
-      ast: {type: 'Program', body: [
-        {type: 'ClassDeclaration',
-          id: {type: 'Identifier', name: 'A'},
-          superClass: null,
-          body: {type: 'ClassBody',
-            body: [],
-          }
-        },
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    describe('as declaration', _ => {
+
+      test('base case empty class',{
+        code: 'class A {}',
+        ast: {type: 'Program', body: [
+          {type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'A'},
+            superClass: null,
+            body: {type: 'ClassBody',
+              body: [],
+            }
+          },
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('semi in an empty class',{
+        code: 'class A {;}',
+        ast: {type: 'Program', body: [
+          {type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'A'},
+            superClass: null,
+            body: {type: 'ClassBody',
+              body: [],
+            }
+          },
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('semis in an empty class',{
+        code: 'class A {; ;; ;}',
+        ast: {type: 'Program', body: [
+          {type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'A'},
+            superClass: null,
+            body: {type: 'ClassBody',
+              body: [],
+            }
+          },
+        ]},
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
     });
 
-    test('semi in an empty class',{
-      code: 'class A {;}',
-      ast: {type: 'Program', body: [
-        {type: 'ClassDeclaration',
-          id: {type: 'Identifier', name: 'A'},
-          superClass: null,
-          body: {type: 'ClassBody',
-            body: [],
-          }
-        },
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
+    describe('as expression', _ => {
 
-    test('semis in an empty class',{
-      code: 'class A {; ;; ;}',
-      ast: {type: 'Program', body: [
-        {type: 'ClassDeclaration',
-          id: {type: 'Identifier', name: 'A'},
-          superClass: null,
-          body: {type: 'ClassBody',
-            body: [],
-          }
-        },
-      ]},
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      test('base case empty class',{
+        code: 'x = class A {};',
+        ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression:
+            {type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'x'},
+              operator: '=',
+              right: {type: 'ClassExpression',
+                id: {type: 'Identifier', name: 'A'},
+                superClass: null,
+                body: {type: 'ClassBody',
+                  body: [],
+                },
+              },
+            },
+          },
+        ]},
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
     });
   });
 
