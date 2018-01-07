@@ -107,6 +107,7 @@ let regexesn = [
   [['/\\$', '/abc\\$', '/\\$abcd', '/abc\\$abcd', '/\\_', '/abc\\_', '/\\_abcd', '/abc\\_abcd'], $ERROR, PARSE_MODE_REGEX, '$ and _', 'suffixsp'],
   // hex escapes
   [['/\\x01/', '/\\x12/', '/\\x23/', '/\\x34/', '/\\x45/', '/\\x56/', '/\\x67/', '/\\x78/', '/\\x89/', '/\\x90/'], $REGEX, PARSE_MODE_REGEX, 'valid hex escapes'],
+  [['/\\xa1/', '/\\xb2/', '/\\xc3/', '/\\x3d/', '/\\x4e/', '/\\x5f/', '/\\x6A/', '/\\xbB/', '/\\xCD/', '/\\xEF/'], $REGEX, PARSE_MODE_REGEX, 'valid hex escapes'],
   [['/\\x/', '/\\x0/', '/\\x1/', '/\\x2/', '/\\x3/', '/\\x4/', '/\\x5/', '/\\x6/', '/\\x7/', '/\\x8/', '/\\x9/'], $ERROR, PARSE_MODE_REGEX, 'invalid hex escape with one char'],
   [['/\\x', '/\\x0', '/\\x1', '/\\x2', '/\\x3', '/\\x4', '/\\x5', '/\\x6', '/\\x7', '/\\x8', '/\\x9'], $ERROR, PARSE_MODE_REGEX, 'invalid hex escape with one charat eol/eof', 'suffixsp'],
   [['/\\x01', '/\\x12', '/\\x23', '/\\x34', '/\\x45', '/\\x56', '/\\x67', '/\\x78', '/\\x89', '/\\x90'], $ERROR, PARSE_MODE_REGEX, 'hex escape at eof/eol', 'suffixsp'],
@@ -252,6 +253,7 @@ let regexesn = [
   [['/[abc\\Adeff', '/[abc\\Bdeff', '/[abc\\Cdeff', '/[abc\\Ddeff', '/[abc\\Edeff', '/[abc\\Fdeff', '/[abc\\Gdeff', '/[abc\\Hdeff', '/[abc\\Ideff', '/[abc\\Jdeff', '/[abc\\Kdeff', '/[abc\\Ldeff', '/[abc\\Mdeff', '/[abc\\Ndeff', '/[abc\\Odeff', '/[abc\\Pdeff', '/[abc\\Qdeff', '/[abc\\Rdeff', '/[abc\\Sdeff', '/[abc\\Tdeff', '/[abc\\Udeff', '/[abc\\Vdeff', '/[abc\\Wdeff', '/[abc\\Xdeff', '/[abc\\Ydeff', '/[abc\\Zdeff'], $ERROR, PARSE_MODE_REGEX, 'escaping a single uc letter in the middle', 'suffixsp'],
   [['/[\\$', '/[abc\\$', '/[\\$abcd', '/[abc\\$abcd', '/[\\_', '/[abc\\_', '/[\\_abcd', '/[abc\\_abcd'], $ERROR, PARSE_MODE_REGEX, '$ and _', 'suffixsp'],
   [['/[\\x01]/', '/[\\xf2]/', '/[\\x23]/', '/[\\xb4]/', '/[\\x45]/', '/[\\x5c]/', '/[\\x67]/', '/[\\x7d]/', '/[\\x89]/', '/[\\x90]/'], $REGEX, PARSE_MODE_REGEX, 'valid hex escapes'],
+  [['/[\\xa1]/', '/[\\xb2]/', '/[\\xc3]/', '/[\\x3d]/', '/[\\x4e]/', '/[\\x5f]/', '/[\\x6A]/', '/[\\xbB]/', '/[\\xCD]/', '/[\\xEF]/'], $REGEX, PARSE_MODE_REGEX, 'valid hex escapes'],
   [['/[\\x]/', '/[\\x0]/', '/[\\x1]/', '/[\\x2]/', '/[\\x3]/', '/[\\x4]/', '/[\\x5]/', '/[\\x6]/', '/[\\x7]/', '/[\\x8]/', '/[\\x9]/'], $ERROR, PARSE_MODE_REGEX, 'invalid hex escape with one char'],
   [['/[\\x', '/[\\x0', '/[\\x1', '/[\\x2', '/[\\x3', '/[\\x4', '/[\\x5', '/[\\x6', '/[\\x7', '/[\\x8', '/[\\x9'], $ERROR, PARSE_MODE_REGEX, 'invalid hex escape with one charat eol/eof', 'suffixsp'],
   [['/[\\x01', '/[\\x12', '/[\\x23', '/[\\x34', '/[\\x45', '/[\\x56', '/[\\x67', '/[\\x78', '/[\\x89', '/[\\x90'], $ERROR, PARSE_MODE_REGEX, 'hex escape at eof/eol', 'suffixsp'],

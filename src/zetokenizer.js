@@ -1418,22 +1418,27 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     return parseIdentFromUnicodeEscape(FIRST_CHAR);
   }
 
+  function regexSyntaxError(desc) {
+    THROW('Regex syntax error: ' + desc);
+    return ALWAYS_BAD;
+  }
+
   let nCapturingParens = 0;
   let largestBackReference = 0;
   function parseRegex(c) {
     nCapturingParens = 0;
     largestBackReference = 0;
     let ustatusBody = parseRegexBody(c);
-    if (nCapturingParens < largestBackReference) ustatusBody = ALWAYS_BAD;
+    if (nCapturingParens < largestBackReference) {
+      ustatusBody = regexSyntaxError('Largest back reference index exceeded the number of capturing groups');
+    }
     let ustatusFlags = parseRegexFlags();
     if (ustatusBody === ALWAYS_BAD) {
-      // body had bad escape
-      THROW('Regex body had bad escape sequence');
+      // body had bad escape (should already have called THROW for this)
       return $ERROR;
     }
     if (ustatusFlags === ALWAYS_BAD) {
-      // body had bad escape or flags occurred twice
-      THROW('Regex had duplicate regex flag');
+      // body had bad escape or flags occurred twice (should already have called THROW for this)
       return $ERROR;
     }
 
@@ -1474,7 +1479,9 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
 
     // dont start with a quantifier
     let badStart = c === $$STAR_2A || c === $$PLUS_2B || c === $$QMARK_3F || c === $$CURLY_L_7B;
-    if (badStart) uflagStatus = ALWAYS_BAD;
+    if (badStart) {
+      uflagStatus = regexSyntaxError('Started with a quantifier but that is not allowed');
+    }
 
     do {
 //console.log('_parseRegexBody loop:', c, 'x' + c.toString(16), '[' + String.fromCharCode(c)+']', uflagStatus)
@@ -1486,7 +1493,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
           if (groupLevel !== 0) {
             // all groups must be closed before the floor is closed
             // dont consume the forward slash. let only the root caller do this
-            return ALWAYS_BAD;
+            return regexSyntaxError('Unclosed group');
           }
 
           ASSERT_skip($$FWDSLASH_2F);
@@ -1522,7 +1529,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
           afterAtom = true; // except in certain cases...
 
           if (eof()) {
-            uflagStatus = ALWAYS_BAD;
+            uflagStatus = regexSyntaxError('Early EOF');
           } else {
             let d = peek();
             // \b \B cannot have quantifiers
@@ -1535,10 +1542,10 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
                 uflagStatus = ALWAYS_BAD;
               } else if (escapeStatus === GOOD_SANS_U_FLAG) {
                 if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
-                else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = ALWAYS_BAD;
+                else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error with u-flag');
               } else if (escapeStatus === GOOD_WITH_U_FLAG) {
                 if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
-                else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
+                else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error without u-flag');
               }
             }
           }
@@ -1550,14 +1557,14 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
           afterAtom = false; // useless. just in case
 
           if (eof()) {
-            uflagStatus = ALWAYS_BAD;
+            uflagStatus = regexSyntaxError('Encountered early EOF');;
             break;
           }
           c = peek();
           if (c === $$QMARK_3F) {
             ASSERT_skip($$QMARK_3F);
             if (eof()) {
-              uflagStatus = ALWAYS_BAD;
+              uflagStatus = regexSyntaxError('Encountered early EOF');
               break;
             }
             c = peek();
@@ -1565,12 +1572,12 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
               ASSERT_skip(c);
               // non capturing group
               if (eof()) {
-                uflagStatus = ALWAYS_BAD;
+                uflagStatus = regexSyntaxError('Encountered early EOF');
                 break;
               }
               c = peek();
             } else {
-              uflagStatus = ALWAYS_BAD;
+              uflagStatus = regexSyntaxError('Illegal character after pseudo group marker `(?` [ord=' + c + ']');
             }
           } else {
             // capturing group
@@ -1580,13 +1587,13 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
           let subbad = _parseRegexBody(c, groupLevel + 1, ALWAYS_GOOD);
           afterAtom = true;
           if (subbad === ALWAYS_BAD) {
-            uflagStatus = ALWAYS_BAD;
+            uflagStatus = ALWAYS_BAD; // should already have THROWn for this
           } else if (subbad === GOOD_SANS_U_FLAG) {
             if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
-            else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = ALWAYS_BAD;
+            else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error with u-flag');
           } else if (subbad === GOOD_WITH_U_FLAG) {
             if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
-            else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
+            else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error without u-flag');
           }
 
           break;
@@ -1594,7 +1601,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
           // a paren might be found in a sub-parse. the outer parse may be recursively parsing a group
           ASSERT_skip($$PAREN_R_29);
           if (groupLevel > 0) return uflagStatus;
-          uflagStatus = ALWAYS_BAD;
+          uflagStatus = regexSyntaxError('Found unescaped closing paren `)` without a group being open');
           afterAtom = true; // meh
           break;
 
@@ -1604,20 +1611,20 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
 
           let charClassEscapeStatus = parseRegexCharClass();
           if (charClassEscapeStatus === ALWAYS_BAD) {
-            uflagStatus = ALWAYS_BAD;
+            uflagStatus = ALWAYS_BAD; // should already have THROWn for this
           } else if (charClassEscapeStatus === GOOD_SANS_U_FLAG) {
             if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
-            else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = ALWAYS_BAD;
+            else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error with u-flag');
           } else if (charClassEscapeStatus === GOOD_WITH_U_FLAG) {
             if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
-            else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = ALWAYS_BAD;
+            else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error without u-flag');
           }
           afterAtom = true;
           break;
         case $$SQUARE_R_5D:
           // this is always bad since we have a quantifier parser that consumes valid curlies
           ASSERT_skip($$SQUARE_R_5D);
-          uflagStatus = ALWAYS_BAD;
+          uflagStatus = regexSyntaxError('Encountered unescaped closing square bracket `]` while not parsing a character class');
           afterAtom = true; // meh
           break;
 
@@ -1634,7 +1641,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
               }
             }
           } else {
-            uflagStatus = ALWAYS_BAD;
+            uflagStatus = regexSyntaxError('Encountered unescaped quantifier (ord=' + c + ') without a value to quantify');
           }
           break;
 
@@ -1642,21 +1649,21 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
           // explicit quantifier
           ASSERT_skip($$CURLY_L_7B);
           if (afterAtom) {
-            if (!parseRegexCurlyQuantifier()) uflagStatus = ALWAYS_BAD;
-            if (neof()) {
-              if (peeky($$QMARK_3F)) {
-                ASSERT_skip($$QMARK_3F);
-              }
+            if (!parseRegexCurlyQuantifier()) {
+              uflagStatus = regexSyntaxError('Encountered unescaped closing curly `}` while not parsing a quantifier');
+            }
+            if (neof() && peeky($$QMARK_3F)) {
+              ASSERT_skip($$QMARK_3F);
             }
             afterAtom = false;
           } else {
-            uflagStatus = ALWAYS_BAD;
+            uflagStatus = regexSyntaxError('Encountered unescaped opening curly `}` and the previous character was not part of something quantifiable');
           }
           break;
         case $$CURLY_R_7D:
           // this is always bad since we have a quantifier parser that consumes valid curlies
           ASSERT_skip($$CURLY_R_7D);
-          uflagStatus = ALWAYS_BAD;
+          uflagStatus = regexSyntaxError('Encountered unescaped closing curly `}` while not parsing a quantifier');
           afterAtom = false;
           break;
 
@@ -1664,7 +1671,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         case $$LF_0A:
         case $$PS_2028:
         case $$LS_2029:
-          return ALWAYS_BAD; // same as end of input
+          return regexSyntaxError('Encountered early EOF'); // same as end of input
 
         default:
           ASSERT_skip(c); // this ought to be a valid regex source character
@@ -1677,7 +1684,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     } while (true);
 
     // this is a fail because we didnt got to the end of input before the closing /
-    return ALWAYS_BAD;
+    return regexSyntaxError('Unknown error at early EOF');
   }
   function parseRegexAtomEscape(c) {
     // backslash already parsed
@@ -1696,26 +1703,26 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
 
       case $$X_78:
         ASSERT_skip($$X_78);
-        if (eof()) return ALWAYS_BAD;
+        if (eof()) return regexSyntaxError('Encountered early EOF while parsing hex escape (1)');
         let a = peek();
-        if (!isAsciiNumber(a)) return ALWAYS_BAD;
+        if (!isHex(a)) return regexSyntaxError('First char of hex escape not a valid digit');
         ASSERT_skip(a);
-        if (eof()) return ALWAYS_BAD;
+        if (eof()) return regexSyntaxError('Encountered early EOF while parsing hex escape (2)');
         let b = peek();
-        if (!isAsciiNumber(b)) return ALWAYS_BAD;
+        if (!isHex(b)) return regexSyntaxError('Second char of hex escape not a valid digit');
         ASSERT_skip(b);
         return ALWAYS_GOOD;
 
       // char escapes
       case $$C_63:
         ASSERT_skip($$C_63);
-        if (eof()) return ALWAYS_BAD;
+        if (eof()) return regexSyntaxError('Encountered early EOF while parsing char escape');
         let d = peek();
         if (isAsciiLetter(d)) {
           ASSERT_skip(d);
           return ALWAYS_GOOD;
         }
-        return ALWAYS_BAD;
+        return regexSyntaxError('Illegal char escape char (ord=' + d);
 
       // control escapes
       case $$F_66:
@@ -1761,7 +1768,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         ASSERT_skip($$0_30);
         // cannot be followed by another digit
         if (eof()) return ALWAYS_GOOD; // let error happen elsewhere
-        if (isAsciiNumber(peek())) return ALWAYS_BAD;
+        if (isAsciiNumber(peek())) return regexSyntaxError('Back references can not have more two or more consecutive numbers');
         return ALWAYS_GOOD;
       case $$1_31:
       case $$2_32:
@@ -1784,7 +1791,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       case $$PS_2028:
       case $$LS_2029:
         ASSERT_skip(c);
-        return ALWAYS_BAD; // regex has no line continuation
+        return regexSyntaxError('Regexes can not have newlines'); // regex has no line continuation
 
       default:
         // this is, probably;
@@ -1794,14 +1801,15 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         //   [+U] /
         //   [~U] SourceCharacter but not UnicodeIDContinue
 
-        ASSERT_skip(c);
         // unicodeidcontinue is;
         // (idstart=) uppercase letters, lowercase letters, titlecase letters, modifier letters, other letters, letter numbers, other_id_start without white_space
         // or; [[:L:][:Ni:][:Other_ID_Start:]--[:Pattern_Syntax:]--[:Patter_White_Space:]]
         // plus: nonspacing marks, spacing combining marks, decimal number, connector punctuation, other_id_continue sans white_space and syntax
         // or; [[:ID_Start:][:Mn:][:Mc:][:Nd:][:Pc:][:Other_ID_Continue:]--[:Pattern_Syntax:]--[:Pattern_White_Space:]]
         // in ascii, unicode continue is all the ascii letters :(
-        if (isIdentRestChr(c)) return ALWAYS_BAD;
+        if (isIdentRestChr(c)) return regexSyntaxError('Cannot escape this regular identifier character [ord=' + c + ']');
+
+        ASSERT_skip(c);
         return GOOD_SANS_U_FLAG; // TODO: verify that UnicodeIDContinue thing for other characters within ascii range and add specific tests for them
     }
     THROW('dis be dead code');
@@ -1852,14 +1860,14 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         ASSERT_skip($$CURLY_R_7D);
         return GOOD_WITH_U_FLAG;
       }
-      return ALWAYS_BAD;
+      return regexSyntaxError('Error while trying to parse new unicode escape');
     } else {
       return parseRegexUnicodeEscapeQuad(c);
     }
   }
   function parseRegexUnicodeEscapeQuad(a) {
     // we've already consumed a. we must consume 3 more chars for this quad unicode escape
-    if (eofd(3)) return ALWAYS_BAD;
+    if (eofd(3)) return regexSyntaxError('Encountered early EOF while parsing a unicode escape quad');
     let b = peekd(1);
     let c = peekd(2);
     let d = peekd(3);
@@ -1873,7 +1881,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       ASSERT_skip(d);
       return ALWAYS_GOOD; // outside char classes we can ignore surrogates
     } else {
-      return ALWAYS_BAD;
+      return regexSyntaxError('Encountered bad character while trying to parse a unicode escape quad [ords: ' + a + ', ' + b + ', ' + c + ', ' + d + ']');
     }
   }
   function parseRegexUnicodeEscapeVary() {
@@ -1984,17 +1992,16 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
 
     let flagState = ALWAYS_GOOD;
 
-    if (eof()) return ALWAYS_BAD;
+    if (eof()) return regexSyntaxError('Encountered early EOF while parsing char class');
     let c = peek();
     if (c === $$XOR_5E) { // the separate inverting caret check is important for surrogate range checks in super edge cases (there's a test)
       ASSERT_skip($$XOR_5E);
-      if (eof()) return ALWAYS_BAD;
+      if (eof()) return regexSyntaxError('Encountered early EOF while parsing char class');
       c = peek();
     }
 
     let n = 0;
     while (true) {
-//console.log(n, 'pointer=',pointer,': c=',c, 'x=', c.toString(16), ' [' + String.fromCharCode(c) + '], flag:',flagState)
 
       if (c === $$SQUARE_R_5D) {
         return parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState);
@@ -2003,19 +2010,18 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         c = parseClassCharEscape(); // note: this may lead to c being >0xffff !!
 
         if (c === CHARCLASS_BAD) {
-          flagState = ALWAYS_BAD;
+          flagState = regexSyntaxError('Encountered early EOF while parsing char class');
         } else if (c & CHARCLASS_BADN) {
           c = c ^ CHARCLASS_BADN; // remove the badn flag (dont use ^= because that deopts... atm; https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean )
           ASSERT(c <= 0x110000, 'c should now be valid unicode range or one above for error');
-          if (c === CHARCLASS_BAD) flagState = ALWAYS_BAD;
+          if (c === CHARCLASS_BAD) flagState = regexSyntaxError('Bad character class body');
           else if (flagState === ALWAYS_GOOD) flagState = GOOD_WITH_U_FLAG;
-          else if (flagState === GOOD_SANS_U_FLAG) flagState = ALWAYS_BAD;
+          else if (flagState === GOOD_SANS_U_FLAG) flagState = regexSyntaxError('Unknown reason that is only an error with u-flag while parsing a character class');
           //} else if (c === CHARCLASS_BAD_RANGE) { // check at range time
           //  console.log('got a class escape that is only bad in range')
         }
-//console.log(' - escaped; c=',c, ', flagState=',flagState)
       } else if (c === $$CR_0D || c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
-        return ALWAYS_BAD; // same as end of input
+        return regexSyntaxError('Encountered newline'); // same as end of input
       } else {
         ASSERT_skip(c);
       }
@@ -2034,21 +2040,20 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         isSurrogateHead = isSurrogateLead(c);
       }
 
-//console.log(' - result before; c=', c, '(0x' + c.toString(16), '), is surrogate?', isSurrogate, ', was surrogate?', wasSurrogate, ', surrogate:', surrogate, ', isSurrogateHead?', isSurrogateHead, ', wasSurrogateHead?', wasSurrogateHead, ', urangeOpen:',urangeOpen,', nrangeOpen:',nrangeOpen, ', urangeLeft=', urangeLeft, ', nrangeLeft=', nrangeLeft)
-
+      // there are a bunch of test cases regarding ranges and the u-flag
       if (urangeOpen) {
-//console.log(' - urange is open, check surrogate cases:', isSurrogateHead, wasSurrogateHead);
         // if c is a head we must check the next char for being a tail before we can determine the code _point_
         // otoh, if c is a tail or a non-surrogate then we can now safely do range checks since the codepoint wont change
         // if this is a head and the previous was too then the previous was the rhs on its own and we check `prev` instead
         let urangeRight = isSurrogate ? surrogate : wasSurrogateHead ? prev : c;
         if (!isSurrogateHead || wasSurrogateHead) {
-//console.log(' - c is code point boundary;', urangeLeft, '>', (isSurrogate ? surrogate : wasSurrogateHead?prev:c), urangeLeft > (isSurrogate ? surrogate : wasSurrogateHead?prev:c))
           urangeOpen = false;
           if (urangeLeft === CHARCLASS_BAD_RANGE || urangeRight === CHARCLASS_BAD_RANGE || urangeLeft > urangeRight) {
-            if (flagState === GOOD_WITH_U_FLAG) flagState = ALWAYS_BAD;
-            else if (flagState === ALWAYS_BAD) flagState = ALWAYS_BAD;
-            else flagState = GOOD_SANS_U_FLAG;
+            if (flagState === GOOD_WITH_U_FLAG) flagState = regexSyntaxError('Unknown reason that is an error without u-flag while parsing a character class');
+            else if (flagState !== ALWAYS_BAD) {
+              ASSERT(flagState === ALWAYS_GOOD || flagState === GOOD_SANS_U_FLAG, 'flag only can only have certain states');
+              flagState = GOOD_SANS_U_FLAG;
+            }
           }
         }
       } else if (c === $$DASH_2D && n > 0) {
@@ -2059,30 +2064,28 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
 
       if (nrangeOpen) {
         nrangeOpen = false;
-//console.log(' - nrange is open');
         if (nrangeLeft === CHARCLASS_BAD_RANGE || c === CHARCLASS_BAD_RANGE || nrangeLeft > c) {
-          if (flagState === GOOD_SANS_U_FLAG) flagState = ALWAYS_BAD;
-          else if (flagState === ALWAYS_BAD) flagState = ALWAYS_BAD;
-          else flagState = GOOD_WITH_U_FLAG;
+          if (flagState === GOOD_SANS_U_FLAG) flagState = regexSyntaxError('Unknown reason that is an error with u-flag while parsing a character class');
+          else if (flagState !== ALWAYS_BAD) {
+            ASSERT(flagState === ALWAYS_GOOD || flagState === GOOD_WITH_U_FLAG, 'flag only can only have certain states');
+            flagState = GOOD_WITH_U_FLAG;
+          }
         }
       } else if (c === $$DASH_2D && n > 0) {
         nrangeOpen = true;
       } else {
         nrangeLeft = c;
-//console.log(n,': nrangeLeft now', nrangeLeft);
       }
-
-//console.log(' - result before; c=', c, '(0x' + c.toString(16), '), is surrogate?', isSurrogate, ', was surrogate?', wasSurrogate, ', surrogate:', surrogate, ', isSurrogateHead?', isSurrogateHead, ', wasSurrogateHead?', wasSurrogateHead, ', urangeOpen:',urangeOpen,', nrangeOpen:',nrangeOpen, ', urangeLeft=', urangeLeft, ', nrangeLeft=', nrangeLeft)
 
       wasSurrogate = isSurrogate;
       wasSurrogateHead = isSurrogateHead;
       prev = c;
 
       ++n;
-      if (eof()) return ALWAYS_BAD;
+      if (eof()) break;
       c = peek();
     }
-    return ALWAYS_BAD; // no end
+    return regexSyntaxError('Unexpected early EOF while parsing character class'); // no end
   }
   function parseClassCharEscape() {
     // atom escape is slightly different from charclass escape
@@ -2254,8 +2257,16 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         case $$BACKSLASH_5C:
           break; // see below
         default:
-          if (isAsciiLetter(c)) ++bad; // unknown flags are considered syntax errors by the semantics
-          else return bad ? ALWAYS_BAD : (g|i|m|u|y) > 1 ? ALWAYS_BAD : u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
+          if (isAsciiLetter(c)) {
+            ++bad; // unknown flags are considered syntax errors by the semantics
+            regexSyntaxError('Unknown regex flag [ord=' + c + ']');
+          } else if (bad) {
+            return ALWAYS_BAD; // already THROWn for this
+          } else if ((g|i|m|u|y) > 1) {
+            return regexSyntaxError('Encountered at least one regex flag twice');
+          } else {
+            return u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
+          }
       }
       ASSERT_skip(c);
 
@@ -2264,17 +2275,24 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         // while syntactically a unicode escaped flag could be valid, the semantics explicitly disallow it
         // just gracefully parse a unicode escape and return an error token
         // (note: this is already the "slow" path because we know it's an error)
-        if (eof()) return ALWAYS_BAD;
+        if (eof()) return regexSyntaxError('Encountered early EOF while trying to parse a regex flag that is escaped (the backslash is the very last char which is illegal)');
         if (peeky($$U_75)) {
           ASSERT_skip($$U_75);
           parseRegexUnicodeEscape();
         }
         ++bad;
+        regexSyntaxError('Unknown regex flag [ord=' + c + ']');
       }
     }
     // the error is the (slightly and very theoretical) slow path because it leads to an error anyways
     // if any flags occurred more than once, the or below will result in >1
-    return bad ? ALWAYS_BAD : (g|i|m|u|y) > 1 ? ALWAYS_BAD : u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
+    if (bad) {
+      return ALWAYS_BAD; // already THROWn for this
+    } else if ((g|i|m|u|y) > 1) {
+      return regexSyntaxError('Encountered at least one regex flag twice');
+    } else {
+      return u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
+    }
   }
   function parseRegexCurlyQuantifier() {
     // parsed the curly, verify the range is not {hi,lo}
@@ -2352,8 +2370,8 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     // code point range may be open if the rhs was a surrogate head.
     // that's the only range case that needs to be checked here.
     if (urangeOpen && wasSurrogateHead && (urangeLeft === CHARCLASS_BAD_RANGE || prev === CHARCLASS_BAD_RANGE || urangeLeft > prev)) {
-      if (flagState === GOOD_WITH_U_FLAG) return ALWAYS_BAD;
-      if (flagState === ALWAYS_BAD) return ALWAYS_BAD;
+      if (flagState === GOOD_WITH_U_FLAG) return regexSyntaxError('Unknown reason that is only an error without u-flag');
+      if (flagState === ALWAYS_BAD) return ALWAYS_BAD; // should already have THROWn for this
       return GOOD_SANS_U_FLAG;
     }
     return flagState;

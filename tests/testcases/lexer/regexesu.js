@@ -85,6 +85,7 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   [['/\\cA/u', '/\\cB/u', '/\\cD/u', '/\\cE/u', '/\\cF/u', '/\\cG/u', '/\\cH/u', '/\\cI/u', '/\\cJ/u', '/\\cK/u', '/\\cL/u', '/\\cM/u', '/\\cN/u', '/\\cO/u', '/\\cP/u', '/\\cQ/u', '/\\cR/u', '/\\cS/u', '/\\cT/u', '/\\cU/u', '/\\cV/u', '/\\cW/u', '/\\cX/u', '/\\cY/u', '/\\cZ/u'], $REGEXU, PARSE_MODE_REGEX, 'control character uc'],
   // hex escapes
   [['/\\x01/u', '/\\x12/u', '/\\x23/u', '/\\x34/u', '/\\x45/u', '/\\x56/u', '/\\x67/u', '/\\x78/u', '/\\x89/u', '/\\x90/u'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
+  [['/\\xa1/', '/\\xb2/', '/\\xc3/', '/\\x3d/', '/\\x4e/', '/\\x5f/', '/\\x6A/', '/\\xbB/', '/\\xCD/', '/\\xEF/'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
   [['/\\x/u', '/\\x0/u', '/\\x1/u', '/\\x2/u', '/\\x3/u', '/\\x4/u', '/\\x5/u', '/\\x6/u', '/\\x7/u', '/\\x8/u', '/\\x9/u'], $ERROR, PARSE_MODE_REGEX, 'invalid hex escape with one char'],
   // digit escape
   // digit escape / backreferences
@@ -214,6 +215,7 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   [['/[\\ca]/u', '/[\\cb]/u', '/[\\cd]/u', '/[\\ce]/u', '/[\\cf]/u', '/[\\cg]/u', '/[\\ch]/u', '/[\\ci]/u', '/[\\cj]/u', '/[\\ck]/u', '/[\\cl]/u', '/[\\cm]/u', '/[\\cn]/u', '/[\\co]/u', '/[\\cp]/u', '/[\\cq]/u', '/[\\cr]/u', '/[\\cs]/u', '/[\\ct]/u', '/[\\cu]/u', '/[\\cv]/u', '/[\\cw]/u', '/[\\cx]/u', '/[\\cy]/u', '/[\\cz]/u'], $REGEXU, PARSE_MODE_REGEX, 'control character lc'],
   [['/[\\cA]/u', '/[\\cB]/u', '/[\\cD]/u', '/[\\cE]/u', '/[\\cF]/u', '/[\\cG]/u', '/[\\cH]/u', '/[\\cI]/u', '/[\\cJ]/u', '/[\\cK]/u', '/[\\cL]/u', '/[\\cM]/u', '/[\\cN]/u', '/[\\cO]/u', '/[\\cP]/u', '/[\\cQ]/u', '/[\\cR]/u', '/[\\cS]/u', '/[\\cT]/u', '/[\\cU]/u', '/[\\cV]/u', '/[\\cW]/u', '/[\\cX]/u', '/[\\cY]/u', '/[\\cZ]/u'], $REGEXU, PARSE_MODE_REGEX, 'control character uc'],
   [['/[\\x01]/u', '/[\\xa2]/u', '/[\\xF3]/u', '/[\\x34]/u', '/[\\xC5]/u', '/[\\x5a]/u', '/[\\x67]/u', '/[\\x7D]/u', '/[\\x8f]/u', '/[\\x90]/u'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
+  [['/[\\xa1]/', '/[\\xb2]/', '/[\\xc3]/', '/[\\x3d]/', '/[\\x4e]/', '/[\\x5f]/', '/[\\x6A]/', '/[\\xbB]/', '/[\\xCD]/', '/[\\xEF]/'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
   [['/[\\x]/u', '/[\\x0]/u', '/[\\x1]/u', '/[\\x2]/u', '/[\\x3]/u', '/[\\x4]/u', '/[\\x5]/u', '/[\\x6]/u', '/[\\x7]/u', '/[\\x8]/u', '/[\\x9]/u'], $ERROR, PARSE_MODE_REGEX, 'invalid hex escape with one char'],
   [['/[\\u1234]/u', '/[x\\u0567]/u', '/[\\uf89ay]/u', '/[x\\ubcdey]/u'], $REGEXU, PARSE_MODE_REGEX, 'non surrogate'],
   [['/[\\ud800]/u', '/[x\\ud810]/u', '/[\\ud900y]/u', '/[x\\udabcy]/u', '/[x\\udabcy]/ug', '/[x\\udabcy]/um', '/[x\\udabcy]/iuy'], $REGEXU, PARSE_MODE_REGEX, 'lead surrogate'],
