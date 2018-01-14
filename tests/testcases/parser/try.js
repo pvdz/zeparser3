@@ -1,6 +1,8 @@
 let {
+  $ASI,
   $IDENT,
   $PUNCTUATOR,
+  $REGEX,
 } = require('../../../src/zetokenizer');
 
 
@@ -145,6 +147,91 @@ module.exports = (describe, test) => describe('try statement', _ => {
       tokens: [],
     });
   });
+
+  describe('regex edge case', _ => {
+
+    describe('catch', _ => {
+
+      test('division', {
+        code: 'try {} catch (e) {}\n/foo',
+        throws: 'Regex syntax error',
+        desc: 'try (/catch/finally) is a statement (not a value) so division is illegal',
+        tokens: [],
+      });
+
+      test('sans flag', {
+        code: 'try {} catch (e) {}\n/foo/',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'TryStatement',
+              block: { type: 'BlockStatement', body: [] },
+              handler:
+              { type: 'CatchClause',
+                param: { type: 'Identifier', name: 'e' },
+                body: { type: 'BlockStatement', body: [] } },
+              finalizer: null },
+              { type: 'ExpressionStatement',
+                expression: { type: 'Literal', value: '<TODO>', raw: '/foo/' } } ] },
+        desc: 'no ASI is attempted because the catch does not expect a semi so this is fine',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI],
+      });
+
+      test('sans flag', {
+        code: 'try {} catch (e) {}\n/foo/g',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'TryStatement',
+              block: { type: 'BlockStatement', body: [] },
+              handler:
+              { type: 'CatchClause',
+                param: { type: 'Identifier', name: 'e' },
+                body: { type: 'BlockStatement', body: [] } },
+              finalizer: null },
+              { type: 'ExpressionStatement',
+                expression: { type: 'Literal', value: '<TODO>', raw: '/foo/g' } } ] },
+        desc: 'no ASI is attempted because the catch does not expect a semi so this is fine',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI],
+      });
+    });
+
+    describe('finally', _ => {
+
+      test('sans flag', {
+        code: 'try {} finally {}\n/foo',
+        throws: 'Regex syntax error',
+        desc: 'no ASI is attempted because the finally does not expect a semi so this is fine',
+        tokens: [],
+      });
+
+      test('sans flag', {
+        code: 'try {} finally {}\n/foo/',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'TryStatement',
+              block: { type: 'BlockStatement', body: [] },
+              handler: null,
+              finalizer: { type: 'BlockStatement', body: [] } },
+              { type: 'ExpressionStatement',
+                expression: { type: 'Literal', value: '<TODO>', raw: '/foo/' } } ] },
+        desc: 'no ASI is attempted because the finally does not expect a semi so this is fine',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI],
+      });
+
+      test('sans flag', {
+        code: 'try {} finally {}\n/foo/g',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'TryStatement',
+              block: { type: 'BlockStatement', body: [] },
+              handler: null,
+              finalizer: { type: 'BlockStatement', body: [] } },
+              { type: 'ExpressionStatement',
+                expression: { type: 'Literal', value: '<TODO>', raw: '/foo/g' } } ] },
+        desc: 'no ASI is attempted because the finally does not expect a semi so this is fine',
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI],
+      });
+    });
+  })
 });
 
 // catch clause var(s) cannot already be bound

@@ -133,7 +133,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   ++testj;
 
-                                                          //if (testj !== 3103) return;
+                                                          //if (testj !== 3319) return;
   testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
   testSuffix += '[' + testj + ']';
   if (WEB) testSuffix += '[WEB]';
@@ -230,6 +230,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     LOG_THROW(prefix, '_failed_ to throw ANY error', code, '', desc);
     if (expectedThrows !== true) {
       console.log('Expected an error message containing: "' + expectedThrows + '"');
+      console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
+      console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
     }
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
     LOG_THROW(prefix, 'AST mismatch', code, '', desc);

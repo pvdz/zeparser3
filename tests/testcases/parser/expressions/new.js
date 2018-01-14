@@ -3,6 +3,7 @@ let {
   $IDENT,
   $NUMBER_DEC,
   $PUNCTUATOR,
+  $REGEX,
   $STRING_DOUBLE,
   $TICK_BODY,
   $TICK_HEAD,
@@ -306,6 +307,145 @@ module.exports = (describe, test) => describe('new', _ => {
           }]}],
         }}]},
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+    });
+
+    describe('regex edge cases', _ => {
+
+      test('regex as value with paren', {
+        code: 'f(new /z/())',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+              { type: 'CallExpression',
+                callee: { type: 'Identifier', name: 'f' },
+                arguments:
+                  [ { type: 'NewExpression',
+                    arguments: [],
+                    callee: { type: 'Literal', value: '<TODO>', raw: '/z/' } } ] } } ] },
+        desc: 'guaranteed to be a runtime error unless the host environment does something wonky',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('regex as value sans paren', {
+        code: 'f(new /z/)',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+              { type: 'CallExpression',
+                callee: { type: 'Identifier', name: 'f' },
+                arguments:
+                  [ { type: 'NewExpression',
+                    arguments: [],
+                    callee: { type: 'Literal', value: '<TODO>', raw: '/z/' } } ] } } ] },
+        desc: 'guaranteed to be a runtime error unless the host environment does something wonky',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $ASI],
+      });
+
+      test('regex as value with property', {
+        code: 'f(new /z/.foo)',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+              { type: 'CallExpression',
+                callee: { type: 'Identifier', name: 'f' },
+                arguments:
+                  [ { type: 'NewExpression',
+                    arguments: [],
+                    callee:
+                    { type: 'MemberExpression',
+                      object: { type: 'Literal', value: '<TODO>', raw: '/z/' },
+                      property: { type: 'Identifier', name: 'foo' },
+                      computed: false } } ] } } ] },
+        desc: 'foo could be an expando (`RegExp.prototype.foo = function(){}`) and then this works, *shrug*',
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('division sans paren', {
+        code: 'new x\n/y',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+              { type: 'BinaryExpression',
+                left:
+                { type: 'NewExpression',
+                  arguments: [],
+                  callee: { type: 'Identifier', name: 'x' } },
+                operator: '/',
+                right: { type: 'Identifier', name: 'y' } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('sans flag sans paren', {
+        code: 'new x\n/y/',
+        throws: 'Expected to parse a value',
+        tokens: [],
+      });
+
+      test('with flag sans paren', {
+        code: 'new x\n/y/g',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+              { type: 'BinaryExpression',
+                left:
+                { type: 'BinaryExpression',
+                  left:
+                  { type: 'NewExpression',
+                    arguments: [],
+                    callee: { type: 'Identifier', name: 'x' } },
+                  operator: '/',
+                  right: { type: 'Identifier', name: 'y' } },
+                operator: '/',
+                right: { type: 'Identifier', name: 'g' } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('division with paren', {
+        code: 'new x()\n/y',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+              { type: 'BinaryExpression',
+                left:
+                { type: 'NewExpression',
+                  arguments: [],
+                  callee: { type: 'Identifier', name: 'x' } },
+                operator: '/',
+                right: { type: 'Identifier', name: 'y' } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('sans flag with paren', {
+        code: 'new x()\n/y/',
+        throws: 'Expected to parse a value',
+        tokens: [],
+      });
+
+      test('with flag with paren', {
+        code: 'new x()\n/y/g',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+              { type: 'BinaryExpression',
+                left:
+                { type: 'BinaryExpression',
+                  left:
+                  { type: 'NewExpression',
+                    arguments: [],
+                    callee: { type: 'Identifier', name: 'x' } },
+                  operator: '/',
+                  right: { type: 'Identifier', name: 'y' } },
+                operator: '/',
+                right: { type: 'Identifier', name: 'g' } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
     });
   });
@@ -1028,3 +1168,7 @@ module.exports = (describe, test) => describe('new', _ => {
     });
   });
 });
+
+// new new foo().foo    (new on the result of new can be made valid)
+// new new foo.foo()    (new on the result of new can be made valid)
+// new without parens is weaker than new with parens,

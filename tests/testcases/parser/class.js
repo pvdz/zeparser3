@@ -1,6 +1,8 @@
 let {
+  $ASI,
   $IDENT,
   $PUNCTUATOR,
+  $REGEX,
 } = require('../../../src/zetokenizer');
 
 
@@ -878,7 +880,75 @@ module.exports = (describe, test) => describe('class statement', _ => {
 
   });
 
+  describe('regex edge case', _ => {
 
+    describe('declaration', _ => {
+
+      test('sans flag', {
+        code: 'class x{}\n/foo/',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ClassDeclaration',
+              id: { type: 'Identifier', name: 'x' },
+              superClass: null,
+              body: { type: 'ClassBody', body: [] } },
+              { type: 'ExpressionStatement',
+                expression: { type: 'Literal', value: '<TODO>', raw: '/foo/' } } ] },
+        desc: 'note: not a division because class decl requires no semi so there is no need to ASI',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI],
+      });
+
+      test('with flag', {
+        code: 'class x{}\n/foo/g',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ClassDeclaration',
+              id: { type: 'Identifier', name: 'x' },
+              superClass: null,
+              body: { type: 'ClassBody', body: [] } },
+              { type: 'ExpressionStatement',
+                expression: { type: 'Literal', value: '<TODO>', raw: '/foo/g' } } ] },
+        desc: 'note: not a division because class decl requires no semi so there is no need to ASI',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI],
+      });
+    });
+
+    describe('expression', _ => {
+
+      test('sans flag', {
+        code: 'typeof class{}\n/foo/',
+        throws: 'Expected to parse a value',
+        desc: 'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
+        tokens: [],
+      });
+
+      test('with flag', {
+        code: 'typeof class{}\n/foo/g',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+              { type: 'BinaryExpression',
+                left:
+                { type: 'BinaryExpression',
+                  left:
+                  { type: 'UnaryExpression',
+                    operator: 'typeof',
+                    prefix: true,
+                    argument:
+                    { type: 'ClassExpression',
+                      id: null,
+                      superClass: null,
+                      body: { type: 'ClassBody', body: [] } } },
+                  operator: '/',
+                  right: { type: 'Identifier', name: 'foo' } },
+                operator: '/',
+                right: { type: 'Identifier', name: 'g' } } } ] },
+        desc: 'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+    });
+  });
 
   /*
   // string and numeric keys are also valid

@@ -715,4 +715,70 @@ module.exports = (describe, test) => describe('yield', _ => {
     desc: '(all tests are ran 4x per input, in mixes of strict/sloppy and module/script mode)',
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
   });
+
+  describe('regex edge case', _ => {
+
+    describe('keyword', _ => {
+
+      test('division', {
+        code: 'function* f(){ yield\n/foo }',
+        throws: 'Regex syntax error',
+        desc: 'note: spec requires a regex after the yield identifier so a division can never happen here',
+        tokens: [],
+      });
+
+      test('sans flag', {
+        code: 'function* f(){ yield\n/foo/ }',
+        throws: 'ASI',
+        desc: 'note: yield keyword is not allowed to have a newline and is expected to be a keyword here, the forward slash on the next line prevents ASI, boom',
+        tokens: [],
+      });
+
+      test('with flag', {
+        code: 'function* f(){ yield\n/foo/g }',
+        throws: 'ASI',
+        desc: 'note: spec requires a regex after the yield identifier so a (double) division can never happen here, ASI cant be applied because of the regex, so boom',
+        tokens: [],
+      });
+    });
+
+    describe('legacy', _ => {
+
+      test('division', {
+        code: 'yield\n/foo',
+        throws: 'Regex syntax error',
+        desc: 'even in sloppy mode, this should not lead to a division (backwards compat breaking I guess)',
+        tokens: [$IDENT, $ASI],
+      });
+
+      test('sans flag', {
+        code: 'yield\n/foo/',
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
+          throws: 'ASI',
+          desc: 'in all fairness nothing would have saved this',
+        },
+        tokens: [$IDENT, $ASI],
+      });
+
+      test('with flag', {
+        code: 'yield\n/foo/g',
+        throws: '`yield` outside of generator',
+        SLOPPY_SCRIPT: {
+          throws: 'ASI',
+          desc: 'even in sloppy mode, this should not lead to a division (backwards compat breaking I guess)',
+        },
+        tokens: [$IDENT, $ASI],
+      });
+    });
+  });
 });
+
+// I don't think a yield expression can ... yield a valid assignment
+// TODO: test stuff like `yield x = y` and `x = yield y = z` and `yield = x` and sloppy mode assignments etc
+// yield is always a regular varname in typeof yield (similar to +) and therefor an error in strict mode
+// yield's argument can be an assignment
+// yield\nfoo should apply ASI
+// yield\n/foo should not apply ASI, `yield` is never a statement so it's the same as (yield)/foo
+// yield\n/foo/ should not apply ASI because the next line starts with forward slash (error always)
+// sanity check; yield with and without argument in an expressions (the comma thing) as start/middle/end part

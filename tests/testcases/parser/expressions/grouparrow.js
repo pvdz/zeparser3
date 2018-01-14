@@ -538,6 +538,157 @@ module.exports = (describe, test) => describe('parens', _ => {
       tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
 
+    describe('regex edge case', _ => {
+
+      describe('with expr', _ => {
+
+        test('sans flag', {
+          code: '_ => _\n/foo/',
+          throws: 'Expected to parse a value',
+          desc: 'the expression becomes a division which fails to parse properly in this case',
+          tokens: [],
+        });
+
+        test('sans flag', {
+          code: '_ => _\n/foo/g',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExpressionStatement',
+                expression:
+                { type: 'ArrowFunctionExpression',
+                  params: [ { type: 'Identifier', name: '_' } ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body:
+                  { type: 'BinaryExpression',
+                    left:
+                    { type: 'BinaryExpression',
+                      left: { type: 'Identifier', name: '_' },
+                      operator: '/',
+                      right: { type: 'Identifier', name: 'foo' } },
+                    operator: '/',
+                    right: { type: 'Identifier', name: 'g' } } } } ] },
+          desc: 'the expression becomes a division which is fine ((_/foo)/g) (make sure tree is correct)',
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+      });
+
+      describe('with block', _ => {
+
+        test('division', {
+          code: '_ => {}\n/foo',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExpressionStatement',
+                expression:
+                { type: 'BinaryExpression',
+                  left:
+                  { type: 'ArrowFunctionExpression',
+                    params: [ { type: 'Identifier', name: '_' } ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: { type: 'BlockStatement', body: [] } },
+                  operator: '/',
+                  right: { type: 'Identifier', name: 'foo' } } } ] },
+          desc: `
+          this is a prelude to the regex test
+
+            MultiplicativeExpression(
+              ExponentiationExpression(
+                UnaryExpression(
+                  UpdateExpression(
+                    LeftHandSideExpression(
+                      NewExpression(
+                        MemberExpression(
+                          MemberExpression(
+                            CoverParenthesizedExpressionAndArrowParameterList
+            )))))))))
+            /
+            foo
+          `,
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('sans flag', {
+          code: '_ => {}\n/foo/',
+          throws: 'Expected to parse a value',
+          desc: `
+          The "arrow/foo" bit would parse as follows:
+
+            MultiplicativeExpression(
+              ExponentiationExpression(
+                UnaryExpression(
+                  UpdateExpression(
+                    LeftHandSideExpression(
+                      NewExpression(
+                        MemberExpression(
+                          MemberExpression(
+                            CoverParenthesizedExpressionAndArrowParameterList
+            )))))))))
+            /
+            foo
+            /
+            {error} because missing rhs of second divison
+
+            And ASI explicitly fails because next line starts with forward slash (and the block can not parse as division)
+          `,
+          tokens: [],
+        });
+
+        test('sans flag', {
+          code: '_ => {}\n/foo/g',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExpressionStatement',
+                expression:
+                { type: 'BinaryExpression',
+                  left:
+                  { type: 'BinaryExpression',
+                    left:
+                    { type: 'ArrowFunctionExpression',
+                      params: [ { type: 'Identifier', name: '_' } ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      body: { type: 'BlockStatement', body: [] } },
+                    operator: '/',
+                    right: { type: 'Identifier', name: 'foo' } },
+                  operator: '/',
+                  right: { type: 'Identifier', name: 'g' } } } ] },
+          desc: `
+          ASI explicitly fails because next line starts with forward slash, in effect the whole arrow is the lhs for the division (((_=>{})/foo)/g)
+
+            MultiplicativeExpression(
+              ExponentiationExpression(
+                UnaryExpression(
+                  UpdateExpression(
+                    LeftHandSideExpression(
+                      NewExpression(
+                        MemberExpression(
+                          MemberExpression(
+                            CoverParenthesizedExpressionAndArrowParameterList
+            )))))))))
+            /
+            foo
+            /
+            g
+          `,
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+      });
+    });
+
     // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
   });
 });
+
+// arrow params and arrow can not have newline (asi breaks an arrow into group and syntax error)
+// cannot have yield or await in the params
+// cannot destructure when body contains "use strict"
+// cant redeclare existing vars
+
