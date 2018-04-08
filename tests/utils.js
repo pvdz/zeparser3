@@ -18,7 +18,7 @@ function LOG(...args) {
 }
 
 function toPrint(s) {
-  return s
+  s = s
     .replace(/[^\u0000-\u00ff\u2028]/g, function (s) {
       return '\\u' + s.charCodeAt(0).toString(16).toUpperCase();
     })
@@ -29,6 +29,8 @@ function toPrint(s) {
     .replace(/\u2028/g, '\u21a9')
     .replace(/\u000a/g, '\u21b5')
     .replace(/\u000d/g, '\\r');
+  if (s.length > 100) return s.slice(0, 100) + '... <TRUNCED>';
+  return s;
 }
 
 //export {
