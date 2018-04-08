@@ -231,7 +231,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (expectedThrows !== true) {
       console.log('Expected an error message containing: "' + expectedThrows + '"');
       console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
-      console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
+      console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
     }
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
     LOG_THROW(prefix, 'AST mismatch', code, '', desc);
