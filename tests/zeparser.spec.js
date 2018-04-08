@@ -193,6 +193,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     var obj = Parser(code, mode, COLLECT_TOKENS_SOLID, {
       strictMode: startInStrictMode,
       webCompat: !!WEB,
+      trailingArgComma: testDetails.options && testDetails.options.trailingArgComma,
     });
   } catch(f) {
     wasError = f.message;

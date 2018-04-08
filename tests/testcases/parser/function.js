@@ -237,6 +237,80 @@ module.exports = (describe, test) => describe('functions', _ => {
       });
     });
 
+    describe('trailing comma', _ => {
+
+      describe('enabled', _ => {
+
+        test('must have args', {
+          code: 'function f(,){}',
+          options: {trailingArgComma: true}, // default
+          throws: 'Expected to parse another function argument',
+          tokens: [],
+        });
+
+        test('one arg', {
+          code: 'function f(a,){}',
+          options: {trailingArgComma: true}, // default
+          ast: {type: 'Program', body: [
+              {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+                  {type: 'Identifier', name: 'a'},
+                ], body: {type: 'BlockStatement', body: []}},
+            ]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('two args', {
+          code: 'function f(a,b,){}',
+          options: {trailingArgComma: true}, // default
+          ast: {type: 'Program', body: [
+              {type: 'FunctionDeclaration', generator: false, async: false, expression: false, id: {type: 'Identifier', name: 'f'}, params: [
+                  {type: 'Identifier', name: 'a'},
+                  {type: 'Identifier', name: 'b'},
+                ], body: {type: 'BlockStatement', body: []}},
+            ]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('cannot elide', {
+          code: 'function f(a,,){}',
+          options: {trailingArgComma: true}, // default
+          throws: 'Expected to parse another function argument',
+          tokens: [],
+        });
+      });
+
+      describe('disabled', _ => {
+
+        test('must have args', {
+          code: 'function f(,){}',
+          options: {trailingArgComma: false},
+          throws: 'Expected to parse another function argument',
+          tokens: [],
+        });
+
+        test('one arg', {
+          code: 'function f(a,){}',
+          options: {trailingArgComma: false},
+          throws: 'Trailing function argument comma',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('two args', {
+          code: 'function f(a,b,){}',
+          options: {trailingArgComma: false},
+          throws: 'Trailing function argument comma',
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('cannot elide', {
+          code: 'function f(a,,){}',
+          options: {trailingArgComma: false},
+          throws: 'Expected to parse another function argument',
+          tokens: [],
+        });
+      });
+    });
+
     describe('defaults', _ => {
 
       test('simple arg default', {
@@ -1610,3 +1684,4 @@ module.exports = (describe, test) => describe('functions', _ => {
 });
 
 // TODO: mirror tests for all functions (regular, expr, arrow, objlit method, class method)
+// TODO: function statements not okay in ES5 strict mode but okay before/after/outside

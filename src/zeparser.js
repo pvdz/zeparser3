@@ -231,6 +231,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let {
     webCompat: options_webCompat = WEB_COMPAT_ON,
     strictMode: options_strictMode = false,
+    trailingArgComma: options_trailingArgComma = true, // :love: , es8+
   } = options;
 
   let tok = ZeTokenizer(code, false, collectTokens, options_webCompat);
@@ -948,7 +949,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$PAREN_R_29) {
       ASSERT_skipRex(')', lexerFlags);
     } else {
-
       parseArgBindings(lexerFlags, 'params');
 
       // TODO: optimize; next must be curly_R or otherwise it is an error
@@ -2348,6 +2348,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('ArrayPattern');
     } else if (curc === $$DOT_2E && curtok.str === '...') {
       // specific to function args
+      // TODO: _must_ be the last arg
       ASSERT_skipAny('...', lexerFlags); // TODO: next is ident or [{
       if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not rest twice');
       if (curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B && curtype !== $IDENT) {
@@ -2358,11 +2359,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('RestElement');
       if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
       if (curc !== $$PAREN_R_29) THROW('Can not have more destructuring parts follow a rest, not even a trailing comma', curtok.str);
-    } else {
+    } else if (curtype === $IDENT) {
       // `let` as a variable name is okay in sloppy mode
       bindingIdentCheck(curtok, 'arg', lexerFlags);
       AST_setIdent(astProp, curtok);
       return;
+    } else if (curc === $$PAREN_R_29) {
+      if (!options_trailingArgComma) {
+        THROW('Trailing function argument comma is not enabled');
+      }
+    } else {
+      THROW('Expected to parse another function argument but none was found');
     }
 
     // arg defaults
@@ -3651,6 +3658,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseExpression(lexerFlags, astProp);
         if (curc !== $$COMMA_2C) break;
         ASSERT_skipRex(',', lexerFlags);
+        if (curc === $$PAREN_R_29) {
+          if (!options_trailingArgComma) {
+            THROW('Option to parse trailing call argument commas is disabled');
+          }
+          break;
+        }
       } while (true);
       skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
