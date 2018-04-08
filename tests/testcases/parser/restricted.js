@@ -1,0 +1,260 @@
+let {
+  $ASI,
+  $IDENT,
+  $NUMBER_DEC,
+  $PUNCTUATOR,
+} = require('../../../src/zetokenizer');
+
+
+module.exports = (describe, test) => describe('restricted productions', _ => {
+
+  describe('update expression', _ => {
+
+    test('comma expression',{
+      code: 'a,b\n++c',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'SequenceExpression',
+                expressions:
+                  [ { type: 'Identifier', name: 'a' },
+                    { type: 'Identifier', name: 'b' } ] } },
+            { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'c' } } } ] },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('after op',{
+      code: 'a=b\n++c',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'AssignmentExpression',
+                left: { type: 'Identifier', name: 'a' },
+                operator: '=',
+                right: { type: 'Identifier', name: 'b' } } },
+            { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'c' } } } ] },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('inside header',{
+      code: 'if (b\n++c);',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('inside for p1',{
+      code: 'for (b\n++c;;);',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('inside for p2',{
+      code: 'for (;b\n++c;);',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('inside for p3',{
+      code: 'for (;b\n++c);',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('in a group',{
+      code: '(b\n++c);',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('in an array',{
+      code: 'z=[b\n++c];',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('in an objlit',{
+      code: 'z={x:b\n++c};',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('in a template',{
+      code: '`x${b\n++c}y`;',
+      throws: 'Unclosed template',
+      tokens: [],
+    });
+
+    test('in a call',{
+      code: 'foo(b\n++c);',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('in a func arg default',{
+      code: 'function f(x=b\n++c){}',
+      throws: 'Next ord should be',
+      tokens: [],
+    });
+
+    test('in a block',{
+      code: '{b\n++c};',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'BlockStatement',
+            body:
+              [ { type: 'ExpressionStatement',
+                expression: { type: 'Identifier', name: 'b' } },
+                { type: 'ExpressionStatement',
+                  expression:
+                    { type: 'UpdateExpression',
+                      operator: '++',
+                      prefix: true,
+                      argument: { type: 'Identifier', name: 'c' } } } ] },
+            { type: 'EmptyStatement' } ] },
+      tokens: [$PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('in a sub-block',{
+      code: 'while (true) {b\n++c};',
+      ast:  { type: 'Program',
+        body:
+          [ { type: 'WhileStatement',
+            test: { type: 'Literal', value: true, raw: 'true' },
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'ExpressionStatement',
+                    expression: { type: 'Identifier', name: 'b' } },
+                    { type: 'ExpressionStatement',
+                      expression:
+                        { type: 'UpdateExpression',
+                          operator: '++',
+                          prefix: true,
+                          argument: { type: 'Identifier', name: 'c' } } } ] } },
+            { type: 'EmptyStatement' } ] },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('in an arrow',{
+      code: '() => b\n++c;',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'ArrowFunctionExpression',
+                params: [],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: { type: 'Identifier', name: 'b' } } },
+            { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'c' } } } ] },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+    });
+
+    test('after await 1',{
+      code: 'async function f(){ await\n++c; }',
+      // note: await is not restricted so the newline is fine here
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'ExpressionStatement',
+                    expression:
+                      { type: 'AwaitExpression',
+                        argument:
+                          { type: 'UpdateExpression',
+                            operator: '++',
+                            prefix: true,
+                            argument: { type: 'Identifier', name: 'c' } } } } ] } } ] },
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('after await 2',{
+      code: 'async function f(){ await b\n++c; }',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'ExpressionStatement',
+                    expression:
+                      { type: 'AwaitExpression',
+                        argument: { type: 'Identifier', name: 'b' } } },
+                    { type: 'ExpressionStatement',
+                      expression:
+                        { type: 'UpdateExpression',
+                          operator: '++',
+                          prefix: true,
+                          argument: { type: 'Identifier', name: 'c' } } } ] } } ] },
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('after typeof',{
+      code: 'typeof b\n++c;',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'UnaryExpression',
+                operator: 'typeof',
+                prefix: true,
+                argument: { type: 'Identifier', name: 'b' } } },
+            { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'c' } } } ] },
+      tokens: [$IDENT, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+    });
+
+    test('after new',{
+      code: 'new b\n++c;',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'NewExpression',
+                arguments: [],
+                callee: { type: 'Identifier', name: 'b' } } },
+            { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'c' } } } ] },
+      tokens: [$IDENT, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+    });
+  });
+});

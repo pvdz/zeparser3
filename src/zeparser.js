@@ -3176,7 +3176,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'UnaryExpression');
     AST_set('operator', identName);
     AST_set('prefix', true);
-    console.log('curtok:', curtok.str)
     // dont parse just any standard expression. instead stop when you find any infix operator
     let assignable = parseValue(lexerFlags, 'argument');
     // TODO: is the assignability ever relevant?
@@ -3625,30 +3624,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseUpdateExpressionSuffix(lexerFlags, astProp) {
     ASSERT(curtok.str === '++' || curtok.str === '--', 'only for update unaries');
-    if (curtok.nl) {
-      // there is a newline between the previous value and the ++ or -- UpdateExpression
-      // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion
-      // https://tc39.github.io/ecma262/#prod-UpdateExpression
-      // ASI should be attempted... this may be very invalid here, though. so we need to validate that somehow.
-      // examples;
-      // - `foo\n++bar` -> `foo;++bar;`
-      // - `foo\n++\nbar` -> `foo;++bar;`
-      // - `++\nfoo;` -> `++foo;`
-      // - `foo\n++` -> `foo;++` -> error
-      // - `if (foo\n++);` -> error
+    // if there is a newline between the previous value and UpdateExpression (++ or --) then it is not postfix
+    // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion
+    // https://tc39.github.io/ecma262/#prod-UpdateExpression
+    // ASI should be attempted... this may be very invalid here, though. so we need to validate that somehow.
+    // examples;
+    // - `foo\n++bar` -> `foo;++bar;`
+    // - `foo\n++\nbar` -> `foo;++bar;`
+    // - `++\nfoo;` -> `++foo;`
+    // - `foo\n++` -> `foo;++` -> error
+    // - `if (foo\n++);` -> error
 
-      // ok when inside a: expression statement, return statement, throw statement, var/let/const decl, export (?)
+    // ok when inside a: expression statement, return statement, throw statement, var/let/const decl, export (?)
 
-      if ((lexerFlags & LF_CAN_POSTFIX_ASI) !== LF_CAN_POSTFIX_ASI) {
-        THROW('Found newline before ++/-- and should ASI but that is not allowed here');
-      }
-    } else {
+    if (!curtok.nl) {
       AST_wrapClosed(astProp, 'UpdateExpression', 'argument');
       AST_set('operator', curtok.str);
       AST_set('prefix', false);
       ASSERT_skipDiv($PUNCTUATOR, lexerFlags);
       AST_close('UpdateExpression');
     }
+    // else do nothing. nothing gets parsed. and since next token is ++ or -- there is no risk of "overaccepting" here
+    // caller can return assignability though it won't matter as there's no scenario where the following assigns to it
   }
   function parseCallArgs(lexerFlags, astProp) {
     if (curc === $$PAREN_R_29) {

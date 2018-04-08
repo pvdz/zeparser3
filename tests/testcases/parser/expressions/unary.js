@@ -556,7 +556,7 @@ module.exports = (describe, test) => describe('unary ops', _ => {
 
       test('statement header',{
         code: 'if (a\n++);',
-        throws: 'Found newline before ++/--',
+        throws: 'Next ord should be',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
@@ -687,7 +687,7 @@ module.exports = (describe, test) => describe('unary ops', _ => {
 
       test('statement header',{
         code: 'if (a\n--);',
-        throws: 'Found newline before ++/--',
+        throws: 'Next ord should be',
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
@@ -725,6 +725,25 @@ module.exports = (describe, test) => describe('unary ops', _ => {
         },
         desc: 'postfix is restricted so ASI should happen', // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
         tokens: [$IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('regression', {
+        code: 'a=b\n++c',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'AssignmentExpression',
+                  left: { type: 'Identifier', name: 'a' },
+                  operator: '=',
+                  right: { type: 'Identifier', name: 'b' } } },
+              { type: 'ExpressionStatement',
+                expression:
+                  { type: 'UpdateExpression',
+                    operator: '++',
+                    prefix: true,
+                    argument: { type: 'Identifier', name: 'c' } } } ] },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
       });
 
       test('asi after', {
@@ -779,7 +798,7 @@ module.exports = (describe, test) => describe('unary ops', _ => {
 
       test('asi before', {
         code: 'if (a\n++b);',
-        throws: 'Found newline before ++/--',
+        throws: 'Next ord should be',
         desc: 'postfix is restricted so ASI should happen', // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
         tokens: [$IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
       });
@@ -792,7 +811,7 @@ module.exports = (describe, test) => describe('unary ops', _ => {
 
       test('asi both', {
         code: 'if (a\n++\nb);',
-        throws: 'Found newline before ++/--',
+        throws: 'Next ord should be',
         desc: 'postfix is restricted so ASI should happen',
         tokens: [$IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
       });
