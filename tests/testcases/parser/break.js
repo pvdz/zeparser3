@@ -66,3 +66,5 @@ module.exports = (describe, test) => describe('break statement', _ => {
     tokens: [$IDENT, $IDENT, $ASI, $IDENT, $PUNCTUATOR],
   });
 });
+
+// break sans loop (with label)

@@ -149,6 +149,7 @@ let { default: ZeTokenizer,
   GOAL_SCRIPT,
 
   LF_CAN_NEW_TARGET,
+  LF_CAN_POSTFIX_ASI,
   LF_STRICT_MODE,
   LF_FOR_REGEX,
   LF_IN_TEMPLATE,
@@ -793,6 +794,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseSemiOrAsi(lexerFlags) {
+    // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion
+    // do if:
+    // - unable to parse next token and there was a newline between that and the previous token
+    // - at eof and the current script is not (yet) valid
+    // - when a closing } is encountered
+    // - when ++ or -- is encountered and a newline preceded it
+    // - when a newline (and no semi) follows a "restricted production" (continue, break, return, throw, yield
+    //   (only with assignment). note that throw is always illegal in that case and continue/break may be.)
+    // unless (don't if):
+    // - the semi would be empty
+    // - the next line starts with forward slash
+    // - the semi would be part of a for-header
     if (curc === $$FWDSLASH_2F) {
       ASSERT(false, 'Tried to apply ASI but next token starts with forward slash. This could be a legit error. Confirm and make sure parser path is properly setting regex/div flag.');
       THROW('Cannot apply ASI when next token starts with forward slash (this could very well be a bug in the parser...)');
@@ -1048,7 +1061,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ExpressionStatement');
     AST_setLiteral('expression', curtok);
     skipDiv(lexerFlags);
-    parseExpressionAfterLiteral(lexerFlags, 'expression');
+    parseExpressionAfterLiteral(lexerFlags | LF_CAN_POSTFIX_ASI, 'expression');
     AST_close('ExpressionStatement');
     parseSemiOrAsi(lexerFlags);
   }
@@ -1058,7 +1071,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'ExpressionStatement');
     parseTickExpression(lexerFlags, 'expression');
-    parseExpressionAfterLiteral(lexerFlags, 'expression');
+    parseExpressionAfterLiteral(lexerFlags | LF_CAN_POSTFIX_ASI, 'expression');
     AST_close('ExpressionStatement');
     parseSemiOrAsi(lexerFlags);
   }
@@ -1086,7 +1099,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('The `async` keyword cannot be followed by a newline');
       }
       AST_open(astProp, 'ExpressionStatement');
-      parseExpressionAfterAsyncAsVarName(lexerFlags, identToken, 'expression');
+      parseExpressionAfterAsyncAsVarName(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, 'expression');
       AST_close('ExpressionStatement');
       parseSemiOrAsi(lexerFlags);
       return;
@@ -1115,13 +1128,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
           THROW('The `async` keyword cannot be followed by `in` or `instanceof`');
         }
-        parseExpressionAfterAsyncAsVarName(lexerFlags, identToken, 'expression');
+        parseExpressionAfterAsyncAsVarName(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, 'expression');
       } else {
         AST_open('expression', 'ArrowFunctionExpression');
         AST_set('params', []);
         AST_setIdent('params', curtok);
         ASSERT_skipAny($IDENT, lexerFlags);
-        parseArrowFromPunc(lexerFlags, WAS_ASYNC);
+        parseArrowFromPunc(lexerFlags, WAS_ASYNC); // TODO: what about postfix? I don't think it's valid anyways but there need to be tests for this either way
         AST_close('ArrowFunctionExpression');
       }
       AST_close('ExpressionStatement');
@@ -1135,7 +1148,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // (this function also deals with errors for async-as-varname-in-module-mode)
       AST_open(astProp, 'ExpressionStatement');
-      parseGroupOrArrow(lexerFlags, identToken, 'expression');
+      parseGroupOrArrow(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, 'expression');
       AST_close('ExpressionStatement');
       parseSemiOrAsi(lexerFlags);
       return;
@@ -1147,7 +1160,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     // async as a var name (but since it's a statement it may also be a label...)
     AST_open(astProp, 'ExpressionStatement');
-    parseExpressionAfterAsyncAsVarName(lexerFlags, identToken, 'expression');
+    parseExpressionAfterAsyncAsVarName(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, 'expression');
     AST_close('ExpressionStatement');
     parseSemiOrAsi(lexerFlags);
   }
@@ -1227,14 +1240,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if ((lexerFlags & LF_IN_ASYNC) === LF_IN_ASYNC) {
       ASSERT_skipRex('await', lexerFlags);
       // TODO: support cases of await as a var name in SCRIPT mode
-      parseAwaitExpression(lexerFlags, identToken, 'expression');
+      parseAwaitExpression(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, 'expression');
     } else {
       if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         THROW('Cannot use `await` outside of `async` functions');
       }
       ASSERT_skipRex('await', lexerFlags);
       // await as a var name
-      parseExpressionAfterAsyncAsVarName(lexerFlags, identToken, 'expression');
+      parseExpressionAfterAsyncAsVarName(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, 'expression');
     }
 
     AST_close('ExpressionStatement');
@@ -1557,7 +1570,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseAsyncExpression(lexerFlags, identToken, true, 'declaration');
       } else {
         // any expression is exported as is (but is not a live binding)
-        parseExpression(lexerFlags, 'declaration');
+        parseExpression(lexerFlags | LF_CAN_POSTFIX_ASI, 'declaration'); // TOFIX: is LF_CAN_POSTFIX_ASI even relevant here? is export foo++ valid? I dont think so
       }
       AST_close('ExportDefaultDeclaration');
     } else if (curc === $$STAR_2A) {
@@ -1908,7 +1921,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex('return', lexerFlags);
 
     if (!curtok.nl && curtype !== $EOF && curc !== $$SEMI_3B && curc !== $$CURLY_R_7D) {
-      parseExpressions(lexerFlags, 'argument');
+      parseExpressions(lexerFlags | LF_CAN_POSTFIX_ASI, 'argument');
     } else {
       AST_set('argument', null);
     }
@@ -1961,7 +1974,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ThrowStatement');
     ASSERT_skipRex('throw', lexerFlags);
     if (curtok.nl) THROW('Premature newline');
-    parseExpressions(lexerFlags, 'argument'); // mandatory1
+    parseExpressions(lexerFlags | LF_CAN_POSTFIX_ASI, 'argument'); // mandatory1
     parseSemiOrAsi(lexerFlags);
     AST_close('ThrowStatement');
   }
@@ -2054,7 +2067,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // in script: same as module but also as regular var names (only) outside of async code
         // (await when not a keyword is assignable)
         AST_open(astProp, 'ExpressionStatement');
-        parseAwaitExpression(lexerFlags, identToken, 'expression');
+        parseAwaitExpression(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, 'expression');
         // TODO: what about multiple expressions?
         AST_close('ExpressionStatement');
         parseSemiOrAsi(lexerFlags);
@@ -2065,7 +2078,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
-        assignable = parseUnary(lexerFlags, identName, astProp);
+        assignable = parseUnary(lexerFlags | LF_CAN_POSTFIX_ASI, identName, astProp);
         break;
 
       case 'false':
@@ -2081,7 +2094,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
-        assignable = parseFunctionExpression(lexerFlags, NOT_ASYNC, astProp);
+        assignable = parseFunctionExpression(lexerFlags | LF_CAN_POSTFIX_ASI, NOT_ASYNC, astProp);
         break;
 
       case 'new':
@@ -2089,7 +2102,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
-        assignable = parseNewKeyword(lexerFlags, astProp);
+        assignable = parseNewKeyword(lexerFlags | LF_CAN_POSTFIX_ASI, astProp);
         // TODO: check assignability; can assign to a property of a new expression but I don't think that property is already parsed here
         break;
 
@@ -2131,7 +2144,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
-        assignable = parseUnary(lexerFlags, identName, astProp);
+        assignable = parseUnary(lexerFlags | LF_CAN_POSTFIX_ASI, identName, astProp);
         break;
 
       case 'yield':
@@ -2142,7 +2155,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
         // note: `yield` is a var name in sloppy mode _is_ assignable. any other appearance of `yield` is not.
-        assignable = parseYieldKeyword(lexerFlags, identToken, astProp);
+        assignable = parseYieldKeyword(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, astProp);
         break;
 
       default:
@@ -2151,7 +2164,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
         // TODO: verify identifier (note: can be value keywords depending on next token being an arrow)
-        assignable = parseAfterVarName(lexerFlags, identToken, astProp);
+        assignable = parseAfterVarName(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, astProp);
     }
 
     ASSERT(_path[_path.length-1].type === 'ExpressionStatement', 'at this point the AST has ExpressionStatement open');
@@ -2159,7 +2172,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(assignable === IS_ASSIGNABLE || assignable === NOT_ASSIGNABLE, 'asssignable should be updated properly [' + assignable + ']');
 
-    assignable = parseValueTail(lexerFlags, assignable, astProp);
+    assignable = parseValueTail(lexerFlags | LF_CAN_POSTFIX_ASI, assignable, astProp);
+    // TODO: check for ++/-- here? because that is probably invalid?
     parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
 
     if (curc === $$COMMA_2C) {
@@ -2193,7 +2207,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
 
       AST_open(astProp, 'ExpressionStatement');
-      parseExpressionAfterPlainVarName(lexerFlags, identToken, 'expression');
+      parseExpressionAfterPlainVarName(lexerFlags | LF_CAN_POSTFIX_ASI, identToken, 'expression');
       if (curc === $$COMMA_2C) {
         _parseExpressions(lexerFlags, 'expression');
       }
@@ -2212,7 +2226,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         break;
       default:
         AST_open(astProp, 'ExpressionStatement');
-        parseExpression(lexerFlags, 'expression');
+        parseExpression(lexerFlags | LF_CAN_POSTFIX_ASI, 'expression');
         AST_close('ExpressionStatement');
         parseSemiOrAsi(lexerFlags);
     }
@@ -2541,7 +2555,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc === $$IS_3D && curtok.str === '=') {
       ASSERT_skipRex($PUNCTUATOR, lexerFlags);
-      parseExpression(lexerFlags, 'init');
+      parseExpression(lexerFlags | LF_CAN_POSTFIX_ASI, 'init');
       if (curtok.str === 'in') {
         // certain cases were possible in legacy mode
         if (!wasDestruct && options_webCompat === WEB_COMPAT_ON && bindingKind === 'var' && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
@@ -2991,6 +3005,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else if (curc === $$PAREN_L_28) {
         return parseGroupOrArrow(lexerFlags, false, astProp);
       } else if (curtok.str === '++' || curtok.str === '--') {
+        // note: this is ++/-- PREFIX. This version does NOT have newline restrictions!
         AST_open(astProp, 'UpdateExpression');
         AST_set('operator', curtok.str);
         ASSERT_skipAny($PUNCTUATOR, lexerFlags); // TODO: optimize; next token can not start with a fwd slash
@@ -3273,7 +3288,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseObjectLitOrDestruc(lexerFlags, fromParam, astProp) {
     // (only a trailing comma is allowed, no elisions)
 
-    lexerFlags = sansFlag(lexerFlags, LF_NO_IN); // we can parse `in` inside the object literal
+    // we can parse `in` inside the object literal
+    // ASI is illegal while inside an objlit
+    lexerFlags = sansFlag(lexerFlags, LF_NO_IN | LF_CAN_POSTFIX_ASI);
 
     // {a}
     // {a:b}
@@ -3491,7 +3508,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // [a]       -> array literal
     // [a] = b   -> array destructuring
 
-    lexerFlags = sansFlag(lexerFlags, LF_NO_IN); // we can parse `in` inside the array literal
+    // we can parse `in` inside the array literal
+    // ASI is illegal while inside an arrlit
+    lexerFlags = sansFlag(lexerFlags, LF_NO_IN | LF_CAN_POSTFIX_ASI);
 
     AST_open(astProp, 'ArrayExpression');
     ASSERT_skipRex('[', lexerFlags); // note: should be verified by caller
@@ -3592,14 +3611,37 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, astProp);
     } else if ((curc === $$PLUS_2B && curtok.str === '++') || (curc === $$DASH_2D && curtok.str === '--')) {
-      ASSERT(curtype === $PUNCTUATOR);
+      // note: this is ++/-- SUFFIX. This version DOES have newline restrictions!
+      parseUpdateExpressionSuffix(lexerFlags, astProp);
+    }
+    return assignable;
+  }
+  function parseUpdateExpressionSuffix(lexerFlags, astProp) {
+    ASSERT(curtok.str === '++' || curtok.str === '--', 'only for update unaries');
+    if (curtok.nl) {
+      // there is a newline between the previous value and the ++ or -- UpdateExpression
+      // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion
+      // https://tc39.github.io/ecma262/#prod-UpdateExpression
+      // ASI should be attempted... this may be very invalid here, though. so we need to validate that somehow.
+      // examples;
+      // - `foo\n++bar` -> `foo;++bar;`
+      // - `foo\n++\nbar` -> `foo;++bar;`
+      // - `++\nfoo;` -> `++foo;`
+      // - `foo\n++` -> `foo;++` -> error
+      // - `if (foo\n++);` -> error
+
+      // ok when inside a: expression statement, return statement, throw statement, var/let/const decl, export (?)
+
+      if ((lexerFlags & LF_CAN_POSTFIX_ASI) !== LF_CAN_POSTFIX_ASI) {
+        THROW('Found newline before ++/-- and should ASI but that is not allowed here');
+      }
+    } else {
       AST_wrapClosed(astProp, 'UpdateExpression', 'argument');
       AST_set('operator', curtok.str);
       AST_set('prefix', false);
-      ASSERT_skipDiv(curtok.str, lexerFlags);
+      ASSERT_skipDiv($PUNCTUATOR, lexerFlags);
       AST_close('UpdateExpression');
     }
-    return assignable;
   }
   function parseCallArgs(lexerFlags, astProp) {
     if (curc === $$PAREN_R_29) {
@@ -3653,7 +3695,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // note: only a group-wrapped solo identifier or a value that results in a property
     // can be assignable (and more restrictions may apply for eval/arguments)
-    let assignable = parseExpression(lexerFlags, astProp);
+    let assignable = parseExpression(sansFlag(lexerFlags, LF_CAN_POSTFIX_ASI), astProp);
 
     if (curc === $$COMMA_2C) {
       // NOTE! this can become an ARROW HEADER! (in fact, this is most likely the case)

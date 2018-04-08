@@ -19,4 +19,20 @@ module.exports = (describe, test) => describe('member expression', _ => {
     ]},
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
   });
+
+  test('property on call', {
+    code: 'a().b',
+    ast: { type: 'Program',
+      body:
+        [ { type: 'ExpressionStatement',
+          expression:
+          { type: 'MemberExpression',
+            object:
+            { type: 'CallExpression',
+              callee: { type: 'Identifier', name: 'a' },
+              arguments: [] },
+            property: { type: 'Identifier', name: 'b' },
+            computed: false } } ] },
+    tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+  });
 });
