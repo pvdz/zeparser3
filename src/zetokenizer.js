@@ -215,10 +215,6 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 //... etc
 //ASSERT(__flag < 32, 'cannot use more than 32 flags');
 
-
-const GOAL_MODULE = true;
-const GOAL_SCRIPT = false;
-
 const LF_STRICT_MODE = 1 << 1;
 const LF_FOR_REGEX = 1 << 2;
 const LF_IN_TEMPLATE = 1 << 3;
@@ -325,9 +321,13 @@ const SOLID_TOKEN = false;
 const PARSING_FROM_TICK = true;
 const PARSING_SANS_TICK = false;
 
-function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON) {
+const FAIL_GRACEFULLY = true;
+const FAIL_HARD = false;
+
+let NOT_A_REGEX_ERROR = '';
+
+function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
-  ASSERT(typeof goal === 'boolean', 'goal boolean');
 
   let pointer = 0;
   let len = input.length;
@@ -527,8 +527,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=RETURN_SOLID_TOKENS) {
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
     ASSERT(!finished, 'should not next() after eof token');
-
-    if (goal === GOAL_MODULE) lexerFlags = lexerFlags | LF_STRICT_MODE; // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
+    // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
     consumedNewline = false;
 
     let token;
@@ -1423,8 +1422,10 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     return parseIdentFromUnicodeEscape(FIRST_CHAR);
   }
 
+  let lastRegexState = NOT_A_REGEX_ERROR; // syntax errors are reported here. empty string means no error. yupyup
   function regexSyntaxError(desc) {
-    THROW('Regex syntax error: ' + desc);
+    lastRegexState = desc;
+    console.error('Tokenizer error while parsing regex:', lastRegexState);
     return ALWAYS_BAD;
   }
 
@@ -1433,13 +1434,17 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   function parseRegex(c) {
     nCapturingParens = 0;
     largestBackReference = 0;
+    lastRegexState = NOT_A_REGEX_ERROR; // we can use a "global" because regexes don't nest
     let ustatusBody = parseRegexBody(c);
+    let ustatusFlags = parseRegexFlags();
     if (nCapturingParens < largestBackReference) {
       ustatusBody = regexSyntaxError('Largest back reference index exceeded the number of capturing groups');
     }
-    let ustatusFlags = parseRegexFlags();
+    if (lastRegexState !== NOT_A_REGEX_ERROR) {
+      return $ERROR;
+    }
     if (ustatusBody === ALWAYS_BAD) {
-      // body had bad escape (should already have called THROW for this)
+      // body had bad escape
       return $ERROR;
     }
     if (ustatusFlags === ALWAYS_BAD) {
@@ -1450,8 +1455,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     if (ustatusBody === GOOD_WITH_U_FLAG) {
       // body had an escape that is only valid with an u flag
       if (ustatusFlags === GOOD_WITH_U_FLAG) return $REGEXU;
-      // in this case the body had syntax that's only valid with a u flag and the flag was not present
-      THROW('Regex had syntax that is only valid with the u-flag');
+      regexSyntaxError('Regex had syntax that is only valid with the u-flag and flag was in fact not present');
       return $ERROR;
     }
 
@@ -1459,7 +1463,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
       // body had an escape or char class range that is invalid with a u flag
       if (ustatusFlags !== GOOD_WITH_U_FLAG) return $REGEX;
       // in this case the body had syntax that's invalid with a u flag and the flag was present anyways
-      THROW('Regex had syntax that is invalid with u-flag');
+      regexSyntaxError('Regex had syntax that is invalid with u-flag and flag was in fact present');
       return $ERROR;
     }
     ASSERT(ustatusBody === ALWAYS_GOOD, 'the body had no syntax depending on a u flag so is always good');
@@ -1689,7 +1693,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
     } while (true);
 
     // this is a fail because we didnt got to the end of input before the closing /
-    return regexSyntaxError('Unknown error at early EOF');
+    return regexSyntaxError('Found EOF before regex was closed');
   }
   function parseRegexAtomEscape(c) {
     // backslash already parsed
@@ -1706,8 +1710,10 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         ASSERT_skip($$U_75);
         return parseRegexUnicodeEscape();
 
+      // hex
+      case $$X_UC_58:
       case $$X_78:
-        ASSERT_skip($$X_78);
+        ASSERT_skip(c);
         if (eof()) return regexSyntaxError('Encountered early EOF while parsing hex escape (1)');
         let a = peek();
         if (!isHex(a)) return regexSyntaxError('First char of hex escape not a valid digit');
@@ -1775,6 +1781,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         if (eof()) return ALWAYS_GOOD; // let error happen elsewhere
         if (isAsciiNumber(peek())) return regexSyntaxError('Back references can not have more two or more consecutive numbers');
         return ALWAYS_GOOD;
+
       case $$1_31:
       case $$2_32:
       case $$3_33:
@@ -1812,7 +1819,7 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
         // plus: nonspacing marks, spacing combining marks, decimal number, connector punctuation, other_id_continue sans white_space and syntax
         // or; [[:ID_Start:][:Mn:][:Mc:][:Nd:][:Pc:][:Other_ID_Continue:]--[:Pattern_Syntax:]--[:Pattern_White_Space:]]
         // in ascii, unicode continue is all the ascii letters :(
-        if (isIdentRestChr(c)) return regexSyntaxError('Cannot escape this regular identifier character [ord=' + c + ']');
+        if (isIdentRestChr(c)) return regexSyntaxError('Cannot escape this regular identifier character [ord=' + c + '][' + String.fromCharCode(c) + ']');
 
         ASSERT_skip(c);
         return GOOD_SANS_U_FLAG; // TODO: verify that UnicodeIDContinue thing for other characters within ascii range and add specific tests for them
@@ -2534,7 +2541,8 @@ function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat
   function _THROW(str) {
     console.log('\n');
     console.log('Error at #|# ```\n', slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)), '\n```');
-    throw new Error(str);
+    if (gracefulErrors === FAIL_HARD) throw new Error(str);
+    else console.error(str);
   }
   function DEBUG() {
     return 'Tokenizer at #|# ```\n' + slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
@@ -2652,8 +2660,8 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
 
-  GOAL_MODULE,
-  GOAL_SCRIPT,
+  FAIL_GRACEFULLY,
+  FAIL_HARD,
 
   LF_CAN_NEW_TARGET,
   LF_CAN_POSTFIX_ASI,

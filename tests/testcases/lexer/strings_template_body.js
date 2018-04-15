@@ -1,17 +1,12 @@
-//import {
 let {
   PARSE_MODE_TICK,
 } = require('../../utils');
-//} from '../../utils';
 
-//import ZeTokenizer, {
 let {
   $STRING_SINGLE,
   $TICK_BODY,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-//import string_body from './string_body';
 let string_body = require('./string_body'); // Λλ
 let strings_template_static = string_body.slice(0);
 

@@ -1,10 +1,7 @@
-//import {
 let {
   PARSE_MODE_DIV,
 } = require('../../utils');
-//} from '../../utils';
 
-//import ZeTokenizer, {
 let {
   $COMMENT_SINGLE,
   $COMMENT_MULTI,
@@ -12,7 +9,6 @@ let {
   $SPACE,
   $PUNCTUATOR,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
 let comments = [
   ['//', $COMMENT_SINGLE, 'empty', 'suffixsp'],
@@ -34,5 +30,4 @@ let comments = [
   ['/* \\u{nope} \\unope \\xno */', $COMMENT_MULTI, 'dont check correctness of escapes'],
 ];
 
-//export default comments;
 module.exports = comments;

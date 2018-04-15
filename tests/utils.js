@@ -2,7 +2,7 @@ let PASS = true;
 let FAIL = false;
 let MODE_MODULE = true; // see zetokenizer.js
 let MODE_SCRIPT = false; // see zetokenizer.js
-let USE_SLOPPY_MODE = 0;
+let USE_SLOPPY_MODE = 1;
 let USE_STRICT_MODE = 2;
 let PARSE_MODE_DIV = 0;
 let PARSE_MODE_REGEX = 4;
@@ -15,6 +15,11 @@ function LOG(...args) {
   if (pre !== 'PASS' && pre !== 'SKIP') {
     console.log.apply(console, args);
   }
+}
+
+function THROW(str, ...rest) {
+  console.log('error args:', rest.length ? require('util').inspect(rest, false, null) : '<none>');
+  throw new Error(`Toktest error! ${str} ${rest.length ? require('util').inspect(rest, false, null) : ''}`);
 }
 
 function toPrint(s) {
@@ -49,4 +54,5 @@ module.exports = {
 
   LOG,
   toPrint,
+  THROW,
 };

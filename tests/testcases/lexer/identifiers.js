@@ -1,9 +1,7 @@
-//import ZeTokenizer, {
 let {
   $ERROR,
   $IDENT,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
 let identifiers = [
   [['foo', 'bar'], $IDENT],
@@ -44,5 +42,4 @@ let identifiers = [
   [[`\\u{000000000000000000070}bc`, `a\\u{0000000000000000000071}c`, `ab\\u{0000000000000000000072}`], $IDENT, 'leading zero padding'],
 ];
 
-//export default identifiers;
 module.exports = identifiers;

@@ -1,13 +1,10 @@
-//import ZeTokenizer, {
 let {
   $CRLF,
   $ERROR,
   $NL,
   $STRING_SINGLE,
 } = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
 
-//import string_body from './string_body';
 let string_body = require('./string_body'); // Λλ
 let strings_single = string_body.slice(0);
 
@@ -31,10 +28,10 @@ strings_single.push(
   [`Λ\r\nλ`, [$ERROR, $CRLF, $ERROR], 'newlines are never allowed in regular strings', 'suffixsp']
 );
 
-strings_single = strings_single.map(([inputs, ...rest]) => {
+strings_single = strings_single.map(([inputs, outs, desc, ...rest]) => {
   let input = (typeof inputs === 'string' ? `${inputs.replace(/Λ|λ/g, '\'')}` : inputs.map(s => `${s.replace(/Λ|λ/g, '\'')}`));
-  return [input, ...rest];
+  // desc = '<single string> ' + desc;
+  return [input, outs, desc, ...rest];
 });
 
-//export default strings_single;
 module.exports = strings_single;

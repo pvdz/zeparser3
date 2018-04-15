@@ -1,6 +1,3 @@
-//} from './utils';
-
-//import ZeTokenizer, {
 let { ZeTokenizer,
   //$ASI, // determined by parser
   $ERROR,
@@ -8,14 +5,12 @@ let { ZeTokenizer,
 
   debug_toktype,
 } = require('../../../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from '../../../src/zetokenizer';
 // these cases are "unboxed" string test cases. that means these tests are only
 // bodies that still need a single quote, double quote, or backtick wrapper.
 // this way we can generate the same series of tests for six different situations
 // (single quote, double quote, backtick wrap, backtick head, backtick middle, backtick tail)
 
 
-//import {
 let {
   PASS,
   FAIL,
@@ -26,7 +21,6 @@ let {
   PARSE_MODE_DIV,
   PARSE_MODE_REGEX,
 } = require('../../utils');
-//} from '../../utils';
 
 let string_body = [
   // all string test should cover the same tests so the delimiter (single quote, double quote, etc) are marked
@@ -135,5 +129,4 @@ let string_body = [
   [[`Λ}`, `Λ aaa }`, `Λ} bbb `, `Λ aaa } bbb `], $ERROR, 'closing curly baiting eol/eof', 'suffixsp'],
 ];
 
-//export default string_body;
 module.exports = string_body;

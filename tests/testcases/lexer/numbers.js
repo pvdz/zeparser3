@@ -81,7 +81,7 @@ let numbers = [
 
   // legacy octal tests
 
-  ['0123', $NUMBER_OLD, USE_SLOPPY_MODE, 'legacy octal representation, only okay without strict mode'],
+  ['0123', $NUMBER_OLD, USE_SLOPPY_MODE, 'legacy octal representation, only okay in sloppy mode'],
   ['0123', $ERROR, USE_STRICT_MODE, 'legacy octal is error in strict mode'],
 
   [['00', '01', '02', '03', '04', '05', '06', '07', '08', '09'], $NUMBER_OLD, USE_SLOPPY_MODE, 'legacy decimal starting with zero, only okay without strict mode'],

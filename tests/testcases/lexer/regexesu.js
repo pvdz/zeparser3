@@ -1,15 +1,12 @@
-//import {
 let {
   PARSE_MODE_REGEX,
 } = require('../../utils');
-//} from '../../utils';
 
-//import ZeTokenizer, {
 let {
   $ERROR,
+  $IDENT,
   $REGEXU,
 } = require('../../../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from '../../../src/zetokenizer';
 
 let regexesu = [ // pretty much the same as regexes except all regexes should have the u flag (causes regex to parse code points instead of code units and requires slightly different syntax)
   [`/abc/u`, $REGEXU, PARSE_MODE_REGEX],
@@ -61,10 +58,10 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   [['/\\A/u', '/\\E/u', '/\\F/u', '/\\G/u', '/\\H/u', '/\\I/u', '/\\J/u', '/\\K/u', '/\\L/u', '/\\M/u', '/\\N/u', '/\\O/u', '/\\P/u', '/\\Q/u', '/\\R/u', '/\\T/u', '/\\U/u', '/\\V/u', '/\\X/u', '/\\Y/u', '/\\Z/u'], $ERROR, PARSE_MODE_REGEX, 'only escaping a single uc letter'],
   [['/abc\\a/u', '/abc\\e/u', '/abc\\g/u', '/abc\\h/u', '/abc\\i/u', '/abc\\j/u', '/abc\\k/u', '/abc\\l/u', '/abc\\m/u', '/abc\\o/u', '/abc\\p/u', '/abc\\q/u', '/abc\\u/u', '/abc\\x/u', '/abc\\y/u', '/abc\\z/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a prefixed single lc letter'],
   [['/abc\\A/u', '/abc\\E/u', '/abc\\F/u', '/abc\\G/u', '/abc\\H/u', '/abc\\I/u', '/abc\\J/u', '/abc\\K/u', '/abc\\L/u', '/abc\\M/u', '/abc\\N/u', '/abc\\O/u', '/abc\\P/u', '/abc\\Q/u', '/abc\\R/u', '/abc\\T/u', '/abc\\U/u', '/abc\\V/u', '/abc\\X/u', '/abc\\Y/u', '/abc\\Z/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a prefixed single uc letter'],
-  [['/\\aabcd/u', '/\\eabcd/u', '/\\gabcd/u', '/\\habcd/u', '/\\iabcd/u', '/\\jabcd/u', '/\\kabcd/u', '/\\labcd/u', '/\\mabcd/u', '/\\oabcd/u', '/\\pabcd/u', '/\\qabcd/u', '/\\xabcd/u', '/\\yabcd/u', '/\\zabcd/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a suffixed single lc letter'],
-  [['/\\Aabcd/u', '/\\Cabcd/u', '/\\Eabcd/u', '/\\Fabcd/u', '/\\Gabcd/u', '/\\Habcd/u', '/\\Iabcd/u', '/\\Jabcd/u', '/\\Kabcd/u', '/\\Labcd/u', '/\\Mabcd/u', '/\\Nabcd/u', '/\\Oabcd/u', '/\\Pabcd/u', '/\\Qabcd/u', '/\\Rabcd/u', '/\\Tabcd/u', '/\\Uabcd/u', '/\\Vabcd/u', '/\\Xabcd/u', '/\\Yabcd/u', '/\\Zabcd/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a suffixed single uc letter'],
-  [['/abc\\adeff/u', '/abc\\gdeff/u', '/abc\\hdeff/u', '/abc\\ideff/u', '/abc\\jdeff/u', '/abc\\kdeff/u', '/abc\\ldeff/u', '/abc\\mdeff/u', '/abc\\odeff/u', '/abc\\pdeff/u', '/abc\\qdeff/u', '/abc\\xdeff/u', '/abc\\ydeff/u', '/abc\\zdeff/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a single lc letter in the middle'],
-  [['/abc\\Adeff/u', '/abc\\Cdeff/u', '/abc\\Edeff/u', '/abc\\Fdeff/u', '/abc\\Gdeff/u', '/abc\\Hdeff/u', '/abc\\Ideff/u', '/abc\\Jdeff/u', '/abc\\Kdeff/u', '/abc\\Ldeff/u', '/abc\\Mdeff/u', '/abc\\Ndeff/u', '/abc\\Odeff/u', '/abc\\Pdeff/u', '/abc\\Qdeff/u', '/abc\\Rdeff/u', '/abc\\Tdeff/u', '/abc\\Udeff/u', '/abc\\Vdeff/u', '/abc\\Xdeff/u', '/abc\\Ydeff/u', '/abc\\Zdeff/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a single uc letter in the middle'],
+  [['/\\aabcd/u', '/\\eabcd/u', '/\\gabcd/u', '/\\habcd/u', '/\\iabcd/u', '/\\jabcd/u', '/\\kabcd/u', '/\\labcd/u', '/\\mabcd/u', '/\\oabcd/u', '/\\pabcd/u', '/\\qabcd/u', '/\\yabcd/u', '/\\zabcd/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a suffixed single lc letter'],
+  [['/\\Aabcd/u', '/\\Cabcd/u', '/\\Eabcd/u', '/\\Fabcd/u', '/\\Gabcd/u', '/\\Habcd/u', '/\\Iabcd/u', '/\\Jabcd/u', '/\\Kabcd/u', '/\\Labcd/u', '/\\Mabcd/u', '/\\Nabcd/u', '/\\Oabcd/u', '/\\Pabcd/u', '/\\Qabcd/u', '/\\Rabcd/u', '/\\Tabcd/u', '/\\Uabcd/u', '/\\Vabcd/u', '/\\Yabcd/u', '/\\Zabcd/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a suffixed single uc letter'],
+  [['/abc\\adeff/u', '/abc\\gdeff/u', '/abc\\hdeff/u', '/abc\\ideff/u', '/abc\\jdeff/u', '/abc\\kdeff/u', '/abc\\ldeff/u', '/abc\\mdeff/u', '/abc\\odeff/u', '/abc\\pdeff/u', '/abc\\qdeff/u', '/abc\\ydeff/u', '/abc\\zdeff/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a single lc letter in the middle'],
+  [['/abc\\Adeff/u', '/abc\\Cdeff/u', '/abc\\Edeff/u', '/abc\\Fdeff/u', '/abc\\Gdeff/u', '/abc\\Hdeff/u', '/abc\\Ideff/u', '/abc\\Jdeff/u', '/abc\\Kdeff/u', '/abc\\Ldeff/u', '/abc\\Mdeff/u', '/abc\\Ndeff/u', '/abc\\Odeff/u', '/abc\\Pdeff/u', '/abc\\Qdeff/u', '/abc\\Rdeff/u', '/abc\\Tdeff/u', '/abc\\Udeff/u', '/abc\\Vdeff/u', '/abc\\Ydeff/u', '/abc\\Zdeff/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a single uc letter in the middle'],
   [['/\\_/u', '/abc\\_/u', '/\\_abcd/u', '/abc\\_abcd/u'], $ERROR, PARSE_MODE_REGEX, '_ is not an escapable char'],
   [['/\\$/u', '/abc\\$/u', '/\\$abcd/u', '/abc\\$abcd/u'], $REGEXU, PARSE_MODE_REGEX, '$ is a syntax char we can escape'],
   // escaping "syntax characters"
@@ -85,7 +82,7 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   [['/\\cA/u', '/\\cB/u', '/\\cD/u', '/\\cE/u', '/\\cF/u', '/\\cG/u', '/\\cH/u', '/\\cI/u', '/\\cJ/u', '/\\cK/u', '/\\cL/u', '/\\cM/u', '/\\cN/u', '/\\cO/u', '/\\cP/u', '/\\cQ/u', '/\\cR/u', '/\\cS/u', '/\\cT/u', '/\\cU/u', '/\\cV/u', '/\\cW/u', '/\\cX/u', '/\\cY/u', '/\\cZ/u'], $REGEXU, PARSE_MODE_REGEX, 'control character uc'],
   // hex escapes
   [['/\\x01/u', '/\\x12/u', '/\\x23/u', '/\\x34/u', '/\\x45/u', '/\\x56/u', '/\\x67/u', '/\\x78/u', '/\\x89/u', '/\\x90/u'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
-  [['/\\xa1/', '/\\xb2/', '/\\xc3/', '/\\x3d/', '/\\x4e/', '/\\x5f/', '/\\x6A/', '/\\xbB/', '/\\xCD/', '/\\xEF/'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
+  [['/\\xa1/u', '/\\xb2/u', '/\\xc3/u', '/\\x3d/u', '/\\x4e/u', '/\\x5f/u', '/\\x6A/u', '/\\xbB/u', '/\\xCD/u', '/\\xEF/u'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
   [['/\\x/u', '/\\x0/u', '/\\x1/u', '/\\x2/u', '/\\x3/u', '/\\x4/u', '/\\x5/u', '/\\x6/u', '/\\x7/u', '/\\x8/u', '/\\x9/u'], $ERROR, PARSE_MODE_REGEX, 'invalid hex escape with one char'],
   // digit escape
   // digit escape / backreferences
@@ -204,7 +201,7 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   [['/[\\aabcd]/u', '/[\\eabcd]/u', '/[\\gabcd]/u', '/[\\habcd]/u', '/[\\iabcd]/u', '/[\\jabcd]/u', '/[\\kabcd]/u', '/[\\labcd]/u', '/[\\mabcd]/u', '/[\\oabcd]/u', '/[\\pabcd]/u', '/[\\qabcd]/u', '/[\\yabcd]/u', '/[\\zabcd]/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a suffixed single lc letter'],
   [['/[\\Aabcd]/u', '/[\\Cabcd]/u', '/[\\Eabcd]/u', '/[\\Fabcd]/u', '/[\\Gabcd]/u', '/[\\Habcd]/u', '/[\\Iabcd]/u', '/[\\Jabcd]/u', '/[\\Kabcd]/u', '/[\\Labcd]/u', '/[\\Mabcd]/u', '/[\\Nabcd]/u', '/[\\Oabcd]/u', '/[\\Pabcd]/u', '/[\\Qabcd]/u', '/[\\Rabcd]/u', '/[\\Tabcd]/u', '/[\\Uabcd]/u', '/[\\Vabcd]/u', '/[\\Xabcd]/u', '/[\\Yabcd]/u', '/[\\Zabcd]/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a suffixed single uc letter'],
   [['/[abc\\adeff]/u', '/[abc\\gdeff]/u', '/[abc\\hdeff]/u', '/[abc\\ideff]/u', '/[abc\\jdeff]/u', '/[abc\\kdeff]/u', '/[abc\\ldeff]/u', '/[abc\\mdeff]/u', '/[abc\\odeff]/u', '/[abc\\pdeff]/u', '/[abc\\qdeff]/u', '/[abc\\ydeff]/u', '/[abc\\zdeff]/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a single lc letter in the middle'],
-  [['/[abc\\Adeff]/u', '/[abc\\Cdeff]/u', '/[abc\\Edeff]/u', '/[abc\\Fdeff]/u', '/[abc\\Gdeff]/u', '/[abc\\Hdeff]/u', '/[abc\\Ideff]/u', '/[abc\\Jdeff]/u', '/[abc\\Kdeff]/u', '/[abc\\Ldeff]/u', '/[abc\\Mdeff]/u', '/[abc\\Ndeff]/u', '/[abc\\Odeff]/u', '/[abc\\Pdeff]/u', '/[abc\\Qdeff]/u', '/[abc\\Rdeff]/u', '/[abc\\Tdeff]/u', '/[abc\\Udeff]/u', '/[abc\\Vdeff]/u', '/[abc\\Xdeff]/u', '/[abc\\Ydeff]/u', '/[abc\\Zdeff]/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a single uc letter in the middle'],
+  [['/[abc\\Adeff]/u', '/[abc\\Cdeff]/u', '/[abc\\Edeff]/u', '/[abc\\Fdeff]/u', '/[abc\\Gdeff]/u', '/[abc\\Hdeff]/u', '/[abc\\Ideff]/u', '/[abc\\Jdeff]/u', '/[abc\\Kdeff]/u', '/[abc\\Ldeff]/u', '/[abc\\Mdeff]/u', '/[abc\\Ndeff]/u', '/[abc\\Odeff]/u', '/[abc\\Pdeff]/u', '/[abc\\Qdeff]/u', '/[abc\\Rdeff]/u', '/[abc\\Tdeff]/u', '/[abc\\Udeff]/u', '/[abc\\Vdeff]/u', '/[abc\\Ydeff]/u', '/[abc\\Zdeff]/u'], $ERROR, PARSE_MODE_REGEX, 'escaping a single uc letter in the middle'],
   [['/[\\_]/u', '/[abc\\_]/u', '/[\\_abcd]/u', '/[abc\\_abcd]/u'], $ERROR, PARSE_MODE_REGEX, '_ is not an escapable char'],
   [['/[\\$]/u', '/[abc\\$]/u', '/[\\$abcd]/u', '/[abc\\$abcd]/u'], $REGEXU, PARSE_MODE_REGEX, '$ is a syntax char we can escape'],
   [[`/[\\^]/u`, `/[\\$]/u`, `/[\\\\]/u`, `/[\\.]/u`, `/[\\*]/u`, `/[\\+]/u`, `/[\\?]/u`, `/[\\(]/u`, `/[\\)]/u`, `/[\\[]/u`, `/[\\]]/u`, `/[\\{]/u`, `/[\\}]/u`, `/[\\|]/u`], $REGEXU, PARSE_MODE_REGEX, 'syntax char escapes'],
@@ -215,7 +212,7 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   [['/[\\ca]/u', '/[\\cb]/u', '/[\\cd]/u', '/[\\ce]/u', '/[\\cf]/u', '/[\\cg]/u', '/[\\ch]/u', '/[\\ci]/u', '/[\\cj]/u', '/[\\ck]/u', '/[\\cl]/u', '/[\\cm]/u', '/[\\cn]/u', '/[\\co]/u', '/[\\cp]/u', '/[\\cq]/u', '/[\\cr]/u', '/[\\cs]/u', '/[\\ct]/u', '/[\\cu]/u', '/[\\cv]/u', '/[\\cw]/u', '/[\\cx]/u', '/[\\cy]/u', '/[\\cz]/u'], $REGEXU, PARSE_MODE_REGEX, 'control character lc'],
   [['/[\\cA]/u', '/[\\cB]/u', '/[\\cD]/u', '/[\\cE]/u', '/[\\cF]/u', '/[\\cG]/u', '/[\\cH]/u', '/[\\cI]/u', '/[\\cJ]/u', '/[\\cK]/u', '/[\\cL]/u', '/[\\cM]/u', '/[\\cN]/u', '/[\\cO]/u', '/[\\cP]/u', '/[\\cQ]/u', '/[\\cR]/u', '/[\\cS]/u', '/[\\cT]/u', '/[\\cU]/u', '/[\\cV]/u', '/[\\cW]/u', '/[\\cX]/u', '/[\\cY]/u', '/[\\cZ]/u'], $REGEXU, PARSE_MODE_REGEX, 'control character uc'],
   [['/[\\x01]/u', '/[\\xa2]/u', '/[\\xF3]/u', '/[\\x34]/u', '/[\\xC5]/u', '/[\\x5a]/u', '/[\\x67]/u', '/[\\x7D]/u', '/[\\x8f]/u', '/[\\x90]/u'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
-  [['/[\\xa1]/', '/[\\xb2]/', '/[\\xc3]/', '/[\\x3d]/', '/[\\x4e]/', '/[\\x5f]/', '/[\\x6A]/', '/[\\xbB]/', '/[\\xCD]/', '/[\\xEF]/'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
+  [['/[\\xa1]/u', '/[\\xb2]/u', '/[\\xc3]/u', '/[\\x3d]/u', '/[\\x4e]/u', '/[\\x5f]/u', '/[\\x6A]/u', '/[\\xbB]/u', '/[\\xCD]/u', '/[\\xEF]/u'], $REGEXU, PARSE_MODE_REGEX, 'valid hex escapes'],
   [['/[\\x]/u', '/[\\x0]/u', '/[\\x1]/u', '/[\\x2]/u', '/[\\x3]/u', '/[\\x4]/u', '/[\\x5]/u', '/[\\x6]/u', '/[\\x7]/u', '/[\\x8]/u', '/[\\x9]/u'], $ERROR, PARSE_MODE_REGEX, 'invalid hex escape with one char'],
   [['/[\\u1234]/u', '/[x\\u0567]/u', '/[\\uf89ay]/u', '/[x\\ubcdey]/u'], $REGEXU, PARSE_MODE_REGEX, 'non surrogate'],
   [['/[\\ud800]/u', '/[x\\ud810]/u', '/[\\ud900y]/u', '/[x\\udabcy]/u', '/[x\\udabcy]/ug', '/[x\\udabcy]/um', '/[x\\udabcy]/iuy'], $REGEXU, PARSE_MODE_REGEX, 'lead surrogate'],
@@ -366,7 +363,6 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   [[
     '/0{2,1}/u',
     '/^[z-a]$/u',
-    '/abc/au','/abc/ub',
     '/a**/u', '/a***/u', '/a++/u', '/a+++/u', '/a???/u', '/a????/u',
     '/x{1}{1,}/u', '/x{1,2}{1}/u', '/x{1,}{1}/u', '/x{0,1}{1,}/u',
     //'/*a/', '/**a/',  // these are multi line comments
@@ -377,14 +373,15 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
     '/[d-G\\x0061]/u', '/[d-G\\u0061]/u', '/[d-G\\a]/u',
     '/\\\rn/u',
   ], $ERROR, PARSE_MODE_REGEX, 'leading quantifier'],
+  [['/abc/au','/abc/ub'], $ERROR, PARSE_MODE_REGEX, 'leading quantifier'],
   [[
     '/(?=.)*/u', '/(?=.)+/u', '/(?=.)?/u', '/(?=.){1}/u',
     '/(?!.)*/u', '/(?!.)+/u', '/(?!.)?/u', '/(?!.){1}/u',
   ], $REGEXU, PARSE_MODE_REGEX, 'leading quantifier'],
   [[
-    '/\\b*/u', '/\\b+/u', '/\\b?/u', '/\\b{1}/u', '/\\b**/u', '/\\b++/u', '/\\b?+/u', '/\\b{1}+/u', '/(?=.)**/', '/(?=.)++/', '/(?=.)?+/', '/(?=.){1}+/',
-    '/\\B*/u', '/\\B+/u', '/\\B?/u', '/\\B{1}/u', '/\\B**/u', '/\\B++/u', '/\\B?+/u', '/\\B{1}+/u', '/(?!.)**/', '/(?!.)++/', '/(?!.)?+/', '/(?!.){1}+/',
-  ], $ERROR, PARSE_MODE_REGEX, 'leading quantifier'],
+    '/\\b*/u', '/\\b+/u', '/\\b?/u', '/\\b{1}/u', '/\\b**/u', '/\\b++/u', '/\\b?+/u', '/\\b{1}+/u', '/(?=.)**/u', '/(?=.)++/u', '/(?=.)?+/u', '/(?=.){1}+/u',
+    '/\\B*/u', '/\\B+/u', '/\\B?/u', '/\\B{1}/u', '/\\B**/u', '/\\B++/u', '/\\B?+/u', '/\\B{1}+/u', '/(?!.)**/u', '/(?!.)++/u', '/(?!.)?+/u', '/(?!.){1}+/u',
+  ], $ERROR, PARSE_MODE_REGEX, 'leading quantifier with flag'],
 
   [['/\\1/u', '/\\2/u', '/\\3/u', '/\\4/u', '/\\5/u', '/\\6/u', '/\\7/u', '/\\8/u', '/\\9/u'], $ERROR, PARSE_MODE_REGEX, 'no backreferences with u flag?'],
   [['/./\\u0067u', '/./u\\u0067'], $ERROR, PARSE_MODE_REGEX, 'It is a Syntax Error if IdentifierPart contains a Unicode escape sequence (11.8.5.1).'],
@@ -413,7 +410,7 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
 ['', 'B', 'L', 'T'].forEach(a => ['', 'B', 'L', 'T'].forEach(b => ['B', 'L', 'T'].forEach(c => ['B', 'L', 'T'].forEach(d => ['', 'B', 'L', 'T'].forEach(e => ['', 'B', 'L', 'T'].forEach(f => {
   let p = `${a}${b}${c}-${d}${e}${f}`;
   let r = `/S[${p}]/u`;
-  let rr = r
+  let regexToTest = r
     .replace(/B/g, 'x')
     .replace(/L/g, '\\uD83D')
     .replace(/T/g, '\\uDCA9')
@@ -425,9 +422,9 @@ let regexesu = [ // pretty much the same as regexes except all regexes should ha
   let t4 = '(?:T-LT)'; // T<=LT LT<=LT (but T>L)
   let t5 = '(?:(?:B|T|^)T-T)'; // T<=T (but LT > T)
   let test = new RegExp(`${t1}|${t2}|${t3}|${t4}|${t5}`);
-  let out = (test.test(p)) ? $REGEXU : $ERROR;
-  regexesu.push([rr, out, PARSE_MODE_REGEX, 'generated case '+ p]);
+  let expectedToken = (test.test(p)) ? $REGEXU : $ERROR;
+
+  regexesu.push([regexToTest, expectedToken, PARSE_MODE_REGEX, 'generated case '+ p + ' -> ' + regexToTest]);
 }))))));
 
-//export default regexesu;
 module.exports = regexesu;

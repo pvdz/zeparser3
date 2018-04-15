@@ -234,7 +234,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     trailingArgComma: options_trailingArgComma = true, // :love: , es8+
   } = options;
 
-  let tok = ZeTokenizer(code, false, collectTokens, options_webCompat);
+  let tok = ZeTokenizer(code, collectTokens, options_webCompat);
 
   let prevtok = null;
   let curtok = null;
@@ -3794,8 +3794,6 @@ function getGenericTokenType(type) {
 
 // </BODY>
 
-//export default ZeParser;
-//export {
 require['__./zeparser'] = module.exports = { default: ZeParser,
   // this is a re-export but prevents external scripts from also needing to require zetokenizer
   // (okay and in the build it all falls apart, anyways)
