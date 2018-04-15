@@ -231,9 +231,9 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     LOG_THROW(prefix, '_failed_ to throw ANY error', code, '', desc);
     if (expectedThrows !== true) {
       console.log('Expected an error message containing: "' + expectedThrows + '"');
-      console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
-      console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
     }
+    console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
+    console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
     LOG_THROW(prefix, 'AST mismatch', code, '', desc);
 
