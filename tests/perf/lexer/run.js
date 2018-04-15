@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 // node --sampling_heap_profiler_suppress_randomness ./tests/perf/lexer/run.js
 
-//import ZeTokenizer, {
 let { default: ZeTokenizer,
   $EOF,
   $ERROR,
 
-  STRICT_MODE,
-  FOR_REGEX,
-  IN_TEMPLATE,
-} = require('../../../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from '../src/zetokenizer';
-
+  LF_STRICT_MODE,
+  LF_FOR_REGEX,
+  LF_IN_TEMPLATE,
+  LF_NO_FLAGS,
+  RETURN_ANY_TOKENS,
+} = require('../../../src/zetokenizer');
 
 function run() {
   let code = require('fs').readFileSync(__dirname + '/../sources/fuzzed-tokens.js').toString();
@@ -27,7 +26,7 @@ function run() {
   let errors = 0;
   let last;
   do {
-    last = tok(0 | (slashIsRegex ? FOR_REGEX : 0) | (strictMode ? STRICT_MODE : 0) | (fromTemplate ? IN_TEMPLATE : 0), true);
+    last = tok(0 | (slashIsRegex ? LF_FOR_REGEX : LF_NO_FLAGS) | (strictMode ? LF_STRICT_MODE : LF_NO_FLAGS) | (fromTemplate ? LF_IN_TEMPLATE : LF_NO_FLAGS), RETURN_ANY_TOKENS );
     ++count;
     if (last.type === $ERROR) ++errors;
   } while (last.type !== $EOF);

@@ -215,6 +215,7 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 //... etc
 //ASSERT(__flag < 32, 'cannot use more than 32 flags');
 
+const LF_NO_FLAGS = 0;
 const LF_STRICT_MODE = 1 << 1;
 const LF_FOR_REGEX = 1 << 2;
 const LF_IN_TEMPLATE = 1 << 3;
@@ -235,7 +236,7 @@ const INITIAL_LEXER_FLAGS = LF_FOR_REGEX;
 function LF_DEBUG(flags) {
   let s = [];
   if (!flags) {
-    s.push('NO_FLAGS');
+    s.push('LF_NO_FLAGS');
   }
   if (flags & LF_STRICT_MODE) {
     flags ^= LF_STRICT_MODE;
@@ -282,7 +283,7 @@ function LF_DEBUG(flags) {
     s.push('LF_CAN_POSTFIX_ASI');
   }
   if (flags) {
-    THROW('UNKNOWN_FLAGS: ' + flags.toString(2));
+    throw new Error('UNKNOWN_FLAGS: ' + flags.toString(2) + ', so far: [' + s.join('|') + ']');
   }
   return s.join('|');
 }
@@ -1425,7 +1426,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
   let lastRegexState = NOT_A_REGEX_ERROR; // syntax errors are reported here. empty string means no error. yupyup
   function regexSyntaxError(desc) {
     lastRegexState = desc;
-    console.error('Tokenizer error while parsing regex:', lastRegexState);
+    // console.error('Tokenizer error while parsing regex:', lastRegexState);
     return ALWAYS_BAD;
   }
 
@@ -2670,6 +2671,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_IN_TEMPLATE,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
+  LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
   LF_NO_YIELD,
   LF_NO_IN,

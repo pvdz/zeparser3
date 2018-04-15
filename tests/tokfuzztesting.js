@@ -7,7 +7,7 @@ let { default: generate,
   pieces,
   r,
 } = require('./fuzz_tokens');
-//import ZeTokenizer, {
+
 let { default: ZeTokenizer,
   $ASI,
   $COMMENT,
@@ -38,17 +38,26 @@ let { default: ZeTokenizer,
   $TICK_TAIL,
   $WHITE,
 
-  debug_toktype,
-} = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from '../src/zetokenizer';
+  LF_FOR_REGEX,
+  LF_IN_TEMPLATE,
+  LF_NO_FLAGS,
+  LF_STRICT_MODE,
+  RETURN_ANY_TOKENS,
 
+  debug_toktype,
+  LF_DEBUG,
+} = require('../src/zetokenizer');
+
+const OUTPUT_THROTTLE = 5e4;
+console.log('Running, printing result every', OUTPUT_THROTTLE, 'runs');
 
 function repeat(n, arr) {
   for (let i = 0; i < n; ++i) {
     //if (i % 1000 === 0) mr = Math.random() * 0.3; // make sure the seed remains spicy
     let obj = r(arr);
     let code = generate(obj);
-    let out = parseSafe(code, obj);
+    let lexerFlags = (obj.slashIsRegex ? LF_FOR_REGEX : LF_NO_FLAGS) | (obj.strictMode ? LF_STRICT_MODE : LF_NO_FLAGS) | (obj.fromTemplate ? LF_IN_TEMPLATE : LF_NO_FLAGS);
+    let out = parseSafe(code, lexerFlags, obj);
     let token = obj.token;
     if (true && obj.evallable) {
       let compileError = uncompilableToken(code);
@@ -65,9 +74,9 @@ function repeat(n, arr) {
       console.log(i + '   !!!CRASH!!!   ' + pp);
       console.log(out);
       throw 'stop because a test crashed';
-    } else {
+    } else if (i) {
       let ok = out.type === token;
-      let printing = !ok || (i % 5e4 === 0);
+      let printing = !ok || (i % OUTPUT_THROTTLE === 0);
       if (printing) {
         let pp = toPrint(code);
         let white1 = ' '.repeat(Math.max(5, 20-debug_toktype(out.type).length));
@@ -75,18 +84,20 @@ function repeat(n, arr) {
         if (ok) {
           console.log(i + ' PASS  ' + debug_toktype(out.type) + white1 + pp);
         } else {
-          console.log(i +' FAIL!! ' + debug_toktype(out.type) + white1 + pp + white2 + ' --> expected ' + debug_toktype(token));
+          console.log('repeat:', [code], 'code:', code, ', lf flags:', LF_DEBUG(lexerFlags), ', token:', debug_toktype(typeof obj.token === 'function' ? obj.token(code) : obj.token), obj);
+          console.log(i +' FAIL!! ' + debug_toktype(out.type) + white1 + pp + white2 + ' --> expected ' + debug_toktype(token) + ', got ' + debug_toktype(out.type));
         }
       }
       if (!ok) throw 'stop because a test failed';
     }
   }
 }
-function parseSafe(code, obj) {
+function parseSafe(code, lexerFlags, obj) {
   try {
-    let tok = ZeTokenizer(code, false);
-    return tok(!!obj.slashIsRegex, !!obj.strictMode, !!obj.fromTemplate, true);
+    let tok = ZeTokenizer(code);
+    return tok(lexerFlags, RETURN_ANY_TOKENS);
   } catch (e) {
+    console.log('parseSafe:', [code], code, LF_DEBUG(lexerFlags), debug_toktype(typeof obj.token === 'function' ? obj.token(code) : obj.token));
     return new Error(e).stack;
   }
 }

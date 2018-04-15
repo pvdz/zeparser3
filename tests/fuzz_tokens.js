@@ -214,6 +214,7 @@ let pieces = {
       tail: _ => '/' + r(['', 'g', 'i', 'm', 'y']),
       token: $REGEX,
       evallable: true,
+      slashIsRegex: true,
     },
     strict: {
       head: '/',
@@ -230,6 +231,7 @@ let pieces = {
       tail: _ => '/u' + r(['', 'g', 'i', 'm', 'y']),
       token: $REGEXU,
       evallable: true,
+      slashIsRegex: true,
     },
   },
   error: {
@@ -318,6 +320,7 @@ let pieces = {
         tail: ['', '\n', '', '\n', _ => '/gg' + r(['', 'g', 'i', 'm', 'y']), except(ascii, '/'), '\\'],
         token: $ERROR,
         evallable: true,
+        slashIsRegex: true,
       },
       strict: {
         head: '/',
@@ -333,6 +336,7 @@ let pieces = {
         tail: ['', '\n', '', '\n', _ => '/uu' + r(['', 'g', 'i', 'm', 'y']), except(ascii, '/'), '\\'],
         token: $ERROR,
         evallable: true,
+        slashIsRegex: true,
       },
     },
   },
