@@ -532,7 +532,6 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
     ASSERT(!finished, 'should not next() after eof token');
     // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
-    consumedNewline = false;
 
     let token;
     do {
@@ -552,6 +551,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
     } while (wasWhite && _returnAny === RETURN_SOLID_TOKENS);
     ++solidTokenCount;
     if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
+    if (!wasWhite) consumedNewline = false;
 
     return token;
   }
@@ -640,9 +640,14 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
         // TODO: only support this under the webcompat flag
         // TODO: and properly parse this, not like the duplicate hack it is now
         if (!eofd(1) && peek() === $$DASH_2D && peekd(1) === $$GT_3E) {
-          parseSingleComment();
-          wasWhite = true;
-          return $COMMENT_HTML;
+          if (consumedNewline) {
+            parseSingleComment();
+            wasWhite = true;
+            return $COMMENT_HTML;
+          } else {
+            // Note that the `-->` is not picked up as a comment since that requires a newline to precede it.
+            // TODO: do we report this anywhere? This isn't an error but most likely end up being one
+          }
         }
         return parseSameOrCompound(c); // - -- -=
       case $$SQUOTE_27:
@@ -2634,6 +2639,7 @@ function debug_toktype(type) {
 require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   $ASI,
   $COMMENT,
+  $COMMENT_HTML,
   $COMMENT_SINGLE,
   $COMMENT_MULTI,
   $CRLF,
