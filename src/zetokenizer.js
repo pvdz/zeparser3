@@ -1314,7 +1314,6 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
     } else if (c === $$STAR_2A) {
       // must be multi comment
       ASSERT_skip($$STAR_2A); // /*
-      wasWhite = true;
       return parseMultiComment();
     } else {
       return parseSingleFwdSlash(lexerFlags, c);
@@ -1350,7 +1349,10 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       while (c === $$STAR_2A) {
         if (eof()) return $ERROR;
         c = peekSkip();
-        if (c === $$FWDSLASH_2F) return $COMMENT_MULTI;
+        if (c === $$FWDSLASH_2F) {
+          wasWhite = true;
+          return $COMMENT_MULTI;
+        }
       }
       if (c === $$CR_0D || isLfPsLs(c)) {
         // if we implement line numbers, make sure to count crlf as one here

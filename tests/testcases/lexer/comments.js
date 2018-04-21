@@ -5,6 +5,7 @@ let {
 let {
   $COMMENT_SINGLE,
   $COMMENT_MULTI,
+  $ERROR,
   $NL,
   $SPACE,
   $PUNCTUATOR,
@@ -28,6 +29,8 @@ let comments = [
   ['/* /* */', $COMMENT_MULTI, 'ignores anything until closer'],
   ['/* /* */ */', [$COMMENT_MULTI, $SPACE, $PUNCTUATOR, $PUNCTUATOR], PARSE_MODE_DIV, 'cant be nested (and the tokenizer doenst throw semantic errors)'],
   ['/* \\u{nope} \\unope \\xno */', $COMMENT_MULTI, 'dont check correctness of escapes'],
+
+  ['/*CHECK#1/', $ERROR, 'regression; unclosed multi-line', ['suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
 ];
 
 module.exports = comments;
