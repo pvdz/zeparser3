@@ -14,6 +14,9 @@ let { default: ZeParser,
   COLLECT_TOKENS_NONE,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
+
+  GOAL_MODULE,
+  GOAL_SCRIPT,
 } = require('../src/zeparser'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 
 let ZeParserBuild = require('../build/build.js').default;
@@ -23,6 +26,8 @@ let {
 
   debug_toktype,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+
+const TEST262 = false;
 
 let dir = __dirname + '/testcases/parser';
 let files = [];
@@ -38,7 +43,7 @@ function read(path, file) {
 }
 read(dir, '');
 
-files = files.filter(f =>!   (f.indexOf('test262') >= 0));
+files = files.filter(f => (f.indexOf('test262') >= 0) === TEST262);
 
 files.sort((a,b) => {
   // push test262 to the back so our own unit tests can find problems first
@@ -86,26 +91,44 @@ function one(parser, testObj, desc, from) {
 function _one(Parser, testSuffix, code, testObj, desc, from) {
   // shorthand for just goal_script/sloppy settings (prevents unncessary object wrapping *shrug*)
   if (testObj.WEB && testObj.WEB !== true) {
+    if (testObj.SLOPPY_SCRIPT !== undefined) throw new Error('SLOPPY_SCRIPT should not be set if WEB is set');
     // TODO: run sloppy mode tests with and without the web compat flag instead of targeting them explicitly
     testObj.SLOPPY_SCRIPT = testObj.WEB;
     testObj.WEB = true;
   }
   let sloppyScriptOptions = testObj.SLOPPY_SCRIPT;
   if (sloppyScriptOptions) {
+    if (testObj.SLOPPY !== undefined) throw new Error('SLOPPY and SLOPPY_SCRIPT should not both be set');
+    if (testObj.SCRIPT !== undefined) throw new Error('SCRIPT and SLOPPY_SCRIPT should not both be set');
     delete testObj.SLOPPY_SCRIPT;
     testObj.SLOPPY = {SCRIPT: sloppyScriptOptions};
   }
 
   // test both module and script parsing modes. if a test should have different outcomes between them then it should use
-  // the MODULE_MODE and SCRIPT_MODE properties to override the expectations.
   [MODE_SCRIPT, MODE_MODULE].forEach(goal => {
     // similarly, run all tests in both sloppy and strict mode. use STRICT and SLOPPY to add exceptions.
     let ms = '[' + (goal === MODE_SCRIPT ? 'Script' : 'Module') + ']';
-    if (goal !== MODE_MODULE && (!testObj.STRICT || !testObj.STRICT.SKIP)) { // module mode is ALWAYS strict mode anyways
-      __one(Parser, testSuffix + ms, code, goal, override(testObj.STRICT, Object.assign({startInStrictMode:true}, testObj)), desc, from);
+    // goal + strict test
+    if (goal === MODE_MODULE) {
+      // the MODULE_MODE and SCRIPT_MODE properties to override the expectations.
+      let totalTestOptions = override(testObj.STRICT, Object.assign({startInStrictMode:true}, testObj));
+      // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
+      // TODO: replace startInStrictMode with expectations of sloppy mode
+      if (totalTestOptions.startInStrictMode) {
+        if (!testObj.STRICT || !testObj.STRICT.SKIP) {
+          __one(Parser, testSuffix + ms, code, goal, totalTestOptions, desc, from);
+        }
+      }
     }
-    if (!testObj.SLOPPY || !testObj.SLOPPY.SKIP) {
-      __one(Parser, testSuffix + ms, code, goal, override(testObj.SLOPPY, Object.assign({startInStrictMode:false}, testObj)), desc, from);
+    // goal + sloppy test
+    // module mode is ALWAYS strict mode so skip sloppy
+    if (goal === MODE_SCRIPT && (!testObj.SLOPPY || !testObj.SLOPPY.SKIP)) {
+      let totalTestOptions = override(testObj.SLOPPY, Object.assign({startInStrictMode:false}, testObj));
+      // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
+      // TODO: replace startInStrictMode with expectations of sloppy mode
+      if (!totalTestOptions.startInStrictMode) {
+       __one(Parser, testSuffix + ms, code, goal, totalTestOptions, desc, from);
+      }
     }
   });
 }
@@ -181,16 +204,21 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   let prefix = parserDesc + ': ' + testi + testSuffix;
 
+  if (mode === MODE_MODULE && !startInStrictMode) {
+    throw new Error('Should not test module goal in sloppy mode because that is impossible anyways; ' + SKIP);
+  }
+
   if (SKIP) {
     console.log(`${prefix} SKIP: \`${toPrint(code)}\``);
     ++skips;
     return;
   }
 
+  let goalMode = mode === MODE_MODULE ? GOAL_MODULE : mode === MODE_SCRIPT ? GOAL_SCRIPT : MODE_VALUE_ERROR;
   let wasError = '';
   let stack;
   try {
-    var obj = Parser(code, mode, COLLECT_TOKENS_SOLID, {
+    var obj = Parser(code, goalMode, COLLECT_TOKENS_SOLID, {
       strictMode: startInStrictMode,
       webCompat: !!WEB,
       trailingArgComma: testDetails.options && testDetails.options.trailingArgComma,

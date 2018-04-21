@@ -291,6 +291,9 @@ function LF_DEBUG(flags) {
 const BAD_ESCAPE = true;
 const GOOD_ESCAPE = false;
 
+const GOAL_MODULE = true;
+const GOAL_SCRIPT = false;
+
 const ALWAYS_GOOD = 0;
 const GOOD_WITH_U_FLAG = 1;
 const GOOD_SANS_U_FLAG = 2;
@@ -2663,6 +2666,9 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
 
   FAIL_GRACEFULLY,
   FAIL_HARD,
+
+  GOAL_MODULE,
+  GOAL_SCRIPT,
 
   LF_CAN_NEW_TARGET,
   LF_CAN_POSTFIX_ASI,

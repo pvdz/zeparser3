@@ -4,7 +4,7 @@ let {
   $PUNCTUATOR,
 } = require('../../../src/zetokenizer');
 
-
+// TODO: replace the startInStrictMode stuff with sloppy mode results instead
 module.exports = (describe, test) => describe('functions', _ => {
 
   // arrow specific tests go into expressions/arrow
@@ -32,9 +32,22 @@ module.exports = (describe, test) => describe('functions', _ => {
 
       test('inside while', {
         code: `while (false) function g() {}`,
-        startInStrictMode: true,
         throws: 'Function statement',
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        SLOPPY_SCRIPT: {
+          ast: { type: 'Program',
+            body:
+              [ { type: 'WhileStatement',
+                test: { type: 'Literal', value: false, raw: 'false' },
+                body:
+                  { type: 'FunctionDeclaration',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: { type: 'Identifier', name: 'g' },
+                    params: [],
+                    body: { type: 'BlockStatement', body: [] } } } ] },
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('inside if', {

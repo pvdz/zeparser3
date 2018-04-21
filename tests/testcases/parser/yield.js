@@ -722,7 +722,7 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('division', {
         code: 'function* f(){ yield\n/foo }',
-        throws: 'Regex syntax error',
+        throws: 'Tried to apply ASI but next token starts with forward slash',
         desc: 'note: spec requires a regex after the yield identifier so a division can never happen here',
         tokens: [],
       });
@@ -746,7 +746,10 @@ module.exports = (describe, test) => describe('yield', _ => {
 
       test('division', {
         code: 'yield\n/foo',
-        throws: 'Regex syntax error',
+        throws: 'Cannot use `yield` outside of generator',
+        SLOPPY_SCRIPT: {
+          throws: 'Tried to apply ASI but next token starts with forward slash',
+        },
         desc: 'even in sloppy mode, this should not lead to a division (backwards compat breaking I guess)',
         tokens: [$IDENT, $ASI],
       });

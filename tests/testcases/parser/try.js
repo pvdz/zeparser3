@@ -154,7 +154,7 @@ module.exports = (describe, test) => describe('try statement', _ => {
 
       test('division', {
         code: 'try {} catch (e) {}\n/foo',
-        throws: 'Regex syntax error',
+        throws: 'Unexpected token: ERROR',
         desc: 'try (/catch/finally) is a statement (not a value) so division is illegal',
         tokens: [],
       });
@@ -198,7 +198,7 @@ module.exports = (describe, test) => describe('try statement', _ => {
 
       test('sans flag', {
         code: 'try {} finally {}\n/foo',
-        throws: 'Regex syntax error',
+        throws: 'Unexpected token: ERROR',
         desc: 'no ASI is attempted because the finally does not expect a semi so this is fine',
         tokens: [],
       });
