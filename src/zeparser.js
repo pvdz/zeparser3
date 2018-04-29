@@ -2107,8 +2107,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
-        assignable = parseNewKeyword(lexerFlags | LF_CAN_POSTFIX_ASI, astProp);
-        // TODO: check assignability; can assign to a property of a new expression but I don't think that property is already parsed here
+        parseNewKeyword(lexerFlags | LF_CAN_POSTFIX_ASI, astProp);
+        assignable = NOT_ASSIGNABLE;
         break;
 
       case 'null':
