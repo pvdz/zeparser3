@@ -214,6 +214,10 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     return;
   }
 
+  // pass references so we can report partial state in case of a crash
+  var ast = {};
+  var tokens = [];
+
   let goalMode = mode === MODE_MODULE ? GOAL_MODULE : mode === MODE_SCRIPT ? GOAL_SCRIPT : MODE_VALUE_ERROR;
   let wasError = '';
   let stack;
@@ -222,6 +226,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       strictMode: startInStrictMode,
       webCompat: !!WEB,
       trailingArgComma: testDetails.options && testDetails.options.trailingArgComma,
+      astRoot: ast,
+      tokenStorage: tokens,
     });
   } catch(f) {
     wasError = f.message;
@@ -229,8 +235,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     stack = f.stack;
   }
 
-  if (!expectedTokens || (!expectedThrows && !expectedAst)) {
-    LOG_THROW(prefix, `Bad tst case: Missing ${!expectedTokens ? 'expected token list' : 'ast|throws'} for: \`${toPrint(code)}\``, code, stack, desc);
+  if ((!expectedTokens && !expectedThrows) || (!expectedThrows && !expectedAst)) {
+    LOG_THROW(prefix, `Bad tst case: Missing ${!expectedTokens ? 'expected token list' : 'ast|throws'} for: \`${toPrint(code)}\``, code, stack, desc, true);
     console.log('testDetails:', testDetails);
     console.log('finalTestOptions:', finalTestOptions);
     ++fail;
@@ -256,14 +262,14 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     }
   } else if (expectedThrows) {
     ++fail;
-    LOG_THROW(prefix, '_failed_ to throw ANY error', code, '', desc);
+    LOG_THROW(prefix, '_failed_ to throw ANY error', code, '', desc, true);
     if (expectedThrows !== true) {
       console.log('Expected an error message containing: "' + expectedThrows + '"');
     }
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
     console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
-    LOG_THROW(prefix, 'AST mismatch', code, '', desc);
+    LOG_THROW(prefix, 'AST mismatch', code, '', desc, true);
 
     console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
 
@@ -282,10 +288,11 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       n += step;
       ++steps;
     }
+    console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
 
     ++fail;
   } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-    LOG_THROW(prefix, 'TOKEN mismatch', code, '', desc);
+    LOG_THROW(prefix, 'TOKEN mismatch', code, '', desc, true);
 
     console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
     console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
@@ -299,13 +306,19 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   if (STOP_AFTER_FAIL && fail) throw 'stopped';
 
-  function LOG_THROW(prefix, errmsg, code, stack = new Error(errmsg).stack, desc) {
+  function LOG_THROW(prefix, errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false) {
     console.log('\n');
     console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
     if (stack) console.log('Stack:', stack);
     //console.log('Final test options:\n', finalTestOptions);
     console.log('Description:', desc);
     console.log('From:', from);
+
+    if (!noPartial) {
+      console.log('Ast so far:', require('util').inspect(ast, false, null));
+      console.log('Tokens so far:[', tokens.map(o => debug_toktype(o.type)).join(', '), ' ...]');
+    }
+
     if (_debug) console.log('Debug:', _debug);
   }
 }

@@ -145,6 +145,8 @@ let { default: ZeTokenizer,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
 
+  FAIL_HARD,
+
   GOAL_MODULE,
   GOAL_SCRIPT,
 
@@ -232,9 +234,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     webCompat: options_webCompat = WEB_COMPAT_ON,
     strictMode: options_strictMode = false,
     trailingArgComma: options_trailingArgComma = true, // :love: , es8+
+    astRoot: options_astRoot = null,
+    tokenStorage: options_tokenStorage = [],
   } = options;
 
-  let tok = ZeTokenizer(code, collectTokens, options_webCompat);
+  let tok = ZeTokenizer(code, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
 
   let prevtok = null;
   let curtok = null;
@@ -259,6 +263,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let _tree = {
     type: 'Program',
   };
+  if (options_astRoot) options_astRoot.root = _tree;
   let _path = [_tree];
   let _pnames = ['ROOT'];
   function AST_open(prop, type, fromWrap = false) {

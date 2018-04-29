@@ -330,7 +330,7 @@ const FAIL_HARD = false;
 
 let NOT_A_REGEX_ERROR = '';
 
-function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD) {
+function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD, tokenStorage = []) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
 
   let pointer = 0;
@@ -348,7 +348,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
   let anyTokenCount = 0;
   let solidTokenCount = 0;
   if (collectTokens !== COLLECT_TOKENS_NONE) {
-    tokens = [];
+    tokens = tokenStorage;
     nextToken.tokens = tokens; // probably will want to find a better way..
   }
 
