@@ -10,6 +10,12 @@ module.exports = (describe, test) => describe('restricted productions', _ => {
 
   describe('update expression', _ => {
 
+    test('base case', {
+      code: 'a\n++',
+      throws: 'Expected to parse a value',
+      tokens: [],
+    });
+
     test('comma expression',{
       code: 'a,b\n++c',
       ast: { type: 'Program',
@@ -169,9 +175,28 @@ module.exports = (describe, test) => describe('restricted productions', _ => {
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
 
+    test('after an op', {
+      code: 'x *\n++y',
+      desc: 'this may throw off the restricted production check for ++ since the newline is fine here',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'BinaryExpression',
+                left: { type: 'Identifier', name: 'x' },
+                operator: '*',
+                right:
+                  { type: 'UpdateExpression',
+                    operator: '++',
+                    prefix: true,
+                    argument: { type: 'Identifier', name: 'y' } } } } ] },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
     test('after await 1',{
       code: 'async function f(){ await\n++c; }',
-      // note: await is not restricted so the newline is fine here
+      desc: 'this may throw off the restricted production check for ++ since the newline is fine here',
+      // note: await is not restricted so the newline is fine here. the await arg is mandatory.
       ast: { type: 'Program',
         body:
           [ { type: 'FunctionDeclaration',

@@ -7,7 +7,7 @@ let {
 
 module.exports = (describe, test) => describe('unary ops', _ => {
 
-  describe('positive prefix', _ => {
+  describe('positive prefix +x', _ => {
 
     test('statement',{
       code: '+a',
@@ -23,7 +23,7 @@ module.exports = (describe, test) => describe('unary ops', _ => {
     });
   });
 
-  describe('negative prefix', _ => {
+  describe('negative prefix -x', _ => {
 
     test('statement',{
       code: '-a',
@@ -149,6 +149,32 @@ module.exports = (describe, test) => describe('unary ops', _ => {
               alternate: null } ] },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
+
+      test('one group', {
+        code: '++(x);',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('multi groups', {
+        code: '++(((x)));',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
     });
 
     describe('with newline', _ => {
@@ -242,6 +268,32 @@ module.exports = (describe, test) => describe('unary ops', _ => {
                       argument: { type: 'Identifier', name: 'a' } } },
               alternate: null } ] },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('one group', {
+        code: '++\n(x);',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('multi groups', {
+        code: '++\n(((x)));',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
   });
@@ -340,6 +392,32 @@ module.exports = (describe, test) => describe('unary ops', _ => {
               alternate: null } ] },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
+
+      test('one group', {
+        code: '--(x);',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '--',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('multi groups', {
+        code: '--(((x)));',
+        ast:  { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '--',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
     });
 
     describe('with newline', _ => {
@@ -433,6 +511,32 @@ module.exports = (describe, test) => describe('unary ops', _ => {
                       argument: { type: 'Identifier', name: 'a' } } },
               alternate: null } ] },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('one group', {
+        code: '--\n(x);',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '--',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('multi groups', {
+        code: '--\n(((x)));',
+        ast:  { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '--',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
   });
@@ -531,6 +635,32 @@ module.exports = (describe, test) => describe('unary ops', _ => {
               alternate: null } ] },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      test('one group', {
+        code: '(x)++;',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  argument: { type: 'Identifier', name: 'x' },
+                  operator: '++',
+                  prefix: false } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('multi groups', {
+        code: '(((x)))++;',
+        ast:  { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  argument: { type: 'Identifier', name: 'x' },
+                  operator: '++',
+                  prefix: false } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
     });
 
     describe('with newline', _ => {
@@ -565,6 +695,24 @@ module.exports = (describe, test) => describe('unary ops', _ => {
         throws: 'Expected to parse a value',
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
+
+      test('one group', {
+        code: '(x)\n++;',
+        throws: 'Expected to parse a value',
+        tokens: [],
+      });
+
+      test('multi groups', {
+        code: '(((x)))\n++;',
+        throws: 'Expected to parse a value',
+        tokens: [],
+      });
+    });
+
+    test('has no tail', {
+      desc: 'there is no production that allows parsing a tail',
+      code: 'x.foo++.bar',
+      throws: 'Unable to ASI',
     });
   });
 
@@ -662,6 +810,32 @@ module.exports = (describe, test) => describe('unary ops', _ => {
               alternate: null } ] },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      test('one group', {
+        code: '(x)--;',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  argument: { type: 'Identifier', name: 'x' },
+                  operator: '--',
+                  prefix: false } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('multi groups', {
+        code: '(((x)))--;',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  argument: { type: 'Identifier', name: 'x' },
+                  operator: '--',
+                  prefix: false } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
     });
 
     describe('with newline', _ => {
@@ -696,6 +870,24 @@ module.exports = (describe, test) => describe('unary ops', _ => {
         throws: 'Expected to parse a value',
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
+
+      test('one group', {
+        code: '(x)\n--;',
+        throws: 'Expected to parse a value',
+        tokens: [],
+      });
+
+      test('multi groups', {
+        code: '(((x)))\n--;',
+        throws: 'Expected to parse a value',
+        tokens: [],
+      });
+    });
+
+    test('has no tail', {
+      desc: 'there is no production that allows parsing a tail',
+      code: 'x.foo--.bar',
+      throws: 'Unable to ASI',
     });
   });
 

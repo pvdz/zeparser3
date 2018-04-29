@@ -15,89 +15,140 @@ module.exports = (describe, test) => describe('new', _ => {
 
   describe('new operator', _ => {
 
-    describe('sans parens', _ => {
+    describe('callee cases', _ => {
 
-      test('just one ident', {
-        code: 'new Foo',
-        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
-          type: 'NewExpression',
-          arguments: [],
-          callee: {type: 'Identifier', name: 'Foo'},
-        }}]},
-        tokens: [$IDENT, $IDENT, $ASI],
+      describe('sans parens', _ => {
+
+        test('just one ident', {
+          code: 'new Foo',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
+                type: 'NewExpression',
+                arguments: [],
+                callee: {type: 'Identifier', name: 'Foo'},
+              }}]},
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('ident member', {
+          code: 'new Foo.Bar',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
+                type: 'NewExpression',
+                arguments: [],
+                callee: {
+                  type: 'MemberExpression',
+                  object: {type: 'Identifier', name: 'Foo'},
+                  property: {type: 'Identifier', name: 'Bar'},
+                  computed: false,
+                },
+              }}]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('multi ident member', {
+          code: 'new a.b.c.d',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExpressionStatement',
+                expression:
+                  { type: 'NewExpression',
+                    arguments: [],
+                    callee:
+                      { type: 'MemberExpression',
+                        object:
+                          { type: 'MemberExpression',
+                            object:
+                              { type: 'MemberExpression',
+                                object: { type: 'Identifier', name: 'a' },
+                                property: { type: 'Identifier', name: 'b' },
+                                computed: false },
+                            property: { type: 'Identifier', name: 'c' },
+                            computed: false },
+                        property: { type: 'Identifier', name: 'd' },
+                        computed: false } } } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic member', {
+          code: 'new Foo["bar"]',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
+                type: 'NewExpression',
+                arguments: [],
+                callee: {
+                  type: 'MemberExpression',
+                  object: {type: 'Identifier', name: 'Foo'},
+                  property: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                  computed: true,
+                },
+              }}]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $ASI],
+        });
       });
 
-      test('ident member', {
-        code: 'new Foo.Bar',
-        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
-          type: 'NewExpression',
-          arguments: [],
-          callee: {
-            type: 'MemberExpression',
-            object: {type: 'Identifier', name: 'Foo'},
-            property: {type: 'Identifier', name: 'Bar'},
-            computed: false,
-          },
-        }}]},
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-      });
+      describe('with parens', _ => {
 
-      test('dynamic member', {
-        code: 'new Foo["bar"]',
-        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
-          type: 'NewExpression',
-          arguments: [],
-          callee: {
-            type: 'MemberExpression',
-            object: {type: 'Identifier', name: 'Foo'},
-            property: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-            computed: true,
-          },
-        }}]},
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $ASI],
-      });
-    });
+        test('just one ident', {
+          code: 'new Foo()',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
+                type: 'NewExpression',
+                arguments: [],
+                callee: {type: 'Identifier', name: 'Foo'},
+              }}]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
 
-    describe('sans arguments', _ => {
+        test('ident member', {
+          code: 'new Foo.Bar()',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
+                type: 'NewExpression',
+                arguments: [],
+                callee: {
+                  type: 'MemberExpression',
+                  object: {type: 'Identifier', name: 'Foo'},
+                  property: {type: 'Identifier', name: 'Bar'},
+                  computed: false,
+                },
+              }}]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
 
-      test('just one ident', {
-        code: 'new Foo()',
-        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
-          type: 'NewExpression',
-          arguments: [],
-          callee: {type: 'Identifier', name: 'Foo'},
-        }}]},
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-      });
+        test('multi ident member', {
+          code: 'new a.b.c.d()',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'ExpressionStatement',
+                expression:
+                  { type: 'NewExpression',
+                    arguments: [],
+                    callee:
+                      { type: 'MemberExpression',
+                        object:
+                          { type: 'MemberExpression',
+                            object:
+                              { type: 'MemberExpression',
+                                object: { type: 'Identifier', name: 'a' },
+                                property: { type: 'Identifier', name: 'b' },
+                                computed: false },
+                            property: { type: 'Identifier', name: 'c' },
+                            computed: false },
+                        property: { type: 'Identifier', name: 'd' },
+                        computed: false } } } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
 
-      test('ident member', {
-        code: 'new Foo.Bar()',
-        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
-          type: 'NewExpression',
-          arguments: [],
-          callee: {
-            type: 'MemberExpression',
-            object: {type: 'Identifier', name: 'Foo'},
-            property: {type: 'Identifier', name: 'Bar'},
-            computed: false,
-          },
-        }}]},
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-      });
-
-      test('dynamic member', {
-        code: 'new Foo["bar"]()',
-        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
-          type: 'NewExpression',
-          arguments: [],
-          callee: {
-            type: 'MemberExpression',
-            object: {type: 'Identifier', name: 'Foo'},
-            property: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-            computed: true,
-          },
-        }}]},
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        test('dynamic member', {
+          code: 'new Foo["bar"]()',
+          ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
+                type: 'NewExpression',
+                arguments: [],
+                callee: {
+                  type: 'MemberExpression',
+                  object: {type: 'Identifier', name: 'Foo'},
+                  property: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                  computed: true,
+                },
+              }}]},
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
       });
     });
 
@@ -187,30 +238,437 @@ module.exports = (describe, test) => describe('new', _ => {
       });
     });
 
+    describe('before/after', _ => {
+
+      test('can have dot property', {
+        code: 'new x().y',
+        ast: {
+          type: "Program",
+          body: [
+            {
+              type: "ExpressionStatement",
+              expression: {
+                type: "MemberExpression",
+                object: {
+                  type: "NewExpression",
+                  arguments: [],
+                  callee: {
+                    type: "Identifier",
+                    name: "x"
+                  },
+                },
+                property: {
+                  type: "Identifier",
+                  name: "y"
+                },
+                computed: false
+              }
+            }
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('can have dynamic property', {
+        code: 'new x()[y]',
+        ast: {
+          type: "Program",
+          body: [
+            {
+              type: "ExpressionStatement",
+              expression: {
+                type: "MemberExpression",
+                object: {
+                  type: "NewExpression",
+                  arguments: [],
+                  callee: {
+                    type: "Identifier",
+                    name: "x"
+                  },
+                },
+                property: {
+                  type: "Identifier",
+                  name: "y"
+                },
+                computed: true
+              }
+            }
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can be called', {
+        code: 'new x()();',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'Identifier',
+                    name: 'x'
+                  },
+                },
+                arguments: [],
+              }
+            }
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('can be tagged', {
+        code: 'new x()`y`',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'TaggedTemplateExpression',
+                  tag:
+                    { type: 'NewExpression',
+                      arguments: [],
+                      callee: { type: 'Identifier', name: 'x' } },
+                  quasi:
+                    { type: 'TemplateLiteral',
+                      expressions: [],
+                      quasis:
+                        [ { type: 'TemplateElement',
+                          value: { raw: 'y', cooked: '<TODO>' },
+                          tail: true } ] } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $TICK_PURE, $ASI],
+      });
+
+      test('can have property and assignment', {
+        code: 'new x().y = z',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'AssignmentExpression',
+                  left:
+                    { type: 'MemberExpression',
+                      object:
+                        { type: 'NewExpression',
+                          arguments: [],
+                          callee: { type: 'Identifier', name: 'x' } },
+                      property: { type: 'Identifier', name: 'y' },
+                      computed: false },
+                  operator: '=',
+                  right: { type: 'Identifier', name: 'z' } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('can have dot property and operator', {
+        code: 'new x().y + z',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'BinaryExpression',
+                  left:
+                    { type: 'MemberExpression',
+                      object:
+                        { type: 'NewExpression',
+                          arguments: [],
+                          callee: { type: 'Identifier', name: 'x' } },
+                      property: { type: 'Identifier', name: 'y' },
+                      computed: false },
+                  operator: '+',
+                  right: { type: 'Identifier', name: 'z' } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('can have dynamic property and assignment', {
+        code: 'new x()[y] = z',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'AssignmentExpression',
+                  left:
+                    { type: 'MemberExpression',
+                      object:
+                        { type: 'NewExpression',
+                          arguments: [],
+                          callee: { type: 'Identifier', name: 'x' } },
+                      property: { type: 'Identifier', name: 'y' },
+                      computed: true },
+                  operator: '=',
+                  right: { type: 'Identifier', name: 'z' } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('can have dynamic property and operator', {
+        code: 'new x()[y] + z',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'BinaryExpression',
+                  left:
+                    { type: 'MemberExpression',
+                      object:
+                        { type: 'NewExpression',
+                          arguments: [],
+                          callee: { type: 'Identifier', name: 'x' } },
+                      property: { type: 'Identifier', name: 'y' },
+                      computed: true },
+                  operator: '+',
+                  right: { type: 'Identifier', name: 'z' } } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('are not assignable', {
+        code: 'new x() = y',
+        throws: 'Unable to ASI',
+        tokens: [],
+      });
+
+      test('can not have prefix inc on its own', {
+        code: '++new x()',
+        throws: 'Cannot inc/dec a non-assignable value',
+        tokens: [],
+      });
+
+      test('can have prefix inc with property', {
+        code: '++new x().y',
+        throws: 'Cannot inc/dec a non-assignable value',
+        tokens: [],
+      });
+
+      test('can not have postfix inc on its own', {
+        code: 'new x()++',
+        throws: 'Cannot inc/dec a non-assignable value',
+        tokens: [],
+      });
+
+      test('can have postfix inc with property', {
+        code: 'new x().y++',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  argument:
+                    { type: 'MemberExpression',
+                      object:
+                        { type: 'NewExpression',
+                          arguments: [],
+                          callee: { type: 'Identifier', name: 'x' } },
+                      property: { type: 'Identifier', name: 'y' },
+                      computed: false },
+                  operator: '++',
+                  prefix: false } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can delete on its own', {
+        code: 'delete new x()',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UnaryExpression',
+                  operator: 'delete',
+                  prefix: true,
+                  argument:
+                    { type: 'NewExpression',
+                      arguments: [],
+                      callee: { type: 'Identifier', name: 'x' } } } } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('can delete a property', {
+        code: 'delete new x().y',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UnaryExpression',
+                  operator: 'delete',
+                  prefix: true,
+                  argument:
+                    { type: 'MemberExpression',
+                      object:
+                        { type: 'NewExpression',
+                          arguments: [],
+                          callee: { type: 'Identifier', name: 'x' } },
+                      property: { type: 'Identifier', name: 'y' },
+                      computed: false } } } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('can typeof on its own', {
+        code: 'typeof new x()',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UnaryExpression',
+                  operator: 'typeof',
+                  prefix: true,
+                  argument:
+                    { type: 'NewExpression',
+                      arguments: [],
+                      callee: { type: 'Identifier', name: 'x' } } } } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('can typeof a property', {
+        code: 'typeof new x().y',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UnaryExpression',
+                  operator: 'typeof',
+                  prefix: true,
+                  argument:
+                    { type: 'MemberExpression',
+                      object:
+                        { type: 'NewExpression',
+                          arguments: [],
+                          callee: { type: 'Identifier', name: 'x' } },
+                      property: { type: 'Identifier', name: 'y' },
+                      computed: false } } } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('can typeof a property', {
+        code: 'new new x',
+        ast:  { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'NewExpression',
+                  arguments: [],
+                  callee:
+                    { type: 'NewExpression',
+                      arguments: [],
+                      callee: { type: 'Identifier', name: 'x' } } } } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+      });
+
+      test('can not new a delete without prop', {
+        code: 'new delete x',
+        throws: 'Cannot apply `new` to `delete`',
+        tokens: [],
+      });
+
+      test('can not new a delete with prop', {
+        code: 'new delete x.y',
+        throws: 'Cannot apply `new` to `delete`',
+        tokens: [],
+      });
+
+      test('can not new a delete with call prop', {
+        code: 'new delete x().y',
+        throws: 'Cannot apply `new` to `delete`',
+        tokens: [],
+      });
+
+      test('can not new a typeof without prop', {
+        code: 'new typeof x',
+        throws: 'Cannot apply `new` to `typeof`',
+        tokens: [],
+      });
+
+      test('can not new a typeof with prop', {
+        code: 'new typeof x.y',
+        throws: 'Cannot apply `new` to `typeof`',
+        tokens: [],
+      });
+
+      test('can not new a typeof with call prop', {
+        code: 'new typeof x().y',
+        throws: 'Cannot apply `new` to `typeof`',
+        tokens: [],
+      });
+
+      test('can not new a ++ without prop', {
+        code: 'new ++x',
+        throws: 'Cannot `new` on an inc/dec expr',
+        tokens: [],
+      });
+
+      test('can not new a ++ with prop', {
+        code: 'new ++x.y',
+        throws: 'Cannot `new` on an inc/dec expr',
+        tokens: [],
+      });
+
+      test('can not new a ++ with call prop', {
+        code: 'new ++x().y',
+        throws: 'Cannot `new` on an inc/dec expr',
+        tokens: [],
+      });
+
+      test('can not ++ a new without prop', {
+        code: 'new x++',
+        throws: 'Cannot inc/dec a non-assignable value',
+        tokens: [],
+      });
+
+      test('can not new a ++ with prop', {
+        code: 'new x.y++',
+        throws: 'Cannot inc/dec a non-assignable value',
+        tokens: [],
+      });
+
+      test('can ++ a new with call prop', {
+        code: 'new x().y++',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  argument:
+                    { type: 'MemberExpression',
+                      object:
+                        { type: 'NewExpression',
+                          arguments: [],
+                          callee: { type: 'Identifier', name: 'x' } },
+                      property: { type: 'Identifier', name: 'y' },
+                      computed: false },
+                  operator: '++',
+                  prefix: false } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+    });
+
     describe('tagged template', _ => {
 
       test('new on tagged template', {
         code: 'new Foo`bar`',
-        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {
-          type: 'NewExpression',
-          arguments: [],
-          callee: {
-            type: 'TaggedTemplateExpression',
-            tag: {type: 'Identifier', name: 'Foo'},
-            quasi: {
-              type: 'TemplateLiteral',
-              expressions: [],
-              quasis: [{
-                type: 'TemplateElement',
-                value: {
-                  raw: 'bar',
-                  cooked: '<TODO>',
-                },
-                tail: true,
-              }],
+        ast: {type: 'Program', body: [{
+          type: 'ExpressionStatement',
+            expression: {
+            type: 'NewExpression',
+            arguments: [],
+            callee: {
+              type: 'TaggedTemplateExpression',
+              tag: {type: 'Identifier', name: 'Foo'},
+              quasi: {
+                type: 'TemplateLiteral',
+                expressions: [],
+                quasis: [{
+                  type: 'TemplateElement',
+                  value: {
+                    raw: 'bar',
+                    cooked: '<TODO>',
+                  },
+                  tail: true,
+                }],
+              },
             },
           },
-        }}]},
+        }]},
         tokens: [$IDENT, $IDENT, $TICK_PURE, $ASI],
         desc: 'Edge case. Example: function f(){ return f } new f`x`;',
       });
