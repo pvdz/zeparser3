@@ -2,6 +2,8 @@
 
 // use https://astexplorer.net/ for ast comparisons
 
+const TEST262 = false;
+
 let fs = require('fs');
 
 let {
@@ -26,8 +28,6 @@ let {
 
   debug_toktype,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-
-const TEST262 = false;
 
 let dir = __dirname + '/testcases/parser';
 let files = [];
