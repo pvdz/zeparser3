@@ -539,28 +539,28 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('no assignment without init', {
             code: 'var [foo];',
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             desc: 'this could be legal in sloppy except not at the start of a statement',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('no assignment with init', {
             code: 'var [foo = x];',
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             desc: 'this could be legal in sloppy except not at the start of a statement',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('no assignment with two declarations first', {
             code: 'var [foo], bar;',
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('no assignment with two declarations second', {
             code: 'var foo, [bar];',
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
@@ -708,13 +708,13 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('single dot vs rest', {
               code: 'var [.x] = obj;',
-              throws: 'Expecting nested ident or destructuring pattern',
+              throws: 'Unexpected token while destructuring array',
               tokens: [],
             });
 
             test('double dot vs rest', {
               code: 'var [..x] = obj;',
-              throws: 'Expecting nested ident or destructuring pattern',
+              throws: 'Unexpected token while destructuring array',
               tokens: [],
             });
 
@@ -762,14 +762,14 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('empty obj with trailing comma', {
             code: 'var {,} = obj;',
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works for array but not for obj',
             tokens: [],
           });
 
           test('empty obj with elided commas', {
             code: 'var {,,} = obj;',
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works for array but not for obj',
             tokens: [],
           });
@@ -820,21 +820,21 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('single var with double trailing comma', {
             code: 'var {x,,} = obj;',
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'does not work with obj, only array',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single var with leading comma', {
             code: 'var {,x} = obj;',
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works with array but not with obj',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single var with double leading comma', {
             code: 'var {,,x} = obj;',
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works with array but not with obj',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -872,7 +872,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('double var with double comma', {
             code: 'var {x,, y} = obj;',
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works with array but not obj',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -1323,67 +1323,67 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('single destruct no assignment', {
             code: 'var {x};',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('double destruct no assignment', {
             code: 'var {x}, {y} = z;',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('ident and destruct no assignment', {
             code: 'var x, {y};',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('destruct no assignment and ident', {
             code: 'var {x}, y;',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('ident with init and destruct no assignment', {
             code: 'var x = y, {z};',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single destruct with rename and no assignment', {
             code: 'var {x:y};',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single destruct with default and no assignment', {
             code: 'var {x=y};',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single destruct with rename and default and no assignment', {
             code: 'var {x:y=z};',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('double destruct with rename and default and with and without assignment', {
             code: 'var {x:y=z} = obj, {a:b=c};',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('double destruct with rename and default and without and with assignment', {
             code: 'var {x:y=z}, {a:b=c} = obj;',
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single destruct with colon-eq', {
             code: 'var {a:=c} = z;',
-            throws: 'must be an identifier',
+            throws: 'Unexpected token while trying to destructure',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
@@ -1411,31 +1411,31 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('dynamic property destructuring missing alias', {
             code: 'var {[x]} = z;',
-            throws: '(:)',
+            throws: 'A computed destructuring property name must be followed by a colon',
             tokens: [],
           });
 
           test('dynamic property destructuring missing alias and init', {
             code: 'var {[x]};',
-            throws: '(:)',
+            throws: 'A computed destructuring property name must be followed by a colon',
             tokens: [],
           });
 
           test('dynamic property destructuring missing assignment', {
             code: 'var {[x]: y};',
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             tokens: [],
           });
 
           test('dynamic property destructuring with default missing alias', {
             code: 'var {[x] = y} = z;',
-            throws: '(:)',
+            throws: 'A computed destructuring property name must be followed by a colon',
             tokens: [],
           });
 
           test('dynamic property destructuring with default and alias missing init', {
             code: 'var {[x]: y = z};',
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             tokens: [],
           });
 
@@ -1636,31 +1636,31 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('var, one var, no init, semi', {
             code: 'for (var foo);',
-            throws: 'Missing required initializer',
+            throws: '(;)',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('var, two vars, no init, semi', {
             code: 'for (var foo, bar);',
-            throws: 'Missing required initializer',
+            throws: '(;)',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('var, var with init, semi', {
             code: 'for (var foo = bar);',
-            throws: 'Missing required initializer',
+            throws: '(;)',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('var, two vars with both init, semi', {
             code: 'for (var foo = bar, zoo = boo);',
-            throws: 'Missing required initializer',
+            throws: '(;)',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('var on next line does not trigger asi', {
             code: 'for (var\nfoo);',
-            throws: 'Missing required initializer',
+            throws: '(;)',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
@@ -1692,20 +1692,20 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('var, two vars, no init, semi',{
             code: 'for (var foo, bar in x);',
-            throws: 'can only have one var binding',
+            throws: 'can only have one binding',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('var, var with init, semi', {
             code: 'for (var foo = bar in x);',
-            throws: 'cannot have an init',
+            throws: 'binding can not have an init',
             desc: 'for some reason, it is not the "cannot have an init" one, probably because `in` is an op while `of` is not',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('var, two vars with both init, semi', {
             code: 'for (var foo = bar, zoo = boo in x);',
-            throws: 'cannot have an init',
+            throws: 'can only have one binding',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
@@ -1754,19 +1754,19 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('var, two vars, no init, semi',{
             code: 'for (var foo, bar of x);',
-            throws: 'can only have one var binding',
+            throws: 'can only have one binding',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('var, var with init, semi',{
             code: 'for (var foo = bar of x);',
-            throws: 'cannot have an init',
+            throws: 'binding can not have an init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('var, two vars with both init, semi',{
             code: 'for (var foo = bar, zoo = boo of x);',
-            throws: 'cannot have an init',
+            throws: 'can only have one binding',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
@@ -2223,28 +2223,28 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('no assignment without init', {
               code: 'for (var [foo];;);',
-              throws: 'In a for-header',
+              throws: 'destructuring must have init',
               desc: 'this could be legal in sloppy except not at the start of a statement',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with init', {
               code: 'for (var [foo = x];;);',
-              throws: 'In a for-header',
+              throws: 'destructuring must have init',
               desc: 'this could be legal in sloppy except not at the start of a statement',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with two declarations first', {
               code: 'for (var [foo], bar;;);',
-              throws: 'In a for-header',
+              throws: 'destructuring must have init',
               desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with two declarations second', {
               code: 'for (var foo, [bar];;);',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
@@ -2405,13 +2405,13 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
               test('single dot vs rest', {
                 code: 'for (var [.x] = obj;;);',
-                throws: 'Expecting nested ident or destructuring pattern',
+                throws: 'Unexpected token while destructuring array',
                 tokens: [],
               });
 
               test('double dot vs rest', {
                 code: 'for (var [..x] = obj;;);',
-                throws: 'Expecting nested ident or destructuring pattern',
+                throws: 'Unexpected token while destructuring array',
                 tokens: [],
               });
 
@@ -2468,14 +2468,14 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('empty obj with trailing comma', {
               code: 'for (var {,} = obj;;);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
               tokens: [],
             });
 
             test('empty obj with elided commas', {
               code: 'for (var {,,} = obj;;);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
               tokens: [],
             });
@@ -2542,21 +2542,21 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('single var with double trailing comma', {
               code: 'for (var {x,,} = obj;;);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'does not work with obj, only array',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single var with leading comma', {
               code: 'for (var {,x} = obj;;);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single var with double leading comma', {
               code: 'for (var {,,x} = obj;;);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
@@ -2601,7 +2601,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('double var with double comma', {
               code: 'for (var {x,, y} = obj;;);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
@@ -3125,67 +3125,67 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('single destruct no assignment', {
               code: 'for (var {x};;);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct no assignment', {
               code: 'for (var {x}, {y} = z;;);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident and destruct no assignment', {
               code: 'for (var x, {y};;);',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('destruct no assignment and ident', {
               code: 'for (var {x}, y;;);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident with init and destruct no assignment', {
               code: 'for (var x = y, {z};;);',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and no assignment', {
               code: 'for (var {x:y};;);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with default and no assignment', {
               code: 'for (var {x=y};;);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and default and no assignment', {
               code: 'for (var {x:y=z};;);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and with and without assignment', {
               code: 'for (var {x:y=z} = obj, {a:b=c};;);',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and without and with assignment', {
               code: 'for (var {x:y=z}, {a:b=c} = obj;;);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with colon-eq', {
               code: 'for (var {a:=c} = z;;);',
-              throws: 'must be an identifier',
+              throws: 'Unexpected token while trying to destructure',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
@@ -3218,31 +3218,31 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('dynamic property destructuring missing alias', {
               code: 'for (var {[x]} = z;;);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
             test('dynamic property destructuring missing alias and init', {
               code: 'for (var {[x]};;);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
             test('dynamic property destructuring missing assignment', {
               code: 'for (var {[x]: y};;);',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               tokens: [],
             });
 
             test('dynamic property destructuring with default missing alias', {
               code: 'for (var {[x] = y} = z;;);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
             test('dynamic property destructuring with default and alias missing init', {
               code: 'for (var {[x]: y = z};;);',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               tokens: [],
             });
 
@@ -3320,142 +3320,142 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('empty "array" should work', {
               code: 'for (var [] = x);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('empty array with one comma', {
               code: 'for (var [,] = x);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('empty array with double comma', {
               code: 'for (var [,,] = x);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('with one var, no init, semi', {
               code: 'for (var [foo] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('trailing comma is insignificant', {
               code: 'for (var [foo,] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double trailing comma is significant', {
               code: 'for (var [foo,,] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('leading comma', {
               code: 'for (var [,foo] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double leading comma', {
               code: 'for (var [,,foo] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('two vars', {
               code: 'for (var [foo,bar] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('two vars with eliding comma', {
               code: 'for (var [foo,,bar] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double destruct', {
               code: 'for (var [foo] = arr, [bar] = arr2);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct without init', {
               code: 'for (var [foo] = arr, bar);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct with init', {
               code: 'for (var [foo] = arr, bar = arr2);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct without init and destruct', {
               code: 'for (var foo, [bar] = arr2);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct with init and destruct', {
               code: 'for (var foo = arr, [bar] = arr2);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('one var with initializer', {
               code: 'for (var [foo=a] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('two vars, with and without initializer', {
               code: 'for (var [foo=a, bar] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('two vars, without and with initializer', {
               code: 'for (var [foo, bar=b] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('two vars, with and with initializer', {
               code: 'for (var [foo=a, bar=b] = arr);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment without init', {
               code: 'for (var [foo]);',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               desc: 'this could be legal in sloppy except not at the start of a statement',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with init', {
               code: 'for (var [foo = x]);',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               desc: 'this could be legal in sloppy except not at the start of a statement',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with two declarations first', {
               code: 'for (var [foo], bar);',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with two declarations second', {
               code: 'for (var foo, [bar]);',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
@@ -3463,13 +3463,13 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
               test('rest as the only destruct', {
                 code: 'for (var [...foo] = obj);',
-                throws: 'Missing required initializer',
+                throws: '(;)',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('rest preceded by an ident', {
                 code: 'for (var [foo, ...bar] = obj);',
-                throws: 'Missing required initializer',
+                throws: '(;)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
@@ -3493,7 +3493,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
               test('rest on a nested destruct', {
                 code: 'for (var [...[foo, bar]] = obj);',
-                throws: 'Missing required initializer',
+                throws: '(;)',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
@@ -3511,7 +3511,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
               test('second param rest on a nested destruct', {
                 code: 'for (var [x, ...[foo, bar]] = obj);',
-                throws: 'Missing required initializer',
+                throws: '(;)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
@@ -3542,19 +3542,19 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
               test('single dot vs rest', {
                 code: 'for (var [.x] = obj);',
-                throws: 'Expecting nested ident or destructuring pattern',
+                throws: 'Unexpected token while destructuring array',
                 tokens: [],
               });
 
               test('double dot vs rest', {
                 code: 'for (var [..x] = obj);',
-                throws: 'Expecting nested ident or destructuring pattern',
+                throws: 'Unexpected token while destructuring array',
                 tokens: [],
               });
 
               test('spread and rest', {
                 code: 'for (var [a=[...b], ...c] = obj);',
-                throws: 'Missing required initializer',
+                throws: '(;)',
                 tokens: [],
               });
             });
@@ -3564,278 +3564,278 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('empty obj', {
               code: 'for (var {} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('empty obj with trailing comma', {
               code: 'for (var {,} = obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
               tokens: [],
             });
 
             test('empty obj with elided commas', {
               code: 'for (var {,,} = obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
               tokens: [],
             });
 
             test('single var base case', {
               code: 'for (var {x} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('single var with trailing comma', {
               code: 'for (var {x,} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('single var with double trailing comma', {
               code: 'for (var {x,,} = obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'does not work with obj, only array',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single var with leading comma', {
               code: 'for (var {,x} = obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single var with double leading comma', {
               code: 'for (var {,,x} = obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double var simple', {
               code: 'for (var {x, y} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double var with double comma', {
               code: 'for (var {x,, y} = obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double var simple', {
               code: 'for (var {x} = a, {y} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct with init', {
               code: 'for (var {x} = a, y = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct without init', {
               code: 'for (var {x} = a, obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct with ini and destruct', {
               code: 'for (var x = a, {y} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct without ini and destruct', {
               code: 'for (var x, {y} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('single destruct with init', {
               code: 'for (var {x = y} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double destruct with and without init', {
               code: 'for (var {x = y, z} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double destruct without and with init', {
               code: 'for (var {x, y = z} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double destruct both with init', {
               code: 'for (var {x = y, z = a} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('single destruct with rename', {
               code: 'for (var {x : y} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double destruct with and without rename', {
               code: 'for (var {x : y, z} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double destruct without and with rename', {
               code: 'for (var {x, y : z} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double destruct both with rename', {
               code: 'for (var {x : y, z : a} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('single destruct with rename and init', {
               code: 'for (var {x : y = z} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('double destruct with rename and init', {
               code: 'for (var {x : y, z, a : b = c} = obj);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('single destruct no assignment', {
               code: 'for (var {x});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct no assignment', {
               code: 'for (var {x}, {y} = z);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident and destruct no assignment', {
               code: 'for (var x, {y});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('destruct no assignment and ident', {
               code: 'for (var {x}, y);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident with init and destruct no assignment', {
               code: 'for (var x = y, {z});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('destruct no assignment and ident', {
               code: 'for (var {x}, y);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and no assignment', {
               code: 'for (var {x:y});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with default and no assignment', {
               code: 'for (var {x=y});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and default and no assignment', {
               code: 'for (var {x:y=z});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and with and without assignment', {
               code: 'for (var {x:y=z} = obj, {a:b=c});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and without and with assignment', {
               code: 'for (var {x:y=z}, {a:b=c} = obj);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with colon-eq', {
               code: 'for (var {a:=c} = z);',
-              throws: 'must be an identifier',
+              throws: 'Unexpected token while trying to destructure',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('correct dynamic property destructuring', {
               code: 'for (var {[x]: y} = z);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               desc: 'TODO: the message is actually wrong here (since the init is present). not a big deal right now as long as something throws.',
               tokens: [],
             });
 
             test('dynamic property destructuring missing alias', {
               code: 'for (var {[x]} = z);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
             test('dynamic property destructuring missing alias and init', {
               code: 'for (var {[x]});',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
             test('dynamic property destructuring missing assignment', {
               code: 'for (var {[x]: y});',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               tokens: [],
             });
 
             test('dynamic property destructuring with default missing alias', {
               code: 'for (var {[x] = y} = z);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
             test('dynamic property destructuring with default and alias missing init', {
               code: 'for (var {[x]: y = z});',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               tokens: [],
             });
 
             test('correct dynamic property destructuring with default and alias', {
               code: 'for (var {[x]: y = z} = a);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('dynamic prop as second prop', {
               code: 'for (var {a, [x]: y} = a);',
-              throws: 'Missing required initializer',
+              throws: '(;)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
           });
@@ -4042,31 +4042,31 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('double destruct', {
               code: 'for (var [foo] = arr, [bar] in arr);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct without init', {
               code: 'for (var [foo], bar in arr);',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct with init', {
               code: 'for (var [foo] = arr, bar in arr);',
-              throws: 'can only have one var binding',
+              throws: 'can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct without init and destruct', {
               code: 'for (var foo, [bar] in arr);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct with init and destruct', {
               code: 'for (var foo = arr, [bar] in arr);',
-              throws: ' destructuring here without an assignment',
+              throws: ' can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
@@ -4169,28 +4169,28 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('no assignment without init', {
               code: 'for (var [foo]);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               desc: '(these mirror tests are kind of moot as per for-in)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with init', {
               code: 'for (var [foo = x]);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               desc: '(these mirror tests are kind of moot as per for-in)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with two declarations first', {
               code: 'for (var [foo], bar);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               desc: '(these mirror tests are kind of moot as per for-in)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with two declarations second', {
               code: 'for (var foo, [bar]);',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               desc: '(these mirror tests are kind of moot as per for-in)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
@@ -4348,13 +4348,13 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
               test('single dot vs rest', {
                 code: 'for (var [.x] in obj);',
-                throws: 'Expecting nested ident or destructuring pattern',
+                throws: 'Unexpected token while destructuring array',
                 tokens: [],
               });
 
               test('double dot vs rest', {
                 code: 'for (var [..x] in obj);',
-                throws: 'Expecting nested ident or destructuring pattern',
+                throws: 'Unexpected token while destructuring array',
                 tokens: [],
               });
 
@@ -4411,14 +4411,14 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('empty obj with trailing comma', {
               code: 'for (var {,} in obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
               tokens: [],
             });
 
             test('empty obj with elided commas', {
               code: 'for (var {,,} in obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
               tokens: [],
             });
@@ -4479,21 +4479,21 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('single var with double trailing comma', {
               code: 'for (var {x,,} in obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'does not work with obj, only array',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single var with leading comma', {
               code: 'for (var {,x} in obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single var with double leading comma', {
               code: 'for (var {,,x} in obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
@@ -4533,42 +4533,42 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('double var with double comma', {
               code: 'for (var {x,, y} in obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double var simple', {
               code: 'for (var {x} = a, {y} in obj);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct with init', {
               code: 'for (var {x} = a, y in obj);',
-              throws: 'can only have one var binding',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct without init', {
               code: 'for (var {x} = a, obj in obj2);',
-              throws: 'can only have one var binding',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct with ini and destruct', {
               code: 'for (var x = a, {y} in obj);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct without ini and destruct', {
               code: 'for (var x, {y} in obj);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
@@ -4912,73 +4912,73 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('single destruct no assignment', {
               code: 'for (var {x});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct no assignment', {
               code: 'for (var {x}, {y} in z);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident and destruct no assignment', {
               code: 'for (var x, {y});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('destruct no assignment and ident', {
               code: 'for (var {x}, y);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident with init and destruct no assignment', {
               code: 'for (var x = y, {z});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('destruct no assignment and ident', {
               code: 'for (var {x}, y);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and no assignment', {
               code: 'for (var {x:y});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with default and no assignment', {
               code: 'for (var {x=y});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and default and no assignment', {
               code: 'for (var {x:y=z});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and with and without assignment', {
               code: 'for (var {x:y=z} = obj, {a:b=c});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and without and with assignment', {
               code: 'for (var {x:y=z}, {a:b=c} in obj);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with colon-eq', {
               code: 'for (var {a:=c} in z);',
-              throws: 'must be an identifier',
+              throws: 'Unexpected token while trying to destructure',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
@@ -5010,13 +5010,13 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('dynamic property destructuring missing alias', {
               code: 'for (var {[x]} in obj);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
             test('dynamic property destructuring with default missing alias', {
               code: 'for (var {[x] = y} in obj);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
@@ -5285,31 +5285,31 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('double destruct', {
               code: 'for (var [foo] = arr, [bar] of arr);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct without init', {
               code: 'for (var [foo], bar of arr);',
-              throws: 'destructuring must be followed',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct with init', {
               code: 'for (var [foo] = arr, bar of arr);',
-              throws: 'can only have one var binding',
+              throws: 'can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct without init and destruct', {
               code: 'for (var foo, [bar] of arr);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct with init and destruct', {
               code: 'for (var foo = arr, [bar] of arr);',
-              throws: ' destructuring here without an assignment',
+              throws: ' can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
@@ -5412,28 +5412,28 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('no assignment without init', {
               code: 'for (var [foo]);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               desc: '(these mirror tests are kind of moot as per for-of)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with init', {
               code: 'for (var [foo = x]);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               desc: '(these mirror tests are kind of moot as per for-of)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with two declarations first', {
               code: 'for (var [foo], bar);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               desc: '(these mirror tests are kind of moot as per for-of)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('no assignment with two declarations second', {
               code: 'for (var foo, [bar]);',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               desc: '(these mirror tests are kind of moot as per for-of)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
@@ -5591,13 +5591,13 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
               test('single dot vs rest', {
                 code: 'for (var [.x] of obj);',
-                throws: 'Expecting nested ident or destructuring pattern',
+                throws: 'Unexpected token while destructuring array',
                 tokens: [],
               });
 
               test('double dot vs rest', {
                 code: 'for (var [..x] of obj);',
-                throws: 'Expecting nested ident or destructuring pattern',
+                throws: 'Unexpected token while destructuring array',
                 tokens: [],
               });
 
@@ -5654,14 +5654,14 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('empty obj with trailing comma', {
               code: 'for (var {,} of obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
               tokens: [],
             });
 
             test('empty obj with elided commas', {
               code: 'for (var {,,} of obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
               tokens: [],
             });
@@ -5722,21 +5722,21 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('single var with double trailing comma', {
               code: 'for (var {x,,} of obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'does not work with obj, only array',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single var with leading comma', {
               code: 'for (var {,x} of obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single var with double leading comma', {
               code: 'for (var {,,x} of obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
@@ -5776,42 +5776,42 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('double var with double comma', {
               code: 'for (var {x,, y} of obj);',
-              throws: 'elided commas',
+              throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double var simple', {
               code: 'for (var {x} = a, {y} of obj);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct with init', {
               code: 'for (var {x} = a, y of obj);',
-              throws: 'can only have one var binding',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('destruct and non-destruct without init', {
               code: 'for (var {x} = a, obj of obj2);',
-              throws: 'can only have one var binding',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct with ini and destruct', {
               code: 'for (var x = a, {y} of obj);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('non-destruct without ini and destruct', {
               code: 'for (var x, {y} of obj);',
-              throws: 'destructuring here without an assignment',
+              throws: 'can only have one binding',
               desc: 'confusing message for only supporting one var with this for-statement type',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
@@ -6155,73 +6155,73 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('single destruct no assignment', {
               code: 'for (var {x});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct no assignment', {
               code: 'for (var {x}, {y} of z);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident and destruct no assignment', {
               code: 'for (var x, {y});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('destruct no assignment and ident', {
               code: 'for (var {x}, y);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident with init and destruct no assignment', {
               code: 'for (var x = y, {z});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('destruct no assignment and ident', {
               code: 'for (var {x}, y);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and no assignment', {
               code: 'for (var {x:y});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with default and no assignment', {
               code: 'for (var {x=y});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and default and no assignment', {
               code: 'for (var {x:y=z});',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and with and without assignment', {
               code: 'for (var {x:y=z} = obj, {a:b=c});',
-              throws: 'destructuring here without an assignment',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and without and with assignment', {
               code: 'for (var {x:y=z}, {a:b=c} of obj);',
-              throws: 'destructuring must be followed by',
+              throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with colon-eq', {
               code: 'for (var {a:=c} of z);',
-              throws: 'must be an identifier',
+              throws: 'Unexpected token while trying to destructure',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
@@ -6253,13 +6253,13 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('dynamic property destructuring missing alias', {
               code: 'for (var {[x]} of obj);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
             test('dynamic property destructuring with default missing alias', {
               code: 'for (var {[x] = y} of obj);',
-              throws: '(:)',
+              throws: 'A computed destructuring property name must be followed by a colon',
               tokens: [],
             });
 
@@ -6593,7 +6593,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('no assignment without init', {
             code: 'export var [foo];',
             SCRIPT: {throws: 'module goal'},
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             desc: 'module goal is always strict',
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -6601,7 +6601,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('no assignment with init', {
             code: 'export var [foo = x];',
             SCRIPT: {throws: 'module goal'},
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             desc: 'module goal is always strict',
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -6609,7 +6609,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('no assignment with two declarations first', {
             code: 'export var [foo], bar;',
             SCRIPT: {throws: 'module goal'},
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             desc: 'module goal is always strict',
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -6617,7 +6617,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('no assignment with two declarations second', {
             code: 'export var foo, [bar];',
             SCRIPT: {throws: 'module goal'},
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
@@ -6788,14 +6788,14 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
             test('single dot vs rest', {
               code: 'export var [.x] = obj;',
-              throws: 'Expecting nested ident or destructuring pattern',
+              throws: 'Unexpected token while destructuring array',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
 
             test('double dot vs rest', {
               code: 'export var [..x] = obj;',
-              throws: 'Expecting nested ident or destructuring pattern',
+              throws: 'Unexpected token while destructuring array',
               SCRIPT: {throws: 'module goal'},
               tokens: [],
             });
@@ -6854,7 +6854,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('empty obj with trailing comma', {
             code: 'export var {,} = obj;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works for array but not for obj',
             tokens: [],
           });
@@ -6862,7 +6862,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('empty obj with elided commas', {
             code: 'export var {,,} = obj;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works for array but not for obj',
             tokens: [],
           });
@@ -6924,7 +6924,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('single var with double trailing comma', {
             code: 'export var {x,,} = obj;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'does not work with obj, only array',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -6932,7 +6932,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('single var with leading comma', {
             code: 'export var {,x} = obj;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works with array but not with obj',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -6940,7 +6940,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('single var with double leading comma', {
             code: 'export var {,,x} = obj;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works with array but not with obj',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -6982,7 +6982,7 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('double var with double comma', {
             code: 'export var {x,, y} = obj;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'elided commas',
+            throws: 'Objects cant have comma without something preceding it',
             desc: 'works with array but not obj',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
@@ -7497,77 +7497,77 @@ module.exports = (describe, test) => describe('var statement', _ => {
           test('single destruct no assignment', {
             code: 'export var {x};',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('double destruct no assignment', {
             code: 'export var {x}, {y} = z;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('ident and destruct no assignment', {
             code: 'export var x, {y};',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('destruct no assignment and ident', {
             code: 'export var {x}, y;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('ident with init and destruct no assignment', {
             code: 'export var x = y, {z};',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single destruct with rename and no assignment', {
             code: 'export var {x:y};',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single destruct with default and no assignment', {
             code: 'export var {x=y};',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single destruct with rename and default and no assignment', {
             code: 'export var {x:y=z};',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('double destruct with rename and default and with and without assignment', {
             code: 'export var {x:y=z} = obj, {a:b=c};',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('double destruct with rename and default and without and with assignment', {
             code: 'export var {x:y=z}, {a:b=c} = obj;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'destructuring here without an assignment',
+            throws: 'destructuring must have init',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
           test('single destruct with colon-eq', {
             code: 'export var {a:=c} = z;',
             SCRIPT: {throws: 'can only be used with the module goal'},
-            throws: 'must be an identifier',
+            throws: 'Unexpected token while trying to destructure',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
 
@@ -7600,35 +7600,35 @@ module.exports = (describe, test) => describe('var statement', _ => {
 
           test('dynamic property destructuring missing alias', {
             code: 'export var {[x]} = z;',
-            throws: '(:)',
+            throws: 'A computed destructuring property name must be followed by a colon',
             SCRIPT: {throws: 'can only be used with the module goal'},
             tokens: [],
           });
 
           test('dynamic property destructuring missing alias and init', {
             code: 'export var {[x]};',
-            throws: '(:)',
+            throws: 'A computed destructuring property name must be followed by a colon',
             SCRIPT: {throws: 'can only be used with the module goal'},
             tokens: [],
           });
 
           test('dynamic property destructuring missing assignment', {
             code: 'export var {[x]: y};',
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             SCRIPT: {throws: 'can only be used with the module goal'},
             tokens: [],
           });
 
           test('dynamic property destructuring with default missing alias', {
             code: 'export var {[x] = y} = z;',
-            throws: '(:)',
+            throws: 'A computed destructuring property name must be followed by a colon',
             SCRIPT: {throws: 'can only be used with the module goal'},
             tokens: [],
           });
 
           test('dynamic property destructuring with default and alias missing init', {
             code: 'export var {[x]: y = z};',
-            throws: 'without an assignment',
+            throws: 'destructuring must have init',
             SCRIPT: {throws: 'can only be used with the module goal'},
             tokens: [],
           });

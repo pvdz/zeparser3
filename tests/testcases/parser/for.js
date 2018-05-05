@@ -372,8 +372,9 @@ module.exports = (describe, test) => describe('for statement', _ => {
 
       test('var with init left of `in`', {
         code: 'for (var a = b in c);',
-        throws: 'cannot have an init',
+        throws: 'can not have an init',
         WEB: { // this is an annexB web compat thing and only valid in sloppy mode
+          desc: 'https://tc39.github.io/ecma262/#sec-initializers-in-forin-statement-heads',
           ast: { type: 'Program',
             body:
               [ { type: 'ForInStatement',
@@ -392,7 +393,7 @@ module.exports = (describe, test) => describe('for statement', _ => {
 
       test('incremental in var init left of `in`', {
         code: 'for (var a = ++b in c);',
-        throws: 'cannot have an init',
+        throws: 'can not have an init',
         WEB: { // this is an annexB web compat thing
           ast: { type: 'Program',
             body:
@@ -416,7 +417,7 @@ module.exports = (describe, test) => describe('for statement', _ => {
 
       test('var with init left and assignment right of `in`', {
         code: 'for (var a = 0 in stored = a, {});',
-        throws: 'cannot have an init',
+        throws: 'can not have an init',
         WEB: { // this is an annexB web compat thing
           ast: { type: 'Program',
             body:
@@ -443,7 +444,7 @@ module.exports = (describe, test) => describe('for statement', _ => {
 
       test('grouped init left of `in`', {
         code: 'for (var a = (++effects, -1) in x);',
-        throws: 'cannot have an init',
+        throws: 'can not have an init',
         WEB: { // this is an annexB web compat thing
           ast: { type: 'Program',
             body:
@@ -520,7 +521,7 @@ module.exports = (describe, test) => describe('for statement', _ => {
 
       test('combination of last two tests', {
         code: 'for (var a = (++effects, -1) in stored = a, {a: 0, b: 1, c: 2});',
-        throws: 'cannot have an init',
+        throws: 'can not have an init',
         WEB: { // this is an annexB web compat thing
           ast: { type: 'Program',
             body:
@@ -579,9 +580,9 @@ module.exports = (describe, test) => describe('for statement', _ => {
 
       test('destructuring with init is always illegal', {
         code: 'for (var [a] = 0 in {});',
-        throws: 'cannot have an init',
+        throws: 'can not have an init',
         WEB: {
-          throws: 'cannot have an init',
+          throws: 'can not have an init',
           desc: 'this is important; it should also throw in web-compat mode',
         },
         tokens: [],

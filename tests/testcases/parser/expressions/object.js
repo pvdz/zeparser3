@@ -1499,6 +1499,25 @@ module.exports = (describe, test) => describe('objects', _ => {
 
     describe('setters (destruct arg)', _ => {
 
+      test('small regression',{
+        code: 'function x([a, b]){};',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'FunctionDeclaration',
+              generator: false,
+              async: false,
+              expression: false,
+              id: { type: 'Identifier', name: 'x' },
+              params:
+                [ { type: 'ArrayPattern',
+                  elements:
+                    [ { type: 'Identifier', name: 'a' },
+                      { type: 'Identifier', name: 'b' } ] } ],
+              body: { type: 'BlockStatement', body: [] } },
+              { type: 'EmptyStatement' } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
       test('object with one setter method',{
         code: 'wrap({set [foo]([a, b]){}});',
         ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [

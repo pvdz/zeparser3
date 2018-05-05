@@ -257,7 +257,7 @@ module.exports = (describe, test) => describe('functions', _ => {
         test('must have args', {
           code: 'function f(,){}',
           options: {trailingArgComma: true}, // default
-          throws: 'Expected to parse another function argument',
+          throws: 'Expected to parse a(nother) binding but none was found',
           tokens: [],
         });
 
@@ -287,7 +287,7 @@ module.exports = (describe, test) => describe('functions', _ => {
         test('cannot elide', {
           code: 'function f(a,,){}',
           options: {trailingArgComma: true}, // default
-          throws: 'Expected to parse another function argument',
+          throws: 'Expected to parse a(nother) binding but none was found',
           tokens: [],
         });
       });
@@ -297,7 +297,7 @@ module.exports = (describe, test) => describe('functions', _ => {
         test('must have args', {
           code: 'function f(,){}',
           options: {trailingArgComma: false},
-          throws: 'Expected to parse another function argument',
+          throws: 'Expected to parse a(nother) binding but none was found',
           tokens: [],
         });
 
@@ -318,7 +318,7 @@ module.exports = (describe, test) => describe('functions', _ => {
         test('cannot elide', {
           code: 'function f(a,,){}',
           options: {trailingArgComma: false},
-          throws: 'Expected to parse another function argument',
+          throws: 'Expected to parse a(nother) binding but none was found',
           tokens: [],
         });
       });
@@ -1292,6 +1292,67 @@ module.exports = (describe, test) => describe('functions', _ => {
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
+        test('regression case', {
+          code: 'function f([a, {b: []}]) {}',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                expression: false,
+                id: { type: 'Identifier', name: 'f' },
+                params:
+                  [ { type: 'ArrayPattern',
+                    elements:
+                      [ { type: 'Identifier', name: 'a' },
+                        { type: 'ObjectPattern',
+                          properties:
+                            [ { type: 'Property',
+                              computed: false,
+                              kind: 'init',
+                              method: false,
+                              shorthand: false,
+                              key: { type: 'Identifier', name: 'b' },
+                              value: { type: 'ArrayPattern', elements: [] } } ] } ] } ],
+                body: { type: 'BlockStatement', body: [] } } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('array in object', {
+          code: 'function f({x: [a, {b: []}]}) {}',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                expression: false,
+                id: { type: 'Identifier', name: 'f' },
+                params:
+                  [ { type: 'ObjectPattern',
+                    properties:
+                      [ { type: 'Property',
+                        computed: false,
+                        kind: 'init',
+                        method: false,
+                        shorthand: false,
+                        key: { type: 'Identifier', name: 'x' },
+                        value:
+                          { type: 'ArrayPattern',
+                            elements:
+                              [ { type: 'Identifier', name: 'a' },
+                                { type: 'ObjectPattern',
+                                  properties:
+                                    [ { type: 'Property',
+                                      computed: false,
+                                      kind: 'init',
+                                      method: false,
+                                      shorthand: false,
+                                      key: { type: 'Identifier', name: 'b' },
+                                      value: { type: 'ArrayPattern', elements: [] } } ] } ] } } ] } ],
+                body: { type: 'BlockStatement', body: [] } } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
         describe('rest operator', _ => {
 
           test('simple rest arg sans default', {
@@ -1580,14 +1641,12 @@ module.exports = (describe, test) => describe('functions', _ => {
 
           test('single dot not a rest', {
             code: 'function f([.x]){}',
-            throws: 'Expecting nested ident or destructuring pattern',
-            tokens: [],
+            throws: 'Unexpected token while destructuring',
           });
 
           test('double dot vs rest', {
             code: 'function f([..x]){}',
-            throws: 'Expecting nested ident or destructuring pattern',
-            tokens: [],
+            throws: 'Unexpected token while destructuring',
           });
 
           test('spread and rest sans default', {

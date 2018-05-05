@@ -119,8 +119,40 @@ module.exports = (describe, test) => describe('try statement', _ => {
 
     test('object with trailing comma', {
       code: 'try {} catch({e},){}',
-      throws: 'exactly one parameter',
+      throws: 'no trailing comma',
       tokens: [],
+    });
+
+    test('object with default', {
+      code: 'try {} catch({e}=x){}',
+      throws: 'The catch clause cannot have a default',
+      tokens: [],
+    });
+
+    test('object with inside default', {
+      code: 'try {} catch({e=x}){}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'TryStatement',
+            block: { type: 'BlockStatement', body: [] },
+            handler:
+              { type: 'CatchClause',
+                param:
+                  { type: 'ObjectPattern',
+                    properties:
+                      [ { type: 'Property',
+                        computed: false,
+                        kind: 'init',
+                        method: false,
+                        shorthand: false,
+                        key: { type: 'Identifier', name: 'e' },
+                        value:
+                          { type: 'AssignmentPattern',
+                            left: { type: 'Identifier', name: 'e' },
+                            right: { type: 'Identifier', name: 'x' } } } ] },
+                body: { type: 'BlockStatement', body: [] } },
+            finalizer: null } ] },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('array with trailing comma', {
@@ -131,20 +163,39 @@ module.exports = (describe, test) => describe('try statement', _ => {
 
     test('ident with default', {
       code: 'try {} catch(e=x){}',
-      throws: 'not support default',
+      throws: 'The catch clause cannot have a default',
       tokens: [],
     });
 
     test('object with default', {
       code: 'try {} catch({e}=x){}',
-      throws: 'not support default',
+      throws: 'The catch clause cannot have a default',
       tokens: [],
     });
 
     test('array with default', {
       code: 'try {} catch([e]=x){}',
-      throws: 'not support default',
+      throws: 'The catch clause cannot have a default',
       tokens: [],
+    });
+
+    test('array with inside default', {
+      code: 'try {} catch([e=x]){}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'TryStatement',
+            block: { type: 'BlockStatement', body: [] },
+            handler:
+              { type: 'CatchClause',
+                param:
+                  { type: 'ArrayPattern',
+                    elements:
+                      [ { type: 'AssignmentPattern',
+                        left: { type: 'Identifier', name: 'e' },
+                        right: { type: 'Identifier', name: 'x' } } ] },
+                body: { type: 'BlockStatement', body: [] } },
+            finalizer: null } ] },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
   });
 

@@ -3,6 +3,7 @@
 // use https://astexplorer.net/ for ast comparisons
 
 const TEST262 = false;
+const STOP_AFTER_FAIL = true;
 
 let fs = require('fs');
 
@@ -323,7 +324,6 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   }
 }
 
-const STOP_AFTER_FAIL = true;
 let pass = 0;
 let fail = 0;
 let crash = 0;
