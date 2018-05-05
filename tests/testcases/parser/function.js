@@ -1353,6 +1353,26 @@ module.exports = (describe, test) => describe('functions', _ => {
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
+        test('array in array', {
+          code: 'function f([a, [b], c]) {}',
+          ast: { type: 'Program',
+            body:
+              [ { type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                expression: false,
+                id: { type: 'Identifier', name: 'f' },
+                params:
+                  [ { type: 'ArrayPattern',
+                    elements:
+                      [ { type: 'Identifier', name: 'a' },
+                        { type: 'ArrayPattern',
+                          elements: [ { type: 'Identifier', name: 'b' } ] },
+                        { type: 'Identifier', name: 'c' } ] } ],
+                body: { type: 'BlockStatement', body: [] } } ] },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
         describe('rest operator', _ => {
 
           test('simple rest arg sans default', {

@@ -2582,7 +2582,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (curc === $$CURLY_L_7B) {
       parseBindingObjectDestructs(lexerFlags, bindingType, astProp);
     } else if (curc === $$SQUARE_L_5B) {
-      TODO
       parseBindingArrayDestructs(lexerFlags, bindingType, astProp);
     } else if (curc === $$DOT_2E && curtok.str === '...') {
       parseBindingRest(lexerFlags, $$SQUARE_R_5D, bindingType, astProp);
