@@ -1,4 +1,4 @@
-// requires a clone of https://github.com/tc39/test262.git
+  // requires a clone of https://github.com/tc39/test262.git
 // test is skipped if that dir cannot be found
 
 let fs = require('fs');
@@ -16,22 +16,24 @@ if (!fs.statSync(PATH262).isDirectory()) {
       if (file.slice(-3) === '.js') {
         let lcname = combo.toLowerCase();
         files[combo] = {path: combo, contents: fs.readFileSync(combo), annexb: lcname.indexOf('annexb') >= 0,skip: !(
-          lcname.indexOf('for-await') < 0 && // TODO: for await is not final yet
           (lcname.indexOf('annexb') < 0 || (lcname.indexOf('regexp') < 0 && lcname.indexOf('escape') < 0)) && // TODO: web compat: lots of regex/escape cruft to support
-          lcname.indexOf('this-val-regexp') < 0 && // TODO: new regex flags
-          lcname.indexOf('unicode-reference') < 0 && // TODO: named back references are not final yet
-          lcname.indexOf('named-groups') < 0 && // TODO: named groups are not final yet
-          lcname.indexOf('regexp/y-') < 0 && // TODO: y-flag in regexes
-          lcname.indexOf('bigint') < 0 && // TODO: adds new number syntax
-          lcname.indexOf('lookbehind') < 0 && // TODO: regex ?<= lookbehind https://github.com/tc39/proposal-regexp-lookbehind
-          lcname.indexOf('spread-sngl-obj') < 0 && // TODO: object spread is es8 or something
-          lcname.indexOf('class-definition-evaluation-scriptbody-duplicate-binding') < 0 && // TODO: duplicate bindings are early error
-          lcname.indexOf('yield-star-sync-throw') < 0 && // TODO: async generators are part of the `for await` proposal
-          lcname.indexOf('use-strict-with-non-simple-param') < 0 && // wtf even. TODO. I guess.
-          lcname.indexOf('vals-rus') < 0 && // TODO: non-ascii idents
+          //lcname.indexOf('this-val-regexp') < 0 && // TODO: new regex flags
+          //lcname.indexOf('unicode-reference') < 0 && // TODO: named back references are not final yet
+          //lcname.indexOf('named-groups') < 0 && // TODO: named groups are not final yet
+          //lcname.indexOf('regexp/y-') < 0 && // TODO: y-flag in regexes
+          //lcname.indexOf('dotall') < 0 && // TODO: s-flag in regexes
+          //lcname.indexOf('bigint') < 0 && // TODO: adds new number syntax
+          //lcname.indexOf('lookbehind') < 0 && // TODO: regex ?<= lookbehind https://github.com/tc39/proposal-regexp-lookbehind
+          //lcname.indexOf('spread-sngl-obj') < 0 && // TODO: object spread is es8 or something
+          //lcname.indexOf('class-definition-evaluation-scriptbody-duplicate-binding') < 0 && // TODO: duplicate bindings are early error
+          //lcname.indexOf('use-strict-with-non-simple-param') < 0 && // wtf even. TODO. I guess.
+          //lcname.indexOf('vals-rus') < 0 && // TODO: non-ascii idents
           lcname.indexOf('__proto__-dup') < 0 && // TODO: enable once we check duplicate objlit keys
+          lcname.indexOf('args-trailing-comma') < 0 && // TODO: new feature: trailign comma in function args
+          lcname.indexOf('s15.5.4.10_a2_t') < 0 && // TODO: enable
           lcname.indexOf('asyncgenerator') < 0 && // TODO: this is a stage proposal, we'll probably add this soon
-          lcname.indexOf('async-generator') < 0 && // TODO: this is a stage proposal, we'll probably add this soon
+          //lcname.indexOf('async-generator') < 0 && // TODO: this is a stage proposal, we'll probably add this soon
+          lcname.indexOf('redeclare-with-') < 0 && // TOOD: fix once we fix scoping and duplicate binding checks (class, async)
           lcname.indexOf('property-escapes') < 0 // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         )};
       }
@@ -49,6 +51,11 @@ if (!fs.statSync(PATH262).isDirectory()) {
         describe(key.slice(1), f.bind(undefined, describe, test, obj))
       } else {
         let code = obj.contents.toString();
+
+        // particular features (especially new ones) will be mentioned in the header so we can filter en-mass based on that here
+        // generated: call arg trailing comma
+        if (/features:.*(?:bigint|async-iteration|regexp-dotall|regexp-lookbehind|regexp-named-groups)/i.test(code)) obj.skip = true;
+
         let headerEndMarker = '---*/';
         let headerEnd = code.indexOf(headerEndMarker);
         if (headerEnd < 0) {
