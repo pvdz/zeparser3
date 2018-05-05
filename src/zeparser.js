@@ -2366,8 +2366,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } while (true);
 
     if (bindingOrigin === FROM_FOR_HEADER && (curtok.str === 'in' || curtok.str === 'of')) {
-      // binding inits are ONLY okay in sloppy mode in web-compat mode for regular var names with for-in statements
-      if (startWasObjectOrArray || curtok.str === 'of' || options_webCompat === WEB_COMPAT_OFF || (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+      // binding inits are ONLY okay when;
+      // - sloppy mode
+      // - web-compat mode
+      // - regular var names
+      // - for-in statements
+      // - `var` binding
+      if (startWasObjectOrArray || curtok.str === 'of' || bindingType !== BINDING_TYPE_VAR || options_webCompat === WEB_COMPAT_OFF || (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
         if (many > 1) {
           THROW('For-in and for-of can only have one binding, found ' + many);
         } else if (inited) {

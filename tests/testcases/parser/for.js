@@ -587,6 +587,16 @@ module.exports = (describe, test) => describe('for statement', _ => {
         },
         tokens: [],
       });
+
+      test('destructuring with const is always illegal', {
+        code: 'for (const x = 0 in {});',
+        throws: true,
+      });
+
+      test('destructuring with const is always illegal', {
+        code: 'for (let x = 0 in {});',
+        throws: true,
+      });
     });
   });
 
