@@ -3,6 +3,7 @@
 // use https://astexplorer.net/ for ast comparisons
 
 const TEST262 = false;
+const TEST262_SKIP_TO = 16000; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = true;
 
 let fs = require('fs');
@@ -143,6 +144,7 @@ function override(wantObj, baseObj) {
   return baseObj;
 }
 function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
+  if (TEST262 && testi < TEST262_SKIP_TO) return;
   let {
     ast: expectedAst,
     SCRIPT: scriptModeObj,
@@ -309,6 +311,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   function LOG_THROW(prefix, errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false) {
     console.log('\n');
+    if (TEST262) console.log('\n============== input ==============' + code + '\n============== /input =============\n');
     console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
     if (stack) console.log('Stack:', stack);
     //console.log('Final test options:\n', finalTestOptions);
@@ -323,6 +326,9 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (_debug) console.log('Debug:', _debug);
   }
 }
+
+if (TEST262) console.log('Running test262 provided tests instead');
+if (TEST262_SKIP_TO) console.log('Warning: Skipping the first', TEST262_SKIP_TO, 'tests');
 
 let pass = 0;
 let fail = 0;
