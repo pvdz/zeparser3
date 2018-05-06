@@ -2629,16 +2629,94 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function bindingIdentCheck(identToken, bindingKind, lexerFlags) {
     ASSERT(typeof bindingKind === 'number', 'the binding should be an enum');
     ASSERT(arguments.length === 3, 'expecting 3 args');
-    if (identToken.str === 'let') {
-      if (bindingKind !== BINDING_TYPE_VAR) {
-        if (bindingKind === BINDING_TYPE_CLASS) THROW('Can not use `let` as a class name');
-        else THROW('Can not use `let` when binding through `let` or `const`');
-      }
-      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Can not use `let` as var name in strict mode');
-    }
-    if (identToken.str === 'await') {
-      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Await is illegal outside of async body');
-      if ((lexerFlags & LF_IN_ASYNC) === LF_IN_ASYNC) THROW('Await not allowed here');
+
+    // TODO: this check can be drastically improved.
+    // note that any match here is usually an error (but not always, like strict mode or context specific stuff), but usually anyways
+    switch (identToken.str) {
+      // keywords
+      case 'break':
+      case 'case':
+      case 'catch':
+      case 'class':
+      case 'const':
+      case 'continue':
+      case 'debugger':
+      case 'default':
+      case 'delete':
+      case 'do':
+      case 'else':
+      case 'export':
+      case 'extends':
+      case 'finally':
+      case 'for':
+      case 'function':
+      case 'if':
+      case 'import':
+      case 'in':
+      case 'instanceof':
+      case 'new':
+      case 'return':
+      case 'super':
+      case 'switch':
+      case 'this':
+      case 'throw':
+      case 'try':
+      case 'typeof':
+      case 'var':
+      case 'void':
+      case 'while':
+      case 'with':
+      // null / boolean
+      case 'null':
+      case 'true':
+      case 'false':
+      // future reserved keyword:
+      case 'enum':
+        THROW('Cannot never use this reserved word as a variable name (`' + identToken.str + '`)');
+        break;
+
+      // strict mode keywords
+      case 'let':
+        if (bindingKind !== BINDING_TYPE_VAR) {
+          if (bindingKind === BINDING_TYPE_CLASS) THROW('Can not use `let` as a class name');
+          else THROW('Can not use `let` when binding through `let` or `const`');
+        }
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Can not use `let` as var name in strict mode');
+        break;
+      case 'static':
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+          THROW('Cannot not use this reserved word as a variable name in strict mode (`' + identToken.str + '`)');
+        }
+        break;
+
+      // strict mode only future reserved keyword:
+      case 'implements':
+      case 'package':
+      case 'protected':
+      case 'interface':
+      case 'private':
+      case 'public':
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+          THROW('Cannot not use this reserved word as a variable name in strict mode (`' + identToken.str + '`)');
+        }
+        break;
+
+      // conditional keywords (strict mode or context)
+      case 'await':
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+          THROW('Await is illegal outside of async body');
+        } else {
+          // in sloppy mode you cant use it inside an async function (and inside params defaults?)
+          if ((lexerFlags & LF_IN_ASYNC) === LF_IN_ASYNC) THROW('Await not allowed here');
+        }
+        break;
+      case 'yield':
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+          THROW('Cannot not use this reserved word as a variable name in strict mode (`' + identToken.str + '`)');
+        } else {
+          // in sloppy mode you cant use it inside a generator function (and inside params defaults?)
+        }
+        break;
     }
   }
 

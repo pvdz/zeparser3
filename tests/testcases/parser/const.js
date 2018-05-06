@@ -89,6 +89,159 @@ module.exports = (describe, test) => describe('let statement', _ => {
     // All variations of tests are executed for statement start, inside for-headers (4x), and in export declaration
     // When new syntax is introduced that allows let/const binding syntax those variations should apply to them as well
 
+    describe('reserved words', _ => {
+
+      [
+        'break',
+        'case',
+        'catch',
+        'class',
+        'const',
+        'continue',
+        'debugger',
+        'default',
+        'delete',
+        'do',
+        'else',
+        'export',
+        'extends',
+        'finally',
+        'for',
+        'function',
+        'if',
+        'import',
+        'in',
+        'instanceof',
+        'new',
+        'return',
+        'super',
+        'switch',
+        'this',
+        'throw',
+        'try',
+        'typeof',
+        'var',
+        'void',
+        'while',
+        'with',
+        // null / boolean
+        'null',
+        'true',
+        'false',
+        // future reserved keyword,
+        'enum',
+      ].forEach(name => {
+        describe(`always keyword=${name}`, _ => {
+          test(`var statement`, {
+            code: `var ${name} = x;`,
+            throws: 'reserved word',
+          });
+
+          test(`for header`, {
+            code: `for (const ${name} = x;;);`,
+            throws: 'reserved word',
+          });
+
+          test(`import regular`, {
+            code: `import ${name} as 'foo';`,
+            throws: true,
+          });
+
+          test(`import destruct`, {
+            code: `import {${name}} as 'foo';`,
+            throws: true,
+          });
+
+          test(`import alias destruct`, {
+            code: `import {x: ${name}} as 'foo';`,
+            throws: true,
+          });
+
+          test(`export`, {
+            code: `export const ${name} = 10;`,
+            SCRIPT: {
+              desc: 'export is only allowed in module code',
+              throws: true,
+            },
+            throws: 'reserved word',
+          });
+        });
+      });
+
+      // in strict mode only
+      [
+        'implements',
+        'package',
+        'protected',
+        'interface',
+        'private',
+        'public',
+        // 'let', // skip: has custom error messages (covered in other tests)
+        'static',
+        // 'await', // skip: has custom error messages (covered in other tests)
+        'yield',
+      ].forEach(name => {
+        describe(`strict mode keyword=${name}`, _ => {
+          test(`var statement`, {
+            code: `var ${name} = x;`,
+            throws: 'reserved word',
+            SLOPPY_SCRIPT: {ast: true, tokens: true},
+          });
+
+          test(`for header`, {
+            code: `for (var ${name} = x;;);`,
+            throws: 'reserved word',
+            SLOPPY_SCRIPT: {ast: true, tokens: true},
+          });
+
+          test(`function arg`, {
+            code: `function f(${name}) {}`,
+            throws: 'reserved word',
+            SLOPPY_SCRIPT: {ast: true, tokens: true},
+          });
+
+          test(`function object destructured arg`, {
+            code: `function f({${name}}) {}`,
+            throws: 'reserved word',
+            SLOPPY_SCRIPT: {ast: true, tokens: true},
+          });
+
+          test(`function object alias destructured arg`, {
+            code: `function f({x: ${name}}) {}`,
+            throws: 'reserved word',
+            SLOPPY_SCRIPT: {ast: true, tokens: true},
+          });
+
+          test(`function array destructured arg`, {
+            code: `function f([${name}]) {}`,
+            throws: 'reserved word',
+            SLOPPY_SCRIPT: {ast: true, tokens: true},
+          });
+
+          test(`catch clause`, {
+            code: `try {} catch (${name}) {}`,
+            throws: 'reserved word',
+            SLOPPY_SCRIPT: {ast: true, tokens: true},
+          });
+
+          test(`export`, {
+            code: `export var ${name} = 10;`,
+            SLOPPY: {
+              desc: 'export is only allowed in module code',
+              throws: 'export',
+            },
+            throws: 'reserved word',
+          });
+
+          test(`can be property`, {
+            code: `obj.${name}`,
+            ast: true,
+            tokens: true,
+          });
+        });
+      });
+    });
+
     describe('as a statement', _ => {
 
       describe('regular vars', _ => {
