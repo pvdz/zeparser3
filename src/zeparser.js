@@ -1,5 +1,3 @@
-console.log('verdergaan met asi dingesen. was ook bezig om expressions in eigen bestand te zetten enzo')
-
 //import {
 let {
   $$A_61,
