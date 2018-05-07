@@ -6,6 +6,7 @@ let {
   $NUMBER_BIN,
   $NUMBER_OCT,
   $NUMBER_OLD,
+  $PUNCTUATOR,
   $STRING_DOUBLE,
   $STRING_SINGLE,
 } = require('../../../../src/zetokenizer');
@@ -60,27 +61,27 @@ module.exports = (describe, test) => describe('literals', _ => {
   });
   
   test('double string literal',{
-    code: '"foo"',
-    ast: {type: 'Program', body: [
-      {type: 'ExpressionStatement', expression: {
-        type: 'Literal',
-        value: '<TODO>',
-        raw: '"foo"',
-      }},
-    ]},
-    tokens: [$STRING_DOUBLE, $ASI],
+    code: 'x;"foo"',
+    desc: 'the x prevents a directive',
+    ast: { type: 'Program',
+      body:
+        [ { type: 'ExpressionStatement',
+          expression: { type: 'Identifier', name: 'x' } },
+          { type: 'ExpressionStatement',
+            expression: { type: 'Literal', value: '<TODO>', raw: '"foo"' } } ] },
+    tokens: [$IDENT, $PUNCTUATOR, $STRING_DOUBLE, $ASI],
   });
   
   test('single string literal',{
-    code: `'foo'`,
-    ast: {type: 'Program', body: [
-      {type: 'ExpressionStatement', expression: {
-        type: 'Literal',
-        value: '<TODO>',
-        raw: `'foo'`,
-      }},
-    ]},
-    tokens: [$STRING_SINGLE, $ASI],
+    code: `x;'foo'`,
+    desc: 'the x prevents a directive',
+    ast: { type: 'Program',
+      body:
+        [ { type: 'ExpressionStatement',
+          expression: { type: 'Identifier', name: 'x' } },
+          { type: 'ExpressionStatement',
+            expression: { type: 'Literal', value: '<TODO>', raw: '\'foo\'' } } ] },
+    tokens: [$IDENT, $PUNCTUATOR, $STRING_SINGLE, $ASI],
   });
   
   test('decimal number',{

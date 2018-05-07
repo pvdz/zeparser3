@@ -226,6 +226,8 @@ const IS_EXPRESSION = true;
 const IS_STATEMENT = false;
 const IS_NEW_ARG = true;
 const NOT_NEW_ARG = false;
+const PARSE_DIRECTIVES = true;
+const IGNORE_DIRECTIVES = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -782,10 +784,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseBodyParts(lexerFlags) {
     AST_set('body', []);
-    _parseBodyParts(lexerFlags, 'body');
+    _parseBodyPartsWithDirectives(lexerFlags, 'body');
   }
 
-  function _parseBodyParts(lexerFlags, astProp) {
+  function parseDirectivePrologues(lexerFlags, astProp) {
+    // note: there may be multiple (bogus or valid) directives...
+    while ((curtype & $STRING) === $STRING) {
+      let dir = curtok.str.slice(1, -1);
+      if (dir === 'use strict') {
+        lexerFlags = lexerFlags | LF_STRICT_MODE;
+      }
+      AST_open(astProp, 'Directive');
+      AST_set('directive', dir);
+      AST_close('Directive');
+      ASSERT_skipDiv($STRING, lexerFlags);
+      parseSemiOrAsi(lexerFlags);
+    }
+    return lexerFlags;
+  }
+
+  function _parseBodyPartsWithDirectives(lexerFlags, astProp) {
+    ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
+    lexerFlags = parseDirectivePrologues(lexerFlags, 'body');
+    while (curtype !== $EOF && curc !== $$CURLY_R_7D) parseBodyPart(lexerFlags, astProp);
+  }
+
+  function _parseBodyPartsSansDirectives(lexerFlags, astProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     while (curtype !== $EOF && curc !== $$CURLY_R_7D) parseBodyPart(lexerFlags, astProp);
   }
@@ -942,7 +966,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseFunctionFromParams(lexerFlags, expressionState) {
     parseFuncArguments(lexerFlags);
-    parseBlockStatement(lexerFlags, expressionState, 'body');
+    parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, 'body');
   }
   function parseFuncArguments(lexerFlags) {
     // TODO: await expression inside the params (like default param) of an async function are illegal
@@ -1279,7 +1303,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
-  function parseBlockStatement(lexerFlags, blockType, astProp) {
+  function parseBlockStatement(lexerFlags, blockType, parseDirectives, astProp) {
+    ASSERT(arguments.length === 4, 'expecting 4 args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL);
@@ -1287,7 +1312,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'BlockStatement');
     AST_set('body', []);
     ASSERT_skipRex('{', lexerFlagsNoTemplate);
-    _parseBodyParts(lexerFlagsNoTemplate, 'body');
+    if (parseDirectives === PARSE_DIRECTIVES) {
+      _parseBodyPartsWithDirectives(lexerFlagsNoTemplate, 'body');
+    } else {
+      ASSERT(parseDirectives === IGNORE_DIRECTIVES, 'should be boolean');
+      _parseBodyPartsSansDirectives(lexerFlagsNoTemplate, 'body');
+    }
     if (blockType === IS_EXPRESSION) {
       skipDivOrDieSingleChar($$CURLY_R_7D, lexerFlags);
     } else {
@@ -2024,7 +2054,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let hasEither = false;
 
     ASSERT_skipAny('try', lexerFlags); // TODO: optimize; next must be {
-    parseBlockStatement(lexerFlags, IS_STATEMENT, 'block');
+    parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, 'block');
 
     if (curc === $$C_63 && curtok.str === 'catch') {
       hasEither = true;
@@ -2039,7 +2069,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc === $$COMMA_2C) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
       if (curc === $$IS_3D && curtok.str === '=') THROW('Catch clause parameter does not support default values');
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags); // TODO: optimize; next must be {
-      parseBlockStatement(lexerFlags, IS_STATEMENT, 'body');
+      parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, 'body');
       AST_close('CatchClause');
     } else {
       AST_set('handler', null);
@@ -2048,7 +2078,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$F_66 && curtok.str === 'finally') {
       hasEither = true;
       ASSERT_skipAny('finally', lexerFlags); // TODO: optimize; next must be {
-      parseBlockStatement(lexerFlags, IS_STATEMENT, 'finalizer');
+      parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, 'finalizer');
     } else {
       AST_set('finalizer', null);
     }
@@ -2262,7 +2292,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parsePunctuatorStatement(lexerFlags, astProp) {
     switch (curc) {
       case $$CURLY_L_7B:
-        parseBlockStatement(lexerFlags, IS_STATEMENT, astProp);
+        parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, astProp);
         break;
       case $$SEMI_3B:
         parseEmptyStatement(lexerFlags, astProp);
@@ -3751,7 +3781,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, NOT_GENERATOR, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
       AST_set('expression', BODY_IS_BLOCK); // "body of arrow is block"
-      parseBlockStatement(lexerFlags, IS_EXPRESSION, 'body');
+      parseBlockStatement(lexerFlags, IS_EXPRESSION, PARSE_DIRECTIVES, 'body');
     } else {
       AST_set('expression', BODY_IS_EXPR); // "body of arrow is expr"
       parseExpression(lexerFlags, 'body'); // TODO: what about curlyLexerFlags here?

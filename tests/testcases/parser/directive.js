@@ -1,0 +1,454 @@
+let {
+  $ASI,
+  $IDENT,
+  $NUMBER_DEC,
+  $PUNCTUATOR,
+  $STRING_DOUBLE,
+  $STRING_SINGLE,
+  $TICK_HEAD,
+  $TICK_TAIL,
+} = require('../../../src/zetokenizer');
+
+module.exports = (describe, test) => describe('directive prologues', _ => {
+
+  describe('global', _ => {
+
+    test('single directive single string', {
+      code: '\'foo\';',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'Directive', directive: 'foo' } ] },
+      tokens: [$STRING_SINGLE, $PUNCTUATOR],
+    });
+
+    test('single directive double string', {
+      code: '"foo";',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'Directive', directive: 'foo' } ] },
+      tokens: [$STRING_DOUBLE, $PUNCTUATOR],
+    });
+
+    test('single directive without semi, eof', {
+      code: '"foo"',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'Directive', directive: 'foo' } ] },
+      tokens: [$STRING_DOUBLE, $ASI],
+    });
+
+    test('single directive without semi, asi', {
+      code: '"foo"\nx',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'Directive', directive: 'foo' },
+            { type: 'ExpressionStatement',
+              expression: { type: 'Identifier', name: 'x' } } ] },
+      tokens: [$STRING_DOUBLE, $ASI, $IDENT, $ASI],
+    });
+
+    test('multi directive on same line', {
+      code: '"foo";"bar";',
+      ast: { type: 'Program',
+        body:
+          [
+            { type: 'Directive', directive: 'foo' },
+            { type: 'Directive', directive: 'bar' },
+          ] },
+      tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
+    });
+
+    test('multi directive on same line sans semi', {
+      code: '"foo" "bar"',
+      throws: true,
+    });
+
+    test('multi directive on own line', {
+      code: '"foo";\n"bar";',
+      ast: { type: 'Program',
+        body:
+          [
+            { type: 'Directive', directive: 'foo' },
+            { type: 'Directive', directive: 'bar' },
+          ] },
+      tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
+    });
+
+    test('multi directive on own line', {
+      code: '\'foo\';\n\'bar\';',
+      ast: { type: 'Program',
+        body:
+          [
+            { type: 'Directive', directive: 'foo' },
+            { type: 'Directive', directive: 'bar' },
+          ] },
+      tokens: [$STRING_SINGLE, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR],
+    });
+
+    test('multi directive mixed quotes single first', {
+      code: '\'foo\';\n"bar";',
+      ast: { type: 'Program',
+        body:
+          [
+            { type: 'Directive', directive: 'foo' },
+            { type: 'Directive', directive: 'bar' },
+          ] },
+      tokens: [$STRING_SINGLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
+    });
+
+    test('multi directive mixed quotes single last', {
+      code: '"foo";\n\'bar\';',
+      ast: { type: 'Program',
+        body:
+          [
+            { type: 'Directive', directive: 'foo' },
+            { type: 'Directive', directive: 'bar' },
+          ] },
+      tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR],
+    });
+
+    test('multi directive with single comment', {
+      code: '"foo"\n// stuff here\n"bar";',
+      ast: { type: 'Program',
+        body:
+          [
+            { type: 'Directive', directive: 'foo' },
+            { type: 'Directive', directive: 'bar' },
+          ] },
+      tokens: [$STRING_DOUBLE, $ASI, $STRING_DOUBLE, $PUNCTUATOR],
+    });
+
+    test('multi directive with multi comment sans asi', {
+      code: '"foo";/*abc\nxyz*/"bar";',
+      ast: { type: 'Program',
+        body:
+          [
+            { type: 'Directive', directive: 'foo' },
+            { type: 'Directive', directive: 'bar' },
+          ] },
+      tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
+    });
+
+    test('multi directive with multi comment causing asi', {
+      code: '"foo"/*abc\nxyz*/"bar";',
+      ast: { type: 'Program',
+        body:
+          [
+            { type: 'Directive', directive: 'foo' },
+            { type: 'Directive', directive: 'bar' },
+          ] },
+      tokens: [$STRING_DOUBLE, $ASI, $STRING_DOUBLE, $PUNCTUATOR],
+    });
+  });
+
+  describe('regular function', _ => {
+
+    test('single directive single string', {
+      code: 'function f(){\n\'foo\';\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body: [ { type: 'Directive', directive: 'foo' } ] } } ] },
+      tokens: true,
+    });
+
+    test('single directive double string', {
+      code: 'function f(){\n"foo";\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body: [ { type: 'Directive', directive: 'foo' } ] } } ] },
+      tokens: true,
+    });
+
+    test('single directive without semi, eof', {
+      code: 'function f(){\n"foo"\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body: [ { type: 'Directive', directive: 'foo' } ] } } ] },
+      tokens: true,
+    });
+
+    test('single directive without semi, asi', {
+      code: 'function f(){\n"foo"\nx\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'ExpressionStatement',
+                      expression: { type: 'Identifier', name: 'x' } } ] } } ] },
+      tokens: true,
+    });
+
+    test('multi directive on same line', {
+      code: 'function f(){\n"foo";"bar";\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'Directive', directive: 'bar' } ] } } ] },
+      tokens: true,
+    });
+
+    test('multi directive on same line sans semi', {
+      code: 'function f(){\n"foo" "bar"',
+      throws: true,
+    });
+
+    test('multi directive on own line', {
+      code: 'function f(){\n"foo";\n"bar";\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'Directive', directive: 'bar' } ] } } ] },
+      tokens: true,
+    });
+
+    test('multi directive on own line', {
+      code: 'function f(){\n\'foo\';\n\'bar\';\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'Directive', directive: 'bar' } ] } } ] },
+      tokens: true,
+    });
+
+    test('multi directive mixed quotes single first', {
+      code: 'function f(){\n\'foo\';\n"bar";\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'Directive', directive: 'bar' } ] } } ] },
+      tokens: true,
+    });
+
+    test('multi directive mixed quotes single last', {
+      code: 'function f(){\n"foo";\n\'bar\';\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'Directive', directive: 'bar' } ] } } ] },
+      tokens: true,
+    });
+
+    test('multi directive with single comment', {
+      code: 'function f(){\n"foo"\n// stuff here\n"bar";\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'Directive', directive: 'bar' } ] } } ] },
+      tokens: true,
+    });
+
+    test('multi directive with multi comment sans asi', {
+      code: 'function f(){\n"foo";/*abc\nxyz*/"bar";\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'Directive', directive: 'bar' } ] } } ] },
+      tokens: true,
+    });
+
+    test('multi directive with multi comment causing asi', {
+      code: 'function f(){\n"foo"/*abc\nxyz*/"bar";\n}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body:
+                  [ { type: 'Directive', directive: 'foo' },
+                    { type: 'Directive', directive: 'bar' } ] } } ] },
+      tokens: true,
+    });
+  });
+
+  describe('function variations', _ => {
+
+    // check other function variations once, to confirm the Delaration shows up at all
+    // since they all use the same body parsing logic we dont need to repeat all tests in perpetuity
+
+    test('check node with paren-less arrow', {
+      code: 'x => { "use strict"; }',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'ArrowFunctionExpression',
+                params: [ { type: 'Identifier', name: 'x' } ],
+                id: null,
+                generator: false,
+                async: false,
+                expression: false,
+                body:
+                  { type: 'BlockStatement',
+                    body: [ { type: 'Directive', directive: 'use strict' } ] } } } ] },
+      tokens: true,
+    });
+
+    test('check node with parened arrow', {
+      code: '() => { "use strict"; }',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'ArrowFunctionExpression',
+                params: [],
+                id: null,
+                generator: false,
+                async: false,
+                expression: false,
+                body:
+                  { type: 'BlockStatement',
+                    body: [ { type: 'Directive', directive: 'use strict' } ] } } } ] },
+      tokens: true,
+    });
+
+    test('check node with async arrow', {
+      code: 'async x => { "use strict"; }',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'ArrowFunctionExpression',
+                params: [ { type: 'Identifier', name: 'x' } ],
+                id: null,
+                generator: false,
+                async: true,
+                expression: false,
+                body:
+                  { type: 'BlockStatement',
+                    body: [ { type: 'Directive', directive: 'use strict' } ] } } } ] },
+      tokens: true,
+    });
+
+    test('check node with asyc function', {
+      code: 'async function f() { "use strict"; }',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body: [ { type: 'Directive', directive: 'use strict' } ] } } ] },
+      tokens: true,
+    });
+
+    test('check node with generator function', {
+      code: 'function* f() { "use strict"; }',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body: [ { type: 'Directive', directive: 'use strict' } ] } } ] },
+      tokens: true,
+    });
+  });
+});
