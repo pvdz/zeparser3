@@ -1789,6 +1789,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close(['ForStatement', 'ForInStatement', 'ForOfStatement']);
   }
   function parseForHeader(lexerFlags, astProp) {
+    // TODO: confirm we do this; > It is a Syntax Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
     // first parse a simple expression and check whether it's assignable (var or prop)
     let assignable = false;
     let wasNotDecl = false;
@@ -2375,6 +2376,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseIncDecStatement(lexerFlags, astProp) {
+    // TODO: for all --/++ confirm we properly do > It is an early Reference Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
     AST_open(astProp, 'ExpressionStatement');
     AST_open('expression', 'UpdateExpression');
     AST_set('operator', curtok.str);
@@ -2506,6 +2508,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
     } else if (curc === $$DOT_2E && curtok.str === '...') {
+      if (bindingType !== BINDING_TYPE_ARG) TODO; // error...
       parseBindingRest(lexerFlags, $$PAREN_R_29, bindingType, astProp);
     } else if (curc === $$PAREN_R_29) {
       if (!options_trailingArgComma) {
@@ -2539,6 +2542,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('init', null);
       AST_close('VariableDeclarator');
     }
+
     return hadInit;
   }
   function parseBindingObjectDestructs(lexerFlags, bindingType, astProp) {
@@ -2674,6 +2678,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseBindingArrayDestructs(lexerFlags, bindingType, astProp);
     } else if (curc === $$DOT_2E && curtok.str === '...') {
       parseBindingRest(lexerFlags, $$SQUARE_R_5D, bindingType, astProp);
+      ASSERT(curtok.str !== $$IS_3D, 'should have been verified');
       return;
     } else if (curc === $$SQUARE_R_5D) { // empty array, trailing comma
       return;
@@ -2690,8 +2695,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function parseBindingRest(lexerFlags, closingChar, bindingType, astProp) {
-    // specific to function args
-    // TODO: _must_ be the last arg
     ASSERT(arguments.length === 4, 'want 4 args');
     ASSERT_skipAny('...', lexerFlags); // TODO: next is ident or [{
     if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not rest twice');
@@ -2699,6 +2702,35 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Rest missing an ident or destruct');
     }
     AST_open(astProp, 'RestElement');
+
+    // So the rest on an array is an assignmentexpression but the rest on a destructuring,
+    // a binding, or func args, has to be an ident or array/object pattern
+
+    // Arrays:
+    // https://tc39.github.io/ecma262/#prod-SpreadElement
+
+    // Bindings, Args, Destructurings:
+    // in no production is rest allowing an init:
+    // var
+    // https://tc39.github.io/ecma262/#prod-VariableStatement
+    // https://tc39.github.io/ecma262/#prod-VariableDeclaration
+    // https://tc39.github.io/ecma262/#prod-BindingPattern ->
+    // let/const
+    // https://tc39.github.io/ecma262/#prod-LexicalDeclaration
+    // https://tc39.github.io/ecma262/#prod-LexicalBinding
+    // https://tc39.github.io/ecma262/#prod-BindingPattern ->
+    // binding destructuring:
+    // https://tc39.github.io/ecma262/#prod-ArrayAssignmentPattern ->
+    // https://tc39.github.io/ecma262/#prod-BindingRestElement
+    // https://tc39.github.io/ecma262/#prod-BindingPattern ->
+    // this is okay in functions:
+    // https://tc39.github.io/ecma262/#prod-FunctionDeclaration
+    // https://tc39.github.io/ecma262/#prod-FunctionRestParameter
+    // https://tc39.github.io/ecma262/#prod-BindingRestElement
+    // https://tc39.github.io/ecma262/#prod-BindingPattern ->
+    // -> binding pattern:
+    // https://tc39.github.io/ecma262/#prod-BindingPattern
+    // this is either [] array or {} object wrapped with no further outer assignments (or anything)
 
     if (curtype === $IDENT) {
       bindingIdentCheck(curtok, bindingType, lexerFlags);
@@ -2713,6 +2745,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     AST_close('RestElement');
+
     if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
     if (curc !== closingChar) THROW('Can not have more destructuring parts follow a rest, not even a trailing comma', curtok.str);
   }

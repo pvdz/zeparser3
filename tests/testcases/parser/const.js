@@ -44,7 +44,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
     // const [...[a, b],] = obj;    // ok!
     // const [...[a, b],,] = obj;   // error
     // const [x, ...[a, b]] = obj;
-    // const [...bar = foo] = obj;  // error (TODO: except in funcs, arrows, and maybe `for`?)
+    // const [...bar = foo] = obj;  // error
     // const [... ...foo] = obj;    // error
     // const [...] = obj;           // error
     // const [...,] = obj;          // error
@@ -764,7 +764,6 @@ module.exports = (describe, test) => describe('let statement', _ => {
             test('rest followed by an ident', {
               code: 'const [...foo, bar] = obj;',
               throws: 'follow a rest',
-              tokens: [],
             });
 
             test('rest followed by a trailing comma', {
@@ -838,20 +837,17 @@ module.exports = (describe, test) => describe('let statement', _ => {
             test('rest with default', {
               code: 'const [...bar = foo] = obj;',
               throws: 'a rest value',
-              desc: 'rest cannot get a default in var decls but they can as func args',
-              tokens: [],
+              desc: 'ok in func args, not possible in const according to https://tc39.github.io/ecma262/#prod-BindingRestElement',
             });
 
             test('double rest / spread rest', {
               code: 'const [... ...foo] = obj;',
               throws: 'Can not rest twice',
-              tokens: [],
             });
 
-            test('rest without value', {
+            test('rest without expr', {
               code: 'const [...] = obj;',
               throws: 'missing an ident or destruct',
-              tokens: [],
             });
 
             test('rest with comma without value', {
@@ -2457,7 +2453,6 @@ module.exports = (describe, test) => describe('let statement', _ => {
               test('rest followed by an ident', {
                 code: 'for (const [...foo, bar] = obj;;);',
                 throws: 'follow a rest',
-                tokens: [],
               });
 
               test('rest followed by a trailing comma', {
@@ -3621,7 +3616,6 @@ module.exports = (describe, test) => describe('let statement', _ => {
               test('rest followed by an ident', {
                 code: 'for (const [...foo, bar] = obj);',
                 throws: 'follow a rest',
-                tokens: [],
               });
 
               test('rest followed by a trailing comma', {
@@ -6792,7 +6786,6 @@ module.exports = (describe, test) => describe('let statement', _ => {
               code: 'export const [...foo, bar] = obj;',
               throws: 'follow a rest',
               SCRIPT: {throws: 'module goal'},
-              tokens: [],
             });
 
             test('rest followed by a trailing comma', {

@@ -78,6 +78,73 @@ module.exports = (describe, test) => describe('functions', _ => {
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
 
+  describe('rest', _ => {
+
+    test('support only rest arg', {
+      code: 'function f(...rest){}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params:
+              [ { type: 'RestElement',
+                argument: { type: 'Identifier', name: 'rest' } } ],
+            body: { type: 'BlockStatement', body: [] } } ] },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('support rest arg with other args', {
+      code: 'function f(a, b, ...rest){}',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params:
+              [ { type: 'Identifier', name: 'a' },
+                { type: 'Identifier', name: 'b' },
+                { type: 'RestElement',
+                  argument: { type: 'Identifier', name: 'rest' } } ],
+            body: { type: 'BlockStatement', body: [] } } ] },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('rest must be last', {
+      code: 'function f(...rest, b){}',
+      throws: 'rest',
+    });
+
+    test('rest cannot be middle', {
+      code: 'function f(a, ...rest, b){}',
+      throws: 'rest',
+    });
+
+    test('rest has no assignment expression', {
+      code: 'function f(...rest = x){}',
+      throws: 'rest',
+    });
+
+    test('rest cannot be addition', {
+      code: 'function f(...rest + x){}',
+      throws: 'rest',
+    });
+
+    test('rest cannot be a property', {
+      code: 'function f(...rest.foo){}',
+      throws: 'rest',
+    });
+
+    test('rest cannot be a group', {
+      code: 'function f(...(x)){}',
+      throws: 'Rest missing an ident or destruct',
+    });
+  });
+
   describe('regex edge case', _ => {
 
     describe('sans async', _ => {

@@ -34,6 +34,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
           lcname.indexOf('asyncgenerator') < 0 && // TODO: this is a stage proposal, we'll probably add this soon
           //lcname.indexOf('async-generator') < 0 && // TODO: this is a stage proposal, we'll probably add this soon
           lcname.indexOf('redeclare-with-') < 0 && // TOOD: fix once we fix scoping and duplicate binding checks (class, async)
+          lcname.indexOf('dflt-params-trailing-') < 0 && // TOOD: trailing comma in func parameter
           lcname.indexOf('property-escapes') < 0 // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         )};
       }
