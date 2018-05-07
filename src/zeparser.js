@@ -792,17 +792,62 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseDirectivePrologues(lexerFlags, astProp) {
     // note: there may be multiple (bogus or valid) directives...
     while ((curtype & $STRING) === $STRING) {
-      let dir = curtok.str.slice(1, -1);
-      if (dir === 'use strict') {
-        lexerFlags = lexerFlags | LF_STRICT_MODE;
+      // we must first parse as usual to confirm this is an isolated string and not
+      // something like `''.foo` or `'' + x`. We can't easily scan forward in this
+      // case since asi is only applied when the next token would cause a syntax
+      // error. There many tokens to check. However this is a fairly cold path since
+      // this will almost never happen outside of "use strict" so perhaps a pervasive
+      // scan here is not so bad... And let's face it; trivial cases are quickly found.
+
+      let stringToken = curtok;
+      ASSERT_skipDiv($STRING, lexerFlags); // statement start means div
+
+      // Remember; this is always the case of a statement that starts with a string and
+      // we are checking the next token after that
+
+      if (isDirective()) {
+        lexerFlags = parseDirectivePrologue(lexerFlags, stringToken, astProp);
+      } else {
+        // not ideal but this almost never happens
+        _parseFromLiteralStatement(lexerFlags, stringToken, astProp)
       }
-      AST_open(astProp, 'Directive');
-      AST_set('directive', dir);
-      AST_close('Directive');
-      ASSERT_skipDiv($STRING, lexerFlags);
-      parseSemiOrAsi(lexerFlags);
     }
     return lexerFlags;
+  }
+  function parseDirectivePrologue(lexerFlags, stringToken, astProp) {
+    AST_open(astProp, 'Directive');
+    let dir = stringToken.str.slice(1, -1);
+    if (dir === 'use strict') {
+      lexerFlags = lexerFlags | LF_STRICT_MODE;
+    }
+    AST_set('directive', dir);
+    AST_close('Directive');
+    parseSemiOrAsi(lexerFlags);
+
+    return lexerFlags;
+  }
+
+  function isDirective() {
+    // scan for simple cases first
+    if (curc === $$SEMI_3B || curc === $$CURLY_R_7D) return true;
+    if (!curtok.nl) {
+      if (curtype === $EOF) return true; // meh. useless in global, leads to an error in any other case. but okay!
+      return false; // no chance to ASI
+    }
+    if (curtok.str === '++' || curtok.str === '--') return false;
+    if (curtype !== $PUNCTUATOR) {
+      if (curtok.str === 'in' || curtok.str === 'instanceof') {
+        return false;
+      }
+      // considering the current token is a string;
+      // only certain punctuators and in/instanceof would be valid
+      // tokens next and we checked those so the newline causes ASI
+      return true;
+    }
+    // so there is a newline and the next token is a punctuation.
+    // we confirmed the edge cases so just consider ASI not allowed here.
+    // TODO: puncs that are invalid here should lead to ASI (and then fail later). How valuable is that level of correctness?
+    return false;
   }
 
   function _parseBodyPartsWithDirectives(lexerFlags, astProp) {
@@ -836,6 +881,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - the semi would be empty
     // - the next line starts with forward slash
     // - the semi would be part of a for-header
+    // TODO: should check whether the next token would be "an error"; especially the newline case makes no such effort :(
     if (curc === $$FWDSLASH_2F) {
       ASSERT(false, 'Tried to apply ASI but next token starts with forward slash. This could be a legit error. Confirm and make sure parser path is properly setting regex/div flag.');
       THROW('Cannot apply ASI when next token starts with forward slash (this could very well be a bug in the parser...)');
@@ -1079,9 +1125,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseFromLiteralStatement(lexerFlags, astProp) {
+    let stringToken = curtok;
+    skipDiv(lexerFlags); // note: this can be any literal
+    _parseFromLiteralStatement(lexerFlags, stringToken, astProp);
+  }
+  function _parseFromLiteralStatement(lexerFlags, stringToken, astProp) {
     AST_open(astProp, 'ExpressionStatement');
-    AST_setLiteral('expression', curtok);
-    skipDiv(lexerFlags);
+    AST_setLiteral('expression', stringToken);
     parseExpressionAfterLiteral(lexerFlags | LF_CAN_POSTFIX_ASI, 'expression');
     AST_close('ExpressionStatement');
     parseSemiOrAsi(lexerFlags);

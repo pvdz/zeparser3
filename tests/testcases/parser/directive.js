@@ -139,6 +139,92 @@ module.exports = (describe, test) => describe('directive prologues', _ => {
           ] },
       tokens: [$STRING_DOUBLE, $ASI, $STRING_DOUBLE, $PUNCTUATOR],
     });
+
+    test('not a directive if a binary op follows it', {
+      code: '"ignore me" + x',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'BinaryExpression',
+                left: { type: 'Literal', value: '<TODO>', raw: '"ignore me"' },
+                operator: '+',
+                right: { type: 'Identifier', name: 'x' } } } ] },
+      tokens: [$STRING_DOUBLE, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('should not over-aggressively apply ASI', {
+      code: '"ignore me"\n+ x',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'BinaryExpression',
+                left: { type: 'Literal', value: '<TODO>', raw: '"ignore me"' },
+                operator: '+',
+                right: { type: 'Identifier', name: 'x' } } } ] },
+      tokens: [$STRING_DOUBLE, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('should expect a div', {
+      code: '"ignore me"\n/x/g',
+      desc: 'div on statement start is never a regex so this is the division (string/x)/g',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'BinaryExpression',
+                left:
+                  { type: 'BinaryExpression',
+                    left: { type: 'Literal', value: '<TODO>', raw: '"ignore me"' },
+                    operator: '/',
+                    right: { type: 'Identifier', name: 'x' } },
+                operator: '/',
+                right: { type: 'Identifier', name: 'g' } } } ] },
+      tokens: [$STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI], // NOT regex!
+    });
+
+    test('postfix ++ on string is still and always an error', {
+      code: '"ignore me"++',
+      throws: true,
+    });
+
+    test('apply ++ asi properly and add a directive', {
+      code: '"ignore me"\n++x',
+      desc: 'the ++ is a restricted production and so the string is a directive',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression: { type: 'Literal', value: '<TODO>', raw: '"ignore me"' } },
+            { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'x' } } } ] },
+      tokens: [$STRING_DOUBLE, $ASI, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('assignment to string is still and always an error', {
+      code: '"ignore me" = x',
+      throws: true,
+    });
+
+    test('end of body can be valid asi', {
+      code: 'function f(){ "use strict" }',
+      ast: { type: 'Program',
+        body:
+          [ { type: 'FunctionDeclaration',
+            generator: false,
+            async: false,
+            expression: false,
+            id: { type: 'Identifier', name: 'f' },
+            params: [],
+            body:
+              { type: 'BlockStatement',
+                body: [ { type: 'Directive', directive: 'use strict' } ] } } ] },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $ASI, $PUNCTUATOR],
+    });
   });
 
   describe('regular function', _ => {
