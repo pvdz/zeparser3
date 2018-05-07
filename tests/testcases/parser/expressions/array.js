@@ -123,6 +123,156 @@ module.exports = (describe, test) => describe('arrays', _ => {
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
     });
 
+    describe('spread', _ => {
+      // https://tc39.github.io/ecma262/#prod-SpreadElement
+      // ...AssignmentExpression[+In, ?Yield, ?Await]
+      // (in other words; any expression is fair game here)
+
+      test('splat another value', {
+        code: '[x, y, ...z]',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'ArrayExpression',
+                  elements:
+                    [ { type: 'Identifier', name: 'x' },
+                      { type: 'Identifier', name: 'y' },
+                      { type: 'SpreadElement',
+                        argument: { type: 'Identifier', name: 'z' } } ] } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can splat in the middle', {
+        code: '[x, ...y, z]',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'ArrayExpression',
+                  elements:
+                    [ { type: 'Identifier', name: 'x' },
+                      { type: 'SpreadElement',
+                        argument: { type: 'Identifier', name: 'y' } },
+                      { type: 'Identifier', name: 'z' } ] } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can splat an assignment at the end', {
+        code: '[x, y, ...z = arr]',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'ArrayExpression',
+                  elements:
+                    [ { type: 'Identifier', name: 'x' },
+                      { type: 'Identifier', name: 'y' },
+                      { type: 'SpreadElement',
+                        argument:
+                          { type: 'AssignmentExpression',
+                            left: { type: 'Identifier', name: 'z' },
+                            operator: '=',
+                            right: { type: 'Identifier', name: 'arr' } } } ] } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can splat a call at the end', {
+        code: '[x, y, ...z()]',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'ArrayExpression',
+                  elements:
+                    [ { type: 'Identifier', name: 'x' },
+                      { type: 'Identifier', name: 'y' },
+                      { type: 'SpreadElement',
+                        argument:
+                          { type: 'CallExpression',
+                            callee: { type: 'Identifier', name: 'z' },
+                            arguments: [] } } ] } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('can splat an expression at the end', {
+        code: '[x, y, ...z + arr]',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'ArrayExpression',
+                  elements:
+                    [ { type: 'Identifier', name: 'x' },
+                      { type: 'Identifier', name: 'y' },
+                      { type: 'SpreadElement',
+                        argument:
+                          { type: 'BinaryExpression',
+                            left: { type: 'Identifier', name: 'z' },
+                            operator: '+',
+                            right: { type: 'Identifier', name: 'arr' } } } ] } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can splat an assignment at the end', {
+        code: '[x, ...z = arr, y]',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'ArrayExpression',
+                  elements:
+                    [ { type: 'Identifier', name: 'x' },
+                      { type: 'SpreadElement',
+                        argument:
+                          { type: 'AssignmentExpression',
+                            left: { type: 'Identifier', name: 'z' },
+                            operator: '=',
+                            right: { type: 'Identifier', name: 'arr' } } },
+                      { type: 'Identifier', name: 'y' } ] } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can splat a call at the end', {
+        code: '[x, ...z(), y]',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'ArrayExpression',
+                  elements:
+                    [
+                      { type: 'Identifier', name: 'x' },
+                      { type: 'SpreadElement',
+                        argument: {
+                          type: 'CallExpression',
+                          callee: { type: 'Identifier', name: 'z' },
+                          arguments: []
+                        }
+                      },
+                      { type: 'Identifier', name: 'y' } ] } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can splat an expression at the end', {
+        code: '[x, ...z + arr, y]',
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'ArrayExpression',
+                  elements:
+                    [ { type: 'Identifier', name: 'x' },
+                      { type: 'SpreadElement',
+                        argument:
+                          { type: 'BinaryExpression',
+                            left: { type: 'Identifier', name: 'z' },
+                            operator: '+',
+                            right: { type: 'Identifier', name: 'arr' } } },
+                      { type: 'Identifier', name: 'y' } ] } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+    });
   });
 
   describe('destructuring', _ => {

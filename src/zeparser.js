@@ -3131,8 +3131,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else if (curc === $$DOT_2E) {
         if (curtok.str === '...') {
           AST_open(astProp, 'SpreadElement');
-          ASSERT_skipAny($PUNCTUATOR, lexerFlags); // TODO: optimize; next token can not start with a fwd slash
-          parseValue(lexerFlags, 'argument');
+          ASSERT_skipRex($PUNCTUATOR, lexerFlags); // next token is expression start
+          // note: an "AssignmentExpression" is actually one Expression while "Expression" is expressions (plural)
+          parseExpression(lexerFlags, 'argument');
           AST_close('SpreadElement');
           return NOT_ASSIGNABLE;
         } else {
@@ -3560,6 +3561,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
       parseObjLitAnyFromLitKey(lexerFlags, WAS_COMPUTED, astProp);
     } else {
+      if (curtok.str === '...') TODO_object_spread;
       console.log('Next error:', startToken);
       THROW('Unknown property name declaration in previous token'); // position will be slightly off :(
     }
