@@ -246,4 +246,309 @@ module.exports = (describe, test) => describe('strict mode', _ => {
       });
     });
   });
+
+  describe('eval', _ => {
+
+    test('cannot assign to eval', {
+      code: 'eval = x',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'AssignmentExpression',
+                  left: { type: 'Identifier', name: 'eval' },
+                  operator: '=',
+                  right: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    });
+
+    test('cannot postinc eval', {
+      code: 'eval++',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  argument: { type: 'Identifier', name: 'eval' },
+                  operator: '++',
+                  prefix: false } } ] },
+        tokens: [$IDENT, $PUNCTUATOR, $ASI],
+      },
+    });
+
+    test('cannot pre-dec eval', {
+      code: '--eval',
+      throws: 'Cannot inc/dec a non-assignable value',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'UpdateExpression',
+                  operator: '--',
+                  prefix: true,
+                  argument: { type: 'Identifier', name: 'eval' } } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      },
+    });
+
+    test('cannot compound assign to eval', {
+      code: 'eval += x',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'AssignmentExpression',
+                  left: { type: 'Identifier', name: 'eval' },
+                  operator: '+=',
+                  right: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    });
+
+    // TODO: will have to circle back for these later. they require a large architectural change.
+    // test('cannot destruct assign to eval', {
+    //   code: '([eval]) = [x]',
+    //   desc: 'vs `([eval]) => [x]`',
+    //   throws: 'eval',
+    //   SLOPPY_SCRIPT: {
+    //     ast: { type: 'Program',
+    //       body:
+    //         [ { type: 'ExpressionStatement',
+    //           expression:
+    //             { type: 'AssignmentExpression',
+    //               left:
+    //                 { type: 'ArrayPattern',
+    //                   elements: [ { type: 'Identifier', name: 'eval' } ] },
+    //               operator: '=',
+    //               right:
+    //                 { type: 'ArrayExpression',
+    //                   elements: [ { type: 'Identifier', name: 'x' } ] } } } ] },
+    //     tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    //   },
+    // });
+    //
+    // test('groups are just one way to destruct', {
+    //   code: 'x, [eval] = [x]',
+    //   desc: 'vs `x, [eval].foo`; make sure we dont assume destructuring without var/let/const happens with a group; that is just a way to disambiguate',
+    //   throws: 'eval',
+    //   SLOPPY_SCRIPT: {
+    //     ast: { type: 'Program',
+    //       body:
+    //         [ { type: 'ExpressionStatement',
+    //           expression:
+    //             { type: 'AssignmentExpression',
+    //               left:
+    //                 { type: 'ArrayPattern',
+    //                   elements: [ { type: 'Identifier', name: 'eval' } ] },
+    //               operator: '=',
+    //               right:
+    //                 { type: 'ArrayExpression',
+    //                   elements: [ { type: 'Identifier', name: 'x' } ] } } } ] },
+    //     tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    //   },
+    // });
+
+    test('cannot import an eval', {
+      code: 'import eval from "x";',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {throws: 'module goal'},
+    });
+
+    test('cannot import an eval sans source', {
+      code: 'import eval;',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {throws: 'module goal'},
+    });
+
+    test('cannot import a destructed eval', {
+      code: 'import {eval} from "x";',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {throws: 'module goal'},
+    });
+
+    test('cannot import an alias eval', {
+      code: 'import {foo as eval} from "x";',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {throws: 'module goal'},
+    });
+
+    test('cannot export an eval', {
+      code: 'export var eval = x;',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {throws: 'module goal'},
+    });
+
+    test('cannot default export an eval', {
+      code: 'export default var eval = x;',
+      desc: 'default exports do not allow var bindings (var/let/const) so just make sure this throws and move on',
+      throws: true,
+    });
+
+    test('cannot use eval as catch var', {
+      code: 'try {} catch (eval) {}',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'TryStatement',
+              block: { type: 'BlockStatement', body: [] },
+              handler:
+                { type: 'CatchClause',
+                  param: { type: 'Identifier', name: 'eval' },
+                  body: { type: 'BlockStatement', body: [] } },
+              finalizer: null } ] },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+    });
+
+    test('cannot use eval as func name', {
+      code: 'function eval() {}',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'FunctionDeclaration',
+              generator: false,
+              async: false,
+              expression: false,
+              id: { type: 'Identifier', name: 'eval' },
+              params: [],
+              body: { type: 'BlockStatement', body: [] } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+    });
+
+    test('cannot use eval as async func name', {
+      code: 'async function eval() {}',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'FunctionDeclaration',
+              generator: false,
+              async: true,
+              expression: false,
+              id: { type: 'Identifier', name: 'eval' },
+              params: [],
+              body: { type: 'BlockStatement', body: [] } } ] },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+    });
+
+    test('cannot use eval as generator func name', {
+      code: 'function* eval() {}',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'FunctionDeclaration',
+              generator: true,
+              async: false,
+              expression: false,
+              id: { type: 'Identifier', name: 'eval' },
+              params: [],
+              body: { type: 'BlockStatement', body: [] } } ] },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+    });
+
+    test('cannot use eval as arg name', {
+      code: 'function f(eval) {}',
+      throws: 'eval',
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'FunctionDeclaration',
+              generator: false,
+              async: false,
+              expression: false,
+              id: { type: 'Identifier', name: 'f' },
+              params: [ { type: 'Identifier', name: 'eval' } ],
+              body: { type: 'BlockStatement', body: [] } } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      },
+    });
+
+    test('cannot use eval as func name', {
+      code: 'var eval = x;',
+      throws: 'eval',
+      SLOPPY_SCRIPT:  {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'VariableDeclaration',
+              kind: 'var',
+              declarations:
+                [ { type: 'VariableDeclarator',
+                  id: { type: 'Identifier', name: 'eval' },
+                  init: { type: 'Identifier', name: 'x' } } ] } ] },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      },
+    });
+
+    test('cannot use eval as let name', {
+      code: 'let eval = x;',
+      throws: 'eval',
+    });
+
+    test('cannot use eval as const name', {
+      code: 'const eval = x;',
+      throws: 'eval',
+    });
+
+    test('cannot assign to grouped eval', {
+      code: '(eval) = x;',
+      throws: 'Unable to ASI', // because `eval` is not assignable
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'AssignmentExpression',
+                  left: { type: 'Identifier', name: 'eval' },
+                  operator: '=',
+                  right: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      },
+    });
+
+    test('should not pass because of newline / asi', {
+      code: '(eval)\n = x;',
+      throws: 'Expected to parse a value', // applies ASI but then hits a wall
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'AssignmentExpression',
+                  left: { type: 'Identifier', name: 'eval' },
+                  operator: '=',
+                  right: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      },
+    });
+
+    test('cannot assign to multi grouped eval', {
+      code: '((((eval)))) = x;',
+      throws: 'Unable to ASI', // because `eval` is not assignable
+      SLOPPY_SCRIPT: {
+        ast: { type: 'Program',
+          body:
+            [ { type: 'ExpressionStatement',
+              expression:
+                { type: 'AssignmentExpression',
+                  left: { type: 'Identifier', name: 'eval' },
+                  operator: '=',
+                  right: { type: 'Identifier', name: 'x' } } } ] },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      },
+    });
+  });
 });
