@@ -3854,10 +3854,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseGroupOrArrow(lexerFlags, asyncKeywordPrefixed, astProp) {
     // returns whether the expression is assignable (ie, `(x)=5` is valid)
 
-    // this function parses an arrow function or a grouped expression
+    // this function parses
+    // - an arrow function
+    // - a grouped expression
+    // - a destructuring assignment
     // in many cases we won't know what we're actually parsing until
     // we encounter the first token after the closing parenthesis
-    // (`=>` leads to function, `=` leads to obscure assignment, other leads to group)
+    // (`=>` leads to function, `=` leads to destructuring assignment, other leads to group)
 
     ASSERT_skipRex('(', lexerFlags);
 
