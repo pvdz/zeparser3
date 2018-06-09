@@ -34,6 +34,7 @@ Can you use new.target as function arg defaults?
 Can you have a for-in or for-of loop without a key? `for (let [] in {a:1, b:2, c:3}) console.log('x');`
 How can you create multiple variables with the catch clause parameter? (`try {} catch (HERE) {}`)
 function f(a,b){ b=5; console.log(arguments[1]); } f(); f(1); f(1,2); f(1, undefined); // implicit arguments bind
+Shortest way of creating an array with one hole and no other values (so `[]` with `'0' in arr) === false`)
 
 s=new Set(); s.add(NaN); s.add(NaN); log(s.size); // NaN == NaN
 

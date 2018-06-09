@@ -505,7 +505,7 @@ module.exports = (describe, test) => describe('strict mode', _ => {
 
     test('cannot assign to grouped eval', {
       code: '(eval) = x;',
-      throws: 'Unable to ASI', // because `eval` is not assignable
+      throws: 'Cannot use this name', // because `eval` is not assignable
       SLOPPY_SCRIPT: {
         ast: { type: 'Program',
           body:
@@ -521,7 +521,7 @@ module.exports = (describe, test) => describe('strict mode', _ => {
 
     test('should not pass because of newline / asi', {
       code: '(eval)\n = x;',
-      throws: 'Expected to parse a value', // applies ASI but then hits a wall
+      throws: 'Cannot use this name', // applies ASI but then hits a wall
       SLOPPY_SCRIPT: {
         ast: { type: 'Program',
           body:
@@ -537,7 +537,7 @@ module.exports = (describe, test) => describe('strict mode', _ => {
 
     test('cannot assign to multi grouped eval', {
       code: '((((eval)))) = x;',
-      throws: 'Unable to ASI', // because `eval` is not assignable
+      throws: 'Cannot use this name', // because `eval` is not assignable
       SLOPPY_SCRIPT: {
         ast: { type: 'Program',
           body:

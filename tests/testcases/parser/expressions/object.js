@@ -1706,22 +1706,44 @@ module.exports = (describe, test) => describe('objects', _ => {
 
       test('object destruct with one shorthand with initializer, invalid when not destructuring',{
         code: 'wrap({a=b}=c);',
-        ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'wrap'}, arguments: [
-          {type: 'AssignmentExpression',
-            left: {type: 'ObjectPattern', properties: [
-              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false,
-                value: {
-                  type: 'AssignmentPattern',
-                  left: {type: 'Identifier', name: 'a'}, // same token as above
-                  //operator: '=', // no
-                  right: {type: 'Identifier', name: 'b'},
-                },
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {type: 'Identifier', name: 'wrap'},
+                arguments: [
+                  {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'a'},
+                          kind: 'init',
+                          method: false,
+                          shorthand: true,
+                          computed: false,
+                          value: {
+                            type: 'AssignmentExpression',
+                            left: {type: 'Identifier', name: 'a'},
+                            operator: '=',
+                            right: {type: 'Identifier', name: 'b'},
+                          },
+                        },
+                      ],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'c'},
+                  },
+                ],
               },
-            ]},
-            operator: '=',
-            right: {type: 'Identifier', name: 'c'},
-          },
-        ]}}]},
+            },
+          ],
+        },
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
@@ -1732,9 +1754,9 @@ module.exports = (describe, test) => describe('objects', _ => {
             left: {type: 'ObjectPattern', properties: [
               {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: false, computed: false,
                 value: {
-                  type: 'AssignmentPattern',
+                  type: 'AssignmentExpression',
                   left: {type: 'Identifier', name: 'v'},
-                  //operator: '=', // no
+                  operator: '=',
                   right: {type: 'Identifier', name: 'b'},
                 },
               },

@@ -199,7 +199,7 @@ module.exports = (describe, test) => describe('await', _ => {
 
   test('dont throw for await as param name in script mode',{
     code: 'function call(await){}',
-    throws: 'Await is illegal outside of async body',
+    throws: 'Cannot use this name',
     SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [{type: 'FunctionDeclaration',
         generator: false,
@@ -248,6 +248,46 @@ module.exports = (describe, test) => describe('await', _ => {
       throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
     },
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+  });
+
+  test('await var name in a group',{
+    code: '(await())',
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'await'},
+              arguments: [],
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    },
+    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+  });
+
+  test('something with grouping',{
+    code: '(await bar())',
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
+      throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
+    },
+    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+  });
+
+  test('something with rhs grouping',{
+    code: '5 + (await bar())',
+    throws: 'Cannot use `await` outside of `async` functions',
+    SLOPPY_SCRIPT: {
+      throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
+    },
+    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
   });
 
   test('can never use await expression as default arg value (slightly more complex)',{

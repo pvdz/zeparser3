@@ -133,27 +133,41 @@ module.exports = (describe, test) => describe('mixed array/object destructuring'
 
   test('horrible addition. this could also be a valid array without the assignment suffixed',{
     code: 'log({foo: [bar]} = obj);',
-
-    ast: {type: 'Program', body: [
-      {
-        type: 'ExpressionStatement',
-        expression: {
-          type: 'CallExpression',
-          callee: {type: 'Identifier', name: 'log'},
-          arguments: [
-            {
-              type: 'AssignmentExpression',
-              left: {type: 'ObjectPattern', properties: [{
-                type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: false, shorthand: false, computed: false, value: {
-                  type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}],
+    ast: {
+      type: 'Program',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {type: 'Identifier', name: 'log'},
+            arguments: [
+              {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'foo'},
+                      kind: 'init',
+                      method: false,
+                      shorthand: false,
+                      computed: false,
+                      value: {
+                        type: 'ArrayExpression',
+                        elements: [{type: 'Identifier', name: 'bar'}],
+                      },
+                    },
+                  ],
                 },
-              }]},
-              operator: '=',
-              right: {type: 'Identifier', name: 'obj'},
-            },
-          ],
+                operator: '=',
+                right: {type: 'Identifier', name: 'obj'},
+              },
+            ],
+          },
         },
-      }],
+      ],
     },
     tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
   });

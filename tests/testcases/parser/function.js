@@ -1721,6 +1721,16 @@ module.exports = (describe, test) => describe('functions', _ => {
                   body: { type: 'BlockStatement', body: [] } } ] },
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
+
+          test('spread on array with default on function', {
+            code: 'f = function([...[ x ] = []]) {};',
+            throws: true,
+          });
+
+          test('spread on array with default on array', {
+            code: 'f = ([...[ x ] = []]) => {};',
+            throws: true,
+          });
         });
       });
     });

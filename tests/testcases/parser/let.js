@@ -7696,7 +7696,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
         test('var decl', {
           code: 'var let;',
-          throws: 'var name in strict',
+          throws: 'Cannot use this name',
           SLOPPY_SCRIPT: {
             desc: 'let as a var name is only allowed in (non-module) sloppy mode to support pre-es6-code',
             ast: {type: 'Program', body: [{
@@ -7714,7 +7714,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
         test('var arr destruct', {
           code: 'var [let] = x;',
-          throws: 'var name in strict',
+          throws: 'Cannot use this name',
           SLOPPY_SCRIPT: {
             desc: 'let as var in destruct can be ok',
             ast: { type: 'Program',
@@ -7733,7 +7733,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
         test('var obj destruct', {
           code: 'var {let} = x;',
-          throws: 'var name in strict',
+          throws: 'Cannot use this name',
           SLOPPY_SCRIPT: {
             desc: 'let as var in destruct can be ok',
             ast: { type: 'Program',
@@ -7759,7 +7759,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
         test('var obj alias destruct', {
           code: 'var {foo: let} = x;',
-          throws: 'var name in strict',
+          throws: 'Cannot use this name',
           SLOPPY_SCRIPT: {
             desc: 'let as var in destruct can be ok',
             ast:  { type: 'Program',
@@ -7785,19 +7785,21 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
         test('let as let name is illegal', {
           code: 'let let;',
-          throws: 'when binding through',
+          throws: 'Cannot use this name',
+          STRICT: {throws: 'Cannot use this name'},
           tokens: [$IDENT, $IDENT, $PUNCTUATOR],
         });
 
         test('let as const name is illegal', {
           code: 'const let = x;',
           throws: 'when binding through',
+          STRICT: {throws: 'Cannot use this name'},
           tokens: [$IDENT, $IDENT, $PUNCTUATOR],
         });
 
         test('let let does not get asi', {
           code: 'let\nlet;',
-          throws: 'when binding through',
+          throws: 'Cannot use this name',
           desc: 'and `let` is always an illegal name for const/let bindings',
           tokens: [$IDENT, $IDENT, $PUNCTUATOR],
         });
@@ -8022,7 +8024,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
         test('var decl', {
           code: 'for (var let;;);',
-          throws: 'var name in strict',
+          throws: 'Cannot use this name',
           SLOPPY_SCRIPT: {
             desc: 'let as a var name is only allowed in (non-module) sloppy mode to support pre-es6-code',
             ast: {
@@ -8049,7 +8051,7 @@ module.exports = (describe, test) => describe('let statement', _ => {
 
         test('let as let name is illegal', {
           code: 'for (let let;;);',
-          throws: 'when binding through',
+          throws: 'Cannot use this name',
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
         });
 

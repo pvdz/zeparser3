@@ -9,17 +9,109 @@ let {
 
 module.exports = (describe, test) => describe('async keyword', _ => {
 
-  test('async is callable as long as it isnt the statement expression itself', {
+  test('async is callable as long as it isnt the statement expression itself (group)', {
+    code: 'foo, async()',
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
+      ast: { type: 'Program',
+        body:
+          [ { type: 'ExpressionStatement',
+            expression:
+              { type: 'SequenceExpression',
+                expressions:
+                  [ { type: 'Identifier', name: 'foo' },
+                    { type: 'CallExpression',
+                      callee: { type: 'Identifier', name: 'async' },
+                      arguments: [] } ] } } ] },
+    },
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+  });
+
+  test('async is callable as long as it isnt the statement expression itself (arg)', {
     code: 'foo(async())',
     throws: 'must be followed by a function',
     SLOPPY_SCRIPT: {
       ast: {type: 'Program', body: [
-        {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
-          {type: 'CallExpression', callee: {type: 'Identifier', name: 'async'}, arguments: []}
-        ]}},
-      ]},
+          {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
+                {type: 'CallExpression', callee: {type: 'Identifier', name: 'async'}, arguments: []}
+              ]}},
+        ]},
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+  });
+
+  test('async hack should not consume nested args when it has no args itself', {
+    code: 'foo(async(), x)',
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'foo'},
+              arguments: [
+                {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'async'},
+                  arguments: [],
+                },
+                {type: 'Identifier', name: 'x'},
+              ],
+            },
+          },
+        ],
+      },
+    },
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+  });
+
+  test('async is callable with args', {
+    code: 'foo(async(x,y,z))',
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
+      ast: {type: 'Program', body: [
+          {type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'foo'}, arguments: [
+                {type: 'CallExpression', callee: {type: 'Identifier', name: 'async'}, arguments: [
+                    {type: 'Identifier', name: 'x'},
+                    {type: 'Identifier', name: 'y'},
+                    {type: 'Identifier', name: 'z'},
+                  ]},
+              ]}},
+        ]},
+    },
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+  });
+
+  test('async hack shold not consume args that are part of the wrapper call', {
+    code: 'foo(async(x,y,z), a, b)',
+    throws: 'must be followed by a function',
+    SLOPPY_SCRIPT: {
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'foo'},
+              arguments: [
+                {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'async'},
+                  arguments: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}, {type: 'Identifier', name: 'z'}],
+                },
+                {type: 'Identifier', name: 'a'},
+                {type: 'Identifier', name: 'b'},
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    },
   });
 
   test('async can be just a value', {
@@ -860,5 +952,69 @@ module.exports = (describe, test) => describe('async keyword', _ => {
       ]},
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
+  });
+
+  test('async() with dot prop', {
+    code: 'log(async().foo);',
+    throws: 'The `async` identifier is a keyword',
+    SLOPPY_SCRIPT: {
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'log'},
+              arguments: [
+                {
+                  type: 'MemberExpression',
+                  object: {
+                    type: 'CallExpression',
+                    callee: {type: 'Identifier', name: 'async'},
+                    arguments: [],
+                  },
+                  property: {type: 'Identifier', name: 'foo'},
+                  computed: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    },
+  });
+
+  test('async() with dynamic prop', {
+    code: 'log(async()[foo]);',
+    throws: 'The `async` identifier is a keyword',
+    SLOPPY_SCRIPT: {
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'log'},
+              arguments: [
+                {
+                  type: 'MemberExpression',
+                  object: {
+                    type: 'CallExpression',
+                    callee: {type: 'Identifier', name: 'async'},
+                    arguments: [],
+                  },
+                  property: {type: 'Identifier', name: 'foo'},
+                  computed: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    },
   });
 });

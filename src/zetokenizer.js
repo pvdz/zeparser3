@@ -565,17 +565,25 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
 
     ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c');
 
+    let str = slice(start, stop);
     return {
-      type,
       // <SCRUB DEV>
       _t: debug_toktype(type),
       // </SCRUB DEV>
+      type,
       ws, // is this token considered whitespace? (space, tab, newline, comment)
       nl, // was there a newline between the start of the previous relevant token and this one?
       start,
       stop, // start of next token
       c,
-      str: slice(start, stop),
+      str,
+
+
+      // <SCRUB DEV>
+      toString() {
+        return `{# ${debug_toktype(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} ${start}:${stop} c=\`${String.fromCharCode(c)}\` o=${c} ${str.length>1?'`'+str+'` ':''}#}`;
+      },
+      // </SCRUB DEV>
     };
   }
 

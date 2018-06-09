@@ -131,7 +131,7 @@ module.exports = (describe, test) => describe('class statement', _ => {
 
     test('extend expression also inherits the strict mode from class', {
       code: 'class let {}',
-      throws: 'Can not use `let` as a class name',
+      throws: 'Cannot use this name',
       desc: 'the name of the function is also considered strict mode so `let` is outlawed',
       tokens: [],
     })

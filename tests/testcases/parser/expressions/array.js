@@ -438,16 +438,9 @@ module.exports = (describe, test) => describe('arrays', _ => {
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('parenthesis should not matter for destructuring ast',{
+    test('only destructuring inside an expr with assignmentpattern',{
       code: '([foo]) = arr;',
-      ast: {type: 'Program', body: [
-        {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
-          left: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]},
-          operator: '=',
-          right: {type: 'Identifier', name: 'arr'},
-        }},
-      ]},
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      throws: 'Invalid assignment',
     });
 
     // (a=/i/) = /i/   -> error (invalid lhs)

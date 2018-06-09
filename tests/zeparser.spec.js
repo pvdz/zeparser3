@@ -7,6 +7,7 @@ const TEST262_SKIP_TO = 16000; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = true;
 
 let fs = require('fs');
+let Prettier = require('prettier');
 
 let {
   MODE_MODULE,
@@ -269,12 +270,13 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (expectedThrows !== true) {
       console.log('Expected an error message containing: "' + expectedThrows + '"');
     }
-    console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
+    console.log('Actual ast:', formatAst(obj.ast) + ',');
     console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
     LOG_THROW(prefix, 'AST mismatch', code, '', desc, true);
 
-    console.log('Actual ast:', require('util').inspect(obj.ast, false, null));
+    console.log('Actual ast:', formatAst(obj.ast) + ',');
+    console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
 
     let s1 = JSON.stringify(expectedAst);
     let s2 = JSON.stringify(obj.ast);
@@ -291,7 +293,6 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       n += step;
       ++steps;
     }
-    console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
 
     ++fail;
   } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
@@ -319,12 +320,25 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     console.log('From:', from);
 
     if (!noPartial) {
-      console.log('Ast so far:', require('util').inspect(ast, false, null));
+      console.log('Ast so far:', formatAst(ast));
       console.log('Tokens so far:[', tokens.map(o => debug_toktype(o.type)).join(', '), ' ...]');
     }
 
     if (_debug) console.log('Debug:', _debug);
   }
+
+}
+
+function formatAst(ast) {
+  return Prettier.format('(' + require('util').inspect(ast, false, null) + ')', {
+    printWidth: 1000,
+    tabWidth: 2,
+    useTabs: false,
+    semi: false,
+    singleQuote: true,
+    trailingComma: 'all',
+    bracketSpacing: false,
+  }).replace(/(?:^;?\(?)|(?:\)[\s\n]*$)/g, '');
 }
 
 if (TEST262) console.log('Running test262 provided tests instead');
