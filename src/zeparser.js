@@ -4114,7 +4114,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('Empty group must indicate an arrow');
       } else if (curtok.nl) {
         // this is a little bit of a weird error since there can't be ambiguity if this is an error anyways *shrug*
-        TODO,THROW('The arrow token `=>` is a restricted production and cannot have a newline preceeding it');
+        THROW('The arrow token `=>` is a restricted production and cannot have a newline preceeding it');
       }
 
       AST_open(astProp, 'ArrowFunctionExpression');

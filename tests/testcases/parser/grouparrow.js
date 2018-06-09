@@ -2002,6 +2002,11 @@ module.exports = (describe, test) =>
         });
       });
 
+      test('empty parens, newline', {
+        code: '()\n=>x',
+        throws: 'restricted production',
+      });
+
       // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
     });
   });
