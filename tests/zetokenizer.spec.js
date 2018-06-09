@@ -28,7 +28,8 @@ let {
   THROW,
 } = require('./utils');
 
-let { default: ZeTokenizer,
+let {
+  default: ZeTokenizer,
   $CRLF,
   $EOF,
   $NL,
@@ -43,7 +44,6 @@ let { default: ZeTokenizer,
   WEB_COMPAT_ON,
 
   RETURN_ANY_TOKENS,
-
 
   debug_toktype,
   LF_DEBUG,
@@ -67,7 +67,7 @@ read(dir, '');
 
 files = files.filter(f => f.indexOf('string_body') < 0);
 
-files.sort((a,b) => {
+files.sort((a, b) => {
   // push test262 to the back so our own unit tests can find problems first
   if (a.indexOf('test262') >= 0) return 1;
   if (b.indexOf('test262') >= 0) return -1;
@@ -102,7 +102,8 @@ for (let [[input, output, modi, desc, skip], fromPath] of all) {
       let sloppystricts = [];
       if ((_mode & USE_SLOPPY_MODE) !== USE_SLOPPY_MODE) sloppystricts.push(LF_STRICT_MODE);
       if ((_mode & USE_STRICT_MODE) !== USE_STRICT_MODE) sloppystricts.push(LF_SLOPPY_MODE);
-      if (((_mode & USE_SLOPPY_MODE) === USE_SLOPPY_MODE) && ((_mode & USE_STRICT_MODE) === USE_STRICT_MODE)) THROW('Test `'+input+'` specifies strict AND sloppy, in that case specify neither\n'+fromPath);
+      if ((_mode & USE_SLOPPY_MODE) === USE_SLOPPY_MODE && (_mode & USE_STRICT_MODE) === USE_STRICT_MODE)
+        THROW('Test `' + input + '` specifies strict AND sloppy, in that case specify neither\n' + fromPath);
       for (let sloppyOrStrict of sloppystricts) {
         // parse in web compat mode and without that mode unless the test explicitly opts in to either
         let webi = [];
@@ -211,7 +212,18 @@ for (let [[input, output, modi, desc, skip], fromPath] of all) {
                 collects.push(token.type);
                 if (token.type !== exp) {
                   failed = true;
-                  LOG('(1) failed=', failed, 'because we got', debug_toktype(token.type || 0), 'but expected', debug_toktype(exp || 0), 'token:', token, 'exp:', debug_toktype(exp));
+                  LOG(
+                    '(1) failed=',
+                    failed,
+                    'because we got',
+                    debug_toktype(token.type || 0),
+                    'but expected',
+                    debug_toktype(exp || 0),
+                    'token:',
+                    token,
+                    'exp:',
+                    debug_toktype(exp),
+                  );
                 }
                 if (token.type === $EOF) break;
               }
@@ -227,33 +239,82 @@ for (let [[input, output, modi, desc, skip], fromPath] of all) {
                 } while (token.type !== $EOF);
               }
 
-              LOG((failed ? 'FAIL: ' : 'PASS: ') + 'i' + testIndex + ' (' + (isStrict ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + LF_DEBUG(lexerFlags) + sloppystricts +']['+(webMode===WEB_COMPAT_ALWAYS?'WEBC':'SPEC')+']: ', [toPrint(code)], '  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype) + (!failed ? '' : ' => ' + desc));
+              LOG(
+                (failed ? 'FAIL: ' : 'PASS: ') +
+                  'i' +
+                  testIndex +
+                  ' (' +
+                  (isStrict ? 'strict' : 'sloppy') +
+                  ')(' +
+                  testVariety +
+                  ')[' +
+                  LF_DEBUG(lexerFlags) +
+                  sloppystricts +
+                  '][' +
+                  (webMode === WEB_COMPAT_ALWAYS ? 'WEBC' : 'SPEC') +
+                  ']: ',
+                [toPrint(code)],
+                '  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype) + (!failed ? '' : ' => ' + desc),
+              );
               if (failed) LOG(fromPath);
               if (failed) {
                 ++fails;
                 if (testVariety === 'original') orifailed = true;
               }
             } catch (rethrow) {
-              LOG('CRASH: ' + 'i' + testIndex + ' (' + (isStrict ? 'strict' : 'sloppy') + ')(' + testVariety + ')[' + LF_DEBUG(lexerFlags) + sloppystricts + ']['+(webMode===WEB_COMPAT_ALWAYS?'WEBC':'SPEC')+']: `' + toPrint(code) + '`  -->  ' + outs.map(debug_toktype) + ', was so far; ' + collects.map(debug_toktype) + ' => ' + desc);
+              LOG(
+                'CRASH: ' +
+                  'i' +
+                  testIndex +
+                  ' (' +
+                  (isStrict ? 'strict' : 'sloppy') +
+                  ')(' +
+                  testVariety +
+                  ')[' +
+                  LF_DEBUG(lexerFlags) +
+                  sloppystricts +
+                  '][' +
+                  (webMode === WEB_COMPAT_ALWAYS ? 'WEBC' : 'SPEC') +
+                  ']: `' +
+                  toPrint(code) +
+                  '`  -->  ' +
+                  outs.map(debug_toktype) +
+                  ', was so far; ' +
+                  collects.map(debug_toktype) +
+                  ' => ' +
+                  desc,
+              );
               LOG(fromPath);
               throw rethrow;
             }
-            if (failed && FAIL_FAST)  throw 'FAIL_FAST';
+            if (failed && FAIL_FAST) throw 'FAIL_FAST';
           }
         }
       }
     }
   }
 }
-LOG('###\nPassed', (testIndex - fails) + 1, '/', testIndex + 1, 'tests (', fails, 'failures )')
+LOG('###\nPassed', testIndex - fails + 1, '/', testIndex + 1, 'tests (', fails, 'failures )');
 
 function toPrint(s) {
   return s
-    .replace(/[^\u0000-\u00ff\u2028]/g, function (s) {
-      return '\\u' + s.charCodeAt(0).toString(16).toUpperCase();
+    .replace(/[^\u0000-\u00ff\u2028]/g, function(s) {
+      return (
+        '\\u' +
+        s
+          .charCodeAt(0)
+          .toString(16)
+          .toUpperCase()
+      );
     })
-    .replace(/[\xa0\x0b\x0c]/g, function (s) {
-      return '\\x' + s.charCodeAt(0).toString(16).toUpperCase();
+    .replace(/[\xa0\x0b\x0c]/g, function(s) {
+      return (
+        '\\x' +
+        s
+          .charCodeAt(0)
+          .toString(16)
+          .toUpperCase()
+      );
     })
     .replace(/\t/g, '\\t')
     .replace(/\u2028/g, '\u21a9')

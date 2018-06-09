@@ -1,34 +1,31 @@
-let {
-  $ASI,
-  $IDENT,
-  $PUNCTUATOR,
-} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $PUNCTUATOR} = require('../../../src/zetokenizer');
 
+module.exports = (describe, test) =>
+  describe('debugger statement', _ => {
+    test('debugger with semi', {
+      code: 'debugger;',
+      ast: {
+        type: 'Program',
+        body: [{type: 'DebuggerStatement'}],
+      },
+      tokens: [$IDENT, $PUNCTUATOR],
+    });
 
-module.exports = (describe, test) => describe('debugger statement', _ => {
+    test('debugger without semi at eof', {
+      code: 'debugger',
+      ast: {
+        type: 'Program',
+        body: [{type: 'DebuggerStatement'}],
+      },
+      tokens: [$IDENT, $ASI],
+    });
 
-  test('debugger with semi',{
-    code: 'debugger;',
-    ast: {type: 'Program', body: [
-      {type: 'DebuggerStatement'},
-    ]},
-    tokens: [$IDENT, $PUNCTUATOR],
+    test('debugger with asi', {
+      code: 'debugger\ndebugger;',
+      ast: {
+        type: 'Program',
+        body: [{type: 'DebuggerStatement'}, {type: 'DebuggerStatement'}],
+      },
+      tokens: [$IDENT, $ASI, $IDENT, $PUNCTUATOR],
+    });
   });
-
-  test('debugger without semi at eof',{
-    code: 'debugger',
-    ast: {type: 'Program', body: [
-      {type: 'DebuggerStatement'},
-    ]},
-    tokens: [$IDENT, $ASI],
-  });
-
-  test('debugger with asi',{
-    code: 'debugger\ndebugger;',
-    ast: {type: 'Program', body: [
-      {type: 'DebuggerStatement'},
-      {type: 'DebuggerStatement'},
-    ]},
-    tokens: [$IDENT, $ASI, $IDENT, $PUNCTUATOR],
-  });
-});

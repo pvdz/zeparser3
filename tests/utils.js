@@ -24,11 +24,23 @@ function THROW(str, ...rest) {
 
 function toPrint(s) {
   s = s
-    .replace(/[^\u0000-\u00ff\u2028]/g, function (s) {
-      return '\\u' + s.charCodeAt(0).toString(16).toUpperCase();
+    .replace(/[^\u0000-\u00ff\u2028]/g, function(s) {
+      return (
+        '\\u' +
+        s
+          .charCodeAt(0)
+          .toString(16)
+          .toUpperCase()
+      );
     })
-    .replace(/[\xa0\x0b\x0c]/g, function (s) {
-      return '\\x' + s.charCodeAt(0).toString(16).toUpperCase();
+    .replace(/[\xa0\x0b\x0c]/g, function(s) {
+      return (
+        '\\x' +
+        s
+          .charCodeAt(0)
+          .toString(16)
+          .toUpperCase()
+      );
     })
     .replace(/\t/g, '\\t')
     .replace(/\u2028/g, '\u21a9')

@@ -1,14 +1,10 @@
 #!/usr/bin/env node
 
-let {
-  toPrint,
-} = require('./utils.js');
-let { default: generate,
-  pieces,
-  r,
-} = require('./fuzz_tokens');
+let {toPrint} = require('./utils.js');
+let {default: generate, pieces, r} = require('./fuzz_tokens');
 //import ZeTokenizer, {
-let { default: ZeTokenizer,
+let {
+  default: ZeTokenizer,
   $ASI,
   $COMMENT,
   $COMMENT_SINGLE,
@@ -44,7 +40,7 @@ let { default: ZeTokenizer,
 
 function repeat(n, parts) {
   let s = '';
-  while (n-->0) {
+  while (n-- > 0) {
     let obj = r(parts);
     let code = generate(obj);
     s += code;

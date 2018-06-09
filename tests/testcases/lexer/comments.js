@@ -1,17 +1,6 @@
-let {
-  PARSE_MODE_DIV,
-} = require('../../utils');
+let {PARSE_MODE_DIV} = require('../../utils');
 
-let {
-  $COMMENT_SINGLE,
-  $COMMENT_MULTI,
-  $COMMENT_HTML,
-  $ERROR,
-  $IDENT,
-  $NL,
-  $SPACE,
-  $PUNCTUATOR,
-} = require('../../../src/zetokenizer');
+let {$COMMENT_SINGLE, $COMMENT_MULTI, $COMMENT_HTML, $ERROR, $IDENT, $NL, $SPACE, $PUNCTUATOR} = require('../../../src/zetokenizer');
 
 let comments = [
   ['//', $COMMENT_SINGLE, 'empty', 'suffixsp'],
@@ -33,11 +22,36 @@ let comments = [
   ['/* \\u{nope} \\unope \\xno */', $COMMENT_MULTI, 'dont check correctness of escapes'],
 
   ['/*CHECK#1/', $ERROR, 'regression; unclosed multi-line', ['suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
-  ['\n--' + '>', [$NL, $COMMENT_HTML], 'if a script has -- > then support it as if it were `//` (in web mode; TODO)',['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
-  [';--' + '>', [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR], 'the -- > must start at if a script has -- > then support it as if it were `//` (in web mode; TODO)',['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
-  ['--' + '>', [$PUNCTUATOR, $PUNCTUATOR], 'start of a file is not a newline so do not parse a html comment here',['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
-  ['\n--' + '> foo bar', [$NL, $COMMENT_HTML], 'text after the html comment should be ignored like single line comments',['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
-  ['\n--' + '> foo bar\nx;', [$NL, $COMMENT_HTML, $NL, $IDENT, $PUNCTUATOR], 'html comments are single line only',['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp']],
+  [
+    '\n--' + '>',
+    [$NL, $COMMENT_HTML],
+    'if a script has -- > then support it as if it were `//` (in web mode; TODO)',
+    ['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp'],
+  ],
+  [
+    ';--' + '>',
+    [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    'the -- > must start at if a script has -- > then support it as if it were `//` (in web mode; TODO)',
+    ['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp'],
+  ],
+  [
+    '--' + '>',
+    [$PUNCTUATOR, $PUNCTUATOR],
+    'start of a file is not a newline so do not parse a html comment here',
+    ['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp'],
+  ],
+  [
+    '\n--' + '> foo bar',
+    [$NL, $COMMENT_HTML],
+    'text after the html comment should be ignored like single line comments',
+    ['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp'],
+  ],
+  [
+    '\n--' + '> foo bar\nx;',
+    [$NL, $COMMENT_HTML, $NL, $IDENT, $PUNCTUATOR],
+    'html comments are single line only',
+    ['prefixnl', 'prefixsp', 'suffixls', 'suffixcr', 'suffcrlf', 'suffixsp'],
+  ],
 ];
 
 module.exports = comments;

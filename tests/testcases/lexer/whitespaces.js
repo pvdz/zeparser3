@@ -1,11 +1,5 @@
 //import ZeTokenizer, {
-let {
-  $CRLF,
-  $NL,
-  $SPACE,
-  $TAB,
-  $WHITE,
-} = require('../../../src/zetokenizer');
+let {$CRLF, $NL, $SPACE, $TAB, $WHITE} = require('../../../src/zetokenizer');
 //} from '../../../src/zetokenizer';
 
 let whitespaces = [

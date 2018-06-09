@@ -1,27 +1,24 @@
-let {
-  $ASI,
-  $IDENT,
-  $PUNCTUATOR,
-} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $PUNCTUATOR} = require('../../../src/zetokenizer');
 
+module.exports = (describe, test) =>
+  describe('throw statement', _ => {
+    test('throw, semi', {
+      code: 'throw foo;',
+      ast: {
+        type: 'Program',
+        body: [{type: 'ThrowStatement', argument: {type: 'Identifier', name: 'foo'}}],
+      },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+    });
 
-module.exports = (describe, test) => describe('throw statement', _ => {
+    test('throw, eof', {
+      code: 'throw foo',
+      ast: {
+        type: 'Program',
+        body: [{type: 'ThrowStatement', argument: {type: 'Identifier', name: 'foo'}}],
+      },
+      tokens: [$IDENT, $IDENT, $ASI],
+    });
 
-  test('throw, semi',{
-    code: 'throw foo;',
-    ast: {type: 'Program', body: [
-      {type: 'ThrowStatement', argument: {type: 'Identifier', name: 'foo'}},
-    ]},
-    tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+    // `throw \n foo` should throw an error since the throw rhs is mandatory
   });
-
-  test('throw, eof',{
-    code: 'throw foo',
-    ast: {type: 'Program', body: [
-      {type: 'ThrowStatement', argument: {type: 'Identifier', name: 'foo'}},
-    ]},
-    tokens: [$IDENT, $IDENT, $ASI],
-  });
-
-  // `throw \n foo` should throw an error since the throw rhs is mandatory
-});

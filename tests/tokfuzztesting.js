@@ -1,14 +1,10 @@
 #!/usr/bin/env node
 
-let {
-  toPrint,
-} = require('./utils.js');
-let { default: generate,
-  pieces,
-  r,
-} = require('./fuzz_tokens');
+let {toPrint} = require('./utils.js');
+let {default: generate, pieces, r} = require('./fuzz_tokens');
 
-let { default: ZeTokenizer,
+let {
+  default: ZeTokenizer,
   $ASI,
   $COMMENT,
   $COMMENT_SINGLE,
@@ -61,7 +57,7 @@ function repeat(n, arr) {
     let token = obj.token;
     if (true && obj.evallable) {
       let compileError = uncompilableToken(code);
-      if ((!!compileError) !== (token === $ERROR)) {
+      if (!!compileError !== (token === $ERROR)) {
         let pp = toPrint(code);
         console.log(i + '   !!!BAD TEST!!!   ' + pp);
         console.log('Compiled result:', compileError || '(expected an error but none was thrown)');
@@ -76,16 +72,26 @@ function repeat(n, arr) {
       throw 'stop because a test crashed';
     } else if (i) {
       let ok = out.type === token;
-      let printing = !ok || (i % OUTPUT_THROTTLE === 0);
+      let printing = !ok || i % OUTPUT_THROTTLE === 0;
       if (printing) {
         let pp = toPrint(code);
-        let white1 = ' '.repeat(Math.max(5, 20-debug_toktype(out.type).length));
-        let white2 = ' '.repeat(Math.max(5, 50-pp.length));
+        let white1 = ' '.repeat(Math.max(5, 20 - debug_toktype(out.type).length));
+        let white2 = ' '.repeat(Math.max(5, 50 - pp.length));
         if (ok) {
           console.log(i + ' PASS  ' + debug_toktype(out.type) + white1 + pp);
         } else {
-          console.log('repeat:', [code], 'code:', code, ', lf flags:', LF_DEBUG(lexerFlags), ', token:', debug_toktype(typeof obj.token === 'function' ? obj.token(code) : obj.token), obj);
-          console.log(i +' FAIL!! ' + debug_toktype(out.type) + white1 + pp + white2 + ' --> expected ' + debug_toktype(token) + ', got ' + debug_toktype(out.type));
+          console.log(
+            'repeat:',
+            [code],
+            'code:',
+            code,
+            ', lf flags:',
+            LF_DEBUG(lexerFlags),
+            ', token:',
+            debug_toktype(typeof obj.token === 'function' ? obj.token(code) : obj.token),
+            obj,
+          );
+          console.log(i + ' FAIL!! ' + debug_toktype(out.type) + white1 + pp + white2 + ' --> expected ' + debug_toktype(token) + ', got ' + debug_toktype(out.type));
         }
       }
       if (!ok) throw 'stop because a test failed';

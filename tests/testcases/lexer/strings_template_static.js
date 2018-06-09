@@ -1,14 +1,9 @@
 //import {
-let {
-  PARSE_MODE_TICK,
-} = require('../../utils');
+let {PARSE_MODE_TICK} = require('../../utils');
 //} from '../../utils';
 
 //import ZeTokenizer, {
-let {
-  $STRING_SINGLE,
-  $TICK_PURE,
-} = require('../../../src/zetokenizer');
+let {$STRING_SINGLE, $TICK_PURE} = require('../../../src/zetokenizer');
 //} from '../../../src/zetokenizer';
 
 //import string_body from './string_body';
@@ -27,13 +22,13 @@ strings_template_static.push(
   [`Λ a \\' b \\' c λ`, $TICK_PURE],
   //["Λ a ` b λ", $TICK_PURE],
   //["Λ a ` b ` c λ", $TICK_PURE],
-  ["Λ a \\` b λ", $TICK_PURE],
-  ["Λ a \\` b \\` c λ", $TICK_PURE]
+  ['Λ a \\` b λ', $TICK_PURE],
+  ['Λ a \\` b \\` c λ', $TICK_PURE],
 );
 
 strings_template_static = strings_template_static.map(([inputs, outs, mode, desc, ...rest]) => {
-  let input = (typeof inputs === 'string' ? `${inputs.replace(/Λ|λ/g, '`')}` : inputs.map(s => `${s.replace(/Λ|λ/g, '`')}`));
-  let output = (typeof outs === 'number' ? (outs === $STRING_SINGLE ? $TICK_PURE : outs) : outs.map(o => o === $STRING_SINGLE ? $TICK_PURE : o));
+  let input = typeof inputs === 'string' ? `${inputs.replace(/Λ|λ/g, '`')}` : inputs.map(s => `${s.replace(/Λ|λ/g, '`')}`);
+  let output = typeof outs === 'number' ? (outs === $STRING_SINGLE ? $TICK_PURE : outs) : outs.map(o => (o === $STRING_SINGLE ? $TICK_PURE : o));
   if (typeof mode === 'string') {
     rest.unshift(desc);
     desc = mode;

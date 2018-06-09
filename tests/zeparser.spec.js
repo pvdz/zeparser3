@@ -15,7 +15,8 @@ let {
 
   toPrint,
 } = require('./utils.js');
-let { default: ZeParser,
+let {
+  default: ZeParser,
   COLLECT_TOKENS_NONE,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
@@ -46,9 +47,9 @@ function read(path, file) {
 }
 read(dir, '');
 
-files = files.filter(f => (f.indexOf('test262') >= 0) === TEST262);
+files = files.filter(f => f.indexOf('test262') >= 0 === TEST262);
 
-files.sort((a,b) => {
+files.sort((a, b) => {
   // push test262 to the back so our own unit tests can find problems first
   if (a.indexOf('test262') >= 0) return 1;
   if (b.indexOf('test262') >= 0) return -1;
@@ -69,15 +70,15 @@ files.map(path => {
       descStack.pop();
     },
     (desc, obj) => {
-      cases.push({desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + desc + ' \u2B88', from: path, obj})
-    }
+      cases.push({desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + desc + ' \u2B88', from: path, obj});
+    },
   );
 });
 
 let checkAST = true;
 let parserDesc = '';
 function all(parser, tests) {
-  for (let {desc, from, obj:test} of tests) {
+  for (let {desc, from, obj: test} of tests) {
     one(parser, test, desc, from);
   }
 }
@@ -114,7 +115,7 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
     // goal + strict test
     if (goal === MODE_MODULE) {
       // the MODULE_MODE and SCRIPT_MODE properties to override the expectations.
-      let totalTestOptions = override(testObj.STRICT, Object.assign({startInStrictMode:true}, testObj));
+      let totalTestOptions = override(testObj.STRICT, Object.assign({startInStrictMode: true}, testObj));
       // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
       // TODO: replace startInStrictMode with expectations of sloppy mode
       if (totalTestOptions.startInStrictMode) {
@@ -126,11 +127,11 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
     // goal + sloppy test
     // module mode is ALWAYS strict mode so skip sloppy
     if (goal === MODE_SCRIPT && (!testObj.SLOPPY || !testObj.SLOPPY.SKIP)) {
-      let totalTestOptions = override(testObj.SLOPPY, Object.assign({startInStrictMode:false}, testObj));
+      let totalTestOptions = override(testObj.SLOPPY, Object.assign({startInStrictMode: false}, testObj));
       // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
       // TODO: replace startInStrictMode with expectations of sloppy mode
       if (!totalTestOptions.startInStrictMode) {
-       __one(Parser, testSuffix + ms, code, goal, totalTestOptions, desc, from);
+        __one(Parser, testSuffix + ms, code, goal, totalTestOptions, desc, from);
       }
     }
   });
@@ -146,21 +147,11 @@ function override(wantObj, baseObj) {
 }
 function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   if (TEST262 && testi < TEST262_SKIP_TO) return;
-  let {
-    ast: expectedAst,
-    SCRIPT: scriptModeObj,
-    MODULE: moduleModeObj,
-    throws: expectedThrows,
-    tokens: expectedTokens,
-    startInStrictMode,
-    debug: _debug,
-    SKIP,
-    WEB,
-  } = testDetails;
+  let {ast: expectedAst, SCRIPT: scriptModeObj, MODULE: moduleModeObj, throws: expectedThrows, tokens: expectedTokens, startInStrictMode, debug: _debug, SKIP, WEB} = testDetails;
 
   ++testj;
 
-                                                          //if (testj !== 3319) return;
+  //if (testj !== 3319) return;
   testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
   testSuffix += '[' + testj + ']';
   if (WEB) testSuffix += '[WEB]';
@@ -233,7 +224,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       astRoot: ast,
       tokenStorage: tokens,
     });
-  } catch(f) {
+  } catch (f) {
     wasError = f.message;
     var obj = '' + f.stack;
     stack = f.stack;
@@ -271,12 +262,26 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       console.log('Expected an error message containing: "' + expectedThrows + '"');
     }
     console.log('Actual ast:', formatAst(obj.ast) + ',');
-    console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
+    console.log(
+      'tokens: [$' +
+        obj.tokens
+          .slice(0, -1)
+          .map(o => debug_toktype(o.type))
+          .join(', $') +
+        '],',
+    );
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
     LOG_THROW(prefix, 'AST mismatch', code, '', desc, true);
 
     console.log('Actual ast:', formatAst(obj.ast) + ',');
-    console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
+    console.log(
+      'tokens: [$' +
+        obj.tokens
+          .slice(0, -1)
+          .map(o => debug_toktype(o.type))
+          .join(', $') +
+        '],',
+    );
 
     let s1 = JSON.stringify(expectedAst);
     let s2 = JSON.stringify(obj.ast);
@@ -301,7 +306,14 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
     console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
     // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
-    console.log('tokens: [$' + obj.tokens.slice(0, -1).map(o => debug_toktype(o.type)).join(', $') + '],');
+    console.log(
+      'tokens: [$' +
+        obj.tokens
+          .slice(0, -1)
+          .map(o => debug_toktype(o.type))
+          .join(', $') +
+        '],',
+    );
     ++fail;
   } else {
     console.log(`${prefix} PASS: \`${toPrint(code)}\``);
@@ -326,12 +338,12 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
     if (_debug) console.log('Debug:', _debug);
   }
-
 }
 
 function formatAst(ast) {
+  // node_modules/.bin/prettier --no-bracket-spacing  --print-width 180 --single-quote --trailing-comma all --write <dir>
   return Prettier.format('(' + require('util').inspect(ast, false, null) + ')', {
-    printWidth: 1000,
+    printWidth: 180,
     tabWidth: 2,
     useTabs: false,
     semi: false,
@@ -354,7 +366,7 @@ try {
   [
     [ZeParser, true, 'dev build'],
     //[ZeParserBuild, false, 'prod build'],
-  ].forEach(([parser, hasAst, desc],i) => {
+  ].forEach(([parser, hasAst, desc], i) => {
     checkAST = hasAst;
     parserDesc = '## ' + desc;
     all(parser, cases);
@@ -362,6 +374,6 @@ try {
 } finally {
   console.log(`
   #####
-  passed: ${pass}, crashed: ${crash}, failed: ${fail-crash}, skipped: ${skips}
+  passed: ${pass}, crashed: ${crash}, failed: ${fail - crash}, skipped: ${skips}
   `);
 }

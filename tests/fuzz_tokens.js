@@ -1,5 +1,6 @@
 //import ZeTokenizer, {
-let { default: ZeTokenizer,
+let {
+  default: ZeTokenizer,
   $ASI,
   $COMMENT,
   $COMMENT_SINGLE,
@@ -30,7 +31,7 @@ let { default: ZeTokenizer,
   $WHITE,
 
   debug_toktype,
-  } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+} = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from '../src/zetokenizer';
 
 function anychr() {
@@ -68,15 +69,25 @@ let pieces = {
     single: {
       head: `'`,
       body: [
-        _ => except(ascii, `'\\\n\r`), _ => except(ascii, `'\\\n\r`), _ => except(ascii, `'\\\n\r`), _ => except(ascii, `'\\\n\r`),
+        _ => except(ascii, `'\\\n\r`),
+        _ => except(ascii, `'\\\n\r`),
+        _ => except(ascii, `'\\\n\r`),
+        _ => except(ascii, `'\\\n\r`),
         _ => except(anychr, `'\\\n\r\u2028\u2029`),
         [
           _ => R(_ => '\\u' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body), `\\u000A\\u000D\\u2028\\u2029`),
           _ => R(_ => '\\u{' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-          _ => R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-          _ => R(_ => '\\u{00' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-          _ => R(_ => '\\u{000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-          _ => R(_ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+          _ =>
+            R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+          _ =>
+            R(_ => '\\u{00' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+          _ =>
+            R(_ => '\\u{000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+          _ =>
+            R(
+              _ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
+              `\\u000A\\u000D\\u2028\\u2029`,
+            ),
         ],
         ['\\\n', '\\\r', '\\\r\n', '\\\\u000A', '\\\\u000D', '\\\\u000D\\u000A', '\\\\u000D\\n', '\\\\u2028', '\\\\u2029', '\\t', `\\'`, '\\"', '\\`', '${', '\\\\'],
       ],
@@ -87,15 +98,25 @@ let pieces = {
     double: {
       head: `"`,
       body: [
-        _ => except(ascii, `"\\\n\r`), _ => except(ascii, `"\\\n\r`), _ => except(ascii, `"\\\n\r`), _ => except(ascii, `"\\\n\r`),
+        _ => except(ascii, `"\\\n\r`),
+        _ => except(ascii, `"\\\n\r`),
+        _ => except(ascii, `"\\\n\r`),
+        _ => except(ascii, `"\\\n\r`),
         _ => except(anychr, `"\\\n\r\u2028\u2029`),
         [
           _ => R(_ => '\\u' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body), `\\u000A\\u000D\\u2028\\u2029`),
           _ => R(_ => '\\u{' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-          _ => R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-          _ => R(_ => '\\u{00' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-          _ => R(_ => '\\u{000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-          _ => R(_ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+          _ =>
+            R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+          _ =>
+            R(_ => '\\u{00' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+          _ =>
+            R(_ => '\\u{000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+          _ =>
+            R(
+              _ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
+              `\\u000A\\u000D\\u2028\\u2029`,
+            ),
         ],
         ['\\\n', '\\\r', '\\\r\n', '\\\\u000A', '\\\\u000D', '\\\\u000D\\u000A', '\\\\u000D\\n', '\\\\u2028', '\\\\u2029', '\\t', `\\'`, '\\"', '\\`', '${', '\\\\'],
       ],
@@ -160,7 +181,10 @@ let pieces = {
   template: {
     head: ['`', '}'],
     body: [
-      _ => except(ascii, '`\\$'), _ => except(ascii, '`\\$'), _ => except(ascii, '`\\$'), _ => except(ascii, '`\\$'),
+      _ => except(ascii, '`\\$'),
+      _ => except(ascii, '`\\$'),
+      _ => except(ascii, '`\\$'),
+      _ => except(ascii, '`\\$'),
       _ => except(anychr, '`\\$'),
       [
         _ => '\\u' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body),
@@ -173,26 +197,139 @@ let pieces = {
       ['\\\n', '\\\r', '\\\r\n', '\\\\u000A', '\\\\u000D', '\\\\u000D\\u000A', '\\\\u000D\\n', '\\\\u2028', '\\\\u2029', '\\t', `\\'`, '\\"', '\\`', '\\\\'],
     ],
     tail: ['`', '${'],
-    token: (generated) => ({
-      '``': $TICK_PURE,
-      '`{': $TICK_HEAD,
-      '}{': $TICK_BODY,
-      '}`': $TICK_TAIL,
-    }[generated[0] + generated[generated.length - 1]]),
+    token: generated =>
+      ({
+        '``': $TICK_PURE,
+        '`{': $TICK_HEAD,
+        '}{': $TICK_BODY,
+        '}`': $TICK_TAIL,
+      }[generated[0] + generated[generated.length - 1]]),
     fromTemplate: true,
     evallable: false,
   },
   ident: {
     head: [
-      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-      '$', '_',
+      'a',
+      'b',
+      'c',
+      'd',
+      'e',
+      'f',
+      'g',
+      'h',
+      'i',
+      'j',
+      'k',
+      'l',
+      'm',
+      'n',
+      'o',
+      'p',
+      'q',
+      'r',
+      's',
+      't',
+      'u',
+      'v',
+      'w',
+      'x',
+      'y',
+      'z',
+      'A',
+      'B',
+      'C',
+      'D',
+      'E',
+      'F',
+      'G',
+      'H',
+      'I',
+      'J',
+      'K',
+      'L',
+      'M',
+      'N',
+      'O',
+      'P',
+      'Q',
+      'R',
+      'S',
+      'T',
+      'U',
+      'V',
+      'W',
+      'X',
+      'Y',
+      'Z',
+      '$',
+      '_',
     ],
     body: [
-      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-      '$', '_', ' ',
+      'a',
+      'b',
+      'c',
+      'd',
+      'e',
+      'f',
+      'g',
+      'h',
+      'i',
+      'j',
+      'k',
+      'l',
+      'm',
+      'n',
+      'o',
+      'p',
+      'q',
+      'r',
+      's',
+      't',
+      'u',
+      'v',
+      'w',
+      'x',
+      'y',
+      'z',
+      'A',
+      'B',
+      'C',
+      'D',
+      'E',
+      'F',
+      'G',
+      'H',
+      'I',
+      'J',
+      'K',
+      'L',
+      'M',
+      'N',
+      'O',
+      'P',
+      'Q',
+      'R',
+      'S',
+      'T',
+      'U',
+      'V',
+      'W',
+      'X',
+      'Y',
+      'Z',
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '$',
+      '_',
+      ' ',
       ['\\u0070', '\\u{71}', '\\u{072}', '\\u{0073}', '\\u{00074}', '\\u{000075}', '\\u{0000076}'],
     ],
     tail: [],
@@ -209,7 +346,7 @@ let pieces = {
         [
           _ => '[' + r(['', '^']) + except(ascii, '\n\r]\\') + except(ascii, '\n\r]\\') + ']',
           _ => '[' + r(['', '^']) + String.fromCharCode(rng(0x10, 0x2d)) + '-' + String.fromCharCode(rng(0x2d, 0x50)) + ']',
-        ]
+        ],
       ],
       tail: _ => '/' + r(['', 'g', 'i', 'm', 'y']),
       token: $REGEX,
@@ -226,7 +363,7 @@ let pieces = {
         [
           _ => '[' + r(['', '^']) + except(ascii, '\n\r]\\') + except(ascii, '\n\r]\\') + ']',
           _ => '[' + r(['', '^']) + String.fromCharCode(rng(0x10, 0x2d)) + '-' + String.fromCharCode(rng(0x2d, 0x50)) + ']',
-        ]
+        ],
       ],
       tail: _ => '/u' + r(['', 'g', 'i', 'm', 'y']),
       token: $REGEXU,
@@ -239,7 +376,9 @@ let pieces = {
       single: {
         head: `'`,
         body: [
-          _ => except(ascii, `'`), _ => except(ascii, `'`), _ => except(ascii, `'`),
+          _ => except(ascii, `'`),
+          _ => except(ascii, `'`),
+          _ => except(ascii, `'`),
           [
             // bad
             _ => '\\u' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body),
@@ -247,11 +386,25 @@ let pieces = {
             _ => R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body), `\\u000A\\u000D\\u2028\\u2029`),
             // good
             _ => R(_ => '\\u' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body), `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{00' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+            _ =>
+              R(_ => '\\u{' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+            _ =>
+              R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+            _ =>
+              R(
+                _ => '\\u{00' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
+                `\\u000A\\u000D\\u2028\\u2029`,
+              ),
+            _ =>
+              R(
+                _ => '\\u{000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
+                `\\u000A\\u000D\\u2028\\u2029`,
+              ),
+            _ =>
+              R(
+                _ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
+                `\\u000A\\u000D\\u2028\\u2029`,
+              ),
           ],
         ],
         tail: ['', '\n', '', '\n', '', '\n', except(ascii, `'`), '\\'],
@@ -261,7 +414,9 @@ let pieces = {
       double: {
         head: `"`,
         body: [
-          _ => except(ascii, `"`), _ => except(ascii, `"`), _ => except(ascii, `"`),
+          _ => except(ascii, `"`),
+          _ => except(ascii, `"`),
+          _ => except(ascii, `"`),
           [
             // bad
             _ => '\\u' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body),
@@ -269,11 +424,25 @@ let pieces = {
             _ => R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body), `\\u000A\\u000D\\u2028\\u2029`),
             // good
             _ => R(_ => '\\u' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body), `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{00' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
-            _ => R(_ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+            _ =>
+              R(_ => '\\u{' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+            _ =>
+              R(_ => '\\u{0' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}', `\\u000A\\u000D\\u2028\\u2029`),
+            _ =>
+              R(
+                _ => '\\u{00' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
+                `\\u000A\\u000D\\u2028\\u2029`,
+              ),
+            _ =>
+              R(
+                _ => '\\u{000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
+                `\\u000A\\u000D\\u2028\\u2029`,
+              ),
+            _ =>
+              R(
+                _ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
+                `\\u000A\\u000D\\u2028\\u2029`,
+              ),
           ],
         ],
         tail: ['', '\n', '', '\n', '', '\n', except(ascii, `"`), '\\'],
@@ -284,7 +453,10 @@ let pieces = {
     template: {
       head: ['`', '}'],
       body: [
-        _ => except(ascii, '`\\$'), _ => except(ascii, '`\\$'), _ => except(ascii, '`\\$'), _ => except(ascii, '`\\$'),
+        _ => except(ascii, '`\\$'),
+        _ => except(ascii, '`\\$'),
+        _ => except(ascii, '`\\$'),
+        _ => except(ascii, '`\\$'),
         _ => except(anychr, '`\\$'),
         [
           // bad
@@ -300,7 +472,7 @@ let pieces = {
           _ => '\\u{0000' + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + r(pieces.number.hex.body) + '}',
         ],
       ],
-        tail: ['', '\n', '', '\n', '', '\n', except(ascii, '`'), '\\'],
+      tail: ['', '\n', '', '\n', '', '\n', except(ascii, '`'), '\\'],
       token: $ERROR,
       fromTemplate: true,
       evallable: false,
@@ -315,7 +487,7 @@ let pieces = {
           [
             _ => '[' + r(['', '^']) + except(ascii, '\n\r]\\') + except(ascii, '\n\r]\\') + ['', ']'],
             _ => '[' + r(['', '^']) + String.fromCharCode(rng(0, 0x50)) + '-' + String.fromCharCode(rng(0, 0x50)) + ']',
-          ]
+          ],
         ],
         tail: ['', '\n', '', '\n', _ => '/gg' + r(['', 'g', 'i', 'm', 'y']), except(ascii, '/'), '\\'],
         token: $ERROR,
@@ -331,7 +503,7 @@ let pieces = {
           [
             _ => '[' + r(['', '^']) + except(ascii, '\n\r]\\') + except(ascii, '\n\r]\\') + ['', ']'],
             _ => '[' + r(['', '^']) + String.fromCharCode(rng(0, 0x50)) + '-' + String.fromCharCode(rng(0, 0x50)) + ']',
-          ]
+          ],
         ],
         tail: ['', '\n', '', '\n', _ => '/uu' + r(['', 'g', 'i', 'm', 'y']), except(ascii, '/'), '\\'],
         token: $ERROR,
@@ -355,7 +527,7 @@ function r(arrfunc, extra) {
     return r(arrfunc(extra));
   } else {
     if (typeof arrfunc !== 'string' && typeof arrfunc !== 'object') {
-      console.log('wtf?', arrfunc)
+      console.log('wtf?', arrfunc);
     }
     return arrfunc || '';
   }
@@ -378,7 +550,8 @@ function generate(obj) {
   return s + t;
 }
 
-module.exports = {default: generate,
+module.exports = {
+  default: generate,
   pieces,
 
   rng,

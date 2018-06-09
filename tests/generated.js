@@ -1,16 +1,10 @@
 #!/usr/bin/env node
 
 //import {
-let {
-  toPrint,
-} = require('./utils.js');
+let {toPrint} = require('./utils.js');
 //} from './utils';
 //import ZeParser, {
-let { default: ZeParser,
-  COLLECT_TOKENS_NONE,
-  COLLECT_TOKENS_SOLID,
-  COLLECT_TOKENS_ALL,
-} = require('../src/zeparser'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+let {default: ZeParser, COLLECT_TOKENS_NONE, COLLECT_TOKENS_SOLID, COLLECT_TOKENS_ALL} = require('../src/zeparser'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 //} from '../src/zeparser';
 
 let prefab = {
@@ -85,84 +79,18 @@ let prefab = {
     'export CLASS',
     //'export default CLASS',
   ],
-  CLASS: [
-    'class c {}',
-    'class c extends value {}',
-    'class c { METHOD METHOD }',
-  ],
-  METHOD: [
-    '',
-    ';',
-    'METHEAD(){}',
-  ],
-  METHEAD: [
-    'foo',
-    '[foo]',
-    'static foo',
-    'static [foo]',
-    'async foo',
-    'async [foo]',
-    'static async foo',
-    'static async [foo]',
-    '*foo',
-    '*[foo]',
-    'static *foo',
-    'static *[foo]',
-  ],
-  STRING: [
-    `"xyz"`,
-    `'abc'`,
-  ],
-  IMPOBJ: [
-    '{}',
-    '{IMPNAME}',
-    '{IMPNAME,}',
-    '{IMPNAME,IMPNAME}',
-    '{IMPNAME,IMPNAME,}',
-  ],
-  IMPNAME: [
-    'x',
-    'x as y',
-  ],
-  FUNCDECL: [
-    'function f FUNCRESTALL',
-    'function *f FUNCRESTALL',
-    'async function f FUNCRESTALL',
-  ],
-  FUNCRESTALL: [
-    '(){EXPR}',
-    '(DESTR){EXPR}',
-    '(DESTR, DESTR){EXPR}',
-    '(DESTR=EXPR, DESTR=EXPR){EXPR}',
-  ],
-  FUNCXPR: [
-    'function f FUNCRESTNA',
-    'function *f FUNCRESTNA',
-    'async function f FUNCRESTNA',
-    'function FUNCRESTNA',
-    'function * FUNCRESTNA',
-    'async function FUNCRESTNA',
-  ],
-  FUNCRESTNA: [
-    '(){EXXPRNA}',
-    '(DESTR){EXXPRNA}',
-    '(DESTR, DESTR){EXXPRNA}',
-    '(DESTR=EXXPRNA, DESTR=EXXPRNA){EXXPRNA}',
-  ],
-  ARG: [
-    'a',
-    'a=EXPR',
-    'DESTR',
-    'DESTR=EXPR'
-  ],
-  DESTR: [
-    '[a]',
-    '[a=EXPR]',
-    '{a}',
-    '{a:EXPR}',
-    '{a=EXPR}',
-    '{a:b=EXPR}',
-  ],
+  CLASS: ['class c {}', 'class c extends value {}', 'class c { METHOD METHOD }'],
+  METHOD: ['', ';', 'METHEAD(){}'],
+  METHEAD: ['foo', '[foo]', 'static foo', 'static [foo]', 'async foo', 'async [foo]', 'static async foo', 'static async [foo]', '*foo', '*[foo]', 'static *foo', 'static *[foo]'],
+  STRING: [`"xyz"`, `'abc'`],
+  IMPOBJ: ['{}', '{IMPNAME}', '{IMPNAME,}', '{IMPNAME,IMPNAME}', '{IMPNAME,IMPNAME,}'],
+  IMPNAME: ['x', 'x as y'],
+  FUNCDECL: ['function f FUNCRESTALL', 'function *f FUNCRESTALL', 'async function f FUNCRESTALL'],
+  FUNCRESTALL: ['(){EXPR}', '(DESTR){EXPR}', '(DESTR, DESTR){EXPR}', '(DESTR=EXPR, DESTR=EXPR){EXPR}'],
+  FUNCXPR: ['function f FUNCRESTNA', 'function *f FUNCRESTNA', 'async function f FUNCRESTNA', 'function FUNCRESTNA', 'function * FUNCRESTNA', 'async function FUNCRESTNA'],
+  FUNCRESTNA: ['(){EXXPRNA}', '(DESTR){EXXPRNA}', '(DESTR, DESTR){EXXPRNA}', '(DESTR=EXXPRNA, DESTR=EXXPRNA){EXXPRNA}'],
+  ARG: ['a', 'a=EXPR', 'DESTR', 'DESTR=EXPR'],
+  DESTR: ['[a]', '[a=EXPR]', '{a}', '{a:EXPR}', '{a=EXPR}', '{a:b=EXPR}'],
   VARDECL: [
     //'VARKEYWORD a',
     //'VARKEYWORD a, b',
@@ -171,47 +99,18 @@ let prefab = {
     'VARKEYWORD a, b = EXPR',
     'VARKEYWORD a = EXPR, b = EXPR',
   ],
-  VARKEYWORD: [
-    'var',
-    'let',
-    'const',
-  ],
-  XPORFN: [
-    'EXPR',
-    'FUNCXPR',
-  ],
-  EXPR: [
-    'EXXPRALL',
-    'EXXPRNA OP EXXPRNA',
-  ],
-  EXXPRNA: _EXPRNA = [
-    '/i/',
-    '/u/g',
-    'd',
-    'm/y',
-    'g=>h',
-    '`tick`',
-    '`tick ${x} tock`',
-    '`tic ${a} tac ${b} toe`',
-  ],
-  EXXPRALL: [
-    ..._EXPRNA,
-    '()=>EXXPRNA',
-    'k=>EXXPRNA',
-    '(k)=>(EXXPRNA)',
-    '(a,b)=>(EXXPRNA)',
-    '(k)=>{EXXPRNA}',
-  ],
-  OP: [
-    '*',
-    '/',
-  ],
+  VARKEYWORD: ['var', 'let', 'const'],
+  XPORFN: ['EXPR', 'FUNCXPR'],
+  EXPR: ['EXXPRALL', 'EXXPRNA OP EXXPRNA'],
+  EXXPRNA: (_EXPRNA = ['/i/', '/u/g', 'd', 'm/y', 'g=>h', '`tick`', '`tick ${x} tock`', '`tic ${a} tac ${b} toe`']),
+  EXXPRALL: [..._EXPRNA, '()=>EXXPRNA', 'k=>EXXPRNA', '(k)=>(EXXPRNA)', '(a,b)=>(EXXPRNA)', '(k)=>{EXXPRNA}'],
+  OP: ['*', '/'],
 };
 
 let arr = [];
 function replace(str) {
   let hit = false;
-  str.replace(/([A-Z]+)/, key => hit = key);
+  str.replace(/([A-Z]+)/, key => (hit = key));
   if (hit) {
     if (!prefab[hit]) console.log('hit:', hit, str);
     prefab[hit].forEach(s => {
@@ -230,7 +129,7 @@ let testi = 0;
 arr.forEach(code => {
   try {
     var obj = ZeParser(code, undefined, COLLECT_TOKENS_SOLID);
-  } catch(e) {
+  } catch (e) {
     ++crash;
     var obj = '' + e.stack;
   }
@@ -240,7 +139,7 @@ arr.forEach(code => {
     console.log(`ERROR: \`${toPrint(code)}\` :: crash;`);
     console.log('Stack:', obj);
     ++fail;
-    exit
+    exit;
   } else {
     console.log(`PASS: \`${toPrint(code)}\``);
     ++pass;

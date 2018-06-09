@@ -1,19 +1,9 @@
 //import {
-let {
-  USE_SLOPPY_MODE,
-  USE_STRICT_MODE,
-} = require('../../utils');
+let {USE_SLOPPY_MODE, USE_STRICT_MODE} = require('../../utils');
 //} from '../../utils';
 
 //import ZeTokenizer, {
-let {
-  $ERROR,
-  $NUMBER_HEX,
-  $NUMBER_DEC,
-  $NUMBER_BIN,
-  $NUMBER_OCT,
-  $NUMBER_OLD,
-} = require('../../../src/zetokenizer');
+let {$ERROR, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $NUMBER_OLD} = require('../../../src/zetokenizer');
 //} from '../../../src/zetokenizer';
 
 let numbers = [
@@ -72,7 +62,33 @@ let numbers = [
 
   [['0x1234567890abcdefABCEF', '0X1234567890abcdefABCEF'], $NUMBER_HEX],
   [['0x0', '0x1', '0x2', '0x3', '0x4', '0x5', '0x6', '0x7', '0x8', '0x9', '0xa', '0xA', '0xb', '0xB', '0xc', '0xC', '0xd', '0xD', '0xe', '0xE', '0xf', '0xF'], $NUMBER_HEX],
-  [['0x01', '0x12', '0x23', '0x34', '0x45', '0x56', '0x67', '0x78', '0x89', '0x9a', '0xab', '0xAc', '0xbd', '0xBe', '0xcf', '0xC0', '0xd1', '0xD2', '0xe3', '0xE4', '0xf5', '0xF6'], $NUMBER_HEX],
+  [
+    [
+      '0x01',
+      '0x12',
+      '0x23',
+      '0x34',
+      '0x45',
+      '0x56',
+      '0x67',
+      '0x78',
+      '0x89',
+      '0x9a',
+      '0xab',
+      '0xAc',
+      '0xbd',
+      '0xBe',
+      '0xcf',
+      '0xC0',
+      '0xd1',
+      '0xD2',
+      '0xe3',
+      '0xE4',
+      '0xf5',
+      '0xF6',
+    ],
+    $NUMBER_HEX,
+  ],
   [['0o12345670', '0O12345670'], $NUMBER_OCT],
   [['0o0', '0o1', '0o2', '0o3', '0o4', '0o5', '0o6', '0o7'], $NUMBER_OCT],
   [['0o01', '0o12', '0o23', '0o34', '0o45', '0o56', '0o67', '0o70'], $NUMBER_OCT],
