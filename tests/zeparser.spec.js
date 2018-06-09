@@ -163,12 +163,14 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   // goal specific overrides
   // (throws override ast and ast overrides throws)
+  let brake = testDetails.brake;
   if (mode === MODE_SCRIPT && scriptModeObj) {
     if (scriptModeObj.STRICT || scriptModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
     if (scriptModeObj.throws) {
       expectedAst = undefined;
       expectedThrows = scriptModeObj.throws;
     }
+    if (scriptModeObj && 'brake' in scriptModeObj) brake = scriptModeObj.brake;
     if (scriptModeObj.SKIP !== undefined) SKIP = scriptModeObj.SKIP;
     if (scriptModeObj.ast) {
       expectedThrows = undefined;
@@ -184,6 +186,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       expectedAst = undefined;
       expectedThrows = moduleModeObj.throws;
     }
+    if (moduleModeObj && 'brake' in moduleModeObj) brake = moduleModeObj.brake;
     if (moduleModeObj.ast) {
       expectedThrows = undefined;
       expectedAst = moduleModeObj.ast;
@@ -213,6 +216,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   if (SKIP) {
     console.log(`${prefix} SKIP: \`${toPrint(code)}\`${suffix}`);
     ++skips;
+    if (brake) throw BOLD + RED + 'stopped for test';
     return;
   }
 
@@ -327,8 +331,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     ++pass;
   }
 
-  if (STOP_AFTER_FAIL && fail) throw 'stopped';
-  if (testDetails.stop) throw 'stopped for test';
+  if (STOP_AFTER_FAIL && fail) throw BOLD + RED + 'stopped';
+  if (brake) throw BOLD + RED + 'stopped for test';
 
   function LOG_THROW(errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false) {
     console.log('\n');
@@ -373,6 +377,7 @@ let crash = 0;
 let testi = 0;
 let testj = 0;
 let skips = 0;
+let completed = false;
 try {
   [
     [ZeParser, true, 'dev build'],
@@ -382,9 +387,10 @@ try {
     parserDesc = '## ' + desc;
     all(parser, cases);
   });
+  completed = true;
 } finally {
   console.log(`
   #####
-  passed: ${pass}, crashed: ${crash}, failed: ${fail - crash}, skipped: ${skips}
+  ${completed?'':RED + 'INCOMPLETE! ' + RESET}passed: ${pass}, crashed: ${crash}, failed: ${fail - crash}, skipped: ${skips}
   `);
 }
