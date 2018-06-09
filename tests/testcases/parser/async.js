@@ -1348,4 +1348,57 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       },
     });
+
+    test('arrow as expression', {
+      code: 'foo(async () => foo)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'foo'},
+              arguments: [
+                {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: true,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'foo'},
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test('export an async arrow', {
+      code: 'export default async (x) => y',
+      throws: 'module goal',
+      MODULE: {
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExportDefaultDeclaration',
+              declaration: {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'x'}],
+                id: null,
+                generator: false,
+                async: true,
+                expression: true,
+                body: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      },
+    });
   });

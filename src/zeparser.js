@@ -1339,13 +1339,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$PAREN_L_28) {
       // `async () => x`
       // `async ()`          (not followed by `=>`)
-      if (curtok.str === '=>') {
-        // async () => ...
-        TODO
-      } else {
-        // async();
-        // covered
-      }
       let assignable = parseArrowableTops(lexerFlags, identToken, astProp);
       return parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
     }
