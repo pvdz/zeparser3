@@ -7,7 +7,7 @@ const TEST262_SKIP_TO = 16000; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = true;
 
 let fs = require('fs');
-let Prettier = require('prettier');
+let Prettier = (function(){ try { return require('prettier'); } catch (e) {} })(); // ignore if not installed
 
 let {
   MODE_MODULE,
@@ -32,6 +32,11 @@ let {
 
   debug_toktype,
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
+
+const BOLD = '\033[;1;1m';
+const RED = '\033[31m';
+const GREEN = '\033[32m';
+const RESET = '\033[0m';
 
 let dir = __dirname + '/testcases/parser';
 let files = [];
@@ -197,14 +202,16 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     SKIP,
   };
 
-  let prefix = parserDesc + ': ' + testi + testSuffix;
+  // https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
+  let prefix = BOLD + parserDesc + ': ' + testi + testSuffix;
+  let suffix = RESET;
 
   if (mode === MODE_MODULE && !startInStrictMode) {
     throw new Error('Should not test module goal in sloppy mode because that is impossible anyways; ' + SKIP);
   }
 
   if (SKIP) {
-    console.log(`${prefix} SKIP: \`${toPrint(code)}\``);
+    console.log(`${prefix} SKIP: \`${toPrint(code)}\`${suffix}`);
     ++skips;
     return;
   }
@@ -231,33 +238,33 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   }
 
   if ((!expectedTokens && !expectedThrows) || (!expectedThrows && !expectedAst)) {
-    LOG_THROW(prefix, `Bad tst case: Missing ${!expectedTokens ? 'expected token list' : 'ast|throws'} for: \`${toPrint(code)}\``, code, stack, desc, true);
+    LOG_THROW(`Bad tst case: Missing ${!expectedTokens ? 'expected token list' : 'ast|throws'} for: \`${toPrint(code)}\``, code, stack, desc, true);
     console.log('testDetails:', testDetails);
     console.log('finalTestOptions:', finalTestOptions);
     ++fail;
   } else if (wasError) {
     if (!expectedThrows) {
-      LOG_THROW(prefix, 'unexpected CRASH', code, stack, desc);
+      LOG_THROW('unexpected CRASH', code, stack, desc);
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
     } else if (wasError.indexOf('Parser error') !== 0 && wasError.indexOf('Tokenizer error') !== 0) {
-      LOG_THROW(prefix, 'Unhandled exception path', code, stack, desc);
+      LOG_THROW('Unhandled exception path', code, stack, desc);
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
     } else if (expectedThrows === true || wasError.indexOf(expectedThrows) >= 0) {
-      console.log(`${prefix} PASS: \`${toPrint(code)}\` :: (properly throws)`);
+      console.log(`${prefix} ${GREEN}PASS${BOLD}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
       ++pass;
     } else {
-      LOG_THROW(prefix, 'thrown message mismatch', code, stack, desc);
+      LOG_THROW('thrown message mismatch', code, stack, desc);
       console.log('Thrown error:', wasError);
       console.log('Expected error message to contain: "' + expectedThrows + '"');
       ++fail;
     }
   } else if (expectedThrows) {
     ++fail;
-    LOG_THROW(prefix, '_failed_ to throw ANY error', code, '', desc, true);
+    LOG_THROW('_failed_ to throw ANY error', code, '', desc, true);
     if (expectedThrows !== true) {
       console.log('Expected an error message containing: "' + expectedThrows + '"');
     }
@@ -271,7 +278,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         '],',
     );
   } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
-    LOG_THROW(prefix, 'AST mismatch', code, '', desc, true);
+    LOG_THROW('AST mismatch', code, '', desc, true);
 
     console.log('Actual ast:', formatAst(obj.ast) + ',');
     console.log(
@@ -301,7 +308,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
     ++fail;
   } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-    LOG_THROW(prefix, 'TOKEN mismatch', code, '', desc, true);
+    LOG_THROW('TOKEN mismatch', code, '', desc, true);
 
     console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
     console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
@@ -316,16 +323,17 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     );
     ++fail;
   } else {
-    console.log(`${prefix} PASS: \`${toPrint(code)}\``);
+    console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
     ++pass;
   }
 
   if (STOP_AFTER_FAIL && fail) throw 'stopped';
+  if (testDetails.stop) throw 'stopped for test';
 
-  function LOG_THROW(prefix, errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false) {
+  function LOG_THROW(errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false) {
     console.log('\n');
     if (TEST262) console.log('\n============== input ==============' + code + '\n============== /input =============\n');
-    console.log(`${prefix} ERROR: \`${toPrint(code)}\` :: ` + errmsg);
+    console.log(`${prefix} ${RED}ERROR${RESET}: \`${toPrint(code)}\` :: ` + errmsg + suffix);
     if (stack) console.log('Stack:', stack);
     //console.log('Final test options:\n', finalTestOptions);
     console.log('Description:', desc);
@@ -341,6 +349,9 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 }
 
 function formatAst(ast) {
+  // If you have no prettier installed then ignore this step. It's not crucial.
+  if (!Prettier) return ast;
+
   // node_modules/.bin/prettier --no-bracket-spacing  --print-width 180 --single-quote --trailing-comma all --write <dir>
   return Prettier.format('(' + require('util').inspect(ast, false, null) + ')', {
     printWidth: 180,
