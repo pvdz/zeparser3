@@ -4233,9 +4233,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$CURLY_L_7B) {
         // note: grouped object/array literals are never assignable
-        if (_parseObjectDestruct(lexerFlags, astProp) === false) TODO,destructible = false;
+        if (_parseObjectDestruct(lexerFlags, astProp) === false) destructible = false;
 
-        if (curtok === '=') {
+        if (curc === $$IS_3D) {
           if (!destructible) TODO,THROW('Did not expect assignment after determining the group is not destructible');
           TODO
           AST_destruct(astProp);
@@ -4250,7 +4250,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // note: grouped object/array literals are never assignable
         if (_parseArrayDestruct(lexerFlags, astProp) === false) destructible = false;
 
-        if (curtok === '=') {
+        if (curc === $$IS_3D) {
           if (!destructible) TODO,THROW('Did not expect assignment after determining the group is not destructible');
           TODO
           AST_destruct(astProp);
@@ -4577,6 +4577,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('ArrayExpression');
 
     if (curc === $$IS_3D && curtok.str === '=') {
+      if (!destructible) TODO,THROW('Did not expect assignment after determining the array is not destructible');
       // the array MUST now be a pattern. Does not need to be an arrow.
       // the outer-most assignment is an expression, the inner assignments become patterns too.
       AST_destruct(_astProp);
@@ -4621,7 +4622,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     //TODO; `{}` can have a default, is destructible
     while (curc !== $$CURLY_R_7D) {
-      let nameBinding = curtok;
+      let nameBinding;
 
       if (curc === $$COMMA_2C) {
         // ({,
@@ -4642,6 +4643,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `({200:expr`
       // - `({...ident`
       // - `({*ident(){}
+      // - `({*[expr](){}
       // - `({[expr]:expr`
       // - `({[expr](){}
 
@@ -4671,6 +4673,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_setIdent('key', identToken);
           AST_setIdent('value', identToken);
           AST_close('Property');
+
+          nameBinding = curtok;
         }
         else if (curc === $$COLON_3A) {
           // property value or label, some are destructible:
@@ -4681,15 +4685,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - ({ident: <array destruct> = expr,}
           // - ({ident: <object destruct> = expr,}
           // anything else as value is non-destructible
-          TODO
+          TODO // skip token
           if (curtype === $IDENT) {
             // ({ident: ident
             // can still become ({ident: foo+bar}) which is not destructible, so confirm token after ident
+            nameBinding = curtok;
             ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
             if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
               destructible = false;
               TODO; // parse remainder of expression starting at ident
-            } else TODO
+            }
+            else TODO
           }
           else if (curc === $$SQUARE_L_5B) {
             // ({ident: <array destruct>
@@ -4698,7 +4704,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
               destructible = false;
               TODO; // parse remainder of expression starting at ident
-            } else TODO
+            }
+            else TODO
           }
           else if (curc === $$CURLY_L_7B) {
             // ({ident: <object destruct>
@@ -4771,16 +4778,38 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // Note that this can also be a spread like it is in `({foo, ...bar});`
         // TODO: pretty sure you can do silly stuff like `({...{x, ...y}}) => y` etc (because you can do it for `([...[x, ...y]]) => y`)
         TODO; // parse the rest value
+        // TODO: verify name because that would otherwise be checked later
         // exit here, do not parse default
         if (!destructible) TODO,THROW('The spread operator is not allowed here unless this is an arrow (and it was already determined this cannot be the case)');
         TODO
         return destructible;
       }
       else if (curc === $$SQUARE_L_5B) {
-        // ({[foo]: x})
         // dynamic property
+        // - ({[foo]: x})
+        // - ({[foo]() {}})
         destructible = false;
-        TODO; // parse the property
+
+        // skip dynamic part first becaue we need to figure out whether we're parsing a method
+        ASSERT_skipRex('[', lexerFlags); // next is expression
+        parseExpression(lexerFlags, astProp);
+        skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
+        ASSERT(curc === $$COLON_3A || curc === $$PAREN_L_28, 'curc is : or *');
+
+        AST_wrapClosed(astProp, 'Property', 'key');
+        AST_set('kind', 'init'); // only getters/setters get special value here
+        AST_set('method', curc === $$PAREN_L_28);
+        AST_set('shorthand', false);
+        AST_set('computed', true);
+
+        // assert next char here so we don't over accept
+        if (curc === $$PAREN_L_28) {
+          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
+        } else {
+          skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
+          parseExpression(lexerFlags, 'value');
+        }
+        AST_close('Property');
       }
       else if (curc === $$STAR_2A) {
         // generator shorthand
@@ -4792,16 +4821,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         TODO,THROW('Unexpected token, wanted to parse a start of a property in an object literal/pattern');
       }
 
-      // nameBinding can be undefined here if it was nested destructuring like `[[x], y] = z`
+      // when destructible, nameBinding can be undefined here if
+      // - dynamic property `{[x]: y}`
+      // - it was nested destructuring like `[[x], y] = z`
       if (destructible && nameBinding !== undefined) {
         let msg = _bindingIdentCheck(nameBinding, BINDING_TYPE_NONE, lexerFlags);
         if (msg !== '') {
           TODO
           // `({true` or `({foo: true` can be valid, but not destructuring
           destructible = false;
-          defaultable = false;
         }
-      } else TODO
+      }
 
       if (curc === $$IS_3D && curtok.str === '=') {
         if (!destructible) {
@@ -4824,6 +4854,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('ObjectExpression');
 
     if (curc === $$IS_3D && curtok.str === '=') {
+      if (!destructible) THROW('This object is not destructible so this assignment is unexpected');
+
       // the object MUST now be a pattern. Does not need to be an arrow.
       // the outer-most assignment is an expression, the inner assignments become patterns too.
       AST_destruct(_astProp);

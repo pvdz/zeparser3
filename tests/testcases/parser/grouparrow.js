@@ -2030,6 +2030,142 @@ module.exports = (describe, test) =>
         });
       });
 
+      test('object in group', {
+        code: '({x});',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    computed: false,
+                    kind: 'init',
+                    method: false,
+                    shorthand: true,
+                    key: {type: 'Identifier', name: 'x'},
+                    value: {type: 'Identifier', name: 'x'},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('destruct assign in group', {
+        code: '({x} = y);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      computed: false,
+                      kind: 'init',
+                      method: false,
+                      shorthand: true,
+                      key: {type: 'Identifier', name: 'x'},
+                      value: {type: 'Identifier', name: 'x'},
+                    },
+                  ],
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('dynamic property object in group', {
+        code: '({[x]:y});',
+        desc: 'the dynamic property makes the object non-destructible',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'x'},
+                    kind: 'init',
+                    method: false,
+                    shorthand: false,
+                    computed: true,
+                    value: {type: 'Identifier', name: 'y'},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('assign to non-destructible dynamic prop object in group', {
+        code: '({[x]:y} = z);',
+        desc: 'the dynamic property makes the object non-destructible',
+        throws: 'not destructible',
+      });
+
+      test('dynamic method object in group', {
+        code: '({[x](){}});',
+        desc: 'the dynamic property makes the object non-destructible',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'x'},
+                    kind: 'init',
+                    method: true,
+                    shorthand: false,
+                    computed: true,
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('assign to non-destructible dynamic method object in group', {
+        code: '({[x](){}} = z);',
+        desc: 'the dynamic property makes the object non-destructible',
+        throws: 'not destructible',
+      });
+
+
       // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
     });
   });
