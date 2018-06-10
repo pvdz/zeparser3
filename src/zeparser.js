@@ -4207,26 +4207,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // we know the ident is followed by a comma so `typeof` would lead to an error anyways
           switch (identToken.str) {
             case 'true':
-              TODO
-              destructible = false;
-              break;
             case 'false':
-              TODO
-              destructible = false;
-              break;
             case 'null':
-              TODO
-              destructible = false;
-              break;
             case 'this':
-              TODO
-              destructible = false;
-              break;
             case 'super':
               // reserved keyword, not destructible
-              TODO // TODO: collapse above cases into this one after all TODOS are gone
               destructible = false;
               break;
+
             default:
               // if curc is a comma then the group is not assignable but that will fail through the toplevelComma flag
               // if the group is just an identifier then it can be assigned to: `(a) = b`. There's a test. Or two.

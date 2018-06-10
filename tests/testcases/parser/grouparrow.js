@@ -2007,6 +2007,29 @@ module.exports = (describe, test) =>
         throws: 'restricted production',
       });
 
+      describe('keywords ok in group not allowed in arrow header', _ => {
+        ['true', 'false', 'null', 'this', 'super'].forEach(keyword => {
+          test('arrow; keyword=' + keyword, {
+            code: '(' + keyword +') => x',
+            throws: 'not destructible',
+          });
+
+          test('group; keyword=' + keyword, {
+            code: '(' + keyword +');',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: keyword},
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+          });
+        });
+      });
+
       // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
     });
   });
