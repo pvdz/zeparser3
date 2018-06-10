@@ -4234,32 +4234,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else if (curc === $$CURLY_L_7B) {
         // note: grouped object/array literals are never assignable
         if (_parseObjectDestruct(lexerFlags, astProp) === false) destructible = false;
-
-        if (curc === $$IS_3D) {
-          if (!destructible) TODO,THROW('Did not expect assignment after determining the group is not destructible');
-          TODO
-          AST_destruct(astProp);
-          AST_wrapClosed(astProp, 'AssignmentExpression', 'left');
-          ASSERT_skipRex('=', lexerFlags);
-          AST_set('operator', '=');
-          parseExpression(lexerFlags, 'right');
-          AST_close('AssignmentExpression');
-        }
+        ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
       }
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are never assignable
         if (_parseArrayDestruct(lexerFlags, astProp) === false) destructible = false;
-
-        if (curc === $$IS_3D) {
-          if (!destructible) TODO,THROW('Did not expect assignment after determining the group is not destructible');
-          TODO
-          AST_destruct(astProp);
-          AST_wrapClosed(astProp, 'AssignmentExpression', 'left');
-          ASSERT_skipRex('=', lexerFlags);
-          AST_set('operator', '=');
-          parseExpression(lexerFlags, 'right');
-          AST_close('AssignmentExpression');
-        }
+        ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
         // note: grouped spread is never assignable
