@@ -1,4 +1,4 @@
-let {$IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE} = require('../../../src/zetokenizer');
+let {$IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE, $ASI} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('objects', _ => {
@@ -4856,6 +4856,67 @@ module.exports = (describe, test) =>
             ],
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        describe('shorthand identifiers check', _ => {
+          [
+            'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
+            'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
+            'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
+            'false', 'enum',
+          ].forEach(keyword => {
+            test('keyword='+keyword, {
+              code: '({'+keyword+'}) => null',
+              throws: 'reserved word',
+            });
+          });
+
+          test('keyword=let', {
+            code: '({let}) => null',
+            throws: 'Cannot use this name',
+          });
+
+          ['eval', 'arguments', 'static', 'implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield'].forEach(keyword => {
+            test('strict-mode only keyword=' + keyword, {
+              code: '({'+keyword+'}) => null',
+              throws: 'Cannot use this name',
+              SLOPPY_SCRIPT: {
+                ast: {
+                  type: 'Program',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'ArrowFunctionExpression',
+                        params: [
+                          {
+                            type: 'ObjectPattern',
+                            properties: [
+                              {
+                                type: 'Property',
+                                key: {type: 'Identifier', name: keyword},
+                                kind: 'init',
+                                method: false,
+                                computed: false,
+                                value: {type: 'Identifier', name: keyword},
+                                shorthand: true,
+                              },
+                            ],
+                          },
+                        ],
+                        id: null,
+                        generator: false,
+                        async: false,
+                        expression: true,
+                        body: {type: 'Literal', value: null, raw: 'null'},
+                      },
+                    },
+                  ],
+                },
+                tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+              },
+            });
+          });
         });
 
         // wrap({a:b=x}=y);

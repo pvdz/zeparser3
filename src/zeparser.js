@@ -4538,6 +4538,7 @@ console.log('loop:',destructible)
           // property shorthand; `{ident}=x` is valid
           // - {a}
           // - {a, ...}
+          // - {true}       !is never valid!
 
           // tmp
           // if (curc === $$COMMA_2C) TODO
@@ -4545,6 +4546,8 @@ console.log('loop:',destructible)
           // if (curc === $$IS_3D) TODO
           if (curtok.str === 'true') TODO
           if (curtok.str === 'new') TODO
+
+          bindingIdentCheck(identToken, bindingType, lexerFlags);
 
           AST_open(astProp, 'Property');
           AST_setIdent('key', identToken);

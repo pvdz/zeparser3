@@ -12391,3 +12391,4 @@ module.exports = (describe, test) =>
 
 // forbid "let" and "static" only in strict mode
 // add more rules where var differs from let/const
+// html comments are outlawed in strict mode (needs reference)
