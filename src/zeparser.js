@@ -1292,7 +1292,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // (this function also deals with errors for async-as-varname-in-module-mode)
       AST_open(astProp, 'ExpressionStatement');
-      let assignable = parseArrowableTops(lexerFlags, identToken, 'expression');
+      let assignable = parseGroupToplevels(lexerFlags, identToken, 'expression');
       assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
       parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
       AST_close('ExpressionStatement');
@@ -1365,7 +1365,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$PAREN_L_28) {
       // `async () => x`
       // `async ()`          (not followed by `=>`)
-      let assignable = parseArrowableTops(lexerFlags, identToken, astProp);
+      let assignable = parseGroupToplevels(lexerFlags, identToken, astProp);
       return parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
     }
 
@@ -3253,16 +3253,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return NOT_ASSIGNABLE;
     } else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
-        let wasDestruct = _parseObjectDestruct(lexerFlags, BINDING_TYPE_NONE, astProp);
+        let wasDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_NONE, astProp);
         if (wasDestruct === MUST_DESTRUCT) THROW('Found a struct that must be destructured but was not');
         return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `({x})=y` is illegal
       } else if (curc === $$SQUARE_L_5B) {
-        let wasDestruct = _parseArrayDestruct(lexerFlags, BINDING_TYPE_NONE, astProp);
+        let wasDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_NONE, astProp);
         if (wasDestruct === MUST_DESTRUCT) THROW('Found a struct that must be destructured but was not');
         return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `([x])=y` is illegal
       } else if (curc === $$PAREN_L_28) {
         // do not parse arrow/group tail, regardless
-        return parseArrowableTops(lexerFlags, NOT_ASYNC, astProp);
+        return parseGroupToplevels(lexerFlags, NOT_ASYNC, astProp);
       } else if (curtok.str === '++' || curtok.str === '--') {
         // note: this is ++/-- PREFIX. This version does NOT have newline restrictions!
         if (checkNewTarget === IS_NEW_ARG) THROW('Cannot `new` on an inc/dec expr');
@@ -3820,7 +3820,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpression(lexerFlags, 'body'); // TODO: what about curlyLexerFlags here?
     }
   }
-  function parseArrowableTops(lexerFlags, asyncKeywordPrefixed, astProp) {
+  function parseGroupToplevels(lexerFlags, asyncKeywordPrefixed, astProp) {
     // = parseGroup
     // must return IS_ASSIGNABLE or NOT_ASSIGNABLE
     ASSERT(arguments.length === 3, 'expecting 3 args');
@@ -4050,13 +4050,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$CURLY_L_7B) {
         // note: grouped object/array literals are never assignable
-        let subDestruct = _parseObjectDestruct(lexerFlags, BINDING_TYPE_ARG, astProp);
+        let subDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_ARG, astProp);
         destructible = updateDestructible(destructible, subDestruct)
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
       }
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are never assignable
-        let subDestruct = _parseArrayDestruct(lexerFlags, BINDING_TYPE_ARG, astProp);
+        let subDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_ARG, astProp);
         destructible = updateDestructible(destructible, subDestruct)
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
       }
@@ -4223,7 +4223,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     TODO;
   }
-  function _parseArrayDestruct(lexerFlags, bindingType, _astProp) {
+  function parseArrayLiteralPattern(lexerFlags, bindingType, _astProp) {
     // token offsetS:
     // - ( [
     // - ( <x> , [
@@ -4374,12 +4374,12 @@ console.log('loop:',destructible)
         }
       }
       else if (curc === $$CURLY_L_7B) {
-        let nowDestruct = _parseObjectDestruct(lexerFlags, bindingType, astProp);
+        let nowDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, astProp);
         destructible = updateDestructible(destructible, nowDestruct);
       }
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are never assignable
-        let nowDestruct = _parseArrayDestruct(lexerFlags, bindingType, astProp);
+        let nowDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, astProp);
         destructible = updateDestructible(destructible, nowDestruct);
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
@@ -4446,7 +4446,7 @@ console.log('loop:',destructible)
 
     return destructible;
   }
-  function _parseObjectDestruct(_lexerFlags, bindingType, _astProp) {
+  function parseObjectLiteralPattern(_lexerFlags, bindingType, _astProp) {
     // have to return whether the whole cant, might, or must destruct;
     // - `f({a = b})`         // FAIL (shorthand only allowed when destructuring)
     // - `f({a = b} = c)`     // PASS (the outer assignment turns the object into a Pattern)
@@ -4616,7 +4616,7 @@ console.log('loop:',destructible)
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let subDestruct = _parseArrayDestruct(lexerFlags, bindingType, 'value');
+            let subDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, 'value');
             destructible = updateDestructible(destructible, subDestruct);
             // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
             if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
@@ -4633,7 +4633,7 @@ console.log('loop:',destructible)
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let subDestruct = _parseObjectDestruct(lexerFlags, bindingType, astProp);
+            let subDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, astProp);
             destructible = updateDestructible(destructible, subDestruct);
             AST_set('shorthand', false);
             AST_close('Property');
@@ -4829,7 +4829,7 @@ console.log('loop:',destructible)
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let wasDestruct = _parseArrayDestruct(lexerFlags, bindingType, 'value');
+            let wasDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, 'value');
             destructible = updateDestructible(destructible, wasDestruct);
             // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
             if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
@@ -4847,7 +4847,7 @@ console.log('loop:',destructible)
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let wasDestruct = _parseObjectDestruct(lexerFlags, bindingType, astProp);
+            let wasDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, astProp);
             destructible = updateDestructible(destructible, wasDestruct);
             AST_set('shorthand', false);
             AST_close('Property');
