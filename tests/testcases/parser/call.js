@@ -1,4 +1,4 @@
-let {$ASI, $IDENT, $PUNCTUATOR} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('call expression', _ => {
@@ -63,6 +63,24 @@ module.exports = (describe, test) =>
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test('function call, one arg, number lit starting with dot', {
+      code: 'foo(.200)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'foo'},
+              arguments: [{type: 'Literal', value: '<TODO>', raw: '.200'}],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $ASI],
     });
 
     test('function call, three args, spread', {

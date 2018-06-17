@@ -175,14 +175,38 @@ module.exports = (describe, test) =>
                 {
                   type: 'ObjectExpression',
                   properties: [
-                    {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'a'}},
-                    {type: 'Property', key: {type: 'Identifier', name: 'b'}, kind: 'init', method: false, shorthand: true, computed: false, value: {type: 'Identifier', name: 'b'}},
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'a'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'a'},
+                      shorthand: true,
+                    },
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'b'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'b'},
+                      shorthand: true,
+                    },
                   ],
                 },
               ],
               quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {raw: '`foo${', cooked: '<TODO>'},
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {raw: '}baz`', cooked: '<TODO>'},
+                },
               ],
             },
           },

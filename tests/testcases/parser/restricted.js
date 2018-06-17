@@ -66,61 +66,52 @@ module.exports = (describe, test) =>
       test('inside header', {
         code: 'if (b\n++c);',
         throws: 'Next ord should be',
-        tokens: [],
       });
 
       test('inside for p1', {
         code: 'for (b\n++c;;);',
         throws: 'Next ord should be',
-        tokens: [],
       });
 
       test('inside for p2', {
         code: 'for (;b\n++c;);',
         throws: 'Next ord should be',
-        tokens: [],
       });
 
       test('inside for p3', {
         code: 'for (;b\n++c);',
         throws: 'Next ord should be',
-        tokens: [],
       });
 
       test('in a group', {
         code: '(b\n++c);',
         throws: 'Next ord should be',
-        tokens: [],
       });
 
       test('in an array', {
         code: 'z=[b\n++c];',
         throws: 'Next ord should be',
-        tokens: [],
       });
 
       test('in an objlit', {
         code: 'z={x:b\n++c};',
-        throws: 'Next ord should be',
-        tokens: [],
+        desc: 'the error is nonsensical but the problem is that asi is needed here and cant be applied',
+        throws: true,
       });
 
       test('in a template', {
         code: '`x${b\n++c}y`;',
         throws: 'Unclosed template',
-        tokens: [],
       });
 
       test('in a call', {
         code: 'foo(b\n++c);',
         throws: 'Next ord should be',
-        tokens: [],
       });
 
       test('in a func arg default', {
         code: 'function f(x=b\n++c){}',
         throws: 'Next ord should be',
-        tokens: [],
       });
 
       test('in a block', {

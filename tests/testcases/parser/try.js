@@ -98,12 +98,12 @@ module.exports = (describe, test) =>
                   properties: [
                     {
                       type: 'Property',
-                      computed: false,
+                      key: {type: 'Identifier', name: 'e'},
                       kind: 'init',
                       method: false,
-                      shorthand: false,
-                      key: {type: 'Identifier', name: 'e'},
+                      computed: false,
                       value: {type: 'Identifier', name: 'e'},
+                      shorthand: true,
                     },
                   ],
                 },
@@ -172,16 +172,16 @@ module.exports = (describe, test) =>
                   properties: [
                     {
                       type: 'Property',
-                      computed: false,
+                      key: {type: 'Identifier', name: 'e'},
                       kind: 'init',
                       method: false,
-                      shorthand: false,
-                      key: {type: 'Identifier', name: 'e'},
+                      computed: false,
                       value: {
                         type: 'AssignmentPattern',
                         left: {type: 'Identifier', name: 'e'},
                         right: {type: 'Identifier', name: 'x'},
                       },
+                      shorthand: true,
                     },
                   ],
                 },

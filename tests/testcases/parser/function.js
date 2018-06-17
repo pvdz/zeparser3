@@ -2445,12 +2445,12 @@ module.exports = (describe, test) =>
                           properties: [
                             {
                               type: 'Property',
-                              computed: false,
+                              key: {type: 'Identifier', name: 'b'},
                               kind: 'init',
                               method: false,
-                              shorthand: false,
-                              key: {type: 'Identifier', name: 'b'},
+                              computed: false,
                               value: {type: 'ArrayPattern', elements: []},
+                              shorthand: false,
                             },
                           ],
                         },
@@ -2498,11 +2498,10 @@ module.exports = (describe, test) =>
                       properties: [
                         {
                           type: 'Property',
-                          computed: false,
+                          key: {type: 'Identifier', name: 'x'},
                           kind: 'init',
                           method: false,
-                          shorthand: false,
-                          key: {type: 'Identifier', name: 'x'},
+                          computed: false,
                           value: {
                             type: 'ArrayPattern',
                             elements: [
@@ -2512,17 +2511,18 @@ module.exports = (describe, test) =>
                                 properties: [
                                   {
                                     type: 'Property',
-                                    computed: false,
+                                    key: {type: 'Identifier', name: 'b'},
                                     kind: 'init',
                                     method: false,
-                                    shorthand: false,
-                                    key: {type: 'Identifier', name: 'b'},
+                                    computed: false,
                                     value: {type: 'ArrayPattern', elements: []},
+                                    shorthand: false,
                                   },
                                 ],
                               },
                             ],
                           },
+                          shorthand: false,
                         },
                       ],
                     },

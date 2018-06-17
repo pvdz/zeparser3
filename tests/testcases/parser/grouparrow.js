@@ -592,21 +592,21 @@ module.exports = (describe, test) =>
                     properties: [
                       {
                         type: 'Property',
-                        computed: false,
+                        key: {type: 'Identifier', name: 'x'},
                         kind: 'init',
                         method: false,
-                        shorthand: true,
-                        key: {type: 'Identifier', name: 'x'},
+                        computed: false,
                         value: {type: 'Identifier', name: 'x'},
+                        shorthand: true,
                       },
                       {
                         type: 'Property',
-                        computed: false,
+                        key: {type: 'Identifier', name: 'y'},
                         kind: 'init',
                         method: false,
-                        shorthand: true,
-                        key: {type: 'Identifier', name: 'y'},
+                        computed: false,
                         value: {type: 'Identifier', name: 'y'},
+                        shorthand: true,
                       },
                     ],
                   },
@@ -2030,7 +2030,7 @@ module.exports = (describe, test) =>
         });
       });
 
-      test('object in group', {
+      test('object in group with shorthand is fine', {
         code: '({x});',
         ast: {
           type: 'Program',
@@ -2042,12 +2042,12 @@ module.exports = (describe, test) =>
                 properties: [
                   {
                     type: 'Property',
-                    computed: false,
+                    key: {type: 'Identifier', name: 'x'},
                     kind: 'init',
                     method: false,
-                    shorthand: true,
-                    key: {type: 'Identifier', name: 'x'},
+                    computed: false,
                     value: {type: 'Identifier', name: 'x'},
+                    shorthand: true,
                   },
                 ],
               },
@@ -2071,12 +2071,12 @@ module.exports = (describe, test) =>
                   properties: [
                     {
                       type: 'Property',
-                      computed: false,
+                      key: {type: 'Identifier', name: 'x'},
                       kind: 'init',
                       method: false,
-                      shorthand: true,
-                      key: {type: 'Identifier', name: 'x'},
+                      computed: false,
                       value: {type: 'Identifier', name: 'x'},
+                      shorthand: true,
                     },
                   ],
                 },
@@ -2105,9 +2105,9 @@ module.exports = (describe, test) =>
                     key: {type: 'Identifier', name: 'x'},
                     kind: 'init',
                     method: false,
-                    shorthand: false,
                     computed: true,
                     value: {type: 'Identifier', name: 'y'},
+                    shorthand: false,
                   },
                 ],
               },
@@ -2119,8 +2119,35 @@ module.exports = (describe, test) =>
 
       test('assign to non-destructible dynamic prop object in group', {
         code: '({[x]:y} = z);',
-        desc: 'the dynamic property makes the object non-destructible',
-        throws: 'not destructible',
+        desc: 'the dynamic property is destructible',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: true,
+                      value: {type: 'Identifier', name: 'y'},
+                      shorthand: false,
+                    },
+                  ],
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'z'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('dynamic method object in group', {
@@ -2139,7 +2166,6 @@ module.exports = (describe, test) =>
                     key: {type: 'Identifier', name: 'x'},
                     kind: 'init',
                     method: true,
-                    shorthand: false,
                     computed: true,
                     value: {
                       type: 'FunctionExpression',
@@ -2150,6 +2176,7 @@ module.exports = (describe, test) =>
                       params: [],
                       body: {type: 'BlockStatement', body: []},
                     },
+                    shorthand: false,
                   },
                 ],
               },
@@ -2165,6 +2192,95 @@ module.exports = (describe, test) =>
         throws: 'not destructible',
       });
 
+      describe('spread', _ => {
+        // TODO: copy to group tests as well, with and without assignments
+
+        test('only', {
+          code: '(...x) => x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [
+                    {
+                      type: 'RestElement',
+                      argument: {type: 'Identifier', name: 'x'},
+                    },
+                  ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('cannot start any statement', {
+          code: '...x => x',
+          throws: 'Unexpected spread/rest dots',
+        });
+
+        test('cannot start any expression', {
+          code: 'y, ...x => x',
+          throws: 'Unexpected spread/rest dots',
+        });
+
+        test('last', {
+          code: '(x, ...y) => x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [
+                    {type: 'Identifier', name: 'x'},
+                    {
+                      type: 'RestElement',
+                      argument: {type: 'Identifier', name: 'y'},
+                    },
+                  ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('middle is bad', {
+          code: '(x, ...y, z) => x',
+          throws: 'not destructible',
+        });
+
+        test('first but not last is bad', {
+          code: '(...x, y) => x',
+          throws: 'not destructible',
+        });
+
+        test('cannot have init', {
+          code: '(...x = y) => x',
+          throws: 'not destructible',
+        });
+
+        test('can not spread member', {
+          code: '([...x.y]) => z',
+          desc: 'would be valid in group; `[...x.y];`',
+          throws: 'not destructible',
+        });
+      });
 
       // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
     });

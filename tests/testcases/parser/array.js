@@ -1,4 +1,4 @@
-let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('arrays', _ => {
@@ -245,6 +245,11 @@ module.exports = (describe, test) =>
             ],
           },
           tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('cant rest an assignment at the end', {
+          code: '[x, y, ...z = arr] = x',
+          throws: 'not destructible',
         });
 
         test('can splat a call at the end', {
@@ -752,6 +757,141 @@ module.exports = (describe, test) =>
         throws: 'Invalid assignment',
       });
 
+      test('spread with ident with tail is ok', {
+        code: '[...x.list];',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrayExpression',
+                elements: [
+                  {
+                    type: 'SpreadElement',
+                    argument: {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'x'},
+                      property: {type: 'Identifier', name: 'list'},
+                      computed: false,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('spread with ident with tail is not destructible', {
+        code: '[...x.list] = a;',
+        throws: 'not destructible',
+      });
+
+      test('spread with ident is ok', {
+        code: '[...x = y];',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrayExpression',
+                elements: [
+                  {
+                    type: 'SpreadElement',
+                    argument: {
+                      type: 'AssignmentExpression',
+                      left: {type: 'Identifier', name: 'x'},
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'y'},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('spread with ident and assignment throws', {
+        code: '[...x = y] = a;',
+        throws: 'not destructible',
+      });
+
+      test('spread with ident and compound assignment is ok', {
+        code: '[...x += y];',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrayExpression',
+                elements: [
+                  {
+                    type: 'SpreadElement',
+                    argument: {
+                      type: 'AssignmentExpression',
+                      left: {type: 'Identifier', name: 'x'},
+                      operator: '+=',
+                      right: {type: 'Identifier', name: 'y'},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('spread with ident and compound assignment is not destructible', {
+        code: '[...x += y] = a;',
+        throws: 'not destructible',
+      });
+
+      test('spread with array with tail is ok', {
+        code: '[...[x].map(y, z)];',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrayExpression',
+                elements: [
+                  {
+                    type: 'SpreadElement',
+                    argument: {
+                      type: 'CallExpression',
+                      callee: {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'ArrayExpression',
+                          elements: [{type: 'Identifier', name: 'x'}],
+                        },
+                        property: {type: 'Identifier', name: 'map'},
+                        computed: false,
+                      },
+                      arguments: [{type: 'Identifier', name: 'y'}, {type: 'Identifier', name: 'z'}],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('spread with array with tail is not destructible', {
+        code: '[...[x].map(y, z)] = a;',
+        throws: 'not destructible',
+      });
+
       // (a=/i/) = /i/   -> error (invalid lhs)
 
       describe('edge cases', _ => {
@@ -790,14 +930,167 @@ module.exports = (describe, test) =>
 
         test('assignment pattern can only have regular assignments 1', {
           code: '[a,b^=[x,y]] = z',
-          throws: 'regular assignment',
-          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+          throws: 'not destructible',
         });
 
         test('assignment pattern can only have regular assignments 2', {
           code: '[a,b+=[x,y]] = z',
-          throws: 'regular assignment',
-          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+          throws: 'not destructible',
+        });
+
+        test('arr destruct inside an arr lit', {
+          code: '(foo, [bar, baz] = doo);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'SequenceExpression',
+                  expressions: [
+                    {type: 'Identifier', name: 'foo'},
+                    {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ArrayPattern',
+                        elements: [{type: 'Identifier', name: 'bar'}, {type: 'Identifier', name: 'baz'}],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'doo'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+      });
+
+      describe('forward slash cases', _ => {
+
+        test('spread with array-division', {
+          code: '[...[x]/y]',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'BinaryExpression',
+                        left: {
+                          type: 'ArrayExpression',
+                          elements: [{type: 'Identifier', name: 'x'}],
+                        },
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('spread with object-division', {
+          code: '[...{x}/y]',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'BinaryExpression',
+                        left: {
+                          type: 'ObjectExpression',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'x'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'x'},
+                              shorthand: true,
+                            },
+                          ],
+                        },
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('spread with regex-division', {
+          code: '[.../x//y]',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Literal', value: '<TODO>', raw: '/x/'},
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('spread with regex-flag-division', {
+          code: '[.../x/g/y]',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Literal', value: '<TODO>', raw: '/x/g'},
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
       });
     });
