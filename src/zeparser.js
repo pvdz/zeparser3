@@ -2583,16 +2583,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     else if (curc === $$SQUARE_L_5B) {
-      parseBindingArrayDestructs(lexerFlags, bindingType, astProp);
-      if (curc !== $$IS_3D) {
-        if (bindingOrigin === FROM_FOR_HEADER && (curtok.str === 'in' || curtok.str === 'of')) {
-          // for-in and for-of are implicit inits for destructs
-        } else if (bindingOrigin === FROM_FUNC_ARG || bindingOrigin === FROM_CATCH) {
-          // func args get init by call
-          // catch clauses get the value of the thrown error
-        } else {
-          THROW('Array destructuring must have init');
-        }
+      let destructible = parseArrayLiteralPattern(lexerFlags, bindingType, SKIP_INIT, astProp);
+      if (destructible === CANT_DESTRUCT) THROW('Could not destructure the declaration');
+      AST_destruct(astProp);
+      // note: throw for `const {};` and `for (const {};;);` but not `for (const {} in obj);`
+      if (
+        (bindingOrigin !== FROM_CATCH) &&
+        (bindingOrigin !== FROM_FOR_HEADER || (curtok.str !== 'in' && curtok.str !== 'of')) &&
+        (bindingType === BINDING_TYPE_CONST || bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_VAR)
+      ) {
+        mustHaveInit = true;
       }
     }
     else if (curc === $$DOT_2E && curtok.str === '...') {
@@ -2872,6 +2872,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function bindingIdentCheck(identToken, bindingKind, lexerFlags) {
+    ASSERT(identToken.type === $IDENT, 'ident check on ident tokens ok');
     let str = _bindingIdentCheck(identToken, bindingKind, lexerFlags);
     if (str !== '') THROW(`Cannot use this name (${identToken.str}) as a variable name because: ${str}`);
   }
@@ -3990,7 +3991,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // must be valid bindable var name
           // TODO: in strict mode the var must exist otherwise it throws if not an arrow
           // TODO: if name is const bound it is only valid as an arrow
-          bindingIdentCheck(curtok, BINDING_TYPE_NONE, lexerFlags);
+          bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
 
           // TODO: instead of wrap-closed below we can do ast_open here in one go
           // AST_open(astProp, 'AssignmentExpression');
@@ -4008,7 +4009,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_close('AssignmentExpression');
         }
         else if (curtok.str[1] === '=' && curtok.str.length === 2 && curc !== $$EXCL_21 && curc !== $$IS_3D) {
-          bindingIdentCheck(curtok, BINDING_TYPE_NONE, lexerFlags);
+          bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
           // TODO: dont wrapClosed below but do it all in once
           AST_setIdent(astProp, identToken);
 
@@ -4300,7 +4301,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // must be valid bindable var name
           // TODO: in strict mode the var must exist (if not an arrow) otherwise it throws if not an arrow
           // TODO: if name is const bound it is only valid as an arrow
-          bindingIdentCheck(curtok, bindingType, lexerFlags);
+          bindingIdentCheck(identToken, bindingType, lexerFlags);
 
           // TODO: instead of wrap-closed below we can do ast_open here in one go
           // AST_open(astProp, 'AssignmentExpression');
@@ -4319,7 +4320,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
         else if (curtok.str[1] === '=' && curtok.str.length === 2 && curc !== $$EXCL_21 && curc !== $$IS_3D) {
           // - [x += y]
-          bindingIdentCheck(curtok, bindingType, lexerFlags);
+          bindingIdentCheck(identToken, bindingType, lexerFlags);
           // TODO: dont wrapClosed below but do it all in once
           AST_setIdent(astProp, identToken);
 
@@ -4346,24 +4347,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // we know the ident is followed by a comma so `typeof` would lead to an error anyways
           switch (identToken.str) {
             case 'true':
-              TODO
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              break;
             case 'false':
-              TODO
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              break;
             case 'null':
-              TODO
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              break;
             case 'this':
-              TODO
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              break;
             case 'super':
               // reserved keyword, not destructible
-              TODO // TODO: collapse above cases into this one after all TODOS are gone
               destructible = updateDestructible(destructible, CANT_DESTRUCT);
               break;
             default:
@@ -4550,13 +4538,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - {a, ...}
           // - {true}       !is never valid!
 
-          // tmp
-          // if (curc === $$COMMA_2C) TODO
-          // if (curc === $$CURLY_R_7D) TODO
-          // if (curc === $$IS_3D) TODO
-          if (curtok.str === 'true') TODO
-          if (curtok.str === 'new') TODO
-
           bindingIdentCheck(identToken, bindingType, lexerFlags);
 
           AST_open(astProp, 'Property');
@@ -4579,7 +4560,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_set('shorthand', true);
           AST_close('Property');
 
-          nameBinding = curtok;
+          nameBinding = identToken;
 
           ASSERT(curc !== $$IS_3D, 'further assignments should be parsed as part of the rhs expression');
         }

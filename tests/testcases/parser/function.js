@@ -2731,38 +2731,32 @@ module.exports = (describe, test) =>
 
             test('rest with arg after it sans default', {
               code: 'function f([...foo, bar]){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with arg after it with default', {
               code: 'function f([...foo, bar] = obj){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with trailing comma sans default', {
               code: 'function f([...foo,]){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with trailing comma with default', {
               code: 'function f([...foo,] = obj){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with double trailing comma sans default', {
               code: 'function f([...foo,,]){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with double trailing comma with default', {
               code: 'function f([...foo,,] = obj){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with destruct with two ident sans default', {
@@ -2867,26 +2861,22 @@ module.exports = (describe, test) =>
 
             test('rest with destruct with two ident with trailing comma sans default', {
               code: 'function f([...[a, b],]){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with destruct with two ident with trailing comma with default', {
               code: 'function f([...[a, b],] = obj){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with destruct with two ident with double trailing comma sans default', {
               code: 'function f([...[a, b],,] = obj){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with destruct with two ident with double trailing comma with default', {
               code: 'function f([...[a, b],,] = obj){}',
-              throws: 'follow a rest',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('nested rest as second sans default', {
@@ -2997,14 +2987,12 @@ module.exports = (describe, test) =>
 
             test('rest with local default sans default', {
               code: 'function f([...bar = foo]){}',
-              throws: 'Cannot set a default on a rest value',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('rest with local default with default', {
               code: 'function f([...bar = foo] = obj){}',
-              throws: 'Cannot set a default on a rest value',
-              tokens: [],
+              throws: 'not destructure',
             });
 
             test('double rest sans default', {
@@ -3021,36 +3009,32 @@ module.exports = (describe, test) =>
 
             test('missing rest value sans default', {
               code: 'function f([...]){}',
-              throws: 'Rest missing an ident or destruct',
-              tokens: [],
+              throws: true,
             });
 
             test('missing rest value with default', {
               code: 'function f([...] = obj){}',
-              throws: 'Rest missing an ident or destruct',
-              tokens: [],
+              throws: true,
             });
 
             test('missing rest value with comma sans default', {
               code: 'function f([...,]){}',
-              throws: 'Rest missing an ident or destruct',
-              tokens: [],
+              throws: true,
             });
 
             test('missing rest value with comma with default', {
               code: 'function f([...,] = obj){}',
-              throws: 'Rest missing an ident or destruct',
-              tokens: [],
+              throws: true,
             });
 
             test('single dot not a rest', {
               code: 'function f([.x]){}',
-              throws: 'Unexpected token while destructuring',
+              throws: true,
             });
 
             test('double dot vs rest', {
               code: 'function f([..x]){}',
-              throws: 'Unexpected token while destructuring',
+              throws: true,
             });
 
             test('spread and rest sans default', {

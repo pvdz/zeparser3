@@ -135,12 +135,12 @@ module.exports = (describe, test) =>
 
             test(`function arg`, {
               code: `function f(${name}) {}`,
-              throws: 'reserved word',
+              throws: true,
             });
 
             test(`function object destructured arg`, {
               code: `function f({${name}}) {}`,
-              throws: 'reserved word',
+              throws: true,
             });
 
             test(`function object alias destructured arg`, {
@@ -150,7 +150,7 @@ module.exports = (describe, test) =>
 
             test(`function array destructured arg`, {
               code: `function f([${name}]) {}`,
-              throws: 'reserved word',
+              throws: true,
             });
 
             test(`catch clause`, {
@@ -958,8 +958,7 @@ module.exports = (describe, test) =>
 
             test('cannot rename a var like obj destruct can', {
               code: 'var [foo:bar] = obj;',
-              throws: 'Cannot rename',
-              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+              throws: true,
             });
 
             describe('rest operator', _ => {
@@ -1024,21 +1023,18 @@ module.exports = (describe, test) =>
 
               test('rest followed by an ident', {
                 code: 'var [...foo, bar] = obj;',
-                throws: 'follow a rest',
-                tokens: [],
+                throws: true,
               });
 
               test('rest followed by a trailing comma', {
                 code: 'var [...foo,] = obj;',
-                throws: 'follow a rest',
                 desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
-                tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('rest followed by two commas', {
                 code: 'var [...foo,,] = obj;',
-                throws: 'follow a rest',
-                tokens: [],
+                throws: true,
               });
 
               test('rest on a nested destruct', {
@@ -1075,14 +1071,12 @@ module.exports = (describe, test) =>
 
               test('trailing comma after rest on a nested destruct', {
                 code: 'var [...[foo, bar],] = obj;',
-                throws: 'follow a rest',
-                tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('double trailing comma after rest on a nested destruct', {
                 code: 'var [...[foo, bar],,] = obj;',
-                throws: 'follow a rest',
-                tokens: [],
+                throws: true,
               });
 
               test('second param rest on a nested destruct', {
@@ -1135,9 +1129,8 @@ module.exports = (describe, test) =>
 
               test('rest with default', {
                 code: 'var [...bar = foo] = obj;',
-                throws: 'a rest value',
                 desc: 'rest cannot get a default in var decls but they can as func args',
-                tokens: [],
+                throws: true,
               });
 
               test('double rest / spread rest', {
@@ -1148,26 +1141,22 @@ module.exports = (describe, test) =>
 
               test('rest without value', {
                 code: 'var [...] = obj;',
-                throws: 'missing an ident or destruct',
-                tokens: [],
+                throws: true,
               });
 
               test('rest with comma without value', {
                 code: 'var [...,] = obj;',
-                throws: 'missing an ident or destruct',
-                tokens: [],
+                throws: true,
               });
 
               test('single dot vs rest', {
                 code: 'var [.x] = obj;',
-                throws: 'Unexpected token while destructuring array',
-                tokens: [],
+                throws: true,
               });
 
               test('double dot vs rest', {
                 code: 'var [..x] = obj;',
-                throws: 'Unexpected token while destructuring array',
-                tokens: [],
+                throws: true,
               });
 
               test('spread vs rest', {
@@ -3596,20 +3585,17 @@ module.exports = (describe, test) =>
 
                 test('rest followed by an ident', {
                   code: 'for (var [...foo, bar] = obj;;);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (var [...foo,] = obj;;);',
-                  throws: 'follow a rest',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('rest followed by two commas', {
                   code: 'for (var [...foo,,] = obj;;);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest on a nested destruct', {
@@ -3670,14 +3656,12 @@ module.exports = (describe, test) =>
 
                 test('trailing comma after rest on a nested destruct', {
                   code: 'for (var [...[foo, bar],] = obj;;);',
-                  throws: 'follow a rest',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (var [...[foo, bar],,] = obj;;);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('second param rest on a nested destruct', {
@@ -3741,9 +3725,8 @@ module.exports = (describe, test) =>
 
                 test('rest with default', {
                   code: 'for (var [...bar = foo] = obj;;);',
-                  throws: 'a rest value',
                   desc: 'rest cannot get a default in var decls but they can as func args',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('double rest / spread rest', {
@@ -3754,26 +3737,22 @@ module.exports = (describe, test) =>
 
                 test('rest without value', {
                   code: 'for (var [...] = obj;;);',
-                  throws: 'missing an ident or destruct',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest with comma without value', {
                   code: 'for (var [...,] = obj;;);',
-                  throws: 'missing an ident or destruct',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('single dot vs rest', {
                   code: 'for (var [.x] = obj;;);',
-                  throws: 'Unexpected token while destructuring array',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('double dot vs rest', {
                   code: 'for (var [..x] = obj;;);',
-                  throws: 'Unexpected token while destructuring array',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('spread and rest', {
@@ -5703,78 +5682,53 @@ module.exports = (describe, test) =>
               describe('rest operator', _ => {
                 test('rest as the only destruct', {
                   code: 'for (var [...foo] = obj);',
-                  throws: '(;)',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('rest preceded by an ident', {
                   code: 'for (var [foo, ...bar] = obj);',
-                  throws: '(;)',
-                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('rest followed by an ident', {
                   code: 'for (var [...foo, bar] = obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (var [...foo,] = obj);',
-                  throws: 'follow a rest',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('rest followed by two commas', {
                   code: 'for (var [...foo,,] = obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest on a nested destruct', {
                   code: 'for (var [...[foo, bar]] = obj);',
-                  throws: '(;)',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('trailing comma after rest on a nested destruct', {
                   code: 'for (var [...[foo, bar],] = obj);',
-                  throws: 'follow a rest',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (var [...[foo, bar],,] = obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('second param rest on a nested destruct', {
                   code: 'for (var [x, ...[foo, bar]] = obj);',
-                  throws: '(;)',
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                  ],
+                  throws: true,
                 });
 
                 test('rest with default', {
                   code: 'for (var [...bar = foo] = obj);',
-                  throws: 'a rest value',
                   desc: 'rest cannot get a default in var decls but they can as func args',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('double rest / spread rest', {
@@ -5785,32 +5739,27 @@ module.exports = (describe, test) =>
 
                 test('rest without value', {
                   code: 'for (var [...] = obj);',
-                  throws: 'missing an ident or destruct',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest with comma without value', {
                   code: 'for (var [...,] = obj);',
-                  throws: 'missing an ident or destruct',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('single dot vs rest', {
                   code: 'for (var [.x] = obj);',
-                  throws: 'Unexpected token while destructuring array',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('double dot vs rest', {
                   code: 'for (var [..x] = obj);',
-                  throws: 'Unexpected token while destructuring array',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('spread and rest', {
                   code: 'for (var [a=[...b], ...c] = obj);',
-                  throws: '(;)',
-                  tokens: [],
+                  throws: true,
                 });
               });
             });
@@ -7066,20 +7015,17 @@ module.exports = (describe, test) =>
 
                 test('rest followed by an ident', {
                   code: 'for (var [...foo, bar] in obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (var [...foo,] in obj);',
-                  throws: 'follow a rest',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('rest followed by two commas', {
                   code: 'for (var [...foo,,] in obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest on a nested destruct', {
@@ -7137,14 +7083,12 @@ module.exports = (describe, test) =>
 
                 test('trailing comma after rest on a nested destruct', {
                   code: 'for (var [...[foo, bar],] in obj);',
-                  throws: 'follow a rest',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (var [...[foo, bar],,] in obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('second param rest on a nested destruct', {
@@ -7205,9 +7149,8 @@ module.exports = (describe, test) =>
 
                 test('rest with default', {
                   code: 'for (var [...bar = foo] in obj);',
-                  throws: 'a rest value',
                   desc: 'rest cannot get a default in var decls but they can as func args',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('double rest / spread rest', {
@@ -7218,26 +7161,22 @@ module.exports = (describe, test) =>
 
                 test('rest without value', {
                   code: 'for (var [...] in obj);',
-                  throws: 'missing an ident or destruct',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest with comma without value', {
                   code: 'for (var [...,] in obj);',
-                  throws: 'missing an ident or destruct',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('single dot vs rest', {
                   code: 'for (var [.x] in obj);',
-                  throws: 'Unexpected token while destructuring array',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('double dot vs rest', {
                   code: 'for (var [..x] in obj);',
-                  throws: 'Unexpected token while destructuring array',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('spread and rest', {
@@ -9075,20 +9014,17 @@ module.exports = (describe, test) =>
 
                 test('rest followed by an ident', {
                   code: 'for (var [...foo, bar] of obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (var [...foo,] of obj);',
-                  throws: 'follow a rest',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('rest followed by two commas', {
                   code: 'for (var [...foo,,] of obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest on a nested destruct', {
@@ -9146,14 +9082,12 @@ module.exports = (describe, test) =>
 
                 test('trailing comma after rest on a nested destruct', {
                   code: 'for (var [...[foo, bar],] of obj);',
-                  throws: 'follow a rest',
-                  tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                  throws: true,
                 });
 
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (var [...[foo, bar],,] of obj);',
-                  throws: 'follow a rest',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('second param rest on a nested destruct', {
@@ -9214,39 +9148,33 @@ module.exports = (describe, test) =>
 
                 test('rest with default', {
                   code: 'for (var [...bar = foo] of obj);',
-                  throws: 'a rest value',
                   desc: 'rest cannot get a default of var decls but they can as func args',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('double rest / spread rest', {
                   code: 'for (var [... ...foo] of obj);',
                   throws: 'Can not rest twice',
-                  tokens: [],
                 });
 
                 test('rest without value', {
                   code: 'for (var [...] of obj);',
-                  throws: 'missing an ident or destruct',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('rest with comma without value', {
                   code: 'for (var [...,] of obj);',
-                  throws: 'missing an ident or destruct',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('single dot vs rest', {
                   code: 'for (var [.x] of obj);',
-                  throws: 'Unexpected token while destructuring array',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('double dot vs rest', {
                   code: 'for (var [..x] of obj);',
-                  throws: 'Unexpected token while destructuring array',
-                  tokens: [],
+                  throws: true,
                 });
 
                 test('spread and rest', {
@@ -9346,16 +9274,14 @@ module.exports = (describe, test) =>
 
               test('empty obj with trailing comma', {
                 code: 'for (var {,} of obj);',
-                throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
+                throws: true,
               });
 
               test('empty obj with elided commas', {
                 code: 'for (var {,,} of obj);',
-                throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
+                throws: true,
               });
 
               test('single var base case', {
@@ -9440,14 +9366,12 @@ module.exports = (describe, test) =>
                 code: 'for (var {x,,} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'does not work with obj, only array',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single var with leading comma', {
                 code: 'for (var {,x} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single var with double leading comma', {
@@ -10909,24 +10833,18 @@ module.exports = (describe, test) =>
 
               test('rest followed by an ident', {
                 code: 'export var [...foo, bar] = obj;',
-                throws: 'follow a rest',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('rest followed by a trailing comma', {
                 code: 'export var [...foo,] = obj;',
-                throws: 'follow a rest',
                 desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('rest followed by two commas', {
                 code: 'export var [...foo,,] = obj;',
-                throws: 'follow a rest',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('rest on a nested destruct', {
@@ -10969,16 +10887,12 @@ module.exports = (describe, test) =>
 
               test('trailing comma after rest on a nested destruct', {
                 code: 'export var [...[foo, bar],] = obj;',
-                throws: 'follow a rest',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('double trailing comma after rest on a nested destruct', {
                 code: 'export var [...[foo, bar],,] = obj;',
-                throws: 'follow a rest',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('second param rest on a nested destruct', {
@@ -11038,45 +10952,34 @@ module.exports = (describe, test) =>
 
               test('rest with default', {
                 code: 'export var [...bar = foo] = obj;',
-                throws: 'a rest value',
                 desc: 'rest cannot get a default in var decls but they can as func args',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('double rest / spread rest', {
                 code: 'export var [... ...foo] = obj;',
                 throws: 'Can not rest twice',
                 SCRIPT: {throws: 'module goal'},
-                tokens: [],
               });
 
               test('rest without value', {
                 code: 'export var [...] = obj;',
-                throws: 'missing an ident or destruct',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('rest with comma without value', {
                 code: 'export var [...,] = obj;',
-                throws: 'missing an ident or destruct',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('single dot vs rest', {
                 code: 'export var [.x] = obj;',
-                throws: 'Unexpected token while destructuring array',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('double dot vs rest', {
                 code: 'export var [..x] = obj;',
-                throws: 'Unexpected token while destructuring array',
-                SCRIPT: {throws: 'module goal'},
-                tokens: [],
+                throws: true,
               });
 
               test('spread and rest', {

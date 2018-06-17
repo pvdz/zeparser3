@@ -257,7 +257,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
-    } else if (expectedThrows === true || wasError.indexOf(expectedThrows) >= 0) {
+    } else if ((expectedThrows === true && wasError.toUpperCase().indexOf('TODO') < 0) || wasError.indexOf(expectedThrows) >= 0) {
       console.log(`${prefix} ${GREEN}PASS${BOLD}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
       ++pass;
     } else {
