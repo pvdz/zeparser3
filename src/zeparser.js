@@ -626,7 +626,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (Array.isArray(node)) node = node[node.length-1]; // the destruct applies to the node just closed, so last in list
 
     ASSERT(node, 'top[' + prop + '] should be a node');
-    ASSERT(node.type === 'ArrayExpression' || node.type === 'ArrayPattern' || node.type === 'ObjectExpression' || node.type === 'ObjectPattern', 'should start at an object or array literal');
+    // (`[...x=y]` would have you start at an identifier)
+    ASSERT(node.type === 'Identifier' || node.type === 'ArrayExpression' || node.type === 'ArrayPattern' || node.type === 'ObjectExpression' || node.type === 'ObjectPattern', 'should start at an object or array literal, was:' + node.type);
 
     AST__destruct(node); // TODO: remove the arg.
     if (traceast) {
@@ -3267,7 +3268,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (wasDestruct === MUST_DESTRUCT) THROW('Found a struct that must be destructured but was not');
         return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `({x})=y` is illegal
       } else if (curc === $$SQUARE_L_5B) {
-        let wasDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_NONE, astProp);
+        let wasDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_NONE, PARSE_INIT, astProp);
         if (wasDestruct === MUST_DESTRUCT) THROW('Found a struct that must be destructured but was not');
         return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `([x])=y` is illegal
       } else if (curc === $$PAREN_L_28) {
@@ -4066,7 +4067,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are never assignable
-        let subDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_ARG, astProp);
+        let subDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_ARG, PARSE_INIT, astProp);
         destructible = updateDestructible(destructible, subDestruct)
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
       }
@@ -4233,11 +4234,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     TODO;
   }
-  function parseArrayLiteralPattern(lexerFlags, bindingType, _astProp) {
+  function parseArrayLiteralPattern(lexerFlags, bindingType, skipInit, _astProp) {
     // token offsetS:
     // - ( [
     // - ( <x> , [
-    ASSERT(arguments.length === 3, 'expecting 3 args');
+    ASSERT(arguments.length === 4, 'expecting 4 args');
 
     // either the bracket starts an array destructuring or literal. they have a similar-but-not-the-same structure
     // - ([]
@@ -4388,7 +4389,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are never assignable
-        let nowDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, astProp);
+        let nowDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, PARSE_INIT, astProp);
         destructible = updateDestructible(destructible, nowDestruct);
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
@@ -4436,7 +4437,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // a forward slash after ] has to be a division
     AST_close('ArrayExpression');
 
-    if (curc === $$IS_3D && curtok.str === '=') {
+    if (skipInit === PARSE_INIT && curc === $$IS_3D && curtok.str === '=') {
       updateDestructible(destructible, MUST_DESTRUCT); // this is to assert the above _can_ be destructed
       // this assignment resets the destructible state
       // for example; `({a = b})` must destruct because of the shorthand. `[...a=b]` can't destruct because rest is only
@@ -4629,7 +4630,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let subDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, 'value');
+            let subDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, PARSE_INIT, 'value');
             destructible = updateDestructible(destructible, subDestruct);
             // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
             if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
@@ -4842,7 +4843,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let wasDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, 'value');
+            let wasDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, PARSE_INIT, 'value');
             destructible = updateDestructible(destructible, wasDestruct);
             // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
             if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
@@ -5078,14 +5079,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return destructible;
   }
-
   function updateDestructible(a, b) {
     if (a === MIGHT_DESTRUCT) return b;
     if (b === MIGHT_DESTRUCT) return a;
     if (a !== b) THROW('Encountered a struct that would have to and couldnt destruct so it is not destructible, bailing');
     return a;
   }
-
   function parseArrowableSpreadOrRest(lexerFlags, closingCharOrd, bindingType, groupTopLevel, astProp) {
     ASSERT(arguments.length === 5, 'want 5 args');
     ASSERT_skipRex('...', lexerFlags); // next is an expression so rex
@@ -5095,7 +5094,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('SpreadElement');
     return result;
   }
-
   function _parseArrowableSpreadOrRest(lexerFlags, closingCharOrd, bindingType, groupTopLevel, astProp) {
     // returns MIGHT_DESTRUCT if the arg is only an ident, returns CANT_DESTRUCT otherwise
 
@@ -5136,24 +5134,35 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (identToken.str === 'true') TODO; // [...true]; -> ok, this will crash, still have to validate it
       skipIdentSafeAndExpensive(lexerFlags);
 
-      if (curc === closingCharOrd || curc === $$COMMA_2C) {
-        // comma is future proofing for object spread/rest and will be checked at array again
+      if (curtok.str === '=') {
         destructible = MIGHT_DESTRUCT;
+        AST_setIdent(astProp, identToken);
+      } else {
+        if (curc === closingCharOrd) { // || curc === $$COMMA_2C
+          destructible = MIGHT_DESTRUCT;
+        }
+        // have to continue parsing here because of the prefix cases (`new`, `typeof` etc)
+        assignable = parseValueHeadBodyAfterIdent(lexerFlags, identToken, NOT_NEW_TARGET, astProp);
       }
-      // have to continue parsing here because of the prefix cases (`new`, `typeof` etc)
-      assignable = parseValueHeadBodyAfterIdent(lexerFlags, identToken, NOT_NEW_TARGET, astProp);
-
-      if (groupTopLevel) return destructible;
     }
     else if (curc === $$SQUARE_L_5B) {
+      // - `(...[x]) => x`
+      // - `[...[x]]`
+      // - `[...[x]] = y`
+      // - `([...[x]]) => x`
       // - `[...[x]/y]`
-      if (parseBindingArrayDestructs(lexerFlags, bindingType, astProp) === true) assignable = NOT_ASSIGNABLE;
-      if (groupTopLevel) {TODO;return CANT_DESTRUCT;}
+      destructible = parseArrayLiteralPattern(lexerFlags, bindingType, SKIP_INIT, astProp);
+      assignable = destructible === CANT_DESTRUCT ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
     }
     else if (curc === $$CURLY_L_7B) {
+      // - `(...{x}) => x`
+      // - `[...{x}]`
+      // - `[...{x}] = y`
+      // - `([...{x}]) => x`
       // - `[...{x}/y]`
-      if (parseBindingObjectDestructs(lexerFlags, bindingType, astProp) === true) assignable = NOT_ASSIGNABLE;
-      if (groupTopLevel) {TODO;return CANT_DESTRUCT;}
+      // (and object)
+      destructible = parseObjectLiteralPattern(lexerFlags, bindingType, SKIP_INIT, astProp);
+      assignable = destructible === CANT_DESTRUCT ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
     }
     else {
       if (groupTopLevel) {TODO;return CANT_DESTRUCT;}
@@ -5163,14 +5172,30 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return CANT_DESTRUCT;
     }
 
-    ASSERT(!groupTopLevel, 'should have returned by now');
+    if (curc !== closingCharOrd && curc !== $$COMMA_2C) {
+      if (curc === $$IS_3D && curtok.str === '=') {
+        updateDestructible(destructible, MUST_DESTRUCT); // this is to assert the above _can_ be destructed
+      // this assignment resets the destructible state
+      // for example; `({a = b})` must destruct because of the shorthand. `[...a=b]` can't destruct because rest is only
+      // legal on a simple identifier. So combining them you get `[...{a = b} = c]` where the inside must destruct and the outside cannot. (there's a test)
+        destructible = CANT_DESTRUCT;
 
-    if (curc !== closingCharOrd) {
-      if (curc !== $$COMMA_2C) {
-        ASSERT(destructible === CANT_DESTRUCT, 'should have checked this');
+        // the array MUST now be a pattern. Does not need to be an arrow.
+        // the outer-most assignment is an expression, the inner assignments become patterns too.
+        AST_destruct(astProp);
+        AST_wrapClosed(astProp, 'AssignmentExpression', 'left');
+        AST_set('operator', '=');
+        ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a division
+        parseExpression(lexerFlags, 'right');
+        AST_close('AssignmentExpression');
+        // at this point the end should be reached or another point in the code will throw an error on it
+        // TODO: should we assert that here and (can we) throw a nicer contextual error?
+      } else {
+        updateDestructible(destructible, CANT_DESTRUCT); // TODO: is there a case where destructible = MUST?
         assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
         parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
       }
+      destructible = updateDestructible(destructible, CANT_DESTRUCT); // a spread with non-ident arg is not restable so not destructible
     }
 
     // destructible because the `...` is at the end of the structure and its arg is an ident/array/object and has no tail
