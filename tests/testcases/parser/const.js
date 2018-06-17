@@ -1010,8 +1010,7 @@ module.exports = (describe, test) =>
               test('rest followed by two commas', {
                 code: 'const [...foo,,] = obj;',
                 throws: 'follow a rest',
-                tokens: [],
-              });
+                });
 
               test('rest on a nested destruct', {
                 code: 'const [...[foo, bar]] = obj;',
@@ -1054,8 +1053,7 @@ module.exports = (describe, test) =>
               test('double trailing comma after rest on a nested destruct', {
                 code: 'const [...[foo, bar],,] = obj;',
                 throws: 'follow a rest',
-                tokens: [],
-              });
+                });
 
               test('second param rest on a nested destruct', {
                 code: 'const [x, ...[foo, bar]] = obj;',
@@ -1124,20 +1122,17 @@ module.exports = (describe, test) =>
               test('rest with comma without value', {
                 code: 'const [...,] = obj;',
                 throws: 'missing an ident or destruct',
-                tokens: [],
-              });
+                });
 
               test('single dot vs rest', {
                 code: 'const [.x] = obj;',
                 throws: 'Unexpected token while destructuring array',
-                tokens: [],
-              });
+                });
 
               test('double dot vs rest', {
                 code: 'const [..x] = obj;',
                 throws: 'Unexpected token while destructuring array',
-                tokens: [],
-              });
+                });
 
               test('spread vs rest', {
                 code: 'const [a=[...b], ...c] = obj;',
@@ -1226,14 +1221,12 @@ module.exports = (describe, test) =>
               code: 'const {,} = obj;',
               throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
-              tokens: [],
             });
 
             test('empty obj with elided commas', {
               code: 'const {,,} = obj;',
               throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
-              tokens: [],
             });
 
             test('single var base case', {
@@ -2057,55 +2050,46 @@ module.exports = (describe, test) =>
             test('ident and destruct no assignment', {
               code: 'const x, {y};',
               throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('destruct no assignment and ident', {
               code: 'const {x}, y;',
               throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('ident with init and destruct no assignment', {
               code: 'const x = y, {z};',
               throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and no assignment', {
               code: 'const {x:y};',
               throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with default and no assignment', {
               code: 'const {x=y};',
               throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with rename and default and no assignment', {
               code: 'const {x:y=z};',
               throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and with and without assignment', {
               code: 'const {x:y=z} = obj, {a:b=c};',
               throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('double destruct with rename and default and without and with assignment', {
               code: 'const {x:y=z}, {a:b=c} = obj;',
               throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct with colon-eq', {
               code: 'const {a:=c} = z;',
-              throws: 'Unexpected token while trying to destructure object',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+              throws: true,
             });
 
             test('correct dynamic property destructuring', {
@@ -2144,32 +2128,27 @@ module.exports = (describe, test) =>
 
             test('dynamic property destructuring missing alias', {
               code: 'const {[x]} = z;',
-              throws: 'A computed destructuring property name must be followed by a colon',
-              tokens: [],
+              throws: 'computed property',
             });
 
             test('dynamic property destructuring missing alias and init', {
               code: 'const {[x]};',
-              throws: 'A computed destructuring property name must be followed by a colon',
-              tokens: [],
+              throws: 'computed property',
             });
 
             test('dynamic property destructuring missing assignment', {
               code: 'const {[x]: y};',
               throws: 'destructuring must have init',
-              tokens: [],
             });
 
             test('dynamic property destructuring with default missing alias', {
               code: 'const {[x] = y} = z;',
-              throws: 'A computed destructuring property name must be followed by a colon',
-              tokens: [],
+              throws: 'computed property',
             });
 
             test('dynamic property destructuring with default and alias missing init', {
               code: 'const {[x]: y = z};',
               throws: 'destructuring must have init',
-              tokens: [],
             });
 
             test('correct dynamic property destructuring with default and alias', {
@@ -3583,8 +3562,7 @@ module.exports = (describe, test) =>
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] = obj;;);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] = obj;;);',
@@ -3651,8 +3629,7 @@ module.exports = (describe, test) =>
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] = obj;;);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('second param rest on a nested destruct', {
                   code: 'for (const [x, ...[foo, bar]] = obj;;);',
@@ -3816,6 +3793,7 @@ module.exports = (describe, test) =>
             });
 
             describe('object', _ => {
+
               test('empty obj', {
                 code: 'for (const {} = obj;;);',
                 ast: {
@@ -3843,19 +3821,67 @@ module.exports = (describe, test) =>
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
+              test('in edge case', {
+                code: 'for (const {x = a in b} = obj;;);',
+                desc: '`in` is illegal due to disambiguation, but an array/object resets that state',
+                ast: {
+                  type: 'Program',
+                  body: [
+                    {
+                      type: 'ForStatement',
+                      init: {
+                        type: 'VariableDeclaration',
+                        kind: 'const',
+                        declarations: [
+                          {
+                            type: 'VariableDeclarator',
+                            id: {
+                              type: 'ObjectPattern',
+                              properties: [
+                                {
+                                  type: 'Property',
+                                  key: {type: 'Identifier', name: 'x'},
+                                  kind: 'init',
+                                  method: false,
+                                  computed: false,
+                                  value: {
+                                    type: 'AssignmentPattern',
+                                    left: {type: 'Identifier', name: 'x'},
+                                    right: {
+                                      type: 'BinaryExpression',
+                                      left: {type: 'Identifier', name: 'a'},
+                                      operator: 'in',
+                                      right: {type: 'Identifier', name: 'b'},
+                                    },
+                                  },
+                                  shorthand: true,
+                                },
+                              ],
+                            },
+                            init: {type: 'Identifier', name: 'obj'},
+                          },
+                        ],
+                      },
+                      test: null,
+                      update: null,
+                      body: {type: 'EmptyStatement'},
+                    },
+                  ],
+                },
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+              });
+
               test('empty obj with trailing comma', {
                 code: 'for (const {,} = obj;;);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
-              });
+                });
 
               test('empty obj with elided commas', {
                 code: 'for (const {,,} = obj;;);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
-              });
+                });
 
               test('single var base case', {
                 code: 'for (const {x} = obj;;);',
@@ -5029,67 +5055,56 @@ module.exports = (describe, test) =>
               test('single destruct no assignment', {
                 code: 'for (const {x};;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct no assignment', {
                 code: 'for (const {x}, {y} = z;;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('ident and destruct no assignment', {
                 code: 'for (const x, {y};;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('destruct no assignment and ident', {
                 code: 'for (const {x}, y;;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('ident with init and destruct no assignment', {
                 code: 'for (const x = y, {z};;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with rename and no assignment', {
                 code: 'for (const {x:y};;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with default and no assignment', {
                 code: 'for (const {x=y};;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with rename and default and no assignment', {
                 code: 'for (const {x:y=z};;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct with rename and default and with and without assignment', {
                 code: 'for (const {x:y=z} = obj, {a:b=c};;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct with rename and default and without and with assignment', {
                 code: 'for (const {x:y=z}, {a:b=c} = obj;;);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with colon-eq', {
                 code: 'for (const {a:=c} = z;;);',
-                throws: 'Unexpected token while trying to destructure object',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('correct dynamic property destructuring', {
@@ -5151,12 +5166,12 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring missing alias', {
                 code: 'for (const {[x]} = z;;);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property',
               });
 
               test('dynamic property destructuring missing alias and init', {
                 code: 'for (const {[x]};;);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property',
               });
 
               test('dynamic property destructuring missing assignment', {
@@ -5166,7 +5181,7 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (const {[x] = y} = z;;);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property',
               });
 
               test('dynamic property destructuring with default and alias missing init', {
@@ -5688,8 +5703,7 @@ module.exports = (describe, test) =>
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] = obj);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] = obj);',
@@ -5778,15 +5792,13 @@ module.exports = (describe, test) =>
                 code: 'for (const {,} = obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
-              });
+                });
 
               test('empty obj with elided commas', {
                 code: 'for (const {,,} = obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
-              });
+                });
 
               test('single var base case', {
                 code: 'for (const {x} = obj);',
@@ -6201,73 +6213,61 @@ module.exports = (describe, test) =>
               test('single destruct no assignment', {
                 code: 'for (const {x});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct no assignment', {
                 code: 'for (const {x}, {y} = z);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('ident and destruct no assignment', {
                 code: 'for (const x, {y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('destruct no assignment and ident', {
                 code: 'for (const {x}, y);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('ident with init and destruct no assignment', {
                 code: 'for (const x = y, {z});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('destruct no assignment and ident', {
                 code: 'for (const {x}, y);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with rename and no assignment', {
                 code: 'for (const {x:y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with default and no assignment', {
                 code: 'for (const {x=y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with rename and default and no assignment', {
                 code: 'for (const {x:y=z});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct with rename and default and with and without assignment', {
                 code: 'for (const {x:y=z} = obj, {a:b=c});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct with rename and default and without and with assignment', {
                 code: 'for (const {x:y=z}, {a:b=c} = obj);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with colon-eq', {
                 code: 'for (const {a:=c} = z);',
-                throws: 'Unexpected token while trying to destructure object',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('correct dynamic property destructuring', {
@@ -6277,12 +6277,12 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring missing alias', {
                 code: 'for (const {[x]} = z);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property',
               });
 
               test('dynamic property destructuring missing alias and init', {
                 code: 'for (const {[x]});',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property',
               });
 
               test('dynamic property destructuring missing assignment', {
@@ -6292,7 +6292,7 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (const {[x] = y} = z);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property',
               });
 
               test('dynamic property destructuring with default and alias missing init', {
@@ -7013,8 +7013,7 @@ module.exports = (describe, test) =>
                 test('rest followed by an ident', {
                   code: 'for (const [...foo, bar] in obj);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (const [...foo,] in obj);',
@@ -7025,8 +7024,7 @@ module.exports = (describe, test) =>
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] in obj);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] in obj);',
@@ -7090,8 +7088,7 @@ module.exports = (describe, test) =>
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] in obj);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('second param rest on a nested destruct', {
                   code: 'for (const [x, ...[foo, bar]] in obj);',
@@ -7153,8 +7150,7 @@ module.exports = (describe, test) =>
                   code: 'for (const [...bar = foo] in obj);',
                   throws: 'a rest value',
                   desc: 'rest cannot get a default in var decls but they can as func args',
-                  tokens: [],
-                });
+                    });
 
                 test('double rest / spread rest', {
                   code: 'for (const [... ...foo] in obj);',
@@ -7280,15 +7276,13 @@ module.exports = (describe, test) =>
                 code: 'for (const {,} in obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
-              });
+                });
 
               test('empty obj with elided commas', {
                 code: 'for (const {,,} in obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
-              });
+                });
 
               test('single var base case', {
                 code: 'for (const {x} in obj);',
@@ -8110,73 +8104,61 @@ module.exports = (describe, test) =>
               test('single destruct no assignment', {
                 code: 'for (const {x});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct no assignment', {
                 code: 'for (const {x}, {y} in z);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('ident and destruct no assignment', {
                 code: 'for (const x, {y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('destruct no assignment and ident', {
                 code: 'for (const {x}, y);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('ident with init and destruct no assignment', {
                 code: 'for (const x = y, {z});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('destruct no assignment and ident', {
                 code: 'for (const {x}, y);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with rename and no assignment', {
                 code: 'for (const {x:y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with default and no assignment', {
                 code: 'for (const {x=y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with rename and default and no assignment', {
                 code: 'for (const {x:y=z});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct with rename and default and with and without assignment', {
                 code: 'for (const {x:y=z} = obj, {a:b=c});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct with rename and default and without and with assignment', {
                 code: 'for (const {x:y=z}, {a:b=c} in obj);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with colon-eq', {
                 code: 'for (const {a:=c} in z);',
-                throws: 'Unexpected token while trying to destructure object',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('correct dynamic property destructuring', {
@@ -8220,15 +8202,13 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring missing alias', {
                 code: 'for (const {[x]} in obj);',
-                throws: 'A computed destructuring property name must be followed by a colon',
-                tokens: [],
-              });
+                throws: 'computed property',
+                });
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (const {[x] = y} in obj);',
-                throws: 'A computed destructuring property name must be followed by a colon',
-                tokens: [],
-              });
+                throws: 'computed property',
+                });
 
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (const {[x]: y = z} in obj);',
@@ -9018,8 +8998,7 @@ module.exports = (describe, test) =>
                 test('rest followed by an ident', {
                   code: 'for (const [...foo, bar] of obj);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (const [...foo,] of obj);',
@@ -9030,8 +9009,7 @@ module.exports = (describe, test) =>
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] of obj);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] of obj);',
@@ -9095,8 +9073,7 @@ module.exports = (describe, test) =>
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] of obj);',
                   throws: 'follow a rest',
-                  tokens: [],
-                });
+                    });
 
                 test('second param rest on a nested destruct', {
                   code: 'for (const [x, ...[foo, bar]] of obj);',
@@ -9158,8 +9135,7 @@ module.exports = (describe, test) =>
                   code: 'for (const [...bar = foo] of obj);',
                   throws: 'a rest value',
                   desc: 'rest cannot get a default of var decls but they can as func args',
-                  tokens: [],
-                });
+                    });
 
                 test('double rest / spread rest', {
                   code: 'for (const [... ...foo] of obj);',
@@ -9285,15 +9261,13 @@ module.exports = (describe, test) =>
                 code: 'for (const {,} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
-              });
+                });
 
               test('empty obj with elided commas', {
                 code: 'for (const {,,} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                tokens: [],
-              });
+                });
 
               test('single var base case', {
                 code: 'for (const {x} of obj);',
@@ -10115,73 +10089,61 @@ module.exports = (describe, test) =>
               test('single destruct no assignment', {
                 code: 'for (const {x});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct no assignment', {
                 code: 'for (const {x}, {y} of z);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('ident and destruct no assignment', {
                 code: 'for (const x, {y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('destruct no assignment and ident', {
                 code: 'for (const {x}, y);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('ident with init and destruct no assignment', {
                 code: 'for (const x = y, {z});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('destruct no assignment and ident', {
                 code: 'for (const {x}, y);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with rename and no assignment', {
                 code: 'for (const {x:y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with default and no assignment', {
                 code: 'for (const {x=y});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with rename and default and no assignment', {
                 code: 'for (const {x:y=z});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct with rename and default and with and without assignment', {
                 code: 'for (const {x:y=z} = obj, {a:b=c});',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double destruct with rename and default and without and with assignment', {
                 code: 'for (const {x:y=z}, {a:b=c} of obj);',
                 throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('single destruct with colon-eq', {
                 code: 'for (const {a:=c} of z);',
-                throws: 'Unexpected token while trying to destructure object',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('correct dynamic property destructuring', {
@@ -10225,15 +10187,13 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring missing alias', {
                 code: 'for (const {[x]} of obj);',
-                throws: 'A computed destructuring property name must be followed by a colon',
-                tokens: [],
-              });
+                throws: 'computed property',
+                });
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (const {[x] = y} of obj);',
-                throws: 'A computed destructuring property name must be followed by a colon',
-                tokens: [],
-              });
+                throws: 'computed property',
+                });
 
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (const {[x]: y = z} of obj);',
@@ -10856,15 +10816,13 @@ module.exports = (describe, test) =>
                 throws: 'follow a rest',
                 desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
                 SCRIPT: {throws: 'module goal'},
-                tokens: [],
-              });
+                });
 
               test('rest followed by two commas', {
                 code: 'export const [...foo,,] = obj;',
                 throws: 'follow a rest',
                 SCRIPT: {throws: 'module goal'},
-                tokens: [],
-              });
+                });
 
               test('rest on a nested destruct', {
                 code: 'export const [...[foo, bar]] = obj;',
@@ -10915,8 +10873,7 @@ module.exports = (describe, test) =>
                 code: 'export const [...[foo, bar],,] = obj;',
                 throws: 'follow a rest',
                 SCRIPT: {throws: 'module goal'},
-                tokens: [],
-              });
+                });
 
               test('second param rest on a nested destruct', {
                 code: 'export const [x, ...[foo, bar]] = obj;',
@@ -10978,29 +10935,25 @@ module.exports = (describe, test) =>
                 throws: 'a rest value',
                 desc: 'rest cannot get a default in var decls but they can as func args',
                 SCRIPT: {throws: 'module goal'},
-                tokens: [],
-              });
+                });
 
               test('double rest / spread rest', {
                 code: 'export const [... ...foo] = obj;',
                 throws: 'Can not rest twice',
                 SCRIPT: {throws: 'module goal'},
-                tokens: [],
-              });
+                });
 
               test('rest without value', {
                 code: 'export const [...] = obj;',
                 throws: 'missing an ident or destruct',
                 SCRIPT: {throws: 'module goal'},
-                tokens: [],
-              });
+                });
 
               test('rest with comma without value', {
                 code: 'export const [...,] = obj;',
                 throws: 'missing an ident or destruct',
                 SCRIPT: {throws: 'module goal'},
-                tokens: [],
-              });
+                });
 
               test('single dot vs rest', {
                 code: 'export const [.x] = obj;',
@@ -11114,7 +11067,6 @@ module.exports = (describe, test) =>
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
-              tokens: [],
             });
 
             test('empty obj with elided commas', {
@@ -11122,7 +11074,6 @@ module.exports = (describe, test) =>
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'Objects cant have comma without something preceding it',
               desc: 'works for array but not for obj',
-              tokens: [],
             });
 
             test('single var base case', {
@@ -12117,7 +12068,7 @@ module.exports = (describe, test) =>
             test('single destruct with colon-eq', {
               code: 'export const {a:=c} = z;',
               SCRIPT: {throws: 'can only be used with the module goal'},
-              throws: 'Unexpected token while trying to destructure object',
+              throws: true,
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
@@ -12163,37 +12114,32 @@ module.exports = (describe, test) =>
 
             test('dynamic property destructuring missing alias', {
               code: 'export const {[x]} = z;',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property',
               SCRIPT: {throws: 'can only be used with the module goal'},
-              tokens: [],
             });
 
             test('dynamic property destructuring missing alias and init', {
               code: 'export const {[x]};',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property',
               SCRIPT: {throws: 'can only be used with the module goal'},
-              tokens: [],
             });
 
             test('dynamic property destructuring missing assignment', {
               code: 'export const {[x]: y};',
               throws: 'destructuring must have init',
               SCRIPT: {throws: 'can only be used with the module goal'},
-              tokens: [],
             });
 
             test('dynamic property destructuring with default missing alias', {
               code: 'export const {[x] = y} = z;',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property',
               SCRIPT: {throws: 'can only be used with the module goal'},
-              tokens: [],
             });
 
             test('dynamic property destructuring with default and alias missing init', {
               code: 'export const {[x]: y = z};',
               throws: 'destructuring must have init',
               SCRIPT: {throws: 'can only be used with the module goal'},
-              tokens: [],
             });
 
             test('correct dynamic property destructuring with default and alias', {

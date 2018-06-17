@@ -235,6 +235,8 @@ const MUST_DESTRUCT = 2;
 const NO_SPREAD = 0;
 const LAST_SPREAD = 1;
 const MID_SPREAD = 2;
+const PARSE_INIT = false;
+const SKIP_INIT = true;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -2558,6 +2560,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // TODO: legacy `let` as a var name support
 
+    let mustHaveInit = false;
+
     if (curtype === $IDENT) {
       // normal
       bindingIdentCheck(curtok, bindingType, lexerFlags);
@@ -2565,16 +2569,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
     }
     else if (curc === $$CURLY_L_7B) {
-      parseBindingObjectDestructs(lexerFlags, bindingType, astProp);
-      if (curc !== $$IS_3D) {
-        if (bindingOrigin === FROM_FOR_HEADER && (curtok.str === 'in' || curtok.str === 'of')) {
-          // for-in and for-of are implicit inits for destructs
-        } else if (bindingOrigin === FROM_FUNC_ARG || bindingOrigin === FROM_CATCH) {
-          // func args get init by call
-          // catch clauses get the value of the thrown error
-        } else {
-          THROW('Object destructuring must have init');
-        }
+      let destructible = parseObjectLiteralPattern(lexerFlags, bindingType, SKIP_INIT, astProp);
+      if (destructible === CANT_DESTRUCT) THROW('Could not destructure the declaration');
+      AST_destruct(astProp);
+      // note: throw for `const {};` and `for (const {};;);` but not `for (const {} in obj);`
+      if (
+        (bindingOrigin !== FROM_CATCH) &&
+        (bindingOrigin !== FROM_FOR_HEADER || (curtok.str !== 'in' && curtok.str !== 'of')) &&
+        (bindingType === BINDING_TYPE_CONST || bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_VAR)
+      ) {
+        mustHaveInit = true;
       }
     }
     else if (curc === $$SQUARE_L_5B) {
@@ -2622,6 +2626,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseExpression(lexerFlags, 'init');
         AST_close('VariableDeclarator');
       }
+    }
+    else if (mustHaveInit) {
+      THROW('Declaration destructuring must have init');
     }
     else if (defaultsOption === ASSIGNMENT_IS_INIT) {
       AST_wrapClosed('declarations', 'VariableDeclarator', 'id');
@@ -3244,16 +3251,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       return parseValueHeadBodyIdent(lexerFlags, checkNewTarget, astProp);
-    } else if (curtype & ($NUMBER|$STRING|$REGEX)) {
+    }
+    else if (curtype & ($NUMBER|$STRING|$REGEX)) {
       AST_setLiteral(astProp, curtok);
       skipDiv(lexerFlags);
       return NOT_ASSIGNABLE;
-    } else if (curtype & $TICK) {
+    }
+    else if (curtype & $TICK) {
       parseTickExpression(lexerFlags, astProp);
       return NOT_ASSIGNABLE;
-    } else if (curtype === $PUNCTUATOR) {
+    }
+    else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
-        let wasDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_NONE, astProp);
+        let wasDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_NONE, PARSE_INIT, astProp);
         if (wasDestruct === MUST_DESTRUCT) THROW('Found a struct that must be destructured but was not');
         return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `({x})=y` is illegal
       } else if (curc === $$SQUARE_L_5B) {
@@ -3411,6 +3421,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       default:
         // TODO: verify identifier (note: can be value keywords depending on next token being an arrow)
         ASSERT_skipDiv($IDENT, lexerFlags); // regular division
+        bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
     }
 
     parseAfterVarName(lexerFlags, identToken, assignable, astProp);
@@ -3493,7 +3504,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseExpressionFromIdent(lexerFlags, identToken, astProp) {
     let assignable = parseValueHeadBodyAfterIdent(lexerFlags, identToken, NOT_NEW_ARG, astProp);
-    console.log('about to parse tail', ''+curtok)
     assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
     return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
   }
@@ -4050,7 +4060,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$CURLY_L_7B) {
         // note: grouped object/array literals are never assignable
-        let subDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_ARG, astProp);
+        let subDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_ARG, PARSE_INIT, astProp);
         destructible = updateDestructible(destructible, subDestruct)
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
       }
@@ -4259,7 +4269,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let spreadStage = NO_SPREAD;
 
     while(curc !== $$SQUARE_R_5D) {
-console.log('loop:',destructible)
       if (curtype === $IDENT) {
         // token offset:
         // - ([IDENT
@@ -4290,7 +4299,7 @@ console.log('loop:',destructible)
           // must be valid bindable var name
           // TODO: in strict mode the var must exist (if not an arrow) otherwise it throws if not an arrow
           // TODO: if name is const bound it is only valid as an arrow
-          bindingIdentCheck(curtok, BINDING_TYPE_NONE, lexerFlags);
+          bindingIdentCheck(curtok, bindingType, lexerFlags);
 
           // TODO: instead of wrap-closed below we can do ast_open here in one go
           // AST_open(astProp, 'AssignmentExpression');
@@ -4309,7 +4318,7 @@ console.log('loop:',destructible)
         }
         else if (curtok.str[1] === '=' && curtok.str.length === 2 && curc !== $$EXCL_21 && curc !== $$IS_3D) {
           // - [x += y]
-          bindingIdentCheck(curtok, BINDING_TYPE_NONE, lexerFlags);
+          bindingIdentCheck(curtok, bindingType, lexerFlags);
           // TODO: dont wrapClosed below but do it all in once
           AST_setIdent(astProp, identToken);
 
@@ -4357,7 +4366,7 @@ console.log('loop:',destructible)
               destructible = updateDestructible(destructible, CANT_DESTRUCT);
               break;
             default:
-              bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
+              bindingIdentCheck(identToken, bindingType, lexerFlags);
           }
         }
         else {
@@ -4374,7 +4383,7 @@ console.log('loop:',destructible)
         }
       }
       else if (curc === $$CURLY_L_7B) {
-        let nowDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, astProp);
+        let nowDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, astProp);
         destructible = updateDestructible(destructible, nowDestruct);
       }
       else if (curc === $$SQUARE_L_5B) {
@@ -4446,7 +4455,7 @@ console.log('loop:',destructible)
 
     return destructible;
   }
-  function parseObjectLiteralPattern(_lexerFlags, bindingType, _astProp) {
+  function parseObjectLiteralPattern(_lexerFlags, bindingType, skipInit, _astProp) {
     // have to return whether the whole cant, might, or must destruct;
     // - `f({a = b})`         // FAIL (shorthand only allowed when destructuring)
     // - `f({a = b} = c)`     // PASS (the outer assignment turns the object into a Pattern)
@@ -4454,7 +4463,7 @@ console.log('loop:',destructible)
     // - `f({...a = b} = c)`  // FAIL (rest cannot have init)
 
     // returns whether this object is destructible
-    ASSERT(arguments.length === 3, 'expecting 3 args');
+    ASSERT(arguments.length === 4, 'expecting 4 args');
 
     // token offsetS:
     // - ( {
@@ -4475,7 +4484,7 @@ console.log('loop:',destructible)
     // - in all other cases this must be an object
 
     let lexerFlags = _lexerFlags;
-    if (lexerFlags & LF_NO_IN) TODO, lexerFlags = lexerFlags ^ LF_NO_IN;
+    if (lexerFlags & LF_NO_IN) lexerFlags = lexerFlags ^ LF_NO_IN;
     if (lexerFlags & LF_IN_TEMPLATE) lexerFlags = lexerFlags ^ LF_IN_TEMPLATE;
 
     AST_open(_astProp, 'ObjectExpression');
@@ -4491,7 +4500,7 @@ console.log('loop:',destructible)
 
       if (curc === $$COMMA_2C) {
         // ({,
-        TODO,THROW('Objects can not have elided commas');
+        THROW('Objects cant have comma without something preceding it');
       }
 
       // an objlit property has quite a few (though limited) valid goals
@@ -4589,6 +4598,7 @@ console.log('loop:',destructible)
             // ({ident: ident
             // can still become ({ident: foo+bar}) which is not destructible, so confirm token after ident
             let valueIdentToken = nameBinding = curtok;
+            bindingIdentCheck(curtok, bindingType, lexerFlags);
             ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
 
             AST_open(astProp, 'Property');
@@ -4636,7 +4646,7 @@ console.log('loop:',destructible)
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let subDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, astProp);
+            let subDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, astProp);
             destructible = updateDestructible(destructible, subDestruct);
             AST_set('shorthand', false);
             AST_close('Property');
@@ -4850,7 +4860,7 @@ console.log('loop:',destructible)
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let wasDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, astProp);
+            let wasDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, astProp);
             destructible = updateDestructible(destructible, wasDestruct);
             AST_set('shorthand', false);
             AST_close('Property');
@@ -4918,7 +4928,6 @@ console.log('loop:',destructible)
         ASSERT_skipRex('[', lexerFlags); // next is expression
         parseExpression(lexerFlags, astProp);
         skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
-        ASSERT(curc === $$COLON_3A || curc === $$PAREN_L_28, 'curc is : or *');
 
         AST_wrapClosed(astProp, 'Property', 'key');
         AST_set('kind', 'init'); // only getters/setters get special value here
@@ -4930,6 +4939,7 @@ console.log('loop:',destructible)
           destructible = updateDestructible(destructible, CANT_DESTRUCT);
           parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
         } else {
+          if (curc !== $$COLON_3A) THROW('A computed property name must be followed by a colon or paren');
           skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
           parseExpression(lexerFlags, 'value');
         }
@@ -5036,7 +5046,7 @@ console.log('loop:',destructible)
           break;
         default:
           // regardless of destructible state, if you see something like `typeof` here you have an error
-          if (nameBinding) bindingIdentCheck(nameBinding, BINDING_TYPE_NONE, lexerFlags);
+          if (nameBinding) bindingIdentCheck(nameBinding, bindingType, lexerFlags);
       }
 
       if (curc !== $$COMMA_2C) break;
@@ -5049,7 +5059,7 @@ console.log('loop:',destructible)
     AST_close('ObjectExpression');
 
     // this is immediately after the top-level object literal closed that we started parsing
-    if (curc === $$IS_3D && curtok.str === '=') {
+    if (skipInit === PARSE_INIT && curc === $$IS_3D && curtok.str === '=') {
       updateDestructible(destructible, MUST_DESTRUCT); // this is to assert the above _can_ be destructed
       // this assignment resets the destructible state
       // for example; `({a = b})` must destruct because of the shorthand. `[...a=b]` can't destruct because rest is only

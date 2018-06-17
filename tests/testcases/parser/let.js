@@ -1954,8 +1954,7 @@ module.exports = (describe, test) =>
 
             test('single destruct with colon-eq', {
               code: 'let {a:=c} = z;',
-              throws: 'Unexpected token while trying to destructure',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+              throws: true,
             });
 
             test('correct dynamic property destructuring', {
@@ -1994,12 +1993,12 @@ module.exports = (describe, test) =>
 
             test('dynamic property destructuring missing alias', {
               code: 'let {[x]} = z;',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property name',
             });
 
             test('dynamic property destructuring missing alias and init', {
               code: 'let {[x]};',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property name',
             });
 
             test('dynamic property destructuring missing assignment', {
@@ -2009,7 +2008,7 @@ module.exports = (describe, test) =>
 
             test('dynamic property destructuring with default missing alias', {
               code: 'let {[x] = y} = z;',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property name',
             });
 
             test('dynamic property destructuring with default and alias missing init', {
@@ -4934,8 +4933,7 @@ module.exports = (describe, test) =>
 
               test('single destruct with colon-eq', {
                 code: 'for (let {a:=c} = z;;);',
-                throws: 'Unexpected token while trying to destructure',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('correct dynamic property destructuring', {
@@ -4997,12 +4995,12 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring missing alias', {
                 code: 'for (let {[x]} = z;;);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('dynamic property destructuring missing alias and init', {
                 code: 'for (let {[x]};;);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('dynamic property destructuring missing assignment', {
@@ -5012,7 +5010,7 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (let {[x] = y} = z;;);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('dynamic property destructuring with default and alias missing init', {
@@ -6124,8 +6122,7 @@ module.exports = (describe, test) =>
 
               test('single destruct with colon-eq', {
                 code: 'for (let {a:=c} = z);',
-                throws: 'Unexpected token while trying to destructure',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('correct dynamic property destructuring', {
@@ -6136,12 +6133,12 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring missing alias', {
                 code: 'for (let {[x]} = z);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('dynamic property destructuring missing alias and init', {
                 code: 'for (let {[x]});',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('dynamic property destructuring missing assignment', {
@@ -6151,7 +6148,7 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (let {[x] = y} = z);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('dynamic property destructuring with default and alias missing init', {
@@ -8039,8 +8036,7 @@ module.exports = (describe, test) =>
 
               test('single destruct with colon-eq', {
                 code: 'for (let {a:=c} in z);',
-                throws: 'Unexpected token while trying to destructure',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('correct dynamic property destructuring', {
@@ -8084,12 +8080,12 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring missing alias', {
                 code: 'for (let {[x]} in obj);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (let {[x] = y} in obj);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('correct dynamic property destructuring with default and alias', {
@@ -10047,8 +10043,7 @@ module.exports = (describe, test) =>
 
               test('single destruct with colon-eq', {
                 code: 'for (let {a:=c} of z);',
-                throws: 'Unexpected token while trying to destructure',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+                throws: true,
               });
 
               test('correct dynamic property destructuring', {
@@ -10092,12 +10087,12 @@ module.exports = (describe, test) =>
 
               test('dynamic property destructuring missing alias', {
                 code: 'for (let {[x]} of obj);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (let {[x] = y} of obj);',
-                throws: 'A computed destructuring property name must be followed by a colon',
+                throws: 'computed property name',
               });
 
               test('correct dynamic property destructuring with default and alias', {
@@ -11984,9 +11979,7 @@ module.exports = (describe, test) =>
 
             test('single destruct with colon-eq', {
               code: 'export let {a:=c} = z;',
-              SCRIPT: {throws: 'can only be used with the module goal'},
-              throws: 'Unexpected token while trying to destructure',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+              throws: true,
             });
 
             test('correct dynamic property destructuring', {
@@ -12031,13 +12024,13 @@ module.exports = (describe, test) =>
 
             test('dynamic property destructuring missing alias', {
               code: 'export let {[x]} = z;',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property name',
               SCRIPT: {throws: 'can only be used with the module goal'},
             });
 
             test('dynamic property destructuring missing alias and init', {
               code: 'export let {[x]};',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property name',
               SCRIPT: {throws: 'can only be used with the module goal'},
             });
 
@@ -12049,7 +12042,7 @@ module.exports = (describe, test) =>
 
             test('dynamic property destructuring with default missing alias', {
               code: 'export let {[x] = y} = z;',
-              throws: 'A computed destructuring property name must be followed by a colon',
+              throws: 'computed property name',
               SCRIPT: {throws: 'can only be used with the module goal'},
             });
 
