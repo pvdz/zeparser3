@@ -2262,23 +2262,23 @@ module.exports = (describe, test) =>
 
         test('middle is bad', {
           code: '(x, ...y, z) => x',
-          throws: 'not destructible',
+          throws: 'rest arg',
         });
 
         test('first but not last is bad', {
           code: '(...x, y) => x',
-          throws: 'not destructible',
+          throws: 'rest arg',
         });
 
         test('cannot have init', {
           code: '(...x = y) => x',
-          throws: 'not destructible',
+          throws: 'rest arg',
         });
 
         test('can not spread member', {
           code: '([...x.y]) => z',
           desc: 'would be valid in group; `[...x.y];`',
-          throws: 'not destructible',
+          throws: 'rest arg',
         });
       });
 
