@@ -3817,14 +3817,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parsedRest = true;
         break; // must be last element in arrow header
       }
-      else if (curc === $$PAREN_R_29) {
-        if (!options_trailingArgComma) {
-          THROW('Trailing function argument comma is not enabled');
-        }
-        TODO
-        // must be last element
-        break;
-      }
       else {
         // arbitrary expression that is not destructible (on this level, at least)
         destructible = CANT_DESTRUCT;
