@@ -1459,12 +1459,86 @@ module.exports = (describe, test) =>
         throws: 'followed by an arrow',
       });
 
-      // (); (empty group is error)
-      // (a=1)=2; (grouped assignment is _not_ a valid assignment target) https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget
-      // assignment to eval and arguments in strict mode should throw (even wrapped)
-      // assignment to `yield` and `await` is valid (even wrapped)
-      // wrapped reserved words are still a syntax error
-      // non-destructible should throw when attempted anyways `([a + b] = x);`, `([a + b] = x) => a;`
+      test('empty group at eof', {
+        code: '()',
+        throws: 'Empty group',
+      });
+
+      test('empty group with semi', {
+        code: '();',
+        throws: 'Empty group',
+      });
+
+      test('grouped assignment is _not_ a valid assignment target', {
+        code: '(a=1)=2',
+        desc: 'https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
+        throws: 'Invalid assignment',
+      });
+
+      test('grouped compound assignment is _not_ a valid assignment target', {
+        code: '(a=1)+=2',
+        desc: 'https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
+        throws: 'Invalid assignment',
+      });
+
+      test('cannot assign to group with comma', {
+        code: '(a,b)=2',
+        throws: 'Cannot assign',
+      });
+
+      test('cannot compound assign to group with comma', {
+        code: '(a,b)+=2',
+        throws: 'Cannot assign',
+      });
+
+      // TODO: confirm that `async` is not a reserved word in any case
+      // TODO: confirm `let` is assignable even in strict mode
+
+      [
+        'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
+        'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
+        'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
+        'false', 'enum',
+      ].forEach(keyword => {
+        test('cannot assign to group with keyword: `' + keyword + '`', {
+          code: '('+keyword+')=2',
+          // Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
+          // Invalid assignment because group does not wrap just a var name or just a property access
+          throws: true,
+        });
+      });
+
+      [
+        'eval', 'arguments', 'static', 'implements', 'package',
+        'protected', 'interface', 'private', 'public', 'await', 'yield',
+      ].forEach(keyword => {
+        test('cannot assign to group with reserved word in strict mode: `' + keyword + '`', {
+          code: '('+keyword+')=2',
+          throws: keyword,
+          SLOPPY_SCRIPT: {
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: keyword},
+                    operator: '=',
+                    right: {type: 'Literal', value: '<TODO>', raw: '2'},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $ASI],
+          },
+        });
+      });
+
+      test('non-destructible should throw when attempted anyways', {
+        code: '([a + b] = x);',
+        throws: 'not destructible',
+      });
     });
 
     describe('arrow', _ => {
@@ -2292,7 +2366,15 @@ module.exports = (describe, test) =>
         });
       });
 
-      // should error: `a => {} + x` because arrow with block cannot be lhs of binary expression
+      test('non-destructible should throw when attempted anyways', {
+        code: '([a + b] = x) => a;',
+        throws: 'not destructible',
+      });
+
+      // TODO
+      // test('arrow with block cannot be lhs of binary expression', {
+      //   code: 'a => {} + x',
+      // });
     });
   });
 
@@ -2300,4 +2382,4 @@ module.exports = (describe, test) =>
 // cannot have yield or await in the params
 // cannot destructure when body contains "use strict"
 // cant redeclare existing vars
-// `async(a, ...b);` vs `async (a, ...b) => a;`
+// TODO: let not allowed in `let`, `const`, `for`-binding of any kind, and class name. But others are fine in sloppy

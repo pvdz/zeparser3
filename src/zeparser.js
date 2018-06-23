@@ -3914,7 +3914,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - (foo.x)
       // - (foo[x])
 
-      if (toplevelComma) TODO,THROW('Cannot assign to list of expressions in a group');
+      if (toplevelComma) THROW('Cannot assign to list of expressions in a group');
       // TODO: need to make sure we can't do `(eval) = x` and `(arguents) = x` in strict mode (only); it's an explicit error
       if (assignable !== IS_ASSIGNABLE) THROW('Invalid assignment because group does not wrap just a var name or just a property access');
 
@@ -3928,9 +3928,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curc !== $$IS_3D && curc !== $$EXCL_21 && curtok.str[curtok.str.length-1] === '=') {
       // compound assignment
-      if (toplevelComma) TODO,THROW('Cannot assign to list of expressions in a group');
+      if (toplevelComma) THROW('Cannot assign to list of expressions in a group');
       // TODO: need to make sure we can't do `(eval) = x` and `(arguents) = x` in strict mode (only); it's an explicit error
-      if (assignable !== IS_ASSIGNABLE) TODO,THROW('Invalid assignment because group does not wrap just a var name or just a property access');
+      if (assignable !== IS_ASSIGNABLE) THROW('Invalid assignment because group does not wrap just a var name or just a property access');
 
       AST_wrapClosed(astProp, 'AssignmentExpression', 'left');
       AST_set('operator', curtok.str);
