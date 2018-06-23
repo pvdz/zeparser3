@@ -3940,12 +3940,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       return NOT_ASSIGNABLE;
     }
-    else {
-      // a group. those still exist?
-      return assignable;
-    }
 
-    TODO;
+    // a group. those still exist?
+    return assignable;
   }
   function parseArrowableTopIdentAssign(lexerFlags, identToken, astProp) {
     // assignment / default init
