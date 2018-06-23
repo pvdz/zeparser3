@@ -34,6 +34,7 @@ let {
 } = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
 
 const BOLD = '\033[;1;1m';
+const BLINK = '\033[;5;1m';
 const RED = '\033[31m';
 const GREEN = '\033[32m';
 const RESET = '\033[0m';
@@ -241,14 +242,23 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     stack = f.stack;
   }
 
-  if ((!expectedTokens && !expectedThrows) || (!expectedThrows && !expectedAst)) {
-    LOG_THROW(`Bad tst case: Missing ${!expectedTokens ? 'expected token list' : 'ast|throws'} for: \`${toPrint(code)}\``, code, stack, desc, true);
-    console.log('testDetails:', testDetails);
-    console.log('finalTestOptions:', finalTestOptions);
-    ++fail;
-  } else if (wasError) {
-    if (!expectedThrows) {
+  if (!expectedTokens) {
+    expectedTokens = ['<not given>'];
+  }
+  if (!expectedAst) {
+    expectedAst = {'<not given>': true};
+  }
+
+  if (wasError) {
+    if (wasError.indexOf('Parser error!') < 0 && wasError.indexOf('TODO') < 0) {
+      console.log(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
       LOG_THROW('unexpected CRASH', code, stack, desc);
+      console.log(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
+      console.log('Thrown error:', wasError);
+      ++fail;
+      ++crash;
+    } else if (!expectedThrows) {
+      LOG_THROW(`${BOLD}unexpected ${RED}${wasError.indexOf('TODO')>=0?'TODO':'ERROR'}${RESET}`, code, stack, desc);
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
@@ -257,7 +267,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
-    } else if ((expectedThrows === true && wasError.toUpperCase().indexOf('TODO') < 0) || wasError.indexOf(expectedThrows) >= 0) {
+    } else if ((expectedThrows === true && wasError.toUpperCase().indexOf('TODO') < 0) || wasError.toUpperCase().indexOf(expectedThrows.toUpperCase()) >= 0) {
       console.log(`${prefix} ${GREEN}PASS${BOLD}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
       ++pass;
     } else {
