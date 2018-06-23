@@ -1449,6 +1449,16 @@ module.exports = (describe, test) =>
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
+      test('missing spread/rest arg', {
+        code: '(...);',
+        throws: 'missing an argument',
+      });
+
+      test('invalid spread/rest', {
+        code: '(...x);',
+        throws: 'followed by an arrow',
+      });
+
       // (); (empty group is error)
       // (a=1)=2; (grouped assignment is _not_ a valid assignment target) https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget
       // assignment to eval and arguments in strict mode should throw (even wrapped)

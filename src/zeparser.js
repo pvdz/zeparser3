@@ -3731,7 +3731,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let destructible = MIGHT_DESTRUCT;
     let assignable = NOT_ASSIGNABLE; // true iif first expr is assignable, always false if the group has a comma
     let toplevelComma = false;
-    let parsedRest = false; // top-level rest means group must be arrow header
 
     while (curc !== $$PAREN_R_29) { // top-level group loop, list of ident, array, object, rest, and other expressions
       if (curtype === $IDENT) {
@@ -3814,7 +3813,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
         parseArrowableTopRest(lexerFlags, asyncKeywordPrefixed, astProp);
-        parsedRest = true;
+        destructible = updateDestructible(destructible, MUST_DESTRUCT); // dots in toplevel group must mean arrow
         break; // must be last element in arrow header
       }
       else {
@@ -3891,12 +3890,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return NOT_ASSIGNABLE;
     }
     else if (destructible === MUST_DESTRUCT) {
-      TODO; // not sure whether this can actually happen here (these cases are caugh earlier?)
-      TODO,THROW('The group had to be destructed but was not followed by an arrow (this is an invalid assignment target)');
-    }
-    else if (parsedRest) {
-      TODO // I think this is caught elsewhere
-      THROW('Three dots in group is only allowed as arrow header');
+      THROW('The group had to be destructed but was not followed by an arrow (this is an invalid assignment target)');
     }
     else if (asyncKeywordPrefixed) {
       // `async(x,y,z)` without arrow
