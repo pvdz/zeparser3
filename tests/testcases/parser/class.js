@@ -2,6 +2,7 @@ let {$ASI, $IDENT, $PUNCTUATOR, $REGEX} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('class statement', _ => {
+
     describe('empty classes', _ => {
       describe('as declaration', _ => {
         test('base case empty class', {
@@ -166,6 +167,7 @@ module.exports = (describe, test) =>
     });
 
     describe('ident methods', _ => {
+
       test('class with simple ident method', {
         code: 'class A {a(){}}',
         ast: {

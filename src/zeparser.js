@@ -213,8 +213,11 @@ const NOT_ARROW = false;
 const FROM_STATEMENT_START = 1;
 const FROM_FOR_HEADER = 2;
 const FROM_EXPORT_DECL = 3;
-const FROM_FUNC_ARG = 4;
-const FROM_CATCH = 5;
+const FROM_CATCH = 4;
+const FROM_GETTER_ARG = 5;
+const FROM_SETTER_ARG = 6;
+const FROM_ASYNC_ARG = 7;
+const FROM_OTHER_FUNC_ARG = 8;
 const BINDING_TYPE_NONE = 0;
 const BINDING_TYPE_ARG = 1;
 const BINDING_TYPE_VAR = 2;
@@ -1073,7 +1076,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //       of the arrow expression until after parsing and processing that token. that needs curly pair checks.
     lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, isGenerator, NOT_ARROW);
 
-    parseFunctionFromParams(lexerFlags, isFuncDecl ? IS_STATEMENT : IS_EXPRESSION);
+    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl ? IS_STATEMENT : IS_EXPRESSION);
     AST_close(isFuncDecl ? 'FunctionDeclaration' : 'FunctionExpression');
   }
   function resetLexerFlagsForFunction(lexerFlags, isAsync, isGenerator, funcType) {
@@ -1088,11 +1091,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (funcType === NOT_ARROW) lexerFlags = lexerFlags | LF_CAN_NEW_TARGET;
     return lexerFlags;
   }
-  function parseFunctionFromParams(lexerFlags, expressionState) {
-    parseFuncArguments(lexerFlags);
+  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState) {
+    parseFuncArguments(lexerFlags, bindingFrom);
     parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, 'body');
   }
-  function parseFuncArguments(lexerFlags) {
+  function parseFuncArguments(lexerFlags, bindingFrom) {
     // TODO: await expression inside the params (like default param) of an async function are illegal
     lexerFlags = lexerFlags | LF_IN_FUNC_ARGS; // prevents await expression as default arg
     AST_set('params', []);
@@ -1101,7 +1104,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$PAREN_R_29) {
       ASSERT_skipRex(')', lexerFlags);
     } else {
-      parseBindings(lexerFlags, BINDING_TYPE_ARG, FROM_FUNC_ARG, ASSIGNMENT_IS_DEFAULT, 'params');
+      parseBindings(lexerFlags, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, 'params');
       AST_destruct('params');
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
@@ -1526,19 +1529,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('superClass', null);
     }
 
-    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
-    skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate);
-
+    return _parseClassBody(sansFlag(lexerFlags, LF_IN_TEMPLATE), 'body');
+  }
+  function _parseClassBody(lexerFlags, astProp) {
     // parse method, static method, or emptystatement
 
-    AST_open('body', 'ClassBody');
+    skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlags);
+    AST_open(astProp, 'ClassBody');
     AST_set('body', []);
-    while (parseClassMethod(lexerFlagsNoTemplate, 'body') === true);
+    while (curc !== $$CURLY_R_7D) parseClassMethod(lexerFlags, 'body');
     AST_close('ClassBody');
   }
   function parseClassMethod(lexerFlags) {
     // everything from objlit that is a method optionally prefixed by `static`, and an empty statement
-    return _parseClassMethod(lexerFlags, NO_STATIC_MODIFIER);
+    // this is what sets it apart from regular object literals (TODO: and `super`?)
+    // class properties would also have a say in this, but that's a nextgen worry
+    _parseClassMethod(lexerFlags, NO_STATIC_MODIFIER);
   }
   function _parseClassMethod(lexerFlags, isStatic) {
     ASSERT(arguments.length === _parseClassMethod.length, 'arg count');

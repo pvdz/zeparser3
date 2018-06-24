@@ -4333,9 +4333,33 @@ module.exports = (describe, test) =>
         throws: 'must be followed by a colon or paren',
       });
 
-      // can not use async/generators on getters/setters ({async get foo(){}})
-      // getters with non-zero param count
-      // setters with not-one param count
+      test('can not use async/generators on getters/setters', {
+        code: '({async get foo(){}});',
+        throws: 'Missing method arg',
+      });
+
+      test('can not use async/generators on getters/setters', {
+        code: '({get set foo(){}});',
+        throws: 'Missing method arg',
+      });
+
+      test('can not use async/generators on getters/setters', {
+        code: '({async set foo(){}});',
+        throws: 'Missing method arg',
+      });
+      //
+      // test('getters with non-zero param count', {
+      //   code: '({get foo(x){}});',
+      //   throws: 'Missing method arg',
+      // });
+      //
+      // test('setters with zero param count', {
+      //   code: '({get foo(){}});',
+      //  });
+      //
+      // test('setters with two params', {
+      //   code: '({get foo(x,y){}});',
+      // });
     });
 
     describe('destructuring', _ => {
