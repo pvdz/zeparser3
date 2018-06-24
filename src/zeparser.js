@@ -4389,7 +4389,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
             if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
               destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              TODO; // parse remainder of expression starting at ident
+              let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, 'value');
+              parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
             }
             AST_set('shorthand', false);
             AST_close('Property');

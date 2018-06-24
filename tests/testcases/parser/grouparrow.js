@@ -2370,6 +2370,142 @@ module.exports = (describe, test) => describe('parens', _ => {
       throws: 'not destructible',
     });
 
+    describe('obj lit with array value that cant destruct', _ => {
+      test('method call as group', {
+        code: '({ident: [foo, bar].join("")})',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'ident'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'CallExpression',
+                      callee: {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'ArrayExpression',
+                          elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
+                        },
+                        property: {type: 'Identifier', name: 'join'},
+                        computed: false,
+                      },
+                      arguments: [{type: 'Literal', value: '<TODO>', raw: '""'}],
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('division as group', {
+        code: '({ident: [foo, bar]/x})',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'ident'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'BinaryExpression',
+                      left: {
+                        type: 'ArrayExpression',
+                        elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
+                      },
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'x'},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('regex-like division as group', {
+        code: '({ident: [foo, bar]/x/g})',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'ident'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'BinaryExpression',
+                      left: {
+                        type: 'BinaryExpression',
+                        left: {
+                          type: 'ArrayExpression',
+                          elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
+                        },
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'x'},
+                      },
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'g'},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('compound assignment should fail', {
+        code: '({ident: [foo, bar] += x})',
+        throws: 'next ord',
+      });
+
+      test('method call as arrow', {
+        code: '({ident: [foo, bar].join("")}) => x',
+        throws: 'not destructible',
+      });
+
+      test('division as arrow', {
+        code: '({ident: [foo, bar]/x}) => x',
+        throws: 'not destructible',
+      });
+
+      test('regex-like division as arrow', {
+        code: '({ident: [foo, bar]/x/g}) => x',
+        throws: 'not destructible',
+      });
+    });
+
     // TODO
     // test('arrow with block cannot be lhs of binary expression', {
     //   code: 'a => {} + x',
