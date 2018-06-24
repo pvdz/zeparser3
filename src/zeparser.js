@@ -3661,7 +3661,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //    ({}) += y
     // v  ({}) != y
     // v  ({}) => y
-    // v  ({x});
+    //    ({x});              // shorthand must destruct so this is an error
     //    ({x}) = y
     //    ({x}) += y
     // v  ({x}) != y
@@ -4313,6 +4313,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           bindingIdentCheck(identToken, bindingType, lexerFlags);
 
+          // obj shorthand is only valid when destructuring
+          destructible = updateDestructible(destructible, MUST_DESTRUCT);
+
           AST_open(astProp, 'Property');
           AST_setIdent('key', identToken);
           AST_set('kind', 'init'); // only getters/setters get special value here
@@ -4402,15 +4405,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            let subDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, astProp);
+            let subDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, 'value');
+            console.log('subDestruct', subDestruct)
             destructible = updateDestructible(destructible, subDestruct);
-            AST_set('shorthand', false);
-            AST_close('Property');
             // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
             if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
               destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              TODO; // parse remainder of expression starting at ident
-            } else TODO
+              let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, 'value');
+              parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
+            }
+            AST_set('shorthand', false);
+            AST_close('Property');
           }
           else {
             // something like `({foo: 15` is valid, just not destructible
@@ -4467,7 +4472,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - ({async ident(){}})
           // - ({get ident(){}})
           // - ({set ident(ident){}})
-
           destructible = updateDestructible(destructible, CANT_DESTRUCT);
 
           if (identToken.str !== 'get' && identToken.str !== 'set' && identToken.str !== 'async') THROW('Did not expect another identifier while parsing an object literal property');

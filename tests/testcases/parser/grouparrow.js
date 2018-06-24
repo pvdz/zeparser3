@@ -2113,31 +2113,9 @@ module.exports = (describe, test) => describe('parens', _ => {
       });
     });
 
-    test('object in group with shorthand is fine', {
+    test('object in group with shorthand is error', {
       code: '({x});',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ObjectExpression',
-              properties: [
-                {
-                  type: 'Property',
-                  key: {type: 'Identifier', name: 'x'},
-                  kind: 'init',
-                  method: false,
-                  computed: false,
-                  value: {type: 'Identifier', name: 'x'},
-                  shorthand: true,
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      throws: 'had to be destructed',
     });
 
     test('destruct assign in group', {
@@ -2371,6 +2349,7 @@ module.exports = (describe, test) => describe('parens', _ => {
     });
 
     describe('obj lit with array value that cant destruct', _ => {
+
       test('method call as group', {
         code: '({ident: [foo, bar].join("")})',
         ast: {
@@ -2502,6 +2481,318 @@ module.exports = (describe, test) => describe('parens', _ => {
 
       test('regex-like division as arrow', {
         code: '({ident: [foo, bar]/x/g}) => x',
+        throws: 'not destructible',
+      });
+    });
+
+    test('nested objects', {
+      code: '({ident: {x: y}})',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ObjectExpression',
+              properties: [
+                {
+                  type: 'Property',
+                  key: {type: 'Identifier', name: 'ident'},
+                  kind: 'init',
+                  method: false,
+                  computed: false,
+                  value: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'x'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'y'},
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                  shorthand: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    test('nested object cant use shorthand unless destructuring', {
+      code: '({ident: {x}})',
+      throws: 'had to be destructed',
+    });
+
+    test('nested destructuring arrow', {
+      code: '({ident: {x: y}}) => x',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ArrowFunctionExpression',
+              params: [
+                {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'ident'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'x'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'y'},
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              ],
+              id: null,
+              generator: false,
+              async: false,
+              expression: true,
+              body: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('nested object with shorthand and arrow', {
+      code: '({ident: {x}}) => x',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ArrowFunctionExpression',
+              params: [
+                {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'ident'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'x'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'x'},
+                            shorthand: true,
+                          },
+                        ],
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              ],
+              id: null,
+              generator: false,
+              async: false,
+              expression: true,
+              body: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    describe('obj lit with obj value that cant destruct', _ => {
+
+      test('method call as group', {
+        code: '({ident: {x: y}.join("")})',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'ident'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'CallExpression',
+                      callee: {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'ObjectExpression',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'x'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'y'},
+                              shorthand: false,
+                            },
+                          ],
+                        },
+                        property: {type: 'Identifier', name: 'join'},
+                        computed: false,
+                      },
+                      arguments: [{type: 'Literal', value: '<TODO>', raw: '""'}],
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('division as group', {
+        code: '({ident: {x:y}/x})',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'ident'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'BinaryExpression',
+                      left: {
+                        type: 'ObjectExpression',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'x'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'y'},
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'x'},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('regex-like division as group', {
+        code: '({ident: {x:y}/x/g})',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'ident'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'BinaryExpression',
+                      left: {
+                        type: 'BinaryExpression',
+                        left: {
+                          type: 'ObjectExpression',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'x'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'y'},
+                              shorthand: false,
+                            },
+                          ],
+                        },
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'x'},
+                      },
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'g'},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('compound assignment should fail', {
+        code: '({ident: {x:y} += x})',
+        throws: 'next ord',
+      });
+
+      test('method call as arrow', {
+        code: '({ident: {x}.join("")}) => x',
+        throws: 'not destructible',
+      });
+
+      test('division as arrow', {
+        code: '({ident: {x}/x}) => x',
+        throws: 'not destructible',
+      });
+
+      test('regex-like division as arrow', {
+        code: '({ident: {x}/x/g}) => x',
         throws: 'not destructible',
       });
     });

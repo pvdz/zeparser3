@@ -999,8 +999,13 @@ module.exports = (describe, test) =>
           tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
 
-        test('spread with object-division', {
+        test('spread with shorthand object-division will throw', {
           code: '[...{x}/y]',
+          throws: 'not destructible',
+        });
+
+        test('spread with object-division', {
+          code: '[...{x:y}/y]',
           ast: {
             type: 'Program',
             body: [
@@ -1022,8 +1027,8 @@ module.exports = (describe, test) =>
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
+                              value: {type: 'Identifier', name: 'y'},
+                              shorthand: false,
                             },
                           ],
                         },
@@ -1036,7 +1041,7 @@ module.exports = (describe, test) =>
               },
             ],
           },
-          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
 
         test('spread with regex-division', {

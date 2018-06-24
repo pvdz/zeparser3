@@ -162,8 +162,13 @@ module.exports = (describe, test) =>
       tokens: [$TICK_HEAD, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
 
-    test('object literal with multiple shorthands inside the tick expression', {
+    test('object literal without destruct with multiple shorthands inside the tick expression', {
       code: '`foo${{a,b}}baz`',
+      throws: 'must be destructured',
+    });
+
+    test('object literal that destructs with multiple shorthands inside the tick expression', {
+      code: '`foo${{a,b} = x}baz`',
       ast: {
         type: 'Program',
         body: [
@@ -173,27 +178,32 @@ module.exports = (describe, test) =>
               type: 'TemplateLiteral',
               expressions: [
                 {
-                  type: 'ObjectExpression',
-                  properties: [
-                    {
-                      type: 'Property',
-                      key: {type: 'Identifier', name: 'a'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {type: 'Identifier', name: 'a'},
-                      shorthand: true,
-                    },
-                    {
-                      type: 'Property',
-                      key: {type: 'Identifier', name: 'b'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {type: 'Identifier', name: 'b'},
-                      shorthand: true,
-                    },
-                  ],
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ObjectPattern',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'a'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'a'},
+                        shorthand: true,
+                      },
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'b'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'b'},
+                        shorthand: true,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'x'},
                 },
               ],
               quasis: [
@@ -212,7 +222,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_TAIL, $ASI],
+      tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
     });
 
     test('head${expr}tail template', {
