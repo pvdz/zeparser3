@@ -250,7 +250,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   }
 
   if (wasError) {
-    if (wasError.indexOf('Parser error!') < 0 && wasError.indexOf('TODO') < 0) {
+    let wasTodo = wasError.indexOf('TODO') >= 0;
+    if (wasError.indexOf('Parser error!') < 0 && !wasTodo) {
       console.log(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
       LOG_THROW('unexpected CRASH', code, stack, desc);
       console.log(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
@@ -258,16 +259,20 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       ++fail;
       ++crash;
     } else if (!expectedThrows) {
-      LOG_THROW(`${BOLD}unexpected ${RED}${wasError.indexOf('TODO')>=0?'TODO':'ERROR'}${RESET}`, code, stack, desc);
+      LOG_THROW(`${BOLD}unexpected ${RED}${wasTodo?'TODO':'ERROR'}${RESET}`, code, stack, desc);
       console.log('Thrown error:', wasError);
       ++fail;
       ++crash;
     } else if (wasError.indexOf('Parser error') !== 0 && wasError.indexOf('Tokenizer error') !== 0) {
-      LOG_THROW('Unhandled exception path', code, stack, desc);
-      console.log('Thrown error:', wasError);
+      if (wasTodo) {
+        LOG_THROW('TODO', code, stack, desc);
+      } else {
+        LOG_THROW('Unhandled exception path', code, stack, desc);
+        console.log('Thrown error:', wasError);
+      }
       ++fail;
       ++crash;
-    } else if ((expectedThrows === true && wasError.toUpperCase().indexOf('TODO') < 0) || wasError.toUpperCase().indexOf(expectedThrows.toUpperCase()) >= 0) {
+    } else if ((expectedThrows === true && !wasTodo) || wasError.toUpperCase().indexOf(expectedThrows.toUpperCase()) >= 0) {
       console.log(`${prefix} ${GREEN}PASS${BOLD}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
       ++pass;
     } else {
@@ -304,46 +309,51 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         '],',
     );
 
+
     let s1 = JSON.stringify(expectedAst);
-    let s2 = JSON.stringify(obj.ast);
-    let max = Math.max(s1.length, s2.length);
-    let n = 0;
-    let step = 200;
-    let steps = 0;
-    while (n < max) {
-      let x1 = s1.slice(Math.min(n, s1.length), Math.min(n + step, s1.length));
-      let x2 = s2.slice(Math.min(n, s2.length), Math.min(n + step, s2.length));
-      if (x1 === x2) {
-        console.log('want[' + steps + ']: SAME', x1);
-        console.log('real[' + steps + ']: SAME', x2);
-      } else {
-        // try to highlight the difference area
+    if (s1 === '{"<not given>":true}') {
+      console.log('(No expected AST given...)');
+    } else {
+      let s2 = JSON.stringify(obj.ast);
+      let max = Math.max(s1.length, s2.length);
+      let n = 0;
+      let step = 200;
+      let steps = 0;
+      while (n < max) {
+        let x1 = s1.slice(Math.min(n, s1.length), Math.min(n + step, s1.length));
+        let x2 = s2.slice(Math.min(n, s2.length), Math.min(n + step, s2.length));
+        if (x1 === x2) {
+          console.log('want[' + steps + ']: SAME', x1);
+          console.log('real[' + steps + ']: SAME', x2);
+        } else {
+          // try to highlight the difference area
 
-        let start = 0;
-        for (; start<x1.length; ++start) {
-          if (x1[start] !== x2[start]) {
-            break;
+          let start = 0;
+          for (; start<x1.length; ++start) {
+            if (x1[start] !== x2[start]) {
+              break;
+            }
           }
-        }
-        if (start > 0 && /[\w\d]/.test(x1[start])) {
-          do --start; while (start > 0 && /[\w\d]/.test(x1[start]));
-        }
-        let stop = x1.length;
-        for (; stop-1 > start; --stop) {
-          if (x1[stop-1] !== x2[stop-1]) {
-            break;
+          if (start > 0 && /[\w\d]/.test(x1[start])) {
+            do --start; while (start > 0 && /[\w\d]/.test(x1[start]));
           }
-        }
-        if (stop < x1.length && /[\w\d]/.test(x1[stop])) {
-          do ++stop; while (stop > 0 && /[\w\d]/.test(x1[stop]));
+          let stop = x1.length;
+          for (; stop-1 > start; --stop) {
+            if (x1[stop-1] !== x2[stop-1]) {
+              break;
+            }
+          }
+          if (stop < x1.length && /[\w\d]/.test(x1[stop])) {
+            do ++stop; while (stop > 0 && /[\w\d]/.test(x1[stop]));
+          }
+
+          console.log('want[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
+          console.log(BOLD+'real'+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
         }
 
-        console.log('want[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
-        console.log(BOLD+'real'+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
+        n += step;
+        ++steps;
       }
-
-      n += step;
-      ++steps;
     }
 
     ++fail;

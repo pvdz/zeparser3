@@ -237,6 +237,8 @@ const LAST_SPREAD = 1;
 const MID_SPREAD = 2;
 const PARSE_INIT = false;
 const SKIP_INIT = true;
+const IS_GROUP_TOPLEVEL = true;
+const NOT_GROUP_TOPLEVEL = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -312,17 +314,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _pnames.pop();
     ASSERT(!names || (typeof names === 'string' && names === was.type) || (names instanceof Array && names.indexOf(was.type) >= 0), 'Expecting to close a node with given name(s), expected: ' + names + ' but closed: ' + was.type)
   }
-  function AST_set(prop, value) {
+  function AST_set(prop, value, clobber = false) {
     if (traceast) {
       console.log('AST_set', prop, value);
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- AST:', require('util').inspect(_tree, false, null))
     }
     ASSERT(typeof prop === 'string', 'prop should be string');
-    ASSERT(arguments.length === 2, 'expecting two args');
+    ASSERT(arguments.length === 2 || arguments.length === 3, 'expecting two args');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(_path[_path.length - 1][prop] === undefined, 'dont clobber, prop=' + prop + ', val=' + value);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
+    ASSERT(clobber !== (_path[_path.length - 1][prop] === undefined), 'dont clobber, prop=' + prop + ', val=' + value);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
 
     _path[_path.length - 1][prop] = value;
   }
@@ -2598,7 +2600,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (curc === $$DOT_2E && curtok.str === '...') {
       if (bindingType !== BINDING_TYPE_ARG) TODO; // error...? if this is legal verify the paren passed on in the next call
 
-      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, $$PAREN_R_29, bindingType, true, astProp);
+      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, $$PAREN_R_29, bindingType, IS_GROUP_TOPLEVEL, undefined, astProp);
       if (curc === $$COMMA_2C) updateDestructible(subDestruct, CANT_DESTRUCT);
     }
     else if (curc === $$PAREN_R_29) {
@@ -3813,8 +3815,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
         parseArrowableTopRest(lexerFlags, asyncKeywordPrefixed, astProp);
-        destructible = updateDestructible(destructible, MUST_DESTRUCT); // dots in toplevel group must mean arrow
-        break; // must be last element in arrow header
+        if (asyncKeywordPrefixed) {
+          // can still be `async (...x) => x` and `async(...x);`
+          if (curc !== $$PAREN_R_29) {
+            destructible = updateDestructible(destructible, CANT_DESTRUCT); // dots in async toplevel must mean spread/call
+          }
+        } else {
+          destructible = updateDestructible(destructible, MUST_DESTRUCT); // dots in toplevel group must mean arrow
+          break; // must be last element in arrow header
+        }
       }
       else {
         // arbitrary expression that is not destructible (on this level, at least)
@@ -3889,23 +3898,30 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('ArrowFunctionExpression');
       return NOT_ASSIGNABLE;
     }
-    else if (destructible === MUST_DESTRUCT) {
-      THROW('The group had to be destructed but was not followed by an arrow (this is an invalid assignment target)');
-    }
     else if (asyncKeywordPrefixed) {
       // `async(x,y,z)` without arrow
       if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
-        THROW('The `async` identifier is a keyword and must be followed by a function');
+        THROW('The `async` identifier is a keyword and must be followed by a function / arrow');
       }
+      console.log(rootAstProp, '->', astProp)
+      console.log('async?', asyncKeywordPrefixed)
+      // console.log('wot' , _path[_path.length - 1])
+      // console.log('dot', _path[_path.length - 1].arguments[0])
+      // console.log('xxx', _path[_path.length - 1].arguments[0].expressions)
+      // AST_set('arguments', (_path[_path.length - 1].arguments[0].expressions), true)
 
       // <SCRUB AST>
-      let node = AST_replaceClosed(rootAstProp, 'CallExpression', toplevelComma ? 'SequenceExpression' : _path[_path.length - 1]);
+      let node = AST_replaceClosed(rootAstProp, 'CallExpression', toplevelComma ? 'SequenceExpression' : _path[_path.length - 1][astProp].type);
+      console.log('-->', node)
       AST_setIdent('callee', asyncKeywordPrefixed);
-      AST_set('arguments', node.expressions);
+      AST_set('arguments', toplevelComma ? node.expressions : node);
       AST_close('CallExpression');
       // </SCRUB AST>
 
       return NOT_ASSIGNABLE
+    }
+    else if (destructible === MUST_DESTRUCT) {
+      THROW('The group had to be destructed but was not followed by an arrow (this is an invalid assignment target)');
     }
     else if (curtok.str === '=') {
       // cannot assign to destructible since that is only allowed as AssignmentPattern and a group is not exempted
@@ -3971,20 +3987,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseArrowableTopRest(lexerFlags, asyncKeywordPrefixed, astProp) {
     // rest (can not be spread)
-    // - (...x)
-    // - (...[destruct])
-    // - (...{destruct})
-    // note: grouped spread is never assignable
-    // a `...` at the top-level of a group means this has to be an arrow header
-    if (asyncKeywordPrefixed) TODO; // this could be `async(...x/y)` which is a pretty annoying edge case
-    // this may parse `...[x+y]` in which case we must consider it an error
-    let subDestruct = parseArrowableSpreadOrRest(lexerFlags, $$PAREN_R_29, BINDING_TYPE_ARG, true, astProp);
-    if (subDestruct === CANT_DESTRUCT || curc === $$COMMA_2C) {
-      THROW('A ... argument must be destructible in an arrow header, found something that was not destructible');
+    // a `...` at the top-level of a group means this has to be an arrow header unless async'ed
+    // a `...[x+y]` at the toplevel is an error
+
+    // - (...x) => x
+    // - (...[destruct]) => x
+    // - (...{destruct}) => x
+    // - async(...ident) => x
+    // - async(...[destruct]) => x
+    // - async(...{destruct}) => x
+    // - async(...<expr>);            // :(
+
+    let subDestruct = parseArrowableSpreadOrRest(lexerFlags, $$PAREN_R_29, BINDING_TYPE_ARG, IS_GROUP_TOPLEVEL, asyncKeywordPrefixed, astProp);
+    if (!asyncKeywordPrefixed) {
+      if (subDestruct === CANT_DESTRUCT || curc === $$COMMA_2C) {
+        THROW('A ... argument must be destructible in an arrow header, found something that was not destructible');
+      }
+      if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
+      if (curc === $$COMMA_2C) THROW('Rest arg cannot have a trailing comma');
+      if (curc !== $$PAREN_R_29) THROW('Rest arg must be last but did not find closing paren');
     }
-    if (curc === $$IS_3D && curtok.str === '=') THROW('Cannot set a default on a rest value');
-    if (curc === $$COMMA_2C) THROW('Rest arg cannot have a trailing comma');
-    if (curc !== $$PAREN_R_29) THROW('Rest arg must be last but did not find closing paren');
   }
   function parseArrayLiteralPattern(lexerFlags, bindingType, skipInit, _astProp) {
     // token offsetS:
@@ -4144,7 +4166,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - ([...x]) => x
         // - ([x, ...y]) => x
         // TODO: the value can be an ident or an array-pattern but I don't think anything else
-        let subDestruct = parseArrowableSpreadOrRest(lexerFlags, $$SQUARE_R_5D, bindingType, false, astProp);
+        let subDestruct = parseArrowableSpreadOrRest(lexerFlags, $$SQUARE_R_5D, bindingType, NOT_GROUP_TOPLEVEL, undefined, astProp);
         if (curc === $$COMMA_2C) subDestruct = updateDestructible(subDestruct, CANT_DESTRUCT);
         destructible = updateDestructible(destructible, subDestruct);
         // if there are any other elements after this then this cannot be a destructible since that demands rest as last
@@ -4817,16 +4839,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (a !== b) THROW('Encountered a struct that would have to and couldnt destruct so it is not destructible, bailing');
     return a;
   }
-  function parseArrowableSpreadOrRest(lexerFlags, closingCharOrd, bindingType, groupTopLevel, astProp) {
-    ASSERT(arguments.length === 5, 'want 5 args');
+  function parseArrowableSpreadOrRest(lexerFlags, closingCharOrd, bindingType, groupTopLevel, asyncIdent, astProp) {
+    ASSERT(arguments.length === 6, 'want 6 args');
     ASSERT_skipRex('...', lexerFlags); // next is an expression so rex
     if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not rest twice');
     AST_open(astProp, 'SpreadElement');
-    let result = _parseArrowableSpreadOrRest(lexerFlags, closingCharOrd, bindingType, groupTopLevel, 'argument');
+    let result = _parseArrowableSpreadOrRest(lexerFlags, closingCharOrd, bindingType, groupTopLevel, asyncIdent, 'argument');
     AST_close('SpreadElement');
     return result;
   }
-  function _parseArrowableSpreadOrRest(lexerFlags, closingCharOrd, bindingType, groupTopLevel, astProp) {
+  function _parseArrowableSpreadOrRest(lexerFlags, closingCharOrd, bindingType, groupTopLevel, asyncIdent, astProp) {
+    ASSERT(arguments.length === 6, 'expecting 6 args');
     // returns MIGHT_DESTRUCT if the arg is only an ident, returns CANT_DESTRUCT otherwise
 
     // Arrays:
@@ -4916,10 +4939,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc !== closingCharOrd) {
       if (bindingType === BINDING_TYPE_ARG) {
-        console.log('rest crashed, closingCharOrd='+String.fromCharCode(closingCharOrd)+', token: ' + curtok);
-        if (curtok.str === '=') THROW('The rest argument can not have an initializer');
-        else if (curtok.str === ',') THROW('The rest argument must be last and can not have a trailing comma');
-        else THROW('The rest argument must the be last parameter');
+        if (asyncIdent) {
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          // dit is de uitzondeirng want nu is het een rest en deze kan expr als rhs hebben. de caller moet vanaf nu non-destructible bijhouden
+        } else {
+          console.log('rest crashed, closingCharOrd='+String.fromCharCode(closingCharOrd)+', token: ' + curtok);
+          if (curtok.str === '=') THROW('The rest argument can not have an initializer');
+          else if (curtok.str === ',') THROW('The rest argument must be last and can not have a trailing comma');
+          else THROW('The rest argument must the be last parameter');
+        }
       }
       if (curc !== $$COMMA_2C) {
         if (curc === $$IS_3D && curtok.str === '=') {
