@@ -4548,8 +4548,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
         }
         else {
-          TODO
-          ASSERT(curc !== $$IS_3D, TODO);
+          // this is most likely an error
+          // - `({x+=y})`
+          THROW('Unexpected character after object literal property name ' + curtok);
         }
       }
       else if ((curtype & $NUMBER) || (curtype & $STRING)) {

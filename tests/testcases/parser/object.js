@@ -4322,7 +4322,17 @@ module.exports = (describe, test) =>
         });
       });
 
-      // call({[x]}) is illegal; dynamic properties can not be shorthand
+      test('property name followup error', {
+        code: '({foo += bar})',
+        desc: 'just tripping an error path',
+        throws: 'Unexpected character',
+      });
+
+      test('dynamic properties can not be shorthand', {
+        code: 'call({[x]})',
+        throws: 'must be followed by a colon or paren',
+      });
+
       // can not use async/generators on getters/setters ({async get foo(){}})
       // getters with non-zero param count
       // setters with not-one param count
