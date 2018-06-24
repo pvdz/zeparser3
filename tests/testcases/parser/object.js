@@ -3460,6 +3460,16 @@ module.exports = (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
+
+        test('getter number must be method', {
+          code: 'wrap({get 123: x});',
+          throws: 'must be a method',
+        });
+
+        test('getter string must be method', {
+          code: 'wrap({get "abc": x});',
+          throws: 'must be a method',
+        });
       });
 
       describe('setters (ident)', _ => {
@@ -4299,6 +4309,16 @@ module.exports = (describe, test) =>
             ],
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('setter number must be method', {
+          code: 'wrap({set 123: x});',
+          throws: 'must be a method',
+        });
+
+        test('setter string must be method', {
+          code: 'wrap({set "abc": x});',
+          throws: 'must be a method',
         });
       });
 

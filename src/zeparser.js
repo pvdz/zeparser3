@@ -4526,7 +4526,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           destructible = updateDestructible(destructible, CANT_DESTRUCT);
 
-          if (identToken.str !== 'get' && identToken.str !== 'set' && identToken.str !== 'async') THROW('Did not expect another identifier while parsing an object literal property');
+          if (identToken.str !== 'get' && identToken.str !== 'set' && identToken.str !== 'async') {
+            THROW('Did not expect another identifier while parsing an object literal property');
+          }
 
           let litToken = curtok;
           ASSERT_skipRex(litToken.str, lexerFlags); // next is `(`
@@ -4541,7 +4543,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             AST_set('shorthand', false);
             AST_close('Property');
           } else {
-            TODO
             THROW('Object literal async keys that are strings or numbers must be a method: ' + curtok);
           }
           ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
