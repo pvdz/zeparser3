@@ -2,6 +2,8 @@
 
 // use https://astexplorer.net/ for ast comparisons
 
+Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
+
 const TEST262 = false;
 const TEST262_SKIP_TO = 16000; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = true;
@@ -384,7 +386,15 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     console.log('\n');
     if (TEST262) console.log('\n============== input ==============' + code + '\n============== /input =============\n');
     console.log(`${prefix} ${RED}ERROR${RESET}: \`${toPrint(code)}\` :: ` + errmsg + suffix);
-    if (stack) console.log('Stack:', stack);
+    if (stack) {
+      console.log(
+        'Stack:',
+        stack
+          .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
+          .replace(/\n.* at (?<what>THROW|ASSERT).*?\n/s, '\nExplicit '+BOLD+'$<what>'+RESET+' at:\n')
+          .replace(/(zeparser.spec.js.*?)\n.*/s, '$1 (trunced remainder of trace)')
+      );
+    }
     //console.log('Final test options:\n', finalTestOptions);
     console.log('Description:', desc);
     console.log('From:', from);
