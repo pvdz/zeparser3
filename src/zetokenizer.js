@@ -2576,7 +2576,7 @@ function isLfPsLs(c) {
   return (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029);
 }
 
-function debug_toktype(type) {
+function debug_toktype(type, ignoreUnknown) {
   ASSERT(typeof type === 'number', 'expecting valid type');
   switch (type) {
     case $ASI: return 'ASI';
@@ -2610,8 +2610,8 @@ function debug_toktype(type) {
     case $TICK_TAIL: return 'TICK_TAIL';
     case $WHITE: return 'WHITE';
     default:
+      if (ignoreUnknown) return 'UNKNOWN[' + type + ']';
       throw new Error('debug_toktype: UNKNOWN[' + JSON.stringify(type) + ']')
-      return 'UNKNOWN[' + type + ']';
   }
 }
 
