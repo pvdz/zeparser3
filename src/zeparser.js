@@ -338,6 +338,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof token === 'object', 'token should be an obj');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
+    ASSERT(token.type === $IDENT, 'token must be ident');
 
     AST_open(astProp, 'Identifier');
     AST_set('name', token.str);
@@ -348,6 +349,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof token === 'object', 'token is obj');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
+    ASSERT((token.type & ($NUMBER | $STRING | $REGEX)), 'should be number or string');
 
     AST_open(astProp, 'Literal');
     AST_set('value', '<TODO>');
@@ -760,7 +762,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       ASSERT((curtype & what) === what, 'expecting to skip token with certain type', 'expect:'
         // <SCRUB DEV>
-        , debug_toktype(what), 'actual:', debug_toktype(curtype)
+        , debug_toktype(what, true), 'actual:', debug_toktype(curtype, true)
         // </SCRUB DEV>
       );
     }
@@ -1102,6 +1104,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = lexerFlags | LF_IN_FUNC_ARGS; // prevents await expression as default arg
     AST_set('params', []);
 
+    if (curc !== $$PAREN_L_28) THROW('Must be a method, did not find `(`');
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
     if (curc === $$PAREN_R_29) {
       ASSERT_skipRex(')', lexerFlags);
@@ -1490,8 +1493,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT_skipAny('class', lexerFlags); // TODO: valid varname, `extends`, or `{`
     AST_open(astProp, 'ClassDeclaration');
-    _parseClass(lexerFlags, optionalIdent);
-    skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
+    _parseClass(lexerFlags, optionalIdent, false);
     AST_close('ClassDeclaration');
   }
   function parseClassExpression(lexerFlags, optionalIdent, astProp) {
@@ -1502,11 +1504,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // x = class x {[static] <method>[]}
 
     AST_open(astProp, 'ClassExpression');
-    _parseClass(lexerFlags, optionalIdent);
+    _parseClass(lexerFlags, optionalIdent, true);
     AST_close('ClassExpression');
-    skipDivOrDieSingleChar($$CURLY_R_7D, lexerFlags);
   }
-  function _parseClass(lexerFlags, optionalIdent) {
+  function _parseClass(lexerFlags, optionalIdent, isExpression) {
+    ASSERT(arguments.length === _parseClass.length, 'expecting all args');
     // Note: all class code is always strict mode implicitly
 
     lexerFlags = lexerFlags | LF_STRICT_MODE;
@@ -1531,126 +1533,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('superClass', null);
     }
 
-    return _parseClassBody(sansFlag(lexerFlags, LF_IN_TEMPLATE), 'body');
-  }
-  function _parseClassBody(lexerFlags, astProp) {
-    // parse method, static method, or emptystatement
+    // TODO: div/regex for class decl/expr, and asi.
 
-    skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlags);
-    AST_open(astProp, 'ClassBody');
-    AST_set('body', []);
-    while (curc !== $$CURLY_R_7D) parseClassMethod(lexerFlags, 'body');
-    AST_close('ClassBody');
-  }
-  function parseClassMethod(lexerFlags) {
-    // everything from objlit that is a method optionally prefixed by `static`, and an empty statement
-    // this is what sets it apart from regular object literals (TODO: and `super`?)
-    // class properties would also have a say in this, but that's a nextgen worry
-    _parseClassMethod(lexerFlags, NO_STATIC_MODIFIER);
-  }
-  function _parseClassMethod(lexerFlags, isStatic) {
-    ASSERT(arguments.length === _parseClassMethod.length, 'arg count');
-
-    if (curtype === $IDENT) {
-      let identToken = curtok;
-      ASSERT_skipAny($IDENT, lexerFlags);
-      // getter, setter, async, or ident method
-      switch (identToken.str) {
-        case 'static':
-          if (!isStatic && curc !== $$PAREN_L_28) {
-            //class x{static(){}}
-            //class x{static static(){}}
-            //class x{async static(){}}
-            //class x{async static static(){}}
-            //class x{*static(){}}
-            //class x{static *static(){}}
-            return _parseClassMethod(lexerFlags, HAS_STATIC_MODIFIER);
-          }
-          break; // this is a method named `static` which seems to be okay.
-        case 'async':
-          if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
-            // async method / static async member
-            parseMethod(lexerFlags, WAS_ASYNC, NOT_GET, NOT_SET, NOT_GENERATOR, isStatic);
-            return true;
-          }
-          // method named "async"
-          break;
-        case 'get':
-          if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
-            // getter function
-            parseMethod(lexerFlags, NOT_ASYNC, WAS_GET, NOT_SET, NOT_GENERATOR, isStatic);
-            return true;
-          }
-          // method named "get"
-          break;
-        case 'set':
-          if (curtype === $IDENT || curc === $$SQUARE_L_5B) {
-            // setter function
-            parseMethod(lexerFlags, NOT_ASYNC, NOT_GET, WAS_SET, NOT_GENERATOR, isStatic);
-            return true;
-          }
-          // method named "set"
-          break;
-        default:
-      }
-      parseMethodIdent(lexerFlags, NOT_ASYNC, NOT_GET, NOT_SET, NOT_GENERATOR, isStatic, identToken);
-    } else if (curc === $$SQUARE_L_5B) {
-      // dynamic property
-      parseMethodDynamic(lexerFlags, NOT_ASYNC, NOT_SET, NOT_GET, NOT_GENERATOR, isStatic);
-    } else if (curc === $$STAR_2A) {
-      // generator method
-      ASSERT_skipAny('*', lexerFlags);
-      parseMethod(lexerFlags, NOT_ASYNC, NOT_GET, NOT_SET, WAS_GENERATOR, isStatic);
-    } else if (curc === $$SEMI_3B) {
-      // this empty statement is not part of the AST
-      ASSERT_skipAny(';', lexerFlags);
-    } else {
-      return false;
-    }
-    return true;
-  }
-
-  function parseMethod(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic) {
-    ASSERT(arguments.length === parseMethod.length, 'arg count');
-
-    if (curtype === $IDENT) {
-      let identToken = curtok;
-      ASSERT_skipAny($IDENT, lexerFlags);
-      parseMethodIdent(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic, identToken);
-    } else if (curc === $$SQUARE_L_5B) {
-      parseMethodDynamic(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic)
-    } else {
-      THROW('Method must have an ident or dynamic name');
-    }
-  }
-  function parseMethodIdent(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic, identToken) {
-    ASSERT(arguments.length === parseMethodIdent.length, 'arg count');
-
-    // TODO: validate given ident token value
-    AST_open('body', 'MethodDefinition');
-    AST_set('static', isStatic);
-    AST_set('computed', false);
-    AST_set('kind', (!isStatic && identToken.str === 'constructor') ? 'constructor' : isGetter ? 'get' : isSetter ? 'set' : 'method');
-
-    AST_setIdent('key', identToken);
-
-    if (curc !== $$PAREN_L_28) THROW('Missing method arg parens'); // must explicitly check here
-    parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator, isAsync, IDENT_OPTIONAL, 'value');
-    AST_close('MethodDefinition');
-  }
-  function parseMethodDynamic(lexerFlags, isAsync, isGetter, isSetter, isGenerator, isStatic) {
-    ASSERT(arguments.length === parseMethodDynamic.length, 'arg count');
-
-    AST_open('body', 'MethodDefinition');
-    AST_set('static', isStatic);
-    AST_set('computed', true);
-    AST_set('kind', isGetter ? 'get' : isSetter ? 'set' : 'method');
-    ASSERT_skipRex('[', lexerFlags);
-    parseExpression(lexerFlags, 'key');
-    skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
-    if (curc !== $$PAREN_L_28) THROW('Missing method arg parens'); // must explicitly check here
-    parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator, isAsync, IDENT_OPTIONAL, 'value');
-    AST_close('MethodDefinition');
+    return parseClassbody(lexerFlags, BINDING_TYPE_NONE, isExpression, 'body');
   }
 
   function parseConstStatement(lexerFlags, astProp) {
@@ -3054,14 +2939,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let wasDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, astProp);
         if (wasDestruct === MUST_DESTRUCT) THROW('Found a struct that must be destructured but was not');
         return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `({x})=y` is illegal
-      } else if (curc === $$SQUARE_L_5B) {
+      }
+      else if (curc === $$SQUARE_L_5B) {
         let wasDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_NONE, PARSE_INIT, astProp);
         if (wasDestruct === MUST_DESTRUCT) THROW('Found a struct that must be destructured but was not');
         return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `([x])=y` is illegal
-      } else if (curc === $$PAREN_L_28) {
+      }
+      else if (curc === $$PAREN_L_28) {
         // do not parse arrow/group tail, regardless
         return parseGroupToplevels(lexerFlags, NOT_ASYNC, astProp);
-      } else if (curtok.str === '++' || curtok.str === '--') {
+      }
+      else if (curtok.str === '++' || curtok.str === '--') {
         // note: this is ++/-- PREFIX. This version does NOT have newline restrictions!
         if (checkNewTarget === IS_NEW_ARG) THROW('Cannot `new` on an inc/dec expr');
         AST_open(astProp, 'UpdateExpression');
@@ -3072,7 +2960,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value');
         AST_close('UpdateExpression');
         return NOT_ASSIGNABLE;
-      } else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
+      }
+      else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
         if (checkNewTarget === IS_NEW_ARG) THROW('Cannot `new` on +/- prefixed value');
         AST_open(astProp, 'UnaryExpression');
         AST_set('operator', curtok.str);
@@ -3081,7 +2970,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, 'argument');
         AST_close('UnaryExpression');
         return NOT_ASSIGNABLE;
-      } else if (curc === $$DOT_2E) {
+      }
+      else if (curc === $$DOT_2E) {
         // foo(...x)
         // foo(.2)
 
@@ -4225,7 +4115,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return destructible;
   }
-  function parseObjectLiteralPattern(_lexerFlags, bindingType, skipInit, isClassMethod, _astProp) {
+  function parseObjectLiteralPattern(lexerFlags, bindingType, skipInit, isClassMethod, _astProp) {
     // have to return whether the whole cant, might, or must destruct;
     // - `f({a = b})`         // FAIL (shorthand only allowed when destructuring)
     // - `f({a = b} = c)`     // PASS (the outer assignment turns the object into a Pattern)
@@ -4253,579 +4143,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - in all above cases destructible, doesn't have to be
     // - in all other cases this must be an object
 
-    let lexerFlags = _lexerFlags;
-    if (lexerFlags & LF_NO_IN) lexerFlags = lexerFlags ^ LF_NO_IN;
-    if (lexerFlags & LF_IN_TEMPLATE) lexerFlags = lexerFlags ^ LF_IN_TEMPLATE;
-
     AST_open(_astProp, 'ObjectExpression');
-    ASSERT_skipAny('{', lexerFlags); // TODO: next must be propname (ident, string, number, square bracket) or }
     AST_set('properties', []);
+    let destructible = _parseObjectLikePattern(lexerFlags, bindingType, isClassMethod, true, 'properties');
 
-    let destructible = MIGHT_DESTRUCT; // innocent until proven guilty? may or may not destruct
-
-    let astProp = 'properties';
-
-    while (curc !== $$CURLY_R_7D) {
-      let nameBinding;
-
-      if (curc === $$COMMA_2C) {
-        // ({,
-        THROW('Objects cant have comma without something preceding it');
-      }
-
-      // an objlit property has quite a few (though limited) valid goals
-      // - `({},`
-      // - `({ident,`
-      // - `({ident:ident`
-      // - `({ident:expr`
-      // - `({ident(){}`
-      // - `({get ident(){}`    (or set/async)
-      // - `({get *ident(){}`   (or set, and I think by now async too?)
-      // - `({get 'x'(){}`      (or double quotes)
-      // - `({get *'x'(){}`     (or double quotes)
-      // - `({get 10(){}`       (could also be .5)
-      // - `({get *10(){}`      (could also be .5)
-      // - `({get [expr](){}`   (or set/async)
-      // - `({get *[expr](){}`  (or set, and I think by now async too?)
-      // - `({'foo':expr`       (or double quotes)
-      // - `({'foo'(){}`        (or double quotes)
-      // - `({200:expr`         (could also be .5)
-      // - `({200(){}`          (could also be .5)
-      // - `({...ident`
-      // - `({*ident(){}`
-      // - `({*'x'(){}`         (or double quotes)
-      // - `({*20(){}`          (could also be .5)
-      // - `({*[expr](){}`
-      // - `({[expr]:expr`      (destructible!)
-      // - `({[expr](){}`
-
-      if (curtype === $IDENT) {
-        // this is the only case that can be a shorthand. only valid syntaxes:
-        // - `({ident,`
-        // - `({ident:ident`
-        // - `({ident:expr`
-        // - `({ident(){}`
-        // - `({get ident(){}`    (or set/async)
-        // - `({get *ident(){}`   (or set, and I think by now async too?)
-        // - `({get [expr](){}`   (or set/async)
-        // - `({get *[expr](){}`  (or set, and I think by now async too?)
-        // - since this is an object curly, it _must_ be a syntax error when not a valid property starter
-        let identToken = curtok;
-        ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
-
-        if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
-          // property shorthand; `{ident}=x` is valid
-          // - {a}
-          // - {a, ...}
-          // - {true}       !is never valid!
-
-          bindingIdentCheck(identToken, bindingType, lexerFlags);
-
-          // obj shorthand is only valid when destructuring
-          destructible = updateDestructible(destructible, MUST_DESTRUCT);
-
-          AST_open(astProp, 'Property');
-          AST_setIdent('key', identToken);
-          AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', false);
-          AST_set('computed', false);
-          AST_setIdent('value', identToken);
-          if (curc === $$IS_3D && curtok.str === '=') {
-            // consider `({foo = 10})` vs `({foo: bar = 10})`
-            // (note: shorthand only forces MUST_DESTRUCT when an initializer follows it immediately)
-            destructible = updateDestructible(destructible, MUST_DESTRUCT); // shorthand is only allowed in Pattern
-
-            AST_wrapClosed('value', 'AssignmentExpression', 'left');
-            AST_set('operator', '=');
-            ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a regex
-            parseExpression(lexerFlags, 'right');
-            AST_close('AssignmentExpression');
-          }
-          AST_set('shorthand', true);
-          AST_close('Property');
-
-          nameBinding = identToken;
-
-          ASSERT(curc !== $$IS_3D, 'further assignments should be parsed as part of the rhs expression');
-        }
-        else if (curc === $$COLON_3A) {
-          // property value or label, some are destructible:
-          // - ({ident: ident,}
-          // - ({ident: <array destruct>,}
-          // - ({ident: <object destruct>,}
-          // - ({ident: ident = expr}
-          // - ({ident: <array destruct> = expr,}
-          // - ({ident: <object destruct> = expr,}
-          // anything else as value is non-destructible
-
-          ASSERT_skipRex(':', lexerFlags); // next is expression
-
-          if (curtype === $IDENT) {
-            // ({ident: ident
-            // can still become ({ident: foo+bar}) which is not destructible, so confirm token after ident
-            let valueIdentToken = nameBinding = curtok;
-            bindingIdentCheck(curtok, bindingType, lexerFlags);
-            ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
-
-            AST_open(astProp, 'Property');
-            AST_setIdent('key', identToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D) {
-              if (curtok.str === '=') {
-                // dont reset nameBinding (`b`) in the `{a: b=c}` case. The binding is verified later.
-                nameBinding = undefined;
-              } else {
-                // something like `({a:v=b}=c)` and `({a:v=b}=c) => x` is valid so don't prevent destruct for `=`
-                destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              }
-              parseExpressionFromIdent(lexerFlags, valueIdentToken, 'value');
-            } else {
-              // note: nameBinding is verified later
-              AST_setIdent('value', nameBinding);
-            }
-            AST_set('shorthand', false);
-            AST_close('Property');
-          }
-          else if (curc === $$SQUARE_L_5B) {
-            // ({ident: <array destruct>
-            AST_open(astProp, 'Property');
-            AST_setIdent('key', identToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            let subDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, PARSE_INIT, 'value');
-            destructible = updateDestructible(destructible, subDestruct);
-            // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
-            if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, 'value');
-              parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
-            }
-            AST_set('shorthand', false);
-            AST_close('Property');
-          }
-          else if (curc === $$CURLY_L_7B) {
-            // ({ident: <object destruct>
-            AST_open(astProp, 'Property');
-            AST_setIdent('key', identToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            let subDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, 'value');
-            console.log('subDestruct', subDestruct)
-            destructible = updateDestructible(destructible, subDestruct);
-            // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
-            if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, 'value');
-              parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
-            }
-            AST_set('shorthand', false);
-            AST_close('Property');
-          }
-          else {
-            // something like `({foo: 15` is valid, just not destructible
-            destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-            AST_open(astProp, 'Property');
-            AST_setIdent('key', identToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            parseExpression(lexerFlags, 'value');
-            AST_set('shorthand', false);
-            AST_close('Property');
-          }
-          ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
-        }
-        else if (curc === $$SQUARE_L_5B) {
-          // - ({get [expr](){}
-          // - ({set [expr](ident){}
-          // - ({async [expr](){}
-
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-          AST_open(astProp, 'Property');
-          ASSERT_skipRex('[', lexerFlags); // next is expression
-          parseExpression(lexerFlags, 'key');
-          skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next must be `(`
-          AST_set('kind', identToken.str === 'async' ? 'init' : identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
-          AST_set('method', true);
-          AST_set('computed', true);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
-          AST_set('shorthand', false);
-          AST_close('Property');
-          ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
-        }
-        else if (curc === $$PAREN_L_28) {
-          // method shorthand
-          // - ({ident(){}})
-
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-          AST_open(astProp, 'Property');
-          AST_setIdent('key', identToken);
-          AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', true);
-          AST_set('computed', false);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
-          AST_set('shorthand', false);
-          AST_close('Property');
-          ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
-        }
-        else if (curtype === $IDENT) {
-          // getter/setter/async shorthand method
-          // - ({async ident(){}})
-          // - ({get ident(){}})
-          // - ({set ident(ident){}})
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-          if (identToken.str !== 'get' && identToken.str !== 'set' && identToken.str !== 'async') THROW('Did not expect another identifier while parsing an object literal property');
-          let identToken2 = curtok;
-          AST_open(astProp, 'Property');
-          AST_setIdent('key', curtok);
-          AST_set('kind', identToken.str === 'async' ? 'init' : identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
-          AST_set('method', true);
-          AST_set('computed', false);
-          ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
-          if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after ' + identToken +' ' +identToken2.str + '; ' + curtok);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_REQUIRED, 'value');
-          AST_set('shorthand', false);
-          AST_close('Property');
-          ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
-        }
-        else if (curc === $$STAR_2A) {
-          // getter/setter with generator
-          // - ({get *ident(){}})
-          // - ({set *ident(ident){}})
-          // (probably async too)
-
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-          ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident
-          if (identToken.str !== 'get' && identToken.str !== 'set') {
-            if (identToken.str === 'async') THROW('Cannot make an async generator method'); // TODO: the spec caught up to this and I think this is fine now...
-            THROW('Did not expect another identifier while parsing an object literal property');
-          }
-          let identToken2 = curtok;
-          AST_open(astProp, 'Property');
-          AST_setIdent('key', curtok);
-          AST_set('kind', identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
-          AST_set('method', true);
-          AST_set('computed', false);
-          ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
-          if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after ' + identToken +' ' +identToken2.str + '; ' + curtok);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
-          AST_set('shorthand', false);
-          AST_close('Property');
-          ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
-        }
-        else if ((curtype & $NUMBER) || (curtype & $STRING)) {
-          // property names can also be strings and numbers but these cannot be shorthanded
-          // number/string keys can still destructure just fine (`({"foo": x} = y)`)
-          // - `({async "a b c"(){}});`
-          // - `({async 15(){}});`
-          // - `({get "a b c"(){}});`
-          // - `({get 15(){}});`
-          // - `({set "a b c"(x){}});`
-          // - `({set 15(x){}});`
-
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-          if (identToken.str !== 'get' && identToken.str !== 'set' && identToken.str !== 'async') {
-            THROW('Did not expect another identifier while parsing an object literal property');
-          }
-
-          let litToken = curtok;
-          ASSERT_skipRex(litToken.str, lexerFlags); // next is `(`
-
-          if (curc === $$PAREN_L_28) {
-            AST_open(astProp, 'Property');
-            AST_setLiteral('key', litToken);
-            AST_set('kind', identToken.str === 'async' ? 'init' : identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
-            AST_set('method', true);
-            AST_set('computed', false);
-            parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
-            AST_set('shorthand', false);
-            AST_close('Property');
-          } else {
-            THROW('Object literal async keys that are strings or numbers must be a method: ' + curtok);
-          }
-          ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
-        }
-        else {
-          // this is most likely an error
-          // - `({x+=y})`
-          THROW('Unexpected character after object literal property name ' + curtok);
-        }
-      }
-      else if ((curtype & $NUMBER) || (curtype & $STRING)) {
-        // property names can also be strings and numbers but these cannot be shorthanded
-        // number/string keys can still destructure just fine (`({"foo": x} = y)`)
-        // - `({"a b c": bar});`
-        // - `({"a b c"(){}});`
-        // - `({"a b c": bar}) => x`
-        // - `({15: bar});`
-        // - `({15(){}});`
-        // - `({15: bar}) => x`
-
-        let litToken = curtok;
-        ASSERT_skipRex(litToken.str, lexerFlags); // next is expression
-
-        if (curc === $$COLON_3A) {
-          // property value or label, some are destructible:
-          // - ({"x": ident,}
-          // - ({"x": <array destruct>,}
-          // - ({"x": <object destruct>,}
-          // - ({"x": ident = expr}
-          // - ({"x": <array destruct> = expr,}
-          // - ({"x": <object destruct> = expr,}
-          // anything else as value is non-destructible
-
-          ASSERT_skipRex(':', lexerFlags); // next is expression
-
-          if (curtype === $IDENT) {
-            // ({35: ident
-            // can still become ({ident: foo+bar}) which is not destructible, so confirm token after ident
-            nameBinding = curtok;
-            ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
-            if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              TODO; // parse remainder of expression starting at ident
-            } else {
-              AST_open(astProp, 'Property');
-              AST_setLiteral('key', litToken);
-              AST_set('kind', 'init'); // only getters/setters get special value here
-              AST_set('method', false);
-              AST_set('computed', false);
-              AST_setIdent('value', nameBinding);
-              AST_set('shorthand', false);
-              AST_close('Property');
-            }
-          }
-          else if (curc === $$SQUARE_L_5B) {
-            // ({35: <array destruct>
-            AST_open(astProp, 'Property');
-            AST_setLiteral('key', litToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            let wasDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, PARSE_INIT, 'value');
-            destructible = updateDestructible(destructible, wasDestruct);
-            // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
-            if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              TODO; // parse remainder of expression starting at ident
-            } else TODO
-            AST_set('shorthand', false);
-            AST_close('Property');
-          }
-          else if (curc === $$CURLY_L_7B) {
-            TODO
-            // ({ident: <object destruct>
-            AST_open(astProp, 'Property');
-            AST_setLiteral('key', litToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            let wasDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, astProp);
-            destructible = updateDestructible(destructible, wasDestruct);
-            AST_set('shorthand', false);
-            AST_close('Property');
-            // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
-            if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              TODO; // parse remainder of expression starting at ident
-            } else TODO
-          }
-          else {
-            TODO
-            // something like `({15: 15` is valid, just not destructible
-            destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-            AST_open(astProp, 'Property');
-            AST_setLiteral('key', litToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            parseExpression(lexerFlags, 'value');
-            AST_set('shorthand', false);
-            AST_close('Property');
-          }
-        }
-        else if (curc === $$PAREN_L_28) {
-          // method shorthand
-          // - ({ident(){}})
-
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-          AST_open(astProp, 'Property');
-          AST_setLiteral('key', litToken);
-          AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', true);
-          AST_set('computed', false);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
-          AST_set('shorthand', false);
-          AST_close('Property');
-        } else {
-          TODO
-          THROW('Object literal keys that are strings or numbers must be a method or have a colon: ' + curtok);
-        }
-
-        ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the expression');
-      }
-      else if (curtok.str === '...') {
-        // ({...foo
-        // Note that this can also be a spread like it is in `({foo, ...bar});`
-        // TODO: pretty sure you can do silly stuff like `({...{x, ...y}}) => y` etc (because you can do it for `([...[x, ...y]]) => y`)
-        TODO; // parse the rest value
-        // TODO: verify name because that would otherwise be checked later
-        // exit here, do not parse default
-        if (!destructible) TODO,THROW('The spread operator is not allowed here unless this is an arrow (and it was already determined this cannot be the case)');
-        // destructible = updateDestructible(destructible, CANT_DESTRUCT);
-        TODO
-        ASSERT(curc !== $$IS_3D, TODO); // any destructuring should be parsed before returning
-        return destructible;
-      }
-      else if (curc === $$SQUARE_L_5B) {
-        // dynamic property (is destructible!)
-        // - ({[foo]: x})
-        // - ({[foo]() {}})
-
-        // skip dynamic part first becaue we need to figure out whether we're parsing a method
-        ASSERT_skipRex('[', lexerFlags); // next is expression
-        parseExpression(lexerFlags, astProp);
-        skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
-
-        AST_wrapClosed(astProp, 'Property', 'key');
-        AST_set('kind', 'init'); // only getters/setters get special value here
-        AST_set('method', curc === $$PAREN_L_28);
-        AST_set('computed', true);
-
-        // assert next char here so we don't over accept
-        if (curc === $$PAREN_L_28) {
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
-        } else {
-          if (curc !== $$COLON_3A) THROW('A computed property name must be followed by a colon or paren');
-          skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
-          parseExpression(lexerFlags, 'value');
-        }
-        AST_set('shorthand', false);
-        AST_close('Property');
-        ASSERT(curc !== $$IS_3D, 'if the array was destructured then that should have been parsed by now');
-      }
-      else if (curc === $$STAR_2A) {
-        // generator shorthand
-        // - `({*ident(){}})`
-        // - `({*"str"(){}})`
-        // - `({*15(){}})`
-        // - `({*[expr](){}})`
-
-        destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
-        ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident, number, string, `[`
-
-        if (curtype === $IDENT) {
-          // - `({*ident(){}})`
-          let identToken2 = curtok;
-          AST_open(astProp, 'Property');
-          AST_setIdent('key', curtok);
-          AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', true);
-          AST_set('computed', false);
-          ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
-          if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after * ' +identToken2.str + '; ' + curtok);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
-          AST_set('shorthand', false);
-          AST_close('Property');
-        } else if (curtype & ($NUMBER | $STRING)) {
-          // - `({*"str"(){}})`
-          // - `({*15(){}})`
-          let litToken = curtok;
-          AST_open(astProp, 'Property');
-          AST_setLiteral('key', litToken);
-          AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', true);
-          AST_set('computed', false);
-          ASSERT_skipAny(litToken.str, lexerFlags); // TODO: next must be `(`
-          if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after * `' +litToken.str + '`; ' + curtok);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
-          AST_set('shorthand', false);
-          AST_close('Property');
-        } else if (curc === $$SQUARE_L_5B) {
-          // - `({*[expr](){}})`
-          AST_open(astProp, 'Property');
-          ASSERT_skipRex('[', lexerFlags); // expression start
-          parseExpression(lexerFlags, 'key');
-          skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: next must be (
-          AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', true);
-          AST_set('computed', true);
-          if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after * [...]; ' + curtok);
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
-          AST_set('shorthand', false);
-          AST_close('Property');
-        } else {
-          TODO
-        }
-        ASSERT(curc !== $$IS_3D, 'this struct can not have an init');
-      }
-      else {
-        // ({<?>
-        TODO,THROW('Unexpected token, wanted to parse a start of a property in an object literal/pattern');
-      }
-
-      // if destructible, the name can not be something like `true` or `new`
-      // nameBinding can be undefined here if
-      // - dynamic property `{[x]: y}`
-
-      ASSERT(destructible !== CANT_DESTRUCT || nameBinding === undefined, 'if cant destruct then must have a name?');
-      // in this case the binding check can force the flag without throwing
-      // - `{true}`
-      // - `{foo: true}`
-      // - `{25: true}`
-      // - `{"x": true}
-      switch (nameBinding && nameBinding.str) {
-        case 'true':
-          TODO
-          // reserved keyword, not destructible. will throw if current state must destruct
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-          break;
-        case 'false':
-          TODO
-          // reserved keyword, not destructible. will throw if current state must destruct
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-          break;
-        case 'null':
-          TODO
-          // reserved keyword, not destructible. will throw if current state must destruct
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-          break;
-        case 'this':
-          TODO
-          // reserved keyword, not destructible. will throw if current state must destruct
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-          break;
-        case 'super':
-          TODO
-          // reserved keyword, not destructible. will throw if current state must destruct
-          destructible = updateDestructible(destructible, CANT_DESTRUCT);
-          break;
-        default:
-          // regardless of destructible state, if you see something like `typeof` here you have an error
-          if (nameBinding) bindingIdentCheck(nameBinding, bindingType, lexerFlags);
-      }
-
-      if (curc !== $$COMMA_2C) break;
-      ASSERT_skipAny(',', lexerFlags); // TODO: ident, }, [, number, string
-    }
-
-    // restore in/template flags (`x${+{}}` would fail if you didn't do this before parsing the closing curly)
-    lexerFlags = _lexerFlags;
-    skipDivOrDieSingleChar($$CURLY_R_7D, lexerFlags); // ({...} / foo)
     AST_close('ObjectExpression');
 
     // this is immediately after the top-level object literal closed that we started parsing
@@ -4844,6 +4165,811 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a regex
       parseExpression(lexerFlags, 'right');
       AST_close('AssignmentExpression');
+    }
+
+    return destructible;
+  }
+  function parseClassbody(lexerFlags, bindingType, isExpression, astProp) {
+    ASSERT(arguments.length === 4, 'expecting 4 args');
+
+    AST_open(astProp, 'ClassBody');
+    AST_set('body', []);
+    _parseObjectLikePattern(lexerFlags, bindingType, IS_CLASS_METHOD, isExpression, 'body');
+    AST_close('ClassBody');
+  }
+  function _parseObjectLikePattern(_lexerFlags, bindingType, isClassMethod, isExpression, astProp) {
+    ASSERT(arguments.length === 5, 'arg count');
+    // parse the body of something that looks like an object literal (obj lit, class body)
+
+    let lexerFlags = _lexerFlags;
+    if (lexerFlags & LF_NO_IN) lexerFlags = lexerFlags ^ LF_NO_IN;
+    if (lexerFlags & LF_IN_TEMPLATE) lexerFlags = lexerFlags ^ LF_IN_TEMPLATE;
+
+    ASSERT_skipAny('{', lexerFlags); // TODO: next must be propname (ident, string, number, square bracket) or } or *
+
+    let destructible = MIGHT_DESTRUCT; // innocent until proven guilty? may or may not destruct
+
+    if (isClassMethod === IS_CLASS_METHOD) {
+      while (curc === $$SEMI_3B) ASSERT_skipAny(';', lexerFlags);
+    }
+
+    while (curc !== $$CURLY_R_7D) {
+      let partDestructible = parseObjectLikePart(lexerFlags, bindingType, isClassMethod, astProp);
+      destructible = updateDestructible(destructible, partDestructible);
+
+      if (isClassMethod === IS_CLASS_METHOD) {
+        while (curc === $$SEMI_3B) ASSERT_skipAny(';', lexerFlags);
+      } else {
+        if (curc !== $$COMMA_2C) break;
+        ASSERT_skipAny(',', lexerFlags); // TODO: ident, }, [, number, string
+      }
+    }
+
+    // restore in/template flags (`x${+{}}` would fail if you didn't do this before parsing the closing curly)
+    lexerFlags = _lexerFlags;
+
+    if (isExpression) {
+      skipDivOrDieSingleChar($$CURLY_R_7D, lexerFlags); // ({...} / foo)
+    } else {
+      skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags); // class x{} /foo/
+    }
+
+    return destructible;
+  }
+  function parseObjectLikePart(lexerFlags, bindingType, isClassMethod, astProp) {
+    if (curc === $$COMMA_2C) {
+      // ({,
+      THROW('Objects cant have comma without something preceding it');
+    }
+
+    return _parseObjectLikePart(lexerFlags, bindingType, isClassMethod, undefined, astProp);
+  }
+
+  function _parseObjectLikePart(lexerFlags, bindingType, isClassMethod, isStatic, astProp) {
+    ASSERT(arguments.length === 5, '5 args');
+    ASSERT(typeof astProp === 'string', 'astprop string');
+    let destructible = MIGHT_DESTRUCT;
+
+    // an objlit property has quite a few (though limited) valid goals
+    // - `({},`
+    // - `({ident,`
+    // - `({ident:ident`
+    // - `({ident:expr`
+    // - `({ident(){}`
+    // - `({get ident(){}`    (or set/async)
+    // - `({get *ident(){}`   (or set, and I think by now async too?)
+    // - `({get 'x'(){}`      (or double quotes)
+    // - `({get *'x'(){}`     (or double quotes)
+    // - `({get 10(){}`       (could also be .5)
+    // - `({get *10(){}`      (could also be .5)
+    // - `({get [expr](){}`   (or set/async)
+    // - `({get *[expr](){}`  (or set, and I think by now async too?)
+    // - `({'foo':expr`       (or double quotes)
+    // - `({'foo'(){}`        (or double quotes)
+    // - `({200:expr`         (could also be .5)
+    // - `({200(){}`          (could also be .5)
+    // - `({...ident`
+    // - `({*ident(){}`
+    // - `({*'x'(){}`         (or double quotes)
+    // - `({*20(){}`          (could also be .5)
+    // - `({*[expr](){}`
+    // - `({[expr]:expr`      (destructible!)
+    // - `({[expr](){}`
+
+    if (curtype === $IDENT) {
+      if (curtok.str === 'static') {
+        if (isStatic) THROW('Cannot have `static static`');
+        // - `{static x(){}`
+        // - `{static *x(){}`
+        // - `{static async x(){}`
+        // - `{static get x(){}`
+        // - `{static set x(y){}`
+        // - `{static [x](){}`
+        // - `{static async [x](){}`
+        // - `{static get [x](){}`
+        // - `{static set [x](y){}`
+        // - `{static *[x](){}`
+        // - `{static *async [x](){}`
+        // - `{static *get [x](){}`
+        // - `{static *set [x](y){}`
+        // - `{static 8(){}`
+        // - `{static async 8(){}`
+        // - `{static get 8(){}`
+        // - `{static set 8(y){}`
+        // - `{static *8(){}`
+        // - `{static *async 8(){}`
+        // - `{static *get 8(){}`
+        // - `{static *set 8(y){}`
+        // - `{static "x"(){}`
+        // - `{static async "x"(){}`
+        // - `{static get "x"(){}`
+        // - `{static set "x"(y){}`
+        // - `{static *"x"(){}`
+        // - `{static *async "x"(){}`
+        // - `{static *get "x"(){}`
+        // - `{static *set "x"(y){}`
+
+        let staticToken = curtok;
+        ASSERT_skipAny('static', lexerFlags); // this is `{static` and the next cannot validly be slash...
+
+        if (curc === $$COMMA_2C || curc === $$CURLY_R_7D) {
+          // in sloppy mode, `({static}=x)` is valid since static is not a proper reserved word
+          destructible = parseObjectLikePartFromIdent(lexerFlags, bindingType, isClassMethod, isStatic, staticToken, astProp);
+        } else {
+          return _parseObjectLikePart(lexerFlags, bindingType, isClassMethod, staticToken, astProp);
+        }
+      } else {
+        // (if prefixed by static then that's already consumed above)
+        // this is the only case that can be a shorthand. only valid syntaxes:
+        // - `({ident,`
+        // - `({ident:ident`
+        // - `({ident:expr`
+        // - `({ident(){}`
+        // - `({get ident(){}`    (or set/async)
+        // - `({get *ident(){}`   (or set, and I think by now async too?)
+        // - `({get [expr](){}`   (or set/async)
+        // - `({get *[expr](){}`  (or set, and I think by now async too?)
+        // - since this is an object curly, it _must_ be a syntax error when not a valid property starter
+
+        let identToken = curtok;
+        ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
+
+        destructible = parseObjectLikePartFromIdent(lexerFlags, bindingType, isClassMethod, isStatic, identToken, astProp);
+      }
+    }
+    else if ((curtype & $NUMBER) || (curtype & $STRING)) {
+      // property names can also be strings and numbers but these cannot be shorthanded
+      // number/string keys can still destructure just fine (`({"foo": x} = y)`)
+      // - `({"a b c": bar});`
+      // - `({"a b c"(){}});`
+      // - `({"a b c": bar}) => x`
+      // - `({15: bar});`
+      // - `({15(){}});`
+      // - `({15: bar}) => x`
+
+      let litToken = curtok;
+      ASSERT_skipRex(litToken.str, lexerFlags); // next is expression
+
+      destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+      if (curc === $$COLON_3A) {
+        // property value or label, some are destructible:
+        // - ({"x": ident,}
+        // - ({"x": <array destruct>,}
+        // - ({"x": <object destruct>,}
+        // - ({"x": ident = expr}
+        // - ({"x": <array destruct> = expr,}
+        // - ({"x": <object destruct> = expr,}
+        // anything else as value is non-destructible
+
+        ASSERT_skipRex(':', lexerFlags); // next is expression
+        if (curtype === $IDENT) {
+          // in this case the binding check can force the flag without throwing
+          // - `{25: true}`
+          // - `{"x": true}
+          switch (curtok.str) {
+            case 'true':
+              TODO
+              // reserved keyword, not destructible. will throw if current state must destruct
+              destructible = updateDestructible(destructible, CANT_DESTRUCT);
+              break;
+            case 'false':
+              TODO
+              // reserved keyword, not destructible. will throw if current state must destruct
+              destructible = updateDestructible(destructible, CANT_DESTRUCT);
+              break;
+            case 'null':
+              TODO
+              // reserved keyword, not destructible. will throw if current state must destruct
+              destructible = updateDestructible(destructible, CANT_DESTRUCT);
+              break;
+            case 'this':
+              TODO
+              // reserved keyword, not destructible. will throw if current state must destruct
+              destructible = updateDestructible(destructible, CANT_DESTRUCT);
+              break;
+            case 'super':
+              TODO
+              // reserved keyword, not destructible. will throw if current state must destruct
+              destructible = updateDestructible(destructible, CANT_DESTRUCT);
+              break;
+            default:
+              // regardless of destructible state, if you see something like `typeof` here you have an error
+              bindingIdentCheck(curtok, bindingType, lexerFlags);
+          }
+          let nameBinding = curtok;
+
+          ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
+          if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
+            destructible = updateDestructible(destructible, CANT_DESTRUCT);
+            TODO; // parse remainder of expression starting at ident
+          } else {
+            AST_open(astProp, 'Property');
+            AST_setLiteral('key', litToken);
+            AST_set('kind', 'init'); // only getters/setters get special value here
+            AST_set('method', false);
+            AST_set('computed', false);
+            AST_setIdent('value', nameBinding);
+            AST_set('shorthand', false);
+            AST_close('Property');
+          }
+        }
+        else if (curc === $$SQUARE_L_5B) {
+          // ({35: <array destruct>
+          AST_open(astProp, 'Property');
+          AST_setLiteral('key', litToken);
+          AST_set('kind', 'init'); // only getters/setters get special value here
+          AST_set('method', false);
+          AST_set('computed', false);
+          let wasDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, PARSE_INIT, 'value');
+          destructible = updateDestructible(destructible, wasDestruct);
+          // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
+          if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
+            destructible = updateDestructible(destructible, CANT_DESTRUCT);
+            TODO; // parse remainder of expression starting at ident
+          } else TODO
+          AST_set('shorthand', false);
+          AST_close('Property');
+        }
+        else if (curc === $$CURLY_L_7B) {
+          TODO
+          // ({ident: <object destruct>
+          AST_open(astProp, 'Property');
+          AST_setLiteral('key', litToken);
+          AST_set('kind', 'init'); // only getters/setters get special value here
+          AST_set('method', false);
+          AST_set('computed', false);
+          let wasDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, astProp);
+          destructible = updateDestructible(destructible, wasDestruct);
+          AST_set('shorthand', false);
+          AST_close('Property');
+          // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
+          if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
+            destructible = updateDestructible(destructible, CANT_DESTRUCT);
+            TODO; // parse remainder of expression starting at ident
+          } else TODO
+        }
+        else {
+          TODO
+          // something like `({15: 15` is valid, just not destructible
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+          AST_open(astProp, 'Property');
+          AST_setLiteral('key', litToken);
+          AST_set('kind', 'init'); // only getters/setters get special value here
+          AST_set('method', false);
+          AST_set('computed', false);
+          parseExpression(lexerFlags, 'value');
+          AST_set('shorthand', false);
+          AST_close('Property');
+        }
+      }
+      else if (curc === $$PAREN_L_28) {
+        // method shorthand
+        // - ({5(){}})
+        // - ({'foo'(){}})
+        AST_setLiteral(astProp, litToken);
+        parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, undefined, litToken, isClassMethod, false, astProp);
+      } else {
+        TODO
+        THROW('Object literal keys that are strings or numbers must be a method or have a colon: ' + curtok);
+      }
+
+      ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the expression');
+    }
+    else if (curtok.str === '...') {
+      // ({...foo
+      // Note that this can also be a spread like it is in `({foo, ...bar});`
+      // TODO: pretty sure you can do silly stuff like `({...{x, ...y}}) => y` etc (because you can do it for `([...[x, ...y]]) => y`)
+      TODO; // parse the rest value
+      // TODO: verify name because that would otherwise be checked later
+      // exit here, do not parse default
+      if (!destructible) TODO,THROW('The spread operator is not allowed here unless this is an arrow (and it was already determined this cannot be the case)');
+      // destructible = updateDestructible(destructible, CANT_DESTRUCT);
+      TODO
+      ASSERT(curc !== $$IS_3D, TODO); // any destructuring should be parsed before returning
+      return destructible;
+    }
+    else if (curc === $$SQUARE_L_5B) {
+      // dynamic property (is destructible!)
+      // - ({[foo]: x})
+      // - ({[foo]() {}})
+
+      // skip dynamic part first becaue we need to figure out whether we're parsing a method
+      ASSERT_skipRex('[', lexerFlags); // next is expression
+      parseExpression(lexerFlags, astProp);
+      skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
+
+      if (isClassMethod === IS_CLASS_METHOD) {
+
+        AST_wrapClosed(astProp, 'MethodDefinition', 'key');
+        AST_set('static', !!isStatic);
+        AST_set('computed', true);
+        AST_set('kind', 'method'); // get/set/constructor/etc but dynamic key is always method
+
+        if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
+
+        AST_close('MethodDefinition');
+      } else {
+        AST_wrapClosed(astProp, 'Property', 'key');
+        AST_set('kind', 'init'); // only getters/setters get special value here
+        AST_set('method', curc === $$PAREN_L_28);
+        AST_set('computed', true);
+
+        // assert next char here so we don't over accept
+        if (curc === $$PAREN_L_28) {
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
+        } else {
+          if (curc !== $$COLON_3A) THROW('A computed property name must be followed by a colon or paren');
+          skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
+          parseExpression(lexerFlags, 'value');
+        }
+        AST_set('shorthand', false);
+        AST_close('Property');
+        ASSERT(curc !== $$IS_3D, 'if the array was destructured then that should have been parsed by now');
+      }
+    }
+    else if (curc === $$STAR_2A) {
+      // generator shorthand
+      // - `({*ident(){}})`
+      // - `({*"str"(){}})`
+      // - `({*15(){}})`
+      // - `({*[expr](){}})`
+
+      destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+      let starToken = curtok;
+      ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident, number, string, `[`
+
+      if (curtype === $IDENT) {
+        if (curtok.str === 'async' || curtok.str === 'get' || curtok.str === 'set') {
+          THROW('Getters, setters, async, can not be generators');
+        }
+
+        // - `({*ident(){}})`
+        let identToken2 = curtok;
+        ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
+
+        AST_setIdent(astProp, identToken2);
+        parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, identToken2, isClassMethod, false, astProp);
+
+        // AST_open(astProp, 'Property');
+        // AST_setIdent('key', curtok);
+        // AST_set('kind', 'init'); // only getters/setters get special value here
+        // AST_set('method', true);
+        // AST_set('computed', false);
+        // ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
+        // if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after * ' +identToken2.str + '; ' + curtok);
+        // parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
+        // AST_set('shorthand', false);
+        // AST_close('Property');
+      }
+      else if (curtype & ($NUMBER | $STRING)) {
+        // - `({*"str"(){}})`
+        // - `({*15(){}})`
+        let litToken = curtok;
+        ASSERT_skipAny(litToken.str, lexerFlags); // TODO: next must be `(`
+
+        destructible = false;
+
+        AST_setLiteral(astProp, litToken);
+        parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, litToken, isClassMethod, false, astProp);
+
+
+        // AST_open(astProp, 'Property');
+        // AST_setLiteral('key', litToken);
+        // AST_set('kind', 'init'); // only getters/setters get special value here
+        // AST_set('method', true);
+        // AST_set('computed', false);
+        // ASSERT_skipAny(litToken.str, lexerFlags); // TODO: next must be `(`
+        // if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after * `' +litToken.str + '`; ' + curtok);
+        // parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
+        // AST_set('shorthand', false);
+        // AST_close('Property');
+      }
+      else if (curc === $$SQUARE_L_5B) {
+        // - `({*[expr](){}})`
+
+        let litToken = curtok;
+        ASSERT_skipRex('[', lexerFlags); // next is expression
+        parseExpression(lexerFlags, astProp);
+        skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
+
+        parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, litToken, isClassMethod, true, astProp);
+
+        //
+        // AST_open(astProp, 'Property');
+        // ASSERT_skipRex('[', lexerFlags); // expression start
+        // parseExpression(lexerFlags, 'key');
+        // skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: next must be (
+        // AST_set('kind', 'init'); // only getters/setters get special value here
+        // AST_set('method', true);
+        // AST_set('computed', true);
+        // if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after * [...]; ' + curtok);
+        // parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
+        // AST_set('shorthand', false);
+        // AST_close('Property');
+      }
+      else {
+        TODO
+      }
+      ASSERT(curc !== $$IS_3D, 'this struct can not have an init');
+    }
+    else if (curc === $$SEMI_3B) {
+      if (isClassMethod === NOT_CLASS_METHOD) {
+        // - `({;})`
+        THROW('Semi is not a valid character in object literals');
+      }
+      // - `class x {;}`
+      // these semi's dont contribute anything to the AST (lossy)
+      ASSERT_skipAny(';', lexerFlags); // any property start or }
+    }
+    else {
+      // ({<?>
+      THROW('Unexpected token, wanted to parse a start of a property in an object literal/pattern');
+    }
+
+    // if destructible, the name can not be something like `true` or `new`
+
+    return destructible;
+  }
+  function parseObjectLikePartFromIdent(lexerFlags, bindingType, isClassMethod, isStatic, identToken, astProp) {
+    ASSERT(arguments.length === 6, '6 args');
+    ASSERT(identToken.type === $IDENT, 'should get ident token: ' + identToken);
+    ASSERT(typeof astProp === 'string', 'astprop string');
+
+    // note: if this part started with `static` then identToken will always be the NEXT token and isstatic=true
+    // - `{x(){}`
+    // - `{async x(){}`
+    // - `{get x(){}`
+    // - `{set x(y){}`
+    // - `{async [x](){}`
+    // - `{get [x](){}`
+    // - `{set [x](y){}`
+    // - `{async 8(){}`
+    // - `{get 8(){}`
+    // - `{set 8(y){}`
+    // - `{async "x"(){}`
+    // - `{get "x"(){}`
+    // - `{set "x"(y){}`
+    // - `{static x(){}`
+    // - `{static async x(){}`
+    // - `{static get x(){}`
+    // - `{static set x(y){}`
+    // - `{static async [x](){}`
+    // - `{static get [x](){}`
+    // - `{static set [x](y){}`
+    // - `{static async 8(){}`
+    // - `{static get 8(){}`
+    // - `{static set 8(y){}`
+    // - `{static async "x"(){}`
+    // - `{static get "x"(){}`
+    // - `{static set "x"(y){}`
+
+    let destructible = MIGHT_DESTRUCT;
+    let nameBinding = undefined;
+
+    if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
+      if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
+      // property shorthand; `{ident}=x` is valid
+      // - {a}
+      // - {a, ...}
+      // - {true}       !is never valid!
+
+      bindingIdentCheck(identToken, bindingType, lexerFlags);
+
+      // obj shorthand is only valid when destructuring
+      destructible = updateDestructible(destructible, MUST_DESTRUCT);
+
+      AST_open(astProp, 'Property');
+      AST_setIdent('key', identToken);
+      AST_set('kind', 'init'); // only getters/setters get special value here
+      AST_set('method', false);
+      AST_set('computed', false);
+      AST_setIdent('value', identToken);
+      if (curc === $$IS_3D && curtok.str === '=') {
+        // consider `({foo = 10})` vs `({foo: bar = 10})`
+        // (note: shorthand only forces MUST_DESTRUCT when an initializer follows it immediately)
+        destructible = updateDestructible(destructible, MUST_DESTRUCT); // shorthand is only allowed in Pattern
+
+        AST_wrapClosed('value', 'AssignmentExpression', 'left');
+        AST_set('operator', '=');
+        ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a regex
+        parseExpression(lexerFlags, 'right');
+        AST_close('AssignmentExpression');
+      }
+      AST_set('shorthand', true);
+      AST_close('Property');
+
+      nameBinding = identToken;
+
+      ASSERT(curc !== $$IS_3D, 'further assignments should be parsed as part of the rhs expression');
+    }
+    else if (curc === $$COLON_3A) {
+      if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
+      // property value or label, some are destructible:
+      // - ({ident: ident,}
+      // - ({ident: <array destruct>,}
+      // - ({ident: <object destruct>,}
+      // - ({ident: ident = expr}
+      // - ({ident: <array destruct> = expr,}
+      // - ({ident: <object destruct> = expr,}
+      // anything else as value is non-destructible
+
+      ASSERT_skipRex(':', lexerFlags); // next is expression
+      if (curtype === $IDENT) {
+        // ({ident: ident
+        // can still become ({ident: foo+bar}) which is not destructible, so confirm token after ident
+        let valueIdentToken = nameBinding = curtok;
+        bindingIdentCheck(curtok, bindingType, lexerFlags);
+        ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
+
+        AST_open(astProp, 'Property');
+        AST_setIdent('key', identToken);
+        AST_set('kind', 'init'); // only getters/setters get special value here
+        AST_set('method', false);
+        AST_set('computed', false);
+        if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D) {
+          if (curtok.str === '=') {
+            // dont reset nameBinding (`b`) in the `{a: b=c}` case. The binding is verified later.
+            nameBinding = undefined;
+          } else {
+            // something like `({a:v=b}=c)` and `({a:v=b}=c) => x` is valid so don't prevent destruct for `=`
+            destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          }
+          parseExpressionFromIdent(lexerFlags, valueIdentToken, 'value');
+        } else {
+          // note: nameBinding is verified later
+          AST_setIdent('value', nameBinding);
+        }
+        AST_set('shorthand', false);
+        AST_close('Property');
+      }
+      else if (curc === $$SQUARE_L_5B) {
+        // ({ident: <array destruct>
+        AST_open(astProp, 'Property');
+        AST_setIdent('key', identToken);
+        AST_set('kind', 'init'); // only getters/setters get special value here
+        AST_set('method', false);
+        AST_set('computed', false);
+        let subDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, PARSE_INIT, 'value');
+        destructible = updateDestructible(destructible, subDestruct);
+        // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
+        if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, 'value');
+          parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
+        }
+        AST_set('shorthand', false);
+        AST_close('Property');
+      }
+      else if (curc === $$CURLY_L_7B) {
+        // ({ident: <object destruct>
+        AST_open(astProp, 'Property');
+        AST_setIdent('key', identToken);
+        AST_set('kind', 'init'); // only getters/setters get special value here
+        AST_set('method', false);
+        AST_set('computed', false);
+        let subDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, 'value');
+        console.log('subDestruct', subDestruct)
+        destructible = updateDestructible(destructible, subDestruct);
+        // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
+        if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, 'value');
+          parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
+        }
+        AST_set('shorthand', false);
+        AST_close('Property');
+      }
+      else {
+        // something like `({foo: 15` is valid, just not destructible
+        destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+        AST_open(astProp, 'Property');
+        AST_setIdent('key', identToken);
+        AST_set('kind', 'init'); // only getters/setters get special value here
+        AST_set('method', false);
+        AST_set('computed', false);
+        parseExpression(lexerFlags, 'value');
+        AST_set('shorthand', false);
+        AST_close('Property');
+      }
+      ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
+    }
+    else if (curc === $$SQUARE_L_5B) {
+      // (this is the part after the first ident of the part (or two if there is a "static" prefix)
+      // - ({static [expr](){}
+      // - ({get [expr](){}
+      // - ({set [expr](ident){}
+      // - ({async [expr](){}
+      // - ({static get [expr](){}
+      // - ({static set [expr](ident){}
+      // - ({static async [expr](){}
+
+      destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+      // skip dynamic part first becaue we need to assert that we're parsing a method
+      ASSERT_skipRex('[', lexerFlags); // next is expression
+      parseExpression(lexerFlags, astProp);
+      skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is (
+
+      if (isClassMethod === IS_CLASS_METHOD) {
+        AST_wrapClosed(astProp, 'MethodDefinition', 'key');
+        AST_set('static', !!isStatic);
+        AST_set('computed', true);
+        AST_set('kind', identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'method'); // only getters/setters get special value here
+
+        if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+
+        AST_close('MethodDefinition');
+      } else {
+        AST_wrapClosed(astProp, 'Property', 'key');
+        AST_set('kind', identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
+        AST_set('method', true);
+        AST_set('computed', true);
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+        AST_set('shorthand', false);
+        AST_close('Property');
+        ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+      }
+    }
+    else if (curc === $$PAREN_L_28) {
+      // method shorthand
+      // - ({ident(){}})
+
+      destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+      AST_setIdent(astProp, identToken);
+      parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, undefined, identToken, isClassMethod, false, astProp);
+
+      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+    }
+    else if (curtype === $IDENT) {
+      // getter/setter/async shorthand method
+      // - ({async ident(){}})
+      // - ({get ident(){}})
+      // - ({set ident(ident){}})
+      destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+      if (identToken.str !== 'get' && identToken.str !== 'set' && identToken.str !== 'async') {
+        if (!isClassMethod || identToken.str !== 'static') {
+          THROW('Did not expect another identifier while parsing an object literal property');
+        }
+      }
+      let identToken2 = curtok;
+      ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
+
+      if (curc !== $$PAREN_L_28) THROW('Must have left paren now, got: ' + curtok);
+      AST_setIdent(astProp, identToken2);
+      parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, identToken, identToken2, isClassMethod, false, astProp);
+
+      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+    }
+    else if (curc === $$STAR_2A) {
+      // getter/setter with generator
+      // (probably async too)
+      // - ({get *ident(){}})
+      // - ({set *ident(ident){}})
+      // - ({get *5(){}})
+      // - ({set *5(ident){}})
+      // - ({get *'x'(){}})
+      // - ({set *'x'(ident){}})
+      // - ({get *[x](){}})
+      // - ({set *[x](ident){}})
+      // - ({static get *ident(){}})
+      // - ({static set *ident(ident){}})
+      // - ({static get *5(){}})
+      // - ({static set *5(ident){}})
+      // - ({static get *'x'(){}})
+      // - ({static set *'x'(ident){}})
+      // - ({static get *[x](){}})
+      // - ({static set *[x](ident){}})
+
+      destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+      let starToken = curtok;
+      ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident
+
+      if (curtype !== $IDENT) {
+        TODO; // what about `class x{*[x](){}}` and `class x{*"foo"(){}}` and `class x{*.15(){}}`
+        THROW('Generator can only do ident');
+      }
+
+      if (identToken.str !== 'get' && identToken.str !== 'set') {
+        if (identToken.str === 'async') TODO,THROW('Cannot make an async generator method'); // TODO: the spec caught up to this and I think this is fine now...
+        if (identToken.str === 'static') TODO,THROW('Cannot have `static` here');
+        THROW('Did not expect another identifier while parsing an object literal property (`' + identToken.str + '`)');
+      }
+
+      if (curtok.type !== $IDENT) TODO; // fix it so non-idents also works
+      AST_setIdent(astProp, curtok);
+      parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, curtok, isClassMethod, false, astProp);
+
+      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+    }
+    else if ((curtype & $NUMBER) || (curtype & $STRING)) {
+      // property names can also be strings and numbers but these cannot be shorthanded
+      // number/string keys can still destructure just fine (`({"foo": x} = y)`)
+      // - `({async "a b c"(){}});`
+      // - `({async 15(){}});`
+      // - `({get "a b c"(){}});`
+      // - `({get 15(){}});`
+      // - `({set "a b c"(x){}});`
+      // - `({set 15(x){}});`
+
+      destructible = updateDestructible(destructible, CANT_DESTRUCT);
+
+      let litToken = curtok;
+      ASSERT_skipRex(litToken.str, lexerFlags); // next is `(`
+
+      AST_setLiteral(astProp, litToken);
+      parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, identToken, curtok, isClassMethod, false, astProp);
+
+
+      // if (curc === $$PAREN_L_28) {
+      //   AST_open(astProp, 'Property');
+      //   AST_setLiteral('key', litToken);
+      //   AST_set('kind', identToken.str === 'async' ? 'init' : identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
+      //   AST_set('method', true);
+      //   AST_set('computed', false);
+      //   parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+      //   AST_set('shorthand', false);
+      //   AST_close('Property');
+      // } else {
+      //   THROW('Object literal async keys that are strings or numbers must be a method: ' + curtok);
+      // }
+      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+    }
+    else {
+      if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
+      // this is most likely an error
+      // - `({x+=y})`
+      THROW('Unexpected character after object literal property name ' + curtok);
+    }
+
+    if (isClassMethod) return; // no init for class members
+
+    // nameBinding can be undefined here if
+    // - dynamic property `{[x]: y}`
+    ASSERT(destructible !== CANT_DESTRUCT || nameBinding === undefined, 'if cant destruct then must have a name?');
+    // in this case the binding check can force the flag without throwing
+    // - `{true}`
+    // - `{foo: true}`
+    // - `{25: true}`
+    // - `{"x": true}
+    switch (nameBinding && nameBinding.str) {
+      case 'true':
+        TODO
+        // reserved keyword, not destructible. will throw if current state must destruct
+        destructible = updateDestructible(destructible, CANT_DESTRUCT);
+        break;
+      case 'false':
+        TODO
+        // reserved keyword, not destructible. will throw if current state must destruct
+        destructible = updateDestructible(destructible, CANT_DESTRUCT);
+        break;
+      case 'null':
+        TODO
+        // reserved keyword, not destructible. will throw if current state must destruct
+        destructible = updateDestructible(destructible, CANT_DESTRUCT);
+        break;
+      case 'this':
+        TODO
+        // reserved keyword, not destructible. will throw if current state must destruct
+        destructible = updateDestructible(destructible, CANT_DESTRUCT);
+        break;
+      case 'super':
+        TODO
+        // reserved keyword, not destructible. will throw if current state must destruct
+        destructible = updateDestructible(destructible, CANT_DESTRUCT);
+        break;
+      default:
+        // regardless of destructible state, if you see something like `typeof` here you have an error
+        if (nameBinding) bindingIdentCheck(nameBinding, bindingType, lexerFlags);
     }
 
     return destructible;
@@ -4994,7 +5120,43 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // destructible because the `...` is at the end of the structure and its arg is an ident/array/object and has no tail
     return destructible;
   }
+  function parseObjectLikeMethodAfterKey(lexerFlags, isStatic, isGenerator, asyncgetset, keyToken, isClassMethod, isDynamic, astProp) {
+    ASSERT(arguments.length === 8, 'want 8 args');
+    let modifier = asyncgetset ? asyncgetset.str : '';
 
+    if (isClassMethod) {
+      AST_wrapClosed(astProp, 'MethodDefinition', 'key');
+      AST_set('static', !!isStatic);
+      AST_set('computed', !!isDynamic);
+
+      // constructor cant have get/set/*/async but can be static
+
+      if (keyToken.str === 'constructor' && !isStatic) {
+        if (modifier !== '' || isGenerator) THROW('The constructor can not be a getter, setter, async, or generator');
+        AST_set('kind', 'constructor');
+      } else {
+        AST_set('kind', modifier === 'get' ? 'get' : modifier === 'set' ? 'set' : 'method');
+      }
+
+      // AST_setLiteral('key', keyToken);
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+
+
+      AST_close('MethodDefinition');
+    } else {
+      if (isStatic) THROW('Only class methods can be `static`');
+      AST_wrapClosed(astProp, 'Property', 'key');
+
+      AST_set('kind', modifier === 'get' ? 'get' : modifier === 'set' ? 'set' : 'init'); // non-class: only getters/setters get special value here
+      AST_set('method', true);
+      AST_set('computed', !!isDynamic);
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+
+
+      AST_set('shorthand', false);
+      AST_close('Property');
+    }
+  }
 
   // <SCRUB AST>
   function logPath() {

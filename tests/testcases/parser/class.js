@@ -182,10 +182,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'a'},
                     static: false,
                     computed: false,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'a'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -218,10 +218,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'a'},
                     static: true,
                     computed: false,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'a'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -254,10 +254,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'constructor'},
                     static: false,
                     computed: false,
                     kind: 'constructor',
-                    key: {type: 'Identifier', name: 'constructor'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -290,10 +290,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'constructor'},
                     static: true,
                     computed: false,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'constructor'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -326,10 +326,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: false,
                     computed: false,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -362,10 +362,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: false,
                     computed: false,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: true,
@@ -398,10 +398,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: false,
                     computed: false,
                     kind: 'get',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -434,10 +434,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'set'},
                     static: false,
                     computed: false,
                     kind: 'get',
-                    key: {type: 'Identifier', name: 'set'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -470,10 +470,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: true,
                     computed: false,
                     kind: 'get',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -494,14 +494,14 @@ module.exports = (describe, test) =>
 
       test('async getter method', {
         code: 'class A {async get foo(){}}',
-        throws: 'Missing method arg parens',
+        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('generator getter method', {
         code: 'class A {* get foo(){}}',
-        throws: 'Missing method arg parens',
+        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
@@ -520,10 +520,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: false,
                     computed: false,
                     kind: 'set',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -556,10 +556,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'get'},
                     static: false,
                     computed: false,
                     kind: 'set',
-                    key: {type: 'Identifier', name: 'get'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -592,10 +592,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: true,
                     computed: false,
                     kind: 'set',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -616,14 +616,14 @@ module.exports = (describe, test) =>
 
       test('async setter method', {
         code: 'class A {async set foo(x){}}',
-        throws: 'Missing method arg parens',
+        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('generator setter method', {
         code: 'class A {* set foo(x){}}',
-        throws: 'Missing method arg parens',
+        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
@@ -642,10 +642,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
-                    static: false,
-                    computed: false,
-                    kind: 'method',
                     key: {type: 'Identifier', name: 'set'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -658,10 +658,10 @@ module.exports = (describe, test) =>
                   },
                   {
                     type: 'MethodDefinition',
-                    static: false,
-                    computed: false,
-                    kind: 'method',
                     key: {type: 'Identifier', name: 'get'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -674,10 +674,10 @@ module.exports = (describe, test) =>
                   },
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'async'},
                     static: false,
                     computed: false,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'async'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -718,6 +718,7 @@ module.exports = (describe, test) =>
     });
 
     describe('dynamic methods', _ => {
+
       test('without modifier', {
         code: 'class A {[a](){}}',
         ast: {
@@ -732,10 +733,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'a'},
                     static: false,
                     computed: true,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'a'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -768,10 +769,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'a'},
                     static: true,
                     computed: true,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'a'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -804,10 +805,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: false,
                     computed: true,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -840,10 +841,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: false,
                     computed: true,
                     kind: 'method',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: true,
@@ -876,10 +877,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: false,
                     computed: true,
                     kind: 'get',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -912,10 +913,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: true,
                     computed: true,
                     kind: 'get',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -936,14 +937,14 @@ module.exports = (describe, test) =>
 
       test('generator setter member', {
         code: 'class A {* get [x](){}}',
-        throws: 'Missing method arg parens',
+        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('async getter member', {
         code: 'class A {async get [x](){}}',
-        throws: 'Missing method arg parens',
+        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
@@ -962,10 +963,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: false,
                     computed: true,
                     kind: 'set',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -998,10 +999,10 @@ module.exports = (describe, test) =>
                 body: [
                   {
                     type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'foo'},
                     static: true,
                     computed: true,
                     kind: 'set',
-                    key: {type: 'Identifier', name: 'foo'},
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -1022,17 +1023,309 @@ module.exports = (describe, test) =>
 
       test('generator setter member', {
         code: 'class A {* set [foo](x){}}',
-        throws: 'Missing method arg parens',
+        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('async getter member', {
         code: 'class A {async get [foo](){}}',
-        throws: 'Missing method arg parens',
+        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      test('generator with dynamic key', {
+        code: 'class x { *[y](){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'y'},
+                    static: false,
+                    computed: true,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: true,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async with dynamic key', {
+        code: 'class x { async [y](){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'y'},
+                    static: false,
+                    computed: true,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('getter with dynamic key', {
+        code: 'class x { get [y](){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'y'},
+                    static: false,
+                    computed: true,
+                    kind: 'get',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('setter with dynamic key', {
+        code: 'class x { set [y](z){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'y'},
+                    static: false,
+                    computed: true,
+                    kind: 'set',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [{type: 'Identifier', name: 'z'}],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('generator with dynamic key', {
+        code: 'class x {static *[y](){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'y'},
+                    static: true,
+                    computed: true,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: true,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async with dynamic key', {
+        code: 'class x { static async [y](){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'y'},
+                    static: true,
+                    computed: true,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('getter with dynamic key', {
+        code: 'class x { static get [y](){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'y'},
+                    static: true,
+                    computed: true,
+                    kind: 'get',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('setter with dynamic key', {
+        code: 'class x { static set [y](z){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'y'},
+                    static: true,
+                    computed: true,
+                    kind: 'set',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [{type: 'Identifier', name: 'z'}],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      // test('async generator with dynamic key', {
+      //   code: 'class x { async *[y](){}}',
+      // });
     });
 
     describe('literal members', _ => {

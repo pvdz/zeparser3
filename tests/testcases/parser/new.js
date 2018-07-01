@@ -1664,10 +1664,10 @@ module.exports = (describe, test) =>
                     body: [
                       {
                         type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: 'constructor'},
                         static: false,
                         computed: false,
                         kind: 'constructor',
-                        key: {type: 'Identifier', name: 'constructor'},
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
@@ -1712,10 +1712,10 @@ module.exports = (describe, test) =>
                     body: [
                       {
                         type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: 'foo'},
                         static: false,
                         computed: false,
                         kind: 'method',
-                        key: {type: 'Identifier', name: 'foo'},
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
@@ -1760,10 +1760,10 @@ module.exports = (describe, test) =>
                     body: [
                       {
                         type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: 'foo'},
                         static: true,
                         computed: false,
                         kind: 'method',
-                        key: {type: 'Identifier', name: 'foo'},
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
@@ -1944,10 +1944,10 @@ module.exports = (describe, test) =>
                   body: [
                     {
                       type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'constructor'},
                       static: false,
                       computed: false,
                       kind: 'constructor',
-                      key: {type: 'Identifier', name: 'constructor'},
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
@@ -1986,10 +1986,10 @@ module.exports = (describe, test) =>
                   body: [
                     {
                       type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'a'},
                       static: false,
                       computed: false,
                       kind: 'method',
-                      key: {type: 'Identifier', name: 'a'},
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
@@ -2028,10 +2028,10 @@ module.exports = (describe, test) =>
                   body: [
                     {
                       type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'a'},
                       static: true,
                       computed: false,
                       kind: 'method',
-                      key: {type: 'Identifier', name: 'a'},
                       value: {
                         type: 'FunctionExpression',
                         generator: false,

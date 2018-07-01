@@ -2184,130 +2184,22 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('object with one async method get', {
+        test('object with one generator method get', {
           code: 'wrap({*get(){}});',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'wrap'},
-                  arguments: [
-                    {
-                      type: 'ObjectExpression',
-                      properties: [
-                        {
-                          type: 'Property',
-                          key: {type: 'Identifier', name: 'get'},
-                          kind: 'init',
-                          method: true,
-                          computed: false,
-                          value: {
-                            type: 'FunctionExpression',
-                            generator: true,
-                            async: false,
-                            expression: false,
-                            id: null,
-                            params: [],
-                            body: {type: 'BlockStatement', body: []},
-                          },
-                          shorthand: false,
-                        },
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          throws: 'can not be generator',
         });
 
-        test('object with one async method set', {
+        test('object with one generator method set', {
           code: 'wrap({*set(){}});',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'wrap'},
-                  arguments: [
-                    {
-                      type: 'ObjectExpression',
-                      properties: [
-                        {
-                          type: 'Property',
-                          key: {type: 'Identifier', name: 'set'},
-                          kind: 'init',
-                          method: true,
-                          computed: false,
-                          value: {
-                            type: 'FunctionExpression',
-                            generator: true,
-                            async: false,
-                            expression: false,
-                            id: null,
-                            params: [],
-                            body: {type: 'BlockStatement', body: []},
-                          },
-                          shorthand: false,
-                        },
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          throws: 'can not be generator',
         });
 
-        test('object with one async method async', {
+        test('object with one generator method async', {
           code: 'wrap({*async(){}});',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'wrap'},
-                  arguments: [
-                    {
-                      type: 'ObjectExpression',
-                      properties: [
-                        {
-                          type: 'Property',
-                          key: {type: 'Identifier', name: 'async'},
-                          kind: 'init',
-                          method: true,
-                          computed: false,
-                          value: {
-                            type: 'FunctionExpression',
-                            generator: true,
-                            async: false,
-                            expression: false,
-                            id: null,
-                            params: [],
-                            body: {type: 'BlockStatement', body: []},
-                          },
-                          shorthand: false,
-                        },
-                      ],
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          throws: 'can not be generator', // TODO
         });
 
-        test('object with one async method', {
+        test('object with one generator dstring method', {
           code: 'wrap({*"foo"(){}});',
           ast: {
             type: 'Program',
@@ -2348,7 +2240,7 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('object with one async method', {
+        test('object with one generator sstring method', {
           code: "wrap({*'foo'(){}});",
           ast: {
             type: 'Program',
@@ -2389,7 +2281,7 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('object with one async method', {
+        test('object with one generator number method', {
           code: 'wrap({*123(){}});',
           ast: {
             type: 'Program',
@@ -2430,7 +2322,7 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('object with one computed generator method', {
+        test('object with one generator dynamic prop method', {
           code: 'wrap({*[foo](){}});',
           ast: {
             type: 'Program',
@@ -2486,7 +2378,7 @@ module.exports = (describe, test) =>
           ],
         });
 
-        test('object with two async methods', {
+        test('object with two generator methods', {
           code: 'wrap({* foo(){},*bar(){}});',
           ast: {
             type: 'Program',
@@ -2564,7 +2456,7 @@ module.exports = (describe, test) =>
           ],
         });
 
-        test('object with an async method and an ident method', {
+        test('object with an generator method and an ident method', {
           code: 'wrap({* foo(){}, bar(){}});',
           ast: {
             type: 'Program',
@@ -2641,7 +2533,7 @@ module.exports = (describe, test) =>
           ],
         });
 
-        test('object with an async method and an ident method', {
+        test('object with an ident method and a generator method', {
           code: 'wrap({foo(){}, *bar(){}});',
           ast: {
             type: 'Program',
@@ -4335,31 +4227,59 @@ module.exports = (describe, test) =>
 
       test('can not use async/generators on getters/setters', {
         code: '({async get foo(){}});',
-        throws: 'Missing method arg',
+        throws: 'Must have left paren',
       });
 
       test('can not use async/generators on getters/setters', {
         code: '({get set foo(){}});',
-        throws: 'Missing method arg',
+        throws: 'Must have left paren',
       });
 
       test('can not use async/generators on getters/setters', {
         code: '({async set foo(){}});',
-        throws: 'Missing method arg',
+        throws: 'Must have left paren',
       });
-      //
+
       // test('getters with non-zero param count', {
       //   code: '({get foo(x){}});',
       //   throws: 'Missing method arg',
       // });
-      //
+
       // test('setters with zero param count', {
       //   code: '({get foo(){}});',
       //  });
-      //
+
       // test('setters with two params', {
       //   code: '({get foo(x,y){}});',
       // });
+
+      describe('dont allow semi because it shares code with class', _ => {
+
+        test('instead of comma', {
+          code: '({x:y;a:b})',
+          throws: true,
+        });
+
+        test('trailing semi', {
+          code: '({x:y;})',
+          throws: true,
+        });
+
+        test('leading semi', {
+          code: '({;x:y,a:b})',
+          throws: true,
+        });
+
+        test('only a semi', {
+          code: '({;})',
+          throws: true,
+        });
+      });
+
+      test('dont allow semi because it shares code with class', {
+        code: '({x:y;a:b})',
+        throws: true,
+      });
     });
 
     describe('destructuring', _ => {
@@ -4847,7 +4767,7 @@ module.exports = (describe, test) =>
         // wrap({a:b=x}=y);
       });
 
-      describe('string properties', _ => {
+      describe('string properties do not destruct', _ => {
         test('object with one double quoted property', {
           code: 'wrap({a:b}=obj);',
           ast: {
@@ -4951,229 +4871,22 @@ module.exports = (describe, test) =>
 
         test('object with one double quoted property', {
           code: "wrap({'a':b}=obj);",
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'wrap'},
-                  arguments: [
-                    {
-                      type: 'AssignmentExpression',
-                      left: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Literal', value: '<TODO>', raw: "'a'"},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'b'},
-                            shorthand: false,
-                          },
-                        ],
-                      },
-                      operator: '=',
-                      right: {type: 'Identifier', name: 'obj'},
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+          throws: 'not destructible',
         });
 
         test('object with two double quoted properties', {
           code: "wrap({'a':b, 'c':d}=obj);",
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'wrap'},
-                  arguments: [
-                    {
-                      type: 'AssignmentExpression',
-                      left: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Literal', value: '<TODO>', raw: "'a'"},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'b'},
-                            shorthand: false,
-                          },
-                          {
-                            type: 'Property',
-                            key: {type: 'Literal', value: '<TODO>', raw: "'c'"},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'd'},
-                            shorthand: false,
-                          },
-                        ],
-                      },
-                      operator: '=',
-                      right: {type: 'Identifier', name: 'obj'},
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $STRING_SINGLE,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $STRING_SINGLE,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          throws: 'not destructible',
         });
 
         test('object with two double quoted properties', {
           code: "wrap({'a':b, c:d}=obj);",
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'wrap'},
-                  arguments: [
-                    {
-                      type: 'AssignmentExpression',
-                      left: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Literal', value: '<TODO>', raw: "'a'"},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'b'},
-                            shorthand: false,
-                          },
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'c'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'd'},
-                            shorthand: false,
-                          },
-                        ],
-                      },
-                      operator: '=',
-                      right: {type: 'Identifier', name: 'obj'},
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $STRING_SINGLE,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          throws: 'not destructible',
         });
 
         test('object with two double quoted properties', {
           code: "wrap({a:b, 'c':d}=obj);",
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'wrap'},
-                  arguments: [
-                    {
-                      type: 'AssignmentExpression',
-                      left: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'a'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'b'},
-                            shorthand: false,
-                          },
-                          {
-                            type: 'Property',
-                            key: {type: 'Literal', value: '<TODO>', raw: "'c'"},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'd'},
-                            shorthand: false,
-                          },
-                        ],
-                      },
-                      operator: '=',
-                      right: {type: 'Identifier', name: 'obj'},
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $STRING_SINGLE,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          throws: 'not destructible',
         });
       });
 
