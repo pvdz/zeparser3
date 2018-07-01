@@ -5160,6 +5160,11 @@ module.exports = (describe, test) =>
           test('keyword=let', {
             code: '({let}) => null',
             throws: 'Cannot use this name',
+            SLOPPY_SCRIPT: {
+              desc: 'let is a valid var name in sloppy mode and destructuring is not "strict" by default',
+              ast: true,
+              tokens: true,
+            },
           });
 
           ['eval', 'arguments', 'static', 'implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield'].forEach(keyword => {

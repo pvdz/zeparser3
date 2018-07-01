@@ -1493,6 +1493,7 @@ module.exports = (describe, test) => describe('parens', _ => {
     // TODO: confirm that `async` is not a reserved word in any case
     // TODO: confirm `let` is assignable even in strict mode
 
+    // keywords
     [
       'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
       'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
@@ -1507,9 +1508,12 @@ module.exports = (describe, test) => describe('parens', _ => {
       });
     });
 
+    // strict-mode only keywords
     [
-      'eval', 'arguments', 'static', 'implements', 'package',
+      'eval', 'arguments', 'implements', 'package',
       'protected', 'interface', 'private', 'public', 'await', 'yield',
+      'static', // Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is
+      'let', // Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is
     ].forEach(keyword => {
       test('cannot assign to group with reserved word in strict mode: `' + keyword + '`', {
         code: '('+keyword+')=2',
@@ -1531,6 +1535,19 @@ module.exports = (describe, test) => describe('parens', _ => {
           },
           tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $ASI],
         },
+      });
+    });
+
+    // non-keywords
+    [
+      'async',     // not an actual keyword
+    ].forEach(keyword => {
+      test('cannot assign to group with keyword: `' + keyword + '`', {
+        code: '('+keyword+')=2',
+        // Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
+        // Invalid assignment because group does not wrap just a var name or just a property access
+        ast: true,
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $ASI],
       });
     });
 

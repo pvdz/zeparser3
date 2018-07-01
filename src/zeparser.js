@@ -745,7 +745,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(typeof what === 'number' || typeof what === 'string', 'what number/string');
     if (typeof what === 'string') {
-      ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', curtok.str);
+      ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', debug_toktype(curtok.type), curtok.str);
     } else {
       ASSERT((curtype & what) === what, 'expecting to skip token with certain type', 'expect:'
         // <SCRUB DEV>
@@ -761,7 +761,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(typeof what === 'number' || typeof what === 'string', 'what number/string');
     if (typeof what === 'string') {
-      ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', curtok.str);
+      ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', debug_toktype(curtok.type), curtok.str);
     } else {
       ASSERT((curtype & what) === what, 'expecting to skip token with certain type', 'expect:'
         // <SCRUB DEV>
@@ -1128,89 +1128,91 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     switch (curtok.str) {
       case 'await':
         parseAwaitStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'break':
         parseBreakStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'class':
         parseClassDeclaration(lexerFlags, IDENT_REQUIRED, astProp);
-        break;
+        return;
 
       case 'const':
         parseConstStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'continue':
         parseContinueStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'debugger':
         parseDebuggerStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'do':
         parseDoStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'export':
         parseExportStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'for':
         parseForStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'function':
         if ((lexerFlags & (LF_NO_FUNC_DECL|LF_STRICT_MODE)) === (LF_NO_FUNC_DECL|LF_STRICT_MODE)) THROW('Function statement is illegal in strict mode');
         parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_REQUIRED, astProp);
-        break;
+        return;
 
       case 'if':
         parseIfStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'import':
         parseImportDeclaration(lexerFlags, astProp);
-        break;
+        return;
 
       case 'let':
         parseLetStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'return':
         parseReturnStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'switch':
         parseSwitchStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'throw':
         parseThrowStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'try':
         parseTryStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'var':
         parseVarStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'while':
         parseWhileStatement(lexerFlags, astProp);
-        break;
+        return;
 
       case 'with':
         parseWithStatement(lexerFlags, astProp);
-        break;
+        return;
 
       default:
         parseIdentLabelOrExpressionStatement(lexerFlags, astProp);
-
+        return;
     }
+
+    THROW('Unexpected identifier case');
   }
 
   function parseFromLiteralStatement(lexerFlags, astProp) {
@@ -1524,8 +1526,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_setIdent('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (!optionalIdent) {
-      THROW('Class decl missing required ident');
+      //  '`export class extends x {}` is the only valid class decl without name');
+      THROW('Class decl missing required ident, `extends` is not a valid variable name');
     } else {
+      // expression           (`x = class {}`)
+      // default exports      (`export default class {}`)
       AST_set('id', null);
     }
 
@@ -2595,16 +2600,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // strict mode keywords
       case 'let':
-        if (bindingKind !== BINDING_TYPE_VAR) {
-          if (bindingKind === BINDING_TYPE_CLASS) return 'Can not use `let` as a class name';
-          else return 'Can not use `let` when binding through `let` or `const`';
+        if (bindingKind === BINDING_TYPE_CLASS) return 'Can not use `let` as a class name';
+        if (bindingKind === BINDING_TYPE_LET || bindingKind === BINDING_TYPE_CONST) {
+          return 'Can not use `let` when binding through `let` or `const`';
         }
-        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) return 'Can not use `let` as var name in strict mode';
+
+        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+        //   Identifier: IdentifierName but not ReservedWord
+        //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "let" ...
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) return 'Can not use `let` as variable name in strict mode';
         break;
       case 'static':
-        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
-          return 'Cannot use this reserved word as a variable name in strict mode';
-        }
+        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+        //   Identifier: IdentifierName but not ReservedWord
+        //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "static" ...
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) return '`static` is a reserved word in strict mode';
         break;
 
       // `eval` and `arguments` edge case paths
@@ -4260,8 +4270,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `({[expr](){}`
 
     if (curtype === $IDENT) {
-      if (curtok.str === 'static') {
-        if (isStatic) THROW('Cannot have `static static`');
+      if (curtok.str === 'static' && !isStatic) {
         // - `{static x(){}`
         // - `{static *x(){}`
         // - `{static async x(){}`
@@ -4702,7 +4711,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curc !== $$IS_3D, 'further assignments should be parsed as part of the rhs expression');
     }
     else if (curc === $$COLON_3A) {
-      if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
+      if (isClassMethod) THROW('Class members have to be methods, for now');
       // property value or label, some are destructible:
       // - ({ident: ident,}
       // - ({ident: <array destruct>,}

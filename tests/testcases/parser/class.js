@@ -1438,6 +1438,430 @@ module.exports = (describe, test) =>
       });
     });
 
+    describe('special keys', _ => {
+      [
+        'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
+        'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
+        'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
+        'false', 'enum', 'eval', 'arguments', 'implements', 'package', 'protected', 'interface', 'private',
+        'public', 'await', 'yield',
+        'let', // "Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName"
+        'static', // "Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName"
+        'async', 'get', 'set',
+      ].forEach(ident => {
+
+        describe('ident=' + ident, _ => {
+
+          test('as class name', {
+            code: 'class ' + ident + ' {}',
+            ...(
+              ['async', 'get', 'set'].indexOf(ident) >= 0 ?
+                {
+                  ast: true,
+                  tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+                }
+                :
+                {
+                  throws: 'variable name',
+                }
+            ),
+          });
+
+          test('as super class name', {
+            code: 'class x extends ' + ident + ' {}',
+            desc: 'since extends accept an arbitrary expression certain keywords lead to different errors',
+            ...(
+              ['super', 'this', 'null', 'true', 'false', 'eval', 'arguments', 'get', 'set'].indexOf(ident) >= 0 ?
+              {
+                ast: true,
+                tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+              }
+                :
+              {
+                throws: true,
+              }
+            ),
+          });
+
+          test('as regular property in class', {
+            code: 'class x {' + ident + ': x}',
+            desc: 'we will have to revisit this with class properties later',
+            throws: 'method',
+          });
+
+          test('as method in class', {
+            code: 'class x {' + ident + '(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as static method in class', {
+            code: 'class x {static ' + ident + '(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: true,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as generator in class', {
+            code: 'class x {* ' + ident + '(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as getter in class', {
+            code: 'class x {get ' + ident + '(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: false,
+                        computed: false,
+                        kind: 'get',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as setter in class', {
+            code: 'class x {set ' + ident + '(x){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: false,
+                        computed: false,
+                        kind: 'set',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [{type: 'Identifier', name: 'x'}],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as async method in class', {
+            code: 'class x {async ' + ident + '(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: true,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as async generator in class', {
+            code: 'class x {async * ' + ident + '(){}}',
+            throws: true, // TODO: async generators
+          });
+
+          test('as static getter in class', {
+            code: 'class x {static get ' + ident + '(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: true,
+                        computed: false,
+                        kind: 'get',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as static generator in class', {
+            code: 'class x {static * ' + ident + '(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: true,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as static setter in class', {
+            code: 'class x {static set ' + ident + '(x){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: true,
+                        computed: false,
+                        kind: 'set',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [{type: 'Identifier', name: 'x'}],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as static async method in class', {
+            code: 'class x {static async ' + ident + '(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: ident},
+                        static: true,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: true,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('as static async generator in class', {
+            code: 'class x {static async * ' + ident + '(){}}',
+            throws: true, // TODO: async generators
+          });
+        });
+      });
+    });
+
     /*
   // string and numeric keys are also valid
 class f {

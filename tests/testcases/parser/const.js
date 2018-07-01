@@ -233,6 +233,71 @@ module.exports = (describe, test) =>
             });
           });
         });
+
+        // not
+        [
+          'async', // there are no explicit rules against `static`
+        ].forEach(name => {
+          describe(`strict mode keyword=${name}`, _ => {
+            test(`var statement`, {
+              code: `var ${name} = x;`,
+              ast: true,
+              tokens: true,
+            });
+
+            test(`for header`, {
+              code: `for (var ${name} = x;;);`,
+              ast: true,
+              tokens: true,
+            });
+
+            test(`function arg`, {
+              code: `function f(${name}) {}`,
+              ast: true,
+              tokens: true,
+            });
+
+            test(`function object destructured arg`, {
+              code: `function f({${name}}) {}`,
+              ast: true,
+              tokens: true,
+            });
+
+            test(`function object alias destructured arg`, {
+              code: `function f({x: ${name}}) {}`,
+              ast: true,
+              tokens: true,
+            });
+
+            test(`function array destructured arg`, {
+              code: `function f([${name}]) {}`,
+              ast: true,
+              tokens: true,
+            });
+
+            test(`catch clause`, {
+              code: `try {} catch (${name}) {}`,
+              ast: true,
+              tokens: true,
+            });
+
+            test(`export`, {
+              code: `export var ${name} = 10;`,
+              SLOPPY: {
+                desc: 'export is only allowed in module code',
+                throws: 'module goal',
+              },
+              ast: true,
+              tokens: true,
+            });
+
+            test(`can be property`, {
+              code: `obj.${name}`,
+              ast: true,
+              tokens: true,
+            });
+          });
+        });
       });
 
       describe('as a statement', _ => {
