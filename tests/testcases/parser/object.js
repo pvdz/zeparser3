@@ -994,6 +994,7 @@ module.exports = (describe, test) =>
       });
 
       describe('identifier method', _ => {
+
         test('object with one method', {
           code: 'wrap({foo(){}});',
           ast: {
@@ -1033,6 +1034,338 @@ module.exports = (describe, test) =>
             ],
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        [
+          'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
+          'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
+          'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
+          'false', 'enum', 'eval', 'arguments', 'implements', 'package', 'protected', 'interface', 'private',
+          'public', 'await', 'yield',
+          'let',
+          'static', 'async', 'get', 'set',
+        ].forEach(ident => {
+
+          describe('special keys with ident=' + ident, _ => {
+
+            test('as regular property in object', {
+              code: '({' + ident + ': x});',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: ident},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'x'},
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('as regular property in arrow', {
+              code: '({' + ident + ': x}) => x;',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [
+                        {
+                          type: 'ObjectPattern',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: ident},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'x'},
+                              shorthand: false,
+                            },
+                          ],
+                        },
+                      ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: true,
+                      body: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+            });
+
+            test('as regular property in destructuring assignment', {
+              code: '({' + ident + ': x} = y);',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: ident},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'x'},
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'y'},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('as method in obj', {
+              code: '({' + ident + '(){}});',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: ident},
+                          kind: 'init',
+                          method: true,
+                          computed: false,
+                          value: {
+                            type: 'FunctionExpression',
+                            generator: false,
+                            async: false,
+                            expression: false,
+                            id: null,
+                            params: [],
+                            body: {type: 'BlockStatement', body: []},
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('as method in arrow', {
+              code: '({' + ident + '(){}}) => x;',
+              throws: true,
+            });
+
+            test('as method in destructuring assignment', {
+              code: '({' + ident + '(){}} = y);',
+              throws: true,
+            });
+
+            test('as static method in obj', {
+              code: '({static ' + ident + '(){}});',
+              throws: true,
+            });
+
+            test('as generator in obj', {
+              code: '({* ' + ident + '(){}});',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: ident},
+                          kind: 'init',
+                          method: true,
+                          computed: false,
+                          value: {
+                            type: 'FunctionExpression',
+                            generator: true,
+                            async: false,
+                            expression: false,
+                            id: null,
+                            params: [],
+                            body: {type: 'BlockStatement', body: []},
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('as getter in obj', {
+              code: '({get ' + ident + '(){}});',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: ident},
+                          kind: 'get',
+                          method: true,
+                          computed: false,
+                          value: {
+                            type: 'FunctionExpression',
+                            generator: false,
+                            async: false,
+                            expression: false,
+                            id: null,
+                            params: [],
+                            body: {type: 'BlockStatement', body: []},
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('as setter in obj', {
+              code: '({set ' + ident + '(x){}});',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: ident},
+                          kind: 'set',
+                          method: true,
+                          computed: false,
+                          value: {
+                            type: 'FunctionExpression',
+                            generator: false,
+                            async: false,
+                            expression: false,
+                            id: null,
+                            params: [{type: 'Identifier', name: 'x'}],
+                            body: {type: 'BlockStatement', body: []},
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('as async method in obj', {
+              code: '({async ' + ident + '(){}});',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: ident},
+                          kind: 'init',
+                          method: true,
+                          computed: false,
+                          value: {
+                            type: 'FunctionExpression',
+                            generator: false,
+                            async: true,
+                            expression: false,
+                            id: null,
+                            params: [],
+                            body: {type: 'BlockStatement', body: []},
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('as async generator in obj', {
+              code: '({async * ' + ident + '(){}});',
+              throws: true, // TODO: async generators
+            });
+
+            test('as static getter in obj', {
+              code: '({static get ' + ident + '(){}});',
+              throws: true,
+            });
+
+            test('as static generator in obj', {
+              code: '({static * ' + ident + '(){}});',
+              desc: 'not because static generator but because static in object',
+              throws: true,
+            });
+
+            test('as static setter in obj', {
+              code: '({static set ' + ident + '(x){}});',
+              throws: true,
+            });
+
+            test('as static async method in obj', {
+              code: '({static async ' + ident + '(){}});',
+              throws: true,
+            });
+
+            test('as static async generator in obj', {
+              code: '({static async * ' + ident + '(){}});',
+              desc: 'note this is because of static, not async generator',
+              throws: true,
+            });
+          });
         });
 
         test('object with one method get', {
@@ -2186,17 +2519,125 @@ module.exports = (describe, test) =>
 
         test('object with one generator method get', {
           code: 'wrap({*get(){}});',
-          throws: 'can not be generator',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'get'},
+                          kind: 'init',
+                          method: true,
+                          computed: false,
+                          value: {
+                            type: 'FunctionExpression',
+                            generator: true,
+                            async: false,
+                            expression: false,
+                            id: null,
+                            params: [],
+                            body: {type: 'BlockStatement', body: []},
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with one generator method set', {
           code: 'wrap({*set(){}});',
-          throws: 'can not be generator',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'set'},
+                          kind: 'init',
+                          method: true,
+                          computed: false,
+                          value: {
+                            type: 'FunctionExpression',
+                            generator: true,
+                            async: false,
+                            expression: false,
+                            id: null,
+                            params: [],
+                            body: {type: 'BlockStatement', body: []},
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with one generator method async', {
           code: 'wrap({*async(){}});',
-          throws: 'can not be generator', // TODO
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'async'},
+                          kind: 'init',
+                          method: true,
+                          computed: false,
+                          value: {
+                            type: 'FunctionExpression',
+                            generator: true,
+                            async: false,
+                            expression: false,
+                            id: null,
+                            params: [],
+                            body: {type: 'BlockStatement', body: []},
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with one generator dstring method', {

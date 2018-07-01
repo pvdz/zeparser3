@@ -4292,8 +4292,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let staticToken = curtok;
         ASSERT_skipAny('static', lexerFlags); // this is `{static` and the next cannot validly be slash...
 
-        if (curc === $$COMMA_2C || curc === $$CURLY_R_7D) {
-          // in sloppy mode, `({static}=x)` is valid since static is not a proper reserved word
+        if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curc === $$COLON_3A || curc === $$PAREN_L_28) {
+          // - `({static: x})`
+          // - `({static: x}) => x`
+          // - `({static}=x)`     // valid in sloppy mode since static is not a proper reserved word
+          // - `({static, y}=x)`
+          // - `({static(){}})`
           destructible = parseObjectLikePartFromIdent(lexerFlags, bindingType, isClassMethod, isStatic, staticToken, astProp);
         } else {
           return _parseObjectLikePart(lexerFlags, bindingType, isClassMethod, staticToken, astProp);
@@ -4524,27 +4528,34 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident, number, string, `[`
 
       if (curtype === $IDENT) {
-        if (curtok.str === 'async' || curtok.str === 'get' || curtok.str === 'set') {
-          THROW('Getters, setters, async, can not be generators');
-        }
-
         // - `({*ident(){}})`
-        let identToken2 = curtok;
+        let identToken = curtok;
         ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
 
-        AST_setIdent(astProp, identToken2);
-        parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, identToken2, isClassMethod, false, astProp);
-
-        // AST_open(astProp, 'Property');
-        // AST_setIdent('key', curtok);
-        // AST_set('kind', 'init'); // only getters/setters get special value here
-        // AST_set('method', true);
-        // AST_set('computed', false);
-        // ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
-        // if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after * ' +identToken2.str + '; ' + curtok);
-        // parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
-        // AST_set('shorthand', false);
-        // AST_close('Property');
+        if (curc === $$PAREN_L_28) {
+          // - `({*ident(){}})`
+          // - `({*get(){}})`
+          // - `({*set(){}})`
+          // - `({*async(){}})`     // NOT an async generator! it's a generatr
+          AST_setIdent(astProp, identToken);
+          parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, identToken, isClassMethod, false, astProp);
+        } else {
+          if (curtok.str === 'async') {
+            // - `({*async x(){}})`     // NOT an async generator! it's a generatr
+            THROW('Found `* async x(){}` but this should be `async * x(){}`'); // provided it's supported at all...
+          }
+          if (curtok.str === 'get' || curtok.str === 'set') {
+            // - `({*get x(){}})`
+            // - `({*set x(){}})`
+            THROW('Getters and setters can not be generators');
+          }
+          if (curc === $$COLON_3A) {
+            // - `({*ident: x})`
+            THROW('Generators must be method shorthands');
+          }
+          // - `({*ident x(){}})`
+          THROW('Unexpected token can not be generator method');
+        }
       }
       else if (curtype & ($NUMBER | $STRING)) {
         // - `({*"str"(){}})`
@@ -4880,7 +4891,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       if (identToken.str !== 'get' && identToken.str !== 'set') {
-        if (identToken.str === 'async') TODO,THROW('Cannot make an async generator method'); // TODO: the spec caught up to this and I think this is fine now...
+        if (identToken.str === 'async') THROW('Cannot make an async generator method'); // TODO: the spec caught up to this and I think this is fine now...
         if (identToken.str === 'static') TODO,THROW('Cannot have `static` here');
         THROW('Did not expect another identifier while parsing an object literal property (`' + identToken.str + '`)');
       }
