@@ -5210,7 +5210,47 @@ module.exports = (describe, test) =>
           });
         });
 
-        // wrap({a:b=x}=y);
+        test('non-shorthand property with init', {
+          code: 'wrap({a:b=x}=y);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'a'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {
+                              type: 'AssignmentPattern',
+                              left: {type: 'Identifier', name: 'b'},
+                              right: {type: 'Identifier', name: 'x'},
+                            },
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'y'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
       });
 
       describe('string properties do not destruct', _ => {
@@ -5448,5 +5488,3 @@ module.exports = (describe, test) =>
       });
     });
   });
-
-// todo: confirm static keyword cant be used in objlit
