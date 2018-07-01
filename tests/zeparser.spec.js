@@ -230,6 +230,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   let goalMode = mode === MODE_MODULE ? GOAL_MODULE : mode === MODE_SCRIPT ? GOAL_SCRIPT : MODE_VALUE_ERROR;
   let wasError = '';
   let stack;
+  let tokenizer;
   try {
     var obj = Parser(code, goalMode, COLLECT_TOKENS_SOLID, {
       strictMode: startInStrictMode,
@@ -237,6 +238,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       trailingArgComma: testDetails.options && testDetails.options.trailingArgComma,
       astRoot: ast,
       tokenStorage: tokens,
+      getTokenizer: tok => tokenizer = tok,
     });
   } catch (f) {
     wasError = f.message;
@@ -384,6 +386,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   function LOG_THROW(errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false) {
     console.log('\n');
+    console.log(tokenizer.GETPOS(BOLD + '#|#' + RESET));
     if (TEST262) console.log('\n============== input ==============' + code + '\n============== /input =============\n');
     console.log(`${prefix} ${RED}ERROR${RESET}: \`${toPrint(code)}\` :: ` + errmsg + suffix);
     if (stack) {

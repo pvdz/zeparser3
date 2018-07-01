@@ -252,9 +252,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     trailingArgComma: options_trailingArgComma = true, // :love: , es8+
     astRoot: options_astRoot = null,
     tokenStorage: options_tokenStorage = [],
+    getTokenizer,
   } = options;
 
   let tok = ZeTokenizer(code, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
+
+  if (getTokenizer) getTokenizer(tok);
 
   let prevtok = null;
   let curtok = null;

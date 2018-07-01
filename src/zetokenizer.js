@@ -2554,12 +2554,16 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
   }
   function _THROW(str) {
     console.log('\n');
-    console.log('Error at #|# ```\n', slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)), '\n```');
+    console.log('Error at #|#\n' + GETPOS('#|#'));
     if (gracefulErrors === FAIL_HARD) throw new Error(str);
     else console.error(str);
   }
   function DEBUG() {
-    return 'Tokenizer at #|# ```\n' + slice(Math.max(0, pointer - 20), pointer) + '#|#' + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
+    return 'Tokenizer at #|#\n' + GETPOS('#|#');
+  }
+  function GETPOS(sep) {
+    if (input.length < 100) return '```\n' + slice(0, pointer) + sep + slice(pointer, input.length) + '\n```';
+    return '```\n' + slice(Math.max(0, pointer - 20), pointer) + sep + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
   }
 
   nextToken.asi = addAsi;
@@ -2568,6 +2572,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
   nextToken.getTokenCountAny = () => anyTokenCount;
   nextToken.getTokenCountSolid = () => solidTokenCount;
   nextToken.DEBUG = DEBUG;
+  nextToken.GETPOS = GETPOS;
 
   return nextToken;
 }
