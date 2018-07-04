@@ -4632,7 +4632,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // AST_close('Property');
       }
       else {
-        TODO
+        THROW('Invalid objlit key character after generator star');
       }
       ASSERT(curc !== $$IS_3D, 'this struct can not have an init');
     }
@@ -4913,27 +4913,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - ({static get *[x](){}})
       // - ({static set *[x](ident){}})
 
-      destructible = updateDestructible(destructible, CANT_DESTRUCT);
+      // destructible = updateDestructible(destructible, CANT_DESTRUCT);
 
-      let starToken = curtok;
-      ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident
+      // let starToken = curtok;
+      // ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident
 
-      if (curtype !== $IDENT) {
-        TODO; // what about `class x{*[x](){}}` and `class x{*"foo"(){}}` and `class x{*.15(){}}`
-        THROW('Generator can only do ident');
-      }
+      if (identToken.str === 'get') THROW('A getter cannot be a generator');
+      if (identToken.str === 'set') THROW('A setter cannot be a generator');
+      if (identToken.str === 'async') THROW('Cannot make an async generator method'); // TODO: the spec caught up to this and I think this is fine now...
+      ASSERT(identToken.str !== 'static', 'this case is caught elsewhere');
+      THROW('Did not expect another identifier while parsing an object literal property (`' + identToken.str + '`)');
 
-      if (identToken.str !== 'get' && identToken.str !== 'set') {
-        if (identToken.str === 'async') THROW('Cannot make an async generator method'); // TODO: the spec caught up to this and I think this is fine now...
-        if (identToken.str === 'static') TODO,THROW('Cannot have `static` here');
-        THROW('Did not expect another identifier while parsing an object literal property (`' + identToken.str + '`)');
-      }
-
-      if (curtok.type !== $IDENT) TODO; // fix it so non-idents also works
-      AST_setIdent(astProp, curtok);
-      parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, curtok, isClassMethod, false, astProp);
-
-      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+      // TODO: this will be useful when implementing async generators
+      // if (curtype === $IDENT) {
+      //   // {get *foo(){}}
+      //   AST_setIdent(astProp, curtok);
+      // } else if ((curtype & $STRING) === $STRING || (curtype & $NUMBER) === $NUMBER) {
+      //   AST_setLiteral(astProp, curtok);
+      // } else if (curc === $$SQUARE_L_5B) {
+      //   TODO
+      // } else {
+      //   THROW('Invalid key token');
+      // }
+      //
+      // parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, curtok, isClassMethod, false, astProp);
+      //
+      // ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
     }
     else if ((curtype & $NUMBER) || (curtype & $STRING)) {
       // property names can also be strings and numbers but these cannot be shorthanded

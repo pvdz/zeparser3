@@ -1,4 +1,4 @@
-let {$ASI, $IDENT, $PUNCTUATOR, $REGEX} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('class statement', _ => {
@@ -1326,6 +1326,487 @@ module.exports = (describe, test) =>
       // test('async generator with dynamic key', {
       //   code: 'class x { async *[y](){}}',
       // });
+    });
+
+    describe('generators', _ => {
+
+      describe('not static', _ => {
+
+        describe('no prefix', _ => {
+
+          test('with ident key', {
+            code: 'class x{*foo(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: 'foo'},
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('with dynamic key', {
+            code: 'class x{*[x](){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: 'x'},
+                        static: false,
+                        computed: true,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('with string key', {
+            code: 'class x{*"foo"(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('with number key', {
+            code: 'class x{*555(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Literal', value: '<TODO>', raw: '555'},
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('with crap', {
+            code: 'class x{*%x(){}}',
+            throws: true,
+          });
+        });
+
+        describe('getter prefix', _ => {
+
+          test('with ident key', {
+            code: 'class x{get *foo(){}}',
+            throws: 'getter cannot be a generator',
+          });
+
+          test('with dynamic key', {
+            code: 'class x{get *[x](){}}',
+            throws: 'getter cannot be a generator',
+          });
+
+          test('with string key', {
+            code: 'class x{get *"foo"(){}}',
+            throws: 'getter cannot be a generator',
+          });
+
+          test('with number key', {
+            code: 'class x{get *555(){}}',
+            throws: 'getter cannot be a generator',
+          });
+
+          test('with crap', {
+            code: 'class x{get *%x(){}}',
+            throws: 'getter cannot be a generator',
+          });
+        });
+
+        describe('setter prefix', _ => {
+
+          test('with ident key', {
+            code: 'class x{set *foo(a){}}',
+            throws: 'setter cannot be a generator',
+          });
+
+          test('with dynamic key', {
+            code: 'class x{set *[x](a){}}',
+            throws: 'setter cannot be a generator',
+          });
+
+          test('with string key', {
+            code: 'class x{set *"foo"(a){}}',
+            throws: 'setter cannot be a generator',
+          });
+
+          test('with number key', {
+            code: 'class x{set *555(a){}}',
+            throws: 'setter cannot be a generator',
+          });
+
+          test('with crap', {
+            code: 'class x{set *%x(a){}}',
+            throws: 'setter cannot be a generator',
+          });
+        });
+
+        describe('async prefix', _ => {
+
+          test('with ident key', {
+            code: 'class x{async *foo(a){}}',
+            throws: 'async generator',
+          });
+
+          test('with dynamic key', {
+            code: 'class x{async *[x](a){}}',
+            throws: 'async generator',
+          });
+
+          test('with string key', {
+            code: 'class x{async *"foo"(a){}}',
+            throws: 'async generator',
+          });
+
+          test('with number key', {
+            code: 'class x{async *555(a){}}',
+            throws: 'async generator',
+          });
+
+          test('with crap', {
+            code: 'class x{async *%x(a){}}',
+            throws: 'async generator',
+          });
+        });
+      });
+
+      describe('with static', _ => {
+
+        describe('no prefix', _ => {
+
+          test('with ident key', {
+            code: 'class x{static *foo(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: 'foo'},
+                        static: true,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('with dynamic key', {
+            code: 'class x{static *[x](){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Identifier', name: 'x'},
+                        static: true,
+                        computed: true,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('with string key', {
+            code: 'class x{static *"foo"(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                        static: true,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('with number key', {
+            code: 'class x{static *555(){}}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {type: 'Identifier', name: 'x'},
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {type: 'Literal', value: '<TODO>', raw: '555'},
+                        static: true,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: true,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('with crap', {
+            code: 'class x{static *%x(){}}',
+            throws: true,
+          });
+        });
+
+        describe('getter prefix', _ => {
+
+          test('with ident key', {
+            code: 'class x{static get *foo(){}}',
+            throws: 'getter cannot be a generator',
+          });
+
+          test('with dynamic key', {
+            code: 'class x{static get *[x](){}}',
+            throws: 'getter cannot be a generator',
+          });
+
+          test('with string key', {
+            code: 'class x{static get *"foo"(){}}',
+            throws: 'getter cannot be a generator',
+          });
+
+          test('with number key', {
+            code: 'class x{static get *555(){}}',
+            throws: 'getter cannot be a generator',
+          });
+
+          test('with crap', {
+            code: 'class x{static get *%x(){}}',
+            throws: 'getter cannot be a generator',
+          });
+        });
+
+        describe('setter prefix', _ => {
+
+          test('with ident key', {
+            code: 'class x{static set *foo(a){}}',
+            throws: 'setter cannot be a generator',
+          });
+
+          test('with dynamic key', {
+            code: 'class x{static set *[x](a){}}',
+            throws: 'setter cannot be a generator',
+          });
+
+          test('with string key', {
+            code: 'class x{static set *"foo"(a){}}',
+            throws: 'setter cannot be a generator',
+          });
+
+          test('with number key', {
+            code: 'class x{static set *555(a){}}',
+            throws: 'setter cannot be a generator',
+          });
+
+          test('with crap', {
+            code: 'class x{static set *%x(a){}}',
+            throws: 'setter cannot be a generator',
+          });
+        });
+
+        describe('async prefix', _ => {
+
+          test('with ident key', {
+            code: 'class x{static async *foo(a){}}',
+            throws: 'async generator',
+          });
+
+          test('with dynamic key', {
+            code: 'class x{static async *[x](a){}}',
+            throws: 'async generator',
+          });
+
+          test('with string key', {
+            code: 'class x{static async *"foo"(a){}}',
+            throws: 'async generator',
+          });
+
+          test('with number key', {
+            code: 'class x{static async *555(a){}}',
+            throws: 'async generator',
+          });
+
+          test('with crap', {
+            code: 'class x{static async *%x(a){}}',
+            throws: 'async generator',
+          });
+        });
+      });
     });
 
     describe('literal members', _ => {
