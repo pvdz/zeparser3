@@ -300,85 +300,90 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
           .join(', $') +
         '],',
     );
-  } else if (checkAST && expectedAst !== true && JSON.stringify(expectedAst) !== JSON.stringify(obj.ast)) {
-    LOG_THROW('AST mismatch', code, '', desc, true);
-
-    console.log('Actual ast:', formatAst(obj.ast) + ',');
-    console.log(
-      'tokens: [$' +
-        obj.tokens
-          .slice(0, -1)
-          .map(o => debug_toktype(o.type))
-          .join(', $') +
-        '],',
-    );
-
-
-    let s1 = JSON.stringify(expectedAst);
-    if (s1 === '{"<not given>":true}') {
-      console.log('(No expected AST given...)');
-    } else {
-      let s2 = JSON.stringify(obj.ast);
-      let max = Math.max(s1.length, s2.length);
-      let n = 0;
-      let step = 200;
-      let steps = 0;
-      while (n < max) {
-        let x1 = s1.slice(Math.min(n, s1.length), Math.min(n + step, s1.length));
-        let x2 = s2.slice(Math.min(n, s2.length), Math.min(n + step, s2.length));
-        if (x1 === x2) {
-          console.log('want[' + steps + ']: SAME', x1);
-          console.log('real[' + steps + ']: SAME', x2);
-        } else {
-          // try to highlight the difference area
-
-          let start = 0;
-          for (; start<x1.length; ++start) {
-            if (x1[start] !== x2[start]) {
-              break;
-            }
-          }
-          if (start > 0 && /[\w\d]/.test(x1[start])) {
-            do --start; while (start > 0 && /[\w\d]/.test(x1[start]));
-          }
-          let stop = x1.length;
-          for (; stop-1 > start; --stop) {
-            if (x1[stop-1] !== x2[stop-1]) {
-              break;
-            }
-          }
-          if (stop < x1.length && /[\w\d]/.test(x1[stop])) {
-            do ++stop; while (stop > 0 && /[\w\d]/.test(x1[stop]));
-          }
-
-          console.log('want[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
-          console.log(BOLD+'real'+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
-        }
-
-        n += step;
-        ++steps;
-      }
-    }
-
-    ++fail;
-  } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-    LOG_THROW('TOKEN mismatch', code, '', desc, true);
-
-    console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
-    console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
-    // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
-    console.log(
-      'tokens: [$' +
-        obj.tokens
-          .slice(0, -1)
-          .map(o => debug_toktype(o.type))
-          .join(', $') +
-        '],',
-    );
-    ++fail;
   } else {
-    console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
-    ++pass;
+    let mustVerify = checkAST && expectedAst !== true;
+    let expectedJson = mustVerify && JSON.stringify(expectedAst);
+    let actualJson = mustVerify && JSON.stringify(obj.ast);
+    if (mustVerify && expectedJson !== actualJson) {
+      LOG_THROW('AST mismatch', code, '', desc, true);
+
+      console.log('Actual ast:', formatAst(obj.ast) + ',');
+      console.log(
+        'tokens: [$' +
+        obj.tokens
+        .slice(0, -1)
+        .map(o => debug_toktype(o.type))
+        .join(', $') +
+        '],',
+      );
+
+
+      let s1 = expectedJson;
+      if (s1 === '{"<not given>":true}') {
+        console.log('(No expected AST given...)');
+      } else {
+        let s2 = actualJson;
+        let max = Math.max(s1.length, s2.length);
+        let n = 0;
+        let step = 200;
+        let steps = 0;
+        while (n < max) {
+          let x1 = s1.slice(Math.min(n, s1.length), Math.min(n + step, s1.length));
+          let x2 = s2.slice(Math.min(n, s2.length), Math.min(n + step, s2.length));
+          if (x1 === x2) {
+            console.log('want[' + steps + ']: SAME', x1);
+            console.log('real[' + steps + ']: SAME', x2);
+          } else {
+            // try to highlight the difference area
+
+            let start = 0;
+            for (; start<x1.length; ++start) {
+              if (x1[start] !== x2[start]) {
+                break;
+              }
+            }
+            if (start > 0 && /[\w\d]/.test(x1[start])) {
+              do --start; while (start > 0 && /[\w\d]/.test(x1[start]));
+            }
+            let stop = x1.length;
+            for (; stop-1 > start; --stop) {
+              if (x1[stop-1] !== x2[stop-1]) {
+                break;
+              }
+            }
+            if (stop < x1.length && /[\w\d]/.test(x1[stop])) {
+              do ++stop; while (stop > 0 && /[\w\d]/.test(x1[stop]));
+            }
+
+            console.log('want[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
+            console.log(BOLD+'real'+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
+          }
+
+          n += step;
+          ++steps;
+        }
+      }
+
+      ++fail;
+    } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
+      LOG_THROW('TOKEN mismatch', code, '', desc, true);
+
+      console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
+      console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
+      // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
+      console.log(
+        'tokens: [$' +
+        obj.tokens
+        .slice(0, -1)
+        .map(o => debug_toktype(o.type))
+        .join(', $') +
+        '],',
+      );
+      ++fail;
+    } else {
+      console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
+      ++pass;
+    }
   }
 
   if (STOP_AFTER_FAIL && fail) throw BOLD + RED + 'stopped';
