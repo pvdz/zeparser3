@@ -1,4 +1,4 @@
-let {$IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE, $ASI} = require('../../../src/zetokenizer');
+let {$IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $STRING_SINGLE, $ASI} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('objects', _ => {
@@ -4717,9 +4717,132 @@ module.exports = (describe, test) =>
         });
       });
 
-      test('dont allow semi because it shares code with class', {
-        code: '({x:y;a:b})',
-        throws: true,
+      test('key:value pair, typeof ident', {
+        code: '({foo: typeof x});',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'foo'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'UnaryExpression',
+                      operator: 'typeof',
+                      prefix: true,
+                      argument: {type: 'Identifier', name: 'x'},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('key:value pair, division', {
+        code: '({foo: true / false});',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'foo'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'BinaryExpression',
+                      left: {type: 'Literal', value: true, raw: 'true'},
+                      operator: '/',
+                      right: {type: 'Literal', value: false, raw: 'false'},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('key:value pair, typeof value, regex sans flag', {
+        code: '({foo: typeof /x/});',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'foo'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'UnaryExpression',
+                      operator: 'typeof',
+                      prefix: true,
+                      argument: {type: 'Literal', value: '<TODO>', raw: '/x/'},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('key:value pair, typeof value, regex with flag', {
+        code: '({foo: typeof /x/g});',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'foo'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'UnaryExpression',
+                      operator: 'typeof',
+                      prefix: true,
+                      argument: {type: 'Literal', value: '<TODO>', raw: '/x/g'},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
 
@@ -5153,7 +5276,7 @@ module.exports = (describe, test) =>
           ].forEach(keyword => {
             test('keyword='+keyword, {
               code: '({'+keyword+'}) => null',
-              throws: 'reserved word',
+              throws: 'name', // various messages related to the var name...
             });
           });
 
@@ -5217,15 +5340,25 @@ module.exports = (describe, test) =>
             'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
             'false', 'enum',
           ].forEach(keyword => {
-            test('keyword='+keyword, {
-              code: '({x: '+keyword+'}) => null',
-              throws: 'reserved word',
+            test('arrow, keyword='+keyword, {
+              code: '({ggg: '+keyword+'}) => null',
+              throws: true,
+            });
+
+            test('assign, keyword='+keyword, {
+              code: '({ggg: '+keyword+'} = null)',
+              throws: true,
+            });
+
+            test('objlit, keyword='+keyword, {
+              code: '({ggg: '+keyword+'} = null)',
+              throws: true,
             });
           });
 
-          test('keyword=let', {
+          test('arrow, keyword=let', {
             code: '({x:let}) => null',
-            throws: 'Cannot use this name',
+            throws: true,
             SLOPPY_SCRIPT: {
               desc: 'let is a valid var name in sloppy mode and destructuring is not "strict" by default',
               ast: true,
@@ -5233,10 +5366,75 @@ module.exports = (describe, test) =>
             },
           });
 
+          test('assign, keyword=let', {
+            code: '({x:let} = null)',
+            throws: true,
+            SLOPPY_SCRIPT: {
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'x'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'let'},
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '=',
+                      right: {type: 'Literal', value: null, raw: 'null'},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+            },
+          });
+
+          test('objlit, keyword=let', {
+            code: '({x:let})',
+            throws: true,
+            SLOPPY_SCRIPT: {
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'x'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'let'},
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            },
+          });
+
           ['eval', 'arguments', 'static', 'implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield'].forEach(keyword => {
-            test('strict-mode only keyword=' + keyword, {
-              code: '({x:'+keyword+'}) => null',
-              throws: 'Cannot use this name',
+            test('strict-mode only, arrow, keyword=' + keyword, {
+              code: '({xxxx:'+keyword+'}) => null',
+              throws: true,
               SLOPPY_SCRIPT: {
                 ast: {
                   type: 'Program',
@@ -5251,7 +5449,7 @@ module.exports = (describe, test) =>
                             properties: [
                               {
                                 type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
+                                key: {type: 'Identifier', name: 'xxxx'},
                                 kind: 'init',
                                 method: false,
                                 computed: false,
@@ -5272,6 +5470,73 @@ module.exports = (describe, test) =>
                 },
                 tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
               },
+            });
+
+            test('strict-mode only, assign, keyword=' + keyword, {
+              code: '({xxxx:'+keyword+'} = null)',
+              throws: true,
+              SLOPPY_SCRIPT: {
+                ast: {
+                  type: 'Program',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'AssignmentExpression',
+                        left: {
+                          type: 'ObjectPattern',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'xxxx'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: keyword},
+                              shorthand: false,
+                            },
+                          ],
+                        },
+                        operator: '=',
+                        right: {type: 'Literal', value: null, raw: 'null'},
+                      },
+                    },
+                  ],
+                },
+                tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+              },
+            });
+
+            test('strict-mode only, objlit, keyword=' + keyword, {
+              code: '({xxxx:'+keyword+'})',
+              ...(keyword === 'eval' || keyword === 'arguments' ? {} : {
+                STRICT: {
+                  throws: true,
+                },
+              }),
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'xxxx'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: keyword},
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
         });

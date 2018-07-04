@@ -144,8 +144,9 @@ module.exports = (describe, test) =>
             });
 
             test(`function object alias destructured arg`, {
-              code: `function f({x: ${name}}) {}`,
-              throws: 'reserved word',
+              code: `function fh({x: ${name}}) {}`,
+              // certain tokens fail because they are part of a multi-token expression
+              throws: true,
             });
 
             test(`function array destructured arg`, {
@@ -227,8 +228,8 @@ module.exports = (describe, test) =>
             });
 
             test(`function object alias destructured arg`, {
-              code: `function f({x: ${name}}) {}`,
-              throws: 'reserved word',
+              code: `function fg({x: ${name}}) {}`,
+              throws: true,
               SLOPPY_SCRIPT: {ast: true, tokens: true},
             });
 

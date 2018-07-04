@@ -38,6 +38,7 @@ Shortest way of creating an array with one hole and no other values (so `[]` wit
 What's legal and what isn't? `f({a = b});`, `f({a = b} = c)`, `f({...a = b})`, `f({...a = b} = c)`
 Which one is legal; `f({a:v=b}=c);`, `({a:v=b}=c);`, `({a:v=b}=c) => x;`
 What does a static constructor do? `class X{static constructor {}}`
+Is the inner `yield` destructible? `function *f({x: x}) { function f({x: yield}) {} }`
 
 s=new Set(); s.add(NaN); s.add(NaN); log(s.size); // NaN == NaN
 

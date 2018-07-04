@@ -14,9 +14,8 @@ module.exports = (describe, test) =>
                 {
                   type: 'ExpressionStatement',
                   expression: {
-                    type: 'YieldExpression',
-                    delegate: false,
-                    argument: null,
+                    type: 'Identifier',
+                    name: 'yield',
                   },
                 },
               ],
@@ -29,47 +28,18 @@ module.exports = (describe, test) =>
           code: 'yield x',
           throws: '`yield` outside of generator',
           SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'YieldExpression',
-                    delegate: false,
-                    argument: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
+            desc: 'cannot be yield outside a generator so it must ASI or bail',
+            throws: 'Unable to ASI',
           },
-          tokens: [$IDENT, $IDENT, $ASI],
         });
 
         test('complex arg', {
           code: 'yield x + y',
           throws: '`yield` outside of generator',
           SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'YieldExpression',
-                    delegate: false,
-                    argument: {
-                      type: 'BinaryExpression',
-                      left: {type: 'Identifier', name: 'x'},
-                      operator: '+',
-                      right: {type: 'Identifier', name: 'y'},
-                    },
-                  },
-                },
-              ],
-            },
+            desc: 'cannot be yield outside a generator so it must ASI or bail',
+            throws: 'Unable to ASI',
           },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
       });
 
@@ -92,8 +62,8 @@ module.exports = (describe, test) =>
                 },
               ],
             },
+            tokens: [$NUMBER_DEC, $PUNCTUATOR, $IDENT, $ASI],
           },
-          tokens: [$NUMBER_DEC, $PUNCTUATOR, $IDENT, $ASI],
         });
 
         test('with args', {
@@ -102,7 +72,6 @@ module.exports = (describe, test) =>
           SLOPPY_SCRIPT: {
             throws: 'Unable to ASI',
           },
-          tokens: [$NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
         });
 
         test('with complex args', {
@@ -111,7 +80,6 @@ module.exports = (describe, test) =>
           SLOPPY_SCRIPT: {
             throws: 'Unable to ASI',
           },
-          tokens: [$NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
       });
 
@@ -129,11 +97,7 @@ module.exports = (describe, test) =>
                     type: 'CallExpression',
                     callee: {type: 'Identifier', name: 'call'},
                     arguments: [
-                      {
-                        type: 'YieldExpression',
-                        delegate: false,
-                        argument: null,
-                      },
+                      {type: 'Identifier', name: 'yield'},
                     ],
                   },
                 },
@@ -147,59 +111,18 @@ module.exports = (describe, test) =>
           code: 'call(yield x)',
           throws: '`yield` outside of generator',
           SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'CallExpression',
-                    callee: {type: 'Identifier', name: 'call'},
-                    arguments: [
-                      {
-                        type: 'YieldExpression',
-                        delegate: false,
-                        argument: {type: 'Identifier', name: 'x'},
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
+            desc: 'cannot be yield outside a generator so it must ASI or bail',
+            throws: '())',
           },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
         });
 
         test('complex args', {
           code: 'call(yield x + y)',
           throws: '`yield` outside of generator',
           SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'CallExpression',
-                    callee: {type: 'Identifier', name: 'call'},
-                    arguments: [
-                      {
-                        type: 'YieldExpression',
-                        delegate: false,
-                        argument: {
-                          type: 'BinaryExpression',
-                          left: {type: 'Identifier', name: 'x'},
-                          operator: '+',
-                          right: {type: 'Identifier', name: 'y'},
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
+            desc: 'cannot be yield outside a generator so it must ASI or bail',
+            throws: '())',
           },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
       });
     });
@@ -517,9 +440,8 @@ module.exports = (describe, test) =>
                       {
                         type: 'ExpressionStatement',
                         expression: {
-                          type: 'YieldExpression',
-                          delegate: false,
-                          argument: null,
+                          type: 'Identifier',
+                          name: 'yield',
                         },
                       },
                     ],
@@ -535,73 +457,16 @@ module.exports = (describe, test) =>
           code: 'function f(){ yield x; }',
           throws: '`yield` outside of generator',
           SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [],
-                  body: {
-                    type: 'BlockStatement',
-                    body: [
-                      {
-                        type: 'ExpressionStatement',
-                        expression: {
-                          type: 'YieldExpression',
-                          delegate: false,
-                          argument: {type: 'Identifier', name: 'x'},
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
+            throws: 'unable to asi',
           },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('complex arg', {
           code: 'function f(){ yield x + y; }',
           throws: '`yield` outside of generator',
           SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [],
-                  body: {
-                    type: 'BlockStatement',
-                    body: [
-                      {
-                        type: 'ExpressionStatement',
-                        expression: {
-                          type: 'YieldExpression',
-                          delegate: false,
-                          argument: {
-                            type: 'BinaryExpression',
-                            left: {type: 'Identifier', name: 'x'},
-                            operator: '+',
-                            right: {type: 'Identifier', name: 'y'},
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
+            throws: 'unable to asi',
           },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
 
@@ -685,9 +550,8 @@ module.exports = (describe, test) =>
                           callee: {type: 'Identifier', name: 'call'},
                           arguments: [
                             {
-                              type: 'YieldExpression',
-                              delegate: false,
-                              argument: null,
+                              type: 'Identifier',
+                              name: 'yield',
                             },
                           ],
                         },
@@ -705,85 +569,16 @@ module.exports = (describe, test) =>
           code: 'function f(){ call(yield x); }',
           throws: '`yield` outside of generator',
           SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [],
-                  body: {
-                    type: 'BlockStatement',
-                    body: [
-                      {
-                        type: 'ExpressionStatement',
-                        expression: {
-                          type: 'CallExpression',
-                          callee: {type: 'Identifier', name: 'call'},
-                          arguments: [
-                            {
-                              type: 'YieldExpression',
-                              delegate: false,
-                              argument: {type: 'Identifier', name: 'x'},
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
+            throws: '())',
           },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('complex args', {
           code: 'function f(){ call(yield x + y); }',
           throws: '`yield` outside of generator',
           SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [],
-                  body: {
-                    type: 'BlockStatement',
-                    body: [
-                      {
-                        type: 'ExpressionStatement',
-                        expression: {
-                          type: 'CallExpression',
-                          callee: {type: 'Identifier', name: 'call'},
-                          arguments: [
-                            {
-                              type: 'YieldExpression',
-                              delegate: false,
-                              argument: {
-                                type: 'BinaryExpression',
-                                left: {type: 'Identifier', name: 'x'},
-                                operator: '+',
-                                right: {type: 'Identifier', name: 'y'},
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
+            throws: '())',
           },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
     });
@@ -959,38 +754,9 @@ module.exports = (describe, test) =>
       code: 'async function f(){ yield a,b; }',
       throws: '`yield` outside of generator',
       SLOPPY_SCRIPT: {
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'FunctionDeclaration',
-              generator: false,
-              async: true,
-              expression: false,
-              id: {type: 'Identifier', name: 'f'},
-              params: [],
-              body: {
-                type: 'BlockStatement',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {
-                      type: 'YieldExpression',
-                      delegate: false,
-                      argument: {
-                        type: 'SequenceExpression',
-                        expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
+        throws: 'Unable to ASI',
       },
       desc: '(all tests are ran 4x per input, in mixes of strict/sloppy and module/script mode)',
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     describe('regex edge case', _ => {
@@ -1049,6 +815,24 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    describe('destructuring and ident disambiguation', _ => {
+
+      // https://tc39.github.io/ecma262/#prod-YieldExpression
+      // YieldExpression cannot be used within the FormalParameters of a generator function because any expressions that are part of FormalParameters are evaluated before the resulting generator object is in a resumable state.
+      // It is a Syntax Error if UniqueFormalParameters Contains YieldExpression is true.
+
+
+      // test('yield as an arg of a generator', {
+      //   code: 'function *f(yield){}',
+      //   desc: 'explicitly not allowed',
+      //   throws: 'generator',
+      // });
+      //
+      // test('yield as arg inside a generator', {
+      //   code: 'function *f({x: x}) { function f({x: yield}) {} }',
+      // });
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment
@@ -1059,3 +843,4 @@ module.exports = (describe, test) =>
 // yield\n/foo should not apply ASI, `yield` is never a statement so it's the same as (yield)/foo
 // yield\n/foo/ should not apply ASI because the next line starts with forward slash (error always)
 // sanity check; yield with and without argument in an expressions (the comma thing) as start/middle/end part
+// test all the exceptions noted in https://tc39.github.io/ecma262/#sec-generator-function-definitions-static-semantics-early-errors

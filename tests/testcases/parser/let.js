@@ -11929,7 +11929,7 @@ module.exports = (describe, test) =>
 
           test('var obj alias destruct', {
             code: 'var {foo: let} = x;',
-            throws: 'Cannot use this name',
+            throws: true,
             SLOPPY_SCRIPT: {
               desc: 'let as var in destruct can be ok',
               ast: {
@@ -12223,20 +12223,17 @@ module.exports = (describe, test) =>
 
           test('let as _alias_ in object destructuring is bad', {
             code: 'let {foo: let} = x;',
-            throws: 'when binding through',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+            throws: true,
           });
 
-          test('let as _alias_ in object destruct name with defaul is badt', {
+          test('let as _alias_ in object destruct name with default is bad', {
             code: 'let {foo: let = y} = x;',
-            throws: 'when binding through',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+            throws: true,
           });
 
           test('let as _alias_ in object destruct name as second name is bad', {
             code: 'let {a, foo: let} = x;',
-            throws: 'when binding through',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+            throws: true,
           });
 
           test('just let', {

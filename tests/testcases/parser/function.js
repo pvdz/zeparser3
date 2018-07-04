@@ -2482,7 +2482,7 @@ module.exports = (describe, test) =>
           });
 
           test('array in object', {
-            code: 'function f({x: [a, {b: []}]}) {}',
+            code: 'function fk({x: [a, {b: []}]}) {}',
             ast: {
               type: 'Program',
               body: [
@@ -2491,7 +2491,7 @@ module.exports = (describe, test) =>
                   generator: false,
                   async: false,
                   expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  id: {type: 'Identifier', name: 'fk'},
                   params: [
                     {
                       type: 'ObjectPattern',

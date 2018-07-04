@@ -2921,7 +2921,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseValueFromIdent(lexerFlags, astProp) {
     ASSERT(curtype === $IDENT, 'should be ident');
-    let assignable = parseValueHeadBodyIdent(lexerFlags, NOT_NEW_ARG, astProp);
+    let assignable = parseValueHeadBodyIdent(lexerFlags, NOT_NEW_ARG, BINDING_TYPE_NONE, astProp);
     return parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
   }
   function parseValueHeadBody(lexerFlags, maybe, checkNewTarget, astProp) {
@@ -2936,7 +2936,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // return a boolean whether the value is assignable (only for regular var names)
 
     if (curtype === $IDENT) {
-      return parseValueHeadBodyIdent(lexerFlags, checkNewTarget, astProp);
+      return parseValueHeadBodyIdent(lexerFlags, checkNewTarget, BINDING_TYPE_NONE, astProp);
     }
     else if (curtype & ($NUMBER|$STRING|$REGEX)) {
       AST_setLiteral(astProp, curtok);
@@ -3026,8 +3026,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // currently all callsites that have maybe=true will ignore the return value
     return true;
   }
-  function parseValueHeadBodyIdent(lexerFlags, checkNewTarget, astProp) {
+  function parseValueHeadBodyIdent(lexerFlags, checkNewTarget, bindingType, astProp) {
     ASSERT(curtype === $IDENT, 'token should not yet have been consumed because the next token depends on its value and so you cant consume this ahead of time...');
+    ASSERT(arguments.length === 4, 'arg count');
     // for new only a subset is accepted;
     // - super
     // - metaproprety
@@ -3078,9 +3079,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return false;
       case 'let':
         // TODO: statement keyword exceptions (the rest is done in parseValueHeadBodyIdent)
-        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
-          THROW('Cannot have `let[...]` as a var name in strict mode');
+        if (bindingType === BINDING_TYPE_CLASS) THROW('Can not use `let` as a class name');
+        if (bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_CONST) {
+          THROW('Can not use `let` when binding through `let` or `const`');
         }
+        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+        //   Identifier: IdentifierName but not ReservedWord
+        //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "let" ...
+        if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) THROW('Can not use `let` as variable name in strict mode');
         ASSERT_skipDiv($IDENT, lexerFlags); // regular division
         break;
       case 'new':
@@ -3112,7 +3118,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       default:
         // TODO: verify identifier (note: can be value keywords depending on next token being an arrow)
         ASSERT_skipDiv($IDENT, lexerFlags); // regular division
-        bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
+        bindingIdentCheck(identToken, bindingType, lexerFlags);
     }
 
     parseAfterVarName(lexerFlags, identToken, assignable, astProp);
@@ -3268,6 +3274,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function parseYieldKeyword(lexerFlags, identToken, astProp) {
+    ASSERT(identToken.str === 'yield', 'the yield keyword token was already consumed');
     // note: yield is a recursive AssignmentExpression (its optional argument can be an assignment or another yield)
     if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
       if ((lexerFlags & LF_IN_GENERATOR) !== LF_IN_GENERATOR) {
@@ -3276,16 +3283,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if ((lexerFlags & LF_NO_YIELD) === LF_NO_YIELD) {
         THROW('Using `yield` after non-operator makes it a var name (illegal in strict mode)');
       }
-    } else if ((lexerFlags & LF_NO_YIELD) === LF_NO_YIELD || curtok.nl) {
+    }
+    else if ((lexerFlags & LF_NO_YIELD) === LF_NO_YIELD || curtok.nl) {
       // considering `yield` a regular var name here. That's okay in sloppy mode.
       parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, astProp);
       return IS_ASSIGNABLE;
     }
-    AST_open(astProp, 'YieldExpression');
-    AST_set('delegate', false); // TODO ??
-    parseYieldArgument(lexerFlags, 'argument');
-    AST_close('YieldExpression');
-    return NOT_ASSIGNABLE;
+
+    // TODO: pretty sure this is fine and that the "in generator"-state does not reset at function bodies
+    if ((lexerFlags & LF_IN_GENERATOR) === LF_IN_GENERATOR) {
+      AST_open(astProp, 'YieldExpression');
+      AST_set('delegate', false); // TODO ??
+      parseYieldArgument(lexerFlags, 'argument');
+      AST_close('YieldExpression');
+      return NOT_ASSIGNABLE;
+    } else {
+      ASSERT((lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE, 'should not be strict mode here');
+      AST_setIdent(astProp, identToken);
+      return IS_ASSIGNABLE;
+    }
   }
   function parseYieldArgument(lexerFlags, astProp) {
     let wasParen = curc === $$PAREN_L_28;
@@ -4720,33 +4736,38 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - ({ident: <array destruct> = expr,}
       // - ({ident: <object destruct> = expr,}
       // anything else as value is non-destructible
-
       ASSERT_skipRex(':', lexerFlags); // next is expression
       if (curtype === $IDENT) {
-        // ({ident: ident
-        // can still become ({ident: foo+bar}) which is not destructible, so confirm token after ident
-        let valueIdentToken = nameBinding = curtok;
-        bindingIdentCheck(curtok, bindingType, lexerFlags);
-        ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
+        // ({ident: ident})
+        // ({ident: ident,...})
+        // ({ident: ident = ...})
+        // ({ident: ident + rest      // not destructible, so confirm token after ident
 
         AST_open(astProp, 'Property');
         AST_setIdent('key', identToken);
         AST_set('kind', 'init'); // only getters/setters get special value here
         AST_set('method', false);
         AST_set('computed', false);
-        if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D) {
-          if (curtok.str === '=') {
-            // dont reset nameBinding (`b`) in the `{a: b=c}` case. The binding is verified later.
-            nameBinding = undefined;
-          } else {
-            // something like `({a:v=b}=c)` and `({a:v=b}=c) => x` is valid so don't prevent destruct for `=`
+        // this part is tricky;
+        // the idea here is that we need to confirm whether this is a "simple assignment" as those are the only
+        // things that can be destructed. But it's totally fine for things not to be destructible here, provided
+        // the flag doesn't already require a destruct. So we parse the start of the expression (an ident), which
+        // may parse more (`{foo: typeof z}`), throw (`{foo: implements}`), be destructible (`{foo: bar}`), or
+        // simply not destructible-yet-legal (`{foo: true}`).
+        // I believe the assignability of the headbody part also tells us the destructible state of it
+        let startAssignable = parseValueHeadBodyIdent(lexerFlags, NOT_NEW_ARG, bindingType, 'value');
+        // if not assignable then its also not destructible
+        // else, confirm whether this is the end (we're not destructible regardless if there is a tail)
+        if (curc === $$CURLY_R_7D || curc === $$COMMA_2C || curtok.str === '=') {
+          if (startAssignable === NOT_ASSIGNABLE) {
             destructible = updateDestructible(destructible, CANT_DESTRUCT);
           }
-          parseExpressionFromIdent(lexerFlags, valueIdentToken, 'value');
         } else {
-          // note: nameBinding is verified later
-          AST_setIdent('value', nameBinding);
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          startAssignable = parseValueTail(lexerFlags, startAssignable, NOT_NEW_ARG, 'value');
         }
+        parseExpressionFromOp(lexerFlags, startAssignable, LHS_NOT_PAREN_START, 'value');
+
         AST_set('shorthand', false);
         AST_close('Property');
       }
@@ -4776,7 +4797,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('method', false);
         AST_set('computed', false);
         let subDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, 'value');
-        console.log('subDestruct', subDestruct)
+
         destructible = updateDestructible(destructible, subDestruct);
         // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
         if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
@@ -4958,41 +4979,31 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // nameBinding can be undefined here if
     // - dynamic property `{[x]: y}`
+    // - name would be illegal to bind to `{x: true}`
     ASSERT(destructible !== CANT_DESTRUCT || nameBinding === undefined, 'if cant destruct then must have a name?');
     // in this case the binding check can force the flag without throwing
     // - `{true}`
     // - `{foo: true}`
     // - `{25: true}`
     // - `{"x": true}
-    switch (nameBinding && nameBinding.str) {
-      case 'true':
-        TODO
-        // reserved keyword, not destructible. will throw if current state must destruct
-        destructible = updateDestructible(destructible, CANT_DESTRUCT);
-        break;
-      case 'false':
-        TODO
-        // reserved keyword, not destructible. will throw if current state must destruct
-        destructible = updateDestructible(destructible, CANT_DESTRUCT);
-        break;
-      case 'null':
-        TODO
-        // reserved keyword, not destructible. will throw if current state must destruct
-        destructible = updateDestructible(destructible, CANT_DESTRUCT);
-        break;
-      case 'this':
-        TODO
-        // reserved keyword, not destructible. will throw if current state must destruct
-        destructible = updateDestructible(destructible, CANT_DESTRUCT);
-        break;
-      case 'super':
-        TODO
-        // reserved keyword, not destructible. will throw if current state must destruct
-        destructible = updateDestructible(destructible, CANT_DESTRUCT);
-        break;
-      default:
-        // regardless of destructible state, if you see something like `typeof` here you have an error
-        if (nameBinding) bindingIdentCheck(nameBinding, bindingType, lexerFlags);
+    if (nameBinding) {
+      switch (nameBinding.str) {
+        case 'true':
+        case 'false':
+        case 'null':
+        case 'this':
+        case 'super':
+          // reserved keyword, not destructible. will throw if current state must destruct
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          break;
+        default:
+          // regardless of destructible state, if you see something like `typeof` here you have an error
+          let errorMsg = _bindingIdentCheck(nameBinding, bindingType, lexerFlags);
+          if (errorMsg) {
+            if (destructible === MUST_DESTRUCT) THROW('Parsed a Pattern that is not destructible: ' + errorMsg);
+            destructible = CANT_DESTRUCT;
+          }
+      }
     }
 
     return destructible;
