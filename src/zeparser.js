@@ -2676,7 +2676,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return parseExpressionFromOp(lexerFlags, assignable, wasParen ? LHS_WAS_PAREN_START : LHS_NOT_PAREN_START, astProp);
   }
   function parseExpressionAfterLiteral(lexerFlags, astProp) {
-    // assume we just parsed and skipped a literal (string/number/regex)
+    // assume we just parsed and skipped a literal (string/number/regex/array/object)
     let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
     return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
   }
@@ -4427,28 +4427,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
           if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
             destructible = updateDestructible(destructible, CANT_DESTRUCT);
-            TODO; // parse remainder of expression starting at ident
-          } else TODO
+            parseExpressionAfterLiteral(lexerFlags, 'value');
+          }
           AST_set('shorthand', false);
           AST_close('Property');
         }
         else if (curc === $$CURLY_L_7B) {
-          TODO
           // ({ident: <object destruct>
           AST_open(astProp, 'Property');
           AST_setLiteral('key', litToken);
           AST_set('kind', 'init'); // only getters/setters get special value here
           AST_set('method', false);
           AST_set('computed', false);
-          let wasDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, astProp);
+          let wasDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, 'value');
           destructible = updateDestructible(destructible, wasDestruct);
-          AST_set('shorthand', false);
-          AST_close('Property');
           // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
           if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
             destructible = updateDestructible(destructible, CANT_DESTRUCT);
-            TODO; // parse remainder of expression starting at ident
-          } else TODO
+            parseExpressionAfterLiteral(lexerFlags, 'value');
+          }
+          AST_set('shorthand', false);
+          AST_close('Property');
         }
         else {
           console.log('else', ''+curtok)

@@ -5899,6 +5899,485 @@ module.exports = (describe, test) =>
             throws: true,
           });
         });
+
+        describe('array value', _ => {
+
+          describe('destructible', _ => {
+
+            test('object', {
+              code: '({"x": [y]})',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {
+                            type: 'ArrayExpression',
+                            elements: [{type: 'Identifier', name: 'y'}],
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('destructing', {
+              code: '({"x": [y]} = x)',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {
+                              type: 'ArrayPattern',
+                              elements: [{type: 'Identifier', name: 'y'}],
+                            },
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+            });
+
+            test('arrow', {
+              code: '({"x": [y]}) => x',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [
+                        {
+                          type: 'ObjectPattern',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {
+                                type: 'ArrayPattern',
+                                elements: [{type: 'Identifier', name: 'y'}],
+                              },
+                              shorthand: false,
+                            },
+                          ],
+                        },
+                      ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: true,
+                      body: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+            });
+          });
+
+          describe('non-destructible', _ => {
+
+            test('object', {
+              code: '({"x": [y + x]})',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {
+                            type: 'ArrayExpression',
+                            elements: [
+                              {
+                                type: 'BinaryExpression',
+                                left: {type: 'Identifier', name: 'y'},
+                                operator: '+',
+                                right: {type: 'Identifier', name: 'x'},
+                              },
+                            ],
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('destructing', {
+              code: '({"x": [y + x]} = x)',
+              throws: true,
+            });
+
+            test('arrow', {
+              code: '({"x": [y + x]}) => x',
+              throws: true,
+            });
+          });
+
+          describe('with tail', _ => {
+
+            test('object', {
+              code: '({"x": [y].slice(0)})',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {
+                            type: 'CallExpression',
+                            callee: {
+                              type: 'MemberExpression',
+                              object: {
+                                type: 'ArrayExpression',
+                                elements: [{type: 'Identifier', name: 'y'}],
+                              },
+                              property: {type: 'Identifier', name: 'slice'},
+                              computed: false,
+                            },
+                            arguments: [{type: 'Literal', value: '<TODO>', raw: '0'}],
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('destructing', {
+              code: '({"x": [y].slice(0)} = x)',
+              throws: true,
+            });
+
+            test('arrow', {
+              code: '({"x": [y].slice(0)}) => x',
+              throws: true,
+            });
+          });
+        });
+
+        describe('object value', _ => {
+
+          describe('destructible', _ => {
+
+            test('object', {
+              code: '({"x": {y: z}})',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {
+                            type: 'ObjectExpression',
+                            properties: [
+                              {
+                                type: 'Property',
+                                key: {type: 'Identifier', name: 'y'},
+                                kind: 'init',
+                                method: false,
+                                computed: false,
+                                value: {type: 'Identifier', name: 'z'},
+                                shorthand: false,
+                              },
+                            ],
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('destructing', {
+              code: '({"x": {y: z}} = x)',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {
+                              type: 'ObjectPattern',
+                              properties: [
+                                {
+                                  type: 'Property',
+                                  key: {type: 'Identifier', name: 'y'},
+                                  kind: 'init',
+                                  method: false,
+                                  computed: false,
+                                  value: {type: 'Identifier', name: 'z'},
+                                  shorthand: false,
+                                },
+                              ],
+                            },
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+            });
+
+            test('arrow', {
+              code: '({"x": {y: z}}) => x',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [
+                        {
+                          type: 'ObjectPattern',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {
+                                type: 'ObjectPattern',
+                                properties: [
+                                  {
+                                    type: 'Property',
+                                    key: {type: 'Identifier', name: 'y'},
+                                    kind: 'init',
+                                    method: false,
+                                    computed: false,
+                                    value: {type: 'Identifier', name: 'z'},
+                                    shorthand: false,
+                                  },
+                                ],
+                              },
+                              shorthand: false,
+                            },
+                          ],
+                        },
+                      ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: true,
+                      body: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+            });
+          });
+
+          describe('non-destructible', _ => {
+
+            test('object', {
+              code: '({"x": {a: y + x}})',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {
+                            type: 'ObjectExpression',
+                            properties: [
+                              {
+                                type: 'Property',
+                                key: {type: 'Identifier', name: 'a'},
+                                kind: 'init',
+                                method: false,
+                                computed: false,
+                                value: {
+                                  type: 'BinaryExpression',
+                                  left: {type: 'Identifier', name: 'y'},
+                                  operator: '+',
+                                  right: {type: 'Identifier', name: 'x'},
+                                },
+                                shorthand: false,
+                              },
+                            ],
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('destructing', {
+              code: '({"x": {a: y + x}} = x)',
+              throws: true,
+            });
+
+            test('arrow', {
+              code: '({"x": {a: y + x}}) => x',
+              throws: true,
+            });
+          });
+
+          describe('with tail', _ => {
+
+            test('object', {
+              code: '({"x": {a: y + x}.slice(0)})',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {
+                            type: 'CallExpression',
+                            callee: {
+                              type: 'MemberExpression',
+                              object: {
+                                type: 'ObjectExpression',
+                                properties: [
+                                  {
+                                    type: 'Property',
+                                    key: {type: 'Identifier', name: 'a'},
+                                    kind: 'init',
+                                    method: false,
+                                    computed: false,
+                                    value: {
+                                      type: 'BinaryExpression',
+                                      left: {type: 'Identifier', name: 'y'},
+                                      operator: '+',
+                                      right: {type: 'Identifier', name: 'x'},
+                                    },
+                                    shorthand: false,
+                                  },
+                                ],
+                              },
+                              property: {type: 'Identifier', name: 'slice'},
+                              computed: false,
+                            },
+                            arguments: [{type: 'Literal', value: '<TODO>', raw: '0'}],
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('destructing', {
+              code: '({"x": {a: y + x}.slice(0)} = x)',
+              throws: true,
+            });
+
+            test('arrow', {
+              code: '({"x": {a: y + x}.slice(0)}) => x',
+              throws: true,
+            });
+          });
+        });
       });
 
       describe('computed properties', _ => {

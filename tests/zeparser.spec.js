@@ -276,7 +276,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       }
       ++fail;
       ++crash;
-    } else if ((expectedThrows === true && !wasTodo) || wasError.toUpperCase().indexOf(expectedThrows.toUpperCase()) >= 0) {
+    } else if (!wasTodo && (expectedThrows === true || wasError.toUpperCase().indexOf(expectedThrows.toUpperCase()) >= 0)) {
       console.log(`${prefix} ${GREEN}PASS${BOLD}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
       ++pass;
     } else {
