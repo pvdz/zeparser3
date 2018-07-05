@@ -4381,27 +4381,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `{"x": true}
           switch (curtok.str) {
             case 'true':
-              TODO
-              // reserved keyword, not destructible. will throw if current state must destruct
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              break;
             case 'false':
-              TODO
-              // reserved keyword, not destructible. will throw if current state must destruct
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              break;
             case 'null':
-              TODO
-              // reserved keyword, not destructible. will throw if current state must destruct
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              break;
             case 'this':
-              TODO
-              // reserved keyword, not destructible. will throw if current state must destruct
-              destructible = updateDestructible(destructible, CANT_DESTRUCT);
-              break;
             case 'super':
-              TODO
               // reserved keyword, not destructible. will throw if current state must destruct
               destructible = updateDestructible(destructible, CANT_DESTRUCT);
               break;

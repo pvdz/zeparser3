@@ -5818,4 +5818,86 @@ module.exports = (describe, test) =>
         // computed property that is a comma expression
       });
     });
+
+    describe('non-ident key with keyword value', _ => {
+      ['true', 'false', 'null', 'this', 'super'].forEach(keyword => {
+        describe('string key', _ => {
+          test('object', {
+            code: `({"foo": ${keyword}})`,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: keyword},
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('destructuring', {
+            code: `({"foo": ${keyword}} = x)`,
+            throws: true,
+          });
+
+          test('arrow', {
+            code: `({"foo": ${keyword}}) => x`,
+            throws: true,
+          });
+        });
+
+        describe('number key', _ => {
+          test('object', {
+            code: `({790: ${keyword}})`,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Literal', value: '<TODO>', raw: '790'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: keyword},
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('destructuring', {
+            code: `({790: ${keyword}} = x)`,
+            throws: true,
+          });
+
+          test('arrow', {
+            code: `({790: ${keyword}}) => x`,
+            throws: true,
+          });
+        });
+      });
+    });
   });
