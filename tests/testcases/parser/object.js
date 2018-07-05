@@ -5584,9 +5584,15 @@ module.exports = (describe, test) =>
         });
       });
 
-      describe('string properties do not destruct', _ => {
+      describe('string properties', _ => {
+        test('object with shorthand quoted key', {
+          code: 'wrap({"a"}=obj);',
+          desc: 'only ident can be shorthand',
+          throws: true,
+        });
+
         test('object with one double quoted property', {
-          code: 'wrap({a:b}=obj);',
+          code: 'wrap({"a":b}=obj);',
           ast: {
             type: 'Program',
             body: [
@@ -5603,7 +5609,7 @@ module.exports = (describe, test) =>
                         properties: [
                           {
                             type: 'Property',
-                            key: {type: 'Identifier', name: 'a'},
+                            key: {type: 'Literal', value: '<TODO>', raw: '"a"'},
                             kind: 'init',
                             method: false,
                             computed: false,
@@ -5620,11 +5626,11 @@ module.exports = (describe, test) =>
               },
             ],
           },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with two double quoted properties', {
-          code: 'wrap({a:b, c:d}=obj);',
+          code: 'wrap({"a":b, "c":d}=obj);',
           ast: {
             type: 'Program',
             body: [
@@ -5641,7 +5647,139 @@ module.exports = (describe, test) =>
                         properties: [
                           {
                             type: 'Property',
-                            key: {type: 'Identifier', name: 'a'},
+                            key: {type: 'Literal', value: '<TODO>', raw: '"a"'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'b'},
+                            shorthand: false,
+                          },
+                          {
+                            type: 'Property',
+                            key: {type: 'Literal', value: '<TODO>', raw: '"c"'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'd'},
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'obj'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('object with one single quoted property', {
+          code: "wrap({'a':b}=obj);",
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Literal', value: '<TODO>', raw: "'a'"},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'b'},
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'obj'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('object with two single quoted properties', {
+          code: "wrap({'a':b, 'c':d}=obj);",
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Literal', value: '<TODO>', raw: "'a'"},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'b'},
+                            shorthand: false,
+                          },
+                          {
+                            type: 'Property',
+                            key: {type: 'Literal', value: '<TODO>', raw: "'c'"},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'd'},
+                            shorthand: false,
+                          },
+                        ],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'obj'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('object with mixed quoted properties', {
+          code: "wrap({'a':b, c:d}=obj);",
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Literal', value: '<TODO>', raw: "'a'"},
                             kind: 'init',
                             method: false,
                             computed: false,
@@ -5667,86 +5805,99 @@ module.exports = (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('object with one double quoted property', {
-          code: "wrap({'a':b}=obj);",
-          throws: 'not destructible',
-        });
-
-        test('object with two double quoted properties', {
-          code: "wrap({'a':b, 'c':d}=obj);",
-          throws: 'not destructible',
-        });
-
-        test('object with two double quoted properties', {
-          code: "wrap({'a':b, c:d}=obj);",
-          throws: 'not destructible',
-        });
-
-        test('object with two double quoted properties', {
+        test('object with other mixed quoted properties', {
           code: "wrap({a:b, 'c':d}=obj);",
-          throws: 'not destructible',
-        });
-
-
-        test('object', {
-          code: '({"x": y+z})',
           ast: {
             type: 'Program',
             body: [
               {
                 type: 'ExpressionStatement',
                 expression: {
-                  type: 'ObjectExpression',
-                  properties: [
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
                     {
-                      type: 'Property',
-                      key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {
-                        type: 'BinaryExpression',
-                        left: {type: 'Identifier', name: 'y'},
-                        operator: '+',
-                        right: {type: 'Identifier', name: 'z'},
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'a'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'b'},
+                            shorthand: false,
+                          },
+                          {
+                            type: 'Property',
+                            key: {type: 'Literal', value: '<TODO>', raw: "'c'"},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'd'},
+                            shorthand: false,
+                          },
+                        ],
                       },
-                      shorthand: false,
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'obj'},
                     },
                   ],
                 },
               },
             ],
           },
-          tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('destructing', {
-          code: '({"x": y+z} = x)',
-          throws: true,
-        });
+        describe('value that would never destruct', _ => {
 
-        test('arrow', {
-          code: '({"x": y+z}) => x',
-          throws: true,
+          test('object', {
+            code: '({"x": y+z})',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {
+                          type: 'BinaryExpression',
+                          left: {type: 'Identifier', name: 'y'},
+                          operator: '+',
+                          right: {type: 'Identifier', name: 'z'},
+                        },
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('destructing', {
+            code: '({"x": y+z} = x)',
+            throws: true,
+          });
+
+          test('arrow', {
+            code: '({"x": y+z}) => x',
+            throws: true,
+          });
         });
       });
 

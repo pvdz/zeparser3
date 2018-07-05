@@ -4362,8 +4362,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let litToken = curtok;
       ASSERT_skipRex(litToken.str, lexerFlags); // next is expression
 
-      destructible = updateDestructible(destructible, CANT_DESTRUCT);
-
       if (curc === $$COLON_3A) {
         // property value or label, some are destructible:
         // - ({"x": ident,}
@@ -4453,6 +4451,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           } else TODO
         }
         else {
+          console.log('else', ''+curtok)
           TODO
           // something like `({15: 15` is valid, just not destructible
           destructible = updateDestructible(destructible, CANT_DESTRUCT);
@@ -4474,7 +4473,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_setLiteral(astProp, litToken);
         parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, undefined, litToken, isClassMethod, false, astProp);
       } else {
-        TODO
         THROW('Object literal keys that are strings or numbers must be a method or have a colon: ' + curtok);
       }
 
