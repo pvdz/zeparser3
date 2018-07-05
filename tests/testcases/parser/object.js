@@ -6378,6 +6378,95 @@ module.exports = (describe, test) =>
             });
           });
         });
+
+
+        describe('number value', _ => {
+
+          describe('non-destructible', _ => {
+
+            test('object', {
+              code: '({"x": 600})',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Literal', value: '<TODO>', raw: '600'},
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('destructing', {
+              code: '({"x": 600} = x)',
+              throws: true,
+            });
+
+            test('arrow', {
+              code: '({"x": 600}) => x',
+              throws: true,
+            });
+          });
+
+          describe('with tail', _ => {
+
+            test('object', {
+              code: '({"x": 600..xyz})',
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {
+                            type: 'MemberExpression',
+                            object: {type: 'Literal', value: '<TODO>', raw: '600.'},
+                            property: {type: 'Identifier', name: 'xyz'},
+                            computed: false,
+                          },
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('destructing', {
+              code: '({"x": 600..xyz} = x)',
+              throws: true,
+            });
+
+            test('arrow', {
+              code: '({"x": 600..xyz}) => x',
+              throws: true,
+            });
+          });
+        });
       });
 
       describe('computed properties', _ => {

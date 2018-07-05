@@ -4450,9 +4450,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_close('Property');
         }
         else {
-          console.log('else', ''+curtok)
-          TODO
-          // something like `({15: 15` is valid, just not destructible
+          // something like `({15: 15` is valid, just never destructible
           destructible = updateDestructible(destructible, CANT_DESTRUCT);
 
           AST_open(astProp, 'Property');
