@@ -5705,6 +5705,49 @@ module.exports = (describe, test) =>
           code: "wrap({a:b, 'c':d}=obj);",
           throws: 'not destructible',
         });
+
+
+        test('object', {
+          code: '({"x": y+z})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Identifier', name: 'y'},
+                        operator: '+',
+                        right: {type: 'Identifier', name: 'z'},
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('destructing', {
+          code: '({"x": y+z} = x)',
+          throws: true,
+        });
+
+        test('arrow', {
+          code: '({"x": y+z}) => x',
+          throws: true,
+        });
       });
 
       describe('computed properties', _ => {

@@ -4376,10 +4376,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         ASSERT_skipRex(':', lexerFlags); // next is expression
         if (curtype === $IDENT) {
+          let nameBinding = curtok;
           // in this case the binding check can force the flag without throwing
           // - `{25: true}`
           // - `{"x": true}
-          switch (curtok.str) {
+          switch (nameBinding.str) {
             case 'true':
             case 'false':
             case 'null':
@@ -4392,12 +4393,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               // regardless of destructible state, if you see something like `typeof` here you have an error
               bindingIdentCheck(curtok, bindingType, lexerFlags);
           }
-          let nameBinding = curtok;
 
           ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
           if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
             destructible = updateDestructible(destructible, CANT_DESTRUCT);
-            TODO; // parse remainder of expression starting at ident
+
+            AST_open(astProp, 'Property');
+            AST_setLiteral('key', litToken);
+            AST_set('kind', 'init'); // only getters/setters get special value here
+            AST_set('method', false);
+            AST_set('computed', false);
+            parseExpressionAfterIdent(lexerFlags, nameBinding, 'value');
+            AST_set('shorthand', false);
+            AST_close('Property');
           } else {
             AST_open(astProp, 'Property');
             AST_setLiteral('key', litToken);
