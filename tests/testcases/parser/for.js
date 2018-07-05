@@ -324,6 +324,91 @@ module.exports = (describe, test) =>
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      describe('rest', _ => {
+        test('rest arr', {
+          code: 'for (const [...x] in y){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForInStatement',
+                left: {
+                  type: 'VariableDeclaration',
+                  kind: 'const',
+                  declarations: [
+                    {
+                      type: 'VariableDeclarator',
+                      id: {
+                        type: 'ArrayPattern',
+                        elements: [
+                          {
+                            type: 'RestElement',
+                            argument: {type: 'Identifier', name: 'x'},
+                          },
+                        ],
+                      },
+                      init: null,
+                    },
+                  ],
+                },
+                right: {type: 'Identifier', name: 'y'},
+                body: {type: 'BlockStatement', body: []},
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('var and rest arr', {
+          code: 'for (const [...x] in y){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForInStatement',
+                left: {
+                  type: 'VariableDeclaration',
+                  kind: 'const',
+                  declarations: [
+                    {
+                      type: 'VariableDeclarator',
+                      id: {
+                        type: 'ArrayPattern',
+                        elements: [
+                          {
+                            type: 'RestElement',
+                            argument: {type: 'Identifier', name: 'x'},
+                          },
+                        ],
+                      },
+                      init: null,
+                    },
+                  ],
+                },
+                right: {type: 'Identifier', name: 'y'},
+                body: {type: 'BlockStatement', body: []},
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('rest obj', {
+          code: 'for (const {...x} in y){}',
+          throws: true, // TODO
+        });
+
+        test('ummmm no', {
+          code: 'for (const ...x in y){}',
+          throws: true, // TODO
+        });
+
+        test('absolutely no', {
+          code: 'for (...x in y){}',
+          throws: true, // TODO
+        });
+      });
     });
 
     describe('vars with initializers', _ => {

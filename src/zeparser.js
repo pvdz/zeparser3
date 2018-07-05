@@ -2344,7 +2344,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function _parseAnyBindingStatement(lexerFlags, kind, astProp) {
     ASSERT(typeof kind === 'number', 'kind is an enum');
-    ASSERT(curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B, 'keyword already consumed');
     // note: the `let` statement may turn out to be a regular expression statement with `let` being a var name
     // in that case an expression statement is parsed, which may still also be a labeled statement. Either will
     // lead to the semi already being parsed so we want to skip that here to prevent double checks (and tokens).
@@ -2359,6 +2358,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return _parseAnyVarDecls(lexerFlags, kind, from, astProp);
   }
   function _parseAnyVarDecls(lexerFlags, kind, from, astProp) {
+    if (curtype !== $IDENT && curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B) THROW('Expected identifier, or array/object destructuring, next token is: ' + curtok);
     ASSERT(kind === BINDING_TYPE_VAR || kind === BINDING_TYPE_LET || kind === BINDING_TYPE_CONST, 'only three kinds here');
     let keyword = kind === BINDING_TYPE_VAR ? 'var' : kind === BINDING_TYPE_LET ? 'let' : 'const';
 
@@ -2450,7 +2450,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     else if (curc === $$DOT_2E && curtok.str === '...') {
-      if (bindingType !== BINDING_TYPE_ARG) TODO; // error...? if this is legal verify the paren passed on in the next call
+      ASSERT(bindingType === BINDING_TYPE_ARG, 'other binding types should catch this sooner?');
 
       let subDestruct = parseArrowableSpreadOrRest(lexerFlags, $$PAREN_R_29, bindingType, IS_GROUP_TOPLEVEL, undefined, astProp);
       if (curc === $$COMMA_2C) updateDestructible(subDestruct, CANT_DESTRUCT);

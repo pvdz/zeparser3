@@ -12258,6 +12258,81 @@ module.exports = (describe, test) =>
           });
         });
       });
+
+      describe('rest', _ => {
+        test('rest arr', {
+          code: 'var [...x] = y',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'VariableDeclaration',
+                kind: 'var',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'RestElement',
+                          argument: {type: 'Identifier', name: 'x'},
+                        },
+                      ],
+                    },
+                    init: {type: 'Identifier', name: 'y'},
+                  },
+                ],
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('var and rest arr', {
+          code: 'var a, [...x] = y',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'VariableDeclaration',
+                kind: 'var',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'a'},
+                    init: null,
+                  },
+                  {
+                    type: 'VariableDeclarator',
+                    id: {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'RestElement',
+                          argument: {type: 'Identifier', name: 'x'},
+                        },
+                      ],
+                    },
+                    init: {type: 'Identifier', name: 'y'},
+                  },
+                ],
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('rest obj', {
+          code: 'var {...x} = y',
+          throws: true, // TODO
+        });
+
+        test('ummmm no', {
+          code: 'var ...x = y',
+          throws: true,
+        });
+      });
     });
 
     test('html comment close marks start of single line comment', {

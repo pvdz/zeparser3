@@ -733,6 +733,107 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
+
+    describe('rest', _ => {
+      test('rest arr', {
+        code: 'export let [...x] = y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration: {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'RestElement',
+                          argument: {type: 'Identifier', name: 'x'},
+                        },
+                      ],
+                    },
+                    init: {type: 'Identifier', name: 'y'},
+                  },
+                ],
+              },
+              source: null,
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        SLOPPY_SCRIPT: {
+          throws: 'module',
+        },
+      });
+
+      test('var and rest arr', {
+        code: 'export let a, [...x] = y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration: {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'a'},
+                    init: null,
+                  },
+                  {
+                    type: 'VariableDeclarator',
+                    id: {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'RestElement',
+                          argument: {type: 'Identifier', name: 'x'},
+                        },
+                      ],
+                    },
+                    init: {type: 'Identifier', name: 'y'},
+                  },
+                ],
+              },
+              source: null,
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        SLOPPY_SCRIPT: {
+          throws: true,
+        },
+      });
+
+      test('rest obj', {
+        code: 'export let {...x} = y',
+        throws: true, // TODO
+      });
+
+      test('ummmm no', {
+        code: 'export let ...x = y',
+        throws: true,
+      });
+
+      test('just no', {
+        code: 'export ...x = y',
+        throws: true,
+      });
+
+      test('nope nope nope', {
+        code: 'export dfault ...x = y',
+        throws: true,
+      });
+    });
   });
 
 // cannot import/export a var named `let` (since module code is strict by default and import/export is module-code-only)
