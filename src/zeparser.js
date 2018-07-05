@@ -443,25 +443,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       console.log('- tree after:', require('util').inspect(_tree, false, null))
     }
   }
-  function AST_renameFreshTop(to, from) {
-    // note: this should be fine since we only replace a string with another string and no other
-    // properties should exist on the object yet so it should not trigger a deopt
-    if (traceast) {
-      console.log('AST_renameFreshTop', prop, newNodeType, newProp)
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before:', require('util').inspect(_tree, false, null))
-    }
-    ASSERT(typeof to === 'string', 'to should be a node name [' + to + ']');
-    ASSERT(typeof from === 'string', 'from should be a node name [' + from + ']');
-
-    let node = _path[_path.length-1];
-    ASSERT(node, 'top should exist');
-    ASSERT(Object.getOwnPropertyNames(node).length === 1, 'expecting only .type to be set');
-    ASSERT('type' in node, 'expecting only .type to be set but it was something else');
-    ASSERT(node.type === from, 'Expecting to replace ' + from + ' to ' + to + ' but found a ' + node.type);
-
-    _path[_path.length-1].type = to;
-  }
   function AST_replaceOpened(newNodeType, oldNodeType) {
     if (traceast) {
       console.log('AST_replaceOpened', oldNodeType, '->', newNodeType);
@@ -554,35 +535,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     return oldNode;
-  }
-  function AST_popOrClear(astProp, expectedType) {
-    // remove a node at given astProp (pop one if it's an array, set to undefined otherwise)
-    // node that is removed (either way) should be of given type
-    if (traceast) {
-      console.log('AST_popOrClear', astProp, newNodeType, newNodeType)
-      console.log('- path:', _pnames.join(' - '));
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before:', require('util').inspect(_tree, false, null))
-    }
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
-    ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-
-    let parentNode = _path[_path.length - 1];
-    let curval = parentNode[astProp];
-    ASSERT(curval, 'parent node did not have a value in given prop (probably a bug)');
-
-    if (Array.isArray(curval)) {
-      ASSERT(curval.length, 'parent node did not have a value in prop (which was an array) (probably a bug)');
-      let node = curval.pop();
-      ASSERT(node.type === expectedType, 'type of popped node does not meet expectations');
-    } else {
-      ASSERT(parentNode[astProp].type === expectedType, 'type of cleared node does not meet expectations');
-      parentNode[astProp] = undefined;
-    }
-
-    if (traceast) {
-      console.log('- tree after:', require('util').inspect(_tree, false, null))
-    }
   }
   function AST_wrapClosedIntoArray(prop, value, newProp) {
     if (traceast) {
@@ -1687,7 +1639,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
         // (note: no arrows here because we require a name)
-        let identToken = curtok;
         ASSERT_skipAny('async', lexerFlags);
 
         if (curtok.str !== 'function') {
@@ -2772,7 +2723,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // <SCRUB AST>
         if (swapped) { // restore swap
-          _path.pop(prev);
+          _path.pop();
           astProp = _pnames.pop();
         }
         // </SCRUB AST>
@@ -3199,11 +3150,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseAfterVarName(lexerFlags, identToken, assignable, astProp);
     return assignable;
   }
-  function parseExpressionFromIdent(lexerFlags, identToken, astProp) {
-    let assignable = parseValueHeadBodyAfterIdent(lexerFlags, identToken, NOT_NEW_ARG, astProp);
-    assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
-    return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
-  }
 
   function verifyEvalArgumentsVar(lexerFlags) {
     if ((lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) return IS_ASSIGNABLE;
@@ -3378,7 +3324,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
   }
 
-  function parseQuasiPart(lexerFlags, tail, astProp) {
+  function parseQuasiPart(lexerFlags, tail) {
     AST_open('quasis', 'TemplateElement');
     AST_set('tail', tail);
     AST_set('value', {raw: curtok.str, cooked: '<TODO>'});
