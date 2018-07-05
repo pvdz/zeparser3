@@ -4476,17 +4476,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the expression');
     }
     else if (curtok.str === '...') {
+      THROW('Object spread/rest is not ES6'); // it's ES9, hihi
       // ({...foo
       // Note that this can also be a spread like it is in `({foo, ...bar});`
       // TODO: pretty sure you can do silly stuff like `({...{x, ...y}}) => y` etc (because you can do it for `([...[x, ...y]]) => y`)
-      TODO; // parse the rest value
       // TODO: verify name because that would otherwise be checked later
       // exit here, do not parse default
-      if (!destructible) TODO,THROW('The spread operator is not allowed here unless this is an arrow (and it was already determined this cannot be the case)');
+      // if (!destructible) TODO,THROW('The spread operator is not allowed here unless this is an arrow (and it was already determined this cannot be the case)');
       // destructible = updateDestructible(destructible, CANT_DESTRUCT);
-      TODO
-      ASSERT(curc !== $$IS_3D, TODO); // any destructuring should be parsed before returning
-      return destructible;
+      // TODO
+      // ASSERT(curc !== $$IS_3D, TODO); // any destructuring should be parsed before returning
+      // return destructible;
     }
     else if (curc === $$SQUARE_L_5B) {
       // dynamic property (is destructible!)

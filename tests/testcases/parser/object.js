@@ -6379,7 +6379,6 @@ module.exports = (describe, test) =>
           });
         });
 
-
         describe('number value', _ => {
 
           describe('non-destructible', _ => {
@@ -6423,7 +6422,7 @@ module.exports = (describe, test) =>
           });
 
           describe('with tail', _ => {
-
+-
             test('object', {
               code: '({"x": 600..xyz})',
               ast: {
@@ -6578,6 +6577,24 @@ module.exports = (describe, test) =>
         });
 
         // computed property that is a comma expression
+      });
+
+      describe('rest/spread', _ => {
+
+        test('need to do spread', {
+          code: '({...x})',
+          throws: true,
+        });
+
+        test('need to do destruct rest', {
+          code: '({...x} = x)',
+          throws: true,
+        });
+
+        test('need to do arrow rest', {
+          code: '({...x}) => x',
+          throws: true,
+        });
       });
     });
 
