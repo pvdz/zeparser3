@@ -352,7 +352,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
               }
             }
             if (stop < x1.length && /[\w\d]/.test(x1[stop])) {
-              do ++stop; while (stop > 0 && /[\w\d]/.test(x1[stop]));
+              do ++stop; while (stop < x1.length && /[\w\d]/.test(x1[stop]));
             }
 
             console.log('want[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
