@@ -1700,6 +1700,90 @@ module.exports = (describe, test) => describe('parens', _ => {
       },
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
     });
+
+    describe('regex cases', _ => {
+
+      test('regex sans flag in group start', {
+        code: '(/x/)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'Literal', value: '<TODO>', raw: '/x/'},
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+      });
+
+      test('regex with flag in group start', {
+        code: '(/x/g)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'Literal', value: '<TODO>', raw: '/x/g'},
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+      });
+
+      test('regex sans flag in group second', {
+        code: '(x, /x/)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Identifier', name: 'x'}, {type: 'Literal', value: '<TODO>', raw: '/x/'}],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+      });
+
+      test('regex with flag in group second', {
+        code: '(x, /x/g)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Identifier', name: 'x'}, {type: 'Literal', value: '<TODO>', raw: '/x/g'}],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+      });
+
+      test('group division', {
+        code: '(x) / y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '/',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+    });
   });
 
   describe('arrow', _ => {
@@ -2956,6 +3040,30 @@ module.exports = (describe, test) => describe('parens', _ => {
       test('regex-like division as arrow', {
         code: '({ident: {x}/x/g}) => x',
         throws: 'not destructible',
+      });
+    });
+
+
+    describe('regex cases', _ => {
+
+      test('regex sans flag in group start', {
+        code: '(/x/) => x',
+        throws: true,
+      });
+
+      test('regex with flag in group start', {
+        code: '(/x/) => x',
+        throws: true,
+      });
+
+      test('regex sans flag in group second', {
+        code: '(x, /x/g) => x',
+        throws: true,
+      });
+
+      test('regex with flag in group second', {
+        code: '(x, /x/g) => x',
+        throws: true,
       });
     });
 

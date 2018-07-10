@@ -3621,7 +3621,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let rootAstProp = astProp;
     let lhpToken = curtok; // used to check .nl in case of async arrow
 
-    skipDivOrDieSingleChar($$PAREN_L_28, lexerFlags);
+    skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags); // `(/x/);`
 
     // parse the group as if it were a group (also for the sake of AST)
     // while doing so keep track of the next three states. At the end
@@ -3816,7 +3816,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         astProp = 'expressions';
       }
 
-      ASSERT_skipAny(',', lexerFlags); // TODO: next must be ident or comma or [ or { or ...
+      ASSERT_skipRex(',', lexerFlags); // `(x, /y/);`
     }
 
     if (toplevelComma) {
