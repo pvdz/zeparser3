@@ -22,24 +22,136 @@ module.exports = (describe, test) =>
       });
 
       describe('identifier properties', _ => {
-        test('object with one shorthand must destruct', {
+        test('object with one shorthand', {
           code: 'wrap({a});',
-          throws: 'must be destructured',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'a'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'a'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('get can be special but can also be shorthand', {
           code: 'wrap({get});',
-          throws: 'must be destructured',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'get'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'get'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('set can be special but can also be shorthand', {
           code: 'wrap({set});',
-          throws: 'must be destructured',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'set'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'set'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('async can be special but can also be shorthand', {
           code: 'wrap({async});',
-          throws: 'must be destructured',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'async'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'async'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('get can be special but can also be destructured shorthand', {
@@ -290,7 +402,44 @@ module.exports = (describe, test) =>
 
         test('object with two shorthand sans init', {
           code: 'wrap({a, b});',
-          throws: 'must be destructured',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'a'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'a'},
+                          shorthand: true,
+                        },
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'b'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'b'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with two shorthand with init', {
@@ -384,12 +533,86 @@ module.exports = (describe, test) =>
 
         test('object with a shorthand and a classic property', {
           code: 'wrap({a, c:d});',
-          throws: 'must be destructured',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'a'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'a'},
+                          shorthand: true,
+                        },
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'c'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'd'},
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with a classic property and a shorthand', {
           code: 'wrap({a:b, c});',
-          throws: 'must be destructured',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {type: 'Identifier', name: 'wrap'},
+                  arguments: [
+                    {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'a'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'b'},
+                          shorthand: false,
+                        },
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'c'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'c'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object destructuring with a shorthand and a classic property', {
@@ -6595,6 +6818,13 @@ module.exports = (describe, test) =>
           code: '({...x}) => x',
           throws: true,
         });
+      });
+
+      test('regression regarding shorthands', {
+        code: 'x = {y}',
+        desc: 'this was incorrectly flagged to have to destruct but thats just not true',
+        ast: true,
+        tokens: true,
       });
     });
 

@@ -2359,9 +2359,31 @@ module.exports = (describe, test) => describe('parens', _ => {
       });
     });
 
-    test('object in group with shorthand is error', {
+    test('object in group with shorthand', {
       code: '({x});',
-      throws: 'had to be destructed',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ObjectExpression',
+              properties: [
+                {
+                  type: 'Property',
+                  key: {type: 'Identifier', name: 'x'},
+                  kind: 'init',
+                  method: false,
+                  computed: false,
+                  value: {type: 'Identifier', name: 'x'},
+                  shorthand: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('destruct assign in group', {
@@ -2771,9 +2793,44 @@ module.exports = (describe, test) => describe('parens', _ => {
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
 
-    test('nested object cant use shorthand unless destructuring', {
+    test('nested object can use shorthand', {
       code: '({ident: {x}})',
-      throws: 'had to be destructed',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ObjectExpression',
+              properties: [
+                {
+                  type: 'Property',
+                  key: {type: 'Identifier', name: 'ident'},
+                  kind: 'init',
+                  method: false,
+                  computed: false,
+                  value: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'x'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'x'},
+                        shorthand: true,
+                      },
+                    ],
+                  },
+                  shorthand: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
 
     test('nested destructuring arrow', {
@@ -3042,7 +3099,6 @@ module.exports = (describe, test) => describe('parens', _ => {
         throws: 'not destructible',
       });
     });
-
 
     describe('regex cases', _ => {
 

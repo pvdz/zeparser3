@@ -4707,15 +4707,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
       if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
-      // property shorthand; `{ident}=x` is valid
+      // property shorthand; `{ident}=x` is valid, x={y} is also valid
       // - {a}
       // - {a, ...}
       // - {true}       !is never valid!
 
       bindingIdentCheck(identToken, bindingType, lexerFlags);
-
-      // obj shorthand is only valid when destructuring
-      destructible = updateDestructible(destructible, MUST_DESTRUCT);
 
       AST_open(astProp, 'Property');
       AST_setIdent('key', identToken);

@@ -1001,7 +1001,42 @@ module.exports = (describe, test) =>
 
         test('spread with shorthand object-division will throw', {
           code: '[...{x}/y]',
-          throws: 'not destructible',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'BinaryExpression',
+                        left: {
+                          type: 'ObjectExpression',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'x'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'x'},
+                              shorthand: true,
+                            },
+                          ],
+                        },
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
 
         test('spread with object-division', {

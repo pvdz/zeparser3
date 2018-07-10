@@ -164,7 +164,55 @@ module.exports = (describe, test) =>
 
     test('object literal without destruct with multiple shorthands inside the tick expression', {
       code: '`foo${{a,b}}baz`',
-      throws: 'must be destructured',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'TemplateLiteral',
+              expressions: [
+                {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'a'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'a'},
+                      shorthand: true,
+                    },
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'b'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'b'},
+                      shorthand: true,
+                    },
+                  ],
+                },
+              ],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {raw: '`foo${', cooked: '<TODO>'},
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {raw: '}baz`', cooked: '<TODO>'},
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
 
     test('object literal that destructs with multiple shorthands inside the tick expression', {
