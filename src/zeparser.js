@@ -3628,6 +3628,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_set('arguments', []);
           AST_close('CallExpression');
           let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
+          // TODO: do we need to fix `(foo + (bar + boo) + ding)` ? propagating the lhs-paren state
           if (asyncStmtOrExpr === IS_STATEMENT) assignable = parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
           return assignable;
         }
@@ -3729,8 +3730,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are never assignable
         let subDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_ARG, PARSE_INIT, astProp);
-        destructible = updateDestructible(destructible, subDestruct)
+        destructible = updateDestructible(destructible, subDestruct);
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
+        console.log('wtf?')
+        if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
+          // TODO: do we need to fix `(foo + (bar + boo) + ding)` ? propagating the lhs-paren state
+          if (asyncStmtOrExpr === IS_STATEMENT) assignable = parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
+        }
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
         parseArrowableTopRest(lexerFlags, asyncKeywordPrefixed, astProp);

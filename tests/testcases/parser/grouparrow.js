@@ -1555,6 +1555,55 @@ module.exports = (describe, test) => describe('parens', _ => {
       code: '([a + b] = x);',
       throws: 'not destructible',
     });
+
+    test('arr with tail', {
+      code: '([].x);',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'MemberExpression',
+              object: {type: 'ArrayExpression', elements: []},
+              property: {type: 'Identifier', name: 'x'},
+              computed: false,
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('async call arr with tail', {
+      code: 'async([].x);',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'async'},
+              arguments: [
+                {
+                  type: 'MemberExpression',
+                  object: {type: 'ArrayExpression', elements: []},
+                  property: {type: 'Identifier', name: 'x'},
+                  computed: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('async arrow with arr with tail is bad', {
+      code: 'async([].x) => x;',
+      throws: true,
+    });
 });
 
   describe('arrow', _ => {
