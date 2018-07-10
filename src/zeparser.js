@@ -2807,6 +2807,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return false;
   }
+  function isCompoundAssignment(str) {
+    let len = str.length;
+    if (len === 1) return false;
+    if (str.charCodeAt(len-1) !== $$IS_3D) return false;
+    // find compound ops but ignore comparison ops
+    switch (str) {
+      case '*=':
+      case '/=':
+      case '%=':
+      case '+=':
+      case '-=':
+      case '<<=':
+      case '>>=':
+      case '>>>=':
+      case '&=':
+      case '^=':
+      case '|=':
+      case '**=':
+        return true;
+    }
+    return false;
+  }
   function isNonAssignBinOp(lexerFlags) {
     switch (curtok.str) {
       case '&&':
@@ -3186,17 +3208,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function verifyEvalArgumentsVar(lexerFlags) {
     if ((lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) return IS_ASSIGNABLE;
 
+    if (isAssignBinOp()) {
+      THROW('Cannot assign to `eval`');
+    }
+
     switch (curtok.str) {
-      case '=':
       case '++':
       case '--':
         THROW('Cannot assign to `eval`');
-    }
-
-    if (curc !== $$IS_3D && curtok.str[1] === '=') {
-      // compound assignment
-      // TODO (should probably verify this? this is slow path anyways, the input could be garble with second char being `=`)
-      THROW('Cannot assign to `eval`');
     }
 
     return NOT_ASSIGNABLE;
@@ -3732,7 +3751,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let subDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_ARG, PARSE_INIT, astProp);
         destructible = updateDestructible(destructible, subDestruct);
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
-        console.log('wtf?')
         if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
           destructible = updateDestructible(destructible, CANT_DESTRUCT);
           assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
@@ -3891,7 +3909,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       return NOT_ASSIGNABLE;
     }
-    else if (curc !== $$IS_3D && curc !== $$EXCL_21 && curtok.str[curtok.str.length-1] === '=') {
+    else if (isCompoundAssignment(curtok.str)) {
       // compound assignment
       if (toplevelComma) THROW('Cannot assign to list of expressions in a group');
       // TODO: need to make sure we can't do `(eval) = x` and `(arguents) = x` in strict mode (only); it's an explicit error
@@ -4040,7 +4058,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           parseExpression(lexerFlags, 'right');
           AST_close('AssignmentExpression');
         }
-        else if (curtok.str[1] === '=' && curtok.str.length === 2 && curc !== $$EXCL_21 && curc !== $$IS_3D) {
+        else if (isCompoundAssignment(curtok.str)) {
           // - [x += y]
           bindingIdentCheck(identToken, bindingType, lexerFlags);
           // TODO: dont wrapClosed below but do it all in once

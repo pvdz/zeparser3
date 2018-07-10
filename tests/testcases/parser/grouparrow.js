@@ -1476,8 +1476,8 @@ module.exports = (describe, test) => describe('parens', _ => {
 
     test('grouped compound assignment is _not_ a valid assignment target', {
       code: '(a=1)+=2',
-      desc: 'https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
-      throws: 'Invalid assignment',
+      desc: 'nope: https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
+      throws: true,
     });
 
     test('cannot assign to group with comma', {
@@ -1604,7 +1604,103 @@ module.exports = (describe, test) => describe('parens', _ => {
       code: 'async([].x) => x;',
       throws: true,
     });
-});
+
+    test('do not consider `>=` a compound assignment', {
+      code: '(x + y) >= z',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '+',
+                right: {type: 'Identifier', name: 'y'},
+              },
+              operator: '>=',
+              right: {type: 'Identifier', name: 'z'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('do not consider `<=` a compound assignment', {
+      code: '(x + y) <= z',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '+',
+                right: {type: 'Identifier', name: 'y'},
+              },
+              operator: '<=',
+              right: {type: 'Identifier', name: 'z'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('do not consider `!=` a compound assignment', {
+      code: '(x + y) != z',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '+',
+                right: {type: 'Identifier', name: 'y'},
+              },
+              operator: '!=',
+              right: {type: 'Identifier', name: 'z'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('do not consider `==` a compound assignment', {
+      code: '(x + y) == z',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '+',
+                right: {type: 'Identifier', name: 'y'},
+              },
+              operator: '==',
+              right: {type: 'Identifier', name: 'z'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+  });
 
   describe('arrow', _ => {
     test('arrow, one arg without parens, expr', {
