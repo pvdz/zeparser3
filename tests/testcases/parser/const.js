@@ -265,8 +265,8 @@ module.exports = (describe, test) =>
 
             test(`function object alias destructured arg`, {
               code: `function g({x: ${name}}) {}`,
-              throws: true, // for async because it wants to parse more, fine in sloppy mode.
-              SLOPPY_SCRIPT: {ast: true, tokens: true},
+              ast: true,
+              tokens: true,
             });
 
             test(`function array destructured arg`, {

@@ -226,6 +226,7 @@ const LF_NO_FUNC_DECL = 1 << 7; // currently nesting inside at least one stateme
 const LF_NO_YIELD = 1 << 8; // yield is not allowed after a non-assignment-op
 const LF_CAN_NEW_TARGET = 1 << 9; // current scope is inside at least one regular (non-arrow) function
 const LF_NO_IN = 1 << 10; // inside the initial part of a for-header, prevents `in` being parsed as a generic expression
+const LF_NO_ASI = 1 << 11; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
@@ -2692,6 +2693,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
   LF_IN_TEMPLATE,
+  LF_NO_ASI,
   LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
   LF_NO_YIELD,

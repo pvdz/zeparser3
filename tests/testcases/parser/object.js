@@ -3796,12 +3796,12 @@ module.exports = (describe, test) =>
 
         test('getter number must be method', {
           code: 'wrap({get 123: x});',
-          throws: 'must be a method',
+          throws: 'func arguments',
         });
 
         test('getter string must be method', {
           code: 'wrap({get "abc": x});',
-          throws: 'must be a method',
+          throws: 'func arguments',
         });
       });
 
@@ -4646,12 +4646,12 @@ module.exports = (describe, test) =>
 
         test('setter number must be method', {
           code: 'wrap({set 123: x});',
-          throws: 'must be a method',
+          throws: 'func arguments',
         });
 
         test('setter string must be method', {
           code: 'wrap({set "abc": x});',
-          throws: 'must be a method',
+          throws: 'func arguments',
         });
       });
 

@@ -46,3 +46,5 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
   });
+
+// TODO: <es6 there was no asi after do/while. es6+ does apply asi (to confirm that it really was es6...)

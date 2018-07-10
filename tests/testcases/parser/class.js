@@ -1952,7 +1952,7 @@ module.exports = (describe, test) =>
             code: 'class x extends ' + ident + ' {}',
             desc: 'since extends accept an arbitrary expression certain keywords lead to different errors',
             ...(
-              ['super', 'this', 'null', 'true', 'false', 'eval', 'arguments', 'get', 'set'].indexOf(ident) >= 0 ?
+              ['async', 'super', 'this', 'null', 'true', 'false', 'eval', 'arguments', 'get', 'set'].indexOf(ident) >= 0 ?
               {
                 ast: true,
                 tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],

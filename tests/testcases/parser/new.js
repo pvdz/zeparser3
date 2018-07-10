@@ -717,7 +717,7 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
 
-        test('can typeof a property', {
+        test('can new new value', {
           code: 'new new x',
           ast: {
             type: 'Program',
@@ -739,22 +739,127 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $IDENT, $IDENT, $ASI],
         });
 
+        test('cannot new new.target without func', {
+          code: 'new new .target',
+          throws: 'function',
+        });
+
+        test('can new new.target in func', {
+          code: 'function f(){ new new .target; }',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                expression: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'NewExpression',
+                        arguments: [],
+                        callee: {
+                          type: 'MetaProperty',
+                          meta: {type: 'Identifier', name: 'new'},
+                          property: {type: 'Identifier', name: 'target'},
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
         test('can not new a delete without prop', {
           code: 'new delete x',
-          throws: 'Cannot apply `new` to `delete`',
-          tokens: [],
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $ASI],
         });
 
         test('can not new a delete with prop', {
           code: 'new delete x.y',
-          throws: 'Cannot apply `new` to `delete`',
-          tokens: [],
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'x'},
+                      property: {type: 'Identifier', name: 'y'},
+                      computed: false,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
 
         test('can not new a delete with call prop', {
           code: 'new delete x().y',
-          throws: 'Cannot apply `new` to `delete`',
-          tokens: [],
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {
+                      type: 'MemberExpression',
+                      object: {
+                        type: 'CallExpression',
+                        callee: {type: 'Identifier', name: 'x'},
+                        arguments: [],
+                      },
+                      property: {type: 'Identifier', name: 'y'},
+                      computed: false,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
 
         test('can not new a typeof without prop', {
@@ -1202,6 +1307,613 @@ module.exports = (describe, test) =>
           },
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
+      });
+
+      describe('argument special cases', _ => {
+        test('arguments', {
+          code: 'new arguments',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Identifier', name: 'arguments'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('async keyword', {
+          code: 'new async',
+          desc: 'okay in sloppy mode...',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {type: 'Identifier', name: 'async'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('async func', {
+          code: 'new async function(){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: true,
+                    expression: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('async parens', {
+          code: 'new async()',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'CallExpression',
+                    callee: {type: 'Identifier', name: 'async'},
+                    arguments: [],
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        // TODO: one rabbit hole at a time please
+        // test('await var', {
+        //   code: 'new await',
+        // });
+
+        // test('await call', {
+        //   code: 'new await()',
+        // });
+
+        // test('await expression fail', {
+        //   code: 'new await foo',
+        // });
+
+        // test('await expression good', {
+        //   code: 'async function f(){ new await foo }',
+        // });
+
+        test('class sans body', {
+          code: 'new class',
+          throws: true,
+        });
+
+        test('class with body', {
+          code: 'new class{}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'ClassExpression',
+                    id: null,
+                    superClass: null,
+                    body: {type: 'ClassBody', body: []},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('class baited', {
+          code: 'new class extends{}',
+          desc: 'it might be valid to extend an expression that starts with an object literal',
+          throws: true, // but this isnt valid
+        });
+
+        test('class extending', {
+          code: 'new class extends x{}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'ClassExpression',
+                    id: null,
+                    superClass: {type: 'Identifier', name: 'x'},
+                    body: {type: 'ClassBody', body: []},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('class extending grouped expression', {
+          code: 'class x extends (x) {}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: {type: 'Identifier', name: 'x'},
+                body: {type: 'ClassBody', body: []},
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('class extending objlit', {
+          code: 'class x extends {} {}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: {type: 'ObjectExpression', properties: []},
+                body: {type: 'ClassBody', body: []},
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('class extending arrow silly case', {
+          code: 'class x extends () => {} {}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  body: {type: 'BlockStatement', body: []},
+                },
+                body: {type: 'ClassBody', body: []},
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('delete sans arg', {
+          code: 'new delete',
+          throws: true,
+        });
+
+        test('delete with arg', {
+          code: 'new delete x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+        });
+
+        test('eval ident', {
+          code: 'new eval',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Identifier', name: 'eval'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('eval call', {
+          code: 'new eval()',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Identifier', name: 'eval'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('false', {
+          code: 'new false',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Literal', value: false, raw: 'false'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('this is why new false might not crash', {
+          code: 'new false.__proto__.constructor',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'MemberExpression',
+                      object: {type: 'Literal', value: false, raw: 'false'},
+                      property: {type: 'Identifier', name: '__proto__'},
+                      computed: false,
+                    },
+                    property: {type: 'Identifier', name: 'constructor'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('function ident', {
+          code: 'new function',
+          throws: true,
+        });
+
+        test('function args', {
+          code: 'new function()',
+          throws: true,
+        });
+
+        test('function whole', {
+          code: 'new function(){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('function called whole', {
+          code: 'new function(){}(x)',
+          desc: 'this is interesting because is it an iffe or not',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [{type: 'Identifier', name: 'x'}],
+                  callee: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('let', {
+          code: 'new let',
+          throws: 'strict mode',
+          SLOPPY_SCRIPT: {
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {type: 'Identifier', name: 'let'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $ASI],
+          },
+        });
+
+        test('new ident', {
+          code: 'new new',
+          throws: true,
+        });
+
+        test('new arg', {
+          code: 'new new A',
+          desc: 'this could work',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {type: 'Identifier', name: 'A'},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+        });
+
+        test('null', {
+          code: 'new null',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Literal', value: null, raw: 'null'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('super invalid', {
+          code: 'new super',
+          // TODO: lets do this validation later ktnx
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Super'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('super valid', {
+          code: 'class x extends y { z(){ new super(); }}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: {type: 'Identifier', name: 'y'},
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'z'},
+                      static: false,
+                      computed: false,
+                      kind: 'method',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        expression: false,
+                        id: null,
+                        params: [],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {
+                                type: 'NewExpression',
+                                arguments: [],
+                                callee: {type: 'Super'},
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('true', {
+          code: 'new true',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Literal', value: true, raw: 'true'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('this', {
+          code: 'new this',
+          decs: 'this could be extending Function',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'ThisExpression'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test('typeof ident', {
+          code: 'new typeof',
+          throws: true,
+        });
+
+        test('typeof arg', {
+          code: 'new typeof x',
+          throws: true,
+        });
+
+        test('typeof called arg', {
+          code: 'new typeof x()',
+          throws: true,
+        });
+
+        test('void ident', {
+          code: 'new void',
+          throws: true,
+        });
+
+        test('void arg', {
+          code: 'new void x',
+          throws: true,
+        });
+
+        // TODO
+        // test('invalid yield ident', {
+        //   code: 'new yield',
+        // });
+        //
+        // test('yield call', {
+        //   code: 'new yield()',
+        // });
+        //
+        // test('valid yield', {
+        //   code: 'function *f(){ new yield }',
+        // });
+        //
+        // test('valid arg yield', {
+        //   code: 'function *f(){ new yield x }',
+        // });
+        //
+        // test('valid called arg yield', {
+        //   code: 'function *f(){ new yield x(); }',
+        // });
       });
     });
 
