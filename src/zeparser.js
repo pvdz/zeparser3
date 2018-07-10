@@ -3745,6 +3745,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let subDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_ARG, PARSE_INIT, NOT_CLASS_METHOD, astProp);
         destructible = updateDestructible(destructible, subDestruct)
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
+        if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
+          destructible = updateDestructible(destructible, CANT_DESTRUCT);
+          assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
+          // TODO: do we need to fix `(foo + (bar + boo) + ding)` ? propagating the lhs-paren state
+          if (asyncStmtOrExpr === IS_STATEMENT) assignable = parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
+        }
       }
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are never assignable

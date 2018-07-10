@@ -1605,6 +1605,55 @@ module.exports = (describe, test) => describe('parens', _ => {
       throws: true,
     });
 
+    test('obj with tail', {
+      code: '({} + 1);',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'ObjectExpression', properties: []},
+              operator: '+',
+              right: {type: 'Literal', value: '<TODO>', raw: '1'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('async call with obj with tail', {
+      code: 'async ({} + 1);',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'async'},
+              arguments: [
+                {
+                  type: 'BinaryExpression',
+                  left: {type: 'ObjectExpression', properties: []},
+                  operator: '+',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('async call with obj with tail', {
+      code: 'async ({} + 1) => x;',
+      throws: true,
+    });
+
     test('do not consider `>=` a compound assignment', {
       code: '(x + y) >= z',
       ast: {
