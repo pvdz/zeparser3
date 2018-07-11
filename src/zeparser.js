@@ -1754,7 +1754,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseForHeader(lexerFlags, astProp) {
     // TODO: confirm we do this; > It is a Syntax Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
     // first parse a simple expression and check whether it's assignable (var or prop)
-    let assignable = false;
+    let assignable = NOT_ASSIGNABLE;
     let wasNotDecl = false;
     let emptyInit = false;
     let startedWithParen = false;
@@ -1762,7 +1762,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       switch (curtok.str) {
         case 'var':
           parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_VAR, FROM_FOR_HEADER, astProp);
-          assignable = true; // i think.
+          assignable = IS_ASSIGNABLE; // i think.
           break;
         case 'let':
 
@@ -1771,7 +1771,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           if (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
             _parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_LET, FROM_FOR_HEADER, astProp);
-            assignable = true; // decls are assignable
+            assignable = IS_ASSIGNABLE; // decls are assignable
           } else if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
             THROW('Let binding missing binding names');
           } else {
@@ -1779,14 +1779,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             assignable = parseExpressionAfterPlainVarName(lexerFlags, identToken, astProp);
             if (curc === $$COMMA_2C) {
               _parseExpressions(lexerFlags, astProp);
-              assignable = false;
+              assignable = NOT_ASSIGNABLE;
             }
           }
 
           break;
         case 'const':
           parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_CONST, FROM_FOR_HEADER, astProp);
-          assignable = true; // i think.
+          assignable = IS_ASSIGNABLE; // i think.
           break;
 
         default:
@@ -1808,7 +1808,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       if (curtok.str === 'in') {
         AST_wrapClosed(astProp, 'ForInStatement', 'left');
-        if (!assignable) {
+        if (assignable === NOT_ASSIGNABLE) {
           // certain cases were possible in legacy mode
           if (options_webCompat === WEB_COMPAT_ON && (lexerFlags & LF_STRICT_MODE) !== LF_STRICT_MODE) {
             // TODO: do we need to verify these patterns first...? or is any assignment okay here
@@ -1822,7 +1822,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       if (curtok.str === 'of') {
         AST_wrapClosed(astProp, 'ForOfStatement', 'left');
-        if (!assignable) THROW('Left part of for-of must be assignable');
+        if (assignable === NOT_ASSIGNABLE) THROW('Left part of for-of must be assignable');
         ASSERT_skipRex('of', lexerFlags);
         parseExpressions(lexerFlags, 'right');
         return;
@@ -2920,7 +2920,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MAYBE, NOT_NEW_TARGET, astProp);
     if (curtok === startok) return YIELD_WITHOUT_VALUE;
     assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
-    if (assignable) return WITH_ASSIGNABLE;
+    if (assignable === IS_ASSIGNABLE) return WITH_ASSIGNABLE;
     return WITH_NON_ASSIGNABLE;
   }
   function parseValueFromIdent(lexerFlags, astProp) {
