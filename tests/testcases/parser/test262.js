@@ -21,17 +21,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
           annexb: lcname.indexOf('annexb') >= 0,
           skip: !(
             (lcname.indexOf('annexb') < 0 || (lcname.indexOf('regexp') < 0 && lcname.indexOf('escape') < 0)) && // TODO: web compat: lots of regex/escape cruft to support
-            //lcname.indexOf('this-val-regexp') < 0 && // TODO: new regex flags
-            //lcname.indexOf('unicode-reference') < 0 && // TODO: named back references are not final yet
-            //lcname.indexOf('named-groups') < 0 && // TODO: named groups are not final yet
-            //lcname.indexOf('regexp/y-') < 0 && // TODO: y-flag in regexes
-            //lcname.indexOf('dotall') < 0 && // TODO: s-flag in regexes
-            //lcname.indexOf('bigint') < 0 && // TODO: adds new number syntax
-            //lcname.indexOf('lookbehind') < 0 && // TODO: regex ?<= lookbehind https://github.com/tc39/proposal-regexp-lookbehind
-            //lcname.indexOf('spread-sngl-obj') < 0 && // TODO: object spread is es8 or something
-            //lcname.indexOf('class-definition-evaluation-scriptbody-duplicate-binding') < 0 && // TODO: duplicate bindings are early error
-            //lcname.indexOf('use-strict-with-non-simple-param') < 0 && // wtf even. TODO. I guess.
-            //lcname.indexOf('vals-rus') < 0 && // TODO: non-ascii idents
             lcname.indexOf('__proto__-dup') < 0 && // TODO: enable once we check duplicate objlit keys
             lcname.indexOf('args-trailing-comma') < 0 && // TODO: new feature: trailign comma in function args
             lcname.indexOf('s15.5.4.10_a2_t') < 0 && // TODO: enable
@@ -39,6 +28,8 @@ if (!fs.statSync(PATH262).isDirectory()) {
             //lcname.indexOf('async-generator') < 0 && // TODO: this is a stage proposal, we'll probably add this soon
             lcname.indexOf('redeclare-with-') < 0 && // TOOD: fix once we fix scoping and duplicate binding checks (class, async)
             lcname.indexOf('dflt-params-trailing-') < 0 && // TOOD: trailing comma in func parameter
+            lcname.indexOf('obj-ptrn-rest') < 0 && // TOOD: object rest/spread
+            lcname.indexOf('no-duplicates') < 0 && // TOOD: duplicate arg bindings
             lcname.indexOf('property-escapes') < 0
           ), // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         };

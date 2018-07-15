@@ -252,6 +252,11 @@ const IS_DyNAMIC_PROPERTY = true;
 const NOT_DyNAMIC_PROPERTY = false;
 const IS_QUASI_TAIL = true;
 const NOT_QUASI_TAIL = false;
+const ARG_NEITHER_SIMPLE_NOR_INIT = 0;
+const ARG_WAS_SIMPLE = 1;
+const ARG_HAD_INIT = 2;
+const ARGS_SIMPLE = true;
+const ARGS_COMPLEX = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -841,18 +846,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let len = _path.length;
     let bak = _path.slice(0);
     // </SCRUB AST>
-    parseBodyParts(lexerFlags);
+    _parseTopLevels(lexerFlags);
     // <SCRUB AST>
     ASSERT(_path.length === len, 'should close all that was opened. Open before: ' + JSON.stringify(bak.map(o=>o.type).join(' > ')) + ', open after: ' + JSON.stringify(_path.map(o=>o.type).join(' > ')));
     // </SCRUB AST>
   }
-
-  function parseBodyParts(lexerFlags) {
+  function _parseTopLevels(lexerFlags) {
     AST_set('body', []);
-    _parseBodyPartsWithDirectives(lexerFlags, 'body');
+    _parseBodyPartsWithDirectives(lexerFlags, ARGS_SIMPLE, 'body');
   }
 
-  function parseDirectivePrologues(lexerFlags, astProp) {
+  function parseDirectivePrologues(lexerFlags, wasSimple, astProp) {
+    ASSERT(arguments.length === 3, 'arg count');
     // note: there may be multiple (bogus or valid) directives...
     while (hasAllFlags(curtype, $STRING)) {
       // we must first parse as usual to confirm this is an isolated string and not
@@ -869,7 +874,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // we are checking the next token after that
 
       if (isDirective()) {
-        lexerFlags = parseDirectivePrologue(lexerFlags, stringToken, astProp);
+        lexerFlags = parseDirectivePrologue(lexerFlags, stringToken, wasSimple, astProp);
       } else {
         // not ideal but this almost never happens
         _parseFromLiteralStatement(lexerFlags, stringToken, astProp)
@@ -877,10 +882,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return lexerFlags;
   }
-  function parseDirectivePrologue(lexerFlags, stringToken, astProp) {
+  function parseDirectivePrologue(lexerFlags, stringToken, wasSimple, astProp) {
+    ASSERT(arguments.length === 4, 'arg count');
     AST_open(astProp, 'Directive');
     let dir = stringToken.str.slice(1, -1);
     if (dir === 'use strict') {
+      // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
+      // "It is a Syntax Error if ContainsUseStrict of FunctionBody is true and IsSimpleParameterList of FormalParameters is false."
+      // and IsSimpleParameterList is only true the params are "es5" (no destructuring, no defaults, just idents)
+      if (wasSimple === ARGS_COMPLEX) THROW('Can only declare use strict if func params are "simple"');
       lexerFlags = lexerFlags | LF_STRICT_MODE;
     }
     AST_set('directive', dir);
@@ -913,9 +923,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return false;
   }
 
-  function _parseBodyPartsWithDirectives(lexerFlags, astProp) {
+  function _parseBodyPartsWithDirectives(lexerFlags, wasSimple, astProp) {
+    ASSERT(arguments.length === 3, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-    lexerFlags = parseDirectivePrologues(lexerFlags, 'body');
+    lexerFlags = parseDirectivePrologues(lexerFlags, wasSimple, 'body');
     while (curtype !== $EOF && curc !== $$CURLY_R_7D) parseBodyPart(lexerFlags, astProp);
   }
 
@@ -1078,25 +1089,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === 4, 'arg count');
     // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
     if (isGenerator === WAS_GENERATOR)  lexerFlags = lexerFlags | LF_IN_GENERATOR;
-    parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom);
+    let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom);
     if (isGenerator === NOT_GENERATOR) lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
-    parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, 'body');
+    parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, wasSimple, 'body');
   }
   function parseFuncArguments(lexerFlags, bindingFrom) {
     // TODO: await expression inside the params (like default param) of an async function are illegal
     lexerFlags = lexerFlags | LF_IN_FUNC_ARGS; // prevents await expression as default arg
     AST_set('params', []);
 
+    let wasSimple = true;
+
     if (curc !== $$PAREN_L_28) THROW('Must have func arguments next but did not find `(`');
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
     if (curc === $$PAREN_R_29) {
       ASSERT_skipRex(')', lexerFlags);
     } else {
-      parseBindings(lexerFlags, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, 'params');
+      wasSimple = parseBindings(lexerFlags, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, 'params');
       AST_destruct('params');
       if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) AST_scanYieldInParams(_path[_path.length - 1].params);
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
+
+    return wasSimple;
   }
 
   // ### statements
@@ -1348,10 +1363,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       AST_open(astProp, 'ArrowFunctionExpression');
       AST_set('params', []);
-      AST_open('params', 'Identifier');
-      AST_set('name', argIdentToken.str);
-      AST_close('Identifier');
-      parseArrowFromPunc(lexerFlags, WAS_ASYNC);
+      AST_setIdent('params', argIdentToken);
+      parseArrowFromPunc(lexerFlags, WAS_ASYNC, ARGS_SIMPLE);
       AST_close('ArrowFunctionExpression');
       if (stmtOrExpr === IS_STATEMENT) {
         AST_close('ExpressionStatement');
@@ -1443,8 +1456,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
-  function parseBlockStatement(lexerFlags, blockType, parseDirectives, astProp) {
-    ASSERT(arguments.length === 4, 'expecting 4 args');
+  function parseBlockStatement(lexerFlags, blockType, parseDirectives, wasSimple, astProp) {
+    ASSERT(arguments.length === 5, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL | LF_NO_ASI);
@@ -1453,7 +1466,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('body', []);
     ASSERT_skipRex('{', lexerFlagsNoTemplate);
     if (parseDirectives === PARSE_DIRECTIVES) {
-      _parseBodyPartsWithDirectives(lexerFlagsNoTemplate, 'body');
+      _parseBodyPartsWithDirectives(lexerFlagsNoTemplate, wasSimple, 'body');
     } else {
       ASSERT(parseDirectives === IGNORE_DIRECTIVES, 'should be boolean');
       _parseBodyPartsSansDirectives(lexerFlagsNoTemplate, 'body');
@@ -2092,7 +2105,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let hasEither = false;
 
     ASSERT_skipAny('try', lexerFlags); // TODO: optimize; next must be {
-    parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, 'block');
+    parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, 'block');
 
     if (curc === $$C_63 && curtok.str === 'catch') {
       hasEither = true;
@@ -2107,7 +2120,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc === $$COMMA_2C) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
       if (curc === $$IS_3D && curtok.str === '=') THROW('Catch clause parameter does not support default values');
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags); // TODO: optimize; next must be {
-      parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, 'body');
+      parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, 'body');
       AST_close('CatchClause');
     } else {
       AST_set('handler', null);
@@ -2116,7 +2129,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$F_66 && curtok.str === 'finally') {
       hasEither = true;
       ASSERT_skipAny('finally', lexerFlags); // TODO: optimize; next must be {
-      parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, 'finalizer');
+      parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, 'finalizer');
     } else {
       AST_set('finalizer', null);
     }
@@ -2339,7 +2352,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parsePunctuatorStatement(lexerFlags, astProp) {
     switch (curc) {
       case $$CURLY_L_7B:
-        parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, astProp);
+        parseBlockStatement(lexerFlags, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, astProp);
         break;
       case $$SEMI_3B:
         parseEmptyStatement(lexerFlags, astProp);
@@ -2428,11 +2441,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let inited = false;
     let startWasObjectOrArray = curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B;
     let wasRest = false;
+    let wasSimple = ARGS_SIMPLE;
     do {
       ++many;
       wasRest = curc === $$DOT_2E && curtok.str === '...';
       // ident or destructuring of object/array or rest arg
-      if (parseBinding(lexerFlags, bindingType, bindingOrigin, defaultOptions, astProp)) inited = true;
+      let bindingMeta = parseBinding(lexerFlags, bindingType, bindingOrigin, defaultOptions, astProp);
+      if (bindingMeta === ARG_HAD_INIT) inited = true;
+      if (bindingMeta !== ARG_WAS_SIMPLE) {
+        ASSERT(typeof bindingMeta === 'number', 'should be number');
+        ASSERT(bindingMeta >= 0 && bindingMeta <= 2, 'bindingMeta should be enum');
+        console.log('Binding meta was weird', bindingMeta)
+        wasSimple = ARGS_COMPLEX;
+      }
       if (wasRest) {
         ASSERT(curc === $$PAREN_R_29, 'the "rest is last and no init" check should happen elsewhere and before this point');
         break;
@@ -2440,7 +2461,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipAny(',', lexerFlags); // TODO: next must be ident or comma or [ or { or .
     } while (true);
-
     if (bindingOrigin === FROM_FOR_HEADER && (curtok.str === 'in' || curtok.str === 'of')) {
       // binding inits are ONLY okay when;
       // - sloppy mode
@@ -2456,6 +2476,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
     }
+    return wasSimple;
   }
   function parseBinding(lexerFlags, bindingType, bindingOrigin, defaultsOption, astProp) {
     // returns whether a binding had an init (necessary to validate for-header bindings)
@@ -2465,12 +2486,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: legacy `let` as a var name support
 
     let mustHaveInit = false;
+    let wasSimple = ARG_NEITHER_SIMPLE_NOR_INIT; // simple if valid in es5 (list of idents, no inits)
 
     if (curtype === $IDENT) {
       // normal
       bindingIdentCheck(curtok, bindingType, lexerFlags);
       AST_setIdent(astProp, curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
+      wasSimple = ARG_WAS_SIMPLE; // could still be complex if init
     }
     else if (curc === $$CURLY_L_7B) {
       let destructible = parseObjectLiteralPattern(lexerFlags, bindingType, SKIP_INIT, NOT_CLASS_METHOD, astProp);
@@ -2512,10 +2535,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else {
       THROW('Expected to parse a(nother) binding but none was found');
     }
-    // this is only relevant to validate bindings in a for-header, irrelevant while destructuring
-    let hadInit = false;
+
     // arg defaults
     if (curc === $$IS_3D && curtok.str === '=') {
+      wasSimple = ARG_HAD_INIT; // this means the arg is not "simple"
       if (defaultsOption === ASSIGNMENT_IS_DEFAULT) {
         if (bindingOrigin === FROM_CATCH) THROW('The catch clause cannot have a default');
         AST_wrapClosed(astProp, 'AssignmentPattern', 'left');
@@ -2523,7 +2546,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseExpression(lexerFlags, 'right');
         AST_close('AssignmentPattern');
       } else {
-        hadInit = true;
         ASSERT(bindingOrigin !== FROM_CATCH, 'catch is default');
         ASSERT(defaultsOption === ASSIGNMENT_IS_INIT, 'two options');
         AST_wrapClosed('declarations', 'VariableDeclarator', 'id');
@@ -2541,7 +2563,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('VariableDeclarator');
     }
 
-    return hadInit;
+    ASSERT(typeof wasSimple === 'number', 'wassimple should be enum');
+    return wasSimple;
   }
 
   function bindingIdentCheck(identToken, bindingKind, lexerFlags) {
@@ -3361,7 +3384,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_open(astProp, 'ArrowFunctionExpression');
       AST_set('params', []);
       AST_setIdent('params', identToken);
-      parseArrowFromPunc(lexerFlags, NOT_ASYNC);
+      parseArrowFromPunc(lexerFlags, NOT_ASYNC, ARGS_SIMPLE);
       AST_close('ArrowFunctionExpression');
       return NOT_ASSIGNABLE;
     } else {
@@ -3608,7 +3631,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
   }
-  function parseArrowFromPunc(lexerFlags, isAsync) {
+  function parseArrowFromPunc(lexerFlags, isAsync, wasSimple) {
+    ASSERT(arguments.length === 3, 'arg count');
     ASSERT(typeof isAsync === 'boolean', 'isasync bool');
     ASSERT_skipRex('=>', lexerFlags); // `{` or any expression
 
@@ -3621,7 +3645,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
       AST_set('expression', BODY_IS_BLOCK); // "body of arrow is block"
-      parseBlockStatement(lexerFlags, IS_EXPRESSION, PARSE_DIRECTIVES, 'body');
+      parseBlockStatement(lexerFlags, IS_EXPRESSION, PARSE_DIRECTIVES, wasSimple, 'body');
     } else {
       AST_set('expression', BODY_IS_EXPR); // "body of arrow is expr"
       parseExpression(lexerFlags, 'body'); // TODO: what about curlyLexerFlags here?
@@ -3753,7 +3777,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       AST_open(astProp, 'ArrowFunctionExpression');
       AST_set('params', []);
-      parseArrowFromPunc(lexerFlags, asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC);
+      parseArrowFromPunc(lexerFlags, asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC, ARGS_SIMPLE);
       AST_close('ArrowFunctionExpression');
       return NOT_ASSIGNABLE;
     }
@@ -3761,6 +3785,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let destructible = MIGHT_DESTRUCT;
     let assignable = NOT_ASSIGNABLE; // true iif first expr is assignable, always false if the group has a comma
     let toplevelComma = false;
+    let simpleArgs = ARGS_SIMPLE; // true if only idents and without assignment (so es5 valid)
 
     while (curc !== $$PAREN_R_29) { // top-level group loop, list of ident, array, object, rest, and other expressions
       ASSERT(typeof assignable === 'boolean', 'assignanum', assignable);
@@ -3791,6 +3816,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         skipIdentSafeAndExpensive(lexerFlags); // will properly deal with div/rex cases
 
         if (curtok.str === '=') {
+          simpleArgs = ARGS_COMPLEX;
           assignable = parseArrowableTopIdentAssign(lexerFlags, identToken, astProp);
           ASSERT(typeof assignable === 'boolean', 'assignanum', assignable);
         }
@@ -3815,6 +3841,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             case 'super':
               // reserved keyword, not destructible
               destructible = CANT_DESTRUCT;
+              simpleArgs = ARGS_COMPLEX;
               break;
 
             default:
@@ -3827,6 +3854,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         else {
           // the token following this ident is not one valid in a destructuring assignment
           // parse a regular ident expression here
+          simpleArgs = ARGS_COMPLEX;
           destructible = updateDestructible(destructible, CANT_DESTRUCT)
           assignable = parseExpressionAfterIdent(lexerFlags, identToken, astProp);
           ASSERT(typeof assignable === 'boolean', 'assignanum', assignable);
@@ -3834,6 +3862,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$CURLY_L_7B) {
         // note: grouped object/array literals are never assignable
+        simpleArgs = ARGS_COMPLEX;
         let subDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_ARG, PARSE_INIT, NOT_CLASS_METHOD, astProp);
         destructible = updateDestructible(destructible, subDestruct)
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
@@ -3848,6 +3877,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are never assignable
+        simpleArgs = ARGS_COMPLEX;
         let subDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_ARG, PARSE_INIT, astProp);
         destructible = updateDestructible(destructible, subDestruct);
         ASSERT(curc !== $$IS_3D, 'destruct assignments should be parsed at this point');
@@ -3859,6 +3889,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
+        simpleArgs = ARGS_COMPLEX;
         parseArrowableTopRest(lexerFlags, asyncKeywordPrefixed, astProp);
         if (asyncKeywordPrefixed) {
           // can still be `async (...x) => x` and `async(...x);`
@@ -3873,6 +3904,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else {
         // arbitrary expression that is not destructible (on this level, at least)
         destructible = CANT_DESTRUCT;
+        simpleArgs = ARGS_COMPLEX;
 
         assignable = parseExpression(lexerFlags, astProp);
         if (curc === $$COMMA_2C) {
@@ -3966,7 +3998,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       // </SCRUB AST>
 
-      parseArrowFromPunc(lexerFlags, asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC);
+      parseArrowFromPunc(lexerFlags, asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC, simpleArgs);
 
       AST_close('ArrowFunctionExpression');
       return NOT_ASSIGNABLE;

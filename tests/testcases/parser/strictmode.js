@@ -1,4 +1,4 @@
-let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_PURE, $TICK_TAIL, $STRING_DOUBLE} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('strict mode', _ => {
@@ -245,6 +245,406 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    describe('requires simple args', _ => {
+
+      describe('sans args', _ => {
+        test('func decl', {
+          code: 'function f(){"use strict";}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                expression: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [{type: 'Directive', directive: 'use strict'}],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('func expr', {
+          code: '+function f(){"use strict";}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'UnaryExpression',
+                  operator: '+',
+                  prefix: true,
+                  argument: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [],
+                    body: {
+                      type: 'BlockStatement',
+                      body: [{type: 'Directive', directive: 'use strict'}],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('property value', {
+          code: '({x:function(){"use strict";}})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        expression: false,
+                        id: null,
+                        params: [],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [{type: 'Directive', directive: 'use strict'}],
+                        },
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+
+      describe('one arg', _ => {
+        test('func decl', {
+          code: 'function f(x){"use strict";}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                expression: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [{type: 'Identifier', name: 'x'}],
+                body: {
+                  type: 'BlockStatement',
+                  body: [{type: 'Directive', directive: 'use strict'}],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('func expr', {
+          code: '+function f(x){"use strict";}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'UnaryExpression',
+                  operator: '+',
+                  prefix: true,
+                  argument: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [{type: 'Identifier', name: 'x'}],
+                    body: {
+                      type: 'BlockStatement',
+                      body: [{type: 'Directive', directive: 'use strict'}],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('property value', {
+          code: '({x:function(x){"use strict";}})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        expression: false,
+                        id: null,
+                        params: [{type: 'Identifier', name: 'x'}],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [{type: 'Directive', directive: 'use strict'}],
+                        },
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+
+      describe('two args', _ => {
+        test('func decl', {
+          code: 'function f(x, y){"use strict";}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                expression: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                body: {
+                  type: 'BlockStatement',
+                  body: [{type: 'Directive', directive: 'use strict'}],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('func expr', {
+          code: '+function f(x, y){"use strict";}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'UnaryExpression',
+                  operator: '+',
+                  prefix: true,
+                  argument: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                    body: {
+                      type: 'BlockStatement',
+                      body: [{type: 'Directive', directive: 'use strict'}],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('property value', {
+          code: '({x:function(x, y){"use strict";}})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        expression: false,
+                        id: null,
+                        params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [{type: 'Directive', directive: 'use strict'}],
+                        },
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+
+      describe('init', _ => {
+        test('func decl', {
+          code: 'function f(x=y){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('func expr', {
+          code: '+function f(x=y){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('property value', {
+          code: '({x:function(x=y){"use strict";}})',
+          throws: 'simple',
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+
+      describe('first arg with init should not reset', _ => {
+        test('func decl', {
+          code: 'function f(x=y, a){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('func expr', {
+          code: '+function f(x=y, a){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('property value', {
+          code: '({x:function(x=y, a){"use strict";}})',
+          throws: 'simple',
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+
+      describe('second arg with init', _ => {
+        test('func decl', {
+          code: 'function f(a, x=y){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('func expr', {
+          code: '+function f(a, x=y){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('property value', {
+          code: '({x:function(a, x=y){"use strict";}})',
+          throws: 'simple',
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+
+      describe('destruct', _ => {
+        test('func decl', {
+          code: 'function f([x]){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('func expr', {
+          code: '+function f([x]){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('property value', {
+          code: '({x:function([x]){"use strict";}})',
+          throws: 'simple',
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+
+      describe('second arg that is destruct', _ => {
+        test('func decl', {
+          code: 'function f(a, [x]){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('func expr', {
+          code: '+function f(a, [x]){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('property value', {
+          code: '({x:function(a, [x]){"use strict";}})',
+          throws: 'simple',
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+
+      describe('first arg that is destruct should not reset', _ => {
+        test('func decl', {
+          code: 'function f([x], a){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('func expr', {
+          code: '+function f([x], a){"use strict";}',
+          throws: 'simple',
+        });
+
+        test('property value', {
+          code: '({x:function([x], a){"use strict";}})',
+          throws: 'simple',
+        });
+
+        // TODO: arrow, async, generatrs, obj methods, class methods
+      });
+    });
+
 
     describe('eval', _ => {
       test('cannot assign to eval', {
