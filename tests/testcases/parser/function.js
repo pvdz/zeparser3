@@ -3265,6 +3265,12 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
+
+    test('array elision in arrow params', {
+      code: 'f = ([[,] = g()]) => {};',
+      ast: true,
+      tokens: true,
+    })
   });
 
 // TODO: mirror tests for all functions (regular, expr, arrow, objlit method, class method)

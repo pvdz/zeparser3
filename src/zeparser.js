@@ -3565,7 +3565,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (node instanceof Array) {
       for (let i=0; i<node.length; ++i) {
-        AST_scanYieldInParams(node[i]);
+        let item = node[i];
+        // array elements can be null like with array elisions
+        if (item !== null) AST_scanYieldInParams(node[i]);
       }
       return;
     }
