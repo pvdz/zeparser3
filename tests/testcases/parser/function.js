@@ -3270,7 +3270,13 @@ module.exports = (describe, test) =>
       code: 'f = ([[,] = g()]) => {};',
       ast: true,
       tokens: true,
-    })
+    });
+
+    test('class expr in arrow params', {
+      code: 'f = (x = class{}) => {};',
+      ast: true,
+      tokens: true,
+    });
   });
 
 // TODO: mirror tests for all functions (regular, expr, arrow, objlit method, class method)

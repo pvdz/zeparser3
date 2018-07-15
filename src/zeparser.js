@@ -3601,7 +3601,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     for (let key in node) {
       let item = node[key];
-      if (typeof item === 'object') {
+      // some nodes can be null like the name of a class expression
+      if (typeof item === 'object' && item !== null) {
         AST_scanYieldInParams(item);
       }
     }
