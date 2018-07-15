@@ -1054,30 +1054,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('id', null);
     }
 
-    // reset the async and generator lexer flags. they don't cross function boundaries
+    // reset the async lexer flags. it doesn't cross function boundaries
+    // leaves the generator flag alone since that's still needed in the args (ident yield vs yield expression)
     // make sure the LF_CAN_NEW_TARGET flag is set from here on out, this enables new.target (is allowed in arg default)
     // note: we dont reset the template lexer flag here. instead we do it at any place where we parse curly pairs
     //       this fixes the problem of parsing arrow functions where we can't tell whether the next token is part
     //       of the arrow expression until after parsing and processing that token. that needs curly pair checks.
-    lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, isGenerator, NOT_ARROW);
+    lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, NOT_ARROW);
 
-    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION);
+    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION, isGenerator);
     AST_close(isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression');
   }
-  function resetLexerFlagsForFunction(lexerFlags, isAsync, isGenerator, funcType) {
-    ASSERT(!isGenerator || !isAsync, 'cant be both generator and async'); // should this be a THROW? don't think so...
-    // reset lexer flag states that dont carry accross function boundary
-    lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
+  function resetLexerFlagsForFunction(lexerFlags, isAsync, funcType) {
+    // generator flag has to be dealt with elsewhere because it's a special case in the params
     lexerFlags = sansFlag(lexerFlags, LF_IN_ASYNC);
     lexerFlags = sansFlag(lexerFlags, LF_IN_FUNC_ARGS); // not likely to be useful but the right thing to do (tm)
     // dont remove the template flag here! let curly pair structures deal with this individually (fixes arrows)
-    if (isGenerator) lexerFlags = lexerFlags | LF_IN_GENERATOR;
     if (isAsync) lexerFlags = lexerFlags | LF_IN_ASYNC;
     if (funcType === NOT_ARROW) lexerFlags = lexerFlags | LF_CAN_NEW_TARGET;
     return lexerFlags;
   }
-  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState) {
+  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState, isGenerator) {
+    ASSERT(arguments.length === 4, 'arg count');
+    // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
+    if (isGenerator === WAS_GENERATOR)  lexerFlags = lexerFlags | LF_IN_GENERATOR;
     parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom);
+    if (isGenerator === NOT_GENERATOR) lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
     parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, 'body');
   }
   function parseFuncArguments(lexerFlags, bindingFrom) {
@@ -1092,6 +1094,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       parseBindings(lexerFlags, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, 'params');
       AST_destruct('params');
+      if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) AST_scanYieldInParams(_path[_path.length - 1].params);
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
   }
@@ -1336,8 +1339,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let argIdentToken = curtok;
       ASSERT_skipAny($IDENT, lexerFlags); // arrow or bust...
 
-      if (curtok.nl) THROW('Can not have newline between arrow arg and actual arrow');
       if (curtok.str !== '=>') THROW('Missing rest of async arrow');
+      if (curtok.nl) THROW('Can not have newline between arrow arg and actual arrow');
 
       if (stmtOrExpr === IS_STATEMENT) {
         AST_open(astProp, 'ExpressionStatement');
@@ -2771,7 +2774,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_set('operator', curtok.str);
           skipRex(lexerFlags);
           lhsWasParenStart = curc === $$PAREN_L_28; // heuristic for determining groups
-          parseValue(lexerFlags | LF_NO_YIELD, 'right');
+          if (curtok.str === 'yield') parseValue(lexerFlags | LF_NO_YIELD, 'right'); // this is easier than resetting it
+          else parseValue(lexerFlags, 'right');
           AST_close(AST_nodeName);
         }
 
@@ -3300,32 +3304,34 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseYieldKeyword(lexerFlags, identToken, astProp) {
     ASSERT(identToken.str === 'yield', 'the yield keyword token was already consumed');
     // note: yield is a recursive AssignmentExpression (its optional argument can be an assignment or another yield)
-    if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      if (hasNoFlag(lexerFlags, LF_IN_GENERATOR)) {
-        THROW('Cannot use `yield` outside of generator functions when in strict mode');
+    // Since it is an AssignmentExpression it cannot appear after a non-assignment operator. oops.
+
+    if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) {
+      // must parse a yield expression now
+
+      if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
+        THROW('Cannot `yield` after non-assignment operator');
       }
+
+      AST_open(astProp, 'YieldExpression');
+      AST_set('delegate', false); // TODO ??
+      parseYieldArgument(lexerFlags, 'argument'); // takes care of newline check
+      AST_close('YieldExpression');
+      return NOT_ASSIGNABLE;
+    }
+
+    // `yield` _must_ be a treated as a regular var binding now
+
+    if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
         THROW('Using `yield` after non-operator makes it a var name (illegal in strict mode)');
       }
-    }
-    else if (hasAllFlags(lexerFlags, LF_NO_YIELD) || curtok.nl) {
-      // considering `yield` a regular var name here. That's okay in sloppy mode.
-      parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, astProp);
-      return IS_ASSIGNABLE;
+      THROW('Cannot use `yield` outside of generator functions when in strict mode');
     }
 
-    // TODO: pretty sure this is fine and that the "in generator"-state does not reset at function bodies
-    if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) {
-      AST_open(astProp, 'YieldExpression');
-      AST_set('delegate', false); // TODO ??
-      parseYieldArgument(lexerFlags, 'argument');
-      AST_close('YieldExpression');
-      return NOT_ASSIGNABLE;
-    } else {
-      ASSERT(hasNoFlag(lexerFlags, LF_STRICT_MODE), 'should not be strict mode here');
-      AST_setIdent(astProp, identToken);
-      return IS_ASSIGNABLE;
-    }
+    // `yield` is a var name in sloppy mode:
+    parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, astProp);
+    return IS_ASSIGNABLE;
   }
   function parseYieldArgument(lexerFlags, astProp) {
     let wasParen = curc === $$PAREN_L_28;
@@ -3349,6 +3355,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.nl) {
         THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
       }
+      if (hasAllFlags(lexerFlags, LF_IN_GENERATOR) && identToken.str === 'yield') THROW('Yield in generator is keyword');
       ASSERT(assignable === IS_ASSIGNABLE, 'not sure whether an arrow is valid if the arg is marked as non-assignable');
       // arrow with single param
       AST_open(astProp, 'ArrowFunctionExpression');
@@ -3551,13 +3558,64 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
+  function AST_scanYieldInParams(node) {
+    ASSERT(!!node, 'should receive node');
+    // note: this is only for arrows. regular functions parse differently!
+    // quickly scan through the AST for an ident with `yield` and throw if it exists
+
+    if (node instanceof Array) {
+      for (let i=0; i<node.length; ++i) {
+        AST_scanYieldInParams(node[i]);
+      }
+      return;
+    }
+
+    let type = node.type;
+    if (type === 'Identifier') {
+      ASSERT('name' in node, 'node should have these properties', node);
+      if (node.id === 'yield') {
+        // avoid in certain positions... (TODO)
+        THROW('Yield is not allowed in the params inside a generator');
+      }
+    } else if (type === 'YieldExpression') {
+      THROW('Yield is not allowed in the params inside a generator');
+    } else if (type === 'ObjectProperty') {
+      ASSERT('key' in node && 'value' in node, 'node should have these properties:', node);
+      // ignore ({yield: foo}) but not `({yield}}` and `({[yield]: foo})`
+      if (node.key.type === 'Identifier' && node.computed && node.key.name === 'yield') {
+        THROW('Yield is not allowed in the params inside a generator');
+      }
+      return AST_scanYieldInParams(node.value);
+    } else if (type === 'MemberExpression') {
+      ASSERT('object' in node && 'property' in node, 'node should have these properties', node);
+      if (node.property.type === 'Identifier' && !node.computed) {
+        // ignore `foo.yield` but not `yield.foo` (although that should be caught elsewhere) or x[yield]
+        return;
+      }
+    } else if (type === 'ArrowFunctionExpression' || type === 'FunctionDeclaration' || type === 'FunctionExpression') {
+      // generator state does not cross function boundaries (not even its arguments)
+      return;
+    }
+
+    for (let key in node) {
+      let item = node[key];
+      if (typeof item === 'object') {
+        AST_scanYieldInParams(item);
+      }
+    }
+
+  }
   function parseArrowFromPunc(lexerFlags, isAsync) {
     ASSERT(typeof isAsync === 'boolean', 'isasync bool');
     ASSERT_skipRex('=>', lexerFlags); // `{` or any expression
+
+    ASSERT(_path[_path.length - 1] && _path[_path.length - 1].params, 'params should be wrapped in arrow node now');
+    AST_scanYieldInParams(_path[_path.length - 1].params);
+
     AST_set('id', null);
     AST_set('generator', false);
     AST_set('async', isAsync);
-    lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, NOT_GENERATOR, IS_ARROW);
+    lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
       AST_set('expression', BODY_IS_BLOCK); // "body of arrow is block"
       parseBlockStatement(lexerFlags, IS_EXPRESSION, PARSE_DIRECTIVES, 'body');
@@ -3679,7 +3737,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (asyncStmtOrExpr === IS_STATEMENT) assignable = parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
           return assignable;
         }
-        THROW('Empty group must indicate an arrow');
+        THROW('Empty group must indicate an arrow'); // or async() or await()...
       } else if (curtok.nl) {
         // this is a little bit of a weird error since there can't be ambiguity if this is an error anyways *shrug*
         THROW('The arrow token `=>` is a restricted production and cannot have a newline preceeding it');

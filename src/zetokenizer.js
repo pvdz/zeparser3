@@ -223,7 +223,7 @@ const LF_IN_ASYNC = 1 << 4;
 const LF_IN_GENERATOR = 1 << 5;
 const LF_IN_FUNC_ARGS = 1 << 6; // throws for await expression
 const LF_NO_FUNC_DECL = 1 << 7; // currently nesting inside at least one statement that is not a block/body
-const LF_NO_YIELD = 1 << 8; // yield is not allowed after a non-assignment-op
+const LF_NO_YIELD = 1 << 8; // yield is not allowed after a non-assignment-op (is different from in_generator). TODO: we can probably get rid of this flag by taking the path at binary op time
 const LF_CAN_NEW_TARGET = 1 << 9; // current scope is inside at least one regular (non-arrow) function
 const LF_NO_IN = 1 << 10; // inside the initial part of a for-header, prevents `in` being parsed as a generic expression
 const LF_NO_ASI = 1 << 11; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
@@ -234,6 +234,7 @@ const LF_NO_ASI = 1 << 11; // can you asi if you must? used for async. LF_IN_TEM
 const INITIAL_LEXER_FLAGS = LF_FOR_REGEX;
 
 function LF_DEBUG(flags) {
+  let bak = flags;
   let s = [];
   if (!flags) {
     s.push('LF_NO_FLAGS');
@@ -278,8 +279,12 @@ function LF_DEBUG(flags) {
     flags ^= LF_NO_IN;
     s.push('LF_NO_IN');
   }
+  if (flags & LF_NO_ASI) {
+    flags ^= LF_NO_ASI;
+    s.push('LF_NO_ASI');
+  }
   if (flags) {
-    throw new Error('UNKNOWN_FLAGS: ' + flags.toString(2) + ', so far: [' + s.join('|') + ']');
+    throw new Error('UNKNOWN_FLAGS: ' + flags.toString(2) + ' (was: ' + bak.toString(2) + '), so far: [' + s.join('|') + ']');
   }
   return s.join('|');
 }
