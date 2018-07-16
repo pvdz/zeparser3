@@ -3172,6 +3172,77 @@ module.exports = (describe, test) => describe('parens', _ => {
       });
     });
 
+    test('arrow with one arg inside an arg list', {
+      code: 'f(((a) => a + b)(1, 4), 5);',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'f'},
+              arguments: [
+                {
+                  type: 'CallExpression',
+                  callee: {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'a'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {
+                      type: 'BinaryExpression',
+                      left: {type: 'Identifier', name: 'a'},
+                      operator: '+',
+                      right: {type: 'Identifier', name: 'b'},
+                    },
+                  },
+                  arguments: [{type: 'Literal', value: '<TODO>', raw: '1'}, {type: 'Literal', value: '<TODO>', raw: '4'}],
+                },
+                {type: 'Literal', value: '<TODO>', raw: '5'},
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('arrow with two args inside an arg list', {
+      code: 'f(((a, b) => a + b));',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'f'},
+              arguments: [
+                {
+                  type: 'ArrowFunctionExpression',
+                  params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {
+                    type: 'BinaryExpression',
+                    left: {type: 'Identifier', name: 'a'},
+                    operator: '+',
+                    right: {type: 'Identifier', name: 'b'},
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
     // TODO
     // test('arrow with block cannot be lhs of binary expression', {
     //   code: 'a => {} + x',

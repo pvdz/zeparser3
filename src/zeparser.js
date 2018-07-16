@@ -3976,25 +3976,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       // <SCRUB AST>
-      let node = _path[_path.length-1];
-      let params = node[rootAstProp];
-
       AST_wrapClosedIntoArray(rootAstProp, 'ArrowFunctionExpression', 'params');
 
+      let top = _path[_path.length - 1];
       if (toplevelComma) {
-        ASSERT(params.type === 'SequenceExpression', 'if toplevelComma then this is a sequence');
+        ASSERT(top.params instanceof Array, 'these params should be an array');
+        let params = top.params[top.params.length - 1];
+        ASSERT(params.type === 'SequenceExpression', 'if toplevelComma then this is a sequence', rootAstProp, params);
         ASSERT(params.expressions instanceof Array, 'if toplevelComma then node is a sequence and .expressions should be an array');
-        node[rootAstProp].params = params.expressions;
+        top.params = params.expressions;
       }
-      else if (!Array.isArray(params)) node[rootAstProp].params = [params];
-      else {
-        ASSERT(params instanceof Array, 'params should be an array');
-        node[rootAstProp].params = params;
-      }
-      ASSERT(Array.isArray(node[rootAstProp].params), 'params should now be an array in any case');
-
-      for (let i=0; i<node[rootAstProp].params.length; ++i) {
-        AST__destruct(node[rootAstProp].params[i]);
+      ASSERT(Array.isArray(top.params), 'params should now be an array in any case');
+      let params = top.params;
+      for (let i=0; i<params.length; ++i) {
+        AST__destruct(params[i]);
       }
       // </SCRUB AST>
 
