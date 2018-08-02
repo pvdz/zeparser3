@@ -5067,6 +5067,12 @@ module.exports = (describe, test) =>
         },
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      test('shorthands can be keyword', {
+        code: 'let o = {true, false, super, this, null};',
+        ast: true,
+        tokens: true,
+      });
     });
 
     describe('destructuring', _ => {
@@ -5499,13 +5505,13 @@ module.exports = (describe, test) =>
           ].forEach(keyword => {
             test('keyword='+keyword, {
               code: '({'+keyword+'}) => null',
-              throws: 'name', // various messages related to the var name...
+              throws: true,
             });
           });
 
           test('keyword=let', {
             code: '({let}) => null',
-            throws: 'Cannot use this name',
+            throws: true,
             SLOPPY_SCRIPT: {
               desc: 'let is a valid var name in sloppy mode and destructuring is not "strict" by default',
               ast: true,
@@ -5516,7 +5522,7 @@ module.exports = (describe, test) =>
           ['eval', 'arguments', 'static', 'implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield'].forEach(keyword => {
             test('strict-mode only keyword=' + keyword, {
               code: '({'+keyword+'}) => null',
-              throws: 'Cannot use this name',
+              throws: true,
               SLOPPY_SCRIPT: {
                 ast: {
                   type: 'Program',

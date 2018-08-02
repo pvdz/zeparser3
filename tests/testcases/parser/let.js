@@ -11966,7 +11966,7 @@ module.exports = (describe, test) =>
 
           test('var obj destruct', {
             code: 'var {let} = x;',
-            throws: 'Cannot use this name',
+            throws: true,
             SLOPPY_SCRIPT: {
               desc: 'let as var in destruct can be ok',
               ast: {
@@ -12165,19 +12165,19 @@ module.exports = (describe, test) =>
 
           test('let as name in object destructuring is always illegal', {
             code: 'let {let} = x;',
-            throws: 'when binding through',
+            throws: true,
             tokens: [$IDENT, $IDENT, $PUNCTUATOR],
           });
 
           test('let as object destruct name with default', {
             code: 'let {let = y} = x;',
-            throws: 'when binding through',
+            throws: true,
             tokens: [$IDENT, $IDENT, $PUNCTUATOR],
           });
 
           test('let as object destruct name as second name', {
             code: 'let {a, let} = x;',
-            throws: 'Cannot use this name',
+            throws: true,
           });
 
           test('let as _prop_ name in object destructuring is okay', {

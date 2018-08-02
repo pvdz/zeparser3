@@ -223,7 +223,7 @@ module.exports = (describe, test) =>
 
             test(`function object destructured arg`, {
               code: `function f({${name}}) {}`,
-              throws: 'reserved word',
+              throws: true,
               SLOPPY_SCRIPT: {ast: true, tokens: true},
             });
 

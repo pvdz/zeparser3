@@ -4893,9 +4893,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // property shorthand; `{ident}=x` is valid, x={y} is also valid
       // - {a}
       // - {a, ...}
-      // - {true}       !is never valid!
+      // - {true}       cant destructure, works fine as init (`let x = {true}` == `let x = {true: true}`)
 
-      bindingIdentCheck(identToken, bindingType, lexerFlags);
+      let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
+      if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
 
       AST_open(astProp, 'Property');
       AST_setIdent('key', identToken);
@@ -5177,7 +5178,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // nameBinding can be undefined here if
     // - dynamic property `{[x]: y}`
     // - name would be illegal to bind to `{x: true}`
-    ASSERT(hasNoFlag(destructible, CANT_DESTRUCT) || nameBinding === undefined, 'if cant destruct then must have a name?');
+
     // in this case the binding check can force the flag without throwing
     // - `{true}`
     // - `{foo: true}`
@@ -5195,9 +5196,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           break;
         default:
           // regardless of destructible state, if you see something like `typeof` here you have an error
-          let errorMsg = _bindingIdentCheck(nameBinding, bindingType, lexerFlags);
-          if (errorMsg) {
-            if (hasAllFlags(destructible, MUST_DESTRUCT)) THROW('Parsed a Pattern that is not destructible: ' + errorMsg);
+          let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
+          if (assignable === NOT_ASSIGNABLE) {
+            if (hasAllFlags(destructible, MUST_DESTRUCT)) THROW('Parsed a Pattern that is not destructible');
             destructible |= CANT_DESTRUCT;
           }
       }
