@@ -1224,6 +1224,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ExpressionStatement');
     AST_setLiteral('expression', stringToken);
     parseExpressionAfterLiteral(lexerFlags, 'expression');
+    if (curc === $$COMMA_2C) {
+      _parseExpressions(lexerFlags, 'expression');
+    }
     AST_close('ExpressionStatement');
     parseSemiOrAsi(lexerFlags);
   }
@@ -1234,6 +1237,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ExpressionStatement');
     parseTickExpression(lexerFlags, 'expression');
     parseExpressionAfterLiteral(lexerFlags, 'expression');
+    if (curc === $$COMMA_2C) {
+      _parseExpressions(lexerFlags, 'expression');
+    }
     AST_close('ExpressionStatement');
     parseSemiOrAsi(lexerFlags);
   }
@@ -2179,7 +2185,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // we deal with async here because it can be a valid label in sloppy mode
         ASSERT_skipAny('async', lexerFlags); // TODO: async can only be followed by `function`, `(`, `:`, or an ident (arrow)
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp, astProp);
-        return parseAsyncStatement(lexerFlags, identToken, NOT_EXPORT, astProp);
+        parseAsyncStatement(lexerFlags, identToken, NOT_EXPORT, astProp);
+        return;
 
       case 'await':
         THROW('expecting the ident statement path to take this and this not to proc, search for await');
@@ -2369,7 +2376,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // fall-through
       default:
         AST_open(astProp, 'ExpressionStatement');
-        parseExpression(lexerFlags, 'expression');
+        parseExpressions(lexerFlags, 'expression');
         AST_close('ExpressionStatement');
         parseSemiOrAsi(lexerFlags);
     }
@@ -2918,14 +2925,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _parseExpressions(lexerFlags, astProp) {
     ASSERT(curc === $$COMMA_2C, 'confirm at callsite');
     AST_wrapClosedIntoArray(astProp, 'SequenceExpression', 'expressions');
-    __parseExpressions(lexerFlags);
+    __parseExpressions(lexerFlags, 'expressions');
     AST_close('SequenceExpression');
   }
-  function __parseExpressions(lexerFlags) {
+  function __parseExpressions(lexerFlags, astProp) {
     // current node should already be a SequenceExpression here. it wont be closed here either
     do {
       ASSERT_skipRex(',', lexerFlags);
-      parseExpression(lexerFlags, 'expressions');
+      parseExpression(lexerFlags, astProp);
     } while (curc === $$COMMA_2C);
   }
 

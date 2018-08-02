@@ -1,4 +1,4 @@
-let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_BODY, $TICK_TAIL} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $TICK_HEAD, $TICK_BODY, $TICK_TAIL} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('comma', _ => {
@@ -709,5 +709,167 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       desc: 'comma is stronger than ternary',
+    });
+
+    describe('toplevel statement expression', _ => {
+
+      test('after a number', {
+        code: '0,1;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Literal', value: '<TODO>', raw: '0'}, {type: 'Literal', value: '<TODO>', raw: '1'}],
+              },
+            },
+          ],
+        },
+        tokens: [$NUMBER_DEC, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+      });
+
+      test('after a string', {
+        code: '"x","y";',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Literal', value: '<TODO>', raw: '"x"'}, {type: 'Literal', value: '<TODO>', raw: '"y"'}],
+              },
+            },
+          ],
+        },
+        tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
+      });
+
+      test('after a template', {
+        code: '`x`,`y`',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {
+                    type: 'TemplateLiteral',
+                    expressions: [],
+                    quasis: [
+                      {
+                        type: 'TemplateElement',
+                        tail: true,
+                        value: {raw: '`x`', cooked: '<TODO>'},
+                      },
+                    ],
+                  },
+                  {
+                    type: 'TemplateLiteral',
+                    expressions: [],
+                    quasis: [
+                      {
+                        type: 'TemplateElement',
+                        tail: true,
+                        value: {raw: '`y`', cooked: '<TODO>'},
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
+
+      test('after a bare regex', {
+        code: '/x/,y;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Literal', value: '<TODO>', raw: '/x/'}, {type: 'Identifier', name: 'y'}],
+              },
+            },
+          ],
+        },
+        tokens: [$REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('after a flagged string', {
+        code: '/x/g,y;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Literal', value: '<TODO>', raw: '/x/g'}, {type: 'Identifier', name: 'y'}],
+              },
+            },
+          ],
+        },
+        tokens: [$REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('after a true', {
+        code: 'true,y;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Literal', value: true, raw: 'true'}, {type: 'Identifier', name: 'y'}],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('after a group', {
+        code: '(x),y;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('more than one', {
+        code: 'a, b, c',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}, {type: 'Identifier', name: 'c'}],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
     });
   });
