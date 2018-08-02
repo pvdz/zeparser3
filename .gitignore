@@ -13,3 +13,6 @@ dist
 
 # Dependency directory
 node_modules
+
+# Random stuff not for git
+ignore
