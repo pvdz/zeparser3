@@ -1061,20 +1061,25 @@ module.exports = (describe, test) =>
 
               test('rest followed by an ident', {
                 code: 'const [...foo, bar] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
               });
 
               test('rest followed by a trailing comma', {
                 code: 'const [...foo,] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('rest followed by two commas', {
                 code: 'const [...foo,,] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 });
+
+              test('rest on a nested that cant destruct', {
+                code: 'const [...[foo + bar]] = obj;',
+                throws: 'not destruct',
+              });
 
               test('rest on a nested destruct', {
                 code: 'const [...[foo, bar]] = obj;',
@@ -1110,13 +1115,13 @@ module.exports = (describe, test) =>
 
               test('trailing comma after rest on a nested destruct', {
                 code: 'const [...[foo, bar],] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double trailing comma after rest on a nested destruct', {
                 code: 'const [...[foo, bar],,] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 });
 
               test('second param rest on a nested destruct', {
@@ -1169,7 +1174,7 @@ module.exports = (describe, test) =>
 
               test('rest with default', {
                 code: 'const [...bar = foo] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 desc: 'ok in func args, not possible in const according to https://tc39.github.io/ecma262/#prod-BindingRestElement',
               });
 
@@ -3614,18 +3619,18 @@ module.exports = (describe, test) =>
 
                 test('rest followed by an ident', {
                   code: 'for (const [...foo, bar] = obj;;);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                 });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (const [...foo,] = obj;;);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] = obj;;);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('rest on a nested destruct', {
@@ -3686,13 +3691,13 @@ module.exports = (describe, test) =>
 
                 test('trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],] = obj;;);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] = obj;;);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('second param rest on a nested destruct', {
@@ -3756,7 +3761,7 @@ module.exports = (describe, test) =>
 
                 test('rest with default', {
                   code: 'for (const [...bar = foo] = obj;;);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   desc: 'rest cannot get a default in var decls but they can as func args',
                 });
 
@@ -5755,18 +5760,18 @@ module.exports = (describe, test) =>
 
                 test('rest followed by an ident', {
                   code: 'for (const [...foo, bar] = obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                 });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (const [...foo,] = obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] = obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('rest on a nested destruct', {
@@ -5777,13 +5782,13 @@ module.exports = (describe, test) =>
 
                 test('trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],] = obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] = obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                 });
 
                 test('second param rest on a nested destruct', {
@@ -5809,7 +5814,7 @@ module.exports = (describe, test) =>
 
                 test('rest with default', {
                   code: 'for (const [...bar = foo] = obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   desc: 'rest cannot get a default in var decls but they can as func args',
                 });
 
@@ -7076,18 +7081,18 @@ module.exports = (describe, test) =>
 
                 test('rest followed by an ident', {
                   code: 'for (const [...foo, bar] in obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (const [...foo,] in obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] in obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('rest on a nested destruct', {
@@ -7145,13 +7150,13 @@ module.exports = (describe, test) =>
 
                 test('trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],] in obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] in obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('second param rest on a nested destruct', {
@@ -7212,7 +7217,7 @@ module.exports = (describe, test) =>
 
                 test('rest with default', {
                   code: 'for (const [...bar = foo] in obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   desc: 'rest cannot get a default in var decls but they can as func args',
                     });
 
@@ -9061,18 +9066,18 @@ module.exports = (describe, test) =>
 
                 test('rest followed by an ident', {
                   code: 'for (const [...foo, bar] of obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (const [...foo,] of obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] of obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('rest on a nested destruct', {
@@ -9130,13 +9135,13 @@ module.exports = (describe, test) =>
 
                 test('trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],] of obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] of obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                     });
 
                 test('second param rest on a nested destruct', {
@@ -9197,7 +9202,7 @@ module.exports = (describe, test) =>
 
                 test('rest with default', {
                   code: 'for (const [...bar = foo] of obj);',
-                  throws: 'not destructure ',
+                  throws: 'not destructible',
                   desc: 'rest cannot get a default of var decls but they can as func args',
                     });
 
@@ -10871,20 +10876,20 @@ module.exports = (describe, test) =>
 
               test('rest followed by an ident', {
                 code: 'export const [...foo, bar] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 SCRIPT: {throws: 'module goal'},
               });
 
               test('rest followed by a trailing comma', {
                 code: 'export const [...foo,] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
                 SCRIPT: {throws: 'module goal'},
                 });
 
               test('rest followed by two commas', {
                 code: 'export const [...foo,,] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 SCRIPT: {throws: 'module goal'},
                 });
 
@@ -10928,14 +10933,14 @@ module.exports = (describe, test) =>
 
               test('trailing comma after rest on a nested destruct', {
                 code: 'export const [...[foo, bar],] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 SCRIPT: {throws: 'module goal'},
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('double trailing comma after rest on a nested destruct', {
                 code: 'export const [...[foo, bar],,] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 SCRIPT: {throws: 'module goal'},
                 });
 
@@ -10996,7 +11001,7 @@ module.exports = (describe, test) =>
 
               test('rest with default', {
                 code: 'export const [...bar = foo] = obj;',
-                throws: 'not destructure ',
+                throws: 'not destructible',
                 desc: 'rest cannot get a default in var decls but they can as func args',
                 SCRIPT: {throws: 'module goal'},
               });

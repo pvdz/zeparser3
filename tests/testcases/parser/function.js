@@ -554,12 +554,12 @@ module.exports = (describe, test) =>
 
         test('rest cannot be addition', {
           code: 'function f(...rest + x){}',
-          throws: 'rest',
+          throws: 'not destructible',
         });
 
         test('rest cannot be a property', {
           code: 'function f(...rest.foo){}',
-          throws: 'rest',
+          throws: 'not destructible',
         });
 
         test('rest cannot be a group', {
@@ -2425,7 +2425,80 @@ module.exports = (describe, test) =>
             ],
           });
 
-          test('regression case', {
+          test('regression case 1', {
+            code: 'function f({b: []}) {}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: {type: 'Identifier', name: 'f'},
+                  params: [
+                    {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'b'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'ArrayPattern', elements: []},
+                          shorthand: false,
+                        },
+                      ],
+                    },
+                  ],
+                  body: {type: 'BlockStatement', body: []},
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('regression case 2', {
+            code: 'function f([{b}]) {}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: {type: 'Identifier', name: 'f'},
+                  params: [
+                    {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'ObjectPattern',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'b'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'b'},
+                              shorthand: true,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                  body: {type: 'BlockStatement', body: []},
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('regression case 3', {
             code: 'function f([a, {b: []}]) {}',
             ast: {
               type: 'Program',

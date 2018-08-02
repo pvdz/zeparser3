@@ -961,7 +961,7 @@ module.exports = (describe, test) =>
 
       test('cannot assign to grouped eval', {
         code: '(eval) = x;',
-        throws: 'Cannot use this name', // because `eval` is not assignable
+        throws: 'Invalid assignment', // because `eval` is not assignable
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',
@@ -983,7 +983,7 @@ module.exports = (describe, test) =>
 
       test('should not pass because of newline / asi', {
         code: '(eval)\n = x;',
-        throws: 'Cannot use this name', // applies ASI but then hits a wall
+        throws: 'Invalid assignment', // applies ASI but then hits a wall
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',
@@ -1003,9 +1003,27 @@ module.exports = (describe, test) =>
         },
       });
 
+      test('multi wrapped ident assign', {
+        code: '((((x)))) = x;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
       test('cannot assign to multi grouped eval', {
         code: '((((eval)))) = x;',
-        throws: 'Cannot use this name', // because `eval` is not assignable
+        throws: true,
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',

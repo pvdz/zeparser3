@@ -6826,6 +6826,201 @@ module.exports = (describe, test) =>
         ast: true,
         tokens: true,
       });
+
+      test('in comma expr', {
+        code: 'x, {foo, bar} = doo',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {type: 'Identifier', name: 'x'},
+                  {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'foo'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'foo'},
+                          shorthand: true,
+                        },
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'bar'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'bar'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'doo'},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('with default in comma expr', {
+        code: 'x, {foo = y, bar} = doo',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {type: 'Identifier', name: 'x'},
+                  {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'foo'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {
+                            type: 'AssignmentPattern',
+                            left: {type: 'Identifier', name: 'foo'},
+                            right: {type: 'Identifier', name: 'y'},
+                          },
+                          shorthand: true,
+                        },
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'bar'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'bar'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'doo'},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('that cant destruct in comma expr', {
+        code: 'x, {x: foo + y, bar} = doo',
+        throws: 'not destructible',
+      });
+
+      test('inside assignment chain', {
+        code: 'x = {a, b} = y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ObjectPattern',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'a'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'a'},
+                        shorthand: true,
+                      },
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'b'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'b'},
+                        shorthand: true,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'y'},
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('left of double assignment chain', {
+        code: '({a, b} = c = d)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'a'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'a'},
+                      shorthand: true,
+                    },
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'b'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'b'},
+                      shorthand: true,
+                    },
+                  ],
+                },
+                operator: '=',
+                right: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'c'},
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'd'},
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
     });
 
     describe('non-ident key with keyword value', _ => {

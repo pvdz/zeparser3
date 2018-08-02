@@ -346,6 +346,30 @@ module.exports = (describe, test) =>
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
 
+    test('double wrapped group in the middle', {
+      code: 'x = ((y)) = z',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'x'},
+              operator: '=',
+              right: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'y'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'z'},
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
     test('assign with dud group', {
       code: 'a = ((b)) = c;',
       ast: {

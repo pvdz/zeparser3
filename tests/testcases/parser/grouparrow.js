@@ -1517,7 +1517,7 @@ module.exports = (describe, test) => describe('parens', _ => {
     ].forEach(keyword => {
       test('cannot assign to group with reserved word in strict mode: `' + keyword + '`', {
         code: '('+keyword+')=2',
-        throws: keyword,
+        throws: 'Invalid assignment',
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',
@@ -1831,6 +1831,263 @@ module.exports = (describe, test) => describe('parens', _ => {
           ],
         },
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+    });
+
+    test('regression1', {
+      code: '([a.b] = x);',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {
+                type: 'ArrayPattern',
+                elements: [
+                  {
+                    type: 'MemberExpression',
+                    object: {type: 'Identifier', name: 'a'},
+                    property: {type: 'Identifier', name: 'b'},
+                    computed: false,
+                  },
+                ],
+              },
+              operator: '=',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('regression full', {
+      code: '([target()[targetKey()]] = x);',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {
+                type: 'ArrayPattern',
+                elements: [
+                  {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'CallExpression',
+                      callee: {type: 'Identifier', name: 'target'},
+                      arguments: [],
+                    },
+                    property: {
+                      type: 'CallExpression',
+                      callee: {type: 'Identifier', name: 'targetKey'},
+                      arguments: [],
+                    },
+                    computed: true,
+                  },
+                ],
+              },
+              operator: '=',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('assignment inside pattern', {
+      code: '([target()[targetKey(a=b)]] = x);',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {
+                type: 'ArrayPattern',
+                elements: [
+                  {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'CallExpression',
+                      callee: {type: 'Identifier', name: 'target'},
+                      arguments: [],
+                    },
+                    property: {
+                      type: 'CallExpression',
+                      callee: {type: 'Identifier', name: 'targetKey'},
+                      arguments: [
+                        {
+                          type: 'AssignmentExpression', // THIS IS IMPORTANT! Not a pattern
+                          left: {type: 'Identifier', name: 'a'},
+                          operator: '=',
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      ],
+                    },
+                    computed: true,
+                  },
+                ],
+              },
+              operator: '=',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('empty array literal that is a property is assignable', {
+      code: '([].length) = y',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {
+                type: 'MemberExpression',
+                object: {type: 'ArrayExpression', elements: []},
+                property: {type: 'Identifier', name: 'length'},
+                computed: false,
+              },
+              operator: '=',
+              right: {type: 'Identifier', name: 'y'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('array literal that is a property is assignable', {
+      code: '([x].length) = y',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {
+                type: 'MemberExpression',
+                object: {
+                  type: 'ArrayExpression',
+                  elements: [{type: 'Identifier', name: 'x'}],
+                },
+                property: {type: 'Identifier', name: 'length'},
+                computed: false,
+              },
+              operator: '=',
+              right: {type: 'Identifier', name: 'y'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('empty object literal that is a property is assignable', {
+      code: '({}.length) = z',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {
+                type: 'MemberExpression',
+                object: {type: 'ObjectExpression', properties: []},
+                property: {type: 'Identifier', name: 'length'},
+                computed: false,
+              },
+              operator: '=',
+              right: {type: 'Identifier', name: 'z'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('object literal that is a property is assignable', {
+      code: '({x: y}.length) = z',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {
+                type: 'MemberExpression',
+                object: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'y'},
+                      shorthand: false,
+                    },
+                  ],
+                },
+                property: {type: 'Identifier', name: 'length'},
+                computed: false,
+              },
+              operator: '=',
+              right: {type: 'Identifier', name: 'z'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    describe('invalid arrow header things', _ => {
+
+      // see counter-test in arrow where this stuff is disallowed
+      [
+        'arguments',
+        'async ()=>x',
+        'await',
+        'class{}',
+        'delete x',
+        'eval',
+        'false',
+        'function(){}',
+        'let',
+        'new x',
+        'null',
+        'super',
+        'true',
+        'this',
+        'typeof x',
+        'void x',
+        'yield',
+        'x + y',
+        '[].length',
+        '[x].length',
+        '{}.length',
+        '{x: y}.length',
+      ].forEach(str => {
+        test('[' + str + '] in arrow params', {
+          code: '('+str+');',
+          ast: true,
+          tokens: true,
+        });
       });
     });
   });
@@ -2656,7 +2913,7 @@ module.exports = (describe, test) => describe('parens', _ => {
       test('can not spread member', {
         code: '([...x.y]) => z',
         desc: 'would be valid in group; `[...x.y];`',
-        throws: 'rest arg',
+        throws: 'illegal',
       });
     });
 
@@ -3243,6 +3500,60 @@ module.exports = (describe, test) => describe('parens', _ => {
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
+    test('cannot assign to group with assignment', {
+      code: '(a=/i/) = /i/',
+      throws: 'Invalid assignment',
+    });
+
+    describe('invalid arrow header things', _ => {
+
+      // always:
+      [
+        'async ()=>x',
+        // 'await foo',
+        'class{}',
+        'delete x',
+        'false',
+        'function(){}',
+        // 'let',
+        'new x',
+        'null',
+        'super',
+        'true',
+        'this',
+        'typeof x',
+        'void x',
+        // 'yield x',
+        'x + y',
+        '[].length',
+        '[x].length',
+        '{}.length',
+        '{x: y}.length',
+      ].forEach(str => {
+        test('[' + str + '] in arrow params', {
+          code: '('+str+') => y',
+          throws: 'destructible',
+        });
+      });
+
+      // only in strict mode:
+      [
+        'arguments',
+        'eval',
+        'static',
+      ].forEach(str => {
+        test('[' + str + '] in arrow params', {
+          code: '('+str+') => y',
+          throws: 'destructible',
+          SLOPPY_SCRIPT: {
+            ast: true,
+            tokens: true,
+          },
+        });
+      });
+    });
+
+
     // TODO
     // test('arrow with block cannot be lhs of binary expression', {
     //   code: 'a => {} + x',
@@ -3255,3 +3566,4 @@ module.exports = (describe, test) => describe('parens', _ => {
 // cannot destructure when body contains "use strict"
 // cant redeclare existing vars
 // TODO: let not allowed in `let`, `const`, `for`-binding of any kind, and class name. But others are fine in sloppy
+// `(foo + (bar + boo) + ding)` propagating the lhs-paren state

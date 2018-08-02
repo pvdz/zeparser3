@@ -340,6 +340,6 @@ module.exports = (describe, test) =>
     test('inside must destruct, outside cannot be arrow', {
       code: '([...{a = b} = c]) => d;',
       desc: 'shorthand prop can only appear in Pattern, rest arg can only be an ident, this tests proper nesting',
-      throws: 'rest arg',
+      throws: 'not destructible',
     });
   });

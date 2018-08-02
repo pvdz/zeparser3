@@ -1,4 +1,4 @@
-let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('arrays', _ => {
@@ -165,6 +165,12 @@ module.exports = (describe, test) =>
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
       });
 
+      test('can contain this', {
+        code: '[this];',
+        ast: true,
+        tokens: true,
+      });
+
       describe('spread', _ => {
         // https://tc39.github.io/ecma262/#prod-SpreadElement
         // ...AssignmentExpression[+In, ?Yield, ?Await]
@@ -249,7 +255,7 @@ module.exports = (describe, test) =>
 
         test('cant rest an assignment at the end', {
           code: '[x, y, ...z = arr] = x',
-          throws: 'not destructible',
+          throws: true,
         });
 
         test('can splat a call at the end', {
@@ -393,6 +399,12 @@ module.exports = (describe, test) =>
             ],
           },
           tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('can splat this', {
+          code: '[...this];',
+          ast: true,
+          tokens: true,
         });
       });
     });
@@ -784,9 +796,36 @@ module.exports = (describe, test) =>
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('spread with ident with tail is not destructible', {
+      test('rest with member expression is destructible', {
         code: '[...x.list] = a;',
-        throws: 'not destructible',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [
+                    {
+                      type: 'RestElement',
+                      argument: {
+                        type: 'MemberExpression',
+                        object: {type: 'Identifier', name: 'x'},
+                        property: {type: 'Identifier', name: 'list'},
+                        computed: false,
+                      },
+                    },
+                  ],
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'a'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
 
       test('spread with ident is ok', {
@@ -818,7 +857,7 @@ module.exports = (describe, test) =>
 
       test('spread with ident and assignment throws', {
         code: '[...x = y] = a;',
-        throws: 'not destructible',
+        throws: true,
       });
 
       test('spread with ident and compound assignment is ok', {
@@ -850,7 +889,7 @@ module.exports = (describe, test) =>
 
       test('spread with ident and compound assignment is not destructible', {
         code: '[...x += y] = a;',
-        throws: 'not destructible',
+        throws: true,
       });
 
       test('spread with array with tail is ok', {
@@ -889,10 +928,174 @@ module.exports = (describe, test) =>
 
       test('spread with array with tail is not destructible', {
         code: '[...[x].map(y, z)] = a;',
-        throws: 'not destructible',
+        throws: true,
       });
 
-      // (a=/i/) = /i/   -> error (invalid lhs)
+      test('spread with array with member tail is destructible', {
+        code: '[...[x].map(y, z)[x]] = a;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [
+                    {
+                      type: 'RestElement',
+                      argument: {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'CallExpression',
+                          callee: {
+                            type: 'MemberExpression',
+                            object: {
+                              type: 'ArrayExpression',
+                              elements: [{type: 'Identifier', name: 'x'}],
+                            },
+                            property: {type: 'Identifier', name: 'map'},
+                            computed: false,
+                          },
+                          arguments: [{type: 'Identifier', name: 'y'}, {type: 'Identifier', name: 'z'}],
+                        },
+                        property: {type: 'Identifier', name: 'x'},
+                        computed: true,
+                      },
+                    },
+                  ],
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'a'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('in comma expr', {
+        code: 'x, [foo, bar] = doo',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {type: 'Identifier', name: 'x'},
+                  {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ArrayPattern',
+                      elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'doo'},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('with default in comma expr', {
+        code: 'x, [foo = y, bar] = doo',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {type: 'Identifier', name: 'x'},
+                  {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'AssignmentPattern',
+                          left: {type: 'Identifier', name: 'foo'},
+                          right: {type: 'Identifier', name: 'y'},
+                        },
+                        {type: 'Identifier', name: 'bar'},
+                      ],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'doo'},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('that cant destruct in comma expr', {
+        code: 'x, [foo + y, bar] = doo',
+        throws: true,
+      });
+
+      test('inside assignment chain', {
+        code: 'x = [a, b] = y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'y'},
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('left of double assignment chain', {
+        code: '[a, b] = c = d',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                },
+                operator: '=',
+                right: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'c'},
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'd'},
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
 
       describe('edge cases', _ => {
         test('should not transform the inner array to a arraydestruct', {
@@ -930,12 +1133,12 @@ module.exports = (describe, test) =>
 
         test('assignment pattern can only have regular assignments 1', {
           code: '[a,b^=[x,y]] = z',
-          throws: 'not destructible',
+          throws: true,
         });
 
         test('assignment pattern can only have regular assignments 2', {
           code: '[a,b+=[x,y]] = z',
-          throws: 'not destructible',
+          throws: true,
         });
 
         test('arr destruct inside an arr lit', {
@@ -1079,6 +1282,33 @@ module.exports = (describe, test) =>
           tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
 
+        test('spread with regex-plus', {
+          code: '[.../x/+y]',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Literal', value: '<TODO>', raw: '/x/'},
+                        operator: '+',
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
         test('spread with regex-division', {
           code: '[.../x//y]',
           ast: {
@@ -1131,6 +1361,970 @@ module.exports = (describe, test) =>
             ],
           },
           tokens: [$PUNCTUATOR, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+      });
+
+      describe('member exprs', _ => {
+
+        test('property of ident is assignable', {
+          code: '[x.y] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {type: 'Identifier', name: 'x'},
+                        property: {type: 'Identifier', name: 'y'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('property of call is assignable', {
+          code: '[x().y] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'CallExpression',
+                          callee: {type: 'Identifier', name: 'x'},
+                          arguments: [],
+                        },
+                        property: {type: 'Identifier', name: 'y'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('property of new is assignable', {
+          code: '[new x().y] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'NewExpression',
+                          arguments: [],
+                          callee: {type: 'Identifier', name: 'x'},
+                        },
+                        property: {type: 'Identifier', name: 'y'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of ident is assignable', {
+          code: '[a[x.y]] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {type: 'Identifier', name: 'a'},
+                        property: {
+                          type: 'MemberExpression',
+                          object: {type: 'Identifier', name: 'x'},
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: false,
+                        },
+                        computed: true,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of call is assignable', {
+          code: '[x()[y]] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'CallExpression',
+                          callee: {type: 'Identifier', name: 'x'},
+                          arguments: [],
+                        },
+                        property: {type: 'Identifier', name: 'y'},
+                        computed: true,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of new is assignable', {
+          code: '[new x()[y]] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'NewExpression',
+                          arguments: [],
+                          callee: {type: 'Identifier', name: 'x'},
+                        },
+                        property: {type: 'Identifier', name: 'y'},
+                        computed: true,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('property of ident with a init is assignable', {
+          code: '[x.y = a] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {type: 'Identifier', name: 'x'},
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: false,
+                        },
+                        right: {type: 'Identifier', name: 'a'},
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('property of call with a init is assignable', {
+          code: '[x().y = a] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'CallExpression',
+                            callee: {type: 'Identifier', name: 'x'},
+                            arguments: [],
+                          },
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: false,
+                        },
+                        right: {type: 'Identifier', name: 'a'},
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('property of new with a init is assignable', {
+          code: '[new x().y = a] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'NewExpression',
+                            arguments: [],
+                            callee: {type: 'Identifier', name: 'x'},
+                          },
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: false,
+                        },
+                        right: {type: 'Identifier', name: 'a'},
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of ident with a init is assignable', {
+          code: '[a[x.y] = a] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {type: 'Identifier', name: 'a'},
+                          property: {
+                            type: 'MemberExpression',
+                            object: {type: 'Identifier', name: 'x'},
+                            property: {type: 'Identifier', name: 'y'},
+                            computed: false,
+                          },
+                          computed: true,
+                        },
+                        right: {type: 'Identifier', name: 'a'},
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of call with a init is assignable', {
+          code: '[x()[y] = a ] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'CallExpression',
+                            callee: {type: 'Identifier', name: 'x'},
+                            arguments: [],
+                          },
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: true,
+                        },
+                        right: {type: 'Identifier', name: 'a'},
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of new with a init is assignable', {
+          code: '[new x()[y] = a] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'NewExpression',
+                            arguments: [],
+                            callee: {type: 'Identifier', name: 'x'},
+                          },
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: true,
+                        },
+                        right: {type: 'Identifier', name: 'a'},
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('property of ident with a+b init is assignable', {
+          code: '[x.y = a + b] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {type: 'Identifier', name: 'x'},
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: false,
+                        },
+                        right: {
+                          type: 'BinaryExpression',
+                          left: {type: 'Identifier', name: 'a'},
+                          operator: '+',
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('property of call with a+b init is assignable', {
+          code: '[x().y = a + b] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'CallExpression',
+                            callee: {type: 'Identifier', name: 'x'},
+                            arguments: [],
+                          },
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: false,
+                        },
+                        right: {
+                          type: 'BinaryExpression',
+                          left: {type: 'Identifier', name: 'a'},
+                          operator: '+',
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('property of new with a+b init is assignable', {
+          code: '[new x().y = a + b] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'NewExpression',
+                            arguments: [],
+                            callee: {type: 'Identifier', name: 'x'},
+                          },
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: false,
+                        },
+                        right: {
+                          type: 'BinaryExpression',
+                          left: {type: 'Identifier', name: 'a'},
+                          operator: '+',
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of ident with a+b init is assignable', {
+          code: '[a[x.y] = a + b] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {type: 'Identifier', name: 'a'},
+                          property: {
+                            type: 'MemberExpression',
+                            object: {type: 'Identifier', name: 'x'},
+                            property: {type: 'Identifier', name: 'y'},
+                            computed: false,
+                          },
+                          computed: true,
+                        },
+                        right: {
+                          type: 'BinaryExpression',
+                          left: {type: 'Identifier', name: 'a'},
+                          operator: '+',
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of call with a+b init is assignable', {
+          code: '[x()[y] = a + b] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'CallExpression',
+                            callee: {type: 'Identifier', name: 'x'},
+                            arguments: [],
+                          },
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: true,
+                        },
+                        right: {
+                          type: 'BinaryExpression',
+                          left: {type: 'Identifier', name: 'a'},
+                          operator: '+',
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('dynamic property of new with a+b init is assignable', {
+          code: '[new x()[y] = a + b] = z',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'NewExpression',
+                            arguments: [],
+                            callee: {type: 'Identifier', name: 'x'},
+                          },
+                          property: {type: 'Identifier', name: 'y'},
+                          computed: true,
+                        },
+                        right: {
+                          type: 'BinaryExpression',
+                          left: {type: 'Identifier', name: 'a'},
+                          operator: '+',
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('can be a function', {
+          code: '[function(){}.length] = x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          expression: false,
+                          id: null,
+                          params: [],
+                          body: {type: 'BlockStatement', body: []},
+                        },
+                        property: {type: 'Identifier', name: 'length'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('can be a number', {
+          code: '[5..length] = x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {type: 'Literal', value: '<TODO>', raw: '5.'},
+                        property: {type: 'Identifier', name: 'length'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('can be a string', {
+          code: '["X".length] = x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {type: 'Literal', value: '<TODO>', raw: '"X"'},
+                        property: {type: 'Identifier', name: 'length'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: true,
+        });
+
+        test('can be a simple template', {
+          code: '[`x`.length] = x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'TemplateLiteral',
+                          expressions: [],
+                          quasis: [
+                            {
+                              type: 'TemplateElement',
+                              tail: true,
+                              value: {raw: '`x`', cooked: '<TODO>'},
+                            },
+                          ],
+                        },
+                        property: {type: 'Identifier', name: 'length'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $TICK_PURE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('can be a complex template', {
+          code: '[`a${5}b`.length] = x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'TemplateLiteral',
+                          expressions: [{type: 'Literal', value: '<TODO>', raw: '5'}],
+                          quasis: [
+                            {
+                              type: 'TemplateElement',
+                              tail: false,
+                              value: {raw: '`a${', cooked: '<TODO>'},
+                            },
+                            {
+                              type: 'TemplateElement',
+                              tail: true,
+                              value: {raw: '}b`', cooked: '<TODO>'},
+                            },
+                          ],
+                        },
+                        property: {type: 'Identifier', name: 'length'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $TICK_HEAD, $NUMBER_DEC, $TICK_TAIL, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('can be a regex', {
+          code: '[/foo/.length] = x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {type: 'Literal', value: '<TODO>', raw: '/foo/'},
+                        property: {type: 'Identifier', name: 'length'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('can be a flagged regex', {
+          code: '[/x/g.length] = x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'MemberExpression',
+                        object: {type: 'Literal', value: '<TODO>', raw: '/x/g'},
+                        property: {type: 'Identifier', name: 'length'},
+                        computed: false,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+      });
+
+      test('this cant destruct', {
+        code: '[this] = obj',
+        throws: 'destructible',
+      });
+
+      describe('spread mirror rest tests', _ => {
+        // https://tc39.github.io/ecma262/#prod-SpreadElement
+        // ...AssignmentExpression[+In, ?Yield, ?Await]
+        // (in other words; any expression is fair game here)
+
+        test('rest another value', {
+          code: '[x, y, ...z] = obj',
+          ast: true,
+          tokens: true,
+        });
+
+        test('can not rest in the middle', {
+          code: '[x, ...y, z] = obj',
+          throws: true,
+        });
+
+        test('can not rest an assignment at the end', {
+          code: '[x, y, ...z = arr] = obj',
+          throws: true,
+        });
+
+        test('cant rest an assignment at the end', {
+          code: '[x, y, ...z = arr] = x = obj',
+          throws: true,
+        });
+
+        test('can not rest a call at the end', {
+          code: '[x, y, ...z()] = obj',
+          throws: true,
+        });
+
+        test('can not splat an expression at the end', {
+          code: '[x, y, ...z + arr] = obj',
+          throws: true,
+        });
+
+        test('can not rest an assignment at the end', {
+          code: '[x, ...z = arr, y] = obj',
+          throws: true,
+        });
+
+        test('can not rest a call at the end', {
+          code: '[x, ...z(), y] = obj',
+          throws: true,
+        });
+
+        test('can not rest an expression at the end', {
+          code: '[x, ...z + arr, y] = obj',
+          throws: true,
+        });
+
+        test('rest this cant destruct', {
+          code: '[...this] = obj',
+          throws: 'destructible',
         });
       });
     });
