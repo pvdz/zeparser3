@@ -435,4 +435,12 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
     });
+
+    test('the `as` keyword cannot contain escape sequence', {
+      code: 'export {a \\u0061s b} from "x";',
+      SCRIPT: {
+        throws: 'module',
+      },
+      throws: true,
+    });
   });

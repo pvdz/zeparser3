@@ -830,9 +830,17 @@ module.exports = (describe, test) =>
       });
 
       test('nope nope nope', {
-        code: 'export dfault ...x = y',
+        code: 'export default ...x = y',
         throws: true,
       });
+    });
+
+    test('the `as` keyword cannot contain escape sequence', {
+      code: 'export {a \\u0061s b} from "x";',
+      SCRIPT: {
+        throws: 'module',
+      },
+      throws: true,
     });
   });
 

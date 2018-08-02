@@ -1164,6 +1164,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // if ((lexerFlags & (LF_NO_FUNC_DECL|LF_STRICT_MODE)) === (LF_NO_FUNC_DECL|LF_STRICT_MODE)) {
         //   THROW('Function statement is illegal in strict mode');
         // }
+        // TODO: consider it a declaration in if/else and statement (requiring semi) in all other statement places
         parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_REQUIRED, astProp);
         return;
 
@@ -1605,6 +1606,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'DoWhileStatement');
     ASSERT_skipRex('do', lexerFlags);
     // if the next part does not start with `{` then it is not a block and ASI can not happen. otherwise dont care here
+    // note that functions and classes DO get ASI
     parseNestedBodyPart(curc !== $$CURLY_L_7B ? lexerFlags | LF_NO_ASI : lexerFlags, 'body');
     skipAnyOrDie($$W_77, 'while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
@@ -1745,6 +1747,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_setIdent('exported', nameToken);
       }
       if (curc === $$COMMA_2C) skipAny(lexerFlagsNoTemplate);
+      else if (curc !== $$CURLY_R_7D) THROW('Unexpected character while parsing export object');
       AST_close('ExportSpecifier');
     }
     skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlags);
@@ -2003,6 +2006,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       if (curc === $$COMMA_2C) ASSERT_skipAny(',', lexerFlagsNoTemplate);
+      else if (curc !== $$CURLY_R_7D) THROW('Unexpected character while parsing export object');
       AST_close('ImportSpecifier');
     }
     skipAnyOrDieSingleChar($$CURLY_R_7D, lexerFlagsNoTemplate);
@@ -2016,6 +2020,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipAnyOrDie($$A_61, 'as', lexerFlags);
 
     AST_open('specifiers', 'ImportNamespaceSpecifier');
+
     AST_setIdent('local', curtok);
     bindingIdentCheck(curtok, BINDING_TYPE_CONST, lexerFlags);
     ASSERT_skipAny($IDENT, lexerFlags); // next must be `as` comma or `from`
