@@ -617,4 +617,32 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
       });
     });
+
+    describe('unicode escape edge case', _ => {
+
+      test('var await should throw in async', {
+        code: 'async () => { var await; }',
+        throws: 'await',
+      });
+
+      test('start of await classic escaped', {
+        code: 'async () => { var \\u0061wait; }',
+        throws: 'await',
+      });
+
+      test('start of await es6 escaped', {
+        code: 'async () => { var \\u{61}wait; }',
+        throws: 'await',
+      });
+
+      test('mid of await classic escaped', {
+        code: 'async () => { var aw\\u0061it; }',
+        throws: 'await',
+      });
+
+      test('mid of await es6 escaped', {
+        code: 'async () => { var aw\\u{61}it; }',
+        throws: 'await',
+      });
+    });
   });

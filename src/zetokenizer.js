@@ -340,6 +340,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
   let wasWhite = false;
   let consumedNewline = false; // whitespace newline token or string token that contained newline or multiline comment
   let finished = false; // generated an $EOF?
+  let lastParsedIdent = ''; // updated after parsing an ident. used to canonalize escaped identifiers (a\u{65}b -> aab)
 
   let cache = input.charCodeAt(0);
 
@@ -572,6 +573,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
     ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c');
 
     let str = slice(start, stop);
+    let canon = type === $IDENT ? lastParsedIdent : str;
     return {
       // <SCRUB DEV>
       _t: debug_toktype(type),
@@ -583,11 +585,14 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       stop, // start of next token
       c,
       str,
-
+      // :'( https://tc39.github.io/ecma262/#prod-EscapeSequence
+      // The ReservedWord definitions are specified as literal sequences of specific SourceCharacter elements.
+      // A code point in a ReservedWord cannot be expressed by a \ UnicodeEscapeSequence.
+      canon, // TODO: should perf check this, perhaps we need to take this slowpath differently
 
       // <SCRUB DEV>
       toString() {
-        return `{# ${debug_toktype(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} ${start}:${stop} c=\`${String.fromCharCode(c)}\` o=${c} ${str.length>1?'`'+str+'` ':''}#}`;
+        return `{# ${debug_toktype(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} ${start}:${stop} curc=${c} \`${str}\`${canon!==str?' (canonical=`' + canon + '`)':''}#}`;
       },
       // </SCRUB DEV>
     };
@@ -599,7 +604,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
 
     let c = peekSkip();
 
-    if (isAsciiLetter(c)) return parseIdentifierRest(c);
+    if (isAsciiLetter(c)) return parseIdentifierRest(c, String.fromCharCode(c));
 
     // https://www.ecma-international.org/ecma-262/7.0/#sec-punctuators
     switch (c) {
@@ -664,7 +669,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       case $$STAR_2A:
         return parseStar(); // * *= ** **=
       case $$$_24:
-        return parseIdentifierRest(c);
+        return parseIdentifierRest(c, '$');
       case $$PERCENT_25:
         return parseCompoundAssignment(); // % %=
       case $$FF_0C:
@@ -689,7 +694,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       case $$COLON_3A:
         return $PUNCTUATOR;
       case $$LODASH_5F:
-        return parseIdentifierRest(c);
+        return parseIdentifierRest(c, '_');
       case $$OR_7C:
         return parseSameOrCompound(c); // | || |=
       case $$QMARK_3F:
@@ -1225,15 +1230,19 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
     return $PUNCTUATOR;
   }
 
-  function parseIdentifierRest(c) {
+  function parseIdentifierRest(c, prev) {
     ASSERT(typeof c === 'number', 'should get the parsed ident start');
     ASSERT(isIdentStart(c), 'ident start should already have been confirmed');
-    return _parseIdentifierRest();
+    ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
+    return _parseIdentifierRest(c, prev);
   }
-  function _parseIdentifierRest() {
+  function _parseIdentifierRest(c, prev) {
+    ASSERT(typeof c === 'number', 'c is an ord');
+    ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
     if (neof()) {
       let c = peek();
       while (isIdentRestChr(c)) { // super hot
+        prev += String.fromCharCode(c); // TODO: if this affects perf we can try a slice after the loop
         ASSERT_skip(c);
         if (eof()) break;
         c = peek();
@@ -1241,15 +1250,20 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       // slow path, dont test this inside the super hot loop above
       if (c === $$BACKSLASH_5C) {
         ASSERT_skip($$BACKSLASH_5C);
-        return parseIdentFromUnicodeEscape(NON_START);
+        return parseIdentFromUnicodeEscape(NON_START, prev);
       }
     }
-
+    lastParsedIdent = prev;
     return $IDENT;
   }
-  function parseIdentFromUnicodeEscape(fromStart) {
-    if (eof()) return $ERROR;
+  function parseIdentFromUnicodeEscape(fromStart, prev) {
+    ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
+    if (eof()) {
+      lastParsedIdent = prev;
+      return $ERROR;
+    }
     if (peeky($$U_75)) ASSERT_skip($$U_75);
+    else TODO // why do we peek for `u`? Shouldn't it fail hard otherwise?
 
     // Note: this is a slow path. and a super edge case.
     let start = pointer;
@@ -1257,9 +1271,16 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       let data;
       if (peekyd(start - pointer, $$CURLY_L_7B)) {
         data = slice(start + 1, pointer);
-        if (eof()) return $ERROR;
-        if (peeky($$CURLY_R_7D)) ASSERT_skip($$CURLY_R_7D);
-        else return $ERROR;
+        if (eof()) {
+          lastParsedIdent = prev;
+          return $ERROR;
+        }
+        if (peeky($$CURLY_R_7D)) {
+          ASSERT_skip($$CURLY_R_7D);
+        } else {
+          lastParsedIdent = prev;
+          return $ERROR;
+        }
       } else {
         data = slice(start , pointer);
       }
@@ -1268,20 +1289,23 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       ASSERT(data.charCodeAt(data.length - 1) !== $$CURLY_R_7D && isHex(data.charCodeAt(data.length - 1)), 'if wrapped, the closer should not be consumed yet');
 
       let ord = parseInt(data, 16);
+      prev += String.fromCharCode(ord);
       //ASSERT(parseInt(data, 16).toString(16) === data, 'data should only contain ascii chars...'); // this can fail if there were leading zeroes in the escaped hex...
 
       // the escaped char must still be a valid identifier character. then and only
       // then can we proceed to parse an identifier. otherwise we'll still parse
       // into an error token.
       if (fromStart === FIRST_CHAR && isIdentStart(ord)) {
-        return _parseIdentifierRest();
+        return _parseIdentifierRest(ord, prev);
       } else if (fromStart === NON_START && isIdentRestChr(ord)) {
-        return _parseIdentifierRest();
+        return _parseIdentifierRest(ord, prev);
       } else {
+        lastParsedIdent = prev;
         return $ERROR;
       }
     }
-    _parseIdentifierRest(); // keep on parsing the identifier but we will make it an error token
+    _parseIdentifierRest(0, prev); // keep on parsing the identifier but we will make it an error token
+    lastParsedIdent = prev;
     return $ERROR;
   }
 
@@ -1442,7 +1466,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
   }
 
   function parseBackslash() {
-    return parseIdentFromUnicodeEscape(FIRST_CHAR);
+    return parseIdentFromUnicodeEscape(FIRST_CHAR, '');
   }
 
   let lastRegexState = NOT_A_REGEX_ERROR; // syntax errors are reported here. empty string means no error. yupyup

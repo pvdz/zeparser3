@@ -2590,7 +2590,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // TODO: this check can be drastically improved.
     // note that any match here is usually an error (but not always, like strict mode or context specific stuff), but usually anyways
-    switch (identToken.str) {
+    switch (identToken.canon) {
       // keywords
       case 'break':
       case 'case':
@@ -2655,7 +2655,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'eval':
       case 'arguments':
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-          return 'Cannot create a binding named `'+ identToken.str +'` in strict mode';
+          return 'Cannot create a binding named `'+ identToken.canon +'` in strict mode';
         }
         if (bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_CONST) {
           return 'Cannot use `eval`/`arguments` as `let`/`const` name';
@@ -2671,8 +2671,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'public':
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
           // slow path
-          if (identToken.str === 'eval' || identToken.str === 'arguments') {
-            return 'Cannot create a binding named `'+ identToken.str +'` in strict mode';
+          if (identToken.canon === 'eval' || identToken.canon === 'arguments') {
+            return 'Cannot create a binding named `'+ identToken.canon +'` in strict mode';
           }
           return 'Cannot use this reserved word as a variable name in strict mode';
         }
@@ -2706,7 +2706,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // this function is called to validate an ident that is the head of a value as an assignable target.
     // this means `foo` is yes, `true` is no, `typeof` is no (and requires a tail), and `instanceof` should just throw.
 
-    switch (identToken.str) {
+    switch (identToken.canon) {
       // keywords
       case 'break':
       case 'case':
@@ -2736,7 +2736,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'with':
       // future reserved keyword:
       case 'enum':
-        THROW('Unexpected keyword: `' + identToken.str + '`');
+        THROW('Unexpected keyword: `' + identToken.canon + '`');
         return NOT_ASSIGNABLE;
 
       // value keywords
@@ -2757,7 +2757,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         //   Identifier: IdentifierName but not ReservedWord
         //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "let" ...
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-          THROW('Unexpected keyword in strict mode: `' + identToken.str + '`');
+          THROW('Unexpected keyword in strict mode: `' + identToken.canon + '`');
           return NOT_ASSIGNABLE;
         }
         if (bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_CONST) return NOT_ASSIGNABLE;
@@ -2783,7 +2783,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'private':
       case 'public':
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-          THROW('Unexpected keyword: `' + identToken.str + '`');
+          THROW('Unexpected keyword: `' + identToken.canon + '`');
           return NOT_ASSIGNABLE;
         }
         break;
