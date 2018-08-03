@@ -1517,7 +1517,7 @@ module.exports = (describe, test) => describe('parens', _ => {
     ].forEach(keyword => {
       test('cannot assign to group with reserved word in strict mode: `' + keyword + '`', {
         code: '('+keyword+')=2',
-        throws: 'Invalid assignment',
+        throws: true,
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',
@@ -2056,7 +2056,7 @@ module.exports = (describe, test) => describe('parens', _ => {
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
     });
 
-    describe('invalid arrow header things', _ => {
+    describe('invalid arrow header things that are valid in a group', _ => {
 
       // see counter-test in arrow where this stuff is disallowed
       [
@@ -2068,7 +2068,6 @@ module.exports = (describe, test) => describe('parens', _ => {
         'eval',
         'false',
         'function(){}',
-        'let',
         'new x',
         'null',
         'super',
@@ -2087,6 +2086,20 @@ module.exports = (describe, test) => describe('parens', _ => {
           code: '('+str+');',
           ast: true,
           tokens: true,
+        });
+      });
+
+      // soe things are special
+      [
+        'let',
+      ].forEach(str => {
+        test('[' + str + '] in arrow params', {
+          code: '('+str+');',
+          throws: true,
+          SLOPPY_SCRIPT: {
+            ast: true,
+            tokens: true,
+          },
         });
       });
     });
@@ -3549,7 +3562,7 @@ module.exports = (describe, test) => describe('parens', _ => {
       ].forEach(str => {
         test('[' + str + '] in arrow params', {
           code: '('+str+') => y',
-          throws: 'destructible',
+          throws: true,
           SLOPPY_SCRIPT: {
             ast: true,
             tokens: true,

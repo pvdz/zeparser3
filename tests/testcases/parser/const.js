@@ -174,7 +174,7 @@ module.exports = (describe, test) =>
           // 'await', // skip: has custom error messages (covered in other tests)
           // 'yield', // TODO: yield seems to be its own rabbit hole
         ].forEach(name => {
-          describe(`strict mode keyword=${name}`, _ => {
+          describe(`strict mode keyword1=${name}`, _ => {
             test(`var statement`, {
               code: `var ${name} = x;`,
               throws: 'reserved word',
@@ -238,7 +238,7 @@ module.exports = (describe, test) =>
         [
           'async', // there are no explicit rules against `static`
         ].forEach(name => {
-          describe(`strict mode keyword=${name}`, _ => {
+          describe(`strict mode keyword2=${name}`, _ => {
             test(`var statement`, {
               code: `var ${name} = x;`,
               ast: true,

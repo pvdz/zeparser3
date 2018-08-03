@@ -2703,12 +2703,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function bindingAssignableIdentCheck(identToken, bindingType, lexerFlags) {
     ASSERT(arguments.length === 3, 'expecting 3 args');
 
+    // this function is called to validate an ident that is the head of a value as an assignable target.
+    // this means `foo` is yes, `true` is no, `typeof` is no (and requires a tail), and `instanceof` should just throw.
+
     switch (identToken.str) {
       // keywords
       case 'break':
       case 'case':
       case 'catch':
-      case 'class':
       case 'const':
       case 'continue':
       case 'debugger':
@@ -2725,24 +2727,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'import':
       case 'in':
       case 'instanceof':
-      case 'new':
       case 'return':
-      case 'super':
       case 'switch':
-      case 'this':
       case 'throw':
       case 'try':
-      case 'typeof':
       case 'var':
-      case 'void':
       case 'while':
       case 'with':
-      // null / boolean
+      // future reserved keyword:
+      case 'enum':
+        THROW('Unexpected keyword: `' + identToken.str + '`');
+        return NOT_ASSIGNABLE;
+
+      // value keywords
+      case 'class':
+      case 'new':
+      case 'super':
+      case 'this':
+      case 'typeof':
+      case 'void':
       case 'null':
       case 'true':
       case 'false':
-      // future reserved keyword:
-      case 'enum':
         return NOT_ASSIGNABLE;
 
       // strict mode keywords
@@ -2750,7 +2756,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
         //   Identifier: IdentifierName but not ReservedWord
         //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "let" ...
-        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) return NOT_ASSIGNABLE;
+        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+          THROW('Unexpected keyword in strict mode: `' + identToken.str + '`');
+          return NOT_ASSIGNABLE;
+        }
         if (bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_CONST) return NOT_ASSIGNABLE;
         break;
       case 'static':
@@ -2773,7 +2782,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'interface':
       case 'private':
       case 'public':
-        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) return NOT_ASSIGNABLE;
+        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+          THROW('Unexpected keyword: `' + identToken.str + '`');
+          return NOT_ASSIGNABLE;
+        }
         break;
 
       // conditional keywords (strict mode or context)
@@ -4559,7 +4571,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         } else {
           return _parseObjectLikePart(lexerFlags, bindingType, isClassMethod, staticToken, astProp);
         }
-      } else {
+      }
+      else {
         // (if prefixed by static then that's already consumed above)
         // this is the only case that can be a shorthand. only valid syntaxes:
         // - `({ident,`
@@ -4937,9 +4950,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - ({ident: <object destruct> = expr,}
       // anything else as value is non-destructible
       ASSERT_skipRex(':', lexerFlags); // next is expression
+
       if (curtype === $IDENT) {
         // ({ident: ident})
         // ({ident: ident,...})
+        // ({ident: ident.ident} = x)
         // ({ident: ident = ...})
         // ({ident: ident + rest      // not destructible, so confirm token after ident
         AST_open(astProp, 'Property');
@@ -4947,25 +4962,45 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('kind', 'init'); // only getters/setters get special value here
         AST_set('method', false);
         AST_set('computed', false);
-        // this part is tricky;
-        // the idea here is that we need to confirm whether this is a "simple assignment" as those are the only
-        // things that can be destructed. But it's totally fine for things not to be destructible here, provided
-        // the flag doesn't already require a destruct. So we parse the start of the expression (an ident), which
-        // may parse more (`{foo: typeof z}`), throw (`{foo: implements}`), be destructible (`{foo: bar}`), or
-        // simply not destructible-yet-legal (`{foo: true}`).
-        // I believe the assignability of the headbody part also tells us the destructible state of it
-        let startAssignable = parseValueHeadBodyIdent(lexerFlags, NOT_NEW_ARG, bindingType, 'value');
-        // if not assignable then its also not destructible
-        // else, confirm whether this is the end (we're not destructible regardless if there is a tail)
-        if (curc === $$CURLY_R_7D || curc === $$COMMA_2C || curtok.str === '=') {
-          if (startAssignable === NOT_ASSIGNABLE) {
-            destructible |= CANT_DESTRUCT;
-          }
+
+        // use the rhs of the colon as identToken now
+        identToken = curtok;
+        skipIdentSafeAndExpensive(lexerFlags); // will properly deal with div/rex cases
+        if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
+          // this is destructible iif the ident is not a keyword
+          let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
+          if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+          AST_setIdent('value', identToken);
+          parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
+        } else  if (curtok.str === '=') {
+          // this is destructible iif the ident is not a keyword
+          let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
+          if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+          AST_setIdent('value', identToken);
+          parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
         } else {
-          destructible |= CANT_DESTRUCT;
-          startAssignable = parseValueTail(lexerFlags, startAssignable, NOT_NEW_ARG, 'value');
+          // this part is tricky;
+          // the idea here is that we need to confirm whether this is a "simple assignment" as those are the only
+          // things that can be destructed. But it's totally fine for things not to be destructible here, provided
+          // the flag doesn't already require a destruct. So we parse the start of the expression (an ident), which
+          // may parse more (`{foo: typeof z}`), throw (`{foo: implements}`), be destructible (`{foo: bar}`), or
+          // simply not destructible-yet-legal (`{foo: true}`).
+          // I believe the assignability of the headbody part also tells us the destructible state of it
+          let assignable = parseValueAfterIdent(lexerFlags, identToken, NOT_NEW_ARG, 'value');
+          // if not assignable then its also not destructible
+          // else, confirm whether this is the end (we're not destructible regardless if there is a tail)
+          if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
+            if (assignable === IS_ASSIGNABLE) destructible |= DESTRUCT_ASSIGN_ONLY;
+            else  destructible |= CANT_DESTRUCT;
+          } else if (curtok.str === '=') {
+            if (assignable === IS_ASSIGNABLE) destructible |= DESTRUCT_ASSIGN_ONLY;
+            else TODO,destructible |= CANT_DESTRUCT;
+            parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
+          } else {
+            destructible |= CANT_DESTRUCT;
+            parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
+          }
         }
-        parseExpressionFromOp(lexerFlags, startAssignable, LHS_NOT_PAREN_START, 'value');
 
         AST_set('shorthand', false);
         AST_close('Property');
@@ -4995,7 +5030,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('method', false);
         AST_set('computed', false);
         destructible |= parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, 'value');
-
         // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
         if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
           destructible |= CANT_DESTRUCT;

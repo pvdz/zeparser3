@@ -5738,7 +5738,7 @@ module.exports = (describe, test) =>
 
             test('strict-mode only, objlit, keyword=' + keyword, {
               code: '({xxxx:'+keyword+'})',
-              ...(keyword === 'eval' || keyword === 'arguments' ? {} : {
+              ...(['eval', 'arguments', 'static', 'await', 'yield'].includes(keyword) ? {} : {
                 STRICT: {
                   throws: true,
                 },
@@ -7026,6 +7026,80 @@ module.exports = (describe, test) =>
           ],
         },
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('arr with yield', {
+        code: 'result = [x[yield]] = vals;',
+        throws: 'strict mode',
+        SLOPPY_SCRIPT: {
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'result'},
+                  operator: '=',
+                  right: {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'MemberExpression',
+                          object: {type: 'Identifier', name: 'x'},
+                          property: {type: 'Identifier', name: 'yield'},
+                          computed: true,
+                        },
+                      ],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'vals'},
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        },
+      });
+
+      test('dynamic property as prop val can assign destruct', {
+        code: '({ x: x[Y] } = x);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'MemberExpression',
+                        object: {type: 'Identifier', name: 'x'},
+                        property: {type: 'Identifier', name: 'Y'},
+                        computed: true,
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
 

@@ -11938,7 +11938,7 @@ module.exports = (describe, test) =>
 
           test('var arr destruct', {
             code: 'var [let] = x;',
-            throws: 'not destructible',
+            throws: true,
             SLOPPY_SCRIPT: {
               desc: 'let as var in destruct can be ok',
               ast: {
@@ -12147,32 +12147,27 @@ module.exports = (describe, test) =>
 
           test('let as name in array destructuring is always illegal', {
             code: 'let [let] = x;',
-            throws: 'not destructible',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+            throws: true,
           });
 
           test('let as array destruct name with default', {
             code: 'let [let = y] = x;',
-            throws: 'not destructible',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+            throws: true,
           });
 
           test('let as array destruct name as second name', {
             code: 'let [a, let] = x;',
-            throws: 'not destructible',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+            throws: true,
           });
 
           test('let as name in object destructuring is always illegal', {
             code: 'let {let} = x;',
             throws: true,
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
           });
 
           test('let as object destruct name with default', {
             code: 'let {let = y} = x;',
             throws: true,
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
           });
 
           test('let as object destruct name as second name', {
@@ -12394,26 +12389,22 @@ module.exports = (describe, test) =>
 
           test('let as name in destructuring is always illegal', {
             code: 'for (let [let] = x;;);',
-            throws: 'not destructible',
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            throws: true,
           });
 
           test('let as name in destructuring with init', {
             code: 'for (let [let = y] = x;;);',
-            throws: 'not destructible',
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            throws: true,
           });
 
           test('let as name in destructuring as second name', {
             code: 'for (let [a, let] = x;;);',
-            throws: 'not destructible',
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            throws: true,
           });
 
           test('cannot const let', {
             code: 'for (const let;;);',
-            throws: 'when binding through',
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            throws: true,
           });
 
           test('just let as left part', {
