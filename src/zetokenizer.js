@@ -668,8 +668,10 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       case $$PERCENT_25:
         return parseCompoundAssignment(); // % %=
       case $$FF_0C:
+        wasWhite = true;
         return $WHITE;
       case $$VTAB_0B:
+        wasWhite = true;
         return $WHITE;
       case $$SEMI_3B:
         return $PUNCTUATOR;
@@ -711,6 +713,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       case $$BACKSLASH_5C:
         return parseBackslash();
       case $$NBSP_A0:
+        wasWhite = true;
         return $WHITE;
       default:
         return parseOtherUnicode(c);
