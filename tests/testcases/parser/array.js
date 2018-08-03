@@ -2327,5 +2327,20 @@ module.exports = (describe, test) =>
           throws: 'destructible',
         });
       });
+
+      test('comma expression assignment', {
+        code: '[(x, y)] = x;',
+        throws: 'not destructible',
+      });
+
+      test('wrapped comma expression assignment', {
+        code: '[[(x, y)]] = x;',
+        throws: 'not destructible',
+      });
+
+      test('spreaded comma expression assignment', {
+        code: '[...[(x, y)]] = x;',
+        throws: 'not destructible',
+      });
     });
   });

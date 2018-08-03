@@ -4004,13 +4004,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (toplevelComma) {
+      assignable = NOT_ASSIGNABLE;
       AST_close('SequenceExpression');
     }
 
     skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
 
     lexerFlags = lexerFlagsBeforeParen;
-
     verifyDestructible(destructible);
 
     if (curtok.str === '=>') {
@@ -4080,7 +4080,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - (foo[x])
       // Compound expression is also valid
       // - (foo) += 3
-
       if (toplevelComma) THROW('Cannot assign to list of expressions in a group');
       // TODO: need to make sure we can't do `(eval) = x` and `(arguments) = x` in strict mode (only); it's an explicit error
       if (assignable === NOT_ASSIGNABLE) THROW('Invalid assignment because group does not wrap a valid var name or just a property access');

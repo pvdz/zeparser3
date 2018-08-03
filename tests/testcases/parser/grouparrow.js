@@ -2090,6 +2090,11 @@ module.exports = (describe, test) => describe('parens', _ => {
         });
       });
     });
+
+    test('comma in a group should make the group non-assignable', {
+      code: '(a, b) = c',
+      throws: 'not assign',
+    });
   });
 
   describe('arrow', _ => {
