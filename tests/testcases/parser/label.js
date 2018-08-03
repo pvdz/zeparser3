@@ -17,7 +17,35 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
 
-    describe('regex edge cases', _ => {
+    test('unicode escapes at the start of labels should not allow keywords', {
+      code: 'async () => { \\u{61}wait: x }',
+      throws: 'await',
+    });
+
+    test('unicode escapes in the middle of labels should not allow keywords', {
+      code: 'async () => { aw\\u{61}it: x }',
+      throws: 'await',
+    });
+
+    test('base case that passes without keyword', {
+      code: 'foo: x;',
+      ast: true,
+      tokens: true,
+    });
+
+    [
+      'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
+      'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
+      'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
+      'false', 'enum',
+    ].forEach(keyword => {
+      test('can not use keywords as label name [' + keyword + ']', {
+        code: keyword + ': x;',
+        throws: true,
+      });
+    });
+
+      describe('regex edge cases', _ => {
       // foo:/bar/
       // foo:\n/bar/
       // foo:\n/bar/g

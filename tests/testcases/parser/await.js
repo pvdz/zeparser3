@@ -635,6 +635,11 @@ module.exports = (describe, test) =>
         throws: 'await',
       });
 
+      test('start of await label', {
+        code: 'async () => { \\u{61}wait: x }',
+        throws: 'await',
+      });
+
       test('mid of await classic escaped', {
         code: 'async () => { var aw\\u0061it; }',
         throws: 'await',
@@ -642,6 +647,11 @@ module.exports = (describe, test) =>
 
       test('mid of await es6 escaped', {
         code: 'async () => { var aw\\u{61}it; }',
+        throws: 'await',
+      });
+
+      test('await as sneaky label in async', {
+        code: 'async () => { aw\\u{61}it: x }',
         throws: 'await',
       });
     });

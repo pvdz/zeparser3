@@ -2331,10 +2331,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseSemiOrAsi(lexerFlags);
   }
   function parseLabeledStatementInstead(lexerFlags, identToken, astProp) {
-    //TODO_MUST_REPLACE_STATEMENT_NODE_IN_AST_WITH_LABEL
-    if (identToken.str === 'yield' && (hasAllFlags(lexerFlags, LF_IN_GENERATOR) || hasAllFlags(lexerFlags, LF_STRICT_MODE))) {
-      THROW('The `yield` keyword cannot be used as a label in strict mode or in a generator');
-    }
+    bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
+
     AST_open(astProp, 'LabeledStatement');
     AST_setIdent('label', identToken);
     ASSERT_skipRex(':', lexerFlags);
