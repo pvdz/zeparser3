@@ -4,9 +4,20 @@
 
 Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
-const TEST262 = false;
-const TEST262_SKIP_TO = 16000; // skips the first n tests (saves me time)
-const STOP_AFTER_FAIL = true;
+// passed: 23166, crashed: 719, failed: 442, skipped: 11364
+// passed: 23196, crashed: 701, failed: 430, skipped: 11364
+// passed: 23246, crashed: 618, failed: 463, skipped: 11364
+// passed: 45354, crashed: 1211, failed: 956, skipped: 11410
+// passed: 45347, crashed: 1210, failed: 964, skipped: 11410
+// passed: 45345, crashed: 1210, failed: 957, skipped: 11424
+// passed: 15875, crashed: 1200, failed: 951, skipped: 8123
+// passed: 15886, crashed: 1191, failed: 949, skipped: 8123
+// passed: 15893, crashed: 1108, failed: 949, skipped: 8201
+// passed: 16112, crashed: 1110, failed: 728, skipped: 8201
+// passed: 16159, crashed: 1111, failed: 680, skipped: 8201
+const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
+const TEST262_SKIP_TO = TEST262 ? 17000 : 0; // skips the first n tests (saves me time)
+const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
 
 let fs = require('fs');
 let Prettier = (function(){ try { return require('prettier'); } catch (e) {} })(); // ignore if not installed
@@ -48,6 +59,7 @@ function read(path, file) {
   //console.log([path, file], combo)
   console.log('read:', path + file);
   if (fs.statSync(combo).isFile()) {
+    let before = files.length;
     files.push(combo);
   } else {
     fs.readdirSync(combo + '/').forEach(s => read(combo + '/', s));
@@ -71,16 +83,22 @@ let cases = [];
 let descStack = [];
 files.map(path => {
   let moduleExports = require(path);
+  let before = cases.length;
+  function describe(desc, callback) {
+    descStack.push(desc);
+    callback();
+    descStack.pop();
+  }
+  function test(desc, obj) {
+    return cases.push({desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + BOLD + desc + RESET + ' \u2B88', from: path, obj});
+  }
+  test.pass = (desc, obj) => test(desc, {ast: true, tokens: true, ...obj});
+  test.fail = (desc, obj) => test(desc, {throws: true, ...obj});
   moduleExports(
-    (desc, callback) => {
-      descStack.push(desc);
-      callback();
-      descStack.pop();
-    },
-    (desc, obj) => {
-      cases.push({desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + desc + ' \u2B88', from: path, obj});
-    },
+    describe,
+    test,
   );
+  console.log('Added', cases.length-before,' tests from', path);
 });
 
 let checkAST = true;
@@ -305,7 +323,9 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     let expectedJson = mustVerify && JSON.stringify(expectedAst);
     let actualJson = mustVerify && JSON.stringify(obj.ast);
     if (mustVerify && expectedJson !== actualJson) {
-      LOG_THROW('AST mismatch', code, '', desc, true);
+      let missingAst = expectedJson === '{"<not given>":true}';
+
+      LOG_THROW(missingAst ? 'AST missing' : 'AST mismatch', code, '', desc, true);
 
       console.log('Actual ast:', formatAst(obj.ast) + ',');
       console.log(
@@ -317,9 +337,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         '],',
       );
 
-
       let s1 = expectedJson;
-      if (s1 === '{"<not given>":true}') {
+      if (missingAst) {
         console.log('(No expected AST given...)');
       } else {
         let s2 = actualJson;
@@ -399,7 +418,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         'Stack:',
         stack
           .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
-          .replace(/\n.* at (?<what>THROW|ASSERT).*?\n/s, '\nExplicit '+BOLD+'$<what>'+RESET+' at:\n')
+          .replace(/\n.* at (THROW|ASSERT).*?\n/s, '\nExplicit '+BOLD+'$1'+RESET+' at:\n')
           .replace(/(zeparser.spec.js.*?)\n.*/s, '$1 (trunced remainder of trace)')
       );
     }
@@ -455,6 +474,6 @@ try {
 } finally {
   console.log(`
   #####
-  ${completed?'':RED + 'INCOMPLETE! ' + RESET}passed: ${pass}, crashed: ${crash}, failed: ${fail - crash}, skipped: ${skips}
+  ${completed?'':RED + 'INCOMPLETE! ' + RESET}passed: ${pass}, ${crash?(STOP_AFTER_FAIL?'':BLINK)+RED:''}crashed: ${crash}${crash?RESET:''}, ${(fail - crash)?RED:''}failed: ${fail - crash}${(fail - crash)?RESET:''}, skipped: ${skips}
   `);
 }
