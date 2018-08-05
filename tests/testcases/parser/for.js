@@ -196,6 +196,10 @@ module.exports = (describe, test) =>
           $PUNCTUATOR,
         ],
       });
+
+      test.pass('you can have `in` inside the ternary', {
+        code: 'for (true ? a in b : {}; false; ) ;',
+      });
     });
 
     describe('var decls', _ => {
@@ -1018,6 +1022,10 @@ module.exports = (describe, test) =>
           code: 'for (let x = 0 in {});',
           throws: true,
         });
+      });
+
+      test.fail('ternary in for-loop', {
+        code: 'for (true ? 0 : 0 in {}; false; ) ;',
       });
     });
 

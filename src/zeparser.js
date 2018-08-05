@@ -1894,7 +1894,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           break;
 
         default:
-          assignable = parseValueFromIdent(lexerFlags, astProp);
+          ASSERT(curtype === $IDENT, 'should be ident');
+          assignable = parseValueHeadBodyIdent(lexerFlags | LF_NO_IN, NOT_NEW_ARG, BINDING_TYPE_NONE, NO_ASSIGNMENT, astProp);
+          assignable = parseValueTail(lexerFlags | LF_NO_IN, assignable, NOT_NEW_ARG, astProp);
           wasNotDecl = true;
       }
     } else if (curc === $$SEMI_3B) {
@@ -1941,8 +1943,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('init', null);
     } else {
       AST_wrapClosed(astProp, 'ForStatement', 'init');
-      // we are still in the `init` part of a classic for. keep parsing from the current expression value.
-      if (wasNotDecl) parseExpressionFromOp(lexerFlags, assignable, startedWithParen ? LHS_WAS_PAREN_START : LHS_NOT_PAREN_START, 'init');
+      // we are still in the `init` part of a classic for. keep parsing _with_ LF_NO_IN from the current expression value.
+      if (wasNotDecl) parseExpressionFromOp(lexerFlags | LF_NO_IN, assignable, startedWithParen ? LHS_WAS_PAREN_START : LHS_NOT_PAREN_START, 'init');
     }
 
     let hadComma = curc === $$COMMA_2C;
@@ -2985,10 +2987,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // </SCRUB AST>
 
         if (curc === $$QMARK_3F) {
+          // parseTernary
           AST_wrapClosed(astProp, 'ConditionalExpression', 'test');
           ASSERT_skipRex('?', lexerFlags);
           // you can have an assignment between `?` and `:` but not after `:`
-          parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'consequent');
+          // the `in` is allowed between as well because there can be no ambiguity
+          parseExpression(sansFlag(lexerFlags, LF_NO_IN), ALLOW_ASSIGNMENT, 'consequent');
           if (curc !== $$COLON_3A) {
             if (curc === $$COMMA_2C) THROW('Can not use comma inside ternary expressions');
             THROW('Unexpected character inside ternary');
@@ -2997,6 +3001,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           parseExpression(lexerFlags, NO_ASSIGNMENT, 'alternate');
           AST_close('ConditionalExpression');
         } else {
+          // parseBinary
           let AST_nodeName = (curtok.str === '&&' || curtok.str === '||') ? 'LogicalExpression' : 'BinaryExpression';
           AST_wrapClosed(astProp, AST_nodeName, 'left');
           AST_set('operator', curtok.str);
@@ -3195,11 +3200,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
     if (assignable === IS_ASSIGNABLE) return WITH_ASSIGNABLE;
     return WITH_NON_ASSIGNABLE;
-  }
-  function parseValueFromIdent(lexerFlags, astProp) {
-    ASSERT(curtype === $IDENT, 'should be ident');
-    let assignable = parseValueHeadBodyIdent(lexerFlags, NOT_NEW_ARG, BINDING_TYPE_NONE, ALLOW_ASSIGNMENT, astProp);
-    return parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
   }
   function parseValueHeadBody(lexerFlags, maybe, checkNewTarget, allowAssignment, astProp) {
     ASSERT(arguments.length === parseValueHeadBody.length, 'argcount');
