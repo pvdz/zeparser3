@@ -263,7 +263,7 @@ function LF_DEBUG(flags) {
     s.push('LF_IN_GENERATOR');
   }
   if (flags & LF_IN_CONSTRUCTOR) {
-    flas ^= LF_IN_CONSTRUCTOR;
+    flags ^= LF_IN_CONSTRUCTOR;
     s.push('LF_IN_CONSTRUCTOR');
   }
   if (flags & LF_IN_FUNC_ARGS) {

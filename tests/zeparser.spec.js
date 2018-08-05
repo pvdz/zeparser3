@@ -4,6 +4,7 @@
 
 Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
+// progress on the test262 test suite;
 // passed: 23166, crashed: 719, failed: 442, skipped: 11364
 // passed: 23196, crashed: 701, failed: 430, skipped: 11364
 // passed: 23246, crashed: 618, failed: 463, skipped: 11364
@@ -15,6 +16,8 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 // passed: 15893, crashed: 1108, failed: 949, skipped: 8201
 // passed: 16112, crashed: 1110, failed: 728, skipped: 8201
 // passed: 16159, crashed: 1111, failed: 680, skipped: 8201
+// passed: 16226, crashed: 1119, failed: 595, skipped: 8213
+// passed: 16223, crashed: 1104, failed: 571, skipped: 8263
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
 const TEST262_SKIP_TO = TEST262 ? 17000 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
@@ -94,6 +97,7 @@ files.map(path => {
   }
   test.pass = (desc, obj) => test(desc, {ast: true, tokens: true, ...obj});
   test.fail = (desc, obj) => test(desc, {throws: true, ...obj});
+  test.fail_strict = (desc, obj) => test(desc, {throws: true, SLOPPY_SCRIPT:{ast:true,tokens:true}, ...obj});
   moduleExports(
     describe,
     test,
@@ -295,7 +299,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       ++fail;
       ++crash;
     } else if (!wasTodo && (expectedThrows === true || wasError.toUpperCase().indexOf(expectedThrows.toUpperCase()) >= 0)) {
-      console.log(`${prefix} ${GREEN}PASS${BOLD}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
+      console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
       ++pass;
     } else {
       LOG_THROW('thrown message mismatch', code, stack, desc);

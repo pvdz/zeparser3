@@ -196,11 +196,10 @@ const CONVERT_ASSIGNMENTS_TOO = true;
 const DONT_CONVERT_ASSIGNMENTS = false;
 const IS_FUNC_DECL = true;
 const NOT_FUNC_DECL = false;
+const IS_FUNC_EXPR = false;
+const NOT_FUNC_EXPR = false;
 const IDENT_OPTIONAL = true;
 const IDENT_REQUIRED = false;
-const BODY_IS_EXPR = true;
-const BODY_IS_BLOCK = false;
-const NOT_FUNCEXPR = false;
 const NOT_ASSIGNABLE = false;
 const IS_ASSIGNABLE = true;
 const HAS_STATIC_MODIFIER = true;
@@ -1044,23 +1043,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!isAsync && skipAnyIf('*', lexerFlags)) {
       isGenerator = true;
     }
-    parseFunctionAfterKeyword(lexerFlags, funcDecl, NOT_FUNCEXPR, isGenerator, isAsync, optionalIdent, NOT_CONSTRUCTOR, NOT_METHOD, astProp);
+    parseFunctionAfterKeyword(lexerFlags, funcDecl, NOT_FUNC_EXPR, isGenerator, isAsync, optionalIdent, NOT_CONSTRUCTOR, NOT_METHOD, astProp);
   }
   function parseFunctionExpression(lexerFlags, isAsync, astProp) {
     let isGenerator = false;
     if (!isAsync && skipAnyIf('*', lexerFlags)) {
       isGenerator = true;
     }
-    parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, BODY_IS_BLOCK, isGenerator, isAsync, IDENT_REQUIRED, NOT_CONSTRUCTOR, NOT_METHOD, astProp);
+    parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, IS_FUNC_EXPR, isGenerator, isAsync, IDENT_REQUIRED, NOT_CONSTRUCTOR, NOT_METHOD, astProp);
   }
-  function parseFunctionAfterKeyword(lexerFlags, isFuncDecl, bodyIsExpr, isGenerator, isAsync, isIdentOptional, isClassConstructor, isMethod, astProp) {
+  function parseFunctionAfterKeyword(lexerFlags, isFuncDecl, isRealFuncExpr, isGenerator, isAsync, isIdentOptional, isClassConstructor, isMethod, astProp) {
     ASSERT(arguments.length === parseFunctionAfterKeyword.length, 'arg count must match');
 
     AST_open(astProp, isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression')
 
     AST_set('generator', isGenerator);
     AST_set('async', isAsync);
-    AST_set('expression', bodyIsExpr);
+    AST_set('expression', isRealFuncExpr);
 
     if (curtype === $IDENT) {
       // TODO: are all functions var bindings? I think so ... should probably confirm this.
@@ -1566,8 +1565,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Note: all class code is always strict mode implicitly
     // Note: methods inside classes can access super properties
     // Note: `super()` is only valid in the constructor a class that uses `extends` (resets when nesting but after `extends`)
-    // Generator state resets before `extends`, while the `async` state reset after it
-    lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_CONSTRUCTOR | LF_IN_GENERATOR);
+    lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_CONSTRUCTOR);
 
     // note: default exports has optional ident but should still not skip `extends` here
     // but it is not a valid class name anyways (which is superseded by a generic keyword check)
@@ -1598,8 +1596,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // TODO: div/regex for class decl/expr, and asi.
 
-    // _now_ enable super props, super call is already set up correctly, remove async state.
-    lexerFlags = sansFlag(lexerFlags | LF_SUPER_PROP, LF_IN_ASYNC);
+    // _now_ enable super props, super call is already set up correctly
+    lexerFlags |= LF_SUPER_PROP;
+    // note: generator and async state is not reset because computed method names still use the outer state
     return parseClassbody(lexerFlags, BINDING_TYPE_NONE, isExpression, 'body');
   }
 
@@ -2715,14 +2714,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // conditional keywords (strict mode or context)
       case 'await':
-        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-          return 'Await is illegal outside of async body';
+        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+        // > IdentifierReference: await
+        // > BindingIdentifier: await
+        // > LabelIdentifier: await
+        // > It is a Syntax Error if the goal symbol of the syntactic grammar is Module.
+        // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
+        if (goalMode === GOAL_MODULE) {
+          return 'Await is illegal outside of async body with module goal';
         } else {
-          // in sloppy mode you cant use it inside an async function (and inside params defaults?)
+          // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
           if (hasAllFlags(lexerFlags, LF_IN_ASYNC)) return 'Await not allowed here';
         }
         break;
       case 'yield':
+        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+        // > It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "yield".
+        // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
           return 'Cannot use this reserved word as a variable name in strict mode';
           // in sloppy mode you cant use it inside a generator function (and inside params defaults?)
@@ -3861,10 +3869,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('async', isAsync);
     lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
-      AST_set('expression', BODY_IS_BLOCK); // "body of arrow is block"
+      AST_set('expression', false); // "body of arrow is block"
       parseBlockStatement(lexerFlags, IS_EXPRESSION, PARSE_DIRECTIVES, wasSimple, 'body');
     } else {
-      AST_set('expression', BODY_IS_EXPR); // "body of arrow is expr"
+      AST_set('expression', true); // "body of arrow is expr"
       parseExpression(lexerFlags, 'body'); // TODO: what about curlyLexerFlags here?
     }
   }
@@ -4848,7 +4856,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('kind', 'method'); // get/set/constructor/etc but dynamic key is always method
 
         if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
-        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
 
         AST_close('MethodDefinition');
       } else {
@@ -4860,7 +4868,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // assert next char here so we don't over accept
         if (curc === $$PAREN_L_28) {
           destructible |= CANT_DESTRUCT;
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
+          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
         } else {
           if (curc !== $$COLON_3A) THROW('A computed property name must be followed by a colon or paren');
           skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
@@ -5166,7 +5174,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('kind', identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'method'); // only getters/setters get special value here
 
         if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
-        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
 
         AST_close('MethodDefinition');
       } else {
@@ -5174,7 +5182,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('kind', identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
         AST_set('method', true);
         AST_set('computed', true);
-        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
         AST_set('shorthand', false);
         AST_close('Property');
         ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
@@ -5585,7 +5593,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       // AST_setLiteral('key', keyToken);
-      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, isConstructor?IS_CONSTRUCTOR:NOT_CONSTRUCTOR, IS_METHOD, 'value');
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, isConstructor?IS_CONSTRUCTOR:NOT_CONSTRUCTOR, IS_METHOD, 'value');
 
 
       AST_close('MethodDefinition');
@@ -5596,7 +5604,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('kind', modifier === 'get' ? 'get' : modifier === 'set' ? 'set' : 'init'); // non-class: only getters/setters get special value here
       AST_set('method', true);
       AST_set('computed', !!isDynamic);
-      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
 
 
       AST_set('shorthand', false);

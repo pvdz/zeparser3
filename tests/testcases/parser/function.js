@@ -3350,6 +3350,86 @@ module.exports = (describe, test) =>
       ast: true,
       tokens: true,
     });
+
+    describe('yield and await keyword cases', _ => {
+
+      // barring exceptions -- for all functions and methods goes:
+      // - name of the func keeps outer scope await/yield state. exception: function expressions clear it.
+      // - args and body explicitly set it according to the type of this function (so async sets await clears yield, etc)
+      // This means you can use `await` as a function name as long as you are not in strict mode and not already inside
+      // an async function and it's okay if the function whose name is being defined is actually async itself.
+      // the cases to test are a cross product of:
+      // <yield, await> * <regular, async, generator, async gen> * <name, args, body> * <method, decl, expr, default>
+
+      describe('<yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
+
+        test.pass('func decl can be called yield', {
+          code: 'function yield() {}',
+          // only illegal in strict mode
+          STRICT: {
+            throws: 'yield',
+          },
+        });
+
+        test.pass('async func decl can be called yield', {
+          code: 'async function yield() {}',
+          // only illegal in strict mode
+          STRICT: {
+            throws: 'yield',
+          },
+        });
+
+        test.pass('generator func decl can be called yield', {
+          code: 'function *yield() {}',
+          // only illegal in strict mode
+          STRICT: {
+            throws: 'yield',
+          },
+        });
+
+        // TODO: async gen
+        // test.pass('async generator func decl can be called yield', {
+        //   code: 'async function *yield() {}',
+        //   // only illegal in strict mode
+        //   STRICT: {
+        //     throws: 'yield',
+        //   },
+        // });
+
+        test.pass('func decl can be called await', {
+          code: 'function await() {}',
+          // only illegal in goal mode
+          MODULE: {
+            throws: 'await',
+          },
+        });
+
+        test.pass('async func decl can be called await', {
+          code: 'async function await() {}',
+          // only illegal in goal mode
+          MODULE: {
+            throws: 'await',
+          },
+        });
+
+        test.pass('generator func decl can be called await', {
+          code: 'function *await() {}',
+          // only illegal in goal mode
+          MODULE: {
+            throws: 'await',
+          },
+        });
+
+        // TODO: async gen
+        // test.pass('async generator func decl can be called await', {
+        //   code: 'async function *await() {}',
+        //   // only illegal in goal mode
+        //   MODULE: {
+        //     throws: 'await',
+        //   },
+        // });
+      });
+    });
   });
 
 // TODO: mirror tests for all functions (regular, expr, arrow, objlit method, class method)

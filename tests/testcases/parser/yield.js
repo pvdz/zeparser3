@@ -1009,6 +1009,33 @@ module.exports = (describe, test) =>
         throws: true,
       });
     });
+
+    describe('state resetting edge cases', _ => {
+
+      test.fail('cannot yield in args of nested arrow', {
+        code: 'function *f(){  return (x=yield y) => x;  }',
+      });
+
+      test.fail('cant yield in args of nested regular function', {
+        code: 'function *f(){  return function(x=yield y) {};  }',
+      });
+
+      test.fail('cant yield in args of class constructor', {
+        code: 'function *f(){  class x{constructor(a=yield x){}}  }',
+      });
+
+      test.fail('cant yield in args of class method', {
+        code: 'function *f(){  class x{foo(a=yield x){}}  }',
+      });
+
+      test.pass('can yield in computed name of class method', {
+        code: 'function *f(){  class x{[yield foo](a){}}  }',
+      });
+
+      test.pass('can yield in extend value of class', {
+        code: 'function *f(){  class x extends yield y{}  }',
+      });
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

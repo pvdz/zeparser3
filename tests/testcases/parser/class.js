@@ -1942,6 +1942,16 @@ module.exports = (describe, test) =>
                   tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 }
                 :
+                ['await'].indexOf(ident) >= 0 ?
+                  {
+                    ast: true,
+                    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+                    // await is only considered a keyword when parsing in module mode
+                    MODULE: {
+                      throws: true,
+                    },
+                  }
+                  :
                 {
                   throws: 'variable name',
                 }
