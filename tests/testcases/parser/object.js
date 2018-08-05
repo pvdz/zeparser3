@@ -5738,7 +5738,7 @@ module.exports = (describe, test) =>
 
             test('strict-mode only, objlit, keyword=' + keyword, {
               code: '({xxxx:'+keyword+'})',
-              ...(['eval', 'arguments', 'static', 'await', 'yield'].includes(keyword) ? {} : {
+              ...(['eval', 'arguments', 'static'].includes(keyword) ? {} : {
                 STRICT: {
                   throws: true,
                 },

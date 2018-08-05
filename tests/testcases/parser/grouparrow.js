@@ -2182,7 +2182,6 @@ module.exports = (describe, test) => describe('parens', _ => {
       [
         'arguments',
         'async ()=>x',
-        'await',
         'class{}',
         'delete x',
         'eval',
@@ -2195,7 +2194,6 @@ module.exports = (describe, test) => describe('parens', _ => {
         'this',
         'typeof x',
         'void x',
-        'yield',
         'x + y',
         '[].length',
         '[x].length',
@@ -2211,7 +2209,9 @@ module.exports = (describe, test) => describe('parens', _ => {
 
       // soe things are special
       [
+        'await',
         'let',
+        'yield',
       ].forEach(str => {
         test('[' + str + '] in arrow params', {
           code: '('+str+');',

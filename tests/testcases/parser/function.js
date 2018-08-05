@@ -3359,75 +3359,2270 @@ module.exports = (describe, test) =>
       // This means you can use `await` as a function name as long as you are not in strict mode and not already inside
       // an async function and it's okay if the function whose name is being defined is actually async itself.
       // the cases to test are a cross product of:
-      // <yield, await> * <regular, async, generator, async gen> * <name, args, body> * <method, decl, expr, default>
+      // <global, inside async, inside generator> * <yield, await> * <regular, async, generator, async gen> * <name, arg-name, arg-default, body> * <class method, obj method, decl, expr, default>
 
-      describe('<yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
+      describe('global', _ => {
 
-        test.pass('func decl can be called yield', {
-          code: 'function yield() {}',
-          // only illegal in strict mode
-          STRICT: {
-            throws: 'yield',
-          },
+        describe('name', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
+
+            test.pass('func decl can be called yield', {
+              code: 'function yield() {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async func decl can be called yield', {
+              code: 'async function yield() {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('generator func decl can be called yield', {
+              code: 'function *yield() {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl can be called yield', {
+            //   code: 'async function *yield() {}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.pass('func decl can be called await', {
+              code: 'function await() {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            test.pass('async func decl can be called await', {
+              code: 'async function await() {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            test.pass('generator func decl can be called await', {
+              code: 'function *await() {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl can be called await', {
+            //   code: 'async function *await() {}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x expr', _ => {
+
+            test.pass('func expr can be called yield', {
+              code: 'let f = function yield() {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async func expr can be called yield', {
+              code: 'let f = async function yield() {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('generator func expr can be called yield', {
+              code: 'let f = function *yield() {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func expr can be called yield', {
+            //   code: 'let f = async function *yield() {}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.pass('func expr can be called await', {
+              code: 'let f = function await() {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            test.pass('async func expr can be called await', {
+              code: 'let f = async function await() {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            test.pass('generator func expr can be called await', {
+              code: 'let f = function *await() {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func expr can be called await', {
+            //   code: 'let f = async function *await() {}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x class method', _ => {
+
+            // since class methods are properties the name can be keywords so skipping the other tests for this
+            test.pass('class method can be called yield', {
+              code: 'class A {yield() {}}',
+            });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x obj method', _ => {
+
+            // since obj methods are properties the name can be keywords so skipping the other tests for this
+            test.pass('obj method can be called yield', {
+              code: 'A = {yield() {}}',
+            });
+          });
         });
 
-        test.pass('async func decl can be called yield', {
-          code: 'async function yield() {}',
-          // only illegal in strict mode
-          STRICT: {
-            throws: 'yield',
-          },
+        describe('arg-name', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x decl', _ => {
+
+            test.pass('func decl arg called yield', {
+              code: 'function f(yield) {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async func decl arg called yield', {
+              code: 'async function f(yield) {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.fail('generator func decl arg called yield', {
+              code: 'function *f(yield) {}',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl arg called yield', {
+            //   code: 'async function *f(yield) {}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.pass('func decl arg called await', {
+              code: 'function f(await) {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async func decl arg called await', {
+              code: 'async function f(await) {}',
+              throws: 'await',
+            });
+
+            test.pass('generator func decl arg called await', {
+              code: 'function *f(await) {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl arg called await', {
+            //   code: 'async function *f(await) {}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x expr', _ => {
+
+            test.pass('func expr arg called yield', {
+              code: 'let f = function f(yield) {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async func expr arg called yield', {
+              code: 'let f = async function f(yield) {}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.fail('generator func expr arg called yield', {
+              code: 'let f = function *f(yield) {}',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func expr arg called yield', {
+            //   code: 'let f = async function *f(yield) {}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.pass('func expr arg called await', {
+              code: 'let f = function f(await) {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async func expr arg called await', {
+              code: 'let f = async function f(await) {}',
+              throws: 'await',
+            });
+
+            test.pass('generator func expr arg called await', {
+              code: 'let f = function *f(await) {}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func expr arg called await', {
+            //   code: 'let f = async function *f(await) {}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method arg called yield', {
+              code: 'class A {f(yield) {}}',
+              throws: 'yield',
+            });
+
+            test.fail('async class method arg called yield', {
+              code: 'class A {async f(yield) {}}',
+              throws: 'yield',
+            });
+
+            test.fail('generator class method arg called yield', {
+              code: 'class A {*f(yield) {}}',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method arg called yield', {
+            //   code: 'class A {async *f(yield) {}}',
+            //   throws: 'yield',
+            // });
+
+            test.pass('class method arg called await', {
+              code: 'class A {f(await) {}}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async class method arg called await', {
+              code: 'class A {async f(await) {}}',
+              throws: 'await',
+            });
+
+            test.pass('generator class method arg called await', {
+              code: 'class A {*f(await) {}}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator class method arg called await', {
+            //   code: 'class A {async *f(await) {}}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x obj method', _ => {
+
+            test.pass('obj method arg called yield', {
+              code: 'o = {f(yield) {}}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async obj method arg called yield', {
+              code: 'o = {async f(yield) {}}',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.fail('generator obj method arg called yield', {
+              code: 'o = {*f(yield) {}}',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method arg called yield', {
+            //   code: 'o = {async *f(yield) {}}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.pass('obj method arg called await', {
+              code: 'o = {f(await) {}}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async obj method arg called await', {
+              code: 'o = {async f(await) {}}',
+              throws: 'await',
+            });
+
+            test.pass('generator obj method arg called await', {
+              code: 'o = {*f(await) {}}',
+              // only illegal in goal mode
+              MODULE: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method arg called await', {
+            //   code: 'o = {async *f(await) {}}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
         });
 
-        test.pass('generator func decl can be called yield', {
-          code: 'function *yield() {}',
-          // only illegal in strict mode
-          STRICT: {
-            throws: 'yield',
-          },
+        describe('arg-default', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
+
+            test.fail('func decl yield', {
+              code: 'function f(x=yield 100) {}',
+            });
+
+            test.fail('async func decl yield', {
+              code: 'async function f(x=yield 100) {}',
+              desc: 'async+yield',
+            });
+
+            test.fail('generator func decl yield', {
+              code: 'function *f(x=yield 100) {}',
+              desc:' explicitly disallowed',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl yield', {
+            //   code: 'async function *f(x=yield 100) {}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func decl arg await', {
+              code: 'function f(x=await foo) {}',
+            });
+
+            test.fail('async func decl await', {
+              code: 'async function f(x=await foo) {}',
+              throws: 'await',
+            });
+
+            test.fail('generator func decl await', {
+              code: 'function *f(x=await foo) {}',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl await', {
+            //   code: 'async function *f(x=await foo) {}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
+
+            test.fail('func expr yield', {
+              code: 'let f = function f(x=yield 100) {}',
+            });
+
+            test.fail('async func expr yield', {
+              code: 'let f = async function f(x=yield 100) {}',
+            });
+
+            test.fail('generator func expr yield', {
+              code: 'let f = function *f(x=yield 100) {}',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr yield', {
+            //   code: 'let f = async function *f(x=yield 100) {}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func expr await', {
+              code: 'let f = function f(x=await foo) {}',
+            });
+
+            test.fail('async func expr await', {
+              code: 'let f = async function f(x=await foo) {}',
+              throws: 'await',
+            });
+
+            test.fail('generator func expr await', {
+              code: 'let f = function *f(x=await foo) {}',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr await', {
+            //   code: 'let f = async function *f(x=await foo) {}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method yield', {
+              code: 'class A {f(x=yield 100) {}}',
+              throws: 'yield',
+            });
+
+            test.fail('async class method yield', {
+              code: 'class A {async f(x=yield 100) {}}',
+              throws: 'yield',
+            });
+
+            test.fail('generator class method yield', {
+              code: 'class A {*f(x=yield 100) {}}',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method yield', {
+            //   code: 'class A {async *f(x=yield 100) {}}',
+            //   throws: 'yield',
+            // });
+
+            test.fail('class method await', {
+              code: 'class A {f(x=await foo) {}}',
+              throws: 'await',
+            });
+
+            test.fail('async class method await', {
+              code: 'class A {async f(x=await foo) {}}',
+              throws: 'await',
+            });
+
+            test.fail('generator class method await', {
+              code: 'class A {*f(x=await foo) {}}',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method await', {
+            //   code: 'class A {async *f(x=await foo) {}}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
+
+            test.fail('obj method yield', {
+              code: 'o = {f(x=yield 100) {}}',
+            });
+
+            test.fail('async obj method yield', {
+              code: 'o = {async f(x=yield 100) {}}',
+            });
+
+            test.fail('generator obj method yield', {
+              code: 'o = {*f(x=yield 100) {}}',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator obj method yield', {
+            //   code: 'o = {async *f(x=yield 100) {}}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('obj method await', {
+              code: 'o = {f(x=await foo) {}}',
+            });
+
+            test.fail('async obj method await', {
+              code: 'o = {async f(x=await foo) {}}',
+              throws: 'await',
+            });
+
+            test.fail('generator obj method await', {
+              code: 'o = {*f(x=await foo) {}}',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method await', {
+            //   code: 'o = {async *f(x=await foo) {}}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
         });
 
-        // TODO: async gen
-        // test.pass('async generator func decl can be called yield', {
-        //   code: 'async function *yield() {}',
-        //   // only illegal in strict mode
-        //   STRICT: {
-        //     throws: 'yield',
-        //   },
-        // });
+        describe('body', _ => {
 
-        test.pass('func decl can be called await', {
-          code: 'function await() {}',
-          // only illegal in goal mode
-          MODULE: {
-            throws: 'await',
-          },
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
+
+            test.fail('func decl yield', {
+              code: 'function f() { return yield 100; }',
+            });
+
+            test.fail('async func decl yield', {
+              code: 'async function f() { return yield 100; }',
+              desc: 'async+yield',
+            });
+
+            test.pass('generator func decl yield', {
+              code: 'function *f() { return yield 100; }',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl yield', {
+            //   code: 'async function *f() { return yield 100; }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func decl arg await', {
+              code: 'function f() { return await foo; }',
+            });
+
+            test.pass('async func decl await', {
+              code: 'async function f() { return await foo; }',
+            });
+
+            test.fail('generator func decl await', {
+              code: 'function *f() { return await foo; }',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl await', {
+            //   code: 'async function *f() { return await foo; }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
+
+            test.fail('func expr yield', {
+              code: 'let f = function f() { return yield 100; }',
+            });
+
+            test.fail('async func expr yield', {
+              code: 'let f = async function f() { return yield 100; }',
+            });
+
+            test.pass('generator func expr yield', {
+              code: 'let f = function *f() { return yield 100; }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr yield', {
+            //   code: 'let f = async function *f() { return yield 100; }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func expr await', {
+              code: 'let f = function f() { return await foo; }',
+            });
+
+            test.pass('async func expr await', {
+              code: 'let f = async function f() { return await foo; }',
+            });
+
+            test.fail('generator func expr await', {
+              code: 'let f = function *f() { return await foo; }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr await', {
+            //   code: 'let f = async function *f() { return await foo; }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method yield', {
+              code: 'class A {f() { return yield 100; }}',
+              throws: 'yield',
+            });
+
+            test.fail('async class method yield', {
+              code: 'class A {async f() { return yield 100; }}',
+              throws: 'yield',
+            });
+
+            test.pass('generator class method yield', {
+              code: 'class A {*f() { return yield 100; }}',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method yield', {
+            //   code: 'class A {async *f() { return yield 100; }}',
+            //   throws: 'yield',
+            // });
+
+            test.fail('class method await', {
+              code: 'class A {f() { return await foo; }}',
+              throws: 'await',
+            });
+
+            test.pass('async class method await', {
+              code: 'class A {async f() { return await foo; }}',
+            });
+
+            test.fail('generator class method await', {
+              code: 'class A {*f() { return await foo; }}',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method await', {
+            //   code: 'class A {async *f() { return await foo; }}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
+
+            test.fail('obj method yield', {
+              code: 'o = {f() { return yield 100; }}',
+            });
+
+            test.fail('async obj method yield', {
+              code: 'o = {async f() { return yield 100; }}',
+            });
+
+            test.pass('generator obj method yield', {
+              code: 'o = {*f() { return yield 100; }}',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator obj method yield', {
+            //   code: 'o = {async *f() { return yield 100; }}',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('obj method await', {
+              code: 'o = {f() { return await foo; }}',
+            });
+
+            test.pass('async obj method await', {
+              code: 'o = {async f() { return await foo; }}',
+            });
+
+            test.fail('generator obj method await', {
+              code: 'o = {*f() { return await foo; }}',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method await', {
+            //   code: 'o = {async *f() { return await foo; }}',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+        });
+      });
+
+      describe('async', _ => {
+
+        describe('name', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
+
+            test.pass('func decl can be called yield', {
+              code: 'async function as(){ function yield() {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async func decl can be called yield', {
+              code: 'async function as(){ async function yield() {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('generator func decl can be called yield', {
+              code: 'async function as(){ function *yield() {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl can be called yield', {
+            //   code: 'async function as(){ async function *yield() {} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func decl can be called await', {
+              code: 'async function as(){ function await() {} }',
+              throws: 'await',
+            });
+
+            test.fail('async func decl can be called await', {
+              code: 'async function as(){ async function await() {} }',
+              throws: 'await',
+            });
+
+            test.fail('generator func decl can be called await', {
+              code: 'async function as(){ function *await() {} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func decl can be called await', {
+            //   code: 'async function as(){ async function *await() {} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x expr', _ => {
+
+            test.pass('func expr can be called yield', {
+              code: 'async function as(){ let f = function yield() {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async func expr can be called yield', {
+              code: 'async function as(){ let f = async function yield() {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('generator func expr can be called yield', {
+              code: 'async function as(){ let f = function *yield() {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func expr can be called yield', {
+            //   code: 'async function as(){ let f = async function *yield() {} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func expr can be called await', {
+              code: 'async function as(){ let f = function await() {} }',
+              throws: 'await',
+            });
+
+            test.fail('async func expr can be called await', {
+              code: 'async function as(){ let f = async function await() { }',
+              throws: 'await',
+            });
+
+            test.fail('generator func expr can be called await', {
+              code: 'async function as(){ let f = function *await() {} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr can be called await', {
+            //   code: 'async function as(){ let f = async function *await() {} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x class method', _ => {
+
+            // since class methods are properties the name can be keywords so skipping the other tests for this
+            test.pass('class method can be called yield', {
+              code: 'async function as(){ class A {yield() {}} }',
+            });
+
+            test.pass('class method can be called await', {
+              code: 'async function as(){ class A {await() {}} }',
+            });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x obj method', _ => {
+
+            // since obj methods are properties the name can be keywords so skipping the other tests for this
+            test.pass('obj method can be called yield', {
+              code: 'async function as(){ A = {yield() {}} }',
+            });
+
+            test.pass('obj method can be called await', {
+              code: 'async function as(){ A = {await() {}} }',
+            });
+          });
         });
 
-        test.pass('async func decl can be called await', {
-          code: 'async function await() {}',
-          // only illegal in goal mode
-          MODULE: {
-            throws: 'await',
-          },
+        describe('arg-name', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x decl', _ => {
+
+            test.pass('func decl arg called yield', {
+              code: 'async function as(){ function f(yield) {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async func decl arg called yield', {
+              code: 'async function as(){ async function f(yield) {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.fail('generator func decl arg called yield', {
+              code: 'async function as(){ function *f(yield) {} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl arg called yield', {
+            //   code: 'async function as(){ async function *f(yield) {} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.pass('func decl arg called await', {
+              code: 'async function as(){ function f(await) {} }',
+              desc: 'args are reset and so no longer a problem',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async func decl arg called await', {
+              code: 'async function as(){ async function f(await) {} }',
+              throws: 'await',
+            });
+
+            test.pass('generator func decl arg called await', {
+              code: 'async function as(){ function *f(await) {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func decl arg called await', {
+            //   code: 'async function as(){ async function *f(await) {} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x expr', _ => {
+
+            test.pass('func expr arg called yield', {
+              code: 'async function as(){ let f = function f(yield) {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async func expr arg called yield', {
+              code: 'async function as(){ let f = async function f(yield) {} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.fail('generator func expr arg called yield', {
+              code: 'async function as(){ let f = function *f(yield) {} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func expr arg called yield', {
+            //   code: 'async function as(){ let f = async function *f(yield) {} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.pass('func expr arg called await', {
+              code: 'async function as(){ let f = function f(await) {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async func expr arg called await', {
+              code: 'async function as(){ let f = async function f(await) {} }',
+              throws: 'await',
+            });
+
+            test.pass('generator func expr arg called await', {
+              code: 'async function as(){ let f = function *f(await) {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr arg called await', {
+            //   code: 'async function as(){ let f = async function *f(await) {} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method arg called yield', {
+              code: 'async function as(){ class A {f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('async class method arg called yield', {
+              code: 'async function as(){ class A {async f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator class method arg called yield', {
+              code: 'async function as(){ class A {*f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method arg called yield', {
+            //   code: 'async function as(){ class A {async *f(yield) {}} }',
+            //   throws: 'yield',
+            // });
+
+            test.pass('class method arg called await', {
+              code: 'async function as(){ class A {f(await) {}} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async class method arg called await', {
+              code: 'async function as(){ class A {async f(await) {}} }',
+              throws: 'await',
+            });
+
+            test.pass('generator class method arg called await', {
+              code: 'async function as(){ class A {*f(await) {}} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method arg called await', {
+            //   code: 'async function as(){ class A {async *f(await) {}} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x obj method', _ => {
+
+            test.pass('obj method arg called yield', {
+              code: 'async function as(){ o = {f(yield) {}} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.pass('async obj method arg called yield', {
+              code: 'async function as(){ o = {async f(yield) {}} }',
+              // only illegal in strict mode
+              STRICT: {
+                throws: 'yield',
+              },
+            });
+
+            test.fail('generator obj method arg called yield', {
+              code: 'async function as(){ o = {*f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method arg called yield', {
+            //   code: 'async function as(){ o = {async *f(yield) {}} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.pass('obj method arg called await', {
+              code: 'async function as(){ o = {f(await) {}} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async obj method arg called await', {
+              code: 'async function as(){ o = {async f(await) {}} }',
+              throws: 'await',
+            });
+
+            test.pass('generator obj method arg called await', {
+              code: 'async function as(){ o = {*f(await) {}} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.fail('async generator obj method arg called await', {
+            //   code: 'async function as(){ o = {async *f(await) {}} }',
+            //   throws: 'await',
+            // });
+          });
         });
 
-        test.pass('generator func decl can be called await', {
-          code: 'function *await() {}',
-          // only illegal in goal mode
-          MODULE: {
-            throws: 'await',
-          },
+        describe('arg-default', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
+
+            test.fail('func decl yield', {
+              code: 'async function as(){ function f(x=yield 100) {} }',
+            });
+
+            test.fail('async func decl yield', {
+              code: 'async function as(){ async function f(x=yield 100) {} }',
+              desc: 'async+yield',
+            });
+
+            test.fail('generator func decl yield', {
+              code: 'async function as(){ function *f(x=yield 100) {} }',
+              desc:' explicitly disallowed',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl yield', {
+            //   code: 'async function as(){ async function *f(x=yield 100) {} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func decl arg await', {
+              code: 'async function as(){ function f(x=await foo) {} }',
+            });
+
+            test.fail('async func decl await', {
+              code: 'async function as(){ async function f(x=await foo) {} }',
+              throws: 'await',
+            });
+
+            test.fail('generator func decl await', {
+              code: 'async function as(){ function *f(x=await foo) {} }',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl await', {
+            //   code: 'async function as(){ async function *f(x=await foo) {} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
+
+            test.fail('func expr yield', {
+              code: 'async function as(){ let f = function f(x=yield 100) {} }',
+            });
+
+            test.fail('async func expr yield', {
+              code: 'async function as(){ let f = async function f(x=yield 100) {} }',
+            });
+
+            test.fail('generator func expr yield', {
+              code: 'async function as(){ let f = function *f(x=yield 100) {} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr yield', {
+            //   code: 'async function as(){ let f = async function *f(x=yield 100) {} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func expr await', {
+              code: 'async function as(){ let f = function f(x=await foo) {} }',
+            });
+
+            test.fail('async func expr await', {
+              code: 'async function as(){ let f = async function f(x=await foo) {} }',
+              throws: 'await',
+            });
+
+            test.fail('generator func expr await', {
+              code: 'async function as(){ let f = function *f(x=await foo) {} }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr await', {
+            //   code: 'async function as(){ let f = async function *f(x=await foo) {} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method yield', {
+              code: 'async function as(){ class A {f(x=yield 100) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('async class method yield', {
+              code: 'async function as(){ class A {async f(x=yield 100) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator class method yield', {
+              code: 'async function as(){ class A {*f(x=yield 100) {}} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method yield', {
+            //   code: 'async function as(){ class A {async *f(x=yield 100) {}} }',
+            //   throws: 'yield',
+            // });
+
+            test.fail('class method await', {
+              code: 'async function as(){ class A {f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            test.fail('async class method await', {
+              code: 'async function as(){ class A {async f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            test.fail('generator class method await', {
+              code: 'async function as(){ class A {*f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method await', {
+            //   code: 'async function as(){ class A {async *f(x=await foo) {}} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
+
+            test.fail('obj method yield', {
+              code: 'async function as(){ o = {f(x=yield 100) {}} }',
+            });
+
+            test.fail('async obj method yield', {
+              code: 'async function as(){ o = {async f(x=yield 100) {}} }',
+            });
+
+            test.fail('generator obj method yield', {
+              code: 'async function as(){ o = {*f(x=yield 100) {}} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator obj method yield', {
+            //   code: 'async function as(){ o = {async *f(x=yield 100) {}} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('obj method await', {
+              code: 'async function as(){ o = {f(x=await foo) {}} }',
+            });
+
+            test.fail('async obj method await', {
+              code: 'async function as(){ o = {async f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            test.fail('generator obj method await', {
+              code: 'async function as(){ o = {*f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method await', {
+            //   code: 'async function as(){ o = {async *f(x=await foo) {}} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
         });
 
-        // TODO: async gen
-        // test.pass('async generator func decl can be called await', {
-        //   code: 'async function *await() {}',
-        //   // only illegal in goal mode
-        //   MODULE: {
-        //     throws: 'await',
-        //   },
-        // });
+        describe('body', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
+
+            test.fail('func decl yield', {
+              code: 'async function as(){ function f() { return yield 100; } }',
+            });
+
+            test.fail('async func decl yield', {
+              code: 'async function as(){ async function f() { return yield 100; } }',
+              desc: 'async+yield',
+            });
+
+            test.pass('generator func decl yield', {
+              code: 'async function as(){ function *f() { return yield 100; } }',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl yield', {
+            //   code: 'async function as(){ async function *f() { return yield 100; } }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func decl arg await', {
+              code: 'async function as(){ function f() { return await foo; } }',
+            });
+
+            test.pass('async func decl await', {
+              code: 'async function as(){ async function f() { return await foo; } }',
+            });
+
+            test.fail('generator func decl await', {
+              code: 'async function as(){ function *f() { return await foo; } }',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl await', {
+            //   code: 'async function as(){ async function *f() { return await foo; } }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
+
+            test.fail('func expr yield', {
+              code: 'async function as(){ let f = function f() { return yield 100; } }',
+            });
+
+            test.fail('async func expr yield', {
+              code: 'async function as(){ let f = async function f() { return yield 100; } }',
+            });
+
+            test.pass('generator func expr yield', {
+              code: 'async function as(){ let f = function *f() { return yield 100; } }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr yield', {
+            //   code: 'async function as(){ let f = async function *f() { return yield 100; } }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func expr await', {
+              code: 'async function as(){ let f = function f() { return await foo; } }',
+            });
+
+            test.pass('async func expr await', {
+              code: 'async function as(){ let f = async function f() { return await foo; } }',
+            });
+
+            test.fail('generator func expr await', {
+              code: 'async function as(){ let f = function *f() { return await foo; } }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr await', {
+            //   code: 'async function as(){ let f = async function *f() { return await foo; } }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method yield', {
+              code: 'async function as(){ class A {f() { return yield 100; }} }',
+              throws: 'yield',
+            });
+
+            test.fail('async class method yield', {
+              code: 'async function as(){ class A {async f() { return yield 100; }} }',
+              throws: 'yield',
+            });
+
+            test.pass('generator class method yield', {
+              code: 'async function as(){ class A {*f() { return yield 100; }} }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method yield', {
+            //   code: 'async function as(){ class A {async *f() { return yield 100; }} }',
+            //   throws: 'yield',
+            // });
+
+            test.fail('class method await', {
+              code: 'async function as(){ class A {f() { return await foo; }} }',
+              throws: 'await',
+            });
+
+            test.pass('async class method await', {
+              code: 'async function as(){ class A {async f() { return await foo; }} }',
+            });
+
+            test.fail('generator class method await', {
+              code: 'async function as(){ class A {*f() { return await foo; }} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method await', {
+            //   code: 'async function as(){ class A {async *f() { return await foo; }} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
+
+            test.fail('obj method yield', {
+              code: 'async function as(){ o = {f() { return yield 100; }} }',
+            });
+
+            test.fail('async obj method yield', {
+              code: 'async function as(){ o = {async f() { return yield 100; }} }',
+            });
+
+            test.pass('generator obj method yield', {
+              code: 'async function as(){ o = {*f() { return yield 100; }} }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator obj method yield', {
+            //   code: 'async function as(){ o = {async *f() { return yield 100; }} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('obj method await', {
+              code: 'async function as(){ o = {f() { return await foo; }} }',
+            });
+
+            test.pass('async obj method await', {
+              code: 'async function as(){ o = {async f() { return await foo; }} }',
+            });
+
+            test.fail('generator obj method await', {
+              code: 'async function as(){ o = {*f() { return await foo; }} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method await', {
+            //   code: 'async function as(){ o = {async *f() { return await foo; }} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+        });
+      });
+
+      describe('generator', _ => {
+
+        describe('name', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
+
+            test.fail('func decl can be called yield', {
+              code: 'function *as(){ function yield() {} }',
+              throws: 'yield',
+            });
+
+            test.fail('async func decl can be called yield', {
+              code: 'function *as(){ async function yield() {} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator func decl can be called yield', {
+              code: 'function *as(){ function *yield() {} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func decl can be called yield', {
+            //   code: 'function *as(){ async function *yield() {} }',
+            //   throws: 'yield',
+            // });
+
+            test.pass('func decl can be called await', {
+              code: 'function *as(){ function await() {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.pass('async func decl can be called await', {
+              code: 'function *as(){ async function await() {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.pass('generator func decl can be called await', {
+              code: 'function *as(){ function *await() {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl can be called await', {
+            //   code: 'function *as(){ async function *await() {} }',
+            // STRICT: {
+            //   throws: 'await',
+            // },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x expr', _ => {
+
+            test.fail('func expr can be called yield', {
+              code: 'function *as(){ let f = function yield() {} }',
+              throws: 'yield',
+            });
+
+            test.fail('async func expr can be called yield', {
+              code: 'function *as(){ let f = async function yield() {} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator func expr can be called yield', {
+              code: 'function *as(){ let f = function *yield() {} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr can be called yield', {
+            //   code: 'function *as(){ let f = async function *yield() {} }',
+            //   throws: 'yield',
+            // });
+
+            test.fail_strict('func expr can be called await', {
+              code: 'function *as(){ let f = function await() {} }',
+            });
+
+            test.fail('async func expr can be called await', {
+              code: 'function *as(){ let f = async function await() { }',
+            });
+
+            test.fail_strict('generator func expr can be called await', {
+              code: 'function *as(){ let f = function *await() {} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr can be called await', {
+            //   code: 'function *as(){ let f = async function *await() {} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x class method', _ => {
+
+            // since class methods are properties the name can be keywords so skipping the other tests for this
+            test.pass('class method can be called yield', {
+              code: 'function *as(){ class A {yield() {}} }',
+            });
+
+            test.pass('class method can be called await', {
+              code: 'function *as(){ class A {await() {}} }',
+            });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x name x obj method', _ => {
+
+            // since obj methods are properties the name can be keywords so skipping the other tests for this
+            test.pass('obj method can be called yield', {
+              code: 'function *as(){ A = {yield() {}} }',
+            });
+
+            test.pass('obj method can be called await', {
+              code: 'function *as(){ A = {await() {}} }',
+            });
+          });
+        });
+
+        describe('arg-name', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x decl', _ => {
+
+            test.fail('func decl arg called yield', {
+              code: 'function *as(){ function f(yield) {} }',
+              throws: 'yield',
+            });
+
+            test.fail('async func decl arg called yield', {
+              code: 'function *as(){ async function f(yield) {} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator func decl arg called yield', {
+              code: 'function *as(){ function *f(yield) {} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func decl arg called yield', {
+            //   code: 'function *as(){ async function *f(yield) {} }',
+            //   throws: 'yield',
+            // });
+
+            test.pass('func decl arg called await', {
+              code: 'function *as(){ function f(await) {} }',
+              desc: 'args are reset and so no longer a problem',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async func decl arg called await', {
+              code: 'function *as(){ async function f(await) {} }',
+              throws: 'await',
+            });
+
+            test.pass('generator func decl arg called await', {
+              code: 'function *as(){ function *f(await) {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func decl arg called await', {
+            //   code: 'function *as(){ async function *f(await) {} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x expr', _ => {
+
+            test.pass('func expr arg called yield', {
+              code: 'function *as(){ let f = function f(yield) {} }',
+              throws: 'yield',
+            });
+
+            test.pass('async func expr arg called yield', {
+              code: 'function *as(){ let f = async function f(yield) {} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator func expr arg called yield', {
+              code: 'function *as(){ let f = function *f(yield) {} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func expr arg called yield', {
+            //   code: 'function *as(){ let f = async function *f(yield) {} }',
+            //   throws: 'yield',
+            // });
+
+            test.pass('func expr arg called await', {
+              code: 'function *as(){ let f = function f(await) {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async func expr arg called await', {
+              code: 'function *as(){ let f = async function f(await) {} }',
+              throws: 'await',
+            });
+
+            test.pass('generator func expr arg called await', {
+              code: 'function *as(){ let f = function *f(await) {} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr arg called await', {
+            //   code: 'function *as(){ let f = async function *f(await) {} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method arg called yield', {
+              code: 'function *as(){ class A {f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('async class method arg called yield', {
+              code: 'function *as(){ class A {async f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator class method arg called yield', {
+              code: 'function *as(){ class A {*f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method arg called yield', {
+            //   code: 'function *as(){ class A {async *f(yield) {}} }',
+            //   throws: 'yield',
+            // });
+
+            test.pass('class method arg called await', {
+              code: 'function *as(){ class A {f(await) {}} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async class method arg called await', {
+              code: 'function *as(){ class A {async f(await) {}} }',
+              throws: 'await',
+            });
+
+            test.pass('generator class method arg called await', {
+              code: 'function *as(){ class A {*f(await) {}} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method arg called await', {
+            //   code: 'function *as(){ class A {async *f(await) {}} }',
+            //   throws: 'await',
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x obj method', _ => {
+
+            test.pass('obj method arg called yield', {
+              code: 'function *as(){ o = {f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            test.pass('async obj method arg called yield', {
+              code: 'function *as(){ o = {async f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator obj method arg called yield', {
+              code: 'function *as(){ o = {*f(yield) {}} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method arg called yield', {
+            //   code: 'function *as(){ o = {async *f(yield) {}} }',
+            //   throws: 'yield',
+            // });
+
+            test.pass('obj method arg called await', {
+              code: 'function *as(){ o = {f(await) {}} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            test.fail('async obj method arg called await', {
+              code: 'function *as(){ o = {async f(await) {}} }',
+              throws: 'await',
+            });
+
+            test.pass('generator obj method arg called await', {
+              code: 'function *as(){ o = {*f(await) {}} }',
+              STRICT: {
+                throws: 'await',
+              },
+            });
+
+            // TODO: async gen
+            // test.fail('async generator obj method arg called await', {
+            //   code: 'function *as(){ o = {async *f(await) {}} }',
+            //   throws: 'await',
+            // });
+          });
+        });
+
+        describe('arg-default', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
+
+            test.fail('func decl yield', {
+              code: 'function *as(){ function f(x=yield 100) {} }',
+            });
+
+            test.fail('async func decl yield', {
+              code: 'function *as(){ async function f(x=yield 100) {} }',
+              desc: 'async+yield',
+            });
+
+            test.fail('generator func decl yield', {
+              code: 'function *as(){ function *f(x=yield 100) {} }',
+              desc:' explicitly disallowed',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl yield', {
+            //   code: 'function *as(){ async function *f(x=yield 100) {} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func decl arg await', {
+              code: 'function *as(){ function f(x=await foo) {} }',
+            });
+
+            test.fail('async func decl await', {
+              code: 'function *as(){ async function f(x=await foo) {} }',
+              throws: 'await',
+            });
+
+            test.fail('generator func decl await', {
+              code: 'function *as(){ function *f(x=await foo) {} }',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl await', {
+            //   code: 'function *as(){ async function *f(x=await foo) {} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
+
+            test.fail('func expr yield', {
+              code: 'function *as(){ let f = function f(x=yield 100) {} }',
+            });
+
+            test.fail('async func expr yield', {
+              code: 'function *as(){ let f = async function f(x=yield 100) {} }',
+            });
+
+            test.fail('generator func expr yield', {
+              code: 'function *as(){ let f = function *f(x=yield 100) {} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr yield', {
+            //   code: 'function *as(){ let f = async function *f(x=yield 100) {} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func expr await', {
+              code: 'function *as(){ let f = function f(x=await foo) {} }',
+            });
+
+            test.fail('async func expr await', {
+              code: 'function *as(){ let f = async function f(x=await foo) {} }',
+              throws: 'await',
+            });
+
+            test.fail('generator func expr await', {
+              code: 'function *as(){ let f = function *f(x=await foo) {} }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr await', {
+            //   code: 'function *as(){ let f = async function *f(x=await foo) {} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method yield', {
+              code: 'function *as(){ class A {f(x=yield 100) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('async class method yield', {
+              code: 'function *as(){ class A {async f(x=yield 100) {}} }',
+              throws: 'yield',
+            });
+
+            test.fail('generator class method yield', {
+              code: 'function *as(){ class A {*f(x=yield 100) {}} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method yield', {
+            //   code: 'function *as(){ class A {async *f(x=yield 100) {}} }',
+            //   throws: 'yield',
+            // });
+
+            test.fail('class method await', {
+              code: 'function *as(){ class A {f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            test.fail('async class method await', {
+              code: 'function *as(){ class A {async f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            test.fail('generator class method await', {
+              code: 'function *as(){ class A {*f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method await', {
+            //   code: 'function *as(){ class A {async *f(x=await foo) {}} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
+
+            test.fail('obj method yield', {
+              code: 'function *as(){ o = {f(x=yield 100) {}} }',
+            });
+
+            test.fail('async obj method yield', {
+              code: 'function *as(){ o = {async f(x=yield 100) {}} }',
+            });
+
+            test.fail('generator obj method yield', {
+              code: 'function *as(){ o = {*f(x=yield 100) {}} }',
+              throws: 'yield',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator obj method yield', {
+            //   code: 'function *as(){ o = {async *f(x=yield 100) {}} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('obj method await', {
+              code: 'function *as(){ o = {f(x=await foo) {}} }',
+            });
+
+            test.fail('async obj method await', {
+              code: 'function *as(){ o = {async f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            test.fail('generator obj method await', {
+              code: 'function *as(){ o = {*f(x=await foo) {}} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method await', {
+            //   code: 'function *as(){ o = {async *f(x=await foo) {}} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+        });
+
+        describe('body', _ => {
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
+
+            test.fail('func decl yield', {
+              code: 'function *as(){ function f() { return yield 100; } }',
+            });
+
+            test.fail('async func decl yield', {
+              code: 'function *as(){ async function f() { return yield 100; } }',
+              desc: 'async+yield',
+            });
+
+            test.pass('generator func decl yield', {
+              code: 'function *as(){ function *f() { return yield 100; } }',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl yield', {
+            //   code: 'function *as(){ async function *f() { return yield 100; } }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func decl arg await', {
+              code: 'function *as(){ function f() { return await foo; } }',
+            });
+
+            test.pass('async func decl await', {
+              code: 'function *as(){ async function f() { return await foo; } }',
+            });
+
+            test.fail('generator func decl await', {
+              code: 'function *as(){ function *f() { return await foo; } }',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator func decl await', {
+            //   code: 'function *as(){ async function *f() { return await foo; } }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
+
+            test.fail('func expr yield', {
+              code: 'function *as(){ let f = function f() { return yield 100; } }',
+            });
+
+            test.fail('async func expr yield', {
+              code: 'function *as(){ let f = async function f() { return yield 100; } }',
+            });
+
+            test.pass('generator func expr yield', {
+              code: 'function *as(){ let f = function *f() { return yield 100; } }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr yield', {
+            //   code: 'function *as(){ let f = async function *f() { return yield 100; } }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('func expr await', {
+              code: 'function *as(){ let f = function f() { return await foo; } }',
+            });
+
+            test.pass('async func expr await', {
+              code: 'function *as(){ let f = async function f() { return await foo; } }',
+            });
+
+            test.fail('generator func expr await', {
+              code: 'function *as(){ let f = function *f() { return await foo; } }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator func expr await', {
+            //   code: 'function *as(){ let f = async function *f() { return await foo; } }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
+
+            // note: classes are strict mode so `yield` is always illegal as method arg name
+
+            test.fail('class method yield', {
+              code: 'function *as(){ class A {f() { return yield 100; }} }',
+              throws: 'yield',
+            });
+
+            test.fail('async class method yield', {
+              code: 'function *as(){ class A {async f() { return yield 100; }} }',
+              throws: 'yield',
+            });
+
+            test.pass('generator class method yield', {
+              code: 'function *as(){ class A {*f() { return yield 100; }} }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method yield', {
+            //   code: 'function *as(){ class A {async *f() { return yield 100; }} }',
+            //   throws: 'yield',
+            // });
+
+            test.fail('class method await', {
+              code: 'function *as(){ class A {f() { return await foo; }} }',
+              throws: 'await',
+            });
+
+            test.pass('async class method await', {
+              code: 'function *as(){ class A {async f() { return await foo; }} }',
+            });
+
+            test.fail('generator class method await', {
+              code: 'function *as(){ class A {*f() { return await foo; }} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator class method await', {
+            //   code: 'function *as(){ class A {async *f() { return await foo; }} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+
+          describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
+
+            test.fail('obj method yield', {
+              code: 'function *as(){ o = {f() { return yield 100; }} }',
+            });
+
+            test.fail('async obj method yield', {
+              code: 'function *as(){ o = {async f() { return yield 100; }} }',
+            });
+
+            test.pass('generator obj method yield', {
+              code: 'function *as(){ o = {*f() { return yield 100; }} }',
+            });
+
+            // TODO: async gen
+            // test.fail('async generator obj method yield', {
+            //   code: 'function *as(){ o = {async *f() { return yield 100; }} }',
+            //   // only illegal in strict mode
+            //   STRICT: {
+            //     throws: 'yield',
+            //   },
+            // });
+
+            test.fail('obj method await', {
+              code: 'function *as(){ o = {f() { return await foo; }} }',
+            });
+
+            test.pass('async obj method await', {
+              code: 'function *as(){ o = {async f() { return await foo; }} }',
+            });
+
+            test.fail('generator obj method await', {
+              code: 'function *as(){ o = {*f() { return await foo; }} }',
+              throws: 'await',
+            });
+
+            // TODO: async gen
+            // test.pass('async generator obj method await', {
+            //   code: 'function *as(){ o = {async *f() { return await foo; }} }',
+            //   // only illegal in goal mode
+            //   MODULE: {
+            //     throws: 'await',
+            //   },
+            // });
+          });
+        });
       });
     });
   });

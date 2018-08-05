@@ -1061,9 +1061,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('async', isAsync);
     AST_set('expression', isRealFuncExpr);
 
+    // barring exceptions for all functions and methods goes:
+    // - ident keeps outer scope await/yield state. exception: function expressions clear it.
+    // - args and body explicitly set it according to the type of this function (so async sets await, etc)
+    // This means you can use `await` as a function name as long as you are not in strict mode and not already inside an
+    // async function and it's okay if the function whose name is being defined is actually async itself.
+
+    // if (isRealFuncExpr === IS_FUNC_EXPR) {
+    //   lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC);
+    // }
+
     if (curtype === $IDENT) {
       // TODO: are all functions var bindings? I think so ... should probably confirm this.
       bindingIdentCheck(curtok, BINDING_TYPE_VAR, lexerFlags);
+      // if (isAsync && curtok.str === 'await') THROW('Cannot use `await` as the name of an async function');
+      // if (isGenerator && curtok.str === 'yield') THROW('Cannot use `yield` as the name of a generator function');
       AST_setIdent('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (isFuncDecl === IS_FUNC_DECL && !isIdentOptional) {
@@ -2831,16 +2843,31 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
         break;
 
-      // conditional keywords (strict mode or context)
+      // conditional keywords
       case 'await':
-        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) return NOT_ASSIGNABLE;
-        // in sloppy mode you cant use it inside an async function (and inside params defaults?)
-        else if (hasAllFlags(lexerFlags, LF_IN_ASYNC)) return NOT_ASSIGNABLE;
+        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+        // > IdentifierReference: await
+        // > BindingIdentifier: await
+        // > LabelIdentifier: await
+        // > It is a Syntax Error if the goal symbol of the syntactic grammar is Module.
+        // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
+        if (goalMode === GOAL_MODULE) {
+          THROW('Await is illegal outside of async body with module goal');
+        } else {
+          // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
+          if (hasAllFlags(lexerFlags, LF_IN_ASYNC)) THROW('Await not allowed here');
+        }
         break;
       case 'yield':
-        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) return NOT_ASSIGNABLE;
-        // in sloppy mode you cant use it inside a generator function (and inside params defaults?)
-        else if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) return NOT_ASSIGNABLE;
+        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+        // > It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "yield".
+        // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
+        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+          THROW('Cannot use this reserved word as a variable name in strict mode');
+          // in sloppy mode you cant use it inside a generator function (and inside params defaults?)
+        } else if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) {
+          THROW('Cannot use this reserved word as a variable name inside a generator');
+        }
         break;
     }
 
