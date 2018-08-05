@@ -56,21 +56,19 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $ASI],
     });
 
-    test('super literal', {
-      // to be refined...
+    test('super literal toplevel', {
       code: 'super',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'Super',
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $ASI],
+      throws: 'super',
+    });
+
+    test('super literal in class', {
+      code: 'class x { constructor(){ super }}',
+      throws: 'super',
+    });
+
+    test('super literal in extending class', {
+      code: 'class x extends y { constructor(){ super }}',
+      throws: 'super',
     });
 
     test('double string literal', {

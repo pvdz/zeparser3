@@ -151,15 +151,18 @@ let { default: ZeTokenizer,
   LF_CAN_NEW_TARGET,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
+  LF_IN_CONSTRUCTOR,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
   LF_IN_TEMPLATE,
   LF_NO_ASI,
   LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
-  LF_NO_YIELD,
   LF_NO_IN,
+  LF_NO_YIELD,
   LF_STRICT_MODE,
+  LF_SUPER_CALL,
+  LF_SUPER_PROP,
   INITIAL_LEXER_FLAGS,
   LF_DEBUG,
 
@@ -258,6 +261,10 @@ const ARG_WAS_SIMPLE = 1;
 const ARG_HAD_INIT = 2;
 const ARGS_SIMPLE = true;
 const ARGS_COMPLEX = false;
+const IS_CONSTRUCTOR = true;
+const NOT_CONSTRUCTOR = false;
+const IS_METHOD = true;
+const NOT_METHOD = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -1037,17 +1044,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!isAsync && skipAnyIf('*', lexerFlags)) {
       isGenerator = true;
     }
-    parseFunctionAfterKeyword(lexerFlags, funcDecl, NOT_FUNCEXPR, isGenerator, isAsync, optionalIdent, astProp);
+    parseFunctionAfterKeyword(lexerFlags, funcDecl, NOT_FUNCEXPR, isGenerator, isAsync, optionalIdent, NOT_CONSTRUCTOR, NOT_METHOD, astProp);
   }
   function parseFunctionExpression(lexerFlags, isAsync, astProp) {
     let isGenerator = false;
     if (!isAsync && skipAnyIf('*', lexerFlags)) {
       isGenerator = true;
     }
-    parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, BODY_IS_BLOCK, isGenerator, isAsync, IDENT_REQUIRED, astProp);
+    parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, BODY_IS_BLOCK, isGenerator, isAsync, IDENT_REQUIRED, NOT_CONSTRUCTOR, NOT_METHOD, astProp);
   }
-  function parseFunctionAfterKeyword(lexerFlags, isFuncDecl, bodyIsExpr, isGenerator, isAsync, isIdentOptional, astProp) {
-    ASSERT(arguments.length === 7, 'arg count');
+  function parseFunctionAfterKeyword(lexerFlags, isFuncDecl, bodyIsExpr, isGenerator, isAsync, isIdentOptional, isClassConstructor, isMethod, astProp) {
+    ASSERT(arguments.length === parseFunctionAfterKeyword.length, 'arg count must match');
 
     AST_open(astProp, isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression')
 
@@ -1074,7 +1081,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //       of the arrow expression until after parsing and processing that token. that needs curly pair checks.
     lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, NOT_ARROW);
 
-    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION, isGenerator);
+    // super() is allowed in constructor param defaults so deal with the flag now...
+    if (isClassConstructor === IS_CONSTRUCTOR) {
+      ASSERT(isAsync === NOT_ASYNC, 'class constructors are not async');
+      ASSERT(isGenerator === NOT_GENERATOR, 'class constructors are not generators');
+      ASSERT(isMethod === IS_METHOD, 'class constructors are methods');
+      // you can use `super()` in arg defaults so set it up now
+      lexerFlags |= LF_IN_CONSTRUCTOR;
+    } else {
+      // since methods cant nest without another class (which resets this flag) or object (which cant have this flag)
+      // we should reset the flag now
+      // Examples of bad case:s
+      // - `class x extends y { constructor(){ ({ constructor(x=super()){} }); } }`
+      // - `class x extends y { constructor(){ class z { constructor(x=super()){} }; } }`
+      lexerFlags = sansFlag(lexerFlags, LF_IN_CONSTRUCTOR | LF_SUPER_CALL);
+    }
+
+    // regular functions cannot use `super` at all (and arrows are not parsed here)
+    // methods can use super props as soon as their arg defaults
+    if (isMethod === IS_METHOD) lexerFlags |= LF_SUPER_PROP;
+    else lexerFlags = sansFlag(lexerFlags, LF_SUPER_PROP);
+
+    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION, isGenerator, isClassConstructor);
     AST_close(isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression');
   }
   function resetLexerFlagsForFunction(lexerFlags, isAsync, funcType) {
@@ -1086,8 +1114,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (funcType === NOT_ARROW) lexerFlags = lexerFlags | LF_CAN_NEW_TARGET;
     return lexerFlags;
   }
-  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState, isGenerator) {
-    ASSERT(arguments.length === 4, 'arg count');
+  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState, isGenerator, isClassConstructor) {
+    ASSERT(arguments.length === parseFunctionFromParams.length, 'arg count should match');
     // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
     if (isGenerator === WAS_GENERATOR)  lexerFlags = lexerFlags | LF_IN_GENERATOR;
     let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom);
@@ -1536,8 +1564,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _parseClass(lexerFlags, optionalIdent, isExpression) {
     ASSERT(arguments.length === _parseClass.length, 'expecting all args');
     // Note: all class code is always strict mode implicitly
-
-    lexerFlags = lexerFlags | LF_STRICT_MODE;
+    // Note: methods inside classes can access super properties
+    // Note: `super()` is only valid in the constructor a class that uses `extends` (resets when nesting but after `extends`)
+    // Generator state resets before `extends`, while the `async` state reset after it
+    lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_CONSTRUCTOR | LF_IN_GENERATOR);
 
     // note: default exports has optional ident but should still not skip `extends` here
     // but it is not a valid class name anyways (which is superseded by a generic keyword check)
@@ -1559,12 +1589,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex('extends', lexerFlags);
       // `class x extends {} {}` is valid so we can't just scan for `{` and throw a nice error
       parseValue(lexerFlags | LF_NO_ASI, 'superClass');
+      // don't set LF_SUPER_CALL before parsing the extending value
+      lexerFlags |= LF_SUPER_CALL; // can do `super()` because this class extends another class
     } else {
       AST_set('superClass', null);
+      lexerFlags = sansFlag(lexerFlags, LF_SUPER_CALL);
     }
 
     // TODO: div/regex for class decl/expr, and asi.
 
+    // _now_ enable super props, super call is already set up correctly, remove async state.
+    lexerFlags = sansFlag(lexerFlags | LF_SUPER_PROP, LF_IN_ASYNC);
     return parseClassbody(lexerFlags, BINDING_TYPE_NONE, isExpression, 'body');
   }
 
@@ -2182,6 +2217,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // note: this node may be replaced by a label node but we can't know that here without backtracking
     let identToken = curtok;
 
+    // TODO: in most of the cases below where it leads to a label an error "keyword label" should be thrown immediately
+
     let assignable = IS_ASSIGNABLE;
     // note: curtok token has been skipped prior to this call.
     let identName = curtok.str;
@@ -2255,7 +2292,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
-        assignable = parseSuperKeyword(astProp); // TODO: more checks here for super
+        assignable = parseSuperKeyword(lexerFlags, astProp);
         break;
 
       case 'this':
@@ -3279,8 +3316,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipDiv('null', lexerFlags); // not very likely but certainly not regex
         return parseNullKeyword(astProp);
       case 'super':
-        ASSERT_skipDiv('super', lexerFlags); // not very likely but certainly not regex
-        return parseSuperKeyword(astProp);
+        ASSERT_skipAny('super', lexerFlags); // must be `(` or `.` or `[`
+        return parseSuperKeyword(lexerFlags, astProp);
       case 'true':
         ASSERT_skipDiv('true', lexerFlags); // not very likely but certainly not regex
         return parseTrueKeyword(astProp);
@@ -3360,7 +3397,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'null':
         return parseNullKeyword(astProp);
       case 'super':
-        return parseSuperKeyword(astProp);
+        return parseSuperKeyword(lexerFlags, astProp);
       case 'true':
         return parseTrueKeyword(astProp);
       case 'this':
@@ -3418,10 +3455,72 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('Literal');
     return NOT_ASSIGNABLE;
   }
-  function parseSuperKeyword(astProp) {
+  function parseSuperKeyword(lexerFlags, astProp) {
+    // https://tc39.github.io/ecma262/#table-17
+    // > GetSuperBase()	Return the object that is the base for super property accesses bound in this Environment Record. The object is derived from this Environment Record's [[HomeObject]] field. The value undefined indicates that super property accesses will produce runtime errors.
+    // implies super() must be called before access to the base
+
+    // The key is in ConstructorKind. In https://tc39.github.io/ecma262/#sec-runtime-semantics-classdefinitionevaluation
+    // this ConstructorKind is set to "derived" if extending. Otherwise this value is "base".
+    // When calling GetThisBinding an error is thrown if ThisBindingStatus is "uninitialized".
+    // When calling NewFunctionEnvironment it will set ThisBindingStatus to "lexical" if ThisMode is lexical. Otherwise to uninitialized.
+    // FunctionInitialize will set ThisMode to "lexical" if an arrow, "strict" if strict mode, and "global" otherwise.
+
+    // `super` can only ever appear as `super()` or member expression `super.foo`
+    // super member expressions (`super.foo`) can appear in class constructors and class/object methods
+    // both can appear in arrows when the arrow is nested in the required construct
+
+    // super.foo is "simple assignment target" (so `(super.foo) = x` is fine)
+
+    // super properties never destruct and super cant be used on its own (so super cannot appear in arrows/args/bindings/etc)
+    // super.foo ok in assignment pattern except for `rest` (https://tc39.github.io/ecma262/#sec-destructuring-assignment-static-semantics-early-errors)
+
+    // args/body of `function` keyworded functions of any type cannot contain either form of `super` (search for "Contains SuperProperty")
+    // `super()` is illegal inside (search for "HasDirectSuper"):
+    // - toplevels
+    // - anything that is not a class constructor (except nested arrows, which inherit these rules)
+    // - anything that is static, a generator, or async
+    // - constructors when its class does not use `extends` (same for nested arrows)
+    // this makes `super()` legal in;
+    // - constructors of classes that extend anything and are not static, async, or generator
+    // - any arrow (including arg init) that is inside such constructors
+    // - any arrow directly nested in such arrow
+
+    // while deleting a super property is illegal, it is a runtime error
+
+    // there seems to be no syntactical rule to throw an error if `this` is used before `super()`, which is a runtime
+    // error. not even when you could statically determine the error. So let's not because tracking this is a PITA :)
+    // the absence of `super()` with and without constructor of an extended class also seems not to be a syntax error.
+
     AST_open(astProp, 'Super');
     AST_close('Super');
-    return NOT_ASSIGNABLE;
+
+    // now confirm the tail
+    // TODO: should we just parse the tail now? I don't think so ... also don't think it's important to do now
+
+    if (curc === $$PAREN_L_28) {
+      // super()
+      // super(..)
+      if (hasNoFlag(lexerFlags, LF_SUPER_CALL)) THROW('Can only use `super()` in constructors of classes that extend another class');
+      // the call expression isn't and we did not parse the tail anyways and `super` is not assignable...
+      return NOT_ASSIGNABLE;
+    }
+
+    if (curc === $$SQUARE_L_5B || curtok.str === '.') {
+      // super.foo
+      // super[foo]
+      if (hasNoFlag(lexerFlags, LF_SUPER_PROP)) {
+        if (curc === $$SQUARE_L_5B)  {
+          THROW('Can only use `super[foo]` in class or object methods or in arrows nested in those methods/arrows');
+        } else {
+          THROW('Can only use `super.foo` in class or object methods or in arrows nested in those methods/arrows');
+        }
+      }
+      // the member expression might be but we did not parse the tail and `super` is not assignable...
+      return NOT_ASSIGNABLE;
+    }
+
+    THROW('The `super` keyword can only be used as call or member expression');
   }
   function parseNewKeyword(lexerFlags, astProp) {
     AST_open(astProp, 'NewExpression');
@@ -4308,6 +4407,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $$SQUARE_R_5D, astProp);
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
+        // TODO: > It is a Syntax Error if DestructuringAssignmentTarget is an ArrayLiteral or an ObjectLiteral.
+        // TODO:   https://tc39.github.io/ecma262/#sec-destructuring-assignment-static-semantics-early-errors
+        // TODO:   (I think this means `[...[x]] = x` is illegal)
+
         // rest/spread.
         // if it isn't the last in the array then the array is not destructible
         // if binding, if spread arg is not array/object/ident then it is not destructible
@@ -4745,7 +4848,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('kind', 'method'); // get/set/constructor/etc but dynamic key is always method
 
         if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
-        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
 
         AST_close('MethodDefinition');
       } else {
@@ -4757,7 +4860,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // assert next char here so we don't over accept
         if (curc === $$PAREN_L_28) {
           destructible |= CANT_DESTRUCT;
-          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, 'value');
+          parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
         } else {
           if (curc !== $$COLON_3A) THROW('A computed property name must be followed by a colon or paren');
           skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
@@ -4832,19 +4935,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
 
         parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, litToken, isClassMethod, IS_DyNAMIC_PROPERTY, astProp);
-
-        //
-        // AST_open(astProp, 'Property');
-        // ASSERT_skipRex('[', lexerFlags); // expression start
-        // parseExpression(lexerFlags, 'key');
-        // skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // TODO: next must be (
-        // AST_set('kind', 'init'); // only getters/setters get special value here
-        // AST_set('method', true);
-        // AST_set('computed', true);
-        // if (curc !== $$PAREN_L_28) THROW('Missing method arg paren after * [...]; ' + curtok);
-        // parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, WAS_GENERATOR, NOT_ASYNC, IDENT_REQUIRED, 'value');
-        // AST_set('shorthand', false);
-        // AST_close('Property');
       }
       else {
         THROW('Invalid objlit key character after generator star');
@@ -5076,7 +5166,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('kind', identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'method'); // only getters/setters get special value here
 
         if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
-        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
 
         AST_close('MethodDefinition');
       } else {
@@ -5084,7 +5174,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('kind', identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
         AST_set('method', true);
         AST_set('computed', true);
-        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+        parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
         AST_set('shorthand', false);
         AST_close('Property');
         ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
@@ -5186,20 +5276,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       AST_setLiteral(astProp, litToken);
       parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, identToken, curtok, isClassMethod, NOT_DyNAMIC_PROPERTY, astProp);
-
-
-      // if (curc === $$PAREN_L_28) {
-      //   AST_open(astProp, 'Property');
-      //   AST_setLiteral('key', litToken);
-      //   AST_set('kind', identToken.str === 'async' ? 'init' : identToken.str === 'get' ? 'get' : identToken.str === 'set' ? 'set' : 'init'); // only getters/setters get special value here
-      //   AST_set('method', true);
-      //   AST_set('computed', false);
-      //   parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, NOT_GENERATOR, identToken.str === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
-      //   AST_set('shorthand', false);
-      //   AST_close('Property');
-      // } else {
-      //   THROW('Object literal async keys that are strings or numbers must be a method: ' + curtok);
-      // }
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
     }
     else {
@@ -5496,7 +5572,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // constructor cant have get/set/*/async but can be static
 
-      if (keyToken.str === 'constructor' && !isStatic) {
+      let isConstructor = keyToken.str === 'constructor' && !isStatic;
+      if (isConstructor) {
+        // https://tc39.github.io/ecma262/#sec-class-definitions-static-semantics-early-errors
+        // > It is a Syntax Error if PropName of MethodDefinition is "constructor" and SpecialMethod of MethodDefinition is true.
+        // (generator, async, async gen, get, set)
+
         if (modifier !== '' || isGenerator) THROW('The constructor can not be a getter, setter, async, or generator');
         AST_set('kind', 'constructor');
       } else {
@@ -5504,7 +5585,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       // AST_setLiteral('key', keyToken);
-      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, isConstructor?IS_CONSTRUCTOR:NOT_CONSTRUCTOR, IS_METHOD, 'value');
 
 
       AST_close('MethodDefinition');
@@ -5515,7 +5596,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('kind', modifier === 'get' ? 'get' : modifier === 'set' ? 'set' : 'init'); // non-class: only getters/setters get special value here
       AST_set('method', true);
       AST_set('computed', !!isDynamic);
-      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, 'value');
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNCEXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, 'value');
 
 
       AST_set('shorthand', false);

@@ -1952,7 +1952,7 @@ module.exports = (describe, test) =>
             code: 'class x extends ' + ident + ' {}',
             desc: 'since extends accept an arbitrary expression certain keywords lead to different errors',
             ...(
-              ['async', 'super', 'this', 'null', 'true', 'false', 'eval', 'arguments', 'get', 'set'].indexOf(ident) >= 0 ?
+              ['async', 'this', 'null', 'true', 'false', 'eval', 'arguments', 'get', 'set'].indexOf(ident) >= 0 ?
               {
                 ast: true,
                 tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
@@ -2375,3 +2375,11 @@ class f {
 
     // class is always strict mode (note below https://tc39.github.io/ecma262/#prod-ClassBody )
   });
+
+
+// https://tc39.github.io/ecma262/#sec-class-definitions-static-semantics-early-errors
+// > It is a Syntax Error if PropName of MethodDefinition is "constructor" and SpecialMethod of MethodDefinition is true.
+// (so can not do `async constructor` etc)
+
+// > It is a Syntax Error if PropName of MethodDefinition is "prototype".
+// (can not make a static method called "prototype")

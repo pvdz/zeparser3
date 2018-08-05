@@ -1765,27 +1765,23 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $IDENT, $ASI],
         });
 
-        test('super invalid', {
+        test('toplevel super invalid', {
           code: 'new super',
-          // TODO: lets do this validation later ktnx
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'NewExpression',
-                  arguments: [],
-                  callee: {type: 'Super'},
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $ASI],
+          throws: 'super',
         });
 
-        test('super valid', {
-          code: 'class x extends y { z(){ new super(); }}',
+        test('class super invalid', {
+          code: 'class x { constructor() { new super }}',
+          throws: 'super',
+        });
+
+        test('extending class super invalid', {
+          code: 'class x extends y { constructor() { new super }}',
+          throws: 'super',
+        });
+
+        test('new super property', {
+          code: 'class x extends y { constructor() { new super.foo }}',
           ast: {
             type: 'Program',
             body: [
@@ -1798,10 +1794,64 @@ module.exports = (describe, test) =>
                   body: [
                     {
                       type: 'MethodDefinition',
-                      key: {type: 'Identifier', name: 'z'},
+                      key: {type: 'Identifier', name: 'constructor'},
                       static: false,
                       computed: false,
-                      kind: 'method',
+                      kind: 'constructor',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        expression: false,
+                        id: null,
+                        params: [],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {
+                                type: 'NewExpression',
+                                arguments: [],
+                                callee: {
+                                  type: 'MemberExpression',
+                                  object: {type: 'Super'},
+                                  property: {type: 'Identifier', name: 'foo'},
+                                  computed: false,
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('new super call', {
+          code: 'class x extends y { constructor() { new super() }}',
+          desc: 'you can probably make this work since the super could return a valid constructor (or like Function)',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: {type: 'Identifier', name: 'y'},
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'constructor'},
+                      static: false,
+                      computed: false,
+                      kind: 'constructor',
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
@@ -1829,7 +1879,7 @@ module.exports = (describe, test) =>
               },
             ],
           },
-          tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('true', {

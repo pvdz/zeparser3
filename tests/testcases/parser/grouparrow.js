@@ -247,51 +247,111 @@ module.exports = (describe, test) => describe('parens', _ => {
       });
 
       test('assignment to a wrapped super property, silly but valid', {
-        code: '(super.a) = 1;',
+        code: 'class x{ constructor(){  (super.a) = 1;  }}',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'MemberExpression',
-                  object: {type: 'Super'},
-                  property: {type: 'Identifier', name: 'a'},
-                  computed: false,
-                },
-                operator: '=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'constructor'},
+                    static: false,
+                    computed: false,
+                    kind: 'constructor',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {
+                        type: 'BlockStatement',
+                        body: [
+                          {
+                            type: 'ExpressionStatement',
+                            expression: {
+                              type: 'AssignmentExpression',
+                              left: {
+                                type: 'MemberExpression',
+                                object: {type: 'Super'},
+                                property: {type: 'Identifier', name: 'a'},
+                                computed: false,
+                              },
+                              operator: '=',
+                              right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('assignment to a wrapped super property, silly but valid', {
-        code: '(super[a]) = 1;',
+        code: 'class x{ constructor(){  (super[a]) = 1;  }}',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'MemberExpression',
-                  object: {type: 'Super'},
-                  property: {type: 'Identifier', name: 'a'},
-                  computed: true,
-                },
-                operator: '=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'constructor'},
+                    static: false,
+                    computed: false,
+                    kind: 'constructor',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {
+                        type: 'BlockStatement',
+                        body: [
+                          {
+                            type: 'ExpressionStatement',
+                            expression: {
+                              type: 'AssignmentExpression',
+                              left: {
+                                type: 'MemberExpression',
+                                object: {type: 'Super'},
+                                property: {type: 'Identifier', name: 'a'},
+                                computed: true,
+                              },
+                              operator: '=',
+                              right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('assignment to a wrapped this property, silly but valid', {
@@ -744,51 +804,111 @@ module.exports = (describe, test) => describe('parens', _ => {
       });
 
       test('assignment to a wrapped super property, silly but valid', {
-        code: '(super.a) += 1;',
+        code: 'class x{ constructor(){  (super.a) += 1;  }}',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'MemberExpression',
-                  object: {type: 'Super'},
-                  property: {type: 'Identifier', name: 'a'},
-                  computed: false,
-                },
-                operator: '+=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'constructor'},
+                    static: false,
+                    computed: false,
+                    kind: 'constructor',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {
+                        type: 'BlockStatement',
+                        body: [
+                          {
+                            type: 'ExpressionStatement',
+                            expression: {
+                              type: 'AssignmentExpression',
+                              left: {
+                                type: 'MemberExpression',
+                                object: {type: 'Super'},
+                                property: {type: 'Identifier', name: 'a'},
+                                computed: false,
+                              },
+                              operator: '+=',
+                              right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('assignment to a wrapped super property, silly but valid', {
-        code: '(super[a]) += 1;',
+        code: 'class x{ constructor(){  (super[a]) += 1;  }}',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'MemberExpression',
-                  object: {type: 'Super'},
-                  property: {type: 'Identifier', name: 'a'},
-                  computed: true,
-                },
-                operator: '+=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'constructor'},
+                    static: false,
+                    computed: false,
+                    kind: 'constructor',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: null,
+                      params: [],
+                      body: {
+                        type: 'BlockStatement',
+                        body: [
+                          {
+                            type: 'ExpressionStatement',
+                            expression: {
+                              type: 'AssignmentExpression',
+                              left: {
+                                type: 'MemberExpression',
+                                object: {type: 'Super'},
+                                property: {type: 'Identifier', name: 'a'},
+                                computed: true,
+                              },
+                              operator: '+=',
+                              right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('assignment to a wrapped this property, silly but valid', {

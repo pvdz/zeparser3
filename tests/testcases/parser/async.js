@@ -2022,4 +2022,8 @@ console.log('FIXME')
     desc: 'this is invalid since this is parsed as `async(x) = y`',
     throws: true,
   });
+
+  // test('yield is not allowed in arg default of async arrow', {
+  //   code: 'async(x = await) => {  }',
+  // });
 });

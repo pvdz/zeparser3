@@ -656,3 +656,6 @@ module.exports = (describe, test) =>
       });
     });
   });
+
+// > Unlike YieldExpression, it is a Syntax Error to omit the operand of an AwaitExpression. You must await something.
+
