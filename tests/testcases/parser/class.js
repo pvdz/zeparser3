@@ -2353,6 +2353,10 @@ module.exports = (describe, test) =>
       });
     });
 
+    test.fail('cannot extend an assignment', {
+      code: 'class x extends a = b {}',
+    });
+
     /*
   // string and numeric keys are also valid
 class f {

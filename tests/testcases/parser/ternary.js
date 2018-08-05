@@ -49,4 +49,80 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
+
+    test('assignment head', {
+      code: 'a=b?c:d',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '=',
+              right: {
+                type: 'ConditionalExpression',
+                test: {type: 'Identifier', name: 'b'},
+                consequent: {type: 'Identifier', name: 'c'},
+                alternate: {type: 'Identifier', name: 'd'},
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('assignment in middle', {
+      code: 'a?b=c:d',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ConditionalExpression',
+              test: {type: 'Identifier', name: 'a'},
+              consequent: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'b'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'c'},
+              },
+              alternate: {type: 'Identifier', name: 'd'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('assignment in tail', {
+      code: 'a?b:c=d',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ConditionalExpression',
+              test: {type: 'Identifier', name: 'a'},
+              consequent: {type: 'Identifier', name: 'b'},
+              alternate: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'c'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'd'},
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    // TODO: yield in each part
+    // TODO: await in each part
+
   });

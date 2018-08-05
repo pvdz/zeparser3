@@ -1032,8 +1032,114 @@ module.exports = (describe, test) =>
         code: 'function *f(){  class x{[yield foo](a){}}  }',
       });
 
-      test.pass('can yield in extend value of class', {
+      test.fail('can yield in extend value of class', {
         code: 'function *f(){  class x extends yield y{}  }',
+        desc: 'a yield is an "AssignmentExpression" and the rhs of `extends` is not accepting assignments',
+        throws: 'yield',
+      });
+
+      test.pass('can grouped yield in extend value of class', {
+        code: 'function *f(){  class x extends (yield y){}  }',
+      });
+    });
+
+    describe('unary operators', _ => {
+
+      describe('yield sans arg', _ => {
+
+        // note: unary ops cannot parse into a yield expression so have to settle for a `yield`
+        // as a var name which should throw inside a generator so all these tests should fail
+
+        test.fail('delete', {
+          code: 'function *f() {  return delete yield;  }',
+          throws: 'yield',
+        });
+
+        test.fail('void', {
+          code: 'function *f() {  return void yield;  }',
+          throws: 'yield',
+        });
+
+        test.fail('typeof', {
+          code: 'function *f() {  return typeof yield;  }',
+          throws: 'yield',
+        });
+
+        test.fail('+', {
+          code: 'fuction *f() {  return +yield;  }',
+        });
+
+        test.fail('-', {
+          code: 'fuction *f() {  return -yield;  }',
+        });
+
+        test.fail('~', {
+          code: 'fuction *f() {  return ~yield;  }',
+        });
+
+        test.fail('!', {
+          code: 'fuction *f() {  return !yield;  }',
+        });
+
+        test.fail('++', {
+          code: 'fuction *f() {  return ++yield;  }',
+        });
+
+        test.fail('--', {
+          code: 'fuction *f() {  return --yield;  }',
+        });
+
+        test.fail('await', {
+          code: 'fuction *f() {  return await yield;  }',
+          desc: 'await requires a unary expression as arg but yield is assignment'
+        });
+      });
+
+      describe('yield with arg', _ => {
+
+        test.fail('delete', {
+          code: 'function *f() {  return delete yield foo;  }',
+          throws: 'yield',
+        });
+
+        test.fail('void', {
+          code: 'function *f() {  return void yield foo;  }',
+          throws: 'yield',
+        });
+
+        test.fail('typeof', {
+          code: 'function *f() {  return typeof yield foo;  }',
+          throws: 'yield',
+        });
+
+        test.fail('+', {
+          code: 'fuction *f() {  return +yield foo;  }',
+        });
+
+        test.fail('-', {
+          code: 'fuction *f() {  return -yield foo;  }',
+        });
+
+        test.fail('~', {
+          code: 'fuction *f() {  return ~yield foo;  }',
+        });
+
+        test.fail('!', {
+          code: 'fuction *f() {  return !yield foo;  }',
+        });
+
+        test.fail('++', {
+          code: 'fuction *f() {  return ++yield foo;  }',
+        });
+
+        test.fail('--', {
+          code: 'fuction *f() {  return --yield foo;  }',
+        });
+
+        test.fail('await', {
+          code: 'fuction *f() {  return await yield foo;  }',
+          desc: 'await requires a unary expression as arg but yield is assignment'
+        });
       });
     });
   });

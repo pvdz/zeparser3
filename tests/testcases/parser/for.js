@@ -564,6 +564,29 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
+      test('assign as rhs', {
+        code: 'for (a in b=c);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForInStatement',
+              left: {type: 'Identifier', name: 'a'},
+              right: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'b'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'c'},
+              },
+              body: {type: 'EmptyStatement'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      // TODO: cases for yield and await as rhs
+
       describe('web compat', _ => {
         // https://tc39.github.io/ecma262/#sec-iteration-statements
         //   for ( var ForBinding[?Yield, ?Await] in Expression[+In, ?Yield, ?Await] )
@@ -1055,6 +1078,29 @@ module.exports = (describe, test) =>
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      test('assign as rhs', {
+        code: 'for (a of b=c);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForOfStatement',
+              left: {type: 'Identifier', name: 'a'},
+              right: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'b'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'c'},
+              },
+              body: {type: 'EmptyStatement'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      // TODO: cases for yield and await as rhs
     });
 
     describe('async for', _ => {

@@ -46,6 +46,7 @@ module.exports = (describe, test) =>
 
     test('nested await', {
       code: 'async function f(){ await await foo; }',
+      desc: 'await is a unaryexpression that expects a unaryexpression as arg so you can chain them',
       ast: {
         type: 'Program',
         body: [
