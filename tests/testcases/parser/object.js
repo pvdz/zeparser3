@@ -3589,6 +3589,10 @@ module.exports = (describe, test) =>
             $PUNCTUATOR,
           ],
         });
+
+        test.fail('getters can not have arguments', {
+          code: 'wrap({get foo(a){}});',
+        });
       });
 
       describe('getters (computed)', _ => {
@@ -4345,6 +4349,14 @@ module.exports = (describe, test) =>
             $PUNCTUATOR,
             $PUNCTUATOR,
           ],
+        });
+
+        test.fail('setters must have some args', {
+          code: 'wrap({set bar(){}});',
+        });
+
+        test.fail('setters may not have more than one arg', {
+          code: 'wrap({set bar(a,b){}});',
         });
       });
 
