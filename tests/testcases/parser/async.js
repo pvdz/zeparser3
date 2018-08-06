@@ -823,43 +823,9 @@ module.exports = (describe, test) => describe('async keyword', function() {
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
   });
 
-  test('async arrow to test ast', {
+  test.fail('async arrow to test ast', {
     code: 'let f = a + b + async()=>d',
-    ast: {
-      type: 'Program',
-      body: [
-        {
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [
-            {
-              type: 'VariableDeclarator',
-              id: {type: 'Identifier', name: 'f'},
-              init: {
-                type: 'BinaryExpression',
-                left: {
-                  type: 'BinaryExpression',
-                  left: {type: 'Identifier', name: 'a'},
-                  operator: '+',
-                  right: {type: 'Identifier', name: 'b'},
-                },
-                operator: '+',
-                right: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: true,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'd'},
-                },
-              },
-            },
-          ],
-        },
-      ],
-    },
-    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    desc: 'I hope this old test wasnt important :p this is illegal because arrow is AssignmentExpression and that is not allowed to the right of +',
   });
 
   test('async testing ast without newline', {

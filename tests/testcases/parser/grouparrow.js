@@ -2183,7 +2183,7 @@ module.exports = (describe, test) => describe('parens', _ => {
         'arguments',
         'async ()=>x',
         'class{}',
-        'delete x',
+        'delete x.y',
         'eval',
         'false',
         'function(){}',
@@ -2200,7 +2200,7 @@ module.exports = (describe, test) => describe('parens', _ => {
         '{}.length',
         '{x: y}.length',
       ].forEach(str => {
-        test('[' + str + '] in arrow params', {
+        test('[' + str + '] in group', {
           code: '('+str+');',
           ast: true,
           tokens: true,
@@ -2213,7 +2213,7 @@ module.exports = (describe, test) => describe('parens', _ => {
         'let',
         'yield',
       ].forEach(str => {
-        test('[' + str + '] in arrow params', {
+        test('[' + str + '] in group', {
           code: '('+str+');',
           throws: true,
           SLOPPY_SCRIPT: {
@@ -3650,7 +3650,7 @@ module.exports = (describe, test) => describe('parens', _ => {
         'async ()=>x',
         // 'await foo',
         'class{}',
-        'delete x',
+        'delete x.x',
         'false',
         'function(){}',
         // 'let',

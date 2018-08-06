@@ -779,105 +779,31 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('can not new a delete without prop', {
+        test.fail('can not new a delete without prop', {
           code: 'new delete x',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'NewExpression',
-                  arguments: [],
-                  callee: {
-                    type: 'UnaryExpression',
-                    operator: 'delete',
-                    prefix: true,
-                    argument: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $IDENT, $ASI],
         });
 
-        test('can not new a delete with prop', {
+        test.fail('can not new a delete with prop', {
           code: 'new delete x.y',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'NewExpression',
-                  arguments: [],
-                  callee: {
-                    type: 'UnaryExpression',
-                    operator: 'delete',
-                    prefix: true,
-                    argument: {
-                      type: 'MemberExpression',
-                      object: {type: 'Identifier', name: 'x'},
-                      property: {type: 'Identifier', name: 'y'},
-                      computed: false,
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
 
-        test('can not new a delete with call prop', {
+        test.fail('can not new a delete with call prop', {
           code: 'new delete x().y',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'NewExpression',
-                  arguments: [],
-                  callee: {
-                    type: 'UnaryExpression',
-                    operator: 'delete',
-                    prefix: true,
-                    argument: {
-                      type: 'MemberExpression',
-                      object: {
-                        type: 'CallExpression',
-                        callee: {type: 'Identifier', name: 'x'},
-                        arguments: [],
-                      },
-                      property: {type: 'Identifier', name: 'y'},
-                      computed: false,
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
 
         test('can not new a typeof without prop', {
           code: 'new typeof x',
-          throws: 'Cannot apply `new` to `typeof`',
-          tokens: [],
+          throws: 'new',
         });
 
         test('can not new a typeof with prop', {
           code: 'new typeof x.y',
-          throws: 'Cannot apply `new` to `typeof`',
-          tokens: [],
+          throws: 'new',
         });
 
         test('can not new a typeof with call prop', {
           code: 'new typeof x().y',
-          throws: 'Cannot apply `new` to `typeof`',
-          tokens: [],
+          throws: 'new',
         });
 
         test('can not new a ++ without prop', {
@@ -1501,28 +1427,9 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('class extending arrow silly case', {
+        test.fail('class extending arrow silly case', {
           code: 'class x extends () => {} {}',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ClassDeclaration',
-                id: {type: 'Identifier', name: 'x'},
-                superClass: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  body: {type: 'BlockStatement', body: []},
-                },
-                body: {type: 'ClassBody', body: []},
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          desc: 'the extends value is not an assignment and arrow is so it fails',
         });
 
         test('delete sans arg', {
@@ -1530,27 +1437,8 @@ module.exports = (describe, test) =>
           throws: true,
         });
 
-        test('delete with arg', {
+        test.fail('delete with arg', {
           code: 'new delete x',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'NewExpression',
-                  arguments: [],
-                  callee: {
-                    type: 'UnaryExpression',
-                    operator: 'delete',
-                    prefix: true,
-                    argument: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $IDENT, $ASI],
         });
 
         test('eval ident', {
@@ -1964,6 +1852,22 @@ module.exports = (describe, test) =>
         // test('valid called arg yield', {
         //   code: 'function *f(){ new yield x(); }',
         // });
+      });
+
+      test.fail('can not do arrow', {
+        code: 'delete () => foo',
+      });
+
+      test.fail('can not do async arrow', {
+        code: 'delete async() => foo',
+      });
+
+      test.pass('can do async function', {
+        code: 'delete async function(){}',
+      });
+
+      test.pass('can do async call', {
+        code: 'delete async(x);',
       });
     });
 

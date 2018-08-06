@@ -68,4 +68,49 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
     });
+
+    test.fail_strict('cannot just be ident in strict mode', {
+      code: 'delete foo',
+    });
+
+    test.pass('can be something stupid (those are runtime errors)', {
+      code: 'delete foo()',
+    });
+
+    test.fail_strict('can be a keyword in sloppy mode', {
+      code: 'delete true',
+    });
+
+    test.pass('can be another unary', {
+      code: 'delete typeof true',
+    });
+
+    test.fail_strict('wrapping in empty group should not matter for the error', {
+      code: 'delete (foo);',
+    });
+
+    test.fail_strict('wrapping in empty groups should not matter for the error', {
+      code: 'delete (((foo)));',
+    });
+
+    test.fail('should not be able to parse an arrow as arg because thats assignment', {
+      code: 'delete (foo) => x;',
+      desc: 'delete only accepts unary and arrow is an assignment expression so this fails',
+    });
+
+    test.fail('fails other arrow too', {
+      code: 'delete foo => x;',
+    });
+
+    test.pass('should work as sequence expression statement', {
+      code: 'delete foo.bar, z;',
+    });
+
+    test.pass('regex without flag', {
+      code: 'delete /foo/.bar;',
+    });
+
+    test.pass('regex with flag', {
+      code: 'delete /foo/g.bar;',
+    });
   });
