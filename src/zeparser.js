@@ -2789,9 +2789,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
           return 'Cannot create a binding named `'+ identToken.canon +'` in strict mode';
         }
-        if (bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_CONST) {
-          return 'Cannot use `eval`/`arguments` as `let`/`const` name';
-        }
         break;
 
       // strict mode only future reserved keyword:

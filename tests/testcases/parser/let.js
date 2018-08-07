@@ -11891,6 +11891,15 @@ module.exports = (describe, test) =>
           throws: true,
         });
       });
+
+      test('arguments check', {
+        code: 'let arguments = x;',
+        throws: true,
+        SLOPPY_SCRIPT: {
+          ast: true,
+          tokens: true,
+        },
+      })
     });
 
     describe('let as identifier in sloppy mode', _ => {

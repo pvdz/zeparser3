@@ -949,14 +949,22 @@ module.exports = (describe, test) =>
         },
       });
 
-      test('cannot use eval as let name', {
+      test('cannot use eval as let name in strict mode', {
         code: 'let eval = x;',
         throws: 'eval',
+        SLOPPY_SCRIPT: {
+          ast: true,
+          tokens: true,
+        },
       });
 
-      test('cannot use eval as const name', {
+      test('cannot use eval as const name in strict mode', {
         code: 'const eval = x;',
         throws: 'eval',
+        SLOPPY_SCRIPT: {
+          ast: true,
+          tokens: true,
+        },
       });
 
       test('cannot assign to grouped eval', {

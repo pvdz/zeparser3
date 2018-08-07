@@ -12378,6 +12378,15 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    test('arguments check', {
+      code: 'const arguments = x;',
+      throws: true,
+      SLOPPY_SCRIPT: {
+        ast: true,
+        tokens: true,
+      },
+    })
   });
 
 // TODO: const probably has some constant-specific rules to test from the parser's perspective?
