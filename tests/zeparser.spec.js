@@ -18,8 +18,15 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 // passed: 16159, crashed: 1111, failed: 680, skipped: 8201
 // passed: 16226, crashed: 1119, failed: 595, skipped: 8213
 // passed: 16223, crashed: 1104, failed: 571, skipped: 8263
+// passed: 16201, crashed: 1126, failed: 571, skipped: 8263
+// passed: 16163, crashed: 640, failed: 547, skipped: 8811
+// passed: 16171, crashed: 636, failed: 539, skipped: 8815
+// passed: 16177, crashed: 636, failed: 533, skipped: 8815
+// passed: 16174, crashed: 640, failed: 531, skipped: 8816
+// passed: 16174, crashed: 639, failed: 531, skipped: 8817
+// passed: 13133, crashed: 619, failed: 517, skipped: 6031
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
-const TEST262_SKIP_TO = TEST262 ? 17000 : 0; // skips the first n tests (saves me time)
+const TEST262_SKIP_TO = TEST262 ? 20000 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
 
 let fs = require('fs');
@@ -177,14 +184,26 @@ function override(wantObj, baseObj) {
 }
 function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   if (TEST262 && testi < TEST262_SKIP_TO) return;
-  let {ast: expectedAst, SCRIPT: scriptModeObj, MODULE: moduleModeObj, throws: expectedThrows, tokens: expectedTokens, startInStrictMode, debug: _debug, SKIP, WEB} = testDetails;
+  let {
+    ast: expectedAst,
+    SCRIPT: scriptModeObj,
+    MODULE: moduleModeObj,
+    throws: expectedThrows,
+    tokens: expectedTokens,
+    startInStrictMode,
+    debug: _debug,
+    SKIP,
+    WEB,
+    ES
+  } = testDetails;
 
   ++testj;
 
   //if (testj !== 3319) return;
   testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
   testSuffix += '[' + testj + ']';
-  if (WEB) testSuffix += '[WEB]';
+  if (WEB) testSuffix += '[' + BLINK + 'WEB' + BOLD + ']';
+  if (ES) testSuffix += '[' + BLINK + 'ES' + ES + BOLD + ']';
 
   // goal specific overrides
   // (throws override ast and ast overrides throws)
@@ -261,6 +280,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       astRoot: ast,
       tokenStorage: tokens,
       getTokenizer: tok => tokenizer = tok,
+      targetEsVersion: ES || Infinity,
     });
   } catch (f) {
     wasError = f.message;

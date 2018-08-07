@@ -178,6 +178,8 @@ let { default: ZeTokenizer,
 
 // <BODY>
 
+const EXPONENTIATION_VERSION = 7;
+
 const LHS_NOT_PAREN_START = false;
 const LHS_WAS_PAREN_START = true;
 const NOT_DESTRUCTURING = false;
@@ -278,9 +280,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     astRoot: options_astRoot = null,
     tokenStorage: options_tokenStorage = [],
     getTokenizer,
+    targetEsVersion = Infinity, // 6, 7, 8, 9, Infinity
   } = options;
 
   let tok = ZeTokenizer(code, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
+
+  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === Infinity, 'version should be 6 7 8 9 or infin');
 
   if (getTokenizer) getTokenizer(tok);
 
@@ -1472,6 +1477,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(lexerFlags, LF_IN_ASYNC)) {
       ASSERT_skipRex('await', lexerFlags);
       parseAwaitExpression(lexerFlags, identToken, NO_ASSIGNMENT, 'expression');
+      parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, LHS_NOT_PAREN_START, 'expression');
     } else {
       if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
         THROW('Cannot use `await` outside of `async` functions');
@@ -1498,8 +1504,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(lexerFlags, LF_IN_ASYNC)) {
       if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) THROW('Await is illegal as default arg value');
       AST_open(astProp, 'AwaitExpression');
-      parseExpression(lexerFlags, NO_ASSIGNMENT, 'argument'); // never optional inside async func
+      parseValue(lexerFlags, NO_ASSIGNMENT, 'argument'); // await expr arg is never optional
       AST_close('AwaitExpression');
+      if (curtok.str === '**') {
+        THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
+      }
       return NOT_ASSIGNABLE; // an await should gobble all assignments so this is not assignable
     }
     else if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) {
@@ -2400,34 +2409,40 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseSemiOrAsi(lexerFlags);
   }
   function parseDeleteExpression(lexerFlags, astProp) {
+    AST_open(astProp, 'UnaryExpression');
     if (curtype !== $IDENT) {
-      let wasGroup = curc === $$PAREN_L_28;
-      AST_open(astProp, 'UnaryExpression');
-      AST_set('operator', 'delete');
-      AST_set('prefix', true);
-      let assignable = parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
-      if (wasGroup && assignable === IS_ASSIGNABLE && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-        THROW('Cannot apply delete to an ident wrapped in parens, in strict mode. Gotcha.');
-      }
-      AST_close('UnaryExpression');
+      parseDeleteOther(lexerFlags, astProp);
     } else {
-      let identToken = curtok;
-      skipRex(lexerFlags); // this is the `delete` arg. if anything it is is `delete /x/` but probably not :)
-
-      _parseDeleteExpression(lexerFlags, identToken, astProp);
+      parseDeleteIdent(lexerFlags, astProp);
+    }
+    AST_close('UnaryExpression');
+    if (curtok.str === '**') {
+      THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
     }
   }
-  function _parseDeleteExpression(lexerFlags, identToken, astProp) {
-    ASSERT(identToken !== curtok, 'ident should be consumed now');
+  function parseDeleteOther(lexerFlags) {
+    let wasGroup = curc === $$PAREN_L_28;
+    AST_set('operator', 'delete');
+    AST_set('prefix', true);
+    let assignable = parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
+    if (wasGroup && assignable === IS_ASSIGNABLE && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      // the only group that is assignable is one that only wraps a var name or a member expression...
+      // TODO: we could signal forward that this particular group should not return assignable when it's a member expr..
+      THROW('Cannot apply delete to an ident wrapped in parens, in strict mode. Gotcha.');
+    }
+  }
+  function parseDeleteIdent(lexerFlags) {
     // `delete foo.bar`
     // `delete foo[bar]`
     // `delete x`
     // `delete (((x)))`
     // `delete "foo".bar`
 
+    let identToken = curtok;
+    skipRex(lexerFlags); // this is the `delete` arg. if anything it is is `delete /x/` but probably not :)
+
     let afterIdentToken = curtok; // store to assert whether anything after the ident was parsed
 
-    AST_open(astProp, 'UnaryExpression');
     AST_set('operator', 'delete');
     AST_set('prefix', true);
     parseValueAfterIdent(lexerFlags, identToken, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument')
@@ -2443,7 +2458,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Cannot delete an identifier without tail, in strict mode');
     }
 
-    AST_close('UnaryExpression');
   }
   function parseLabeledStatementInstead(lexerFlags, identToken, astProp) {
     bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
@@ -2507,9 +2521,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('operator', curtok.str);
     ASSERT_skipRex(curc === $$PLUS_2B ? '++' : '--', lexerFlags); // TODO: optimize; next most likely a varname
     AST_set('prefix', true);
-    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument');
+    let assignable = parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
     if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value');
     AST_close('UpdateExpression');
+    parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'expression');
     AST_close('ExpressionStatement');
     parseSemiOrAsi(lexerFlags);
   }
@@ -3153,7 +3168,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case '+':
       case '-':
       case '*':
-      case '**':
       case '/':
       case '&':
       case '|':
@@ -3174,6 +3188,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return true;
       case 'in':
         return hasNoFlag(lexerFlags, LF_NO_IN);
+      case '**':
+        if (targetEsVersion < EXPONENTIATION_VERSION) THROW('`**` is not supported in ES' + targetEsVersion);
+        return true;
     }
     return false;
   }
@@ -3231,9 +3248,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return parseValueTail(lexerFlags, assignable, newTarget, astProp);
   }
   function parseYieldValueMaybe(lexerFlags, allowAssignment, astProp) {
-    // TODO: how to properly solve this when there are no tokens? can we even do that?
     let startok = curtok;
     let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MAYBE, NOT_NEW_TARGET, allowAssignment, astProp);
+    // TODO: how to properly solve this when there are no tokens? can we even do that? (-> lexer head)
     if (curtok === startok) return YIELD_WITHOUT_VALUE;
     assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
     if (assignable === IS_ASSIGNABLE) return WITH_ASSIGNABLE;
@@ -3290,12 +3307,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
         if (checkNewTarget === IS_NEW_ARG) THROW('Cannot `new` on +/- prefixed value');
-        AST_open(astProp, 'UnaryExpression');
-        AST_set('operator', curtok.str);
+        let name = curtok.str;
         ASSERT_skipRex($PUNCTUATOR, lexerFlags);
-        AST_set('prefix', true);
-        parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument');
-        AST_close('UnaryExpression');
+        parseUnary(lexerFlags, name, astProp);
         return NOT_ASSIGNABLE;
       }
       else if (curc === $$DOT_2E) {
@@ -3680,14 +3694,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function parseUnary(lexerFlags, identName, astProp) {
+    ASSERT(identName !== 'delete', 'delete has a special parser');
+    ASSERT(identName !== 'new', 'new has a special parser');
+    ASSERT(identName !== 'yield', 'yield has a special parser');
+    ASSERT(identName !== 'await', 'await has a special parser');
+
     AST_open(astProp, 'UnaryExpression');
     AST_set('operator', identName);
     AST_set('prefix', true);
     // dont parse just any standard expression. instead stop when you find any infix operator
     parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
-    // TODO: should delete verify that the rhs ends with a member expression?
-    // TODO: delete has strict mode specific rules
     AST_close('UnaryExpression');
+    if (curtok.str === '**') {
+      THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
+    }
     return NOT_ASSIGNABLE;
   }
   function parseYieldKeyword(lexerFlags, identToken, allowAssignment, astProp) {

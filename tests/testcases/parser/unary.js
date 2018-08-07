@@ -405,6 +405,34 @@ module.exports = (describe, test) =>
           tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
+
+      test.pass('simple statement', {
+        code: '++x',
+      });
+
+      test('complex statement', {
+        code: '++x + y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: {type: 'Identifier', name: 'x'},
+                },
+                operator: '+',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
     });
 
     describe('decremental prefix', _ => {
@@ -1452,6 +1480,33 @@ module.exports = (describe, test) =>
           ],
         },
         tokens: [$PUNCTUATOR, $IDENT, $ASI],
+      });
+    });
+
+    describe('precedent', _ => {
+
+      test('operator should not consume binaries', {
+        code: 'typeof x + y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'UnaryExpression',
+                  operator: 'typeof',
+                  prefix: true,
+                  argument: {type: 'Identifier', name: 'x'},
+                },
+                operator: '+',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
     });
   });

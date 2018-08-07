@@ -577,8 +577,30 @@ module.exports = (describe, test) =>
 
         test('can have prefix inc with property', {
           code: '++new x().y',
-          throws: 'Cannot inc/dec a non-assignable value',
-          tokens: [],
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'UpdateExpression',
+                  operator: '++',
+                  prefix: true,
+                  argument: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'NewExpression',
+                      arguments: [],
+                      callee: {type: 'Identifier', name: 'x'},
+                    },
+                    property: {type: 'Identifier', name: 'y'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
 
         test('can not have postfix inc on its own', {

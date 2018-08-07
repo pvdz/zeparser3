@@ -570,15 +570,14 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
 
-    describe('regex edge case', _ => {
+    describe('regex edge case is an error', _ => {
       test('sans flag', {
         code: 'async function f(){ await foo\n/foo/ }',
-        throws: 'Expected to parse a value',
         desc: 'note: asi explicitly does not apply when next line starts with forward slash',
-        tokens: [],
+        throws: true,
       });
 
-      test('with flag', {
+      test('with flag makes it a division', {
         code: 'async function f(){ await foo\n/foo/g }',
         ast: {
           type: 'Program',
@@ -596,18 +595,18 @@ module.exports = (describe, test) =>
                   {
                     type: 'ExpressionStatement',
                     expression: {
-                      type: 'AwaitExpression',
-                      argument: {
+                      type: 'BinaryExpression',
+                      left: {
                         type: 'BinaryExpression',
                         left: {
-                          type: 'BinaryExpression',
-                          left: {type: 'Identifier', name: 'foo'},
-                          operator: '/',
-                          right: {type: 'Identifier', name: 'foo'},
+                          type: 'AwaitExpression',
+                          argument: {type: 'Identifier', name: 'foo'},
                         },
                         operator: '/',
-                        right: {type: 'Identifier', name: 'g'},
+                        right: {type: 'Identifier', name: 'foo'},
                       },
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'g'},
                     },
                   },
                 ],
