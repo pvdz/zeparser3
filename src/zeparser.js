@@ -271,6 +271,7 @@ const NO_ASSIGNMENT = false;
 const NOT_GETSET = 0;
 const IS_GETTER = 1;
 const IS_SETTER = 2;
+const NOT_EVAL_OR_ARGS = undefined;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -870,11 +871,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseTopLevels(lexerFlags) {
     AST_set('body', []);
-    _parseBodyPartsWithDirectives(lexerFlags, ARGS_SIMPLE, 'body');
+    _parseBodyPartsWithDirectives(lexerFlags, ARGS_SIMPLE, NOT_EVAL_OR_ARGS, 'body');
   }
 
-  function parseDirectivePrologues(lexerFlags, wasSimple, astProp) {
-    ASSERT(arguments.length === 3, 'arg count');
+  function parseDirectivePrologues(lexerFlags, astProp) {
+    ASSERT(arguments.length === parseDirectivePrologues.length, 'arg count');
     // note: there may be multiple (bogus or valid) directives...
     while (hasAllFlags(curtype, $STRING)) {
       // we must first parse as usual to confirm this is an isolated string and not
@@ -891,7 +892,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // we are checking the next token after that
 
       if (isDirective()) {
-        lexerFlags = parseDirectivePrologue(lexerFlags, stringToken, wasSimple, astProp);
+        lexerFlags = parseDirectivePrologue(lexerFlags, stringToken, astProp);
       } else {
         // not ideal but this almost never happens
         _parseFromLiteralStatement(lexerFlags, stringToken, astProp)
@@ -899,17 +900,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return lexerFlags;
   }
-  function parseDirectivePrologue(lexerFlags, stringToken, wasSimple, astProp) {
-    ASSERT(arguments.length === 4, 'arg count');
+  function parseDirectivePrologue(lexerFlags, stringToken, astProp) {
+    ASSERT(arguments.length === parseDirectivePrologue.length, 'arg count');
     AST_open(astProp, 'Directive');
     let dir = stringToken.str.slice(1, -1);
-    if (dir === 'use strict') {
-      // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
-      // "It is a Syntax Error if ContainsUseStrict of FunctionBody is true and IsSimpleParameterList of FormalParameters is false."
-      // and IsSimpleParameterList is only true the params are "es5" (no destructuring, no defaults, just idents)
-      if (wasSimple === ARGS_COMPLEX) THROW('Can only declare use strict if func params are "simple"');
-      lexerFlags = lexerFlags | LF_STRICT_MODE;
-    }
+    if (dir === 'use strict') lexerFlags = lexerFlags | LF_STRICT_MODE;
     AST_set('directive', dir);
     AST_close('Directive');
     parseSemiOrAsi(lexerFlags);
@@ -940,10 +935,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return false;
   }
 
-  function _parseBodyPartsWithDirectives(lexerFlags, wasSimple, astProp) {
-    ASSERT(arguments.length === 3, 'arg count');
+  function _parseBodyPartsWithDirectives(lexerFlags, wasSimple, funtionNameTokenToVerify, astProp) {
+    ASSERT(arguments.length === _parseBodyPartsWithDirectives.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-    lexerFlags = parseDirectivePrologues(lexerFlags, wasSimple, 'body');
+    let addedLexerFlags = parseDirectivePrologues(LF_NO_FLAGS, 'body');
+    if (hasAnyFlag(addedLexerFlags, LF_STRICT_MODE)) {
+      if (wasSimple === ARGS_COMPLEX) {
+        // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
+        // "It is a Syntax Error if ContainsUseStrict of FunctionBody is true and IsSimpleParameterList of FormalParameters is false."
+        // and IsSimpleParameterList is only true the params are "es5" (no destructuring, no defaults, just idents)
+        THROW('Can only declare use strict if func params are "simple"');
+      }
+      if (funtionNameTokenToVerify && (funtionNameTokenToVerify.str === 'eval' || funtionNameTokenToVerify.str === 'arguments')) {
+        THROW('Can not use `eval` or `arguments` for a strict mode function');
+      }
+    }
+
+    lexerFlags |= addedLexerFlags;
     while (curtype !== $EOF && curc !== $$CURLY_R_7D) parseBodyPart(lexerFlags, astProp);
   }
 
@@ -1081,9 +1089,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //   lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC);
     // }
 
+    // need to track whether the name was eval/args because if the func body is strict mode then it should still throw
+    // retroactively for having that name. a bit annoying.
+    let funtionNameTokenToVerify = NOT_EVAL_OR_ARGS;
+
     if (curtype === $IDENT) {
       // TODO: are all functions var bindings? I think so ... should probably confirm this.
       bindingIdentCheck(curtok, BINDING_TYPE_VAR, lexerFlags);
+      funtionNameTokenToVerify = curtok; // basically if this was strict mode and bad name, the binding check would throw already
       // if (isAsync && curtok.str === 'await') THROW('Cannot use `await` as the name of an async function');
       // if (isGenerator && curtok.str === 'yield') THROW('Cannot use `yield` as the name of a generator function');
       AST_setIdent('id', curtok);
@@ -1123,7 +1136,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isMethod === IS_METHOD) lexerFlags |= LF_SUPER_PROP;
     else lexerFlags = sansFlag(lexerFlags, LF_SUPER_PROP);
 
-    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION, isGenerator, isClassConstructor, isGetSet);
+    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION, isGenerator, isClassConstructor, isGetSet, funtionNameTokenToVerify);
     AST_close(isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression');
   }
   function resetLexerFlagsForFunction(lexerFlags, isAsync, funcType) {
@@ -1135,13 +1148,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (funcType === NOT_ARROW) lexerFlags = lexerFlags | LF_CAN_NEW_TARGET;
     return lexerFlags;
   }
-  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState, isGenerator, isClassConstructor, isGetSet) {
+  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState, isGenerator, isClassConstructor, isGetSet, funtionNameTokenToVerify) {
     ASSERT(arguments.length === parseFunctionFromParams.length, 'arg count should match');
     // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
     if (isGenerator === WAS_GENERATOR)  lexerFlags = lexerFlags | LF_IN_GENERATOR;
     let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom, isGetSet);
     if (isGenerator === NOT_GENERATOR) lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
-    parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, wasSimple, 'body');
+    _parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, wasSimple, funtionNameTokenToVerify, 'body');
   }
   function parseFuncArguments(lexerFlags, bindingFrom, isGetSet) {
     ASSERT(arguments.length === parseFuncArguments.length, 'arg count');
@@ -1528,7 +1541,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseBlockStatement(lexerFlags, blockType, parseDirectives, wasSimple, astProp) {
-    ASSERT(arguments.length === 5, 'arg count');
+    return _parseBlockStatement(lexerFlags, blockType, parseDirectives, wasSimple, NOT_EVAL_OR_ARGS, astProp);
+  }
+  function _parseBlockStatement(lexerFlags, blockType, parseDirectives, wasSimple, funtionNameTokenToVerify, astProp) {
+    ASSERT(arguments.length === _parseBlockStatement.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL | LF_NO_ASI);
@@ -1537,7 +1553,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('body', []);
     ASSERT_skipRex('{', lexerFlagsNoTemplate);
     if (parseDirectives === PARSE_DIRECTIVES) {
-      _parseBodyPartsWithDirectives(lexerFlagsNoTemplate, wasSimple, 'body');
+      _parseBodyPartsWithDirectives(lexerFlagsNoTemplate, wasSimple, funtionNameTokenToVerify, 'body');
     } else {
       ASSERT(parseDirectives === IGNORE_DIRECTIVES, 'should be boolean');
       _parseBodyPartsSansDirectives(lexerFlagsNoTemplate, 'body');

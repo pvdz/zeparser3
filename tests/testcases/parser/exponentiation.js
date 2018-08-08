@@ -619,7 +619,7 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR],
       });
 
-      test('await is same as ~', {
+      test('await has higher precendence so is okay', {
         code: '(async function f() { (await x ** y) }',
         throws: '**',
       });
