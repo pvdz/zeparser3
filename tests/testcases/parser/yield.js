@@ -975,14 +975,13 @@ module.exports = (describe, test) =>
 
     describe('regular func args', _ => {
 
-      test('yield in generator in assigned group', {
+      test.pass('yield in param default when function itself is not a generator', {
         code: 'function *g() { function f(x = yield) {}; }',
-        throws: true,
+        STRICT: {throws: true},
       });
 
-      test('yield in generator in arrow arg must track assignable as well', {
+      test.fail('yield in generator in arrow arg must track assignable as well', {
         code: 'function *g() { function f(x = y = yield z) {}; }',
-        throws: 'yield',
       });
 
       test('yield bad in generator in complex arrow arg default', {
@@ -1003,36 +1002,190 @@ module.exports = (describe, test) =>
         throws: true,
       });
 
-      test('yield in second call arg as arrow', {
+      test.fail('yield in second call arg as arrow', {
         code: 'function *g() { function f(x = x + foo(a, yield y)) {}; }',
         desc: 'yield inside generator is never a var',
-        throws: true,
       });
     });
 
     describe('state resetting edge cases', _ => {
 
-      test.fail('cannot yield in args of nested arrow', {
-        code: 'function *f(){  return (x=yield y) => x;  }',
+      describe('yield with arg', _ => {
+
+        describe('nested non-gen funcs inside a generator', _ => {
+
+          test.fail('can never yield in args of nested arrow', {
+            code: 'function *f(){  return (x=yield y) => x;  }',
+          });
+
+          test.fail('can yield in args of nested regular function', {
+            code: 'function *f(){  return function(x=yield y) {};  }',
+          });
+
+          test.fail('can yield in args of class constructor', {
+            code: 'function *f(){  class x{constructor(a=yield x){}}  }',
+            STRICT: {throws: true},
+          });
+
+          test.fail('can yield in args of class method', {
+            code: 'function *f(){  class x{foo(a=yield x){}}  }',
+          });
+
+          test.fail('can yield in args of object method', {
+            code: 'function *f(){  x = {foo(a=yield x){}}  }',
+          });
+        });
+
+        describe('nested generator funcs inside a generator', _ => {
+
+          test.fail('can never yield in args of nested arrow', {
+            code: 'function *f(){  return *(x=yield y) => x;  }',
+          });
+
+          test.fail('yield in args of nested regular function', {
+            code: 'function *f(){  return function*(x=yield y) {};  }',
+          });
+
+          test.fail('yield in args of class method', {
+            code: 'function *f(){  class x{*foo(a=yield x){}}  }',
+          });
+
+          test.fail('yield in args of object method', {
+            code: 'function *f(){  x = {*foo(a=yield x){}}  }',
+          });
+        });
+
+        describe('nested generator funcs inside a non-gen', _ => {
+
+          test.fail('can never yield in args of nested arrow', {
+            code: 'function f(){  return *(x=yield y) => x;  }',
+          });
+
+          test.fail('yield in args of nested regular function', {
+            code: 'function f(){  return function*(x=yield y) {};  }',
+          });
+
+          test.fail('yield in args of class method', {
+            code: 'function f(){  class x{*foo(a=yield x){}}  }',
+          });
+
+          test.fail('yield in args of object method', {
+            code: 'function f(){  x = {*foo(a=yield x){}}  }',
+          });
+        });
+
+        describe('nested non-gen funcs inside a non-gen', _ => {
+
+          test.fail('can never yield in args of nested arrow', {
+            code: 'function f(){  return (x=yield y) => x;  }',
+          });
+
+          test.fail('yield in args of nested regular function', {
+            code: 'function f(){  return function(x=yield y) {};  }',
+          });
+
+          test.fail('yield in args of class method', {
+            code: 'function f(){  class x{foo(a=yield x){}}  }',
+          });
+
+          test.fail('yield in args of object method', {
+            code: 'function f(){  x = {foo(a=yield x){}}  }',
+          });
+        });
       });
 
-      test.fail('cant yield in args of nested regular function', {
-        code: 'function *f(){  return function(x=yield y) {};  }',
+      describe('yield without arg could be var', _ => {
+
+        describe('nested non-gen funcs inside a generator', _ => {
+
+          test.fail('can never yield in args of nested arrow', {
+            code: 'function *f(){  return (x=yield) => x;  }',
+          });
+
+          test.pass('can yield in args of nested regular function', {
+            code: 'function *f(){  return function(x=yield) {};  }',
+            STRICT: {throws: true},
+          });
+
+          test.fail('can yield in args of class constructor', {
+            code: 'function *f(){  class x{constructor(a=yield){}}  }',
+          });
+
+          test.fail('can yield in args of class method', {
+            code: 'function *f(){  class x{foo(a=yield x){}}  }',
+          });
+
+          test.fail('can yield in args of object method', {
+            code: 'function *f(){  x = {foo(a=yield x){}}  }',
+          });
+        });
+
+        describe('nested generator funcs inside a generator', _ => {
+
+          test.fail('can never yield in args of nested arrow', {
+            code: 'function *f(){  return *(x=yield) => x;  }',
+          });
+
+          test.pass('yield in args of nested regular function', {
+            code: 'function *f(){  return function*(x=yield) {};  }',
+            STRICT: {throws: true},
+          });
+
+          test.fail('yield in args of class method', {
+            code: 'function *f(){  class x{*foo(a=yield){}}  }',
+          });
+
+          test.pass('yield in args of object method', {
+            code: 'function *f(){  x = {*foo(a=yield){}}  }',
+            STRICT: {throws: true},
+          });
+        });
+
+        describe('nested generator funcs inside a non-gen', _ => {
+
+          test.fail('can never yield in args of nested arrow', {
+            code: 'function f(){  return *(x=yield) => x;  }',
+          });
+
+          test.pass('yield in args of nested regular function', {
+            code: 'function f(){  return function*(x=yield) {};  }',
+            STRICT: {throws: true},
+          });
+
+          test.fail('yield in args of class method', {
+            code: 'function f(){  class x{*foo(a=yield){}}  }',
+          });
+
+          test.pass('yield in args of object method', {
+            code: 'function f(){  x = {*foo(a=yield){}}  }',
+            STRICT: {throws: true},
+          });
+        });
+
+        describe('nested non-gen funcs inside a non-gen', _ => {
+
+          test.pass('can never yield in args of nested arrow', {
+            code: 'function f(){  return (x=yield) => x;  }',
+            STRICT: { throws: true },
+          });
+
+          test.pass('yield in args of nested regular function', {
+            code: 'function f(){  return function(x=yield) {};  }',
+            STRICT: { throws: true },
+          });
+
+          test.fail('yield in args of class method', {
+            code: 'function f(){  class x{foo(a=yield){}}  }',
+          });
+
+          test.pass('yield in args of object method', {
+            code: 'function f(){  x = {foo(a=yield){}}  }',
+            STRICT: { throws: true },
+          });
+        });
       });
 
-      test.fail('cant yield in args of class constructor', {
-        code: 'function *f(){  class x{constructor(a=yield x){}}  }',
-      });
-
-      test.fail('cant yield in args of class method', {
-        code: 'function *f(){  class x{foo(a=yield x){}}  }',
-      });
-
-      test.pass('can yield in computed name of class method', {
-        code: 'function *f(){  class x{[yield foo](a){}}  }',
-      });
-
-      test.fail('can yield in extend value of class', {
+      test.fail('cant yield in extend value of class', {
         code: 'function *f(){  class x extends yield y{}  }',
         desc: 'a yield is an "AssignmentExpression" and the rhs of `extends` is not accepting assignments',
         throws: 'yield',
@@ -1040,6 +1193,10 @@ module.exports = (describe, test) =>
 
       test.pass('can grouped yield in extend value of class', {
         code: 'function *f(){  class x extends (yield y){}  }',
+      });
+
+      test.pass('can yield in computed name of class method', {
+        code: 'function *f(){  class x{[yield foo](a){}}  }',
       });
     });
 

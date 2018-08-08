@@ -935,7 +935,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return false;
   }
 
-  function _parseBodyPartsWithDirectives(lexerFlags, wasSimple, funtionNameTokenToVerify, astProp) {
+  function _parseBodyPartsWithDirectives(lexerFlags, wasSimple, functionNameTokenToVerify, astProp) {
     ASSERT(arguments.length === _parseBodyPartsWithDirectives.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     let addedLexerFlags = parseDirectivePrologues(LF_NO_FLAGS, 'body');
@@ -946,7 +946,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // and IsSimpleParameterList is only true the params are "es5" (no destructuring, no defaults, just idents)
         THROW('Can only declare use strict if func params are "simple"');
       }
-      if (funtionNameTokenToVerify && (funtionNameTokenToVerify.str === 'eval' || funtionNameTokenToVerify.str === 'arguments')) {
+      if (functionNameTokenToVerify && (functionNameTokenToVerify.str === 'eval' || functionNameTokenToVerify.str === 'arguments')) {
         THROW('Can not use `eval` or `arguments` for a strict mode function');
       }
     }
@@ -1091,12 +1091,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // need to track whether the name was eval/args because if the func body is strict mode then it should still throw
     // retroactively for having that name. a bit annoying.
-    let funtionNameTokenToVerify = NOT_EVAL_OR_ARGS;
+    let functionNameTokenToVerify = NOT_EVAL_OR_ARGS;
 
     if (curtype === $IDENT) {
       // TODO: are all functions var bindings? I think so ... should probably confirm this.
       bindingIdentCheck(curtok, BINDING_TYPE_VAR, lexerFlags);
-      funtionNameTokenToVerify = curtok; // basically if this was strict mode and bad name, the binding check would throw already
+      functionNameTokenToVerify = curtok; // basically if this was strict mode and bad name, the binding check would throw already
       // if (isAsync && curtok.str === 'await') THROW('Cannot use `await` as the name of an async function');
       // if (isGenerator && curtok.str === 'yield') THROW('Cannot use `yield` as the name of a generator function');
       AST_setIdent('id', curtok);
@@ -1136,7 +1136,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isMethod === IS_METHOD) lexerFlags |= LF_SUPER_PROP;
     else lexerFlags = sansFlag(lexerFlags, LF_SUPER_PROP);
 
-    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION, isGenerator, isClassConstructor, isGetSet, funtionNameTokenToVerify);
+    parseFunctionFromParams(lexerFlags, isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG, isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION, isGenerator, isClassConstructor, isGetSet, functionNameTokenToVerify);
     AST_close(isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression');
   }
   function resetLexerFlagsForFunction(lexerFlags, isAsync, funcType) {
@@ -1148,15 +1148,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (funcType === NOT_ARROW) lexerFlags = lexerFlags | LF_CAN_NEW_TARGET;
     return lexerFlags;
   }
-  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState, isGenerator, isClassConstructor, isGetSet, funtionNameTokenToVerify) {
+  function parseFunctionFromParams(lexerFlags, bindingFrom, expressionState, isGenerator, isClassConstructor, isGetSet, functionNameTokenToVerify) {
     ASSERT(arguments.length === parseFunctionFromParams.length, 'arg count should match');
     // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
     if (isGenerator === WAS_GENERATOR)  lexerFlags = lexerFlags | LF_IN_GENERATOR;
-    let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom, isGetSet);
+    let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom, isGetSet, isGenerator);
     if (isGenerator === NOT_GENERATOR) lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
-    _parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, wasSimple, funtionNameTokenToVerify, 'body');
+    _parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, wasSimple, functionNameTokenToVerify, 'body');
   }
-  function parseFuncArguments(lexerFlags, bindingFrom, isGetSet) {
+  function parseFuncArguments(lexerFlags, bindingFrom, isGetSet, isGenerator) {
     ASSERT(arguments.length === parseFuncArguments.length, 'arg count');
     ASSERT(isGetSet === IS_GETTER || isGetSet === IS_SETTER || isGetSet === NOT_GETSET, 'enum');
     // TODO: await expression inside the params (like default param) of an async function are illegal
@@ -1177,7 +1177,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       wasSimple = parseBindings(lexerFlags, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, isGetSet, 'params');
       AST_destruct('params');
-      if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) AST_scanYieldInParams(_path[_path.length - 1].params);
+      // TODO: we can detect an illegal yield with an extra flag that simply disallows it
+      // this is only bad if the current function is a generator.
+      if (isGenerator) AST_scanYieldInParams(_path[_path.length - 1].params);
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
 
@@ -1543,7 +1545,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseBlockStatement(lexerFlags, blockType, parseDirectives, wasSimple, astProp) {
     return _parseBlockStatement(lexerFlags, blockType, parseDirectives, wasSimple, NOT_EVAL_OR_ARGS, astProp);
   }
-  function _parseBlockStatement(lexerFlags, blockType, parseDirectives, wasSimple, funtionNameTokenToVerify, astProp) {
+  function _parseBlockStatement(lexerFlags, blockType, parseDirectives, wasSimple, functionNameTokenToVerify, astProp) {
     ASSERT(arguments.length === _parseBlockStatement.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
@@ -1553,7 +1555,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('body', []);
     ASSERT_skipRex('{', lexerFlagsNoTemplate);
     if (parseDirectives === PARSE_DIRECTIVES) {
-      _parseBodyPartsWithDirectives(lexerFlagsNoTemplate, wasSimple, funtionNameTokenToVerify, 'body');
+      _parseBodyPartsWithDirectives(lexerFlagsNoTemplate, wasSimple, functionNameTokenToVerify, 'body');
     } else {
       ASSERT(parseDirectives === IGNORE_DIRECTIVES, 'should be boolean');
       _parseBodyPartsSansDirectives(lexerFlagsNoTemplate, 'body');
@@ -3729,10 +3731,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // note: yield is a recursive AssignmentExpression (its optional argument can be an assignment or another yield)
     // Since it is an AssignmentExpression it cannot appear after a non-assignment operator. oops.
 
-    if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) {
+    // If inside function args then yield is never a YieldExpression. All functions remove the `Yield` cfg parameter so
+    // when the cfg reaches AssignmentExpression (https://tc39.github.io/ecma262/#prod-AssignmentExpression) it will
+    // not be able to satisfy the required `[+Yield]` parameter to parse it as a yield expression and so it goes to ident
+
+    if (hasAllFlags(lexerFlags, LF_IN_GENERATOR) && hasNoFlag(lexerFlags, LF_IN_FUNC_ARGS)) {
       // must parse a yield expression now
 
-      if (allowAssignment === NO_ASSIGNMENT) THROW('Did not exect to parse an AssignmentExpression but found `yield`');
+      if (allowAssignment === NO_ASSIGNMENT) THROW('Did not expect to parse an AssignmentExpression but found `yield`');
       if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
         THROW('Cannot `yield` after non-assignment operator');
       }

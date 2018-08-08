@@ -1,4 +1,4 @@
-let {$ASI, $IDENT, $PUNCTUATOR, $REGEX} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX} = require('../../../src/zetokenizer');
 
 // TODO: replace the startInStrictMode stuff with sloppy mode results instead
 module.exports = (describe, test) =>
@@ -3784,7 +3784,6 @@ module.exports = (describe, test) =>
             test.fail('generator func decl yield', {
               code: 'function *f(x=yield 100) {}',
               desc:' explicitly disallowed',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -3831,7 +3830,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator func expr yield', {
               code: 'let f = function *f(x=yield 100) {}',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -3872,17 +3870,14 @@ module.exports = (describe, test) =>
 
             test.fail('class method yield', {
               code: 'class A {f(x=yield 100) {}}',
-              throws: 'yield',
             });
 
             test.fail('async class method yield', {
               code: 'class A {async f(x=yield 100) {}}',
-              throws: 'yield',
             });
 
             test.fail('generator class method yield', {
               code: 'class A {*f(x=yield 100) {}}',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -3928,7 +3923,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator obj method yield', {
               code: 'o = {*f(x=yield 100) {}}',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -4542,7 +4536,6 @@ module.exports = (describe, test) =>
             test.fail('generator func decl yield', {
               code: 'async function as(){ function *f(x=yield 100) {} }',
               desc:' explicitly disallowed',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -4589,7 +4582,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator func expr yield', {
               code: 'async function as(){ let f = function *f(x=yield 100) {} }',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -4686,7 +4678,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator obj method yield', {
               code: 'async function as(){ o = {*f(x=yield 100) {}} }',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -5243,7 +5234,7 @@ module.exports = (describe, test) =>
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
 
-            test.fail('func decl yield', {
+            test.fail('func decl yield in arg is okay as long as the func is not a generator itself', {
               code: 'function *as(){ function f(x=yield 100) {} }',
             });
 
@@ -5255,7 +5246,6 @@ module.exports = (describe, test) =>
             test.fail('generator func decl yield', {
               code: 'function *as(){ function *f(x=yield 100) {} }',
               desc:' explicitly disallowed',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -5292,7 +5282,7 @@ module.exports = (describe, test) =>
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
 
-            test.fail('func expr yield', {
+            test.fail('yield is okay in func arg as long as the arg is not a generator itself', {
               code: 'function *as(){ let f = function f(x=yield 100) {} }',
             });
 
@@ -5302,7 +5292,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator func expr yield', {
               code: 'function *as(){ let f = function *f(x=yield 100) {} }',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -5341,19 +5330,16 @@ module.exports = (describe, test) =>
 
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
-            test.fail('class method yield', {
+            test.fail('class method yield is okay in args as long as the method is not a generator', {
               code: 'function *as(){ class A {f(x=yield 100) {}} }',
-              throws: 'yield',
             });
 
             test.fail('async class method yield', {
               code: 'function *as(){ class A {async f(x=yield 100) {}} }',
-              throws: 'yield',
             });
 
             test.fail('generator class method yield', {
               code: 'function *as(){ class A {*f(x=yield 100) {}} }',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -5389,7 +5375,7 @@ module.exports = (describe, test) =>
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
 
-            test.fail('obj method yield', {
+            test.fail('obj method yield is okay in param if the func is not a generator itself', {
               code: 'function *as(){ o = {f(x=yield 100) {}} }',
             });
 
@@ -5399,7 +5385,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator obj method yield', {
               code: 'function *as(){ o = {*f(x=yield 100) {}} }',
-              throws: 'yield',
             });
 
             // TODO: async gen
@@ -5535,12 +5520,10 @@ module.exports = (describe, test) =>
 
             test.fail('class method yield', {
               code: 'function *as(){ class A {f() { return yield 100; }} }',
-              throws: 'yield',
             });
 
             test.fail('async class method yield', {
               code: 'function *as(){ class A {async f() { return yield 100; }} }',
-              throws: 'yield',
             });
 
             test.pass('generator class method yield', {
