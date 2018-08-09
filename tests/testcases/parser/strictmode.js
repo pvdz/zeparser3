@@ -286,7 +286,7 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: false,
+                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {
@@ -321,7 +321,7 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
+                        expression: true,
                         id: null,
                         params: [],
                         body: {
@@ -380,7 +380,7 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: false,
+                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [{type: 'Identifier', name: 'x'}],
                     body: {
@@ -415,7 +415,7 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
+                        expression: true,
                         id: null,
                         params: [{type: 'Identifier', name: 'x'}],
                         body: {
@@ -474,7 +474,7 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: false,
+                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                     body: {
@@ -509,7 +509,7 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
+                        expression: true,
                         id: null,
                         params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                         body: {

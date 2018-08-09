@@ -198,7 +198,7 @@ const CONVERT_ASSIGNMENTS_TOO = true;
 const DONT_CONVERT_ASSIGNMENTS = false;
 const IS_FUNC_DECL = true;
 const NOT_FUNC_DECL = false;
-const IS_FUNC_EXPR = false;
+const IS_FUNC_EXPR = true;
 const NOT_FUNC_EXPR = false;
 const IDENT_OPTIONAL = true;
 const IDENT_REQUIRED = false;
@@ -1037,7 +1037,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   // ### functions
 
-  function parseFunction(lexerFlags, funcDecl, isAsync, optionalIdent, astProp) {
+  function parseFunction(lexerFlags, isFuncDecl, isRealFuncExpr, isAsync, optionalIdent, astProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerflags number');
 
     /*
@@ -1061,7 +1061,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!isAsync && skipAnyIf('*', lexerFlags)) {
       isGenerator = true;
     }
-    parseFunctionAfterKeyword(lexerFlags, funcDecl, NOT_FUNC_EXPR, isGenerator, isAsync, optionalIdent, NOT_CONSTRUCTOR, NOT_METHOD, NOT_GETSET, astProp);
+    parseFunctionAfterKeyword(lexerFlags, isFuncDecl, isRealFuncExpr, isGenerator, isAsync, optionalIdent, NOT_CONSTRUCTOR, NOT_METHOD, NOT_GETSET, astProp);
   }
   function parseFunctionExpression(lexerFlags, isAsync, astProp) {
     let isGenerator = false;
@@ -1095,7 +1095,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       // TODO: are all functions var bindings? I think so ... should probably confirm this.
-      bindingIdentCheck(curtok, BINDING_TYPE_VAR, lexerFlags);
+      bindingIdentCheck(curtok, BINDING_TYPE_VAR, !isGenerator && isRealFuncExpr ? sansFlag(lexerFlags, LF_IN_GENERATOR) : lexerFlags);
       functionNameTokenToVerify = curtok; // basically if this was strict mode and bad name, the binding check would throw already
       // if (isAsync && curtok.str === 'await') THROW('Cannot use `await` as the name of an async function');
       // if (isGenerator && curtok.str === 'yield') THROW('Cannot use `yield` as the name of a generator function');
@@ -1236,7 +1236,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         //   THROW('Function statement is illegal in strict mode');
         // }
         // TODO: consider it a declaration in if/else and statement (requiring semi) in all other statement places
-        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_REQUIRED, astProp);
+        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_REQUIRED, astProp);
         return;
 
       case 'if':
@@ -1426,7 +1426,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - async foo \n ..      error
 
       if (curtok.str === 'function') {
-        parseFunction(lexerFlags, stmtOrExpr === IS_EXPRESSION ? NOT_FUNC_DECL : IS_FUNC_DECL, WAS_ASYNC, (isExport === IS_EXPORT || stmtOrExpr === IS_EXPRESSION) ? IDENT_OPTIONAL : IDENT_REQUIRED, astProp);
+        parseFunction(
+          lexerFlags,
+          stmtOrExpr === IS_EXPRESSION ? NOT_FUNC_DECL : IS_FUNC_DECL,
+          stmtOrExpr === IS_EXPRESSION ? IS_FUNC_EXPR : NOT_FUNC_EXPR,
+          WAS_ASYNC,
+          (isExport === IS_EXPORT || stmtOrExpr === IS_EXPRESSION) ? IDENT_OPTIONAL : IDENT_REQUIRED,
+          astProp
+        );
         return NOT_ASSIGNABLE;
       }
 
@@ -1732,7 +1739,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // export default function* f(){}
         // export default function(){}
         // export default function* (){}
-        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_OPTIONAL, 'declaration');
+        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_OPTIONAL, 'declaration');
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export default async function f(){}
         // export default async function(){}
@@ -1795,7 +1802,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // export function f(){}
         // export function* f(){}
         // (anonymous should not be allowed but parsers seem to do it anyways)
-        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_ASYNC, IDENT_REQUIRED, 'declaration');
+        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_REQUIRED, 'declaration');
         AST_set('source', null);
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
@@ -1806,7 +1813,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('Can only export async functions (not arrows), did not find a function');
         }
 
-        parseFunction(lexerFlags, IS_FUNC_DECL, WAS_ASYNC, IDENT_REQUIRED, 'declaration');
+        parseFunction(lexerFlags, IS_FUNC_DECL, NOT_FUNC_EXPR, WAS_ASYNC, IDENT_REQUIRED, 'declaration');
         AST_set('source', null);
       } else {
         THROW('Unknown export type [' + curtok.str +  ']');
@@ -5680,7 +5687,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           destructible |= CANT_DESTRUCT;
         }
 
-        if (identToken.str === 'yield') TODO;
         let assignable = parseValueAfterIdent(lexerFlags, identToken, NOT_NEW_ARG, ALLOW_ASSIGNMENT, astProp);
         if (curc === closingCharOrd || curc === $$COMMA_2C) {
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;

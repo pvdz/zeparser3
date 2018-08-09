@@ -2047,7 +2047,7 @@ module.exports = (describe, test) =>
                           type: 'FunctionExpression',
                           generator: false,
                           async: false,
-                          expression: false,
+                          expression: true,
                           id: null,
                           params: [],
                           body: {type: 'BlockStatement', body: []},

@@ -353,7 +353,7 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: false,
+                    expression: true,
                     id: null,
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -381,7 +381,7 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: false,
+                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -404,7 +404,7 @@ module.exports = (describe, test) =>
               expression: {
                 type: 'CallExpression',
                 callee: {type: 'Identifier', name: 'foo'},
-                arguments: [{type: 'FunctionExpression', generator: true, async: false, expression: false, id: null, params: [], body: {type: 'BlockStatement', body: []}}],
+                arguments: [{type: 'FunctionExpression', generator: true, async: false, expression: true, id: null, params: [], body: {type: 'BlockStatement', body: []}}],
               },
             },
           ],
@@ -427,7 +427,7 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: true,
                     async: false,
-                    expression: false,
+                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -450,7 +450,15 @@ module.exports = (describe, test) =>
               expression: {
                 type: 'CallExpression',
                 callee: {type: 'Identifier', name: 'foo'},
-                arguments: [{type: 'FunctionExpression', generator: false, async: true, expression: false, id: null, params: [], body: {type: 'BlockStatement', body: []}}],
+                arguments: [{
+                  type: 'FunctionExpression',
+                  generator: false,
+                  async: true,
+                  expression: true,
+                  id: null,
+                  params: [],
+                  body: {type: 'BlockStatement', body: []}
+                }],
               },
             },
           ],
@@ -473,7 +481,7 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: true,
-                    expression: false,
+                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -648,7 +656,7 @@ module.exports = (describe, test) =>
                             type: 'FunctionExpression',
                             generator: false,
                             async: false,
-                            expression: false,
+                            expression: true,
                             id: {type: 'Identifier', name: 'f'},
                             params: [],
                             body: {type: 'BlockStatement', body: []},
@@ -749,7 +757,7 @@ module.exports = (describe, test) =>
                             type: 'FunctionExpression',
                             generator: false,
                             async: true,
-                            expression: false,
+                            expression: true,
                             id: {type: 'Identifier', name: 'f'},
                             params: [],
                             body: {type: 'BlockStatement', body: []},
@@ -3317,7 +3325,7 @@ module.exports = (describe, test) =>
       });
     });
 
-    // there are more extensive tests in the generator test file
+    // there are more extensive tests in the yield test file
     describe('generators', _ => {
       test('empty async function', {
         code: 'function* f(){}',
@@ -4962,19 +4970,18 @@ module.exports = (describe, test) =>
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x expr', _ => {
 
-            test.fail('func expr can be called yield', {
+            test.pass('func expr can be called yield', {
               code: 'function *as(){ let f = function yield() {} }',
-              throws: 'yield',
+              STRICT: {throws: true},
             });
 
-            test.fail('async func expr can be called yield', {
+            test.pass('async func expr can be called yield', {
               code: 'function *as(){ let f = async function yield() {} }',
-              throws: 'yield',
+              STRICT: {throws: true},
             });
 
-            test.fail('generator func expr can be called yield', {
+            test.fail('generator func expr not can be called yield', {
               code: 'function *as(){ let f = function *yield() {} }',
-              throws: 'yield',
             });
 
             // TODO: async gen

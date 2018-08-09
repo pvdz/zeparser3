@@ -1334,6 +1334,42 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
+
+    test('yield can be name of func expr inside generator', {
+      code: 'function* g() { (function yield() {}) }',
+      STRICT: {throws: true},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    id: {type: 'Identifier', name: 'yield'},
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment
