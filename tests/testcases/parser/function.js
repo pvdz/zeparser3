@@ -3391,12 +3391,8 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.pass('generator func decl can be called yield', {
+            test.fail('generator func decl can not be called yield', {
               code: 'function *yield() {}',
-              // only illegal in strict mode
-              STRICT: {
-                throws: 'yield',
-              },
             });
 
             // TODO: async gen
@@ -3460,12 +3456,8 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.pass('generator func expr can be called yield', {
+            test.fail('generator func expr can be called yield', {
               code: 'let f = function *yield() {}',
-              // only illegal in strict mode
-              STRICT: {
-                throws: 'yield',
-              },
             });
 
             // TODO: async gen
@@ -4178,12 +4170,8 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.pass('generator func decl can be called yield', {
+            test.fail('generator func decl can not be called yield', {
               code: 'async function as(){ function *yield() {} }',
-              // only illegal in strict mode
-              STRICT: {
-                throws: 'yield',
-              },
             });
 
             // TODO: async gen
@@ -4235,12 +4223,8 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.pass('generator func expr can be called yield', {
+            test.fail('generator func expr can be called yield', {
               code: 'async function as(){ let f = function *yield() {} }',
-              // only illegal in strict mode
-              STRICT: {
-                throws: 'yield',
-              },
             });
 
             // TODO: async gen
@@ -4927,9 +4911,8 @@ module.exports = (describe, test) =>
               throws: 'yield',
             });
 
-            test.fail('generator func decl can be called yield', {
+            test.fail('generator func decl can not be called yield', {
               code: 'function *as(){ function *yield() {} }',
-              throws: 'yield',
             });
 
             // TODO: async gen

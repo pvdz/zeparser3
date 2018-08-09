@@ -1370,6 +1370,10 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
     });
+
+    test.fail('gen expr named yield', {
+      code: 'var g = function* yield() {};',
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

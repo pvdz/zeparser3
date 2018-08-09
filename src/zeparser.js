@@ -1095,7 +1095,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       // TODO: are all functions var bindings? I think so ... should probably confirm this.
-      bindingIdentCheck(curtok, BINDING_TYPE_VAR, !isGenerator && isRealFuncExpr ? sansFlag(lexerFlags, LF_IN_GENERATOR) : lexerFlags);
+      bindingIdentCheck(curtok, BINDING_TYPE_VAR, isGenerator ? lexerFlags | LF_IN_GENERATOR : isRealFuncExpr ? sansFlag(lexerFlags, LF_IN_GENERATOR) : lexerFlags);
       functionNameTokenToVerify = curtok; // basically if this was strict mode and bad name, the binding check would throw already
       // if (isAsync && curtok.str === 'await') THROW('Cannot use `await` as the name of an async function');
       // if (isGenerator && curtok.str === 'yield') THROW('Cannot use `yield` as the name of a generator function');
