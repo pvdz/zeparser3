@@ -5611,20 +5611,42 @@ module.exports = (describe, test) =>
 
     describe('eval/args name', _ => {
 
-      test.fail('eval in strict mode', {
-        code: '"use strict"; function eval(){}',
+      describe('decl', _ => {
+
+        test.fail('eval in strict mode', {
+          code: '"use strict"; function eval(){}',
+        });
+
+        test.fail('arguments in strict mode', {
+          code: '"use strict"; function eval(){}',
+        });
+
+        test.fail('eval when function contains strict mode', {
+          code: 'function eval(){ "use strict"; }',
+        });
+
+        test.fail('arguments when function contains strict mode', {
+          code: 'function arguments(){ "use strict"; }',
+        });
       });
 
-      test.fail('arguments in strict mode', {
-        code: '"use strict"; function eval(){}',
-      });
+      describe('expr', _ => {
 
-      test.fail('eval when function contains strict mode', {
-        code: 'function eval(){ "use strict"; }',
-      });
+        test.fail('eval in strict mode', {
+          code: '"use strict"; (function eval(){})',
+        });
 
-      test.fail('arguments when function contains strict mode', {
-        code: 'function arguments(){ "use strict"; }',
+        test.fail('arguments in strict mode', {
+          code: '"use strict"; (function eval(){})',
+        });
+
+        test.fail('eval when function contains strict mode', {
+          code: '(function eval(){ "use strict"; })',
+        });
+
+        test.fail('arguments when function contains strict mode', {
+          code: '(function arguments(){ "use strict"; })',
+        });
       });
     });
   });

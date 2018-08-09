@@ -5634,22 +5634,40 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.str === '=') {
         // - `[...x = x];` (valid but never destructible)
         // don't update destructible here. assignment is handled at the end of this function (!)
-        bindingIdentCheck(identToken, bindingType, lexerFlags);
-        AST_setIdent(astProp, identToken);
+        if (identToken.str === 'yield') {
+          assignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, astProp);
+          // TODO: we could have bindingIdentCheck deal with yield, but then it'd have to deal with assignable too...
+          if (assignable === NOT_ASSIGNABLE) TODO,destructible |= CANT_DESTRUCT;
+          else TODO
+        } else {
+          bindingIdentCheck(identToken, bindingType, lexerFlags);
+          AST_setIdent(astProp, identToken);
+        }
       } else if (curc === closingCharOrd) { // || curc === $$COMMA_2C
         // - `[...x];`
         // - `[...x] => y;`
         // - `[...this];`
 
-        let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
-        if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
-
-        AST_setIdent(astProp, identToken);
+        if (identToken.str === 'yield') {
+          assignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, astProp);
+          if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+          else TODO
+        } else {
+          let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
+          if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+          AST_setIdent(astProp, identToken);
+        }
       } else if (curc === $$COMMA_2C) {
         // - `[...x, y];`
         // - `[...this, y];`
-        destructible = CANT_DESTRUCT;
-        AST_setIdent(astProp, identToken);
+        if (identToken.str === 'yield') {
+          assignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, astProp);
+          if (assignable === NOT_ASSIGNABLE) TODO,destructible |= CANT_DESTRUCT;
+          else TODO
+        } else {
+          destructible = CANT_DESTRUCT;
+          AST_setIdent(astProp, identToken);
+        }
       } else {
         // - `[...x+y];`
         // - `[...x/y];`
@@ -5662,6 +5680,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           destructible |= CANT_DESTRUCT;
         }
 
+        if (identToken.str === 'yield') TODO;
         let assignable = parseValueAfterIdent(lexerFlags, identToken, NOT_NEW_ARG, ALLOW_ASSIGNMENT, astProp);
         if (curc === closingCharOrd || curc === $$COMMA_2C) {
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;

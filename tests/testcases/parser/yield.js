@@ -1299,6 +1299,41 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    test('spread a yield', {
+      code: 'function *g() { [...yield]; }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrayExpression',
+                    elements: [
+                      {
+                        type: 'SpreadElement',
+                        argument: {type: 'YieldExpression', delegate: false, argument: null},
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment
