@@ -355,7 +355,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
   let wasWhite = false;
   let consumedNewline = false; // whitespace newline token or string token that contained newline or multiline comment
   let finished = false; // generated an $EOF?
-  let lastParsedIdent = ''; // updated after parsing an ident. used to canonalize escaped identifiers (a\u{65}b -> aab)
+  let lastParsedIdent = ''; // updated after parsing an ident. used to canonalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
 
   let cache = input.charCodeAt(0);
 
@@ -603,7 +603,7 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       // :'( https://tc39.github.io/ecma262/#prod-EscapeSequence
       // The ReservedWord definitions are specified as literal sequences of specific SourceCharacter elements.
       // A code point in a ReservedWord cannot be expressed by a \ UnicodeEscapeSequence.
-      canon, // TODO: should perf check this, perhaps we need to take this slowpath differently
+      canon, // will NOT contain escapes // TODO: should perf check this, perhaps we need to take this slowpath differently
 
       // <SCRUB DEV>
       toString() {

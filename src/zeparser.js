@@ -2419,6 +2419,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = verifyEvalArgumentsVar(lexerFlags);
         }
 
+        // must confirm ident for the str!=canon case of keywords...
+        if (identToken.str !== identToken.canon) bindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
+
         assignable = parseAfterVarName(lexerFlags, identToken, assignable, ALLOW_ASSIGNMENT, astProp);
     }
 
@@ -2516,7 +2519,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           TODO,THROW('Cannot delete an arrow');
         } else {
           // `delete (((x)) => x)`
-          TODO,THROW('Arrow is illegal here');
+          THROW('Arrow is illegal here');
         }
       }
     }
@@ -2863,6 +2866,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'false':
       // future reserved keyword:
       case 'enum':
+        if (identToken.str !== identToken.canon) return 'Keywords may not have escapes in their name';
         return 'Cannot never use this reserved word as a variable name';
 
       // strict mode keywords
@@ -2881,7 +2885,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
         //   Identifier: IdentifierName but not ReservedWord
         //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "static" ...
-        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) return '`static` is a reserved word in strict mode';
+        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+          if (identToken.str !== identToken.canon) return 'Keywords may not have escapes in their name';
+          return '`static` is a reserved word in strict mode';
+        }
         break;
 
       // `eval` and `arguments` edge case paths
@@ -2901,6 +2908,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'public':
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
           // slow path
+          if (identToken.str !== identToken.canon) {
+            return 'Keywords may not have escapes in their name';
+          }
           if (identToken.canon === 'eval' || identToken.canon === 'arguments') {
             return 'Cannot create a binding named `'+ identToken.canon +'` in strict mode';
           }
@@ -2976,6 +2986,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // future reserved keyword:
       case 'enum':
         THROW('Unexpected keyword: `' + identToken.canon + '`');
+        if (identToken.str !== identToken.canon) THROW('Keywords may not have escapes in their name');
         return NOT_ASSIGNABLE;
 
       // value keywords
@@ -2988,6 +2999,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'null':
       case 'true':
       case 'false':
+        if (identToken.str !== identToken.canon) THROW('Keywords may not have escapes in their name');
         return NOT_ASSIGNABLE;
 
       // strict mode keywords
@@ -3005,7 +3017,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
         //   Identifier: IdentifierName but not ReservedWord
         //     It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "static" ...
-        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) return NOT_ASSIGNABLE;
+        if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+          if (identToken.str !== identToken.canon) THROW('Keywords may not have escapes in their name');
+          return NOT_ASSIGNABLE;
+        }
         break;
 
       // `eval` and `arguments` edge case paths
@@ -3022,6 +3037,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'private':
       case 'public':
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+          if (identToken.str !== identToken.canon) THROW('Keywords may not have escapes in their name');
           THROW('Unexpected keyword: `' + identToken.canon + '`');
           return NOT_ASSIGNABLE;
         }

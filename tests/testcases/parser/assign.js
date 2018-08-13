@@ -393,4 +393,179 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
+
+    describe('keyword with escapes check', _ => {
+
+      [
+        'break',
+        'case',
+        'catch',
+        'class',
+        'const',
+        'continue',
+        'debugger',
+        'default',
+        'delete',
+        'do',
+        'else',
+        'export',
+        'extends',
+        'finally',
+        'for',
+        'function',
+        'if',
+        'import',
+        'in',
+        'instanceof',
+        'new',
+        'return',
+        'super',
+        'switch',
+        'this',
+        'throw',
+        'try',
+        'typeof',
+        'var',
+        'void',
+        'while',
+        'with',
+        'null',
+        'true',
+        'false',
+        'enum',
+      ].forEach(keyword => {
+
+        // this should turn `switch` into `\u0073witch`
+        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+        if (keyword === 'switch' && prefixed !== '\\u0073witch') throw new Error('Test is broken, fixmeee');
+
+        test('leading escape [' + keyword + ' => ' + prefixed + ']', {
+          code: '(' + prefixed + ' = "sentinal 1564646")',
+          throws: 'escape',
+        });
+
+        // this should turn `switch` into `s\u0077itch`
+        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+        if (keyword === 'switch' && middled !== 's\\u0077itch') throw new Error('Test is broken, fixmeee');
+
+        test('second char escaped [' + keyword + ' => ' + middled + ']', {
+          code: '(' + middled + ' = "sentinal 1564646")',
+          throws: 'escape',
+        });
+      });
+
+      // strict mode only
+      [
+        'let',
+        'implements',
+        'package',
+        'protected',
+        'interface',
+        'private',
+        'public',
+        // special non-keywords
+        'static',
+      ].forEach(keyword => {
+
+        // this should turn `switch` into `\u0073witch`
+        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+
+        test('leading escape [' + keyword + ' => ' + prefixed + ']', {
+          code: '(' + prefixed + ' = "sentinal 3435")',
+          STRICT: {throws: keyword === 'let' ? 'variable name' : 'escape'},
+          ast: true,
+          tokens: true,
+        });
+
+        // this should turn `switch` into `s\u0077itch`
+        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+
+        test('second char escaped [' + keyword + ' => ' + middled + ']', {
+          code: '(' + middled + ' = "sentinal 6543322")',
+          STRICT: {throws: keyword === 'let' ? 'variable name' : 'escape'},
+          ast: true,
+          tokens: true,
+        });
+      });
+
+      [
+        // special context
+        'await',
+      ].forEach(keyword => {
+
+        // this should turn `switch` into `\u0073witch`
+        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+
+        test.fail('leading escape [' + keyword + ' => ' + prefixed + ']', {
+          code: 'async function f(){   (' + prefixed + ' "sentinal 45334")   }',
+        });
+
+        test.fail_strict('leading escape [' + keyword + ' => ' + prefixed + ']', {
+          code: '(' + prefixed + ', "sentinal 15145")',
+        });
+
+        // this should turn `switch` into `s\u0077itch`
+        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+
+        test.fail('second char escaped [' + keyword + ' => ' + middled + ']', {
+          code: 'async function f(){   (' + middled + ' "sentinal 45334")   }',
+        });
+
+        test.fail_strict('second char escaped [' + keyword + ' => ' + middled + ']', {
+          code: '(' + middled + ', "sentinal 431431")',
+        });
+      });
+
+      [
+        // special context
+        'yield',
+      ].forEach(keyword => {
+
+        // this should turn `switch` into `\u0073witch`
+        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+
+        test.fail('cannot be yield expression [' + keyword + ' => ' + prefixed + ']', {
+          code: 'function *f(){   (' + prefixed + ' "sentinal 89456")   }',
+        });
+
+        test.fail_strict('leading escape [' + keyword + ' => ' + prefixed + ']', {
+          code: '(' + prefixed + ', "sentinal 89456")',
+        });
+
+        // this should turn `switch` into `s\u0077itch`
+        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+
+        test.fail('cannot be yield expression [' + keyword + ' => ' + middled + ']', {
+          code: 'function *f(){   (' + middled + ' "sentinal 78432")   }',
+        });
+
+        test.fail_strict('second char escaped [' + keyword + ' => ' + middled + ']', {
+          code: '(' + middled + ', "sentinal 78432")',
+        });
+      });
+
+      // should be fine for non-keywords
+      [
+        'foo',
+        'eval',
+        'arguments',
+      ].forEach(keyword => {
+
+        // this should turn `switch` into `\u0073witch`
+        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+
+        test.pass('leading escape [' + keyword + ' => ' + prefixed + ']', {
+          code: '(' + prefixed + ' = "sentinal 432432")',
+          STRICT: keyword === 'eval' || keyword === 'arguments' ? {throws: keyword} : undefined,
+        });
+
+        // this should turn `switch` into `s\u0077itch`
+        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+
+        test.pass('second char escaped [' + keyword + ' => ' + middled + ']', {
+          code: '(' + middled + ' = "sentinal 62435")',
+          STRICT: keyword === 'eval' || keyword === 'arguments' ? {throws: keyword} : undefined,
+        });
+      });
+    });
   });
