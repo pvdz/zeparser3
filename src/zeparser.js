@@ -160,7 +160,6 @@ let { default: ZeTokenizer,
   LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
   LF_NO_IN,
-  LF_NO_YIELD,
   LF_STRICT_MODE,
   LF_SUPER_CALL,
   LF_SUPER_PROP,
@@ -1001,7 +1000,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       console.log('parse error at curc', curc, String.fromCharCode(curc), curtok.str);
       console.log('current token:', curtok);
-      THROW('Unable to ASI' + (hasAllFlags(lexerFlags, LF_NO_YIELD) ? ' (note: yield is probably considered a var name here!' : '') + ', token: ' + curtok);
+      THROW('Unable to ASI, token: ' + curtok);
     }
   }
 
@@ -3195,7 +3194,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_set('operator', curtok.str);
           skipRex(lexerFlags);
           lhsWasParenStart = curc === $$PAREN_L_28; // heuristic for determining groups
-          if (curtok.str === 'yield') parseValue(lexerFlags | LF_NO_YIELD, NO_ASSIGNMENT, 'right'); // this is easier than resetting it
+          if (curtok.str === 'yield') parseValue(lexerFlags, NO_ASSIGNMENT, 'right'); // this is easier than resetting it
           else parseValue(lexerFlags, NO_ASSIGNMENT, 'right');
           AST_close(AST_nodeName);
         }
@@ -3853,9 +3852,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // (could still be arrow header, but we won't know that until much later, however, this causes destructible=false)
         // must parse a yield expression now
         if (allowAssignment === NO_ASSIGNMENT) THROW('Did not expect to parse an AssignmentExpression but found `yield`');
-        if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
-          THROW('Cannot `yield` after non-assignment operator');
-        }
         AST_open(astProp, 'YieldExpression');
         AST_set('delegate', false); // TODO ??
         parseYieldArgument(lexerFlags, allowAssignment, 'argument'); // takes care of newline check
@@ -3872,9 +3868,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // `yield` _must_ be a treated as a regular var binding now
 
     if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
-        THROW('Using `yield` after non-operator makes it a var name (illegal in strict mode)');
-      }
       THROW('Cannot use `yield` outside of generator functions when in strict mode');
     }
 
