@@ -1385,6 +1385,50 @@ module.exports = (describe, test) =>
       code: '(function *f(){  ({*g(x=yield){}})  })',
       throws: 'yield',
     });
+
+    test('parse in all parts of ternary', {
+      code: 'function *f() { (yield 1) ? yield 2 : yield 3; }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ConditionalExpression',
+                    test: {
+                      type: 'YieldExpression',
+                      delegate: false,
+                      argument: {type: 'Literal', value: '<TODO>', raw: '1'},
+                    },
+                    consequent: {
+                      type: 'YieldExpression',
+                      delegate: false,
+                      argument: {type: 'Literal', value: '<TODO>', raw: '2'},
+                    },
+                    alternate: {
+                      type: 'YieldExpression',
+                      delegate: false,
+                      argument: {type: 'Literal', value: '<TODO>', raw: '3'},
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

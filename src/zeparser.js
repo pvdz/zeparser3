@@ -3174,7 +3174,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             THROW('Unexpected character inside ternary');
           }
           ASSERT_skipRex(':', lexerFlags);
-          parseExpression(lexerFlags, NO_ASSIGNMENT, 'alternate');
+          parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'alternate');
           AST_close('ConditionalExpression');
         } else {
           // parseBinary
