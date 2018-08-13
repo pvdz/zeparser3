@@ -645,7 +645,6 @@ module.exports = (describe, test) =>
       });
     });
 
-
     describe('eval', _ => {
       test('cannot assign to eval', {
         code: 'eval = x',
@@ -1049,6 +1048,59 @@ module.exports = (describe, test) =>
           },
           tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         },
+      });
+    });
+
+    describe('header requirements for directive in body', _ => {
+
+      // these tests should cover cases where the header is fine in sloppy mode and throw when finding a use strict in the body
+
+      test.fail_strict('eval name w/o directive', {
+        code: 'function eval(){ }',
+      });
+
+      test.fail('eval name w directive', {
+        code: 'function eval(){ "use strict"; }',
+      });
+
+      test.fail_strict('arguments name w/o directive', {
+        code: 'function arguments(){ }',
+      });
+
+      test.fail('arguments name w directive', {
+        code: 'function arguments(){ "use strict"; }',
+      });
+
+      test.fail_strict('eval as arg w/o directive', {
+        code: 'function f(eval){ }',
+      });
+
+      test.fail('eval as arg w directive', {
+        code: 'function f(eval){ "use strict"; }',
+      });
+
+      test.fail_strict('arguments as arg w/o directive', {
+        code: 'function f(arguments){ }',
+      });
+
+      test.fail('arguments as arg w directive', {
+        code: 'function f(arguments){ "use strict"; }',
+      });
+
+      test.fail_strict('eval as arg init w/o directive', {
+        code: 'function f(x=eval=10){ }',
+      });
+
+      test.fail('eval as arg init w directive', {
+        code: 'function f(x=eval=10){ "use strict"; }',
+      });
+
+      test.fail_strict('arguments as arg init w/o directive', {
+        code: 'function f(x=arguments=10){ }',
+      });
+
+      test.fail('arguments as arg init w directive', {
+        code: 'function f(x=arguments=10){ "use strict"; }',
       });
     });
   });

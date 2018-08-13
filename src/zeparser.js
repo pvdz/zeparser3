@@ -2736,9 +2736,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       // normal
       bindingIdentCheck(curtok, bindingType, lexerFlags);
+      let identToken = curtok;
       AST_setIdent(astProp, curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
-      wasSimple = ARG_WAS_SIMPLE; // could still be complex if init
+      if (identToken.str !== 'eval' && identToken.str !== 'arguments') {
+        // The name `eval` and `arguments` are illegal in param names in strict mode. However, the function body could
+        // retroactively enforce this so we won't know right now. We do already have to scan whether or not the params
+        // are "simple" for the same sole reason that if the body has a strict mode header that an error is thrown so
+        // we'll just piggyback on that. This does make the thrown error a bit conflated :( Maybe we can fix that later.
+
+        wasSimple = ARG_WAS_SIMPLE; // could still be complex if init
+      }
     }
     else if (curc === $$CURLY_L_7B) {
       let destructible = parseObjectLiteralPattern(lexerFlags, bindingType, SKIP_INIT, NOT_CLASS_METHOD, astProp);
