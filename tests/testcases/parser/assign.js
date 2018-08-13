@@ -394,6 +394,123 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
 
+    describe('assigning to keyword', _ => {
+
+      [
+        'break',
+        'case',
+        'catch',
+        'class',
+        'const',
+        'continue',
+        'debugger',
+        'default',
+        'delete',
+        'do',
+        'else',
+        'export',
+        'extends',
+        'finally',
+        'for',
+        'function',
+        'if',
+        'import',
+        'in',
+        'instanceof',
+        'new',
+        'return',
+        'super',
+        'switch',
+        'this',
+        'throw',
+        'try',
+        'typeof',
+        'var',
+        'void',
+        'while',
+        'with',
+        'null',
+        'true',
+        'false',
+        'enum',
+      ].forEach(keyword => {
+        test.fail('assigning to [' + keyword + ']', {
+          code: '(' + keyword + ' = "sentinal 453543")',
+        });
+
+        test.fail('should listen to use strict directive in global[' + keyword + ']', {
+          code: '"use strict"; (' + keyword + ' = "sentinal 48945666");',
+        });
+
+        test.fail('should listen to use strict directive in function [' + keyword + ']', {
+          code: 'function f() { "use strict"; (' + keyword + ' = "sentinal 79845134"); }',
+        });
+
+        test.fail('should listen to use strict directive in getter [' + keyword + ']', {
+          code: 'foo = { get x(){  "use strict"; (' + keyword + ' = "sentinal 79845134");   }}',
+        });
+      });
+
+      // strict mode only
+      [
+        'let',
+        'implements',
+        'package',
+        'protected',
+        'interface',
+        'private',
+        'public',
+        'yield',
+        // special non-keywords
+        'static',
+        'eval',
+        'arguments',
+      ].forEach(keyword => {
+        test.fail_strict('assigning to [' + keyword + ']', {
+          code: '(' + keyword + ' = "sentinal 543665")',
+        });
+
+        test.fail('should listen to use strict directive in global[' + keyword + ']', {
+          code: '"use strict"; (' + keyword + ' = "sentinal 535426");',
+        });
+
+        test.fail('should listen to use strict directive in function [' + keyword + ']', {
+          code: 'function f() { "use strict"; (' + keyword + ' = "sentinal 7533336"); }',
+        });
+
+        test.fail('should listen to use strict in getters [' + keyword + ']', {
+          code : 'x = { get x() { "use strict"; ' + keyword + ' = 787984536; } }',
+        });
+      });
+
+      describe('`await` is only but always an illegal var name with the _module_ goal', _ => {
+
+        test.pass('no directive', {
+          code: '(await = "sentinal 543665")',
+          MODULE: {throws: true},
+        });
+
+        test.pass('global strict mode', {
+          code: '"use strict"; (await = "sentinal 535426");',
+          MODULE: {throws: true},
+        });
+
+        test.pass('local strict mode', {
+          code: 'function f() { "use strict"; (await = "sentinal 7533336"); }',
+          MODULE: {throws: true},
+        });
+      });
+
+      // should be fine for non-keywords
+      [
+        'foo',
+      ].forEach(keyword => {
+        test.pass('assignment to [' + keyword + ']', {
+          code: '(' + keyword + ' = "sentinal 453188")',
+        });
+      });
+    });
+
     describe('keyword with escapes check', _ => {
 
       [

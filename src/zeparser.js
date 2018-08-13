@@ -2411,16 +2411,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
 
-        // TODO: verify identifier (note: can be value keywords depending on next token being an arrow)
-        // note: the verification is limited in scope since many keywords are already checked before getting here
-        //bindingIdentCheck(identName, lexerFlags, BINDING_TYPE_NONE);
-
-        if (identName === 'arguments' || identName === 'eval') {
-          assignable = verifyEvalArgumentsVar(lexerFlags);
+        // TODO: the verification could be limited in scope since many (but no tall) keywords are already checked before getting here
+        assignable = bindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
+        if (assignable === NOT_ASSIGNABLE) {
+          // just a nice error. can/will probably clean this up later. probably.
+          if (identName === 'arguments' || identName === 'eval') {
+            assignable = verifyEvalArgumentsVar(lexerFlags);
+          }
         }
-
-        // must confirm ident for the str!=canon case of keywords...
-        if (identToken.str !== identToken.canon) bindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
 
         assignable = parseAfterVarName(lexerFlags, identToken, assignable, ALLOW_ASSIGNMENT, astProp);
     }
@@ -2950,7 +2948,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return '';
   }
   function bindingAssignableIdentCheck(identToken, bindingType, lexerFlags) {
-    ASSERT(arguments.length === 3, 'expecting 3 args');
+    ASSERT(arguments.length === bindingAssignableIdentCheck.length, 'expecting arg count');
+    ASSERT(typeof identToken === 'object', 'token, not name')
 
     // this function is called to validate an ident that is the head of a value as an assignable target.
     // this means `foo` is yes, `true` is no, `typeof` is no (and requires a tail), and `instanceof` should just throw.
