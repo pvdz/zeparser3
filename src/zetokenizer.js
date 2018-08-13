@@ -345,6 +345,9 @@ const PARSING_SANS_TICK = false;
 const FAIL_GRACEFULLY = true;
 const FAIL_HARD = false;
 
+const FOR_TEMPLATE = true; // templates are never not allowed to have octal escapes except when tagged
+const NOT_TEMPLATE = false;
+
 let NOT_A_REGEX_ERROR = '';
 
 function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD, tokenStorage = []) {
@@ -825,15 +828,15 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
       ASSERT_skip(c);
 
       if (c === $$BACKSLASH_5C) {
-        bad = parseStringEscape(lexerFlags) === BAD_ESCAPE || bad;
+        bad = parseStringEscape(lexerFlags, NOT_TEMPLATE) === BAD_ESCAPE || bad;
       }
     }
 
     if (bad || c !== marker) return $ERROR; // unclosed string or illegal escape
     return tokenType;
   }
-  function parseStringEscape(lexerFlags) {
-    ASSERT(arguments.length === 1, 'need 1 arg');
+  function parseStringEscape(lexerFlags, forTemplate) {
+    ASSERT(arguments.length === parseStringEscape.length, 'need args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     if (eof()) return BAD_ESCAPE; // you cant escape eof ;)
@@ -862,7 +865,7 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
       case $$8_38:
       case $$9_39:
         // need to determine what to do with \8 and \9 in strict mode
-        return parseStringEscapeOctal(c, lexerFlags);
+        return parseStringEscapeOctal(c, forTemplate, lexerFlags);
 
       case $$CR_0D:
         // edge case: `\crlf` is a valid line continuation
@@ -978,16 +981,16 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
       return BAD_ESCAPE;
     }
   }
-  function parseStringEscapeOctal(a, lexerFlags) {
-    ASSERT(arguments.length === 2, 'need 2 args');
+  function parseStringEscapeOctal(a, forTemplate, lexerFlags) {
+    ASSERT(arguments.length === parseStringEscapeOctal.length, 'need args');
     ASSERT(typeof a === 'number', 'first digit ord');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+    if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE || forTemplate === FOR_TEMPLATE) {
       if (a === $$0_30) {
-        if (eof()) return GOOD_ESCAPE; // will still lead to an error later for the next token
+        if (eof()) return GOOD_ESCAPE; // will still lead to an eof error later for the next token
         let b = peek();
-        if (b < $$0_30 || b > $$9_39) return GOOD_ESCAPE; // `\0` without digit following is ok in strict
+        if (b < $$0_30 || b > $$9_39) return GOOD_ESCAPE; // `\0` without digit following is ok in strict/tpl
       }
       return BAD_ESCAPE; // early error
     }
@@ -1001,7 +1004,6 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
     // tbh we dont really need to parse any further. it's irrelevant to the parser whether
     // 1 2 or 3 digits are consumed here as those digits can not lead to other problems
     // and we've already consumed one character at callsite
-
     return GOOD_ESCAPE;
 
     //if (eof()) return GOOD_ESCAPE;
@@ -1037,6 +1039,9 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
     ASSERT(arguments.length === 2, 'need 2 args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
+    // https://tc39.github.io/ecma262/#prod-CodePoint
+    // "A conforming implementation must not use the extended definition of EscapeSequence described in B.1.2 when parsing a TemplateCharacter."
+
     // Since ES9 a _tagged_ tick literal can contain illegal escapes. Regular template strings must still conform. So
     // we just add the $TICK_BAD_ESCAPE flag in the token type indicating whether or not the token contains a bad escape.
 
@@ -1070,19 +1075,11 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
         return (fromTick ? $TICK_PURE : $TICK_TAIL) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
       }
 
-      //if (isLfPsLs(c)) {
-      //  newline stuff
-      //}
-      //if (c === $$CR_0D) {
-      //  if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A); // handle crlf properly in terms of token generation
-      //  newline stuff
-      //}
-
       ASSERT_skip(c);
 
       if (c === $$BACKSLASH_5C) {
         // TODO: isnt a string escape in a template always considered a strict mode escape?
-        badEscapes = parseStringEscape(lexerFlags) || badEscapes;
+        badEscapes = parseStringEscape(lexerFlags, FOR_TEMPLATE) || badEscapes;
       }
     }
 

@@ -183,6 +183,7 @@ module.exports = (describe, test) =>
 
     test('legacy octal number', {
       code: '0456',
+      STRICT: {throws: true},
       ast: {
         type: 'Program',
         body: [

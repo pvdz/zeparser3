@@ -701,9 +701,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
-  function init() {
+  function init(lexerFlags) {
     do {
-      skipRex(sansFlag(INITIAL_LEXER_FLAGS, LF_FOR_REGEX));
+      skipRex(lexerFlags);
       if (curtype === $ERROR) softError();
     } while (curtype === $ERROR);
   }
@@ -6066,8 +6066,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   // </SCRUB AST>
 
-  init();
   let initialLexerFlags = sansFlag(INITIAL_LEXER_FLAGS | ((options_strictMode || goalMode === GOAL_MODULE) ? LF_STRICT_MODE : 0), LF_FOR_REGEX);
+  init(initialLexerFlags);
   parseTopLevels(initialLexerFlags);
 
   //tok.deopt();

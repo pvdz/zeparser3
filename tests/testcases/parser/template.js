@@ -486,6 +486,22 @@ module.exports = (describe, test) =>
 
     describe('bad escapes', _ => {
 
+      // https://tc39.github.io/ecma262/#prod-CodePoint
+      // "A conforming implementation must not use the extended definition of EscapeSequence described in B.1.2 when parsing a TemplateCharacter."
+      // (these can be extended for string but should always be errors for non-tagged templates)
+
+      test.pass('octal zero is ok, even in strict mode', {
+        code: '`a\\0b`',
+      });
+
+      test.fail('octal at start', {
+        code: '`\\00`',
+      });
+
+      test.fail('octal double zero in template is always illegal', {
+        code: '`a\\00b`',
+      });
+
       describe('in pure', _ => {
 
         describe('still bad in regular templates', _ => {
