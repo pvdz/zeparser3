@@ -3397,7 +3397,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       skipDiv(lexerFlags);
       return NOT_ASSIGNABLE;
     }
-    else if (hasAllFlags(curtype, $TICK)) {
+    else if (isTemplateStart(curtype)) {
       parseTickExpression(lexerFlags, astProp);
       return NOT_ASSIGNABLE;
     }
@@ -3856,7 +3856,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
           THROW('Cannot `yield` after non-assignment operator');
         }
-
         AST_open(astProp, 'YieldExpression');
         AST_set('delegate', false); // TODO ??
         parseYieldArgument(lexerFlags, allowAssignment, 'argument'); // takes care of newline check
@@ -3923,17 +3922,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseTickExpression(lexerFlags, astProp) {
     // basically; parse tick. if head, keep parsing body until parsing tail
-
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-    ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE) || hasAllFlags(curtype, $TICK_HEAD) || hasAllFlags(curtype, $TICK_PURE), 'if in template this function can only be called by the head of a nested template', debug_toktype(curtype));
+    ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE) || isTemplateStart(curtype), 'if in template this function can only be called by the head of a nested template', debug_toktype(curtype));
 
     AST_open(astProp, 'TemplateLiteral');
     AST_set('expressions', []);
     AST_set('quasis', []);
 
-    if (curtype === $TICK_PURE) {
+    if (hasAllFlags(curtype, $TICK_PURE)) {
       parseQuasiPart(lexerFlags, IS_QUASI_TAIL);
-    } else if (curtype === $TICK_HEAD) {
+    } else if (hasAllFlags(curtype, $TICK_HEAD)) {
       parseQuasiPart(lexerFlags | LF_IN_TEMPLATE, NOT_QUASI_TAIL);
 
       // keep parsing expression+tick until tick-tail
@@ -3941,15 +3939,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseExpressions(lexerFlags | LF_IN_TEMPLATE, ALLOW_ASSIGNMENT, 'expressions');
 
         AST_open('quasis', 'TemplateElement');
-        AST_set('tail', curtype === $TICK_TAIL);
+        AST_set('tail', hasAllFlags(curtype, $TICK_TAIL));
         AST_set('value', {raw: curtok.str, cooked: '<TODO>'});
         AST_close('TemplateElement');
         if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
           THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
         }
-        if (curtype === $TICK_BODY) {
+        if (hasAllFlags(curtype, $TICK_BODY)) {
           ASSERT_skipRex(curtok.str, lexerFlags | LF_IN_TEMPLATE); // first token in template expression can be regex
-        } else  if (curtype === $TICK_TAIL) {
+        } else  if (hasAllFlags(curtype, $TICK_TAIL)) {
           ASSERT_skipDiv(curtok.str, lexerFlags); // first token after template expression can be div
           break;
         } else {
@@ -3973,10 +3971,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
       THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok, curtype, $TICK_BAD_ESCAPE);
     }
-    if (curtype === $TICK_PURE) {
+    if (hasAllFlags(curtype, $TICK_PURE)) {
       ASSERT_skipDiv(curtok.str, lexerFlags);
     } else {
-      ASSERT(curtype === $TICK_HEAD, 'not used for other ticks');
+      ASSERT(hasAllFlags(curtype, $TICK_HEAD), 'not used for other ticks');
       ASSERT_skipRex(curtok.str, lexerFlags); // note: dont set IN_TEMPLATE here because a pure template wont want it
     }
     AST_close('TemplateElement');
@@ -4016,12 +4014,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_close('CallExpression');
         assignable = parseValueTail(lexerFlags | LF_NO_ASI, NOT_ASSIGNABLE, isNewArg, astProp);
       }
-    } else if (curc === $$TICK_60) {
+    } else if (curc === $$TICK_60 && isTemplateStart(curtype)) {
       // parseTaggedTemplate
       // note: in es9+ (only) it is legal for _tagged_ templates to contain illegal escapes ($TICK_BAD_ESCAPE)
 
       // tagged template is like a call but slightly special (and a very particular AST)
-      ASSERT(hasAllFlags(curtype, $TICK), 'dont be an error dont be an error dont be an error');
       AST_wrapClosed(astProp, 'TaggedTemplateExpression', 'tag');
 
       AST_open('quasi', 'TemplateLiteral');
@@ -4037,7 +4034,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if ((targetEsVersion >= 6 && targetEsVersion < 9) && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
         THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
       }
-      if (hasAllFlags(curtype,  $TICK_HEAD)) {
+      if (hasAllFlags(curtype, $TICK_HEAD)) {
         let lfbak = lexerFlags;
         lexerFlags = lexerFlags | LF_IN_TEMPLATE; // tell tokenizer to interpret `}` as template
         do {
@@ -6098,6 +6095,10 @@ function getGenericTokenType(type) {
   let flag = (type | redundantFlags) ^ redundantFlags;
   //ASSERT((1 << Math.clz(flag)) === flag, 'should only have one bit set');
   return flag;
+}
+
+function isTemplateStart(curtype) {
+  return (curtype & $TICK_PURE) === $TICK_PURE || (curtype & $TICK_HEAD) === $TICK_HEAD;
 }
 
 // </BODY>

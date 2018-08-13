@@ -1,4 +1,4 @@
-let {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('templates', _ => {
@@ -654,6 +654,309 @@ module.exports = (describe, test) =>
             code: 'f`${x} \\xg`;',
             ES: 9,
           });
+        });
+      });
+    });
+
+    describe('and yield', _ => {
+
+      describe('as var name', _ => {
+
+        test('yield in middle', {
+          code: 'x = `1 ${ yield } 2`',
+          STRICT: {throws: true},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'x'},
+                  operator: '=',
+                  right: {
+                    type: 'TemplateLiteral',
+                    expressions: [{type: 'Identifier', name: 'yield'}],
+                    quasis: [
+                      {
+                        type: 'TemplateElement',
+                        tail: false,
+                        value: {raw: '`1 ${', cooked: '<TODO>'},
+                      },
+                      {
+                        type: 'TemplateElement',
+                        tail: true,
+                        value: {raw: '} 2`', cooked: '<TODO>'},
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_TAIL, $ASI],
+        });
+
+        test('yield in with another part', {
+          code: 'x = `1 ${ yield } 2 ${ 3 } 4`',
+          STRICT: {throws: true},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'x'},
+                  operator: '=',
+                  right: {
+                    type: 'TemplateLiteral',
+                    expressions: [{type: 'Identifier', name: 'yield'}, {type: 'Literal', value: '<TODO>', raw: '3'}],
+                    quasis: [
+                      {
+                        type: 'TemplateElement',
+                        tail: false,
+                        value: {raw: '`1 ${', cooked: '<TODO>'},
+                      },
+                      {
+                        type: 'TemplateElement',
+                        tail: false,
+                        value: {raw: '} 2 ${', cooked: '<TODO>'},
+                      },
+                      {
+                        type: 'TemplateElement',
+                        tail: true,
+                        value: {raw: '} 4`', cooked: '<TODO>'},
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $NUMBER_DEC, $TICK_TAIL, $ASI],
+        });
+
+        test.fail('yield with arg in middle', {
+          code: 'x = `1 ${ yield x } 2`',
+        });
+
+        test.fail('yield with arg  in with another part', {
+          code: 'x = `1 ${ yield x } 2 ${ 3 } 4`',
+        });
+      });
+
+      describe('in generator', _ => {
+
+        test('yield in middle', {
+          code: 'function *f(){   x = `1 ${ yield } 2`   }',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: true,
+                async: false,
+                expression: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'x'},
+                        operator: '=',
+                        right: {
+                          type: 'TemplateLiteral',
+                          expressions: [{type: 'YieldExpression', delegate: false, argument: null}],
+                          quasis: [
+                            {
+                              type: 'TemplateElement',
+                              tail: false,
+                              value: {raw: '`1 ${', cooked: '<TODO>'},
+                            },
+                            {
+                              type: 'TemplateElement',
+                              tail: true,
+                              value: {raw: '} 2`', cooked: '<TODO>'},
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_TAIL, $ASI, $PUNCTUATOR],
+        });
+
+        test('yield in with another part', {
+          code: 'function *f(){   x = `1 ${ yield } 2 ${ 3 } 4`   }',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: true,
+                async: false,
+                expression: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'x'},
+                        operator: '=',
+                        right: {
+                          type: 'TemplateLiteral',
+                          expressions: [{type: 'YieldExpression', delegate: false, argument: null}, {type: 'Literal', value: '<TODO>', raw: '3'}],
+                          quasis: [
+                            {
+                              type: 'TemplateElement',
+                              tail: false,
+                              value: {raw: '`1 ${', cooked: '<TODO>'},
+                            },
+                            {
+                              type: 'TemplateElement',
+                              tail: false,
+                              value: {raw: '} 2 ${', cooked: '<TODO>'},
+                            },
+                            {
+                              type: 'TemplateElement',
+                              tail: true,
+                              value: {raw: '} 4`', cooked: '<TODO>'},
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $NUMBER_DEC, $TICK_TAIL, $ASI, $PUNCTUATOR],
+        });
+
+        test('yield with arg in middle', {
+          code: 'function *f(){   x = `1 ${ yield x } 2`   }',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: true,
+                async: false,
+                expression: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'x'},
+                        operator: '=',
+                        right: {
+                          type: 'TemplateLiteral',
+                          expressions: [
+                            {
+                              type: 'YieldExpression',
+                              delegate: false,
+                              argument: {type: 'Identifier', name: 'x'},
+                            },
+                          ],
+                          quasis: [
+                            {
+                              type: 'TemplateElement',
+                              tail: false,
+                              value: {raw: '`1 ${', cooked: '<TODO>'},
+                            },
+                            {
+                              type: 'TemplateElement',
+                              tail: true,
+                              value: {raw: '} 2`', cooked: '<TODO>'},
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $IDENT, $TICK_TAIL, $ASI, $PUNCTUATOR],
+        });
+
+        test('yield with arg  in with another part', {
+          code: 'function *f(){   x = `1 ${ yield x } 2 ${ 3 } 4`   }',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: true,
+                async: false,
+                expression: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'x'},
+                        operator: '=',
+                        right: {
+                          type: 'TemplateLiteral',
+                          expressions: [
+                            {
+                              type: 'YieldExpression',
+                              delegate: false,
+                              argument: {type: 'Identifier', name: 'x'},
+                            },
+                            {type: 'Literal', value: '<TODO>', raw: '3'},
+                          ],
+                          quasis: [
+                            {
+                              type: 'TemplateElement',
+                              tail: false,
+                              value: {raw: '`1 ${', cooked: '<TODO>'},
+                            },
+                            {
+                              type: 'TemplateElement',
+                              tail: false,
+                              value: {raw: '} 2 ${', cooked: '<TODO>'},
+                            },
+                            {
+                              type: 'TemplateElement',
+                              tail: true,
+                              value: {raw: '} 4`', cooked: '<TODO>'},
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $IDENT, $TICK_BODY, $NUMBER_DEC, $TICK_TAIL, $ASI, $PUNCTUATOR],
         });
       });
     });
