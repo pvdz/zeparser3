@@ -272,6 +272,12 @@ const NOT_GETSET = 0;
 const IS_GETTER = 1;
 const IS_SETTER = 2;
 const NOT_EVAL_OR_ARGS = undefined;
+const IS_DELETE_ARG = true;
+const NOT_DELETE_ARG = false;
+const IS_SINGLE_IDENT_WRAP_A = ['IS_SINGLE_IDENT_WRAP_A'];
+const IS_SINGLE_IDENT_WRAP_NA = ['IS_SINGLE_IDENT_WRAP_NA'];
+const NOT_SINGLE_IDENT_WRAP_A = ['NOT_SINGLE_IDENT_WRAP_A'];
+const NOT_SINGLE_IDENT_WRAP_NA = ['NOT_SINGLE_IDENT_WRAP_NA'];
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -839,7 +845,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(!x  || curc !== $$FWDSLASH_2F, 'skip any should not be called when the next char can be fwd slash');
     return x;
   }
-  function skipIdentSafeAndExpensive(lexerFlags) {
+  function skipIdentSafeSlowAndExpensive(lexerFlags) {
     // skip an IDENT that may be a keyword
     // this can be done efficiently but in destructuring there are too many signals and so this needs to be done before
     // processing the ident for special cases that normally determine whether the next token is a div, regex, or any
@@ -982,7 +988,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - the semi would be part of a for-header
     // TODO: should check whether the next token would be "an error"; especially the newline case makes no such effort :(
     if (curc === $$FWDSLASH_2F) {
-      ASSERT(false, 'Tried to apply ASI but next token starts with forward slash. This could be a legit error. Confirm and make sure parser path is properly setting regex/div flag.');
+      ASSERT(false, 'Tried to apply ASI but next token starts with forward slash. This could be a legit error. Confirm and make sure parser path is properly setting regex/div flag.', ''+curtok);
       THROW('Cannot apply ASI when next token starts with forward slash (this could very well be a bug in the parser...)');
     }
     if (curc === $$SEMI_3B) {
@@ -2435,41 +2441,111 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseDeleteExpression(lexerFlags, astProp) {
     AST_open(astProp, 'UnaryExpression');
-    if (curtype !== $IDENT) {
-      parseDeleteOther(lexerFlags, astProp);
-    } else {
+    AST_set('operator', 'delete');
+    AST_set('prefix', true);
+    if (curtype === $IDENT) {
       parseDeleteIdent(lexerFlags, astProp);
+    } else if (curc === $$PAREN_L_28) {
+      // This case has to be confirmed not to just wrap an ident in parens
+      // `delete (foo)`
+      // `delete ((foo).x)`
+      // `delete ((((foo))).x)`
+      // `delete (a, b).c`
+      parseDeleteParenSpecialCase(lexerFlags, astProp);
+    } else {
+      // `delete "x".y`
+      // `delete [].x`
+      parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
     }
     AST_close('UnaryExpression');
     if (curtok.str === '**') {
       THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
     }
   }
-  function parseDeleteOther(lexerFlags) {
-    let wasGroup = curc === $$PAREN_L_28;
-    AST_set('operator', 'delete');
-    AST_set('prefix', true);
-    let assignable = parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
-    if (wasGroup && assignable === IS_ASSIGNABLE && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      // the only group that is assignable is one that only wraps a var name or a member expression...
-      // TODO: we could signal forward that this particular group should not return assignable when it's a member expr..
-      THROW('Cannot apply delete to an ident wrapped in parens, in strict mode. Gotcha.');
+  function parseDeleteParenSpecialCase(lexerFlags, astProp){
+    // This parser has to confirm whether or not the `delete` is only on an ident wrapped with any number of parens.
+    // While still properly parsing the whole thing, of course.
+
+    // some cases to consider;
+    // - `delete (foo)`
+    // - `delete ((foo).x)`
+    // - `delete ((((foo))).x)`
+    // - `delete (a, b).c`
+    // - `delete ((a)=>b)`
+    // - `delete (((a)=>b).x)`
+    // - `delete (((a)=b).x)`
+    // - `delete ((true)=x)`               -- assignability of the ident is relevant
+    // - `delete ((((true)))=x)`           -- consider that it may be a few recursive calls down
+    // - `delete true.__proto__.foo`       -- and technically it could work so we can't just throw
+
+    ASSERT(curc === $$PAREN_L_28, 'this is why we are here');
+
+    let parens = 0;
+    let lastLhp;
+    do {
+      ++parens;
+      lastLhp = curtok;
+      ASSERT_skipRex('(', lexerFlags); // `delete (/x/.y)`, for bonus points
+    } while (curc === $$PAREN_L_28);
+
+    // Now parse a group and pass it a special flag that changes the semantics of the return value
+    // It's an ugly hack :( all caused by `delete ((((a, b) => c).d))` being hard to custom parse
+    let assignableOrJustIdent = _parseGroupToplevels(lexerFlags, NOT_ASYNC, IS_EXPRESSION, parens === 1 ? NO_ASSIGNMENT : ALLOW_ASSIGNMENT, lastLhp, IS_DELETE_ARG, astProp);
+    ASSERT(assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_NA || assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_NA, 'exception enum');
+    let assignable = assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_A;
+
+    // the group parser parses one rhs paren so there may not be any parens left to consume here
+    let canBeErrorCase = assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_NA;
+    while (--parens > 0) { // this only passes for inner parens
+      // `delete ((foo).bar)`, parse a tail then continue parsing parens
+      if (curc !== $$PAREN_R_29) {
+        // (this is never toplevel)
+        // `delete ((foo).bar)`      -- parse a tail then continue parsing parens
+        // `delete ((foo)++)`
+        // `delete ((true)++)`       -- (this is why we juggle `assignable`)
+        assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
+        assignable = parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
+        if (curc === $$COMMA_2C) _parseExpressions(lexerFlags, 'expression');
+        canBeErrorCase = false;
+      }
+      // at least one rhs paren must appear now
+      skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
+      if (curtok.str === '=>') {
+        if (parens === 0) {
+          // `delete (foo)=>bar`
+          TODO,THROW('Cannot delete an arrow');
+        } else {
+          // `delete (((x)) => x)`
+          TODO,THROW('Arrow is illegal here');
+        }
+      }
+    }
+
+    ASSERT(curtok.str !== '=>', 'we checked this in the loop');
+
+    // this is after the outer most rhs paren. we still have to check whether we can parse a tail (but no op)
+    // - `delete (foo).foo`
+    // - `delete (foo)++`        -- wait is this even legal?
+    let prevtok = curtok;
+    parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
+    if (curtok === prevtok && canBeErrorCase && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
+      // strict mode only
+      // `delete foo`
+      // `delete (((foo)))`
+      THROW('Bad delete case, can not delete an ident wrapped in parens');
     }
   }
   function parseDeleteIdent(lexerFlags) {
     // `delete foo.bar`
     // `delete foo[bar]`
     // `delete x`
-    // `delete (((x)))`
-    // `delete "foo".bar`
 
     let identToken = curtok;
-    skipRex(lexerFlags); // this is the `delete` arg. if anything it is is `delete /x/` but probably not :)
+    ASSERT_skipDiv($IDENT, lexerFlags); // this is the `delete` _arg_. could lead to `delete arg / x` (but definitely not a regex)
 
     let afterIdentToken = curtok; // store to assert whether anything after the ident was parsed
 
-    AST_set('operator', 'delete');
-    AST_set('prefix', true);
     parseValueAfterIdent(lexerFlags, identToken, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument')
     if (identToken.type === $IDENT && curtok === afterIdentToken && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
@@ -3790,6 +3866,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // assume an identifier has just been parsed and that it should be considered a regular var name
     // (in the case of `await`, consider it a regular var)
     if (curc === $$IS_3D && curtok.str === '=>') {
+      // - `x => x`
       if (curtok.nl) THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
       if (allowAssignment === NO_ASSIGNMENT) THROW('Was parsing a value that could not be AssignmentExpression but found an arrow');
       if (hasAllFlags(lexerFlags, LF_IN_GENERATOR) && identToken.str === 'yield') THROW('Yield in generator is keyword');
@@ -4062,7 +4139,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'body'); // TODO: what about curlyLexerFlags here?
     }
   }
-  function parseGroupToplevels(lexerFlagsBeforeParen, asyncKeywordPrefixed, asyncStmtOrExpr, allowAssignment, astProp) {
+  function parseGroupToplevels(lexerFlags, asyncKeywordPrefixed, asyncStmtOrExpr, allowAssignment, astProp) {
     // = parseGroup, = parseArrow
     // will parse `=>` tail if it exists
     // must return IS_ASSIGNABLE or NOT_ASSIGNABLE
@@ -4080,12 +4157,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - if rest-pattern occurs anywhere as part of the group the group _must_ be an arrow
     // - objects and arrows in a group are never assignable (you can only destructure by <arr/obj, `=`, init>, no group)
 
-    let lexerFlags = lexerFlagsBeforeParen | LF_NO_ASI;
-
-    let rootAstProp = astProp;
     let lhpToken = curtok; // used to check .nl in case of async arrow
 
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags); // `(/x/);`
+
+    return _parseGroupToplevels(lexerFlags, asyncKeywordPrefixed, asyncStmtOrExpr, allowAssignment, lhpToken, NOT_DELETE_ARG, astProp)
+  }
+  function _parseGroupToplevels(lexerFlagsBeforeParen, asyncKeywordPrefixed, asyncStmtOrExpr, allowAssignment, lhpToken, isDeleteArg, astProp) {
+    ASSERT(arguments.length === _parseGroupToplevels.length, 'arg count');
+    // this function assumes you've just skipped the paren and are now in the first token of a group/arrow/async-call
+    // this is either the arg of a delete, or any other group opener that may or may not have been prefixed with async
+    let lexerFlags = lexerFlagsBeforeParen | LF_NO_ASI;
 
     // parse the group as if it were a group (also for the sake of AST)
     // while doing so keep track of the next three states. At the end
@@ -4113,6 +4195,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
           // TODO: do we need to fix `(foo + (bar + boo) + ding)` ? propagating the lhs-paren state
           if (asyncStmtOrExpr === IS_STATEMENT) assignable = parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
+          ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not async prefixed');
           return assignable;
         }
         THROW('Empty group must indicate an arrow'); // or async() or await()...
@@ -4123,6 +4206,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `async \n () => x`
         // - `return async \n () => x`
         // - `(async \n () => x)`
+        if (isDeleteArg === IS_DELETE_ARG) TODO;
         return backtrackForCrappyAsync(lexerFlagsBeforeParen, asyncKeywordPrefixed, lhpToken, astProp);
       }
 
@@ -4131,10 +4215,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('params', []);
       parseArrowFromPunc(lexerFlags, asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC, ARGS_SIMPLE);
       AST_close('ArrowFunctionExpression');
+      if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
       return NOT_ASSIGNABLE;
     }
 
-    let destructible = MIGHT_DESTRUCT;
+    let foundSingleIdentWrap = false; // did we find `(foo)` ?
+    let rootAstProp = astProp; // astprop changes after the first comma when the group becomes a sequenceexpression
+    let destructible = MIGHT_DESTRUCT; // this function checks so many things :(
     let assignable = NOT_ASSIGNABLE; // true iif first expr is assignable, always false if the group has a comma
     let toplevelComma = false;
     let simpleArgs = ARGS_SIMPLE; // true if only idents and without assignment (so es5 valid)
@@ -4155,7 +4242,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // first scan next token to see what potential checks we need to apply
         const identToken = curtok;
-        skipIdentSafeAndExpensive(lexerFlags); // because `(x/y)` and `(typeof /x/)` need different next token states
+        skipIdentSafeSlowAndExpensive(lexerFlags); // because `(x/y)` and `(typeof /x/)` need different next token states
 
         if (curtok.str === '=') {
           simpleArgs = ARGS_COMPLEX;
@@ -4168,7 +4255,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // or this is the end of a group
           // - (x)
           // - (..., x)
-          // must be valid bindable var name
+          // or this is the delete edge case
+          // - delete (foo)
+          // - delete ((foo) => foo)
+          // - delete ((foo).bar)
+
+          if (!toplevelComma && isDeleteArg === IS_DELETE_ARG && curc === $$PAREN_R_29) {
+            ASSERT(destructible === MIGHT_DESTRUCT, 'should not have parsed anything yet so destructible is still default');
+            ASSERT(assignable === NOT_ASSIGNABLE, 'should still be the default');
+            ASSERT(simpleArgs === ARGS_SIMPLE, 'should still be the default');
+            // this must be the case where the group consists entirely of one ident, `(foo)`
+            // there may still be an arrow trailing, which this function should deal with too
+            foundSingleIdentWrap = true; // move on to the arrow
+          }
 
           AST_setIdent(astProp, identToken);
 
@@ -4294,8 +4393,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
           if (asyncStmtOrExpr === IS_STATEMENT) assignable = parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
 
+          ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not prefixed with async');
           return NOT_ASSIGNABLE
         }
+
+        if (isDeleteArg === IS_DELETE_ARG) return assignable === IS_ASSIGNABLE ? NOT_SINGLE_IDENT_WRAP_A : NOT_SINGLE_IDENT_WRAP_NA;
         return assignable;
       }
 
@@ -4336,6 +4438,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // this is `async \n () => x` which means `async` is now an ident and ASI has to occur.
           // ASI may not be able to occur (like `[async \n () => x]` is an error) and this is difficult to detect
           // This is one super uncommon edge case I'll just backtrack for
+          ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not prefixed by async');
           return backtrackForCrappyAsync(lexerFlagsBeforeParen, asyncKeywordPrefixed, lhpToken, rootAstProp);
         }
       }
@@ -4361,6 +4464,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseArrowFromPunc(lexerFlags, asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC, simpleArgs);
 
       AST_close('ArrowFunctionExpression');
+
+      if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
       return NOT_ASSIGNABLE;
     }
     else if (asyncKeywordPrefixed) {
@@ -4376,6 +4481,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, rootAstProp);
       if (asyncStmtOrExpr === IS_STATEMENT) parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, rootAstProp);
 
+      ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not prefixed by async');
       return NOT_ASSIGNABLE
     }
     else if (hasAllFlags(destructible, MUST_DESTRUCT)) {
@@ -4400,9 +4506,24 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
       AST_close('AssignmentExpression');
 
+      if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
       return NOT_ASSIGNABLE;
     }
 
+    if (isDeleteArg === IS_DELETE_ARG) {
+      // TODO: this is a non-bool value making the func poly :'( this case will never hit for the real
+      //       world where perf matters, though. So it's mostly compiler inference that crap out
+      if (foundSingleIdentWrap) {
+        ASSERT(!toplevelComma, 'sanity check; the main loop should break after this state was found');
+        if (assignable === IS_ASSIGNABLE) return IS_SINGLE_IDENT_WRAP_A;
+        return IS_SINGLE_IDENT_WRAP_NA;
+      }
+      else {
+        // TODO: we could also just return assignable in this case... this seems a bit overkill
+        if (assignable === IS_ASSIGNABLE) return NOT_SINGLE_IDENT_WRAP_A;
+        return NOT_SINGLE_IDENT_WRAP_NA;
+      }
+    }
     // a group. those still exist?
     return assignable;
   }
@@ -4526,7 +4647,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // first scan next token to see what potential checks we need to apply (wrt the above comments)
         const identToken = curtok;
-        skipIdentSafeAndExpensive(lexerFlags); // will properly deal with div/rex cases
+        skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
 
         if (curtok.str === '=') {
           // - [x = y]
@@ -5257,7 +5378,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // use the rhs of the colon as identToken now
         identToken = curtok;
-        skipIdentSafeAndExpensive(lexerFlags); // will properly deal with div/rex cases
+        skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
         if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
           // this is destructible iif the ident is not a keyword
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
@@ -5636,7 +5757,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       let identToken = curtok;
       if (identToken.str === 'true') TODO; // [...true]; -> ok, this will crash, still have to validate it
-      skipIdentSafeAndExpensive(lexerFlags);
+      skipIdentSafeSlowAndExpensive(lexerFlags);
 
       if (curtok.str === '=') {
         // - `[...x = x];` (valid but never destructible)
