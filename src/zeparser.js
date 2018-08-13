@@ -5029,6 +5029,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let identToken = curtok;
         ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
 
+        if (identToken.str === 'async' && curc !== $$PAREN_L_28 && curtok.nl) {
+          // this is `{async \n ..(){}}` which is always an error due to async being a restricted production
+          THROW('Async methods are a restricted production and cannot have a newline following it');
+        }
+
         destructible = parseObjectLikePartFromIdent(lexerFlags, bindingType, isClassMethod, isStatic, identToken, astProp);
       }
     }

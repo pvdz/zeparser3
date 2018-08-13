@@ -1989,7 +1989,114 @@ console.log('FIXME')
     throws: true,
   });
 
-  // test('yield is not allowed in arg default of async arrow', {
-  //   code: 'async(x = await) => {  }',
-  // });
+  describe('object method', _ => {
+
+    test('async object method good', {
+      code: '({async foo() {}})',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ObjectExpression',
+              properties: [
+                {
+                  type: 'Property',
+                  key: {type: 'Identifier', name: 'foo'},
+                  kind: 'init',
+                  method: true,
+                  computed: false,
+                  value: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: true,
+                    expression: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                  shorthand: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    test.pass('async object method with newline before async', {
+      code: '({\nasync foo() {}})',
+    });
+
+    test.fail('async object method with newline after async', {
+      code: '({async \n foo() {}})',
+      desc: 'restricted production',
+    });
+
+    test.pass('async object method with newline after name', {
+      code: '({async foo \n () {}})',
+    });
+
+    test.pass('async object method with newline after params', {
+      code: '({async foo () \n {}})',
+    });
+  });
+
+  describe('class method', _ => {
+
+    test('async object method good', {
+      code: 'class x {async foo() {}}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'x'},
+            superClass: null,
+            body: {
+              type: 'ClassBody',
+              body: [
+                {
+                  type: 'MethodDefinition',
+                  key: {type: 'Identifier', name: 'foo'},
+                  static: false,
+                  computed: false,
+                  kind: 'method',
+                  value: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: true,
+                    expression: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test.pass('async object method with newline before async', {
+      code: 'class x {\nasync foo() {}}',
+    });
+
+    test.fail('async object method with newline after async', {
+      code: 'class x {async \n foo() {}}',
+      desc: 'restricted production',
+    });
+
+    test.pass('async object method with newline after name', {
+      code: 'class x {async foo \n () {}}',
+    });
+
+    test.pass('async object method with newline after params', {
+      code: 'class x {async foo () \n {}}',
+    });
+  });
 });
