@@ -5080,10 +5080,89 @@ module.exports = (describe, test) =>
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('shorthands can be keyword', {
+      test.fail('happy learned to putt', {
+        code: '({this});',
+        // https://tc39.github.io/ecma262/#prod-ObjectLiteral
+        // https://tc39.github.io/ecma262/#prod-PropertyDefinitionList
+        // https://tc39.github.io/ecma262/#prod-PropertyDefinition
+        // https://tc39.github.io/ecma262/#prod-IdentifierReference
+        // https://tc39.github.io/ecma262/#prod-Identifier
+        // Identifier : IdentifierName but not ReservedWord
+      });
+
+      [
+        'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
+        'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
+        'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
+        'false', 'enum',
+      ].forEach(keyword => {
+        test.fail('cannot use as shirthand objlit ['+keyword+']', {
+          code: '({'+keyword+'});',
+        });
+
+        test.fail('cannot use as assignment pattern ['+keyword+']', {
+          code: '({'+keyword+'} = x);',
+        });
+
+        test.fail('cannot use as arrow header ['+keyword+']', {
+          code: '({'+keyword+'}) => x;',
+        });
+
+        test.fail('cannot use as binding destruct ['+keyword+']', {
+          code: 'const {'+keyword+'} = x;',
+        });
+      });
+
+      [
+        'eval', 'arguments', 'implements', 'package', 'protected', 'interface',
+        'private', 'public', 'await', 'yield', 'static', 'let',
+      ].forEach(keyword => {
+        test.fail_strict('cannot use as shirthand objlit ['+keyword+']', {
+          code: '({'+keyword+'});',
+        });
+
+        test.fail_strict('cannot use as assignment pattern ['+keyword+']', {
+          code: '({'+keyword+'} = x);',
+        });
+
+        test.fail_strict('cannot use as arrow header ['+keyword+']', {
+          code: '({'+keyword+'}) => x;',
+        });
+
+        if (keyword !== 'let') {
+          test.fail_strict('cannot use as binding destruct ['+keyword+']', {
+            code: 'const {'+keyword+'} = x;',
+          });
+        }
+      });
+
+      [
+        'await',
+      ].forEach(keyword => {
+        test.pass('cannot use as shirthand objlit ['+keyword+']', {
+          code: '({'+keyword+'});',
+          MODULE: {throws: true},
+        });
+
+        test.pass('cannot use as assignment pattern ['+keyword+']', {
+          code: '({'+keyword+'} = x);',
+          MODULE: {throws: true},
+        });
+
+        test.pass('cannot use as arrow header ['+keyword+']', {
+          code: '({'+keyword+'}) => x;',
+          MODULE: {throws: true},
+        });
+
+        test.pass('cannot use as binding destruct ['+keyword+']', {
+          code: 'const {'+keyword+'} = x;',
+          MODULE: {throws: true},
+        });
+      });
+
+
+      test.fail('shorthands can NOT be keyword', {
         code: 'let o = {true, false, super, this, null};',
-        ast: true,
-        tokens: true,
       });
     });
 

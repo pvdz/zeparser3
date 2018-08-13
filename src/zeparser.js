@@ -5396,13 +5396,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
       if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
+      // https://tc39.github.io/ecma262/#prod-ObjectLiteral
+      // https://tc39.github.io/ecma262/#prod-PropertyDefinitionList
+      // https://tc39.github.io/ecma262/#prod-PropertyDefinition
+      // https://tc39.github.io/ecma262/#prod-IdentifierReference
+      // https://tc39.github.io/ecma262/#prod-Identifier
+      // Identifier : IdentifierName but not ReservedWord
+
       // property shorthand; `{ident}=x` is valid, x={y} is also valid
       // - {a}
       // - {a, ...}
-      // - {true}       cant destructure, works fine as init (`let x = {true}` == `let x = {true: true}`)
+      // - {true}       illegal
 
-      let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
-      if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+      bindingIdentCheck(identToken, bindingType, lexerFlags);
 
       AST_open(astProp, 'Property');
       AST_setIdent('key', identToken);
