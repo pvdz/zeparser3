@@ -1181,11 +1181,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (isGetSet === IS_GETTER) {
       THROW('Getters can not have any parameters');
     } else {
-      wasSimple = parseBindings(lexerFlags, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, isGetSet, 'params');
+      // note: it is ONLY the function itself (and strict mode in general) that determines whether or not an arg can
+      // be named `yield`, or have a default containing a var name `yield`. Outer functions do not matter.
+      wasSimple = parseBindings(isGenerator ? lexerFlags | LF_IN_GENERATOR : sansFlag(lexerFlags, LF_IN_GENERATOR), BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, isGetSet, 'params');
       AST_destruct('params');
-      // TODO: we can detect an illegal yield with an extra flag that simply disallows it
-      // this is only bad if the current function is a generator.
-      if (isGenerator) AST_scanYieldInParams(_path[_path.length - 1].params);
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
 
@@ -2784,18 +2783,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // arg defaults
     if (curc === $$IS_3D && curtok.str === '=') {
+      ASSERT_skipRex('=', lexerFlags); // x(foo=/bar/){}
       wasSimple = ARG_HAD_INIT; // this means the arg is not "simple"
       if (defaultsOption === ASSIGNMENT_IS_DEFAULT) {
         if (bindingOrigin === FROM_CATCH) THROW('The catch clause cannot have a default');
         AST_wrapClosed(astProp, 'AssignmentPattern', 'left');
-        ASSERT_skipRex($PUNCTUATOR, lexerFlags);
         parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
         AST_close('AssignmentPattern');
       } else {
         ASSERT(bindingOrigin !== FROM_CATCH, 'catch is default');
         ASSERT(defaultsOption === ASSIGNMENT_IS_INIT, 'two options');
         AST_wrapClosed('declarations', 'VariableDeclarator', 'id');
-        ASSERT_skipRex($PUNCTUATOR, lexerFlags);
         parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'init');
         AST_close('VariableDeclarator');
       }
@@ -3832,22 +3830,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // If inside function args then yield is never a YieldExpression. All functions remove the `Yield` cfg parameter so
     // when the cfg reaches AssignmentExpression (https://tc39.github.io/ecma262/#prod-AssignmentExpression) it will
     // not be able to satisfy the required `[+Yield]` parameter to parse it as a yield expression and so it goes to ident
+    // Note that `yield` var names are never allowed inside generator scopes, which only resets between func name and args
 
-    if (hasAllFlags(lexerFlags, LF_IN_GENERATOR) && hasNoFlag(lexerFlags, LF_IN_FUNC_ARGS)) {
-      // must parse a yield expression now
+    if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) {
+      if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) {
+        THROW('The `yield` keyword in arg default must be a var name but that is not allowed inside a generator');
+      } else {
+        // must parse a yield expression now
+        if (allowAssignment === NO_ASSIGNMENT) THROW('Did not expect to parse an AssignmentExpression but found `yield`');
+        if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
+          THROW('Cannot `yield` after non-assignment operator');
+        }
 
-      if (allowAssignment === NO_ASSIGNMENT) THROW('Did not expect to parse an AssignmentExpression but found `yield`');
-      if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
-        THROW('Cannot `yield` after non-assignment operator');
+        AST_open(astProp, 'YieldExpression');
+        AST_set('delegate', false); // TODO ??
+        parseYieldArgument(lexerFlags, allowAssignment, 'argument'); // takes care of newline check
+        AST_close('YieldExpression');
+        return NOT_ASSIGNABLE;
       }
-
-      AST_open(astProp, 'YieldExpression');
-      AST_set('delegate', false); // TODO ??
-      parseYieldArgument(lexerFlags, allowAssignment, 'argument'); // takes care of newline check
-      AST_close('YieldExpression');
-      return NOT_ASSIGNABLE;
     }
-
     // `yield` _must_ be a treated as a regular var binding now
 
     if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {

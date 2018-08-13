@@ -5022,14 +5022,14 @@ module.exports = (describe, test) =>
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x decl', _ => {
 
-            test.fail('func decl arg called yield', {
+            test.pass('func decl arg called yield', {
               code: 'function *as(){ function f(yield) {} }',
-              throws: 'yield',
+              STRICT: {throws: 'yield'},
             });
 
-            test.fail('async func decl arg called yield', {
+            test.pass('async func decl arg called yield', {
               code: 'function *as(){ async function f(yield) {} }',
-              throws: 'yield',
+              STRICT: {throws: 'yield'},
             });
 
             test.fail('generator func decl arg called yield', {
@@ -5074,12 +5074,12 @@ module.exports = (describe, test) =>
 
             test.pass('func expr arg called yield', {
               code: 'function *as(){ let f = function f(yield) {} }',
-              throws: 'yield',
+              STRICT: {throws: 'yield'},
             });
 
             test.pass('async func expr arg called yield', {
               code: 'function *as(){ let f = async function f(yield) {} }',
-              throws: 'yield',
+              STRICT: {throws: 'yield'},
             });
 
             test.fail('generator func expr arg called yield', {
@@ -5123,12 +5123,12 @@ module.exports = (describe, test) =>
 
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
-            test.fail('class method arg called yield', {
+            test('class method arg called yield', {
               code: 'function *as(){ class A {f(yield) {}} }',
               throws: 'yield',
             });
 
-            test.fail('async class method arg called yield', {
+            test('async class method arg called yield', {
               code: 'function *as(){ class A {async f(yield) {}} }',
               throws: 'yield',
             });
@@ -5174,12 +5174,12 @@ module.exports = (describe, test) =>
 
             test.pass('obj method arg called yield', {
               code: 'function *as(){ o = {f(yield) {}} }',
-              throws: 'yield',
+              STRICT: {throws: 'yield'},
             });
 
             test.pass('async obj method arg called yield', {
               code: 'function *as(){ o = {async f(yield) {}} }',
-              throws: 'yield',
+              STRICT: {throws: 'yield'},
             });
 
             test.fail('generator obj method arg called yield', {

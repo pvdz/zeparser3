@@ -990,10 +990,10 @@ module.exports = (describe, test) =>
         throws: 'yield',
       });
 
-      test('yield as rhs sans arg', {
+      test.pass('yield as rhs sans arg', {
         code: 'function *g() { function f(x = x + yield) {}; }',
-        desc: 'yield inside generator is never a var',
-        throws: true,
+        desc: 'yield inside generator is never a var but this state is determined by the function whose args are being parsed, not any outer function',
+        STRICT: {throws: 'yield'},
       });
 
       test('yield as rhs with arg', {
@@ -1126,18 +1126,17 @@ module.exports = (describe, test) =>
             code: 'function *f(){  return *(x=yield) => x;  }',
           });
 
-          test.pass('yield in args of nested regular function', {
+          test.fail('yield in args of nested generator function doesnt matter', {
             code: 'function *f(){  return function*(x=yield) {};  }',
-            STRICT: {throws: true},
+            desc: '(because only the function itsel determines whether yield can appear)',
           });
 
           test.fail('yield in args of class method', {
             code: 'function *f(){  class x{*foo(a=yield){}}  }',
           });
 
-          test.pass('yield in args of object method', {
+          test.fail('yield in args of object method', {
             code: 'function *f(){  x = {*foo(a=yield){}}  }',
-            STRICT: {throws: true},
           });
         });
 
@@ -1147,18 +1146,16 @@ module.exports = (describe, test) =>
             code: 'function f(){  return *(x=yield) => x;  }',
           });
 
-          test.pass('yield in args of nested regular function', {
+          test.fail('yield in args of nested regular function', {
             code: 'function f(){  return function*(x=yield) {};  }',
-            STRICT: {throws: true},
           });
 
           test.fail('yield in args of class method', {
             code: 'function f(){  class x{*foo(a=yield){}}  }',
           });
 
-          test.pass('yield in args of object method', {
+          test.fail('yield in args of object method', {
             code: 'function f(){  x = {*foo(a=yield){}}  }',
-            STRICT: {throws: true},
           });
         });
 
@@ -1373,6 +1370,20 @@ module.exports = (describe, test) =>
 
     test.fail('gen expr named yield', {
       code: 'var g = function* yield() {};',
+    });
+
+    test.pass('gen method named yield', {
+      code: '({  * yield() {}  })',
+    });
+
+    test('yield in default of generator method inside generator decl', {
+      code: 'function *f(){  ({*g(x=yield){}})  }',
+      throws: 'yield',
+    });
+
+    test('yield in default of generator method inside generator expr', {
+      code: '(function *f(){  ({*g(x=yield){}})  })',
+      throws: 'yield',
     });
   });
 
