@@ -155,6 +155,7 @@ let { default: ZeTokenizer,
   LF_IN_CONSTRUCTOR,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
+  LF_IN_GLOBAL,
   LF_IN_TEMPLATE,
   LF_NO_ASI,
   LF_NO_FLAGS,
@@ -287,6 +288,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     astRoot: options_astRoot = null,
     tokenStorage: options_tokenStorage = [],
     getTokenizer,
+    allowGlobalReturn = false, // you may need this to parse arbitrary code or eval code for example
     targetEsVersion = Infinity, // 6, 7, 8, 9, Infinity
   } = options;
 
@@ -1160,7 +1162,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isGenerator === WAS_GENERATOR)  lexerFlags = lexerFlags | LF_IN_GENERATOR;
     let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom, isGetSet, isGenerator);
     if (isGenerator === NOT_GENERATOR) lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
-    _parseBlockStatement(lexerFlags, expressionState, PARSE_DIRECTIVES, wasSimple, functionNameTokenToVerify, 'body');
+    _parseBlockStatement(sansFlag(lexerFlags, LF_IN_GLOBAL), expressionState, PARSE_DIRECTIVES, wasSimple, functionNameTokenToVerify, 'body');
   }
   function parseFuncArguments(lexerFlags, bindingFrom, isGetSet, isGenerator) {
     ASSERT(arguments.length === parseFuncArguments.length, 'arg count');
@@ -2156,6 +2158,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseReturnStatement(lexerFlags, astProp) {
+    if (hasAllFlags(lexerFlags, LF_IN_GLOBAL)) THROW('Not configured to parse `return` statement in global, bailing');
+
     AST_open(astProp, 'ReturnStatement');
     ASSERT_skipRex('return', lexerFlags);
 
@@ -4185,7 +4189,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
       AST_set('expression', false); // "body of arrow is block"
-      parseBlockStatement(lexerFlags, IS_EXPRESSION, PARSE_DIRECTIVES, wasSimple, 'body');
+      parseBlockStatement(sansFlag(lexerFlags, LF_IN_GLOBAL), IS_EXPRESSION, PARSE_DIRECTIVES, wasSimple, 'body');
     } else {
       AST_set('expression', true); // "body of arrow is expr"
       parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'body'); // TODO: what about curlyLexerFlags here?

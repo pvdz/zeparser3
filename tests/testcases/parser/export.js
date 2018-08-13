@@ -842,6 +842,11 @@ module.exports = (describe, test) =>
       },
       throws: true,
     });
+
+    test.pass('export null', {
+      code: 'export default null;',
+      SLOPPY: {throws: true},
+    });
   });
 
 // cannot import/export a var named `let` (since module code is strict by default and import/export is module-code-only)

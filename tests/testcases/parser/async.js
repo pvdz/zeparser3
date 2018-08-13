@@ -1844,16 +1844,14 @@ module.exports = (describe, test) => describe('async keyword', function() {
         });
 
         test('return arg', {
-          code: 'return async \n () => x',
+          code: 'function f(){   return async \n () => x    }',
           throws: 'async', // valid but zeparser cant recover
         });
 
-console.log('FIXME')
         // test('break label', {
         //   code: 'break async \n () => x',
         // });
 
-console.log('FIXME')
         // test('continue label', {
         //   code: 'continue async \n () => x',
         // });

@@ -225,8 +225,9 @@ const LF_IN_GENERATOR = 1 << 6;
 const LF_IN_FUNC_ARGS = 1 << 7; // throws for await expression
 const LF_NO_FUNC_DECL = 1 << 8; // currently nesting inside at least one statement that is not a block/body
 const LF_IN_TEMPLATE = 1 << 9;
-const LF_NO_ASI = 1 << 10; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
-const LF_NO_IN = 1 << 11; // inside the initial part of a for-header, prevents `in` being parsed as a generic expression
+const LF_IN_GLOBAL = 1 << 10; // unset whenever you go into any kind of function
+const LF_NO_ASI = 1 << 11; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
+const LF_NO_IN = 1 << 12; // inside the initial part of a for-header, prevents `in` being parsed as a generic expression
 const LF_STRICT_MODE = 1 << 13;
 const LF_SUPER_CALL = 1 << 14; // can call `super()`
 const LF_SUPER_PROP = 1 << 15; // can read `super.foo` (there are cases where you can doo this but not `super()`)
@@ -234,7 +235,7 @@ const LF_SUPER_PROP = 1 << 15; // can read `super.foo` (there are cases where yo
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
 // - sloppy mode until proven otherwise
-const INITIAL_LEXER_FLAGS = LF_FOR_REGEX;
+const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about global, that may change depending on options?
 
 function LF_DEBUG(flags) {
   let bak = flags;
@@ -273,6 +274,10 @@ function LF_DEBUG(flags) {
   if (flags & LF_NO_FUNC_DECL) {
     flags ^= LF_NO_FUNC_DECL;
     s.push('LF_NO_FUNC_DECL');
+  }
+  if (flags & LF_IN_GLOBAL) {
+    flags ^= LF_IN_GLOBAL;
+    s.push('LF_IN_GLOBAL');
   }
   if (flags & LF_CAN_NEW_TARGET) {
     flags ^= LF_CAN_NEW_TARGET;
@@ -2745,6 +2750,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
   LF_NO_IN,
+  LF_IN_GLOBAL,
   LF_STRICT_MODE,
   LF_SUPER_CALL,
   LF_SUPER_PROP,
