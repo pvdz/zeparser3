@@ -1579,6 +1579,57 @@ module.exports = (describe, test) =>
       },
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $ASI, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
+
+    test.fail_strict('yield as shorthand array destruct assign in global', {
+      code: '([yield] = x)',
+      desc: 'in sloppy this is fine',
+    });
+
+    test.fail_strict('yield as shorthand in array pattern in arrow in global', {
+      code: '([yield]) => x',
+      desc: 'in sloppy this is fine',
+    });
+
+    test.fail_strict('yield as shorthand in array lit in global', {
+      code: '([yield])',
+      desc: 'in sloppy this is fine',
+    });
+
+    test.pass('arg-less yield inside array', {
+      code: '({ *g1() {   [yield]  }})',
+    });
+
+    test.pass('arg-full yield inside array', {
+      code: '({ *g1() {   [yield 1]  }})',
+    });
+
+    test.fail_strict('yield as shorthand object destruct assign in global', {
+      code: '({yield} = x)',
+      desc: 'in sloppy this is fine',
+    });
+
+    test.fail_strict('yield as shorthand in object pattern in arrow in global', {
+      code: '({yield}) => x',
+      desc: 'in sloppy this is fine',
+    });
+
+    test.fail_strict('yield as shorthand in object lit in global', {
+      code: '({yield})',
+      desc: 'in sloppy this is fine',
+    });
+
+    test.fail('yield as shorthand in generator', {
+      code: '({ *g1() {   return {yield}  }})',
+      desc: 'fails because yield is not allowed to be a var name inside a generator and a shorthand kind of is both',
+    });
+
+    test.pass('arg-less yield inside object', {
+      code: '({ *g1() {   return {x: yield}  }})',
+    });
+
+    test.pass('arg-full yield inside object', {
+      code: '({ *g1() {   return {x: yield 1}  }})',
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

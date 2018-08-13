@@ -3823,7 +3823,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseYieldKeyword(lexerFlags, identToken, allowAssignment, astProp) {
     ASSERT(arguments.length === parseYieldKeyword.length, 'arg count');
-    ASSERT(identToken.str === 'yield', 'the yield keyword token was already consumed');
+    ASSERT(identToken !== curtok, 'should have consumed the ident already');
+    ASSERT(identToken.str === 'yield', 'should receive the yield keyword token that was already consumed');
     // note: yield is a recursive AssignmentExpression (its optional argument can be an assignment or another yield)
     // Since it is an AssignmentExpression it cannot appear after a non-assignment operator. oops.
 
@@ -4717,6 +4718,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               // cant destruct regardless of bindingtype
               destructible |= CANT_DESTRUCT;
               break;
+            case 'yield':
+              let yieldAssignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, astProp);
+              if (yieldAssignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+              break;
+              // fall-through
             default:
               let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
               if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
@@ -5090,6 +5096,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               // reserved keyword, not destructible. will throw if current state must destruct
               destructible |= CANT_DESTRUCT;
               break;
+            case 'yield':
+              let yieldAssignable = parseYieldKeyword(lexerFlags, nameBinding, ALLOW_ASSIGNMENT, astProp);
+              if (yieldAssignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+              break;
             default:
               if (nameBinding.str === 'new') TODO // `{x: typeof}` is always an error but `{x: true}` may not be
               let assignable = bindingAssignableIdentCheck(nameBinding, bindingType, lexerFlags);
@@ -5351,7 +5361,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `{static set "x"(y){}`
 
     let destructible = MIGHT_DESTRUCT;
-    let nameBinding = undefined;
 
     if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
       if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
@@ -5383,8 +5392,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('shorthand', true);
       AST_close('Property');
 
-      nameBinding = identToken;
-
       ASSERT(curc !== $$IS_3D, 'further assignments should be parsed as part of the rhs expression');
     }
     else if (curc === $$COLON_3A) {
@@ -5414,7 +5421,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // use the rhs of the colon as identToken now
         identToken = curtok;
         skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
-        if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
+
+        if (identToken.str === 'yield') {
+          let assignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, 'value');
+          if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+        } else if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
           // this is destructible iif the ident is not a keyword
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
@@ -5676,35 +5687,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (isClassMethod) return; // no init for class members
-
-    // nameBinding can be undefined here if
-    // - dynamic property `{[x]: y}`
-    // - name would be illegal to bind to `{x: true}`
-
-    // in this case the binding check can force the flag without throwing
-    // - `{true}`
-    // - `{foo: true}`
-    // - `{25: true}`
-    // - `{"x": true}
-    if (nameBinding) {
-      switch (nameBinding.str) {
-        case 'true':
-        case 'false':
-        case 'null':
-        case 'this':
-        case 'super':
-          // reserved keyword, not destructible. will throw if current state must destruct
-          destructible |= CANT_DESTRUCT;
-          break;
-        default:
-          // regardless of destructible state, if you see something like `typeof` here you have an error
-          let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
-          if (assignable === NOT_ASSIGNABLE) {
-            if (hasAllFlags(destructible, MUST_DESTRUCT)) THROW('Parsed a Pattern that is not destructible');
-            destructible |= CANT_DESTRUCT;
-          }
-      }
-    }
 
     return destructible;
   }
