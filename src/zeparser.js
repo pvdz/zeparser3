@@ -3363,11 +3363,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, allowAssignment, astProp);
     return parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
   }
-  function parseValueMaybe(lexerFlags, allowAssignment, astProp) {
-    ASSERT(arguments.length === parseValue.length, 'arg count');
-    let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MAYBE, NOT_NEW_TARGET, allowAssignment, astProp);
-    return parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
-  }
   function parseValueAfterIdent(lexerFlags, identToken, newTarget, allowAssignment, astProp) {
     // only parses head+body+tail but STOPS at ops
     let assignable = parseValueHeadBodyAfterIdent(lexerFlags, identToken, newTarget, allowAssignment, astProp);
@@ -3978,6 +3973,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseValueTail(lexerFlags, assignable, isNewArg, astProp) {
+    ASSERT(arguments.length === parseValueTail.length, 'arg coung')
     ASSERT(typeof isNewArg === 'boolean', 'expecting bool isNewArg arg');
     ASSERT(typeof assignable === 'boolean', 'assignablenum', assignable);
     if (curc === $$DOT_2E && curtok.str === '.') {
@@ -4835,8 +4831,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [`x`.foo]=x
         // only destructible as assignment destructuring and member expression
 
-        // TODO: we can do away with the "maybe" by simply asserting the right ]
-        let assignable = parseValueMaybe(lexerFlags, ALLOW_ASSIGNMENT, astProp);
+        let assignable = parseValue(lexerFlags, ALLOW_ASSIGNMENT, astProp);
         destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, assignable, destructible, $$SQUARE_R_5D, astProp);
       }
 
@@ -5918,7 +5913,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `[..."foo".bar]`
       // - `[...a=b]`
 
-      let assignable = parseValueMaybe(lexerFlags, ALLOW_ASSIGNMENT, astProp);
+      let assignable = parseValue(lexerFlags, ALLOW_ASSIGNMENT, astProp);
 
       if (curc !== $$COMMA_2C && curc !== closingCharOrd) {
         ASSERT(curtok.str !== '=', 'assignment should be parsed as part of the object');

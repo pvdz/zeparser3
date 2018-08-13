@@ -847,11 +847,9 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
     // note: it _does_ need to take care of escaped digits
     switch(c) {
       case $$U_75:
-      case $$U_UC_55:
         return parseIdentOrStringEscapeUnicode();
 
       case $$X_78:
-      case $$X_UC_58:
         return parseStringEscapeHex();
 
       case $$0_30:
@@ -1778,7 +1776,6 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
         return parseRegexUnicodeEscape();
 
       // hex
-      case $$X_UC_58:
       case $$X_78:
         ASSERT_skip(c);
         if (eof()) return regexSyntaxError('Encountered early EOF while parsing hex escape (1)');
