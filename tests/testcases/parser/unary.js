@@ -433,6 +433,14 @@ module.exports = (describe, test) =>
         },
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
+
+      test.pass('property of keyword as statement', {
+        code: '++this.x',
+      });
+
+      test.pass('property of keyword as expr', {
+        code: '(++this.x)',
+      });
     });
 
     describe('decremental prefix', _ => {
@@ -775,6 +783,14 @@ module.exports = (describe, test) =>
           tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
+
+      test.pass('property of keyword as statement', {
+        code: '--this.x',
+      });
+
+      test.pass('property of keyword as expr', {
+        code: '(--this.x)',
+      });
     });
 
     describe('incremental suffix', _ => {
@@ -999,6 +1015,14 @@ module.exports = (describe, test) =>
         code: 'x.foo++.bar',
         throws: 'Unable to ASI',
       });
+
+      test.pass('property of keyword as statement', {
+        code: 'this.x++',
+      });
+
+      test.pass('property of keyword as expr', {
+        code: '(this.x++)',
+      });
     });
 
     describe('decremental suffix', _ => {
@@ -1222,6 +1246,14 @@ module.exports = (describe, test) =>
         desc: 'there is no production that allows parsing a tail',
         code: 'x.foo--.bar',
         throws: 'Unable to ASI',
+      });
+
+      test.pass('property of keyword as statement', {
+        code: 'this.x--',
+      });
+
+      test.pass('property of keyword as expr', {
+        code: '(this.x--)',
       });
     });
 

@@ -3420,6 +3420,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipAny($PUNCTUATOR, lexerFlags); // TODO: optimize; next token can not start with a fwd slash
         AST_set('prefix', true);
         let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument');
+        assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, 'argument');
         if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value');
         AST_close('UpdateExpression');
         return NOT_ASSIGNABLE;
