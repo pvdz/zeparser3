@@ -1489,6 +1489,96 @@ module.exports = (describe, test) =>
     test.pass('parse in tail of ternary', {
       code: 'function *f() { 1 ? 1 : yield ; }',
     });
+
+    test('arg-less yield inside group', {
+      code: '({ *g1() {   (yield)  }})',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ObjectExpression',
+              properties: [
+                {
+                  type: 'Property',
+                  key: {type: 'Identifier', name: 'g1'},
+                  kind: 'init',
+                  method: true,
+                  computed: false,
+                  value: {
+                    type: 'FunctionExpression',
+                    generator: true,
+                    async: false,
+                    expression: false,
+                    id: null,
+                    params: [],
+                    body: {
+                      type: 'BlockStatement',
+                      body: [
+                        {
+                          type: 'ExpressionStatement',
+                          expression: {type: 'YieldExpression', delegate: false, argument: null},
+                        },
+                      ],
+                    },
+                  },
+                  shorthand: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    test('arg-full yield inside group', {
+      code: '({ *g1() {   (yield 1)  }})',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ObjectExpression',
+              properties: [
+                {
+                  type: 'Property',
+                  key: {type: 'Identifier', name: 'g1'},
+                  kind: 'init',
+                  method: true,
+                  computed: false,
+                  value: {
+                    type: 'FunctionExpression',
+                    generator: true,
+                    async: false,
+                    expression: false,
+                    id: null,
+                    params: [],
+                    body: {
+                      type: 'BlockStatement',
+                      body: [
+                        {
+                          type: 'ExpressionStatement',
+                          expression: {
+                            type: 'YieldExpression',
+                            delegate: false,
+                            argument: {type: 'Literal', value: '<TODO>', raw: '1'},
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  shorthand: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $ASI, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

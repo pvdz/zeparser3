@@ -3836,6 +3836,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) {
         THROW('The `yield` keyword in arg default must be a var name but that is not allowed inside a generator');
       } else {
+        // (could still be arrow header, but we won't know that until much later, however, this causes destructible=false)
         // must parse a yield expression now
         if (allowAssignment === NO_ASSIGNMENT) THROW('Did not expect to parse an AssignmentExpression but found `yield`');
         if (hasAllFlags(lexerFlags, LF_NO_YIELD)) {
@@ -4291,8 +4292,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             foundSingleIdentWrap = true; // move on to the arrow
           }
 
-          AST_setIdent(astProp, identToken);
-
           // destructible is determined by the ident being a reserved keyword
           // we know the ident is followed by a comma so `typeof` would lead to an error anyways
           switch (identToken.str) {
@@ -4304,13 +4303,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               // reserved keyword, not destructible
               destructible |= CANT_DESTRUCT;
               simpleArgs = ARGS_COMPLEX;
+              AST_setIdent(astProp, identToken);
               break;
 
+            case 'yield':
+              if (hasAllFlags(lexerFlags, LF_IN_GENERATOR)) {
+                parseYieldKeyword(lexerFlags, identToken, allowAssignment, astProp);
+                destructible |= CANT_DESTRUCT;
+                break;
+              }
+              // fall-through
             default:
               // if curc is a comma then the group is not assignable but that will fail through the toplevelComma flag
               // if the group is just an identifier then it can be assigned to: `(a) = b`. There's a test. Or two.
               assignable = bindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
               if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+              AST_setIdent(astProp, identToken);
            }
         }
         else {
