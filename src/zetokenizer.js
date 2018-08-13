@@ -235,7 +235,7 @@ const LF_SUPER_PROP = 1 << 15; // can read `super.foo` (there are cases where yo
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
 // - sloppy mode until proven otherwise
-const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about global, that may change depending on options?
+const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about global, that may change depending on options{$?
 
 function LF_DEBUG(flags) {
   let bak = flags;
@@ -1207,11 +1207,14 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
     if (eof()) return $ERROR; // 0b is illegal without a digit
 
     // at least one digit is required
-    if (!isOctal(peek())) return $ERROR; // 0b is illegal without a digit
+    if (!isBinary(peek())) return $ERROR; // 0b is illegal without a digit
 
-    while (neof() && isOctal(peek())) skip();
+    while (neof() && isBinary(peek())) skip();
 
     return $NUMBER_BIN;
+  }
+  function isBinary(ord) {
+    return ord === $$0_30 || ord === $$1_31;
   }
 
   function parseExcl() {

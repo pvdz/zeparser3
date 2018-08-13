@@ -163,23 +163,32 @@ module.exports = (describe, test) =>
       tokens: [$NUMBER_OCT, $ASI],
     });
 
-    test('binary number', {
-      code: '0b1010',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'Literal',
-              value: '<TODO>',
-              raw: '0b1010',
+    describe('binary literal', _ => {
+
+      test('binary number', {
+        code: '0b1010',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'Literal',
+                value: '<TODO>',
+                raw: '0b1010',
+              },
             },
-          },
-        ],
-      },
-      tokens: [$NUMBER_BIN, $ASI],
+          ],
+        },
+        tokens: [$NUMBER_BIN, $ASI],
+      });
+
+      test.fail('illegal binary char', {
+        code: '0b2',
+      });
     });
+
+
 
     test('legacy octal number', {
       code: '0456',
