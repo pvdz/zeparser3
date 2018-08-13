@@ -2158,7 +2158,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseReturnStatement(lexerFlags, astProp) {
-    if (hasAllFlags(lexerFlags, LF_IN_GLOBAL)) THROW('Not configured to parse `return` statement in global, bailing');
+    if (!allowGlobalReturn && hasAllFlags(lexerFlags, LF_IN_GLOBAL)) THROW('Not configured to parse `return` statement in global, bailing');
 
     AST_open(astProp, 'ReturnStatement');
     ASSERT_skipRex('return', lexerFlags);

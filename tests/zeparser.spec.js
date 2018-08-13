@@ -26,8 +26,24 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 // passed: 16174, crashed: 639, failed: 531, skipped: 8817
 // passed: 13133, crashed: 619, failed: 517, skipped: 6031
 // passed: 13141, crashed: 615, failed: 513, skipped: 6031
+// passed: 13141, crashed: 613, failed: 515, skipped: 6031
+// passed: 13140, crashed: 613, failed: 516, skipped: 6031
+// passed: 13131, crashed: 617, failed: 514, skipped: 6045
+// passed: 13144, crashed: 602, failed: 512, skipped: 6049
+// passed: 13145, crashed: 602, failed: 511, skipped: 6049
+// passed: 13153, crashed: 602, failed: 503, skipped: 6049
+// passed: 13175, crashed: 602, failed: 481, skipped: 6049
+// passed: 13177, crashed: 602, failed: 479, skipped: 6049
+// passed: 13178, crashed: 602, failed: 478, skipped: 6049
+// passed: 13184, crashed: 596, failed: 472, skipped: 6055
+// passed: 13190, crashed: 590, failed: 472, skipped: 6055
+// passed: 13189, crashed: 587, failed: 471, skipped: 6055 // fixed a filter test
+// passed: 13192, crashed: 587, failed: 468, skipped: 6055
+// passed: 13198, crashed: 581, failed: 468, skipped: 6055
+// passed: 13199, crashed: 581, failed: 467, skipped: 6055
+// passed: 10071, crashed: 578, failed: 442, skipped: 5342
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
-const TEST262_SKIP_TO = TEST262 ? 20000 : 0; // skips the first n tests (saves me time)
+const TEST262_SKIP_TO = TEST262 ? 22000 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
 
 let fs = require('fs');
@@ -195,7 +211,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     debug: _debug,
     SKIP,
     WEB,
-    ES
+    ES,
+    OPTIONS,
   } = testDetails;
 
   ++testj;
@@ -205,6 +222,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   testSuffix += '[' + testj + ']';
   if (WEB) testSuffix += '[' + BLINK + 'WEB' + BOLD + ']';
   if (ES) testSuffix += '[' + BLINK + 'ES' + ES + BOLD + ']';
+  if (OPTIONS) testSuffix += '[' + BLINK + 'OPTIONS=' + JSON.stringify(OPTIONS) + BOLD + ']';
 
   // goal specific overrides
   // (throws override ast and ast overrides throws)
@@ -282,6 +300,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       tokenStorage: tokens,
       getTokenizer: tok => tokenizer = tok,
       targetEsVersion: ES || Infinity,
+      ...OPTIONS,
     });
   } catch (f) {
     wasError = f.message;

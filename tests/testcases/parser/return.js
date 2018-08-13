@@ -289,4 +289,119 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
     });
+
+    describe('return with option', _ => {
+
+      test('return, no value, eof', {
+        code: 'return',
+        OPTIONS: {allowGlobalReturn: true},
+        ast: {
+          type: 'Program',
+          body: [{type: 'ReturnStatement', argument: null}],
+        },
+        tokens: [$IDENT, $ASI],
+      });
+
+      test('double return, no value, semi', {
+        code: 'return;return',
+        OPTIONS: {allowGlobalReturn: true},
+        ast: {
+          type: 'Program',
+          body: [{type: 'ReturnStatement', argument: null}, {type: 'ReturnStatement', argument: null}],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('double return, no value, eof', {
+        code: 'return\nreturn',
+        OPTIONS: {allowGlobalReturn: true},
+        ast: {
+          type: 'Program',
+          body: [{type: 'ReturnStatement', argument: null}, {type: 'ReturnStatement', argument: null}],
+        },
+        tokens: [$IDENT, $ASI, $IDENT, $ASI],
+      });
+
+      test('return, no value, semi', {
+        code: 'return foo;',
+        OPTIONS: {allowGlobalReturn: true},
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ReturnStatement',
+              argument: {type: 'Identifier', name: 'foo'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+      });
+
+      test('return, no value, semi', {
+        code: 'return 15;',
+        OPTIONS: {allowGlobalReturn: true},
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ReturnStatement',
+              argument: {type: 'Literal', value: '<TODO>', raw: '15'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $NUMBER_DEC, $PUNCTUATOR],
+      });
+
+      test('return, asi check', {
+        code: 'return \n foo;',
+        OPTIONS: {allowGlobalReturn: true},
+        ast: {
+          type: 'Program',
+          body: [
+            {type: 'ReturnStatement', argument: null},
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'Identifier', name: 'foo'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $ASI, $IDENT, $PUNCTUATOR],
+      });
+
+      test('return, asi check, wrapped in body', {
+        code: '{return \n foo}',
+        OPTIONS: {allowGlobalReturn: true},
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'BlockStatement',
+              body: [
+                {type: 'ReturnStatement', argument: null},
+                {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'foo'},
+                },
+              ],
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $ASI, $IDENT, $ASI, $PUNCTUATOR],
+      });
+
+      test('return, confirm body acts as asi', {
+        code: '{return}',
+        OPTIONS: {allowGlobalReturn: true},
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'BlockStatement',
+              body: [{type: 'ReturnStatement', argument: null}],
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
+      });
+    });
   });
