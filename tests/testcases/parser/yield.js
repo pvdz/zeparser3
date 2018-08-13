@@ -1429,6 +1429,66 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
     });
+
+    test('parse with arg head of ternary (should put ternary as arg of yield entirely)', {
+      code: 'function *f() { yield 1 ? 2 : 3; }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'YieldExpression',
+                    delegate: false,
+                    argument: {
+                      type: 'ConditionalExpression',
+                      test: {type: 'Literal', value: '<TODO>', raw: '1'},
+                      consequent: {type: 'Literal', value: '<TODO>', raw: '2'},
+                      alternate: {type: 'Literal', value: '<TODO>', raw: '3'},
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test.pass('parse with arg head of ternary', {
+      code: 'function *f() { 1 ? yield 2 : 3; }',
+    });
+
+    test.pass('parse with arg tail of ternary', {
+      code: 'function *f() { 1 ? 2 : yield 3; }',
+    });
+
+    test.fail('parse in all parts of ternary', {
+      code: 'function *f() { yield ? yield : yield ; }',
+    });
+
+    test.fail('parse in head of ternary', {
+      code: 'function *f() { yield ? 1 : 1 ; }',
+    });
+
+    test.pass('parse in body of ternary', {
+      code: 'function *f() { 1 ? yield : 1 ; }',
+    });
+
+    test.pass('parse in tail of ternary', {
+      code: 'function *f() { 1 ? 1 : yield ; }',
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

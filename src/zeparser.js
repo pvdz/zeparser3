@@ -3846,6 +3846,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('delegate', false); // TODO ??
         parseYieldArgument(lexerFlags, allowAssignment, 'argument'); // takes care of newline check
         AST_close('YieldExpression');
+
+        if (curc === $$QMARK_3F) {
+          ASSERT(curtok.str === '?', 'future projection');
+          THROW('Can not have a `yield` expression on the left side of a ternary');
+        }
+
         return NOT_ASSIGNABLE;
       }
     }

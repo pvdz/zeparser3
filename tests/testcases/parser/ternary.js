@@ -122,7 +122,6 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
 
-    // TODO: yield in each part
     // TODO: await in each part
 
   });
