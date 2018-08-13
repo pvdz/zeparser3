@@ -100,7 +100,7 @@ function repeat(n, arr) {
 }
 function parseSafe(code, lexerFlags, obj) {
   try {
-    let tok = ZeTokenizer(code);
+    let tok = ZeTokenizer(code, 6);
     return tok(lexerFlags, RETURN_ANY_TOKENS);
   } catch (e) {
     console.log('parseSafe:', [code], code, LF_DEBUG(lexerFlags), debug_toktype(typeof obj.token === 'function' ? obj.token(code) : obj.token));

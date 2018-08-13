@@ -149,7 +149,8 @@ const $TICK = 1 << ++$flag;
 const $TICK_HEAD = (1 << ++$flag) | $TICK;
 const $TICK_BODY = (1 << ++$flag) | $TICK;
 const $TICK_TAIL = (1 << ++$flag) | $TICK;
-const $TICK_PURE = $TICK_HEAD | $TICK_TAIL;
+const $TICK_PURE = (1 << ++$flag) | $TICK;
+const $TICK_BAD_ESCAPE = 1 << ++$flag; // these are only valid in tagged templates from es9 onward...
 const $ASI = 1 << ++$flag;
 const $EOF = 1 << ++$flag;
 ASSERT($flag < 32, 'cannot use more than 32 flags');
@@ -346,8 +347,9 @@ const FAIL_HARD = false;
 
 let NOT_A_REGEX_ERROR = '';
 
-function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD, tokenStorage = []) {
+function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD, tokenStorage = []) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
+  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === Infinity, 'only support v6~9 right now');
 
   let pointer = 0;
   let len = input.length;
@@ -1031,14 +1033,18 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
   }
 
   function parseTemplateString(lexerFlags, fromTick) {
+    // parseTick
     ASSERT(arguments.length === 2, 'need 2 args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
+
+    // Since ES9 a _tagged_ tick literal can contain illegal escapes. Regular template strings must still conform. So
+    // we just add the $TICK_BAD_ESCAPE flag in the token type indicating whether or not the token contains a bad escape.
 
     // `...`
     // `...${expr}...`
     // `...${expr}...${expr}...`
 
-    let bad = false;
+    let badEscapes = false;
     let c;
     while (neof()) {
       // while we will want to consume at least one more byte for proper strings,
@@ -1049,20 +1055,19 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
       while (c === $$$_24) {
         ASSERT_skip($$$_24);
         if (eof()) {
-          bad = true;
           return $ERROR;
         }
 
         c = peek();
         if (c === $$CURLY_L_7B) {
           ASSERT_skip($$CURLY_L_7B);
-          return bad ? $ERROR : fromTick ? $TICK_HEAD : $TICK_BODY;
+          return (fromTick ? $TICK_HEAD : $TICK_BODY) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
         }
       }
 
       if (c === $$TICK_60) {
         ASSERT_skip($$TICK_60);
-        return bad ? $ERROR : fromTick ? $TICK_PURE : $TICK_TAIL;
+        return (fromTick ? $TICK_PURE : $TICK_TAIL) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
       }
 
       //if (isLfPsLs(c)) {
@@ -1077,11 +1082,11 @@ function ZeTokenizer(input, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB
 
       if (c === $$BACKSLASH_5C) {
         // TODO: isnt a string escape in a template always considered a strict mode escape?
-        bad = parseStringEscape(lexerFlags) === BAD_ESCAPE || bad;
+        badEscapes = parseStringEscape(lexerFlags) || badEscapes;
       }
     }
 
-    return $ERROR; // unclosed string or illegal escape
+    return $ERROR; // unclosed template literal
   }
 
   function parseLeadingZero(lexerFlags) {
@@ -2631,6 +2636,7 @@ function isLfPsLs(c) {
 
 function debug_toktype(type, ignoreUnknown) {
   ASSERT(typeof type === 'number', 'expecting valid type');
+  if (type & $TICK_BAD_ESCAPE) return debug_toktype(type ^ $TICK_BAD_ESCAPE, ignoreUnknown) + '+$TICK_BAD_ESCAPE';
   switch (type) {
     case $ASI: return 'ASI';
     case $COMMENT: return 'COMMENT';
@@ -2661,6 +2667,7 @@ function debug_toktype(type, ignoreUnknown) {
     case $TICK_HEAD: return 'TICK_HEAD';
     case $TICK_PURE: return 'TICK_PURE';
     case $TICK_TAIL: return 'TICK_TAIL';
+    case $TICK_BAD_ESCAPE: return 'TICK_BAD_ESCAPE';
     case $WHITE: return 'WHITE';
     default:
       if (ignoreUnknown) return 'UNKNOWN[' + type + ']';
@@ -2718,6 +2725,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   $STRING_SINGLE,
   $TAB,
   $TICK,
+  $TICK_BAD_ESCAPE,
   $TICK_BODY,
   $TICK_HEAD,
   $TICK_PURE,

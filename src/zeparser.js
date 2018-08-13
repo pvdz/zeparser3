@@ -134,6 +134,7 @@ let { default: ZeTokenizer,
   $STRING_SINGLE,
   $TAB,
   $TICK,
+  $TICK_BAD_ESCAPE,
   $TICK_BODY,
   $TICK_HEAD,
   $TICK_PURE,
@@ -290,7 +291,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     targetEsVersion = Infinity, // 6, 7, 8, 9, Infinity
   } = options;
 
-  let tok = ZeTokenizer(code, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
+  let tok = ZeTokenizer(code, targetEsVersion, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
 
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === Infinity, 'version should be 6 7 8 9 or infin');
 
@@ -305,10 +306,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   let traceast = false;
 
-  function THROW(desc) {
+  function THROW(desc, ...args) {
     console.log('\n');
-    console.log('Error in parser:', desc);
-    console.log('Error token:', curtok);
+    console.log('Error in parser:', desc, 'remaining throw args;', args);
+    console.log('Error token:', curtok, '\n'+curtok);
     tok.throw('Parser error! ' + desc);
   }
 
@@ -1311,6 +1312,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseTickStatement(lexerFlags, astProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
+    if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
+      THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
+    }
     AST_open(astProp, 'ExpressionStatement');
     parseTickExpression(lexerFlags, 'expression');
     parseExpressionAfterLiteral(lexerFlags, 'expression');
@@ -3921,16 +3925,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // basically; parse tick. if head, keep parsing body until parsing tail
 
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-    ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE) || hasAllFlags(curtype, $TICK_HEAD), 'if in template this function can only be called by the head of a nested template');
+    ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE) || hasAllFlags(curtype, $TICK_HEAD) || hasAllFlags(curtype, $TICK_PURE), 'if in template this function can only be called by the head of a nested template', debug_toktype(curtype));
 
     AST_open(astProp, 'TemplateLiteral');
     AST_set('expressions', []);
     AST_set('quasis', []);
 
     if (curtype === $TICK_PURE) {
-      parseQuasiPart(lexerFlags, IS_QUASI_TAIL, astProp);
+      parseQuasiPart(lexerFlags, IS_QUASI_TAIL);
     } else if (curtype === $TICK_HEAD) {
-      parseQuasiPart(lexerFlags | LF_IN_TEMPLATE, NOT_QUASI_TAIL, astProp);
+      parseQuasiPart(lexerFlags | LF_IN_TEMPLATE, NOT_QUASI_TAIL);
 
       // keep parsing expression+tick until tick-tail
       do {
@@ -3940,6 +3944,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('tail', curtype === $TICK_TAIL);
         AST_set('value', {raw: curtok.str, cooked: '<TODO>'});
         AST_close('TemplateElement');
+        if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
+          THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
+        }
         if (curtype === $TICK_BODY) {
           ASSERT_skipRex(curtok.str, lexerFlags | LF_IN_TEMPLATE); // first token in template expression can be regex
         } else  if (curtype === $TICK_TAIL) {
@@ -3950,6 +3957,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       } while (true);
     } else {
+      if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) THROW('Template containd bad escape');
       THROW('Template should start as head or pure');
     }
 
@@ -3957,9 +3965,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseQuasiPart(lexerFlags, tail) {
+    ASSERT(arguments.length === parseQuasiPart.length, 'arg count');
     AST_open('quasis', 'TemplateElement');
     AST_set('tail', tail);
     AST_set('value', {raw: curtok.str, cooked: '<TODO>'});
+
+    if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
+      THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok, curtype, $TICK_BAD_ESCAPE);
+    }
     if (curtype === $TICK_PURE) {
       ASSERT_skipDiv(curtok.str, lexerFlags);
     } else {
@@ -4004,8 +4017,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         assignable = parseValueTail(lexerFlags | LF_NO_ASI, NOT_ASSIGNABLE, isNewArg, astProp);
       }
     } else if (curc === $$TICK_60) {
+      // parseTaggedTemplate
+      // note: in es9+ (only) it is legal for _tagged_ templates to contain illegal escapes ($TICK_BAD_ESCAPE)
+
       // tagged template is like a call but slightly special (and a very particular AST)
-      ASSERT(hasAllFlags(curtype, $TICK));
+      ASSERT(hasAllFlags(curtype, $TICK), 'dont be an error dont be an error dont be an error');
       AST_wrapClosed(astProp, 'TaggedTemplateExpression', 'tag');
 
       AST_open('quasi', 'TemplateLiteral');
@@ -4013,12 +4029,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('quasis', []);
 
       AST_open('quasis', 'TemplateElement');
-      AST_set('value', {raw: curtok.str.slice(1, (curtype === $TICK_PURE) ? -1 : -2), cooked: '<TODO>'});
-      AST_set('tail', curtype === $TICK_PURE);
+      AST_set('value', {raw: curtok.str.slice(1, hasAllFlags(curtype, $TICK_PURE) ? -1 : -2), cooked: '<TODO>'});
+      AST_set('tail', hasAllFlags(curtype, $TICK_PURE));
       // curtok skipped in loop or afterwards if loop is skipped
       AST_close('TemplateElement');
 
-      if (curtype === $TICK_HEAD) {
+      if ((targetEsVersion >= 6 && targetEsVersion < 9) && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
+        THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
+      }
+      if (hasAllFlags(curtype,  $TICK_HEAD)) {
         let lfbak = lexerFlags;
         lexerFlags = lexerFlags | LF_IN_TEMPLATE; // tell tokenizer to interpret `}` as template
         do {
@@ -4026,13 +4045,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // `a${b=c}d` is valid
           parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'expressions');
 
+          if ((targetEsVersion >= 6 && targetEsVersion < 9) && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
+            THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
+          }
+          if (!hasAllFlags(curtype, $TICK_BODY) && !hasAllFlags(curtype, $TICK_TAIL)) {
+            TODO; //??
+          }
+
           AST_open('quasis', 'TemplateElement');
-          AST_set('value', {raw: curtok.str.slice(1, (curtype === $TICK_TAIL) ? -1 : -2), cooked: '<TODO>'});
-          AST_set('tail', curtype === $TICK_TAIL);
+          AST_set('value', {raw: curtok.str.slice(1, hasAllFlags(curtype, $TICK_TAIL) ? -1 : -2), cooked: '<TODO>'});
+          AST_set('tail', hasAllFlags(curtype, $TICK_TAIL));
           AST_close('TemplateElement');
-          if (curtype === $TICK_TAIL) lexerFlags = lfbak; // should happen only once and always
-        } while (curtype !== $TICK_TAIL); // also fixes $EOF check so no infi loop
+          if (hasAllFlags(curtype, $TICK_TAIL)) lexerFlags = lfbak; // should happen only once and always
+        } while (!hasAllFlags(curtype, $TICK_TAIL)); // also fixes $EOF check so no infi loop
+      } else if (!hasAnyFlag(curtype, $TICK_PURE)) {
+        TODO; //??
       }
+
       ASSERT_skipRex($TICK, lexerFlags); // f`x`\n/foo/
       AST_close('TemplateLiteral');
       AST_close('TaggedTemplateExpression');
@@ -6064,7 +6093,7 @@ function getGenericTokenType(type) {
     (($NUMBER_HEX | $NUMBER_DEC | $NUMBER_BIN | $NUMBER_OCT | $NUMBER_OLD | $NUMBER) ^ $NUMBER) |
     (($REGEXU | $REGEX) ^ $REGEX) |
     (($STRING_DOUBLE | $STRING_SINGLE | $STRING) ^ $STRING) |
-    (($TICK_BODY | $TICK_HEAD | $TICK_PURE | $TICK_TAIL | $TICK) ^ $TICK);
+    (($TICK_BODY | $TICK_HEAD | $TICK_PURE | $TICK_TAIL | $TICK_BAD_ESCAPE | $TICK) ^ $TICK);
   // (x|y)^y : the or will first make sure the bits are set (regardless) and the xor then unsets them
   let flag = (type | redundantFlags) ^ redundantFlags;
   //ASSERT((1 << Math.clz(flag)) === flag, 'should only have one bit set');

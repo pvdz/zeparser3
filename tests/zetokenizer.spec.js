@@ -200,8 +200,8 @@ for (let [[input, output, modi, desc, skip], fromPath] of all) {
 
             let failed = false;
             try {
-              // function ZeTokenizer(input, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON)
-              let tok = ZeTokenizer(code, COLLECT_TOKENS_NONE, webMode);
+              // function ZeTokenizer(input, 6, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON)
+              let tok = ZeTokenizer(code, 6, COLLECT_TOKENS_NONE, webMode);
 
               let token;
               for (let exp of outs) {

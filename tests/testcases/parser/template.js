@@ -484,5 +484,163 @@ module.exports = (describe, test) =>
       tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
 
+    describe('bad escapes', _ => {
+
+      describe('in pure', _ => {
+
+        describe('still bad in regular templates', _ => {
+
+          test.fail('illegal escapes are an error < es9', {
+            code: '`\\xg`;',
+            ES: 8,
+          });
+
+          test.fail('check illegal escapes in infinity mode', {
+            code: '`\\xg`;',
+            ES: Infinity,
+          });
+
+          test.fail('illegal escapes in ticks are still bad in es9', {
+            code: '`\\xg`;',
+            ES: 9,
+          });
+        });
+
+        describe('only okay in tagged templates in es9', _ => {
+
+          test.fail('illegal escapes are an error < es9', {
+            code: 'f`\\xg`;',
+            ES: 8,
+          });
+
+          test.pass('check illegal escapes in infinity mode', {
+            code: 'f`\\xg`;',
+            ES: Infinity,
+          });
+
+          test.pass('illegal escapes in ticks are okay in es9', {
+            code: 'f`\\xg`;',
+            ES: 9,
+          });
+        });
+      });
+
+      describe('in head', _ => {
+
+        describe('still bad in regular templates', _ => {
+
+          test.fail('illegal escapes are an error < es9', {
+            code: '`\\xg ${x}`;',
+            ES: 8,
+          });
+
+          test.fail('check illegal escapes in infinity mode', {
+            code: '`\\xg ${x}`;',
+            ES: Infinity,
+          });
+
+          test.fail('illegal escapes in ticks are still bad in es9', {
+            code: '`\\xg ${x}`;',
+            ES: 9,
+          });
+        });
+
+        describe('only okay in tagged templates in es9', _ => {
+
+          test.fail('illegal escapes are an error < es9', {
+            code: 'f`\\xg ${x}`;',
+            ES: 8,
+          });
+
+          test.pass('check illegal escapes in infinity mode', {
+            code: 'f`\\xg ${x}`;',
+            ES: Infinity,
+          });
+
+          test.pass('illegal escapes in ticks are okay in es9', {
+            code: 'f`\\xg ${x}`;',
+            ES: 9,
+          });
+        });
+      });
+
+      describe('in body', _ => {
+
+        describe('still bad in regular templates', _ => {
+
+          test.fail('illegal escapes are an error < es9', {
+            code: '`${x} \\xg ${x}`;',
+            ES: 8,
+          });
+
+          test.fail('check illegal escapes in infinity mode', {
+            code: '`${x} \\xg ${x}`;',
+            ES: Infinity,
+          });
+
+          test.fail('illegal escapes in ticks are still bad in es9', {
+            code: '`${x} \\xg ${x}`;',
+            ES: 9,
+          });
+        });
+
+        describe('only okay in tagged templates in es9', _ => {
+
+          test.fail('illegal escapes are an error < es9', {
+            code: 'f`${x} \\xg ${x}`;',
+            ES: 8,
+          });
+
+          test.pass('check illegal escapes in infinity mode', {
+            code: 'f`${x} \\xg ${x}`;',
+            ES: Infinity,
+          });
+
+          test.pass('illegal escapes in ticks are okay in es9', {
+            code: 'f`${x} \\xg ${x}`;',
+            ES: 9,
+          });
+        });
+      });
+      describe('in tail', _ => {
+
+        describe('still bad in regular templates', _ => {
+
+          test.fail('illegal escapes are an error < es9', {
+            code: '`${x} \\xg`;',
+            ES: 8,
+          });
+
+          test.fail('check illegal escapes in infinity mode', {
+            code: '`${x} \\xg`;',
+            ES: Infinity,
+          });
+
+          test.fail('illegal escapes in ticks are still bad in es9', {
+            code: '`${x} \\xg`;',
+            ES: 9,
+          });
+        });
+
+        describe('only okay in tagged templates in es9', _ => {
+
+          test.fail('illegal escapes are an error < es9', {
+            code: 'f`${x} \\xg`;',
+            ES: 8,
+          });
+
+          test.pass('check illegal escapes in infinity mode', {
+            code: 'f`${x} \\xg`;',
+            ES: Infinity,
+          });
+
+          test.pass('illegal escapes in ticks are okay in es9', {
+            code: 'f`${x} \\xg`;',
+            ES: 9,
+          });
+        });
+      });
+    });
+
     // empty template `${}`
   });
