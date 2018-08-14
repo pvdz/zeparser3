@@ -467,7 +467,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('export a named async function', {
@@ -492,21 +492,20 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('non-default export of an anonymous async function is illegal', {
       code: 'export async function(){}',
       MODULE: {throws: 'missing required ident'},
       SCRIPT: {throws: 'module goal'},
-      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('legacy meaning of `async` cant save this export from failing in SCRIPT mode', {
       code: 'export async',
       SCRIPT: {throws: 'module goal'},
       MODULE: {throws: 'Can only export async functions'},
-      tokens: [$IDENT, $IDENT, $ASI],
     });
 
     test('export a named generator function', {
@@ -531,7 +530,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('default export a named function', {
@@ -554,7 +553,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('default export a named async function', {
@@ -577,7 +576,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('default export a named generator function', {
@@ -600,7 +599,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('default export an anonymous function', {
@@ -623,7 +622,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('default export an anonymous async function', {
@@ -646,7 +645,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('default export an anonymous generator function', {
@@ -669,7 +668,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('export a class', {
@@ -691,7 +690,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('default export a named class', {
@@ -711,7 +710,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('default export an anonymous class', {
@@ -731,7 +730,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     describe('rest', _ => {
@@ -835,18 +834,187 @@ module.exports = (describe, test) =>
       });
     });
 
+    describe('confirm when a semi is not needed', _ => {
+
+      describe('non-default', _ => {
+
+
+        test.pass('regular func', {
+          code: 'export function f(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('async func', {
+          code: 'export async function f(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('generator func', {
+          code: 'export function *f(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        // test.pass('async generator func', {
+        //   code: 'export async function *f(){} foo',
+        // SCRIPT: {throws: 'module'},
+        // });
+
+        test.pass('regular class', {
+          code: 'export class x {} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('var', {
+          code: 'export var foo = x foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('let', {
+          code: 'export let foo = x foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('const', {
+          code: 'export const foo = x foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('export clause own', {
+          code: 'export {x, y} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('export clause from', {
+          code: 'export {x, y} from "x" foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('export star from', {
+          code: 'export * from "x" foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('export namespaced star', {
+          code: 'export * as x from "x" foo',
+          SCRIPT: {throws: 'module'},
+        });
+      });
+
+      describe('default', _ => {
+
+        test.pass('regular func', {
+          code: 'export default function f(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('regular anon func', {
+          code: 'export default function(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('async func', {
+          code: 'export default async function f(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('async anon func', {
+          code: 'export default async function(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('generator func', {
+          code: 'export default function *f(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('generator anon func', {
+          code: 'export default function *(){} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        // test.pass('async generator func', {
+        //   code: 'export default async function *f(){} foo',
+        // SCRIPT: {throws: 'module'},
+        // });
+
+        // test.pass('async generator anon func', {
+        //   code: 'export default async function *(){} foo',
+        // SCRIPT: {throws: 'module'},
+        // });
+
+        test.pass('regular class', {
+          code: 'export default class x {} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('regular anon class', {
+          code: 'export default class {} foo',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.pass('assignment expression', {
+          code: 'export default () => x',
+          SCRIPT: {throws: 'module'},
+        });
+      });
+    });
+
     test('the `as` keyword cannot contain escape sequence', {
       code: 'export {a \\u0061s b} from "x";',
-      SCRIPT: {
-        throws: 'module',
-      },
+      SCRIPT: {throws: 'module'},
       throws: true,
     });
 
     test.pass('export null', {
       code: 'export default null;',
-      SLOPPY: {throws: true},
+      SCRIPT: {throws: 'module'},
+    });
+
+    test.pass('lhs cannot be array literal', {
+      code: 'export default [x] = y',
+      desc: 'It is a Syntax Error if LeftHandSideExpression is either an ObjectLiteral or an ArrayLiteral and LeftHandSideExpression is not covering an AssignmentPattern.',
+      SCRIPT: {throws: 'module'},
+    });
+
+    test.pass('lhs cannot be object literal', {
+      code: 'export default {x, y} = x',
+      desc: 'It is a Syntax Error if LeftHandSideExpression is either an ObjectLiteral or an ArrayLiteral and LeftHandSideExpression is not covering an AssignmentPattern.',
+      SCRIPT: {throws: 'module'},
+    });
+
+    test.pass('edge case regarding `in`', {
+      code: 'export default a in b',
+      // always allowed by cfg
+      SCRIPT: {throws: 'module'},
+    });
+
+    test.fail('edge case regarding `await`', {
+      code: 'export default await',
+      // always forbidden by cfg
+      SCRIPT: {throws: 'module'},
+    });
+
+    test.fail('edge case regarding `await x`', {
+      code: 'export default await x',
+      // always forbidden by cfg
+      SCRIPT: {throws: 'module'},
+    });
+
+    test.fail('edge case regarding `yield`', {
+      code: 'export default yield',
+      // always forbidden by cfg
+      SCRIPT: {throws: 'module'},
+    });
+
+    test.fail('edge case regarding `yield x`', {
+      code: 'export default yield x',
+      // always forbidden by cfg
+      SCRIPT: {throws: 'module'},
+    });
+
+    test('cannot export let', {
+      code: 'export var let = x;',
+      SCRIPT: {throws: 'module'},
+      MODULE: {throws: 'let'},
     });
   });
-
-// cannot import/export a var named `let` (since module code is strict by default and import/export is module-code-only)

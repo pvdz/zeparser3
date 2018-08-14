@@ -1720,22 +1720,34 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseExportStatement(lexerFlags, astProp) {
-    // export * FromClause;
-    // export ExportClause FromClause;
-    // export ExportClause;
-    // export VariableStatement
-    // export Declaration
-    // export default HoistableDeclaration
-    // export default ClassDeclaration
-    // export default AssignmentExpression
+    // export * FromClause ;
+    // export ExportClause FromClause ;
+    // export ExportClause ;
+    // export VariableStatement ;
+    // export let ;
+    // export const ;
+    // export class
+    // export function
+    // export async function
+    // export generator function
+    // export async generator function
+    // export default class
+    // export default function
+    // export default async function
+    // export default generator function
+    // export default async generator function
+    // export default assignment ;
 
     // export sans default can do; var, let, const, function, async function, function *, class
     // export with default can do: function, async function, function *, class, and any assignment expression
+    // regarding asi; classes and function decls dont get asi, anything else does. `default` does not change this.
     // note: the regular function, async function, and class may have no name only with `default`
 
     if (goalMode !== GOAL_MODULE) THROW('The `export` keyword can only be used with the module goal');
 
     ASSERT_skipAny('export', lexerFlags);
+
+    let needsSemi = true; // only classes and function decls don't get this
 
     if (curc === $$D_64 && curtok.str === 'default') {
       AST_open(astProp, 'ExportDefaultDeclaration');
@@ -1744,12 +1756,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.str === 'class') {
         // export default class ...
         parseClassDeclaration(lexerFlags, IDENT_OPTIONAL, 'declaration');
+        needsSemi = false;
       } else if (curc === $$F_66 && curtok.str === 'function') {
         // export default function f(){}
         // export default function* f(){}
         // export default function(){}
         // export default function* (){}
         parseFunction(lexerFlags, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_OPTIONAL, 'declaration');
+        needsSemi = false;
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export default async function f(){}
         // export default async function(){}
@@ -1759,8 +1773,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let identToken = curtok;
         ASSERT_skipRex('async', lexerFlags);
         // note: can be any expression, function or legacy. default export doesnt care as much
-        if (curtok.str === 'function') parseAsyncStatement(lexerFlags, identToken, IS_EXPORT, 'declaration');
-        else parseAsyncExpression(lexerFlags, identToken, NOT_NEW_ARG, IS_EXPORT, ALLOW_ASSIGNMENT, 'declaration');
+        if (curtok.str === 'function') {
+          parseAsyncStatement(lexerFlags, identToken, IS_EXPORT, 'declaration');
+          needsSemi = false;
+        } else {
+          // TODO: can we even parse an arrow here? what about semi after an arrow?
+          parseAsyncExpression(lexerFlags, identToken, NOT_NEW_ARG, IS_EXPORT, ALLOW_ASSIGNMENT, 'declaration');
+        }
       } else {
         // any expression is exported as is (but is not a live binding)
         parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'declaration');
@@ -1804,6 +1823,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         } else if (curtok.str === 'class') {
           // export class ...
           parseClassDeclaration(lexerFlags, IDENT_REQUIRED, 'declaration');
+          needsSemi = false;
         } else {
           THROW('Unknown export type [' + curtok.str +  ']');
         }
@@ -1814,6 +1834,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // (anonymous should not be allowed but parsers seem to do it anyways)
         parseFunction(lexerFlags, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_REQUIRED, 'declaration');
         AST_set('source', null);
+        needsSemi = false;
       } else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
         // (note: no arrows here because we require a name)
@@ -1825,13 +1846,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         parseFunction(lexerFlags, IS_FUNC_DECL, NOT_FUNC_EXPR, WAS_ASYNC, IDENT_REQUIRED, 'declaration');
         AST_set('source', null);
+        needsSemi = false;
       } else {
         THROW('Unknown export type [' + curtok.str +  ']');
       }
       AST_close('ExportNamedDeclaration');
     }
 
-    parseSemiOrAsi(lexerFlags);
+    if (needsSemi) {
+      // function decls and classes do not need asi
+      parseSemiOrAsi(lexerFlags);
+    }
   }
   function parseExportObject(lexerFlags) {
     // import {...} from 'x'
