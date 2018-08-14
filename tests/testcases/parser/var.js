@@ -12337,6 +12337,9 @@ module.exports = (describe, test) =>
 
     test('html comment close marks start of single line comment', {
       code: 'var foo = [23]\n-->[0];',
+      MODULE: {
+        throws: true, // because `[23]\n--` is actually `[23];--` and `>` is not a valid operand
+      },
       ast: {
         type: 'Program',
         body: [

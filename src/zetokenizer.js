@@ -350,7 +350,7 @@ const NOT_TEMPLATE = false;
 
 let NOT_A_REGEX_ERROR = '';
 
-function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD, tokenStorage = []) {
+function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD, tokenStorage = []) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === Infinity, 'only support v6~9 right now');
 
@@ -359,6 +359,7 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
 
   let wasWhite = false;
   let consumedNewline = false; // whitespace newline token or string token that contained newline or multiline comment
+  let consumedComment = false; // needed to confirm requirement to parse --> closing html comment
   let finished = false; // generated an $EOF?
   let lastParsedIdent = ''; // updated after parsing an ident. used to canonalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
 
@@ -573,7 +574,10 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
     } while (wasWhite && _returnAny === RETURN_SOLID_TOKENS);
     ++solidTokenCount;
     if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
-    if (!wasWhite) consumedNewline = false;
+    if (!wasWhite) {
+      consumedNewline = false;
+      consumedComment = false;
+    }
 
     return token;
   }
@@ -671,13 +675,13 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
       case $$AND_26:
         return parseSameOrCompound(c); // & && &=
       case $$DASH_2D:
+        // https://tc39.github.io/ecma262/#sec-html-like-comments
+        // The syntax and semantics of 11.4 is extended as follows except that this extension is not allowed when parsing source code using the goal symbol Module:
         // TODO: only support this under the webcompat flag
         // TODO: and properly parse this, not like the duplicate hack it is now
-        if (!eofd(1) && peek() === $$DASH_2D && peekd(1) === $$GT_3E) {
-          if (consumedNewline) {
-            parseSingleComment();
-            wasWhite = true;
-            return $COMMENT_HTML;
+        if (!eofd(1) && moduleGoal === GOAL_SCRIPT && peek() === $$DASH_2D && peekd(1) === $$GT_3E) {
+          if (consumedNewline || consumedComment) {
+            return parseCommentHtmlClose();
           } else {
             // Note that the `-->` is not picked up as a comment since that requires a newline to precede it.
             // TODO: do we report this anywhere? This isn't an error but most likely end up being one
@@ -720,13 +724,8 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
       case $$QMARK_3F:
         return $PUNCTUATOR;
       case $$LT_3C:
-        if (!eofd(3) && peek() === $$EXCL_21 && peekd(1) === $$DASH_2D && peekd(2) === $$DASH_2D) {
-          // This is the starting html comment, the spec defines it as the start of a single line JS comment
-          // TODO: hide this under the web compat flag
-          // TODO: and clean the check up already
-          parseSingleComment();
-          wasWhite = true;
-          return $COMMENT_HTML;
+        if (!eofd(3) && moduleGoal === GOAL_SCRIPT && peek() === $$EXCL_21 && peekd(1) === $$DASH_2D && peekd(2) === $$DASH_2D) {
+          return parseCommentHtmlOpen();
         }
         return parseLtPunctuator(); // < << <= <<=
       case $$GT_3E:
@@ -1391,6 +1390,7 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
     }
   }
   function parseSingleComment() {
+    consumedComment = true;
     while (neof()) {
       let c = peek();
       if (c === $$CR_0D || isLfPsLs(c)) {
@@ -1402,6 +1402,7 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
     return $COMMENT_SINGLE;
   }
   function parseMultiComment() {
+    consumedComment = true;
     let c;
     while (neof()) {
       c = peekSkip();
@@ -1419,6 +1420,22 @@ function ZeTokenizer(input, targetEsVersion = 6, collectTokens = COLLECT_TOKENS_
       }
     }
     return $ERROR;
+  }
+  function parseCommentHtmlOpen() {
+    // parseHtmlComment
+    // This is the starting html comment <!--
+    // the spec defines it as the start of a single line JS comment
+    // TODO: hide this under the web compat flag
+    // TODO: and clean the check up already
+    parseSingleComment();
+    wasWhite = true;
+    return $COMMENT_HTML;
+  }
+  function parseCommentHtmlClose() {
+    // parseHtmlComment
+    parseSingleComment();
+    wasWhite = true;
+    return $COMMENT_HTML;
   }
 
   function parseEqual() {

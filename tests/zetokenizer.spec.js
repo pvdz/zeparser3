@@ -40,6 +40,9 @@ let {
   LF_STRICT_MODE,
   LF_SLOPPY_MODE,
 
+  GOAL_MODULE,
+  GOAL_SCRIPT,
+
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
 
@@ -201,7 +204,7 @@ for (let [[input, output, modi, desc, skip], fromPath] of all) {
             let failed = false;
             try {
               // function ZeTokenizer(input, 6, goal, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON)
-              let tok = ZeTokenizer(code, 6, COLLECT_TOKENS_NONE, webMode);
+              let tok = ZeTokenizer(code, 6, (_mode & MODE_MODULE) ? GOAL_MODULE : GOAL_SCRIPT, COLLECT_TOKENS_NONE, webMode);
 
               let token;
               for (let exp of outs) {

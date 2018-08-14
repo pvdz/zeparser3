@@ -42,6 +42,10 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 // passed: 13198, crashed: 581, failed: 468, skipped: 6055
 // passed: 13199, crashed: 581, failed: 467, skipped: 6055
 // passed: 10071, crashed: 578, failed: 442, skipped: 5342
+// passed: 10079, crashed: 558, failed: 433, skipped: 5363
+// passed: 10081, crashed: 558, failed: 431, skipped: 5363
+// passed: 10043, crashed: 494, failed: 427, skipped: 5469
+// passed: 10046, crashed: 494, failed: 424, skipped: 5469
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
 const TEST262_SKIP_TO = TEST262 ? 22000 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
@@ -317,7 +321,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   if (wasError) {
     let wasTodo = wasError.indexOf('TODO') >= 0;
-    if (wasError.indexOf('Parser error!') < 0 && !wasTodo) {
+    if (wasError.indexOf('Parser error!') < 0 && wasError.indexOf('Tokenizer error!') < 0 && !wasTodo) {
       console.log(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
       LOG_THROW('unexpected CRASH', code, stack, desc);
       console.log(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);

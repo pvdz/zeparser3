@@ -292,7 +292,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     targetEsVersion = Infinity, // 6, 7, 8, 9, Infinity
   } = options;
 
-  let tok = ZeTokenizer(code, targetEsVersion, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
+  let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
 
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === Infinity, 'version should be 6 7 8 9 or infin');
 
