@@ -156,7 +156,9 @@ let { default: ZeTokenizer,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
   LF_IN_GLOBAL,
+  LF_IN_ITERATION,
   LF_IN_SCOPE_ROOT,
+  LF_IN_SWITCH,
   LF_IN_TEMPLATE,
   LF_NO_ASI,
   LF_NO_FLAGS,
@@ -1163,7 +1165,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isGenerator === WAS_GENERATOR)  lexerFlags = lexerFlags | LF_IN_GENERATOR;
     let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom, isGetSet, isGenerator);
     if (isGenerator === NOT_GENERATOR) lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
-    _parseBlockStatement(sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL), expressionState, PARSE_DIRECTIVES, wasSimple, functionNameTokenToVerify, 'body');
+    _parseBlockStatement(sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), expressionState, PARSE_DIRECTIVES, wasSimple, functionNameTokenToVerify, 'body');
   }
   function parseFuncArguments(lexerFlags, bindingFrom, isGetSet, isGenerator) {
     ASSERT(arguments.length === parseFuncArguments.length, 'arg count');
@@ -1591,7 +1593,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseBreakStatement(lexerFlags, astProp) {
     AST_open(astProp, 'BreakStatement');
-    // break is only valid inside a breakable, fenced by functions
+    // break is only valid inside an iteration or switch statement, fenced by functions
+    if (hasNoFlag(lexerFlags, LF_IN_ITERATION | LF_IN_SWITCH)) THROW('Can only `break` inside a `switch` or loop');
     ASSERT_skipRex('break', lexerFlags);
     // a break may be followed by another identifier which must then be a valid label.
     // otherwise it's just a break to the nearest breakable (most likely).
@@ -1682,6 +1685,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseContinueStatement(lexerFlags, astProp) {
     AST_open(astProp, 'ContinueStatement');
     // continue is only valid inside a loop, fenced by functions
+    if (hasNoFlag(lexerFlags, LF_IN_ITERATION)) THROW('Can only `continue` inside a loop');
     ASSERT_skipRex('continue', lexerFlags);
     // a continue may be followed by another identifier which must then be a valid label.
     // otherwise it's just a continue to the nearest loop (most likely).
@@ -1713,7 +1717,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex('do', lexerFlags);
     // if the next part does not start with `{` then it is not a block and ASI can not happen. otherwise dont care here
     // note that functions and classes DO get ASI
-    parseNestedBodyPart(curc !== $$CURLY_L_7B ? lexerFlags | LF_NO_ASI : lexerFlags, 'body');
+    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags | LF_NO_ASI : lexerFlags) | LF_IN_ITERATION, 'body');
     skipAnyOrDie($$W_77, 'while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
     parseSemiOrAsi(lexerFlags);
@@ -1926,7 +1930,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
     parseForHeader(lexerFlags | LF_NO_ASI, astProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
-    parseNestedBodyPart(lexerFlags, 'body');
+    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, 'body');
     AST_close(['ForStatement', 'ForInStatement', 'ForOfStatement']);
   }
   function parseForHeader(lexerFlags, astProp) {
@@ -2207,39 +2211,44 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'SwitchStatement');
     ASSERT_skipAny('switch', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'discriminant');
-    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE);
+    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE); // TODO: in what valid case is this relevant? switch cant appear directly in a template
     skipAnyOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // TODO: optimize; next must be `case` or `default` or `}`
     AST_set('cases', []);
+
+    parseSwitchCases(lexerFlagsNoTemplate | LF_IN_SWITCH, 'cases');
+
+    skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
+    AST_close('SwitchStatement');
+  }
+  function parseSwitchCases(lexerFlags, astProp) {
     let hadDefault = false;
     while (true) {
       if (curtok.str === 'case') {
-        AST_open('cases', 'SwitchCase');
-        ASSERT_skipRex('case', lexerFlagsNoTemplate);
-        parseExpressions(lexerFlagsNoTemplate, ALLOW_ASSIGNMENT, 'test');
+        AST_open(astProp, 'SwitchCase');
+        ASSERT_skipRex('case', lexerFlags);
+        parseExpressions(lexerFlags, ALLOW_ASSIGNMENT, 'test');
         AST_set('consequent', []);
         if (curc !== $$COLON_3A) THROW('Missing colon after case expr');
-        ASSERT_skipRex(':', lexerFlagsNoTemplate);
+        ASSERT_skipRex(':', lexerFlags);
         while (curtype !== $EOF && curc !== $$CURLY_R_7D && (curtype !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) {
-          parseNestedBodyPart(lexerFlagsNoTemplate, 'consequent');
+          parseNestedBodyPart(lexerFlags, 'consequent');
         }
 
         AST_close('SwitchCase');
       } else if (curtok.str === 'default') {
         if (hadDefault) THROW('Found second default in same switch');
-        AST_open('cases', 'SwitchCase');
-        ASSERT_skipAny('default', lexerFlagsNoTemplate); // TODO: optimize; next must be :
+        AST_open(astProp, 'SwitchCase');
+        ASSERT_skipAny('default', lexerFlags); // TODO: optimize; next must be :
         if (curc !== $$COLON_3A) THROW('Missing colon after default');
-        ASSERT_skipRex(':', lexerFlagsNoTemplate);
+        ASSERT_skipRex(':', lexerFlags);
         AST_set('test', null);
         AST_set('consequent', []);
-        while (curtype !== $EOF && curc !== $$CURLY_R_7D && (curtype !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) parseNestedBodyPart(lexerFlagsNoTemplate, 'consequent');
+        while (curtype !== $EOF && curc !== $$CURLY_R_7D && (curtype !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) parseNestedBodyPart(lexerFlags, 'consequent');
         AST_close('SwitchCase');
       } else {
         break;
       }
     }
-    skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
-    AST_close('SwitchStatement');
   }
 
   function parseThrowStatement(lexerFlags, astProp) {
@@ -2300,7 +2309,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'WhileStatement');
     ASSERT_skipAny('while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
-    parseNestedBodyPart(lexerFlags, 'body');
+    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, 'body');
     AST_close('WhileStatement');
   }
 
@@ -4214,7 +4223,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
       AST_set('expression', false); // "body of arrow is block"
-      parseBlockStatement(sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL), IS_EXPRESSION, PARSE_DIRECTIVES, wasSimple, 'body');
+      parseBlockStatement(sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), IS_EXPRESSION, PARSE_DIRECTIVES, wasSimple, 'body');
     } else {
       AST_set('expression', true); // "body of arrow is expr"
       parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'body'); // TODO: what about curlyLexerFlags here?
