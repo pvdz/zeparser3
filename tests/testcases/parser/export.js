@@ -1017,4 +1017,126 @@ module.exports = (describe, test) =>
       SCRIPT: {throws: 'module'},
       MODULE: {throws: 'let'},
     });
+
+    describe('scoping', _ => {
+
+      test('block', {
+        code: '{export {x};}',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('function', {
+        code: 'function f(){export {x};}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+
+      test('arrow decl', {
+        code: 'let x = () => {export {x};}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+
+      test.fail('arrow expr', {
+        code: 'let x = () => export {x}',
+      });
+
+      test('if statement', {
+        code: 'if (x) export {x};',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('else statement', {
+        code: 'if (x); else export {x};',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('while statement', {
+        code: 'while (x) export {x};',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('do-while statement', {
+        code: 'do export {x}; while (x);',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('for statement', {
+        code: 'for (;;) export {x};',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test.fail('for statement', {
+        code: 'switch (x) { export {x}; }',
+      });
+
+      test('case statement', {
+        code: 'switch (x) { case x: export {x}; }',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('default statement', {
+        code: 'switch (x) { default: export {x}; }',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('with statement', {
+        code: 'with (x) export {x};',
+        // with is illegal in module goal because it is strict by default, anyways
+        SCRIPT: {throws: 'module'},
+        throws: 'with',
+      });
+
+      test('try statement', {
+        code: 'try { export {x}; } catch(e){}',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('catch statement', {
+        code: 'try { } catch(e){ export {x}; }',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('finally statement', {
+        code: 'try { } finally { export {x}; }',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test.fail('return statement', {
+        code: 'function f(){ return export {x}; }',
+      });
+
+      test.fail('class decl', {
+        code: 'class x { export {x}; }',
+      });
+
+      test('class constructor', {
+        code: 'class x { constructor(){ export {x}; }}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+
+      test('class method', {
+        code: 'class x { foo(){ export {x}; }}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+
+      test('obj method', {
+        code: 'x = { foo(){ export {x}; }}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+    })
   });

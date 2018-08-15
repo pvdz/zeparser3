@@ -216,26 +216,29 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 //... etc
 //ASSERT(__flag < 32, 'cannot use more than 32 flags');
 
+$flag = 0;
 const LF_NO_FLAGS = 0;
-const LF_CAN_NEW_TARGET = 1 << 2; // current scope is inside at least one regular (non-arrow) function
-const LF_FOR_REGEX = 1 << 3;
-const LF_IN_ASYNC = 1 << 4;
-const LF_IN_CONSTRUCTOR = 1 << 5; // inside a class constructor (not a regular function) that is not static
-const LF_IN_GENERATOR = 1 << 6;
-const LF_IN_FUNC_ARGS = 1 << 7; // throws for await expression
-const LF_NO_FUNC_DECL = 1 << 8; // currently nesting inside at least one statement that is not a block/body
-const LF_IN_TEMPLATE = 1 << 9;
-const LF_IN_GLOBAL = 1 << 10; // unset whenever you go into any kind of function
-const LF_NO_ASI = 1 << 11; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
-const LF_NO_IN = 1 << 12; // inside the initial part of a for-header, prevents `in` being parsed as a generic expression
-const LF_STRICT_MODE = 1 << 13;
-const LF_SUPER_CALL = 1 << 14; // can call `super()`
-const LF_SUPER_PROP = 1 << 15; // can read `super.foo` (there are cases where you can doo this but not `super()`)
+const LF_CAN_NEW_TARGET = 1 << ++$flag; // current scope is inside at least one regular (non-arrow) function
+const LF_FOR_REGEX = 1 << ++$flag;
+const LF_IN_ASYNC = 1 << ++$flag;
+const LF_IN_CONSTRUCTOR = 1 << ++$flag; // inside a class constructor (not a regular function) that is not static
+const LF_IN_FUNC_ARGS = 1 << ++$flag; // throws for await expression
+const LF_IN_GENERATOR = 1 << ++$flag;
+const LF_IN_GLOBAL = 1 << ++$flag; // unset whenever you go into any kind of function (for return)
+const LF_IN_SCOPE_ROOT = 1 << ++$flag; // unset when parsing any thing inside a global/func scope (right now for import/export inside statement)
+const LF_IN_TEMPLATE = 1 << ++$flag;
+const LF_NO_ASI = 1 << ++$flag; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
+const LF_NO_FUNC_DECL = 1 << ++$flag; // currently nesting inside at least one statement that is not a block/body
+const LF_NO_IN = 1 << ++$flag; // inside the initial part of a for-header, prevents `in` being parsed as a generic expression
+const LF_STRICT_MODE = 1 << ++$flag;
+const LF_SUPER_CALL = 1 << ++$flag; // can call `super()`
+const LF_SUPER_PROP = 1 << ++$flag; // can read `super.foo` (there are cases where you can doo this but not `super()`)
+ASSERT($flag < 16, 'cannot use more than 32 flags (prefer 16)');
 // start of the first statement without knowing strict mode status:
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
 // - sloppy mode until proven otherwise
-const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about global, that may change depending on options{$?
+const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL | LF_IN_SCOPE_ROOT; // not sure about global, that may change depending on options{$?
 
 function LF_DEBUG(flags) {
   let bak = flags;
@@ -274,6 +277,10 @@ function LF_DEBUG(flags) {
   if (flags & LF_NO_FUNC_DECL) {
     flags ^= LF_NO_FUNC_DECL;
     s.push('LF_NO_FUNC_DECL');
+  }
+  if (flags & LF_IN_SCOPE_ROOT) {
+    flags ^= LF_IN_SCOPE_ROOT;
+    s.push('LF_IN_SCOPE_ROOT');
   }
   if (flags & LF_IN_GLOBAL) {
     flags ^= LF_IN_GLOBAL;
@@ -2762,12 +2769,13 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_IN_CONSTRUCTOR,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
+  LF_IN_GLOBAL,
+  LF_IN_SCOPE_ROOT,
   LF_IN_TEMPLATE,
   LF_NO_ASI,
   LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
   LF_NO_IN,
-  LF_IN_GLOBAL,
   LF_STRICT_MODE,
   LF_SUPER_CALL,
   LF_SUPER_PROP,

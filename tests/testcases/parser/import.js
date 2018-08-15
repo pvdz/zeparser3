@@ -443,4 +443,124 @@ module.exports = (describe, test) =>
       },
       throws: true,
     });
+
+    describe('scoping', _ => {
+
+      test('block', {
+        code: '{import {x} from "y";}',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('function', {
+        code: 'function f(){import {x} from "y";}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+
+      test.fail('arrow decl', {
+        code: 'let x = () => {import {x} from "y";}',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test.fail('arrow expr', {
+        code: 'let x = () => import {x} from "y"',
+      });
+
+      test('if statement', {
+        code: 'if (x) import {x} from "y";',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('else statement', {
+        code: 'if (x); else import {x} from "y";',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('while statement', {
+        code: 'while (x) import {x} from "y";',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('do-while statement', {
+        code: 'do import {x} from "y"; while (x);',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('for statement', {
+        code: 'for (;;) import {x} from "y";',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test.fail('for statement', {
+        code: 'switch (x) { import {x} from "y"; }',
+      });
+
+      test.fail('case statement', {
+        code: 'switch (x) { case x: import {x} from "y"; }',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test('default statement', {
+        code: 'switch (x) { default: import {x} from "y"; }',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('with statement', {
+        code: 'with (x) import {x} from "y";',
+        // with is illegal in module goal because it is strict by default, anyways
+        SCRIPT: {throws: 'module'},
+        throws: 'with',
+      });
+
+      test('try statement', {
+        code: 'try { import {x} from "y"; } catch(e){}',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('catch statement', {
+        code: 'try { } catch(e){ import {x} from "y"; }',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test('finally statement', {
+        code: 'try { } finally { import {x} from "y"; }',
+        SCRIPT: {throws: 'module'},
+        throws: 'can not be nested',
+      });
+
+      test.fail('return statement', {
+        code: 'function f(){ return import {x} from "y"; }',
+      });
+
+      test.fail('class decl', {
+        code: 'class x { import {x} from "y"; }',
+      });
+
+      test('class constructor', {
+        code: 'class x { constructor(){ import {x} from "y"; }}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+
+      test('class method', {
+        code: 'class x { foo(){ import {x} from "y"; }}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+
+      test('obj method', {
+        code: 'x = { foo(){ import {x} from "y"; }}',
+        SCRIPT: {throws: 'module'},
+        throws: 'top level',
+      });
+    })
   });

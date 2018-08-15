@@ -156,6 +156,7 @@ let { default: ZeTokenizer,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
   LF_IN_GLOBAL,
+  LF_IN_SCOPE_ROOT,
   LF_IN_TEMPLATE,
   LF_NO_ASI,
   LF_NO_FLAGS,
@@ -965,7 +966,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function _parseBodyPartsSansDirectives(lexerFlags, astProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-    while (curtype !== $EOF && curc !== $$CURLY_R_7D) parseBodyPart(lexerFlags, astProp);
+    while (curtype !== $EOF && curc !== $$CURLY_R_7D) parseNestedBodyPart(lexerFlags, astProp);
   }
 
   function parseStatementHeader(lexerFlags, headProp) {
@@ -1008,7 +1009,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseNestedBodyPart(lexerFlags, astProp) {
     // nested statements like that of if, while, for, try, etc
-    return parseBodyPart(lexerFlags | LF_NO_FUNC_DECL, astProp);
+    return parseBodyPart(sansFlag(lexerFlags | LF_NO_FUNC_DECL, LF_IN_SCOPE_ROOT), astProp);
   }
 
   function parseBodyPart(lexerFlags, astProp) {
@@ -1162,7 +1163,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isGenerator === WAS_GENERATOR)  lexerFlags = lexerFlags | LF_IN_GENERATOR;
     let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, bindingFrom, isGetSet, isGenerator);
     if (isGenerator === NOT_GENERATOR) lexerFlags = sansFlag(lexerFlags, LF_IN_GENERATOR);
-    _parseBlockStatement(sansFlag(lexerFlags, LF_IN_GLOBAL), expressionState, PARSE_DIRECTIVES, wasSimple, functionNameTokenToVerify, 'body');
+    _parseBlockStatement(sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL), expressionState, PARSE_DIRECTIVES, wasSimple, functionNameTokenToVerify, 'body');
   }
   function parseFuncArguments(lexerFlags, bindingFrom, isGetSet, isGenerator) {
     ASSERT(arguments.length === parseFuncArguments.length, 'arg count');
@@ -1742,8 +1743,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // export with default can do: function, async function, function *, class, and any assignment expression
     // regarding asi; classes and function decls dont get asi, anything else does. `default` does not change this.
     // note: the regular function, async function, and class may have no name only with `default`
-
     if (goalMode !== GOAL_MODULE) THROW('The `export` keyword can only be used with the module goal');
+    if (hasNoFlag(lexerFlags, LF_IN_GLOBAL)) THROW('The `export` keyword is only supported at the top level');
+    if (hasNoFlag(lexerFlags, LF_IN_SCOPE_ROOT)) THROW('The `export` keyword can not be nested in another statement'); // TODO: import()
 
     ASSERT_skipAny('export', lexerFlags);
 
@@ -2072,6 +2074,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // (cannot create a var named `yield` or `await` or `let` this way)
 
     if (goalMode !== GOAL_MODULE) THROW('The `import` keyword can only be used with the module goal');
+    if (hasNoFlag(lexerFlags, LF_IN_GLOBAL)) THROW('The `import` keyword is only supported at the top level'); // TODO: import()
+    if (hasNoFlag(lexerFlags, LF_IN_SCOPE_ROOT)) THROW('The `import` keyword can not be nested in another statement'); // TODO: import()
 
     ASSERT_skipAny('import', lexerFlags);
 
@@ -4210,7 +4214,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = resetLexerFlagsForFunction(lexerFlags, isAsync, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
       AST_set('expression', false); // "body of arrow is block"
-      parseBlockStatement(sansFlag(lexerFlags, LF_IN_GLOBAL), IS_EXPRESSION, PARSE_DIRECTIVES, wasSimple, 'body');
+      parseBlockStatement(sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL), IS_EXPRESSION, PARSE_DIRECTIVES, wasSimple, 'body');
     } else {
       AST_set('expression', true); // "body of arrow is expr"
       parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'body'); // TODO: what about curlyLexerFlags here?
@@ -5738,7 +5742,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
     }
     else {
-      if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
+      if (isClassMethod) THROW('Class members have to be methods, for now');
       // this is most likely an error
       // - `({x+=y})`
       THROW('Unexpected character after object literal property name ' + curtok);
