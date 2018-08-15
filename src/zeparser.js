@@ -5328,17 +5328,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `({*get(){}})`
           // - `({*set(){}})`
           // - `({*async(){}})`     // NOT an async generator! it's a generatr
+          if (identToken.str === 'prototype') THROW('Class methods can not be called `prototype`');
           AST_setIdent(astProp, identToken);
           parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, undefined, identToken, isClassMethod, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
         } else {
           if (curtok.str === 'async') {
-            // - `({*async x(){}})`     // NOT an async generator! it's a generatr
+            // - `({*async x(){}})`     // NOT an async generator! just an error
             THROW('Found `* async x(){}` but this should be `async * x(){}`'); // provided it's supported at all...
           }
           if (curtok.str === 'get' || curtok.str === 'set') {
             // - `({*get x(){}})`
             // - `({*set x(){}})`
-            THROW('Getters and setters can not be generators');
+            THROW('Getters and setters can not be generators'); // (and you would put the get/set before the *, anyways)
           }
           if (curc === $$COLON_3A) {
             // - `({*ident: x})`
@@ -5647,6 +5648,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible |= CANT_DESTRUCT;
 
       AST_setIdent(astProp, identToken);
+      if (identToken.str === 'prototype') THROW('Class methods can not be called `prototype`');
       parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, undefined, identToken, isClassMethod, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
 
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
@@ -5669,6 +5671,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
       let identToken2 = curtok;
+      if (identToken2.str === 'prototype') THROW('Class methods can not be called `prototype`');
       ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
 
       if (curc !== $$PAREN_L_28) THROW('Must have left paren now, got: ' + curtok);
@@ -5711,6 +5714,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // TODO: this will be useful when implementing async generators
       // if (curtype === $IDENT) {
       //   // {get *foo(){}}
+      // if (curtok.str === 'prototype') THROW('Class methods can not be called `prototype`');
       //   AST_setIdent(astProp, curtok);
       // } else if ((curtype & $STRING) === $STRING || (curtype & $NUMBER) === $NUMBER) {
       //   AST_setLiteral(astProp, curtok);

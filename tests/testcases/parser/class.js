@@ -1,7 +1,7 @@
 let {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
-  describe('class statement', _ => {
+  describe('classes', _ => {
 
     describe('empty classes', _ => {
       describe('as declaration', _ => {
@@ -2351,6 +2351,38 @@ module.exports = (describe, test) =>
           });
         });
       });
+    });
+
+    describe('method names cannot be `prototype`', _ => {
+
+      test('plain', {
+        code: 'class x { prototype(){} }',
+        throws: 'prototype',
+      });
+
+      test('getter', {
+        code: 'class x { get prototype(){} }',
+        throws: 'prototype',
+      });
+
+      test('setter', {
+        code: 'class x { set prototype(x){} }',
+        throws: 'prototype',
+      });
+
+      test('generator', {
+        code: 'class x { *prototype(){} }',
+        throws: 'prototype',
+      });
+
+      test('async', {
+        code: 'class x { async prototype(){} }',
+        throws: 'prototype',
+      });
+
+      // test('gen async', {
+      //   code: 'class x { async *prototype(){} }',
+      // });
     });
 
     test.fail('cannot extend an assignment', {
