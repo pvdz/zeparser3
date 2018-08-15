@@ -379,46 +379,13 @@ module.exports = (describe, test) =>
     test('export const statement, one var', {
       code: 'export const x',
       SCRIPT: {throws: 'module goal'},
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExportNamedDeclaration',
-            specifiers: [],
-            declaration: {
-              type: 'VariableDeclaration',
-              kind: 'const',
-              declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null}],
-            },
-            source: null,
-          },
-        ],
-      },
-      tokens: [$IDENT, $IDENT, $IDENT, $ASI],
+      throws: 'init',
     });
 
     test('export const statement, two vars', {
       code: 'export const x, y',
       SCRIPT: {throws: 'module goal'},
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExportNamedDeclaration',
-            specifiers: [],
-            declaration: {
-              type: 'VariableDeclaration',
-              kind: 'const',
-              declarations: [
-                {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
-                {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: null},
-              ],
-            },
-            source: null,
-          },
-        ],
-      },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      throws: 'init',
     });
 
     test('export const statement, two vars, with init', {

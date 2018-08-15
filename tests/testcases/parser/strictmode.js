@@ -118,7 +118,7 @@ module.exports = (describe, test) =>
         });
 
         test('not first', {
-          code: 'const x; "use strict"; with (x) y;',
+          code: 'var x; "use strict"; with (x) y;',
           ast: true,
           tokens: true,
           STRICT: {throws: 'strict'},
@@ -200,7 +200,7 @@ module.exports = (describe, test) =>
 
       describe('mixed cases', _ => {
         test('ignored when not first', {
-          code: 'const x; "use strict"; with (x) y;',
+          code: 'var x; "use strict"; with (x) y;',
           ast: true,
           tokens: true,
           STRICT: {throws: 'strict'},

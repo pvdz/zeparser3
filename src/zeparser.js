@@ -2854,6 +2854,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (mustHaveInit) {
       THROW('Declaration destructuring must have init');
     }
+    else if (bindingType === BINDING_TYPE_CONST && (bindingOrigin !== FROM_FOR_HEADER || (curc === $$SEMI_3B || curc === $$COMMA_2C))) {
+      // only exception is a for-header where the next token is `in` or `of` instead of `=`
+      THROW('Constants must be initialized');
+    }
     else if (defaultsOption === ASSIGNMENT_IS_INIT) {
       AST_wrapClosed('declarations', 'VariableDeclarator', 'id');
       AST_set('init', null);

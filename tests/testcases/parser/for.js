@@ -289,44 +289,12 @@ module.exports = (describe, test) =>
 
       test('for-classic, only init, empty body', {
         code: 'for (const a;;);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ForStatement',
-              init: {type: 'VariableDeclaration', kind: 'const', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: null}]},
-              test: null,
-              update: null,
-              body: {type: 'EmptyStatement'},
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        throws: 'init',
       });
 
       test('for-classic, three consts, empty body', {
         code: 'for (const a,b,c;;);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ForStatement',
-              init: {
-                type: 'VariableDeclaration',
-                kind: 'const',
-                declarations: [
-                  {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: null},
-                  {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'b'}, init: null},
-                  {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'c'}, init: null},
-                ],
-              },
-              test: null,
-              update: null,
-              body: {type: 'EmptyStatement'},
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        throws: 'init',
       });
 
       describe('rest', _ => {
