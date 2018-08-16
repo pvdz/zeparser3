@@ -420,7 +420,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
   });
 
   test('async can be a label type in script mode', {
-    code: 'async: function f(){}',
+    code: 'async: foo',
     ast: {
       type: 'Program',
       body: [
@@ -428,22 +428,17 @@ module.exports = (describe, test) => describe('async keyword', function() {
           type: 'LabeledStatement',
           label: {type: 'Identifier', name: 'async'},
           body: {
-            type: 'FunctionDeclaration',
-            generator: false,
-            async: false,
-            expression: false,
-            id: {type: 'Identifier', name: 'f'},
-            params: [],
-            body: {type: 'BlockStatement', body: []},
+            type: 'ExpressionStatement',
+            expression: {type: 'Identifier', name: 'foo'},
           },
         },
       ],
     },
-    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
   });
 
   test('confirming that async with newline doesnt stop the identifier statement parsing', {
-    code: 'async\n: function f(){}',
+    code: 'async\n: foo',
     ast: {
       type: 'Program',
       body: [
@@ -451,18 +446,13 @@ module.exports = (describe, test) => describe('async keyword', function() {
           type: 'LabeledStatement',
           label: {type: 'Identifier', name: 'async'},
           body: {
-            type: 'FunctionDeclaration',
-            generator: false,
-            async: false,
-            expression: false,
-            id: {type: 'Identifier', name: 'f'},
-            params: [],
-            body: {type: 'BlockStatement', body: []},
+            type: 'ExpressionStatement',
+            expression: {type: 'Identifier', name: 'foo'},
           },
         },
       ],
     },
-    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
   });
 
   test('async can not have line terminator after it; should throw before function decl', {
@@ -1916,7 +1906,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('do statement', {
           code: 'do async \n () => x while (x);',
-          throws: 'ASI is illegal here',
+          throws: 'expecting statements', // unrelated error...
         });
 
         test('if statement', {
