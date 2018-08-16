@@ -1090,6 +1090,15 @@ module.exports = (describe, test) =>
       //  `,
       //});
     });
+
+    test.pass('allow assignment', {
+      code: 'for (foo=10;;);',
+    });
+
+    test.pass('allow let assignment', {
+      code: 'for (let=10;;);',
+      STRICT: {throws: 'let'},
+    });
   });
 
 // lhs can not use paren trick to avoid non-assignability (https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors)

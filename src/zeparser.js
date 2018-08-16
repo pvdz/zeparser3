@@ -1967,7 +1967,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           let identToken = curtok;
           ASSERT_skipDiv('let', lexerFlags); // div; if let is varname then next token can be next line statement start and if that starts with forward slash it's a div
-
           if (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
             _parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_LET, FROM_FOR_HEADER, astProp);
             assignable = IS_ASSIGNABLE; // decls are assignable
@@ -1975,7 +1974,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             THROW('Let binding missing binding names');
           } else {
             // backwards compat; treat let as an identifier
-            assignable = parseExpressionAfterPlainVarName(lexerFlags, identToken, NO_ASSIGNMENT, astProp);
+            assignable = parseExpressionAfterPlainVarName(lexerFlags, identToken, ALLOW_ASSIGNMENT, astProp);
             if (curc === $$COMMA_2C) {
               _parseExpressions(lexerFlags, astProp);
               assignable = NOT_ASSIGNABLE;
