@@ -995,6 +995,26 @@ module.exports = (describe, test) =>
       test.fail('ternary in for-loop', {
         code: 'for (true ? 0 : 0 in {}; false; ) ;',
       });
+
+      test('let edge case', {
+        code: 'for (let in x) y',
+        STRICT: {throws: 'strict mode'},
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForInStatement',
+              left: {type: 'Identifier', name: 'in'},
+              right: {type: 'Identifier', name: 'x'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
     });
 
     describe('for-of', _ => {
@@ -1074,6 +1094,10 @@ module.exports = (describe, test) =>
           ],
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test.fail('let edge case does not work in for-of', {
+        code: 'for (let of x) y',
       });
 
       // TODO: cases for yield and await as rhs

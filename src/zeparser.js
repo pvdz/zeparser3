@@ -1987,12 +1987,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = IS_ASSIGNABLE; // i think.
           break;
         case 'let':
-
           let identToken = curtok;
           ASSERT_skipDiv('let', lexerFlags); // div; if let is varname then next token can be next line statement start and if that starts with forward slash it's a div
           if (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
-            _parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_LET, FROM_FOR_HEADER, astProp);
-            assignable = IS_ASSIGNABLE; // decls are assignable
+            if (curtok.str === 'in') {
+              // edge case `for (let in x)` makes `let` to be parsed as a var name in sloppy mode
+              if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+                THROW('Let binding missing binding names as `let` cannot be a var name in strict mode');
+              }
+              AST_setIdent(astProp, curtok);
+            } else {
+              _parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_LET, FROM_FOR_HEADER, astProp);
+            }
+            assignable = IS_ASSIGNABLE; // decls are assignable (`let` as a var name should be as well)
           } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
             THROW('Let binding missing binding names');
           } else {
