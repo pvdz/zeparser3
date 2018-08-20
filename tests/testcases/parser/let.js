@@ -12947,7 +12947,7 @@ module.exports = (describe, test) =>
 
         test('as continue arg', {
           code: 'while (true) let: continue let;',
-          throws: 'Let statement missing binding names', // TODO: label specific message
+          throws: 'strict mode',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
@@ -12972,7 +12972,7 @@ module.exports = (describe, test) =>
 
         test('as sub-statement statement', {
           code: 'if (x) let: y;',
-          throws: 'Let statement missing binding names', // TODO: label specific message
+          throws: 'strict mode',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
@@ -12998,7 +12998,7 @@ module.exports = (describe, test) =>
 
         test('as nested label', {
           code: 'foo: let: y;',
-          throws: 'Let statement missing binding names', // TODO: label specific message
+          throws: 'strict mode',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
@@ -13023,7 +13023,7 @@ module.exports = (describe, test) =>
 
         test('as continue arg', {
           code: 'while (true) let: continue let;',
-          throws: 'Let statement missing binding names', // TODO: label specific message
+          throws: 'strict mode',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
@@ -13048,7 +13048,7 @@ module.exports = (describe, test) =>
 
         test('in arrow', {
           code: '_ => { let: foo; }',
-          throws: 'Let statement missing binding names', // TODO: label specific message
+          throws: 'strict mode',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
@@ -13085,7 +13085,7 @@ module.exports = (describe, test) =>
 
         test('as label and var name', {
           code: 'let: let;',
-          throws: 'Let statement missing binding names', // TODO: label specific message
+          throws: 'strict mode',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
@@ -13102,6 +13102,125 @@ module.exports = (describe, test) =>
             },
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+      });
+
+      describe('`let` is a decl and in sub statement should result in `let` variable expression', _ => {
+
+        test('base case', {
+          code: 'if (x) let;',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'IfStatement',
+                test: {type: 'Identifier', name: 'x'},
+                consequent: {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'let'},
+                },
+                alternate: null,
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('if else', {
+          code: 'if (x) ; else let',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'IfStatement',
+                test: {type: 'Identifier', name: 'x'},
+                consequent: {type: 'EmptyStatement'},
+                alternate: {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'let'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        });
+
+        test('newlined decl-looking should trigger asi', {
+          code: 'for (;;) let \n x = 1',
+          desc: 'should yield an assignment statement as a sibling node to the `for`',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForStatement',
+                init: null,
+                test: null,
+                update: null,
+                body: {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'let'},
+                },
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'x'},
+                  operator: '=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: true,
+        });
+
+        test('asi case for block', {
+          code: 'for (;;) let \n {}',
+          desc: 'should yield a block statement as a sibling node to the `for`',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForStatement',
+                init: null,
+                test: null,
+                update: null,
+                body: {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'let'},
+                },
+              },
+              {type: 'BlockStatement', body: []},
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('asi case', {
+          code: 'if (x) let \n {}',
+          desc: 'should yield a block statement as a sibling node to the `if`',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'IfStatement',
+                test: {type: 'Identifier', name: 'x'},
+                consequent: {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'let'},
+                },
+                alternate: null,
+              },
+              {type: 'BlockStatement', body: []},
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
     });

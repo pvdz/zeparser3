@@ -2196,13 +2196,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Note that in the case of `let/foo/g` the `/` is always a division, so parse div
     ASSERT_skipDiv('let', lexerFlags); // if let is varname then next token can be next line statement start
 
-    if (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
+    if (includeDeclarations === INC_DECL && (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B)) {
       if (includeDeclarations === EXC_DECL) THROW('Cannot parse a let declaration here, only excpecting statements here');
       _parseAnyBindingStatement(lexerFlags, BINDING_TYPE_LET, astProp);
     } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      THROW('Let statement missing binding names');
+      if (includeDeclarations === EXC_DECL) THROW('`let` declaration not allowed here and `let` cannot be a regular var name in strict mode');
+      THROW('Let statement missing binding names and `let` cannot be a regular var name in strict mode');
     } else {
-      // backwards compat; treat let as an identifier
+      // backwards compat; treat let as an identifier (only in sloppy mode)
+      // note that the parser also goes here for trying to parse `let` as a sub-statement since declarations are not allowed there
+      // this is important for cases like `if(x)let\n{}` which otherwise ought to throw an error but won't in sloppy mode
       _parseLetAsPlainVarNameExpressionStatement(lexerFlags, identToken, astProp);
     }
   }
@@ -2628,7 +2631,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseLetAsPlainVarNameExpressionStatement(lexerFlags, identToken, astProp) {
     ASSERT(identToken.str === 'let', 'should pass on the let token');
-    ASSERT(curtype !== $IDENT && curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B, 'should already have validated that this isnt a let binding');
     if (curtype === $EOF) {
       // TODO: assert sloppy mode
       AST_open(astProp, 'ExpressionStatement');
