@@ -2342,5 +2342,71 @@ module.exports = (describe, test) =>
         code: '[...[(x, y)]] = x;',
         throws: 'not destructible',
       });
+
+      test('destructuring an objlit with property in an array', {
+        code: '[{}.x] = y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [
+                    {
+                      type: 'MemberExpression',
+                      object: {type: 'ObjectExpression', properties: []},
+                      property: {type: 'Identifier', name: 'x'},
+                      computed: false,
+                    },
+                  ],
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('destructuring an objlit with computed property in an array', {
+        code: '[{}[x]] = y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [
+                    {
+                      type: 'MemberExpression',
+                      object: {type: 'ObjectExpression', properties: []},
+                      property: {type: 'Identifier', name: 'x'},
+                      computed: true,
+                    },
+                  ],
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test.pass('destructuring an arrlit with property in an array', {
+        code: '[[].x] = y',
+      });
+
+      test.pass('destructuring an arrlit with computed property in an array', {
+        code: '[[][x]] = y',
+      });
     });
   });

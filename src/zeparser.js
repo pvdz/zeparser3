@@ -4900,9 +4900,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - [{..}, x]
         // - [{..}.x]
         // - [{..}=x]
+        // - [{}.foo] = x
+        // - [{}[foo]] = x
         let nowDestruct = parseObjectLiteralPattern(lexerFlags, bindingType, PARSE_INIT, NOT_CLASS_METHOD, astProp);
         destructible |= nowDestruct;
-        if (curtok.str !== ',' && curtok.str !== ']') TODO; // [{}.foo]=x
         destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $$SQUARE_R_5D, astProp);
       }
       else if (curc === $$SQUARE_L_5B) {
@@ -4911,11 +4912,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - [[..], x]
         // - [[..].x]
         // - [[..]=x]
+        // - [[..].foo] = x
+        // - [[..][foo]] = x
         // note: grouped object/array literals are never assignable
         let nowDestruct = parseArrayLiteralPattern(lexerFlags, bindingType, PARSE_INIT, astProp);
         destructible |= nowDestruct;
-
-        if (curtok.str !== ',' && curtok.str !== ']') TODO; // [[].foo]=x
         destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $$SQUARE_R_5D, astProp);
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
