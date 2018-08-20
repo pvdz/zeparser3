@@ -150,6 +150,7 @@ let { default: ZeTokenizer,
   GOAL_SCRIPT,
 
   LF_CAN_NEW_TARGET,
+  LF_DO_WHILE_ASI,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
   LF_IN_CONSTRUCTOR,
@@ -1001,14 +1002,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     if (curc === $$SEMI_3B) {
       ASSERT_skipRex(';', lexerFlags);
-      // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
-    } else if (curc === $$CURLY_R_7D || curtok.nl || curtype === $EOF) {
-      tok.asi();
-      ASSERT(hasNoFlag(lexerFlags, LF_NO_ASI) || curtok.str === 'while', 'this case should have been caught sooner (ignored for do-while)');
+    } else if (hasAllFlags(lexerFlags, LF_DO_WHILE_ASI)) {
+      if (curtok.nl) tok.asi();
+      else THROW('Unable to ASI inside a do-while statement without a newline');
     } else {
-      console.log('parse error at curc', curc, String.fromCharCode(curc), curtok.str);
-      console.log('current token:', curtok);
-      THROW('Unable to ASI, token: ' + curtok);
+      ASSERT(hasNoFlag(lexerFlags, LF_NO_ASI), 'this case should have been caught sooner');
+      // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
+      if (curc === $$CURLY_R_7D || curtok.nl || curtype === $EOF) {
+        tok.asi();
+      } else {
+        console.log('parse error at curc', curc, String.fromCharCode(curc), curtok.str);
+        console.log('current token:', curtok);
+        THROW('Unable to ASI, token: ' + curtok);
+      }
     }
   }
 
@@ -1213,9 +1219,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'async':
         // we deal with async here because it can be a valid label in sloppy mode
         ASSERT_skipAny('async', lexerFlags); // TODO: async can only be followed by `function`, `(`, `:`, or an ident (arrow)
-        if (includeDeclarations === EXC_DECL) THROW('Cannot parse a async function declaration here, only expecting statements here');
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp, astProp);
-        parseAsyncStatement(lexerFlags, identToken, NOT_EXPORT, astProp);
+        parseAsyncStatement(lexerFlags, identToken, NOT_EXPORT, includeDeclarations, astProp);
         return;
 
       case 'await':
@@ -1275,7 +1280,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case 'let':
-        parseLetStatement(lexerFlags, includeDeclarations, astProp);
+        // When parsed as declaration (so directly inside a global, function, or block scope) the parsing goal is first a
+        // let declaration and in particular can not be a let variable when the next token is an identifier, array, or object.
+        // However, when parsed as a sub-statement it will always parse a `let` as variable and only in the case where it is
+        // followed by an array literal an ASI is forced ("restricted production").
+        // Additionally, in strict mode `let` can not be the name of a variable regardless parsing a declaration or statement.
+        if (includeDeclarations === INC_DECL) {
+          parseLetDeclaration(lexerFlags, astProp);
+        } else {
+          ASSERT(includeDeclarations === EXC_DECL, 'enum');
+          parseLetExpressionStatement(lexerFlags, astProp);
+        }
         return;
 
       case 'return':
@@ -1346,18 +1361,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseSemiOrAsi(lexerFlags);
   }
 
-  function parseAsyncStatement(lexerFlags, asyncIdentToken, isExport, astProp) {
+  function parseAsyncStatement(lexerFlags, asyncIdentToken, isExport, includeDeclarations, astProp) {
+    ASSERT(parseAsyncStatement.length === arguments.length, 'arg count');
     // an async statement is almost the same as an expression but it needs to know whether it was in fact
     // an expression or not so it knows how to apply the statement semi/asi.
     // at this point already verified not to be a label.
     // only the `async function ...` form does NOT require a semi as a statement. all other forms do.
-    _parseAsync(lexerFlags, IS_STATEMENT, asyncIdentToken, NOT_NEW_ARG, isExport, ALLOW_ASSIGNMENT, astProp);
+    _parseAsync(lexerFlags, IS_STATEMENT, asyncIdentToken, NOT_NEW_ARG, isExport, ALLOW_ASSIGNMENT, includeDeclarations, astProp);
   }
   function parseAsyncExpression(lexerFlags, asyncIdentToken, checkNewTarget, isExport, allowAssignment, astProp) {
     // parsed the `async` keyword (-> identToasyncIdentTokenken)
-    return _parseAsync(lexerFlags, IS_EXPRESSION, asyncIdentToken, checkNewTarget, isExport, allowAssignment, astProp);
+    return _parseAsync(lexerFlags, IS_EXPRESSION, asyncIdentToken, checkNewTarget, isExport, allowAssignment, EXC_DECL, astProp);
   }
-  function _parseAsync(lexerFlags, stmtOrExpr, asyncIdentToken, checkNewTarget, isExport, allowAssignment, astProp) {
+  function _parseAsync(lexerFlags, stmtOrExpr, asyncIdentToken, checkNewTarget, isExport, allowAssignment, includeDeclarations, astProp) {
     ASSERT(arguments.length === _parseAsync.length, 'arg count');
     // this function will parse tail but NOT parse op and rhs.
     // parsed the `async` keyword (-> asyncIdentToken)
@@ -1434,6 +1450,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // If it turns out to be a call then this function handles wrapping it in a CallExpression
       ASSERT(curc === $$PAREN_L_28, 'to be clear; this was asserted before');
 
+
+      // Note: not a func decl because of the newline and we already asserted this is not `async function ...`
       if (stmtOrExpr === IS_STATEMENT) {
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression'
@@ -1456,6 +1474,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - async foo \n ..      error
 
       if (curtok.str === 'function') {
+        if (stmtOrExpr === IS_STATEMENT && includeDeclarations === EXC_DECL) {
+          THROW('Cannot parse a async function declaration here, only expecting statements here');
+        }
         parseFunction(
           lexerFlags,
           stmtOrExpr === IS_EXPRESSION ? NOT_FUNC_DECL : IS_FUNC_DECL,
@@ -1468,7 +1489,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       // note that the function above is okay... just the arrow is not.
-      if (allowAssignment === NO_ASSIGNMENT) THROW('Was not allowed to parse an AssignmentExpression but had to parse an arrow (which is just that)');
+      if (allowAssignment === NO_ASSIGNMENT) {
+        THROW('Was not allowed to parse an AssignmentExpression but had to parse an arrow (which is considered to be one)');
+      }
 
       let argIdentToken = curtok;
       ASSERT_skipAny($IDENT, lexerFlags); // arrow or bust...
@@ -1586,7 +1609,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === _parseBlockStatement.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL | LF_NO_ASI);
+    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL | LF_NO_ASI | LF_DO_WHILE_ASI);
 
     AST_open(astProp, 'BlockStatement');
     AST_set('body', []);
@@ -1734,7 +1757,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex('do', lexerFlags);
     // if the next part does not start with `{` then it is not a block and ASI can not happen. otherwise dont care here
     // note that functions and classes DO get ASI
-    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags | LF_NO_ASI : lexerFlags) | LF_IN_ITERATION, EXC_DECL, 'body');
+    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags | LF_DO_WHILE_ASI : lexerFlags) | LF_IN_ITERATION, EXC_DECL, 'body');
     skipAnyOrDie($$W_77, 'while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
     parseSemiOrAsi(lexerFlags);
@@ -1797,7 +1820,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipRex('async', lexerFlags);
         // note: can be any expression, function or legacy. default export doesnt care as much
         if (curtok.str === 'function') {
-          parseAsyncStatement(lexerFlags, identToken, IS_EXPORT, 'declaration');
+          parseAsyncStatement(lexerFlags, identToken, IS_EXPORT, INC_DECL, 'declaration');
           needsSemi = false;
         } else {
           // TODO: can we even parse an arrow here? what about semi after an arrow?
@@ -2188,26 +2211,66 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipAny('from', lexerFlags);
   }
 
-  function parseLetStatement(lexerFlags, includeDeclarations, astProp) {
+  function parseLetDeclaration(lexerFlags, astProp) {
     let identToken = curtok;
+    ASSERT(identToken.str === 'let', 'should pass on the let token');
 
-    // next token is ident, {, or [ in most cases. It can be . and ( in exceptional
-    // cases in sloppy mode. Not sure whether there are other valid cases in es6+.
-    // Note that in the case of `let/foo/g` the `/` is always a division, so parse div
-    ASSERT_skipDiv('let', lexerFlags); // if let is varname then next token can be next line statement start
+    // next token is ident, {, or [ in most cases. In sloppy mode it can also be any valid value tail, operator, and ASI-able.
+    ASSERT_skipDiv('let', lexerFlags); // in `let/foo/g` the `/` is always a division, so parse div
 
-    if (includeDeclarations === INC_DECL && (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B)) {
-      if (includeDeclarations === EXC_DECL) THROW('Cannot parse a let declaration here, only excpecting statements here');
+    // parsing `let` as a declaration if the next token is an ident, `[`, or `{`
+    if (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
+      // let declaration
       _parseAnyBindingStatement(lexerFlags, BINDING_TYPE_LET, astProp);
     } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      if (includeDeclarations === EXC_DECL) THROW('`let` declaration not allowed here and `let` cannot be a regular var name in strict mode');
-      THROW('Let statement missing binding names and `let` cannot be a regular var name in strict mode');
+      THROW('Let declaration missing binding names and `let` cannot be a regular var name in strict mode');
     } else {
-      // backwards compat; treat let as an identifier (only in sloppy mode)
-      // note that the parser also goes here for trying to parse `let` as a sub-statement since declarations are not allowed there
-      // this is important for cases like `if(x)let\n{}` which otherwise ought to throw an error but won't in sloppy mode
+      // let expression statement
       _parseLetAsPlainVarNameExpressionStatement(lexerFlags, identToken, astProp);
     }
+  }
+  function parseLetExpressionStatement(lexerFlags, astProp) {
+    let identToken = curtok;
+    ASSERT(identToken.str === 'let', 'should pass on the let token');
+
+    // next token is ident, {, or [ in most cases. In sloppy mode it can also be any valid value tail, operator, and ASI-able.
+    ASSERT_skipDiv('let', lexerFlags); // in `let/foo/g` the `/` is always a division, so parse div
+
+    // parsing `let` as an expression
+    if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      THROW('`let` declaration not allowed here and `let` cannot be a regular var name in strict mode');
+    } else if (curc === $$SQUARE_L_5B && curtok.nl) {
+      // `let \n [` is a restricted production at the start of a statement (and only then) and ASI should occur after `let`
+      // this means `let↵[x] = y` is fine on the global level but `if(x)let↵[x];` (property access) is actually parsed
+      // as `if(x)let;[x];` and `if(x)let↵[x]; else x;` is actually an error (because `if(x)let;[x];else x;` ...)
+      AST_open(astProp, 'ExpressionStatement');
+      AST_setIdent('expression', identToken);
+      AST_close('ExpressionStatement');
+      parseSemiOrAsi(lexerFlags);
+    } else {
+      // let expression statement
+      _parseLetAsPlainVarNameExpressionStatement(lexerFlags, identToken, astProp);
+    }
+  }
+  function _parseLetAsPlainVarNameExpressionStatement(lexerFlags, identToken, astProp) {
+    ASSERT(identToken.str === 'let', 'should pass on the let token');
+    ASSERT(identToken !== curtok, 'the `let` token should have been skipped');
+    ASSERT(hasNoFlag(lexerFlags, LF_STRICT_MODE), 'sloppy mode should be asserted at call site');
+    if (curtype === $EOF) {
+      AST_open(astProp, 'ExpressionStatement');
+      AST_setIdent('expression', identToken);
+      AST_close('ExpressionStatement');
+    } else {
+      if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
+
+      AST_open(astProp, 'ExpressionStatement');
+      parseExpressionAfterPlainVarName(lexerFlags, identToken, ALLOW_ASSIGNMENT, 'expression');
+      if (curc === $$COMMA_2C) {
+        _parseExpressions(lexerFlags, 'expression');
+      }
+      AST_close('ExpressionStatement');
+    }
+    parseSemiOrAsi(lexerFlags);
   }
 
   function parseReturnStatement(lexerFlags, astProp) {
@@ -2628,25 +2691,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex(':', lexerFlags);
     parseNestedBodyPart(lexerFlags, EXC_DECL, 'body');
     AST_close('LabeledStatement');
-  }
-  function _parseLetAsPlainVarNameExpressionStatement(lexerFlags, identToken, astProp) {
-    ASSERT(identToken.str === 'let', 'should pass on the let token');
-    if (curtype === $EOF) {
-      // TODO: assert sloppy mode
-      AST_open(astProp, 'ExpressionStatement');
-      AST_setIdent('expression', identToken);
-      AST_close('ExpressionStatement');
-    } else {
-      if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
-
-      AST_open(astProp, 'ExpressionStatement');
-      parseExpressionAfterPlainVarName(lexerFlags, identToken, ALLOW_ASSIGNMENT, 'expression');
-      if (curc === $$COMMA_2C) {
-        _parseExpressions(lexerFlags, 'expression');
-      }
-      AST_close('ExpressionStatement');
-    }
-    parseSemiOrAsi(lexerFlags);
   }
 
   function parsePunctuatorStatement(lexerFlags, astProp) {
@@ -6106,6 +6150,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (hasAllFlags(lexerFlags, LF_NO_ASI)) {
       THROW('Async newline edge case requires ASI but ASI is illegal here');
+    }
+
+    if (hasAllFlags(lexerFlags, LF_DO_WHILE_ASI)) {
+      THROW('Tried to parse async arrow inside do-while with newlines in bad positions inside the header... (best guess)');
     }
 
     // I can't easily fix the AST. :(

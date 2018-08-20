@@ -1,7 +1,7 @@
 let {$ASI, $IDENT, $PUNCTUATOR} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
-  describe('let statement', _ => {
+  describe('let declaration', _ => {
     describe('binding generic', _ => {
       // for destructuring, these are the array pattern tests to check for all places where we'd want to check it:
       // let [] = x;
@@ -12111,7 +12111,7 @@ module.exports = (describe, test) =>
 
           test('prop access as expr stmt', {
             code: 'let.foo;',
-            throws: 'Let statement missing binding names',
+            throws: 'Let declaration missing binding names',
             SLOPPY_SCRIPT: {
               desc: 'in sloppy mode this is okay as it is not ambiguous with a let binding',
               ast: {
@@ -12134,7 +12134,7 @@ module.exports = (describe, test) =>
 
           test('call as expr stmt', {
             code: 'let();',
-            throws: 'Let statement missing binding names',
+            throws: 'Let declaration missing binding names',
             SLOPPY_SCRIPT: {
               desc: 'in sloppy mode this is okay as it is not ambiguous with a let binding',
               ast: {
@@ -12892,7 +12892,7 @@ module.exports = (describe, test) =>
       describe('as a label', _ => {
         test('in global', {
           code: 'let: foo;',
-          throws: 'Let statement missing binding names', // TODO: could error about label specifically...
+          throws: 'Let declaration missing binding names', // TODO: could error about label specifically...
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
@@ -12913,7 +12913,7 @@ module.exports = (describe, test) =>
 
         test('in function', {
           code: 'function f(){ let: foo; }',
-          throws: 'Let statement missing binding names', // TODO: could error about label specifically
+          throws: 'Let declaration missing binding names', // TODO: could error about label specifically
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
@@ -13127,6 +13127,69 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
 
+        test('fine when destructuring top level', {
+          code: 'let \n [x] = y',
+          desc: 'does NOT throw in STRICT',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {
+                      type: 'ArrayPattern',
+                      elements: [{type: 'Identifier', name: 'x'}],
+                    },
+                    init: {type: 'Identifier', name: 'y'},
+                  },
+                ],
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('causes separate assignment as sub statement due to ASI', {
+          code: 'if (x) let \n [x] = y',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'IfStatement',
+                test: {type: 'Identifier', name: 'x'},
+                consequent: {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'let'},
+                },
+                alternate: null,
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [{type: 'Identifier', name: 'x'}],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'y'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('causes silly if-else case due to ASI', {
+          code: 'if (x) let \n [x] = y; else x;',
+          STRICT: {throws: 'strict mode'},
+          throws: '`else`',
+        });
+
         test('if else', {
           code: 'if (x) ; else let',
           STRICT: {throws: 'strict mode'},
@@ -13201,7 +13264,7 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('asi case', {
+        test('asi case for if', {
           code: 'if (x) let \n {}',
           desc: 'should yield a block statement as a sibling node to the `if`',
           STRICT: {throws: 'strict mode'},
@@ -13221,6 +13284,18 @@ module.exports = (describe, test) =>
             ],
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (1)', {
+          code: 'do let \n [x] = 0 \n while (false);',
+        });
+
+        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (2)', {
+          code: 'do let \n [x] = 0; while (false);',
+        });
+
+        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (3)', {
+          code: 'do let \n [x]; while (false);',
         });
       });
     });

@@ -307,7 +307,7 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
     });
 
-    test('export let statement, one var', {
+    test('export let declaration, one var', {
       code: 'export let x',
       SCRIPT: {throws: 'module goal'},
       ast: {
@@ -328,7 +328,7 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $IDENT, $IDENT, $ASI],
     });
 
-    test('export let statement, two vars', {
+    test('export let declaration, two vars', {
       code: 'export let x, y',
       SCRIPT: {throws: 'module goal'},
       ast: {
@@ -352,7 +352,7 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
 
-    test('export let statement, two vars, with init', {
+    test('export let declaration, two vars, with init', {
       code: 'export let x = 10, y = 20',
       SCRIPT: {throws: 'module goal'},
       ast: {

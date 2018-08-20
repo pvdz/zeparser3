@@ -704,7 +704,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
     },
   });
 
-  test('regular async arrow let statement without newline', {
+  test('regular async arrow let declaration without newline', {
     code: 'let f = async function g(){}',
     ast: {
       type: 'Program',
@@ -1906,7 +1906,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('do statement', {
           code: 'do async \n () => x while (x);',
-          throws: 'expecting statements', // unrelated error...
+          throws: 'async',
         });
 
         test('if statement', {

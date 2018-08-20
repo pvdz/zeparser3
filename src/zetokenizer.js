@@ -219,6 +219,7 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 $flag = 0;
 const LF_NO_FLAGS = 0;
 const LF_CAN_NEW_TARGET = 1 << ++$flag; // current scope is inside at least one regular (non-arrow) function
+const LF_DO_WHILE_ASI = 1 << ++$flag; // for do-while, can only asi sub-statement if there was a newline before `while`
 const LF_FOR_REGEX = 1 << ++$flag;
 const LF_IN_ASYNC = 1 << ++$flag;
 const LF_IN_CONSTRUCTOR = 1 << ++$flag; // inside a class constructor (not a regular function) that is not static
@@ -307,6 +308,10 @@ function LF_DEBUG(flags) {
   if (flags & LF_NO_ASI) {
     flags ^= LF_NO_ASI;
     s.push('LF_NO_ASI');
+  }
+  if (flags & LF_DO_WHILE_ASI) {
+    flags ^= LF_DO_WHILE_ASI;
+    s.push('LF_DO_WHILE_ASI');
   }
   if (flags & LF_SUPER_CALL) {
     flags ^= LF_SUPER_CALL;
@@ -2788,6 +2793,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
   LF_NO_IN,
+  LF_DO_WHILE_ASI,
   LF_STRICT_MODE,
   LF_SUPER_CALL,
   LF_SUPER_PROP,

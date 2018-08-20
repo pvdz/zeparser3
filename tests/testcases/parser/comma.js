@@ -312,9 +312,8 @@ module.exports = (describe, test) =>
 
     test('in a do while body no asi', {
       code: 'do x, y while (z)',
-      throws: 'Unable to ASI',
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
       desc: 'ASI does not apply (would require a newline or curly close) so the whole thing fails.',
+      throws: 'Unable to ASI',
     });
 
     test('in a do while body semi', {
