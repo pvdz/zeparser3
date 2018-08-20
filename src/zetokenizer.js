@@ -223,16 +223,16 @@ const LF_DO_WHILE_ASI = 1 << ++$flag; // for do-while, can only asi sub-statemen
 const LF_FOR_REGEX = 1 << ++$flag;
 const LF_IN_ASYNC = 1 << ++$flag;
 const LF_IN_CONSTRUCTOR = 1 << ++$flag; // inside a class constructor (not a regular function) that is not static
-const LF_IN_ITERATION = 1 << ++$flag; // inside a loop (tells you whether break/continue is valid)
+const LF_IN_FOR_LHS = 1 << ++$flag; // inside the initial part of a for-header, prevents `in` being parsed as an operator, hint for checks when destructuring pattern as lhs
 const LF_IN_FUNC_ARGS = 1 << ++$flag; // throws for await expression
 const LF_IN_GENERATOR = 1 << ++$flag;
 const LF_IN_GLOBAL = 1 << ++$flag; // unset whenever you go into any kind of function (for return)
+const LF_IN_ITERATION = 1 << ++$flag; // inside a loop (tells you whether break/continue is valid)
 const LF_IN_SCOPE_ROOT = 1 << ++$flag; // unset when parsing any thing inside a global/func scope (right now for import/export inside statement)
 const LF_IN_SWITCH = 1 << ++$flag; // inside a switch (tells you whether break is valid)
 const LF_IN_TEMPLATE = 1 << ++$flag;
 const LF_NO_ASI = 1 << ++$flag; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
 const LF_NO_FUNC_DECL = 1 << ++$flag; // currently nesting inside at least one statement that is not a block/body
-const LF_NO_IN = 1 << ++$flag; // inside the initial part of a for-header, prevents `in` being parsed as a generic expression
 const LF_STRICT_MODE = 1 << ++$flag;
 const LF_SUPER_CALL = 1 << ++$flag; // can call `super()`
 const LF_SUPER_PROP = 1 << ++$flag; // can read `super.foo` (there are cases where you can doo this but not `super()`)
@@ -301,9 +301,9 @@ function LF_DEBUG(flags) {
     flags ^= LF_CAN_NEW_TARGET;
     s.push('LF_CAN_NEW_TARGET');
   }
-  if (flags & LF_NO_IN) {
-    flags ^= LF_NO_IN;
-    s.push('LF_NO_IN');
+  if (flags & LF_IN_FOR_LHS) {
+    flags ^= LF_IN_FOR_LHS;
+    s.push('LF_IN_FOR_LHS');
   }
   if (flags & LF_NO_ASI) {
     flags ^= LF_NO_ASI;
@@ -2782,6 +2782,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
   LF_IN_CONSTRUCTOR,
+  LF_IN_FOR_LHS,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
   LF_IN_GLOBAL,
@@ -2792,7 +2793,6 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_NO_ASI,
   LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
-  LF_NO_IN,
   LF_DO_WHILE_ASI,
   LF_STRICT_MODE,
   LF_SUPER_CALL,

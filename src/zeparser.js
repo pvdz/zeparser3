@@ -154,6 +154,7 @@ let { default: ZeTokenizer,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
   LF_IN_CONSTRUCTOR,
+  LF_IN_FOR_LHS,
   LF_IN_FUNC_ARGS,
   LF_IN_GENERATOR,
   LF_IN_GLOBAL,
@@ -164,7 +165,6 @@ let { default: ZeTokenizer,
   LF_NO_ASI,
   LF_NO_FLAGS,
   LF_NO_FUNC_DECL,
-  LF_NO_IN,
   LF_STRICT_MODE,
   LF_SUPER_CALL,
   LF_SUPER_PROP,
@@ -1984,7 +1984,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       switch (curtok.str) {
         case 'var':
-          parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_VAR, FROM_FOR_HEADER, astProp);
+          parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, BINDING_TYPE_VAR, FROM_FOR_HEADER, astProp);
           assignable = IS_ASSIGNABLE; // i think.
           break;
         case 'let':
@@ -1998,7 +1998,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               }
               AST_setIdent(astProp, curtok);
             } else {
-              _parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_LET, FROM_FOR_HEADER, astProp);
+              _parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, BINDING_TYPE_LET, FROM_FOR_HEADER, astProp);
             }
             assignable = IS_ASSIGNABLE; // decls are assignable (`let` as a var name should be as well)
           } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
@@ -2014,14 +2014,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           break;
         case 'const':
-          parseAnyVarDecls(lexerFlags | LF_NO_IN, BINDING_TYPE_CONST, FROM_FOR_HEADER, astProp);
+          parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, BINDING_TYPE_CONST, FROM_FOR_HEADER, astProp);
           assignable = IS_ASSIGNABLE; // i think.
           break;
 
         default:
           ASSERT(curtype === $IDENT, 'should be ident');
-          assignable = parseValueHeadBodyIdent(lexerFlags | LF_NO_IN, NOT_NEW_ARG, BINDING_TYPE_NONE, NO_ASSIGNMENT, astProp);
-          assignable = parseValueTail(lexerFlags | LF_NO_IN, assignable, NOT_NEW_ARG, astProp);
+          assignable = parseValueHeadBodyIdent(lexerFlags | LF_IN_FOR_LHS, NOT_NEW_ARG, BINDING_TYPE_NONE, NO_ASSIGNMENT, astProp);
+          assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
           wasNotDecl = true;
       }
     } else if (curc === $$SEMI_3B) {
@@ -2029,7 +2029,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       startedWithParen = curc === $$PAREN_L_28;
       startedWithArrObj = curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B;
-      assignable = parseValue(lexerFlags | LF_NO_IN, ALLOW_ASSIGNMENT, astProp);
+      assignable = parseValue(lexerFlags | LF_IN_FOR_LHS, ALLOW_ASSIGNMENT, astProp);
       wasNotDecl = true;
     }
 
@@ -2071,8 +2071,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('init', null);
     } else {
       AST_wrapClosed(astProp, 'ForStatement', 'init');
-      // we are still in the `init` part of a classic for. keep parsing _with_ LF_NO_IN from the current expression value.
-      if (wasNotDecl) parseExpressionFromOp(lexerFlags | LF_NO_IN, assignable, startedWithParen ? LHS_WAS_PAREN_START : LHS_NOT_PAREN_START, 'init');
+      // we are still in the `init` part of a classic for. keep parsing _with_ LF_IN_FOR_LHS from the current expression value.
+      if (wasNotDecl) parseExpressionFromOp(lexerFlags | LF_IN_FOR_LHS, assignable, startedWithParen ? LHS_WAS_PAREN_START : LHS_NOT_PAREN_START, 'init');
     }
 
     let hadComma = curc === $$COMMA_2C;
@@ -3290,7 +3290,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           ASSERT_skipRex('?', lexerFlags);
           // you can have an assignment between `?` and `:` but not after `:`
           // the `in` is allowed between as well because there can be no ambiguity
-          parseExpression(sansFlag(lexerFlags, LF_NO_IN), ALLOW_ASSIGNMENT, 'consequent');
+          parseExpression(sansFlag(lexerFlags, LF_IN_FOR_LHS), ALLOW_ASSIGNMENT, 'consequent');
           if (curc !== $$COLON_3A) {
             if (curc === $$COMMA_2C) THROW('Can not use comma inside ternary expressions');
             THROW('Unexpected character inside ternary');
@@ -3420,7 +3420,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'instanceof':
         return true;
       case 'in':
-        return hasNoFlag(lexerFlags, LF_NO_IN);
+        return hasNoFlag(lexerFlags, LF_IN_FOR_LHS);
       case '**':
         if (targetEsVersion < EXPONENTIATION_VERSION) THROW('`**` is not supported in ES' + targetEsVersion);
         return true;
@@ -4796,7 +4796,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - in all other cases this is a regular array and not destructible
 
     // we can parse `in` inside an array literal/destruct
-    let lexerFlags = sansFlag(lexerFlagsBeforeParen, LF_NO_IN);
+    let lexerFlags = sansFlag(lexerFlagsBeforeParen, LF_IN_FOR_LHS);
 
     AST_open(_astProp, 'ArrayExpression');
     ASSERT_skipRex('[', lexerFlags); // `x = ([/foo/]);` is a valid albeit little weird group
@@ -5068,7 +5068,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // parse the body of something that looks like an object literal (obj lit, class body)
 
     let lexerFlags = _lexerFlags;
-    if (hasAllFlags(lexerFlags, LF_NO_IN)) lexerFlags = lexerFlags ^ LF_NO_IN;
+    if (hasAllFlags(lexerFlags, LF_IN_FOR_LHS)) lexerFlags = lexerFlags ^ LF_IN_FOR_LHS;
     if (hasAllFlags(lexerFlags, LF_IN_TEMPLATE)) lexerFlags = lexerFlags ^ LF_IN_TEMPLATE;
 
     ASSERT_skipAny('{', lexerFlags); // TODO: next must be propname (ident, string, number, square bracket) or } or *
