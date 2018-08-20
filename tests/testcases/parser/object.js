@@ -7192,85 +7192,149 @@ module.exports = (describe, test) =>
         },
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      test('destruct assign with default when key is a string', {
+        code: 'a={"b":c=d}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'a'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Literal', value: '<TODO>', raw: '"b"'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'c'},
+                        operator: '=',
+                        right: {type: 'Identifier', name: 'd'},
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
     });
 
     describe('non-ident key with keyword value', _ => {
-      ['true', 'false', 'null', 'this', 'super'].forEach(keyword => {
+
+      ['true', 'false', 'null', 'this'].forEach(keyword => {
         describe('string key', _ => {
-          test('object', {
+
+          test.pass('object', {
             code: `({"foo": ${keyword}})`,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ObjectExpression',
-                    properties: [
-                      {
-                        type: 'Property',
-                        key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                        kind: 'init',
-                        method: false,
-                        computed: false,
-                        value: {type: 'Identifier', name: keyword},
-                        shorthand: false,
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
           });
 
-          test('destructuring', {
+          test.fail('destructuring', {
             code: `({"foo": ${keyword}} = x)`,
-            throws: true,
           });
 
-          test('arrow', {
+          test.fail('arrow', {
             code: `({"foo": ${keyword}}) => x`,
-            throws: true,
           });
         });
 
         describe('number key', _ => {
-          test('object', {
+
+          test.pass('object', {
             code: `({790: ${keyword}})`,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ObjectExpression',
-                    properties: [
-                      {
-                        type: 'Property',
-                        key: {type: 'Literal', value: '<TODO>', raw: '790'},
-                        kind: 'init',
-                        method: false,
-                        computed: false,
-                        value: {type: 'Identifier', name: keyword},
-                        shorthand: false,
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
           });
 
-          test('destructuring', {
+          test.fail('destructuring', {
             code: `({790: ${keyword}} = x)`,
-            throws: true,
           });
 
-          test('arrow', {
+          test.fail('arrow', {
             code: `({790: ${keyword}}) => x`,
-            throws: true,
+          });
+        });
+      });
+
+      describe('good supers', _ => {
+
+        // I can't find any rule that restricts the lexical position of `super()` beyond "in a proper constructor"
+        // https://tc39.github.io/ecma262/#sec-super-keyword-runtime-semantics-evaluation
+        // So it should syntactically be ok to use inside a property as long as it's inside a proper constructor
+        // The rules for a super property are even more relaxed
+        ['super()', 'super.cool', 'super[cool]'].forEach(keyword => {
+          describe('string key', _ => {
+
+            test.pass('object', {
+              code: `class x extends y {constructor(){    ({"foo": ${keyword}})    }}`,
+            });
+
+            test.fail('destructuring', {
+              code: `class x extends y {constructor(){    ({"foo": ${keyword}} = x)    }}`,
+            });
+
+            test.fail('arrow', {
+              code: `class x extends y {constructor(){    ({"foo": ${keyword}}) => x    }}`,
+            });
+          });
+
+          describe('number key', _ => {
+
+            test.pass('object', {
+              code: `class x extends y {constructor(){    ({790: ${keyword}})    }}`,
+            });
+
+            test.fail('destructuring', {
+              code: `class x extends y {constructor(){    ({790: ${keyword}} = x)    }}`,
+            });
+
+            test.fail('arrow', {
+              code: `class x extends y {constructor(){    ({790: ${keyword}}) => x    }}`,
+            });
+          });
+        });
+      });
+
+      describe('bad supers', _ => {
+
+        ['super'].forEach(keyword => {
+          describe('string key', _ => {
+
+            test.fail('object', {
+              code: `class x extends y {constructor(){    ({"foo": ${keyword}})    }}`,
+            });
+
+            test.fail('destructuring', {
+              code: `class x extends y {constructor(){    ({"foo": ${keyword}} = x)    }}`,
+            });
+
+            test.fail('arrow', {
+              code: `class x extends y {constructor(){    ({"foo": ${keyword}}) => x    }}`,
+            });
+          });
+
+          describe('number key', _ => {
+
+            test.fail('object', {
+              code: `class x extends y {constructor(){    ({790: ${keyword}})    }}`,
+            });
+
+            test.fail('destructuring', {
+              code: `class x extends y {constructor(){    ({790: ${keyword}} = x)    }}`,
+            });
+
+            test.fail('arrow', {
+              code: `class x extends y {constructor(){    ({790: ${keyword}}) => x    }}`,
+            });
           });
         });
       });

@@ -3808,8 +3808,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseSuperKeyword(lexerFlags, astProp) {
     // https://tc39.github.io/ecma262/#table-17
-    // > GetSuperBase()	Return the object that is the base for super property accesses bound in this Environment Record. The object is derived from this Environment Record's [[HomeObject]] field. The value undefined indicates that super property accesses will produce runtime errors.
-    // implies super() must be called before access to the base
+    // > GetSuperBase()	Return the object that is the base for super property accesses bound in this Environment Record.
+    // > The object is derived from this Environment Record's [[HomeObject]] field. The value undefined indicates that
+    // > super property accesses will produce runtime errors.
+    // This implies super() must be called before access to the base. But that's a _runtime_ error.
 
     // The key is in ConstructorKind. In https://tc39.github.io/ecma262/#sec-runtime-semantics-classdefinitionevaluation
     // this ConstructorKind is set to "derived" if extending. Otherwise this value is "base".
@@ -5254,7 +5256,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             AST_set('kind', 'init'); // only getters/setters get special value here
             AST_set('method', false);
             AST_set('computed', false);
-            AST_setIdent('value', nameBinding);
+            parseExpressionAfterIdent(lexerFlags, nameBinding, ALLOW_ASSIGNMENT, 'value');
             AST_set('shorthand', false);
             AST_close('Property');
           }
