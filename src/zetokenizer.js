@@ -1301,8 +1301,13 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       lastParsedIdent = prev;
       return $ERROR;
     }
-    if (peeky($$U_75)) ASSERT_skip($$U_75);
-    else TODO // why do we peek for `u`? Shouldn't it fail hard otherwise?
+    if (peeky($$U_75)) {
+      // \u0065xx
+      ASSERT_skip($$U_75);
+    } else {
+      // any other escape is not supported in identifiers
+      THROW('Only unicode escapes are supported in identifier escapes');
+    }
 
     // Note: this is a slow path. and a super edge case.
     let start = pointer;
