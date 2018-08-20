@@ -204,35 +204,8 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
 
-    test('in a for-of header part 1', {
+    test.fail('in a for-of header part 1', {
       code: 'for (a of b,c) d;',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ForOfStatement',
-            left: {type: 'Identifier', name: 'a'},
-            right: {
-              type: 'SequenceExpression',
-              expressions: [
-                {
-                  type: 'Identifier',
-                  name: 'b',
-                },
-                {
-                  type: 'Identifier',
-                  name: 'c',
-                },
-              ],
-            },
-            body: {
-              type: 'ExpressionStatement',
-              expression: {type: 'Identifier', name: 'd'},
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
 
     test('in a yield arg', {

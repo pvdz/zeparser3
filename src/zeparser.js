@@ -2060,7 +2060,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (assignable === NOT_ASSIGNABLE) THROW('Left part of for-of must be assignable');
         ASSERT_skipRex('of', lexerFlags);
         // `for (a of b=c) ..`
-        parseExpressions(lexerFlags, ALLOW_ASSIGNMENT, 'right');
+        // Note that this rhs is an AssignmentExpression, _not_ a SequenceExpression
+        parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
         return;
       }
       ASSERT(curtok.str === 'instanceof', 'the only other valid identifier here is the instanceof op'); // very unlikely case tho

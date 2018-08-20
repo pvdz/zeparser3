@@ -1390,6 +1390,10 @@ module.exports = (describe, test) =>
         tokens: true,
       });
 
+      test.fail('rhs must be AssignmentExpression', {
+        code: 'for (let x of a,b) c',
+      });
+
       // TODO: cases for yield and await as rhs
     });
 
@@ -1412,6 +1416,14 @@ module.exports = (describe, test) =>
     test.pass('allow let assignment', {
       code: 'for (let=10;;);',
       STRICT: {throws: 'let'},
+    });
+
+    test.fail('should not over accept an `of` after an `in` 1', {
+      code: 'for (x in y of) ;',
+    });
+
+    test.fail('should not over accept an `of` after an `in` 2', {
+      code: 'for (x in y of z) ;',
     });
   });
 
