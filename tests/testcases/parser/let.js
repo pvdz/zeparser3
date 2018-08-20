@@ -13152,42 +13152,16 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
 
-        test('causes separate assignment as sub statement due to ASI', {
+        test('expression statement cannot start with `let [`', {
           code: 'if (x) let \n [x] = y',
           STRICT: {throws: 'strict mode'},
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'IfStatement',
-                test: {type: 'Identifier', name: 'x'},
-                consequent: {
-                  type: 'ExpressionStatement',
-                  expression: {type: 'Identifier', name: 'let'},
-                },
-                alternate: null,
-              },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'AssignmentExpression',
-                  left: {
-                    type: 'ArrayPattern',
-                    elements: [{type: 'Identifier', name: 'x'}],
-                  },
-                  operator: '=',
-                  right: {type: 'Identifier', name: 'y'},
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+          throws: 'let ['
         });
 
-        test('causes silly if-else case due to ASI', {
+        test('silly if else case throws same error  ', {
           code: 'if (x) let \n [x] = y; else x;',
           STRICT: {throws: 'strict mode'},
-          throws: '`else`',
+          throws: 'let ['
         });
 
         test('if else', {

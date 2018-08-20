@@ -2240,13 +2240,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       THROW('`let` declaration not allowed here and `let` cannot be a regular var name in strict mode');
     } else if (curc === $$SQUARE_L_5B && curtok.nl) {
-      // `let \n [` is a restricted production at the start of a statement (and only then) and ASI should occur after `let`
-      // this means `let↵[x] = y` is fine on the global level but `if(x)let↵[x];` (property access) is actually parsed
-      // as `if(x)let;[x];` and `if(x)let↵[x]; else x;` is actually an error (because `if(x)let;[x];else x;` ...)
-      AST_open(astProp, 'ExpressionStatement');
-      AST_setIdent('expression', identToken);
-      AST_close('ExpressionStatement');
-      parseSemiOrAsi(lexerFlags);
+      // `let \n [` is a restricted production at the start of a statement (and only then)
+      // This means that `let [` can not be the start of an ExpressionStatement (which is what we'd be parsing here)
+      THROW('Must parse expression statement here but that is not allowed to start with `let [` which we just parsed');
     } else {
       // let expression statement
       _parseLetAsPlainVarNameExpressionStatement(lexerFlags, identToken, astProp);
