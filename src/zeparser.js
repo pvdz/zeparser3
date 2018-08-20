@@ -1980,6 +1980,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let wasNotDecl = false;
     let emptyInit = false;
     let startedWithParen = false;
+    let startedWithArrObj = false; // `for ([x] in y)` or `for ({x} of y)` etc. need this to turn lhs into Pattern.
     if (curtype === $IDENT) {
       switch (curtok.str) {
         case 'var':
@@ -2027,6 +2028,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       emptyInit = true;
     } else {
       startedWithParen = curc === $$PAREN_L_28;
+      startedWithArrObj = curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B;
       assignable = parseValue(lexerFlags | LF_NO_IN, ALLOW_ASSIGNMENT, astProp);
       wasNotDecl = true;
     }
@@ -2037,6 +2039,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       if (curtok.str === 'in') {
+        if (startedWithArrObj) AST_destruct(astProp);
         AST_wrapClosed(astProp, 'ForInStatement', 'left');
         if (assignable === NOT_ASSIGNABLE) {
           // certain cases were possible in legacy mode
@@ -2052,6 +2055,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
       }
       if (curtok.str === 'of') {
+        if (startedWithArrObj) AST_destruct(astProp);
         AST_wrapClosed(astProp, 'ForOfStatement', 'left');
         if (assignable === NOT_ASSIGNABLE) THROW('Left part of for-of must be assignable');
         ASSERT_skipRex('of', lexerFlags);
@@ -3506,12 +3510,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc === $$CURLY_L_7B) {
         let wasDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, astProp);
         if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) THROW('Found a struct that must be destructured but was not');
-        return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `({x})=y` is illegal
+
+        // Note: immediate tail assignments are parsed at this point and `({x})=y` is illegal
+        // Note: however, this may still be the lhs inside a `for` header so we still need to propagate it...
+        // To make sure we don't accidentally over accept we can check the next token to clamp down abuse
+        if (hasNoFlag(wasDestruct, CANT_DESTRUCT) && (curtok.str === 'in' || curtok.str === 'of')) {
+          // Only when `in` or `of` to prevent cases like `({x})=y`, though they could be handled differently as well...
+          return IS_ASSIGNABLE;
+        }
+        return NOT_ASSIGNABLE;
       }
       else if (curc === $$SQUARE_L_5B) {
         let wasDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_NONE, PARSE_INIT, astProp);
         if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) THROW('Found a struct that must be destructured but was not');
-        return NOT_ASSIGNABLE; // immediate tail assignments are parsed at this point and `([x])=y` is illegal
+        // Note: immediate tail assignments are parsed at this point and `([x])=y` is illegal
+        // Note: however, this may still be the lhs inside a `for` header so we still need to propagate it...
+        // To make sure we don't accidentally over accept we can check the next token to clamp down abuse
+        if (hasNoFlag(wasDestruct, CANT_DESTRUCT) && (curtok.str === 'in' || curtok.str === 'of')) {
+          // Only when `in` or `of` to prevent cases like `([x])=y`, though they could be handled differently as well...
+          return IS_ASSIGNABLE;
+        }
+        return NOT_ASSIGNABLE;
       }
       else if (curc === $$PAREN_L_28) {
         // do not parse arrow/group tail, regardless

@@ -1015,6 +1015,152 @@ module.exports = (describe, test) =>
         },
         tokens: true,
       });
+
+      test('arr destructuring without binding', {
+        code: 'for ([a.b] in c) d',
+        desc: '[a.b] is destructible so should be fine as lhs of any for loop. note: the lhs must be a Pattern with `in` or `of`!',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForInStatement',
+              left: {
+                type: 'ArrayPattern',
+                elements: [
+                  {
+                    type: 'MemberExpression',
+                    object: {type: 'Identifier', name: 'a'},
+                    property: {type: 'Identifier', name: 'b'},
+                    computed: false,
+                  },
+                ],
+              },
+              right: {type: 'Identifier', name: 'c'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'd'},
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
+
+      test('no arr destructuring with property', {
+        code: 'for ([a.b].foo in c) d',
+        desc: 'the lhs must not contain a Pattern',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForInStatement',
+              left: {
+                type: 'MemberExpression',
+                object: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'a'},
+                      property: {type: 'Identifier', name: 'b'},
+                      computed: false,
+                    },
+                  ],
+                },
+                property: {type: 'Identifier', name: 'foo'},
+                computed: false,
+              },
+              right: {type: 'Identifier', name: 'c'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'd'},
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
+
+
+      test('obj destructuring without binding', {
+        code: 'for ({a: b.c} in d) e',
+        desc: '{a: b.c} is destructible so should be fine as lhs of any for loop. note: the lhs must be a Pattern with `in` or `of`!',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForInStatement',
+              left: {
+                type: 'ObjectPattern',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'a'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'b'},
+                      property: {type: 'Identifier', name: 'c'},
+                      computed: false,
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+              right: {type: 'Identifier', name: 'd'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'e'},
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
+
+      test('no destructuring with property', {
+        code: 'for ({a: b.c}.foo in d) e',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForInStatement',
+              left: {
+                type: 'MemberExpression',
+                object: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'a'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'MemberExpression',
+                        object: {type: 'Identifier', name: 'b'},
+                        property: {type: 'Identifier', name: 'c'},
+                        computed: false,
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+                property: {type: 'Identifier', name: 'foo'},
+                computed: false,
+              },
+              right: {type: 'Identifier', name: 'd'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'e'},
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
     });
 
     describe('for-of', _ => {
@@ -1098,6 +1244,150 @@ module.exports = (describe, test) =>
 
       test.fail('let edge case does not work in for-of', {
         code: 'for (let of x) y',
+      });
+
+      test('destructuring without binding', {
+        code: 'for ([a.b] of c) d',
+        desc: '[a.b] is destructible so should be fine as lhs of any for loop. note: the lhs must be a Pattern with `in` or `of`!',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForOfStatement',
+              left: {
+                type: 'ArrayPattern',
+                elements: [
+                  {
+                    type: 'MemberExpression',
+                    object: {type: 'Identifier', name: 'a'},
+                    property: {type: 'Identifier', name: 'b'},
+                    computed: false,
+                  },
+                ],
+              },
+              right: {type: 'Identifier', name: 'c'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'd'},
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
+
+      test('no destructuring with property', {
+        code: 'for ([a.b].foo of c) d',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForOfStatement',
+              left: {
+                type: 'MemberExpression',
+                object: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'a'},
+                      property: {type: 'Identifier', name: 'b'},
+                      computed: false,
+                    },
+                  ],
+                },
+                property: {type: 'Identifier', name: 'foo'},
+                computed: false,
+              },
+              right: {type: 'Identifier', name: 'c'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'd'},
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
+
+      test('obj destructuring without binding', {
+        code: 'for ({a: b.c} of d) e',
+        desc: '{a: b.c} is destructible so should be fine as lhs of any for loop. note: the lhs must be a Pattern with `in` or `of`!',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForOfStatement',
+              left: {
+                type: 'ObjectPattern',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'a'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'b'},
+                      property: {type: 'Identifier', name: 'c'},
+                      computed: false,
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+              right: {type: 'Identifier', name: 'd'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'e'},
+              },
+            },
+          ],
+        },
+        tokens: true,
+      });
+
+      test('no destructuring with property', {
+        code: 'for ({a: b.c}.foo of d) e',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForOfStatement',
+              left: {
+                type: 'MemberExpression',
+                object: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'a'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'MemberExpression',
+                        object: {type: 'Identifier', name: 'b'},
+                        property: {type: 'Identifier', name: 'c'},
+                        computed: false,
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+                property: {type: 'Identifier', name: 'foo'},
+                computed: false,
+              },
+              right: {type: 'Identifier', name: 'd'},
+              body: {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'e'},
+              },
+            },
+          ],
+        },
+        tokens: true,
       });
 
       // TODO: cases for yield and await as rhs
