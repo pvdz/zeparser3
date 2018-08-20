@@ -46,8 +46,31 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 // passed: 10081, crashed: 558, failed: 431, skipped: 5363
 // passed: 10043, crashed: 494, failed: 427, skipped: 5469
 // passed: 10046, crashed: 494, failed: 424, skipped: 5469
+// passed: 10054, crashed: 485, failed: 413, skipped: 5481
+// passed: 10137, crashed: 484, failed: 324, skipped: 5488
+// passed: 10110, crashed: 471, failed: 294, skipped: 5558
+// passed: 10084, crashed: 433, failed: 282, skipped: 5634
+// passed: 5227, crashed: 433, failed: 254, skipped: 2858
+// passed: 5422, crashed: 440, failed: 52, skipped: 2858 ! statements/declaration :D
+// passed: 5329, crashed: 439, failed: 36, skipped: 2970
+// passed: 5328, crashed: 425, failed: 44, skipped: 2984
+// passed: 5329, crashed: 425, failed: 43, skipped: 2984
+// passed: 5336, crashed: 425, failed: 36, skipped: 2984
+// passed: 5332, crashed: 423, failed: 20, skipped: 3006
+// passed: 5334, crashed: 421, failed: 20, skipped: 3006
+// passed: 5692, crashed: 63, failed: 20, skipped: 3006 ! Patterns in for-header lhs
+// passed: 5702, crashed: 53, failed: 20, skipped: 3006
+// passed: 5741, crashed: 14, failed: 20, skipped: 3006
+// passed: 5747, crashed: 14, failed: 14, skipped: 3006
+// passed: 5733, crashed: 12, failed: 12, skipped: 3042
+// passed: 5734, crashed: 11, failed: 12, skipped: 3042
+// passed: 5711, crashed: 0, failed: 0, skipped: 3088 ! remaining tests were todos (really..)
+// passed: 46051, crashed: 194, failed: 1, skipped: 12733 ! no longer skip the first 22k cases
+// passed: 46047, crashed: 9, failed: 1, skipped: 13107 ! ignoring more cases which are todos
+// passed: 46046, crashed: 0, failed: 0, skipped: 13119 ! now the long road to stop skipping tests begins... 75% and counting!
+
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
-const TEST262_SKIP_TO = TEST262 ? 22000 : 0; // skips the first n tests (saves me time)
+const TEST262_SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
 
 let fs = require('fs');
@@ -466,7 +489,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         'Stack:',
         stack
           .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
-          .replace(/\n.* at (THROW|ASSERT).*?\n/s, '\nExplicit '+BOLD+'$1'+RESET+' at:\n')
+          .replace(/\n.* at (THROW|ASSERT\().*?\n/s, '\nExplicit '+BOLD+'$1'+RESET+' at:\n')
           .replace(/(zeparser.spec.js.*?)\n.*/s, '$1 (trunced remainder of trace)')
       );
     }
