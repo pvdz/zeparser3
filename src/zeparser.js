@@ -3509,12 +3509,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
         let wasDestruct = parseObjectLiteralPattern(lexerFlags, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, astProp);
-        if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) THROW('Found a struct that must be destructured but was not');
+        if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) {
+          // fail: `({x=y});`
+          // pass: `for ({x=y} in a) b;`
+          // pass: `for ({x=y} of a) b;`
+          // fail: `for ({x=y} ;;) b;`
+          if (curtok.str !== 'in' && curtok.str !== 'of') {
+            THROW('Found a struct that must be destructured but was not');
+          }
+        }
 
         // Note: immediate tail assignments are parsed at this point and `({x})=y` is illegal
         // Note: however, this may still be the lhs inside a `for` header so we still need to propagate it...
         // To make sure we don't accidentally over accept we can check the next token to clamp down abuse
-        if (hasNoFlag(wasDestruct, CANT_DESTRUCT) && (curtok.str === 'in' || curtok.str === 'of')) {
+        if (hasNoFlag(wasDestruct, CANT_DESTRUCT) && hasAllFlags(lexerFlags, LF_IN_FOR_LHS)) {
           // Only when `in` or `of` to prevent cases like `({x})=y`, though they could be handled differently as well...
           return IS_ASSIGNABLE;
         }
@@ -3522,11 +3530,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$SQUARE_L_5B) {
         let wasDestruct = parseArrayLiteralPattern(lexerFlags, BINDING_TYPE_NONE, PARSE_INIT, astProp);
-        if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) THROW('Found a struct that must be destructured but was not');
+        if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) {
+          // TODO: what cases pass through here? can probably construct one using spread/rest
+          // fail: `([???]);`
+          // pass: `for ([???] in a) b;`
+          // pass: `for ([???] of a) b;`
+          // fail: `for ([???] ;;) b;`
+          if (curtok.str !== 'in' && curtok.str !== 'of') {
+            THROW('Found a struct that must be destructured but was not');
+          }
+        }
         // Note: immediate tail assignments are parsed at this point and `([x])=y` is illegal
         // Note: however, this may still be the lhs inside a `for` header so we still need to propagate it...
         // To make sure we don't accidentally over accept we can check the next token to clamp down abuse
-        if (hasNoFlag(wasDestruct, CANT_DESTRUCT) && (curtok.str === 'in' || curtok.str === 'of')) {
+        if (hasNoFlag(wasDestruct, CANT_DESTRUCT) && hasAllFlags(lexerFlags, LF_IN_FOR_LHS)) {
           // Only when `in` or `of` to prevent cases like `([x])=y`, though they could be handled differently as well...
           return IS_ASSIGNABLE;
         }

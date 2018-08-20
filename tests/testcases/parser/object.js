@@ -708,6 +708,87 @@ module.exports = (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
+
+        test.fail('shorthand cannot have default without init', {
+          code: '({x=y})',
+        });
+
+        test('shorthand can have default without init when lhs of for-in', {
+          code: 'for ({x=y} in a) b',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForInStatement',
+                left: {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'AssignmentPattern',
+                        left: {type: 'Identifier', name: 'x'},
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                      shorthand: true,
+                    },
+                  ],
+                },
+                right: {type: 'Identifier', name: 'a'},
+                body: {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'b'},
+                },
+              },
+            ],
+          },
+          tokens: true,
+        });
+
+        test('shorthand can have default without init when lhs of for-of', {
+          code: 'for ({x=y} of a) b',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForOfStatement',
+                left: {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'AssignmentPattern',
+                        left: {type: 'Identifier', name: 'x'},
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                      shorthand: true,
+                    },
+                  ],
+                },
+                right: {type: 'Identifier', name: 'a'},
+                body: {
+                  type: 'ExpressionStatement',
+                  expression: {type: 'Identifier', name: 'b'},
+                },
+              },
+            ],
+          },
+          tokens: true,
+        });
+
+        test.fail('shorthand cannot have default without init of for-loop', {
+          code: 'for ({x=y};;);',
+          desc: 'the test is to assert this is properly acceptable with for-in and for-of but rejected with a for-loop',
+        });
       });
 
       describe('number properties', _ => {
