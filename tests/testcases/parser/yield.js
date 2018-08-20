@@ -1368,12 +1368,14 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
     });
 
-    test.fail('gen expr named yield', {
+    test.fail_strict('gen expr named yield is okay in sloppy', {
       code: 'var g = function* yield() {};',
+      desc: 'there is an extensive suite for these cases in the yield test file',
     });
 
     test.pass('gen method named yield', {
       code: '({  * yield() {}  })',
+      desc: 'there is an extensive suite for these cases in the yield test file',
     });
 
     test('yield in default of generator method inside generator decl', {

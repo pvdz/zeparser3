@@ -3391,7 +3391,7 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.fail('generator func decl can not be called yield', {
+            test.fail_strict('generator func decl can be called yield in sloppy mode', {
               code: 'function *yield() {}',
             });
 
@@ -3456,7 +3456,7 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.fail('generator func expr can be called yield', {
+            test.fail_strict('generator func expr can be called yield in sloppy', {
               code: 'let f = function *yield() {}',
             });
 
@@ -4170,7 +4170,7 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.fail('generator func decl can not be called yield', {
+            test.fail_strict('generator func decl can be called yield', {
               code: 'async function as(){ function *yield() {} }',
             });
 
@@ -4223,7 +4223,7 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.fail('generator func expr can be called yield', {
+            test.fail_strict('generator func expr can be called yield', {
               code: 'async function as(){ let f = function *yield() {} }',
             });
 
