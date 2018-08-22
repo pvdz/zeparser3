@@ -35,7 +35,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('head-const-bound-names-in-stmt') || has('function/13.1') || has('attempt-to-redeclare-let-binding-with') || has('try/early-catch') || // more scoping
             has('early-undef-break') || has('early-undef-continue') || has('labeled/continue') || has('labeled/value-await-non-module') || // TODO: implement label collection and verification
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
-            has('obj-ptrn-rest') || has('obj-rest') || // TODO: object rest/spread
             has('duplicate') || // TODO: duplicate arg bindings
             has('function-declarations/in-statement') || has('/if-decl') || has('/if-stmt-else-decl') || has('labeled/function-decl') || // TODO: func statement hell
             has('class/fields') || // TODO: class properties

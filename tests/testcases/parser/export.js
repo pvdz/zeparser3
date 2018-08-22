@@ -782,7 +782,37 @@ module.exports = (describe, test) =>
 
       test('rest obj', {
         code: 'export let {...x} = y',
-        throws: true, // TODO
+        SCRIPT: {throws: true},
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExportNamedDeclaration',
+              specifiers: [],
+              declaration: {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'RestElement',
+                          argument: {type: 'Identifier', name: 'x'},
+                        },
+                      ],
+                    },
+                    init: {type: 'Identifier', name: 'y'},
+                  },
+                ],
+              },
+              source: null,
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
       });
 
       test('ummmm no', {

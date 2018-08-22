@@ -184,6 +184,7 @@ let { default: ZeTokenizer,
 // <BODY>
 
 const VERSION_EXPONENTIATION = 7;
+const VERSION_OBJECTSPREAD = 9;
 const VERSION_WHATEVER = Infinity;
 
 const LHS_NOT_PAREN_START = false;
@@ -684,9 +685,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         node.type = 'ObjectPattern';
         let properties = node.properties;
         for (let i = 0, n = properties.length; i < n; ++i) {
-          ASSERT(properties[i].type === 'Property', 'expecting only properties and assignments here');
-          ASSERT(properties[i].value, 'each property should have a value');
-          AST__destruct(properties[i].value);
+          if (properties[i].type === 'Property') {
+            ASSERT(properties[i].value, 'each property should have a value');
+          } else {
+            ASSERT(properties[i].type === 'SpreadElement', 'expecting only properties, spreads, and assignments here');
+            ASSERT(properties[i].argument, 'each property should have a value');
+          }
+          AST__destruct(properties[i]);
         }
         break;
       case 'AssignmentExpression':
@@ -702,6 +707,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         break;
       case 'SpreadElement':
         // `([...x]);` vs `([...x]) => x`
+        // `({...x});` vs `({...x}) => x`
         node.type = 'RestElement';
 
         AST__destruct(node.argument);
@@ -5365,17 +5371,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the expression');
     }
     else if (curtok.str === '...') {
-      THROW('Object spread/rest is not ES6'); // it's ES9, hihi
-      // ({...foo
-      // Note that this can also be a spread like it is in `({foo, ...bar});`
-      // TODO: pretty sure you can do silly stuff like `({...{x, ...y}}) => y` etc (because you can do it for `([...[x, ...y]]) => y`)
-      // TODO: verify name because that would otherwise be checked later
-      // exit here, do not parse default
-      // if (hasAllFlags(destructible, CANT)) TODO,THROW('The spread operator is not allowed here unless this is an arrow (and it was already determined this cannot be the case)');
-      // destructible |= CANT_DESTRUCT;
-      // TODO
-      // ASSERT(curc !== $$IS_3D, TODO); // any destructuring should be parsed before returning
-      // return destructible;
+      if (targetEsVersion < VERSION_OBJECTSPREAD && targetEsVersion !== VERSION_WHATEVER) {
+        THROW('Object spread/rest requires the requested version to be ES9+');
+      }
+
+      // rest/spread (supported in objects since es9)
+      // unlike arrays it can appear as any element in an object
+      // note that an object spread, if the last element, CAN have a trailing comma
+      // if binding, if spread arg is not array/object/ident then it is not destructible
+      // if not binding, it is also destructible if arg is member expression
+      // - ({...x});                  (this is valid)
+      // - ({...x=y});                (spread wraps the assignment (!))
+      // - ({...x+=y});               (spread wraps the assignment (!))
+      // - ({...x+y});                (spread wraps any expression)
+      // - ({...x, y});               (spread does not need to be last)
+      // - ({...x, ...y});            (spread can appear more than once)
+      // - ({...x}) => x
+      // - ({x, ...y}) => x
+      // - ({...x.y} = z)             (ok)
+      // - ({...x.y}) => z            (bad)
+      // - ({...x.y} = z) => z        (bad)
+      // - (z = {...x.y}) => z        (ok)
+      // - (z = {...x.y} = z) => z    (ok)
+      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, $$CURLY_R_7D, bindingType, NOT_GROUP_TOPLEVEL, undefined, astProp);
+      destructible |= subDestruct;
+      ASSERT(curc !== $$COMMA_2C || hasAllFlags(subDestruct, CANT_DESTRUCT), 'if comma then cannot destruct, should be dealt with in function');
+      ASSERT(curc === $$COMMA_2C || curc === $$CURLY_R_7D, 'abstraction should parse whole rest/spread goal; ' + curtok);
     }
     else if (curc === $$SQUARE_L_5B) {
       // dynamic property (is valid in destructuring assignment! but not binding)

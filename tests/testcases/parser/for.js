@@ -368,7 +368,36 @@ module.exports = (describe, test) =>
 
         test('rest obj', {
           code: 'for (const {...x} in y){}',
-          throws: true, // TODO
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForInStatement',
+                left: {
+                  type: 'VariableDeclaration',
+                  kind: 'const',
+                  declarations: [
+                    {
+                      type: 'VariableDeclarator',
+                      id: {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'RestElement',
+                            argument: {type: 'Identifier', name: 'x'},
+                          },
+                        ],
+                      },
+                      init: null,
+                    },
+                  ],
+                },
+                right: {type: 'Identifier', name: 'y'},
+                body: {type: 'BlockStatement', body: []},
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('ummmm no', {

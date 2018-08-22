@@ -34,6 +34,11 @@ module.exports = (describe, test) =>
         ES: 7,
       });
 
+      test.pass('ES*', {
+        code: '2 ** 4',
+        ES: Infinity,
+      });
+
       test('tilde is not allowed as lhs', {
         code: '~3 ** 2;',
         desc: 'the lhs of `**` must be an assignment or exponentiation operator... there is no goal that allows this unary expression',

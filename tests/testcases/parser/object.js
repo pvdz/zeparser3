@@ -2,6 +2,7 @@ let {$IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $PUNCTUATOR, $R
 
 module.exports = (describe, test) =>
   describe('objects', _ => {
+
     describe('literals', _ => {
       test('empty object', {
         code: 'wrap({});',
@@ -7013,24 +7014,6 @@ module.exports = (describe, test) =>
         // computed property that is a comma expression
       });
 
-      describe('rest/spread', _ => {
-
-        test('need to do spread', {
-          code: '({...x})',
-          throws: true,
-        });
-
-        test('need to do destruct rest', {
-          code: '({...x} = x)',
-          throws: true,
-        });
-
-        test('need to do arrow rest', {
-          code: '({...x}) => x',
-          throws: true,
-        });
-      });
-
       test('regression regarding shorthands', {
         code: 'x = {y}',
         desc: 'this was incorrectly flagged to have to destruct but thats just not true',
@@ -7449,6 +7432,659 @@ module.exports = (describe, test) =>
             test.fail('arrow', {
               code: `class x extends y {constructor(){    ({790: ${keyword}}) => x    }}`,
             });
+          });
+        });
+      });
+    });
+
+    describe('ellipsis', _ => {
+
+      test('base case', {
+        code: 'x = {...y}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {type: 'Identifier', name: 'y'},
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test.pass('base case', {
+        code: 'x = {...y}',
+        ES: 9, // first version where this was introduced
+      });
+
+      test.fail('base case', {
+        code: 'x = {...y}',
+        ES: 8,
+      });
+
+      test.fail('base case', {
+        code: 'x = {...y}',
+        ES: 7,
+      });
+
+      test.fail('base case', {
+        code: 'x = {...y}',
+        ES: 6,
+      });
+
+      test('as second element', {
+        code: 'x = {x, ...y}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'x'},
+                      shorthand: true,
+                    },
+                    {
+                      type: 'SpreadElement',
+                      argument: {type: 'Identifier', name: 'y'},
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('as middle element', {
+        code: 'x = {a, ...y, b}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'a'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'a'},
+                      shorthand: true,
+                    },
+                    {
+                      type: 'SpreadElement',
+                      argument: {type: 'Identifier', name: 'y'},
+                    },
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'b'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'b'},
+                      shorthand: true,
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('with next element', {
+        code: 'x = {...y, b}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {type: 'Identifier', name: 'y'},
+                    },
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'b'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Identifier', name: 'b'},
+                      shorthand: true,
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can have a trailing comma', {
+        code: 'x = {...a,}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {type: 'Identifier', name: 'a'},
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('can be assignment', {
+        code: 'x = {...a=b}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'a'},
+                        operator: '=',
+                        right: {type: 'Identifier', name: 'b'},
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can be addition', {
+        code: 'x = {...a + b}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Identifier', name: 'a'},
+                        operator: '+',
+                        right: {type: 'Identifier', name: 'b'},
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('can be array', {
+        code: 'x = {...[a, b]}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'ArrayExpression',
+                        elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test('can be object', {
+        code: 'x = {...{a, b}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {
+                        type: 'ObjectExpression',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'a'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'a'},
+                            shorthand: true,
+                          },
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'b'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'b'},
+                            shorthand: true,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      describe('parened', _ => {
+
+        describe('group', _ => {
+
+          // ast tests are redundant with general tests
+
+          test.pass('object base', {
+            code: '({...a})',
+          });
+
+          test.pass('object assignment', {
+            code: '({...a=b})',
+          });
+
+          test.pass('object addition', {
+            code: '({...a+b})',
+          });
+
+          test.pass('object array', {
+            code: '({...[a, b]})',
+          });
+
+          test.pass('object object', {
+            code: '({...{a, b}})',
+          });
+
+          test('can have multiple spreads', {
+            code: 'x = {...a, ...b}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: 'x'},
+                    operator: '=',
+                    right: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {type: 'Identifier', name: 'a'},
+                        },
+                        {
+                          type: 'SpreadElement',
+                          argument: {type: 'Identifier', name: 'b'},
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+        });
+
+        describe('destruct assignment', _ => {
+
+          test('object base', {
+            code: '({...a} = x)',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'RestElement',
+                          argument: {type: 'Identifier', name: 'a'},
+                        },
+                      ],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+
+          test.fail('object assignment', {
+            code: '({...a=b} = x)',
+          });
+
+          test.fail('object addition', {
+            code: '({...a+b} = x)',
+          });
+
+          test('object array', {
+            code: '({...[a, b]} = x)',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'RestElement',
+                          argument: {
+                            type: 'ArrayPattern',
+                            elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                          },
+                        },
+                      ],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+
+          test('object object', {
+            code: '({...{a, b}} = x)',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'RestElement',
+                          argument: {
+                            type: 'ObjectPattern',
+                            properties: [
+                              {
+                                type: 'Property',
+                                key: {type: 'Identifier', name: 'a'},
+                                kind: 'init',
+                                method: false,
+                                computed: false,
+                                value: {type: 'Identifier', name: 'a'},
+                                shorthand: true,
+                              },
+                              {
+                                type: 'Property',
+                                key: {type: 'Identifier', name: 'b'},
+                                kind: 'init',
+                                method: false,
+                                computed: false,
+                                value: {type: 'Identifier', name: 'b'},
+                                shorthand: true,
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                    operator: '=',
+                    right: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+
+          test.fail('can not have two rest elements', {
+            code: '({...a, ...b} = x)',
+          });
+        });
+
+        describe('arrow', _ => {
+
+          test('object base', {
+            code: '({...a}) => x',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [
+                      {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'RestElement',
+                            argument: {type: 'Identifier', name: 'a'},
+                          },
+                        ],
+                      },
+                    ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+          });
+
+          test.fail('object assignment', {
+            code: '({...a=b}) => x',
+          });
+
+          test.fail('object addition', {
+            code: '({...a+b}) => x',
+          });
+
+          test('object array', {
+            code: '({...[a, b]}) => x',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [
+                      {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'RestElement',
+                            argument: {
+                              type: 'ArrayPattern',
+                              elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+          });
+
+          test('object object', {
+            code: '({...{a, b}}) => x',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [
+                      {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'RestElement',
+                            argument: {
+                              type: 'ObjectPattern',
+                              properties: [
+                                {
+                                  type: 'Property',
+                                  key: {type: 'Identifier', name: 'a'},
+                                  kind: 'init',
+                                  method: false,
+                                  computed: false,
+                                  value: {type: 'Identifier', name: 'a'},
+                                  shorthand: true,
+                                },
+                                {
+                                  type: 'Property',
+                                  key: {type: 'Identifier', name: 'b'},
+                                  kind: 'init',
+                                  method: false,
+                                  computed: false,
+                                  value: {type: 'Identifier', name: 'b'},
+                                  shorthand: true,
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+          });
+
+          test.fail('can not have two rest elements', {
+            code: '({...a, ...b}) => x',
           });
         });
       });

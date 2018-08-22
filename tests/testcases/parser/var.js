@@ -12325,12 +12325,35 @@ module.exports = (describe, test) =>
 
         test('rest obj', {
           code: 'var {...x} = y',
-          throws: true, // TODO
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'VariableDeclaration',
+                kind: 'var',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {
+                      type: 'ObjectPattern',
+                      properties: [
+                        {
+                          type: 'RestElement',
+                          argument: {type: 'Identifier', name: 'x'},
+                        },
+                      ],
+                    },
+                    init: {type: 'Identifier', name: 'y'},
+                  },
+                ],
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
 
-        test('ummmm no', {
+        test.fail('ummmm no', {
           code: 'var ...x = y',
-          throws: true,
         });
       });
     });
