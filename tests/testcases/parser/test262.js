@@ -37,7 +37,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
             has('duplicate') || // TODO: duplicate arg bindings
             has('function-declarations/in-statement') || has('/if-decl') || has('/if-stmt-else-decl') || has('labeled/function-decl') || // TODO: func statement hell
-            has('class/fields') || // TODO: class properties
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
             has('numeric/numeric-separator') || // TODO: numeric separators is just a proposal but should be simple to do
             has('regexp/u-invalid-quantifiable-assertion') || // TODO: regexp /u edge cases
