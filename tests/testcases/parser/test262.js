@@ -26,7 +26,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             (has('annexb') && (has('regexp') || has('escape'))) || // TODO: web compat: lots of regex/escape cruft to support
             has('__proto__-dup') || has('dup-bound-names') || has('multiple-constructor') || has('names-dup') || // TODO: enable once we check duplicate objlit keys
             has('args-trailing-comma') || has('dflt-params-trailing-') || // TODO: new feature: trailign comma in function args/call
-            has('s15.5.4.10_a2_t') || // TODO: enable
             has('break/S12.8') || has('continue/S12.7_A5_T1') || // TODO: verify labels
             has('asyncgenerator') || has('await-in-generator') || // TODO: async generators
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check

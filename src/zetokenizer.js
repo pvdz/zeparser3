@@ -2172,10 +2172,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           c = c ^ CHARCLASS_BADN; // remove the badn flag (dont use ^= because that deopts... atm; https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean )
           ASSERT(c <= 0x110000, 'c should now be valid unicode range or one above for error');
           if (c === CHARCLASS_BAD) flagState = regexSyntaxError('Bad character class body');
-          else if (flagState === ALWAYS_GOOD) flagState = GOOD_WITH_U_FLAG;
+          else if (flagState === ALWAYS_GOOD) flagState = GOOD_SANS_U_FLAG;
           else if (flagState === GOOD_SANS_U_FLAG) flagState = regexSyntaxError('Unknown reason that is only an error with u-flag while parsing a character class');
           //} else if (c === CHARCLASS_BAD_RANGE) { // check at range time
           //  console.log('got a class escape that is only bad in range')
+          ASSERT(flagState === GOOD_SANS_U_FLAG, 'either way, the flag state should now reflect badn');
         }
       } else if (c === $$CR_0D || c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
         return regexSyntaxError('Encountered newline'); // same as end of input
@@ -2369,6 +2370,20 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           // only valid with u-flag!
           return $$DASH_2D | CHARCLASS_BADN;
         }
+
+      default:
+        // IdentityEscape
+        // with u-flag: forward slash or syntax character (`^$\.*+?()[]{}|`) and these cases are already caught above
+        // without-u-flag: SourceCharacter but not UnicodeIDContinue
+        ASSERT(![$$BACKSLASH_5C, $$XOR_5E, $$$_24, $$DOT_2E, $$STAR_2A, $$PLUS_2B, $$QMARK_3F, $$PAREN_L_28, $$PAREN_R_29, $$SQUARE_L_5B, $$SQUARE_R_5D, $$CURLY_L_7B, $$CURLY_R_7D, $$OR_7C].includes(c), 'all these u-flag chars should be checked above');
+
+        // so we can already not be valid for u flag, we just need to check here whether we can be valid without u-flag
+        if (!isIdentRestChr(c)) {
+          ASSERT_skip(c);
+          return c | CHARCLASS_BADN;
+        }
+        // else return bad char class because the escape is bad
+        console.warn('Tokenizer $ERROR: the char class had an escape that would not be valid with and without u-flag');
     }
 
     // bad escapes
@@ -2674,7 +2689,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         return parseNewline();
 
       default:
-        console.warn('Tokenizer $ERROR: unexpected unicode character: ' + c + ' (' + String.fromCharCode(s) + ')');
+        console.warn('Tokenizer $ERROR: unexpected unicode character: ' + c + ' (' + String.fromCharCode(c) + ')');
         return $ERROR;
         --pointer;
         THROW('fixme, c=0x'+ c.toString(16));

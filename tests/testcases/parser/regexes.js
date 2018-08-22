@@ -3,7 +3,7 @@ let {$ASI, $IDENT, $PUNCTUATOR, $REGEX} = require('../../../src/zetokenizer');
 // Tests in this file should concern themselves with parser ambiguity, not lexer test cases. Those can
 // be found in the lexer tests and regressions that concern one token should be added there (in duplicate).
 
-module.exports = (describe, test) =>
+module.exports = (describe, test) => describe('regexes', _ => {
   describe('regular expression disambiguation', _ => {
     describe('method call on regex literal', _ => {
       test('sans flag', {
@@ -174,3 +174,22 @@ module.exports = (describe, test) =>
     //  tokens: [$IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
     //});
   });
+
+  test('weird escape in char class is okay without u flag', {
+    code: '/[\\ ]/',
+    ast: {
+      type: 'Program',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {type: 'Literal', value: '<TODO>', raw: '/[\\ ]/'},
+        },
+      ],
+    },
+    tokens: [$REGEX, $ASI],
+  });
+
+  test.fail('weird escape in char class is bad with u flag', {
+    code: '/[\\ ]/u',
+  });
+});
