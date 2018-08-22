@@ -853,7 +853,10 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       }
     }
 
-    if (bad || c !== marker) return $ERROR; // unclosed string or illegal escape
+    if (bad || c !== marker) {
+      console.warn('Tokenizer $ERROR: unclosed string or illegal escape');
+      return $ERROR;
+    }
     return tokenType;
   }
   function parseStringEscape(lexerFlags, forTemplate) {
@@ -1079,6 +1082,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       while (c === $$$_24) {
         ASSERT_skip($$$_24);
         if (eof()) {
+          console.warn('Tokenizer $ERROR: unclosed template string');
           return $ERROR;
         }
 
@@ -1102,7 +1106,8 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       }
     }
 
-    return $ERROR; // unclosed template literal
+    console.warn('Tokenizer $ERROR: unclosed template literal');
+    return $ERROR;
   }
 
   function parseLeadingZero(lexerFlags) {
@@ -1116,8 +1121,10 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (isAsciiNumber(c)) {
       skip();
       if (neof()) skipDigits();
-      // this is an "illegal" octal escape in strict mode
-      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) return $ERROR;
+      if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+        console.warn('Tokenizer $ERROR: "illegal" octal escape in strict mode');
+        return $ERROR;
+      }
       return $NUMBER_OLD;
     } else if (c === $$DOT_2E) {
       parseFromFractionDot();
@@ -1194,10 +1201,16 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     }
   }
   function parseHex() {
-    if (eof()) return $ERROR; // 0x is illegal without a digit
+    if (eof()) {
+      console.warn('Tokenizer $ERROR: 0x is illegal without a digit');
+      return $ERROR;
+    }
 
     // at least one digit is required
-    if (!isHex(peek())) return $ERROR; // 0x is illegal without a digit
+    if (!isHex(peek())) {
+      console.warn('Tokenizer $ERROR: 0x is illegal without a digit');
+      return $ERROR;
+    }
 
     while (neof() && isHex(peek())) skip();
 
@@ -1210,10 +1223,16 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     return false;
   }
   function parseOctal() {
-    if (eof()) return $ERROR; // 0o is illegal without a digit
+    if (eof()) {
+      console.warn('Tokenizer $ERROR: 0o is illegal without a digit');
+      return $ERROR;
+    }
 
     // at least one digit is required
-    if (!isOctal(peek())) return $ERROR; // 0o is illegal without a digit
+    if (!isOctal(peek())) {
+      console.warn('Tokenizer $ERROR: 0o is illegal without a digit');
+      return $ERROR;
+    }
 
     while (neof() && isOctal(peek())) skip();
 
@@ -1223,10 +1242,16 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     return ord >= $$0_30 && ord <= $$7_37;
   }
   function parseBinary() {
-    if (eof()) return $ERROR; // 0b is illegal without a digit
+    if (eof()) {
+      console.warn('Tokenizer $ERROR: 0b is illegal without a digit');
+      return $ERROR;
+    }
 
     // at least one digit is required
-    if (!isBinary(peek())) return $ERROR; // 0b is illegal without a digit
+    if (!isBinary(peek())) {
+      console.warn('Tokenizer $ERROR: 0b is illegal without a digit');
+      return $ERROR;
+    }
 
     while (neof() && isBinary(peek())) skip();
 
@@ -1299,6 +1324,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
     if (eof()) {
       lastParsedIdent = prev;
+      console.warn('Tokenizer $ERROR: encountered backslash at end of input');
       return $ERROR;
     }
     if (peeky($$U_75)) {
@@ -1317,12 +1343,14 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         data = slice(start + 1, pointer);
         if (eof()) {
           lastParsedIdent = prev;
+          console.warn('Tokenizer $ERROR: Identifier contained dynamic unicode escape that was not closed');
           return $ERROR;
         }
         if (peeky($$CURLY_R_7D)) {
           ASSERT_skip($$CURLY_R_7D);
         } else {
           lastParsedIdent = prev;
+          console.warn('Tokenizer $ERROR: Identifier contained dynamic unicode escape that was not closed');
           return $ERROR;
         }
       } else {
@@ -1345,11 +1373,13 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         return _parseIdentifierRest(ord, prev);
       } else {
         lastParsedIdent = prev;
+        console.warn('Tokenizer $ERROR: identifier escape did not yield a valid identifier character');
         return $ERROR;
       }
     }
     _parseIdentifierRest(0, prev); // keep on parsing the identifier but we will make it an error token
     lastParsedIdent = prev;
+    console.warn('Tokenizer $ERROR: only unicode escapes are supported in identifiers');
     return $ERROR;
   }
 
@@ -1434,7 +1464,10 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     while (neof()) {
       c = peekSkip();
       while (c === $$STAR_2A) {
-        if (eof()) return $ERROR;
+        if (eof()) {
+          console.warn('Tokenizer $ERROR: unclosed multi line comment, early eof after star');
+          return $ERROR;
+        }
         c = peekSkip();
         if (c === $$FWDSLASH_2F) {
           wasWhite = true;
@@ -1446,6 +1479,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         consumedNewline = true;
       }
     }
+    console.warn('Tokenizer $ERROR: unclosed multi line comment, early eof');
     return $ERROR;
   }
   function parseCommentHtmlOpen() {
@@ -1550,20 +1584,22 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       ustatusBody = regexSyntaxError('Largest back reference index exceeded the number of capturing groups');
     }
     if (lastRegexState !== NOT_A_REGEX_ERROR) {
+      console.warn('Tokenizer $ERROR: ' + lastRegexState);
       return $ERROR;
     }
     if (ustatusBody === ALWAYS_BAD) {
-      // body had bad escape
+      console.warn('Tokenizer $ERROR: regex body had bad escape');
       return $ERROR;
     }
     if (ustatusFlags === ALWAYS_BAD) {
-      // body had bad escape or flags occurred twice (should already have called THROW for this)
+      console.warn('Tokenizer $ERROR: regex body had bad escape or regex flags occurred twice (should already have called THROW for this)');
       return $ERROR;
     }
 
     if (ustatusBody === GOOD_WITH_U_FLAG) {
       // body had an escape that is only valid with an u flag
       if (ustatusFlags === GOOD_WITH_U_FLAG) return $REGEXU;
+      console.warn('Tokenizer $ERROR: regex body had an escape that is only valid with an u flag');
       regexSyntaxError('Regex had syntax that is only valid with the u-flag and flag was in fact not present');
       return $ERROR;
     }
@@ -1572,6 +1608,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       // body had an escape or char class range that is invalid with a u flag
       if (ustatusFlags !== GOOD_WITH_U_FLAG) return $REGEX;
       // in this case the body had syntax that's invalid with a u flag and the flag was present anyways
+      console.warn('Tokenizer $ERROR: regex body had an escape or char class range that is invalid with a u flag');
       regexSyntaxError('Regex had syntax that is invalid with u-flag and flag was in fact present');
       return $ERROR;
     }
@@ -2637,6 +2674,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         return parseNewline();
 
       default:
+        console.warn('Tokenizer $ERROR: unexpected unicode character: ' + c + ' (' + String.fromCharCode(s) + ')');
         return $ERROR;
         --pointer;
         THROW('fixme, c=0x'+ c.toString(16));
