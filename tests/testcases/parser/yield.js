@@ -1368,7 +1368,7 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
     });
 
-    test.fail_strict('gen expr named yield is okay in sloppy', {
+    test.fail('gen expr named yield is okay in sloppy', {
       code: 'var g = function* yield() {};',
       desc: 'there is an extensive suite for these cases in the yield test file',
     });

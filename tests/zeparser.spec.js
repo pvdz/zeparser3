@@ -68,6 +68,7 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 // passed: 46051, crashed: 194, failed: 1, skipped: 12733 ! no longer skip the first 22k cases
 // passed: 46047, crashed: 9, failed: 1, skipped: 13107 ! ignoring more cases which are todos
 // passed: 46046, crashed: 0, failed: 0, skipped: 13119 ! now the long road to stop skipping tests begins... 75% and counting!
+// passed: 46057, crashed: 0, failed: 0, skipped: 13107
 
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
 const TEST262_SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)

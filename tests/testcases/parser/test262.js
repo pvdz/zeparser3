@@ -44,7 +44,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('numeric/numeric-separator') || // TODO: numeric separators is just a proposal but should be simple to do
             has('regexp/u-invalid-quantifiable-assertion') || // TODO: regexp /u edge cases
             has('switch/S12.11_A2_T1') || // TODO: duplicate switch case
-has('generators/yield-as-generator-expression-binding-identifier') || // TODO: I guess we outlaw yield as gen expr
             has('property-escapes') // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
         };
       }

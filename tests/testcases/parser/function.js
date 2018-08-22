@@ -3456,7 +3456,7 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.fail_strict('generator func expr can be called yield in sloppy', {
+            test.fail('generator func expr can be called yield in sloppy', {
               code: 'let f = function *yield() {}',
             });
 
@@ -4223,7 +4223,7 @@ module.exports = (describe, test) =>
               },
             });
 
-            test.fail_strict('generator func expr can be called yield', {
+            test.fail('generator func expr can be called yield', {
               code: 'async function as(){ let f = function *yield() {} }',
             });
 
