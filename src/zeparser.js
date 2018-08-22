@@ -149,6 +149,7 @@ let { default: ZeTokenizer,
   GOAL_MODULE,
   GOAL_SCRIPT,
 
+  LF_CAN_FUNC_STMT,
   LF_CAN_NEW_TARGET,
   LF_DO_WHILE_ASI,
   LF_FOR_REGEX,
@@ -164,7 +165,6 @@ let { default: ZeTokenizer,
   LF_IN_TEMPLATE,
   LF_NO_ASI,
   LF_NO_FLAGS,
-  LF_NO_FUNC_DECL,
   LF_STRICT_MODE,
   LF_SUPER_CALL,
   LF_SUPER_PROP,
@@ -1028,7 +1028,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseNestedBodyPart(lexerFlags, includeDeclarations, astProp) {
     ASSERT(arguments.length === parseNestedBodyPart.length, 'arg count');
     // nested statements like that of if, while, for, try, etc
-    return parseBodyPart(sansFlag(lexerFlags | LF_NO_FUNC_DECL, LF_IN_SCOPE_ROOT), includeDeclarations, astProp);
+    return parseBodyPart(sansFlag(lexerFlags, LF_IN_SCOPE_ROOT), includeDeclarations, astProp);
   }
 
   function parseBodyPart(lexerFlags, includeDeclarations, astProp) {
@@ -1270,12 +1270,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case 'function':
-        // TODO: enforce this in an ES5 mode, the only version of the spec that disallowed this
-        // if ((lexerFlags & (LF_NO_FUNC_DECL|LF_STRICT_MODE)) === (LF_NO_FUNC_DECL|LF_STRICT_MODE)) {
-        //   THROW('Function statement is illegal in strict mode');
-        // }
+        // TODO: only ES5 explicitly disallowed function statements, we may want to look into detecting them
         // TODO: consider it a declaration in if/else and statement (requiring semi) in all other statement places
-        if (includeDeclarations === EXC_DECL) THROW('Cannot parse a function declaration here, only excpecting statements here');
+        if (includeDeclarations === EXC_DECL) {
+          // in web compat mode func statements are only allowed inside `if` and `else` statements in sloppy mode
+          if (options_webCompat === WEB_COMPAT_OFF || hasNoFlag(lexerFlags, LF_CAN_FUNC_STMT) || hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+            THROW('Cannot parse a function declaration here, only excpecting statements here');
+          }
+        }
         parseFunction(lexerFlags, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_REQUIRED, astProp);
         return;
 
@@ -1617,7 +1619,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === _parseBlockStatement.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_FUNC_DECL | LF_NO_ASI | LF_DO_WHILE_ASI);
+    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI | LF_DO_WHILE_ASI);
 
     AST_open(astProp, 'BlockStatement');
     AST_set('body', []);
@@ -2112,12 +2114,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseIfStatement(lexerFlags, astProp) {
     AST_open(astProp, 'IfStatement');
+
+    // TODO: > "It is a Syntax Error if IsLabelledFunction(Statement) is true."
+    // TODO: > "It is only necessary to apply this rule if the extension specified in B.3.2 is implemented."
+
+    // TODO: > "Each else for which the choice of associated if is ambiguous shall be associated with the
+    // TODO:    nearest possible if that would otherwise have no corresponding else."
+
     ASSERT_skipAny('if', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
-    parseNestedBodyPart(lexerFlags, EXC_DECL, 'consequent');
+    parseNestedBodyPart(lexerFlags | LF_CAN_FUNC_STMT, EXC_DECL, 'consequent');
     if (curtype === $IDENT && curtok.str === 'else') {
       ASSERT_skipRex('else', lexerFlags);
-      parseNestedBodyPart(lexerFlags, EXC_DECL, 'alternate');
+      parseNestedBodyPart(lexerFlags | LF_CAN_FUNC_STMT, EXC_DECL, 'alternate');
     } else {
       AST_set('alternate', null);
     }
@@ -2475,12 +2484,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         break;
 
       case 'function':
-        ASSERT_skipAny('function', lexerFlags); // TODO: next token is ident or paren
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        assignable = parseFunctionExpression(lexerFlags, NOT_ASYNC, astProp);
-        break;
+        ASSERT(false, 'function ident is already checked before this func');
+        throw new Error('fail');
 
       case 'new':
         ASSERT_skipRex('new', lexerFlags); // not very likely
@@ -2708,7 +2713,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'LabeledStatement');
     AST_setIdent('label', identToken);
     ASSERT_skipRex(':', lexerFlags);
-    parseNestedBodyPart(lexerFlags, EXC_DECL, 'body');
+    parseNestedBodyPart(lexerFlags | LF_CAN_FUNC_STMT, EXC_DECL, 'body');
     AST_close('LabeledStatement');
   }
 

@@ -218,6 +218,7 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 
 $flag = 0;
 const LF_NO_FLAGS = 0;
+const LF_CAN_FUNC_STMT = 1 << ++$flag; // currently nesting inside at least one statement that is not a block/body
 const LF_CAN_NEW_TARGET = 1 << ++$flag; // current scope is inside at least one regular (non-arrow) function
 const LF_DO_WHILE_ASI = 1 << ++$flag; // for do-while, can only asi sub-statement if there was a newline before `while`
 const LF_FOR_REGEX = 1 << ++$flag;
@@ -232,7 +233,6 @@ const LF_IN_SCOPE_ROOT = 1 << ++$flag; // unset when parsing any thing inside a 
 const LF_IN_SWITCH = 1 << ++$flag; // inside a switch (tells you whether break is valid)
 const LF_IN_TEMPLATE = 1 << ++$flag;
 const LF_NO_ASI = 1 << ++$flag; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
-const LF_NO_FUNC_DECL = 1 << ++$flag; // currently nesting inside at least one statement that is not a block/body
 const LF_STRICT_MODE = 1 << ++$flag;
 const LF_SUPER_CALL = 1 << ++$flag; // can call `super()`
 const LF_SUPER_PROP = 1 << ++$flag; // can read `super.foo` (there are cases where you can doo this but not `super()`)
@@ -277,9 +277,9 @@ function LF_DEBUG(flags) {
     flags ^= LF_IN_FUNC_ARGS;
     s.push('LF_IN_FUNC_ARGS');
   }
-  if (flags & LF_NO_FUNC_DECL) {
-    flags ^= LF_NO_FUNC_DECL;
-    s.push('LF_NO_FUNC_DECL');
+  if (flags & LF_CAN_FUNC_STMT) {
+    flags ^= LF_CAN_FUNC_STMT;
+    s.push('LF_CAN_FUNC_STMT');
   }
   if (flags & LF_IN_SCOPE_ROOT) {
     flags ^= LF_IN_SCOPE_ROOT;
@@ -2836,6 +2836,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   GOAL_MODULE,
   GOAL_SCRIPT,
 
+  LF_CAN_FUNC_STMT,
   LF_CAN_NEW_TARGET,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
@@ -2850,7 +2851,6 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_IN_TEMPLATE,
   LF_NO_ASI,
   LF_NO_FLAGS,
-  LF_NO_FUNC_DECL,
   LF_DO_WHILE_ASI,
   LF_STRICT_MODE,
   LF_SUPER_CALL,

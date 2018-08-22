@@ -5639,6 +5639,45 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    describe('func statements', _ => {
+
+      test('base if', {
+        code: 'if (x) function f(){}',
+        WEB: {
+          ast: true,
+          tokens: true,
+        },
+        STRICT: {throws: true},
+      });
+
+      test.fail('`if` always bad without web compat', {
+        code: 'if (x) function f(){}',
+      });
+
+      test('base else', {
+        code: 'if (x) ; else function f(){}',
+        WEB: {
+          ast: true,
+          tokens: true,
+        },
+        STRICT: {throws: true},
+      });
+
+      test.fail('`else` always bad without web compat', {
+        code: 'if (x) ; else function f(){}',
+      });
+
+      test('`while` always bad with web compat', {
+        code: 'while (true) function f(){}',
+        WEB: {throws: true},
+        STRICT: {throws: true},
+      });
+
+      test.fail('`while` always bad without web compat', {
+        code: 'while (true) function f(){}',
+      });
+    });
   });
 
 // TODO: mirror tests for all functions (regular, expr, arrow, objlit method, class method)
