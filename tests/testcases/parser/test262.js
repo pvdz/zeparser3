@@ -26,7 +26,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
             (has('annexb') && (has('regexp') || has('escape'))) || // TODO: web compat: lots of regex/escape cruft to support
             has('__proto__-dup') || has('dup-bound-names') || has('multiple-constructor') || has('names-dup') || // TODO: enable once we check duplicate objlit keys
             has('args-trailing-comma') || has('dflt-params-trailing-') || // TODO: new feature: trailign comma in function args/call
-            has('break/S12.8') || has('continue/S12.7_A5_T1') || // TODO: verify labels
+            has('break/S12.8') || has('continue/S12.7_A5') || has('for/S12.7_A5') || has('for/S12.6.3_A1') || has('switch/S12.7_A5') || // TODO: verify labels
             has('asyncgenerator') || has('await-in-generator') || // TODO: async generators
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
             has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
@@ -86,7 +86,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
           function has(s) { return testFileName.toLowerCase().includes(s.toLowerCase()); }
 
           if (obj.skip
-            || has('break/S12') || has('continue/S12') || has('for/S12') || has('switch/S12') // wtf, this should be picked up above but is not ignored :/
           ) {
             testObj.SKIP = true;
           } else {
