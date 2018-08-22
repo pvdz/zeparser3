@@ -183,7 +183,8 @@ let { default: ZeTokenizer,
 
 // <BODY>
 
-const EXPONENTIATION_VERSION = 7;
+const VERSION_EXPONENTIATION = 7;
+const VERSION_WHATEVER = Infinity;
 
 const LHS_NOT_PAREN_START = false;
 const LHS_WAS_PAREN_START = true;
@@ -295,12 +296,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     tokenStorage: options_tokenStorage = [],
     getTokenizer,
     allowGlobalReturn = false, // you may need this to parse arbitrary code or eval code for example
-    targetEsVersion = Infinity, // 6, 7, 8, 9, Infinity
+    targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, Infinity
   } = options;
 
   let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
 
-  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === Infinity, 'version should be 6 7 8 9 or infin');
+  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 or infin');
 
   if (getTokenizer) getTokenizer(tok);
 
@@ -3427,7 +3428,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'in':
         return hasNoFlag(lexerFlags, LF_IN_FOR_LHS);
       case '**':
-        if (targetEsVersion < EXPONENTIATION_VERSION) THROW('`**` is not supported in ES' + targetEsVersion);
+        if (targetEsVersion < VERSION_EXPONENTIATION && targetEsVersion !== VERSION_WHATEVER) {
+          THROW('`**` is not supported in ES' + targetEsVersion);
+        }
         return true;
     }
     return false;
@@ -6277,4 +6280,7 @@ require['__./zeparser'] = module.exports = { default: ZeParser,
 
   GOAL_MODULE,
   GOAL_SCRIPT,
+
+  VERSION_EXPONENTIATION,
+  VERSION_WHATEVER,
 };
