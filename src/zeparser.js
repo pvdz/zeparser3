@@ -5536,19 +5536,31 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
       if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
+
+      // property shorthand; `{ident}=x` is valid, x={y} is also valid
+      // - {a}
+      // - {a, ...}
+      // - {true}       illegal
+      // - {eval}       ok, it is not a "reserved word"
+
       // https://tc39.github.io/ecma262/#prod-ObjectLiteral
       // https://tc39.github.io/ecma262/#prod-PropertyDefinitionList
       // https://tc39.github.io/ecma262/#prod-PropertyDefinition
       // https://tc39.github.io/ecma262/#prod-IdentifierReference
       // https://tc39.github.io/ecma262/#prod-Identifier
       // Identifier : IdentifierName but not ReservedWord
-
-      // property shorthand; `{ident}=x` is valid, x={y} is also valid
-      // - {a}
-      // - {a, ...}
-      // - {true}       illegal
-
-      bindingIdentCheck(identToken, bindingType, lexerFlags);
+      if (identToken.str === 'eval' || identToken.str === 'arguments') {
+        // ({eval});         // ok
+        // ({eval} = x);     // bad in strict mode
+        // {{eval}) => x;    // bad in strict mode
+        if (hasAnyFlag(lexerFlags, LF_STRICT_MODE)) {
+          destructible |= CANT_DESTRUCT;
+        }
+      } else {
+        // must throw for reserved words but binding check also checks for `eval`
+        // and `arguments` which are not reserved and which would be allowed here
+        bindingIdentCheck(identToken, bindingType, lexerFlags);
+      }
 
       AST_open(astProp, 'Property');
       AST_setIdent('key', identToken);

@@ -5177,7 +5177,7 @@ module.exports = (describe, test) =>
         'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
         'false', 'enum',
       ].forEach(keyword => {
-        test.fail('cannot use as shirthand objlit ['+keyword+']', {
+        test.fail('cannot use as shorthand objlit ['+keyword+']', {
           code: '({'+keyword+'});',
         });
 
@@ -5195,10 +5195,10 @@ module.exports = (describe, test) =>
       });
 
       [
-        'eval', 'arguments', 'implements', 'package', 'protected', 'interface',
+        'implements', 'package', 'protected', 'interface',
         'private', 'public', 'await', 'yield', 'static', 'let',
       ].forEach(keyword => {
-        test.fail_strict('cannot use as shirthand objlit ['+keyword+']', {
+        test.fail_strict('cannot use as shorthand objlit ['+keyword+']', {
           code: '({'+keyword+'});',
         });
 
@@ -5220,7 +5220,7 @@ module.exports = (describe, test) =>
       [
         'await',
       ].forEach(keyword => {
-        test.pass('cannot use as shirthand objlit ['+keyword+']', {
+        test.pass('cannot use as shorthand objlit ['+keyword+']', {
           code: '({'+keyword+'});',
           MODULE: {throws: true},
         });
@@ -5241,9 +5241,36 @@ module.exports = (describe, test) =>
         });
       });
 
+      [
+        'eval', 'arguments',
+      ].forEach(keyword => {
+        test.pass('cannot use as shorthand objlit ['+keyword+']', {
+          code: '({'+keyword+'});',
+        });
+
+        test.fail_strict('cannot use as assignment pattern ['+keyword+']', {
+          code: '({'+keyword+'} = x);',
+        });
+
+        test.fail_strict('cannot use as arrow header ['+keyword+']', {
+          code: '({'+keyword+'}) => x;',
+        });
+
+        test.fail_strict('cannot use as binding destruct ['+keyword+']', {
+          code: 'const {'+keyword+'} = x;',
+        });
+      });
 
       test.fail('shorthands can NOT be keyword', {
         code: 'let o = {true, false, super, this, null};',
+      });
+
+      test.pass('eval as shorthand keys', {
+        code: 'x = {eval}',
+      });
+
+      test.pass('arguments as shorthand keys', {
+        code: 'x = {arguments}',
       });
     });
 
@@ -5691,7 +5718,7 @@ module.exports = (describe, test) =>
             },
           });
 
-          ['eval', 'arguments', 'static', 'implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield'].forEach(keyword => {
+          ['static', 'implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield'].forEach(keyword => {
             test('strict-mode only keyword=' + keyword, {
               code: '({'+keyword+'}) => null',
               throws: true,
@@ -5730,6 +5757,12 @@ module.exports = (describe, test) =>
                 },
                 tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
               },
+            });
+          });
+
+          ['eval', 'arguments'].forEach(keyword => {
+            test.fail_strict('eval/arguments =' + keyword, {
+              code: '({'+keyword+'}) => null',
             });
           });
         });
