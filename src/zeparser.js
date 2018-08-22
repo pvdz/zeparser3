@@ -1634,11 +1634,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseBreakStatement(lexerFlags, astProp) {
     AST_open(astProp, 'BreakStatement');
-    // break is only valid inside an iteration or switch statement, fenced by functions
-    if (hasNoFlag(lexerFlags, LF_IN_ITERATION | LF_IN_SWITCH)) THROW('Can only `break` inside a `switch` or loop');
     ASSERT_skipRex('break', lexerFlags);
     // a break may be followed by another identifier which must then be a valid label.
     // otherwise it's just a break to the nearest breakable (most likely).
+
+    // break without label is only valid inside an iteration or switch statement, fenced by functions
+    // break with label is only valid if the label exists in the current statement tree
 
     // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
     if (curtype === $IDENT && !(curtok.nl || curtype === $EOF || curtok.value === ';')) {
@@ -1648,6 +1649,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex($IDENT, lexerFlags);
     } else {
       AST_set('label', null);
+
+      if (hasNoFlag(lexerFlags, LF_IN_ITERATION | LF_IN_SWITCH)) THROW('Can only `break` inside a `switch` or loop');
     }
 
     parseSemiOrAsi(lexerFlags);

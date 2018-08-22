@@ -405,12 +405,32 @@ module.exports = (describe, test) =>
       code: 'break',
     });
 
-    test.fail('break at eof (with label, with semi)', {
+    test('break at eof (with label, with semi)', {
       code: 'break foo;',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'BreakStatement',
+            label: {type: 'Identifier', name: 'foo'},
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR],
     });
 
-    test.fail('break at eof (with label, without semi)', {
+    test('break at eof (with label, without semi)', {
       code: 'break foo',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'BreakStatement',
+            label: {type: 'Identifier', name: 'foo'},
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $ASI],
     });
 
     test.fail('double break', {
@@ -447,12 +467,37 @@ module.exports = (describe, test) =>
             code: 'if (x) break',
           });
 
-          test.fail('labeled', {
+          test('labeled', {
             code: 'break y',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'BreakStatement',
+                  label: {type: 'Identifier', name: 'y'},
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $ASI],
           });
 
-          test.fail('labeled nested', {
+          test('labeled nested', {
             code: 'if (x) break y',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'IfStatement',
+                  test: {type: 'Identifier', name: 'x'},
+                  consequent: {
+                    type: 'BreakStatement',
+                    label: {type: 'Identifier', name: 'y'},
+                  },
+                  alternate: null,
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
           });
         });
 
@@ -470,12 +515,63 @@ module.exports = (describe, test) =>
             code: 'function f(){    if (x) break   }',
           });
 
-          test.fail('labeled', {
+          test('labeled', {
             code: 'function f(){    break y   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: {type: 'Identifier', name: 'f'},
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'BreakStatement',
+                        label: {type: 'Identifier', name: 'y'},
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR],
           });
 
-          test.fail('labeled nested', {
+          test('labeled nested', {
             code: 'function f(){    if (x) break y   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  id: {type: 'Identifier', name: 'f'},
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'IfStatement',
+                        test: {type: 'Identifier', name: 'x'},
+                        consequent: {
+                          type: 'BreakStatement',
+                          label: {type: 'Identifier', name: 'y'},
+                        },
+                        alternate: null,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR],
           });
         });
 
@@ -497,12 +593,69 @@ module.exports = (describe, test) =>
             code: '() => {    if (x) break   }',
           });
 
-          test.fail('labeled', {
+          test('labeled', {
             code: '() => {    break y   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {
+                      type: 'BlockStatement',
+                      body: [
+                        {
+                          type: 'BreakStatement',
+                          label: {type: 'Identifier', name: 'y'},
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR, $ASI],
           });
 
-          test.fail('labeled nested', {
+          test('labeled nested', {
             code: '() => {    if (x) break y   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {
+                      type: 'BlockStatement',
+                      body: [
+                        {
+                          type: 'IfStatement',
+                          test: {type: 'Identifier', name: 'x'},
+                          consequent: {
+                            type: 'BreakStatement',
+                            label: {type: 'Identifier', name: 'y'},
+                          },
+                          alternate: null,
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR, $ASI],
           });
         });
       });
