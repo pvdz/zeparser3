@@ -2228,6 +2228,140 @@ module.exports = (describe, test) => describe('parens', _ => {
       code: '(a, b) = c',
       throws: 'not assign',
     });
+
+    describe('trailing comma without arrow', _ => {
+
+      describe('non-assign', _ => {
+
+        // trailing comma in just a group is always an error
+        [undefined, 6, 7, 8, 9, Infinity].forEach(ES => {
+          test.fail('must have args to trail', {
+            code: '(,)',
+            ES,
+          });
+
+          test.fail('just commas is error', {
+            code: '(,,)',
+            ES,
+          });
+
+          test.fail('one arg', {
+            code: '(a,)',
+            ES,
+          });
+
+          test.fail('two args', {
+            code: '(a,b,)',
+            ES,
+          });
+
+          test.fail('cannot elide', {
+            code: '(a,,)',
+            ES,
+          });
+
+          test.fail('after default', {
+            code: '(a = b,)',
+            ES,
+          });
+
+          test.fail('not allowed after rest', {
+            code: '(...a,)',
+            ES,
+          });
+
+          test.fail('after array destruct', {
+            code: '([x],)',
+            ES,
+          });
+
+          test.fail('after object destruct', {
+            code: '({a},)',
+            ES,
+          });
+
+          test.fail('rest cant even have an default', {
+            code: '(...a = x,)',
+            ES,
+          });
+
+          test.fail('after array destruct with default', {
+            code: '([x] = y,)',
+            ES,
+          });
+
+          test.fail('after object destruct with default', {
+            code: '({a} = b,)',
+            ES,
+          });
+        });
+      });
+
+      describe('assigned', _ => {
+
+        [undefined, 6, 7, 8, 9, Infinity].forEach(ES => {
+          test.fail('must have args to trail', {
+            code: '(,) = x',
+            ES,
+          });
+
+          test.fail('just commas is error', {
+            code: '(,,) = x',
+            ES,
+          });
+
+          test.fail('one arg', {
+            code: '(a,) = x',
+            ES,
+          });
+
+          test.fail('two args', {
+            code: '(a,b,) = x',
+            ES,
+          });
+
+          test.fail('cannot elide', {
+            code: '(a,,) = x',
+            ES,
+          });
+
+          test.fail('after default', {
+            code: '(a = b,) = x',
+            ES,
+          });
+
+          test.fail('not allowed after rest', {
+            code: '(...a,) = x',
+            ES,
+          });
+
+          test.fail('after array destruct', {
+            code: '([x],) = x',
+            ES,
+          });
+
+          test.fail('after object destruct', {
+            code: '({a},) = x',
+            ES,
+          });
+
+          test.fail('rest cant even have an default', {
+            code: '(...a = x,) = x',
+            ES,
+          });
+
+          test.fail('after array destruct with default', {
+            code: '([x] = y,) = x',
+            ES,
+          });
+
+          test.fail('after object destruct with default', {
+            code: '({a} = b,) = x',
+            ES,
+          });
+        });
+      });
+    });
   });
 
   describe('arrow', _ => {
@@ -3691,6 +3825,318 @@ module.exports = (describe, test) => describe('parens', _ => {
       });
     });
 
+    describe('trailing comma', _ => {
+
+      describe('enabled', _ => {
+
+        [undefined, 8, 9, Infinity].forEach(ES => {
+          test.fail('must have args to trail', {
+            code: '(,) => {}',
+            ES,
+          });
+
+          test.fail('just commas is error', {
+            code: '(,,) => {}',
+            ES,
+          });
+
+          test('one arg', {
+            code: '(a,) => {}',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'a'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('two args', {
+            code: '(a,b,) => {}',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test.fail('cannot elide', {
+            code: '(a,,) => {}',
+            ES,
+          });
+
+          test('after default', {
+            code: '(a = b,) => {}',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {type: 'Identifier', name: 'a'},
+                        right: {type: 'Identifier', name: 'b'},
+                      },
+                    ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test.fail('not allowed after rest', {
+            code: '(...a,) => {}',
+            ES,
+          });
+
+          test('after array destruct', {
+            code: '([x],) => {}',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [
+                      {
+                        type: 'ArrayPattern',
+                        elements: [{type: 'Identifier', name: 'x'}],
+                      },
+                    ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('after object destruct', {
+            code: '({a},) => {}',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [
+                      {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'a'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'a'},
+                            shorthand: true,
+                          },
+                        ],
+                      },
+                    ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test.fail('rest cant even have an default', {
+            code: '(...a = x,) => {}',
+            ES,
+          });
+
+          test('after array destruct with default', {
+            code: '([x] = y,) => {}',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'ArrayPattern',
+                          elements: [{type: 'Identifier', name: 'x'}],
+                        },
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                    ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('after object destruct with default', {
+            code: '({a} = b,) => {}',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'ObjectPattern',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'a'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'a'},
+                              shorthand: true,
+                            },
+                          ],
+                        },
+                        right: {type: 'Identifier', name: 'b'},
+                      },
+                    ],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+        });
+      });
+
+      describe('disabled', _ => {
+
+        [6, 7].forEach(ES => {
+          test.fail('must have args to trail', {
+            code: '(,) => {}',
+            ES,
+          });
+
+          test.fail('just commas is error', {
+            code: '(,,) => {}',
+            ES,
+          });
+
+          test.fail('one arg', {
+            code: '(a,) => {}',
+            ES,
+          });
+
+          test.fail('two args', {
+            code: '(a,b,) => {}',
+            ES,
+          });
+
+          test.fail('cannot elide', {
+            code: '(a,,) => {}',
+            ES,
+          });
+
+          test.fail('after default', {
+            code: '(a = b,) => {}',
+            ES,
+          });
+
+          test.fail('not allowed after rest', {
+            code: '(...a,) => {}',
+            ES,
+          });
+
+          test.fail('after array destruct', {
+            code: '([x],) => {}',
+            ES,
+          });
+
+          test.fail('after object destruct', {
+            code: '({a},) => {}',
+            ES,
+          });
+
+          test.fail('rest cant even have an default', {
+            code: '(...a = x,) => {}',
+            ES,
+          });
+
+          test.fail('after array destruct with default', {
+            code: '([x] = y,) => {}',
+            ES,
+          });
+
+          test.fail('after object destruct with default', {
+            code: '({a} = b,) => {}',
+            ES,
+          });
+        });
+      });
+    });
 
     // TODO
     // test('arrow with block cannot be lhs of binary expression', {

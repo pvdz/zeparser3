@@ -176,87 +176,107 @@ module.exports = (describe, test) =>
     });
 
     describe('trailing comma', _ => {
+
       describe('enabled', _ => {
-        test('not on no args', {
-          code: 'foo(,);',
-          options: {trailingArgComma: true}, // default
-          throws: 'Expected to parse a value',
-          tokens: [],
-        });
 
-        test('one arg', {
-          code: 'foo(x,);',
-          options: {trailingArgComma: true}, // default
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'foo'},
-                  arguments: [{type: 'Identifier', name: 'x'}],
+        [undefined, 8, 9, Infinity].forEach(ES => {
+
+          test('not on no args', {
+            code: 'foo(,);',
+            ES,
+            throws: 'Expected to parse a value',
+          });
+
+          test('not just commas', {
+            code: 'foo(,,);',
+            ES,
+            throws: 'Expected to parse a value',
+          });
+
+          test('one arg', {
+            code: 'foo(x,);',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'CallExpression',
+                    callee: {type: 'Identifier', name: 'foo'},
+                    arguments: [{type: 'Identifier', name: 'x'}],
+                  },
                 },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-        });
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
 
-        test('two args', {
-          code: 'foo(x,y,);',
-          options: {trailingArgComma: true}, // default
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'CallExpression',
-                  callee: {type: 'Identifier', name: 'foo'},
-                  arguments: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+          test('two args', {
+            code: 'foo(x,y,);',
+            ES,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'CallExpression',
+                    callee: {type: 'Identifier', name: 'foo'},
+                    arguments: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                  },
                 },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-        });
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
 
-        test('cannot elide', {
-          code: 'foo(a,,);',
-          options: {trailingArgComma: true}, // default
-          throws: 'Expected to parse a value',
-          tokens: [],
+          test('cannot elide', {
+            code: 'foo(a,,);',
+            ES,
+            throws: 'Expected to parse a value',
+          });
+
+          test.pass('can after spread', {
+            code: 'foo(...a,);',
+            ES,
+          });
         });
       });
 
       describe('disabled', _ => {
-        test('not on no args', {
-          code: 'foo(,);',
-          options: {trailingArgComma: false},
-          throws: 'Expected to parse a value',
-          tokens: [],
-        });
 
-        test('one arg', {
-          code: 'foo(x,);',
-          options: {trailingArgComma: false},
-          throws: 'Option to parse trailing call argument comma',
-          tokens: [],
-        });
+        [6, 7].forEach(ES => {
 
-        test('two args', {
-          code: 'foo(x,y,);',
-          options: {trailingArgComma: false},
-          throws: 'Option to parse trailing call argument comma',
-          tokens: [],
-        });
+          test.fail('not on no args', {
+            code: 'foo(,);',
+            ES,
+          });
 
-        test('cannot elide', {
-          code: 'foo(a,,);',
-          options: {trailingArgComma: false},
-          throws: 'Expected to parse a value',
-          tokens: [],
+          test.fail('not just commas', {
+            code: 'foo(,,);',
+            ES,
+          });
+
+          test.fail('one arg', {
+            code: 'foo(x,);',
+            ES,
+          });
+
+          test.fail('two args', {
+            code: 'foo(x,y,);',
+            ES,
+          });
+
+          test.fail('cannot elide', {
+            code: 'foo(a,,);',
+            ES,
+          });
+
+          test.fail('can after spread', {
+            code: 'foo(...a,);',
+            ES,
+          });
         });
       });
     });

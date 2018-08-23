@@ -184,6 +184,7 @@ let { default: ZeTokenizer,
 // <BODY>
 
 const VERSION_EXPONENTIATION = 7;
+const VERSION_TRAILING_FUNC_COMMAS = 8;
 const VERSION_OBJECTSPREAD = 9;
 const VERSION_WHATEVER = Infinity;
 
@@ -292,7 +293,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let {
     webCompat: options_webCompat = WEB_COMPAT_ON,
     strictMode: options_strictMode = false,
-    trailingArgComma: options_trailingArgComma = true, // :love: , es8+
     astRoot: options_astRoot = null,
     tokenStorage: options_tokenStorage = [],
     getTokenizer,
@@ -303,6 +303,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
 
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 or infin');
+
+  let allowTrailingFunctionComma = targetEsVersion >= VERSION_TRAILING_FUNC_COMMAS || targetEsVersion === VERSION_WHATEVER;
 
   if (getTokenizer) getTokenizer(tok);
 
@@ -1209,6 +1211,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // be named `yield`, or have a default containing a var name `yield`. Outer functions do not matter.
       wasSimple = parseBindings(isGenerator ? lexerFlags | LF_IN_GENERATOR : sansFlag(lexerFlags, LF_IN_GENERATOR), BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, isGetSet, 'params');
       AST_destruct('params');
+      ASSERT(curc !== $$COMMA_2C, 'the trailing func comma case should already be caught by now');
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
 
@@ -2829,6 +2832,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipAny(',', lexerFlags); // TODO: next must be ident or comma or [ or { or .
+      if (curc === $$PAREN_R_29) {
+        if (bindingType === BINDING_TYPE_ARG) {
+          if (allowTrailingFunctionComma) {
+            // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-issimpleparameterlist
+            // The [empty] is the case of `FormalParameters : FormalParameterList ,` which is actually the prod
+            // `FormalParameters : FormalParameterList , [empty]`. So a trailing comma does not change simple state.
+            return wasSimple;
+          }
+          THROW('Targeted language version does not support trailing function arg comma');
+        }
+        // can this even? in which non-arg case do you see rhp here?
+        TODO,THROW('Trailing comma is not supported here');
+      }
     } while (true);
     if (many !== 1 && isGetSet === IS_SETTER) {
       THROW('Setters require exactly one parameter');
@@ -2907,12 +2923,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // dots in a group must be a binding and as such these dots cannot be spread
       verifyDestructible(subDestruct | MUST_DESTRUCT);
     }
-    else if (curc === $$PAREN_R_29) {
-      if (!options_trailingArgComma) {
-        THROW('Trailing function argument comma is not enabled');
-      }
-    }
-    else {
+    else if (curc !== $$PAREN_R_29) {
       THROW('Expected to parse a(nother) binding but none was found');
     }
 
@@ -4271,10 +4282,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc !== $$COMMA_2C) break;
         ASSERT_skipRex(',', lexerFlags);
         if (curc === $$PAREN_R_29) {
-          if (!options_trailingArgComma) {
-            THROW('Option to parse trailing call argument commas is disabled');
-          }
-          break;
+          // `x(a,b,)`
+          if (allowTrailingFunctionComma) break;
+          THROW('Targeted language version does not support trailing call arg comma');
         }
       } while (true);
       skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
@@ -4621,14 +4631,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       if (curc !== $$COMMA_2C) break;
+
+      ASSERT_skipRex(',', lexerFlags); // `(x, /y/);`
+
+      if (curc === $$PAREN_R_29) {
+        if (allowTrailingFunctionComma) {
+          // This may only be valid in ES8+ and as an arrow. Any other case fails here.
+          destructible |= MUST_DESTRUCT;
+          // trailing function commas do not affect the AST (so don't wrap in sequence)
+          break;
+        } else {
+          THROW('Encountered trailing comma in the toplevel of a group, this could be valid in arrows but not with the currently targeted language version');
+        }
+      }
       if (!toplevelComma) {
         toplevelComma = true;
         // only do this once
         AST_wrapClosedIntoArray(rootAstProp, 'SequenceExpression', 'expressions');
         astProp = 'expressions';
       }
-
-      ASSERT_skipRex(',', lexerFlags); // `(x, /y/);`
     }
     allowAssignment = backup_allowAssignment;
 

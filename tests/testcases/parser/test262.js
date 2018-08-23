@@ -25,7 +25,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             // these are tests that I choose to ignore while the parser matures
             (has('annexb') && (has('regexp') || has('escape'))) || // TODO: web compat: lots of regex/escape cruft to support
             has('__proto__-dup') || has('dup-bound-names') || has('multiple-constructor') || has('names-dup') || // TODO: enable once we check duplicate objlit keys
-            has('args-trailing-comma') || has('dflt-params-trailing-') || // TODO: new feature: trailign comma in function args/call
             has('break/S12.8') || has('continue/S12.7_A5') || has('for/S12.7_A5') || has('for/S12.6.3_A1') || has('switch/S12.7_A5') || // TODO: verify labels
             has('asyncgenerator') || has('await-in-generator') || // TODO: async generators
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
@@ -37,7 +36,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
             has('duplicate') || // TODO: duplicate arg bindings
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
-            has('numeric/numeric-separator') || // TODO: numeric separators is just a proposal but should be simple to do
             has('regexp/u-invalid-quantifiable-assertion') || // TODO: regexp /u edge cases
             has('switch/S12.11_A2_T1') || // TODO: duplicate switch case
             has('property-escapes') // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
@@ -61,7 +59,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
           // particular features (especially new ones) will be mentioned in the header so we can filter en-mass based on that here
           // generated: call arg trailing comma
-          if (/features:.*(?:bigint|async-iteration|regexp-dotall|regexp-lookbehind|regexp-named-groups|object-spread|class-fields-public|class-fields-private|optional-catch-binding)/i.test(code)) obj.skip = true;
+          if (/features:.*(?:numeric-separator-literal|bigint|async-iteration|regexp-dotall|regexp-lookbehind|regexp-named-groups|object-spread|class-fields-public|class-fields-private|optional-catch-binding)/i.test(code)) obj.skip = true;
 
           let headerEndMarker = '---*/';
           let headerEnd = code.indexOf(headerEndMarker);

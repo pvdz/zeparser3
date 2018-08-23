@@ -783,6 +783,7 @@ module.exports = (describe, test) =>
     });
 
     describe('function args', _ => {
+
       describe('classic vars', _ => {
         test('one arg', {
           code: 'function f(a){}',
@@ -824,89 +825,293 @@ module.exports = (describe, test) =>
       });
 
       describe('trailing comma', _ => {
+
         describe('enabled', _ => {
-          test('must have args', {
-            code: 'function f(,){}',
-            options: {trailingArgComma: true}, // default
-            throws: 'Expected to parse a(nother) binding but none was found',
-            tokens: [],
-          });
 
-          test('one arg', {
-            code: 'function f(a,){}',
-            options: {trailingArgComma: true}, // default
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [{type: 'Identifier', name: 'a'}],
-                  body: {type: 'BlockStatement', body: []},
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-          });
+          [undefined, 8, 9, Infinity].forEach(ES => {
+            test.fail('must have args to trail', {
+              code: 'function f(,){}',
+              ES,
+            });
 
-          test('two args', {
-            code: 'function f(a,b,){}',
-            options: {trailingArgComma: true}, // default
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-                  body: {type: 'BlockStatement', body: []},
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-          });
+            test.fail('just commas is error', {
+              code: 'function f(,,){}',
+              ES,
+            });
 
-          test('cannot elide', {
-            code: 'function f(a,,){}',
-            options: {trailingArgComma: true}, // default
-            throws: 'Expected to parse a(nother) binding but none was found',
-            tokens: [],
+            test('one arg', {
+              code: 'function f(a,){}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'FunctionDeclaration',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [{type: 'Identifier', name: 'a'}],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
+              },
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('two args', {
+              code: 'function f(a,b,){}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'FunctionDeclaration',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
+              },
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test.fail('cannot elide', {
+              code: 'function f(a,,){}',
+              ES,
+            });
+
+            test('after default', {
+              code: 'function f(a = b,){}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'FunctionDeclaration',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {type: 'Identifier', name: 'a'},
+                        right: {type: 'Identifier', name: 'b'},
+                      },
+                    ],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
+              },
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test.fail('not allowed after rest', {
+              code: 'function f(...a,){}',
+              ES,
+            });
+
+            test('after array destruct', {
+              code: 'function f([x],){}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'FunctionDeclaration',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [
+                      {
+                        type: 'ArrayPattern',
+                        elements: [{type: 'Identifier', name: 'x'}],
+                      },
+                    ],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
+              },
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('after object destruct', {
+              code: 'function f({a},){}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'FunctionDeclaration',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [
+                      {
+                        type: 'ObjectPattern',
+                        properties: [
+                          {
+                            type: 'Property',
+                            key: {type: 'Identifier', name: 'a'},
+                            kind: 'init',
+                            method: false,
+                            computed: false,
+                            value: {type: 'Identifier', name: 'a'},
+                            shorthand: true,
+                          },
+                        ],
+                      },
+                    ],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
+              },
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test.fail('rest cant even have an default', {
+              code: 'function f(...a = x,){}',
+              ES,
+            });
+
+            test('after array destruct with default', {
+              code: 'function f([x] = y,){}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'FunctionDeclaration',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'ArrayPattern',
+                          elements: [{type: 'Identifier', name: 'x'}],
+                        },
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                    ],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
+              },
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
+
+            test('after object destruct with default', {
+              code: 'function f({a} = b,){}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'FunctionDeclaration',
+                    generator: false,
+                    async: false,
+                    expression: false,
+                    id: {type: 'Identifier', name: 'f'},
+                    params: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {
+                          type: 'ObjectPattern',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'a'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'a'},
+                              shorthand: true,
+                            },
+                          ],
+                        },
+                        right: {type: 'Identifier', name: 'b'},
+                      },
+                    ],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
+              },
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            });
           });
         });
 
         describe('disabled', _ => {
-          test('must have args', {
-            code: 'function f(,){}',
-            options: {trailingArgComma: false},
-            throws: 'Expected to parse a(nother) binding but none was found',
-            tokens: [],
-          });
 
-          test('one arg', {
-            code: 'function f(a,){}',
-            options: {trailingArgComma: false},
-            throws: 'Trailing function argument comma',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-          });
+          [6, 7].forEach(ES => {
+            test.fail('must have args to trail', {
+              code: 'function f(,){}',
+              ES,
+            });
 
-          test('two args', {
-            code: 'function f(a,b,){}',
-            options: {trailingArgComma: false},
-            throws: 'Trailing function argument comma',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-          });
+            test.fail('just commas is error', {
+              code: 'function f(,,){}',
+              ES,
+            });
 
-          test('cannot elide', {
-            code: 'function f(a,,){}',
-            options: {trailingArgComma: false},
-            throws: 'Expected to parse a(nother) binding but none was found',
-            tokens: [],
+            test.fail('one arg', {
+              code: 'function f(a,){}',
+              ES,
+            });
+
+            test.fail('two args', {
+              code: 'function f(a,b,){}',
+              ES,
+            });
+
+            test.fail('cannot elide', {
+              code: 'function f(a,,){}',
+              ES,
+            });
+
+            test.fail('after default', {
+              code: 'function f(a = b,){}',
+              ES,
+            });
+
+            test.fail('not allowed after rest', {
+              code: 'function f(...a,){}',
+              ES,
+            });
+
+            test.fail('after array destruct', {
+              code: 'function f([x],){}',
+              ES,
+            });
+
+            test.fail('after object destruct', {
+              code: 'function f({a},){}',
+              ES,
+            });
+
+            test.fail('rest cant even have an default', {
+              code: 'function f(...a = x,){}',
+              ES,
+            });
+
+            test.fail('after array destruct with default', {
+              code: 'function f([x] = y,){}',
+              ES,
+            });
+
+            test.fail('after object destruct with default', {
+              code: 'function f({a} = b,){}',
+              ES,
+            });
           });
         });
       });
