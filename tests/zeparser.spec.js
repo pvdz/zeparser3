@@ -74,6 +74,7 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 // passed: 46493, crashed: 0, failed: 0, skipped: 12669
 // passed: 46687, crashed: 0, failed: 0, skipped: 12285
 // passed: 46747, crashed: 0, failed: 0, skipped: 12225
+// passed: 46749, crashed: 0, failed: 0, skipped: 12223
 
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
 const TEST262_SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)

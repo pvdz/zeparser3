@@ -215,4 +215,29 @@ module.exports = (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
+
+    test('empty double default', {
+      code: 'switch(x) { default: default: }',
+      throws: 'default',
+    });
+
+    test('normal double default', {
+      code: 'switch(x) { default: break; default: break; }',
+      throws: 'default',
+    });
+
+    test('double default with more cases before', {
+      code: 'switch(x) { case y: break; case z: break; default: default: }',
+      throws: 'default',
+    });
+
+    test('double default with more cases after', {
+      code: 'switch(x) { default: default: case y: break; case z: break; }',
+      throws: 'default',
+    });
+
+    test('double default with cases between', {
+      code: 'switch(x) { default: break; case y: break; case z: break; default: break; }',
+      throws: 'default',
+    });
   });

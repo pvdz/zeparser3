@@ -45,8 +45,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
 
-            has('switch/S12.11_A2_T1') || // TODO: duplicate switch case
-
             false
         };
       }

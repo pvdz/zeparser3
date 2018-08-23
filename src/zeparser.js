@@ -2350,7 +2350,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         AST_close('SwitchCase');
       } else if (curtok.str === 'default') {
-        if (hadDefault) THROW('Found second default in same switch');
+        if (hadDefault) THROW('Found second `default` in same switch');
+        hadDefault = true;
         AST_open(astProp, 'SwitchCase');
         ASSERT_skipAny('default', lexerFlags); // TODO: optimize; next must be :
         if (curc !== $$COLON_3A) THROW('Missing colon after default');
