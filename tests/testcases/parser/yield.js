@@ -1632,6 +1632,310 @@ module.exports = (describe, test) =>
     test.pass('arg-full yield inside object', {
       code: '({ *g1() {   return {x: yield 1}  }})',
     });
+
+    test('yield spread yield yield no comma', {
+      code: 'function *g() {yield {     ...yield yield    };}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'YieldExpression',
+                    delegate: false,
+                    argument: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {
+                            type: 'YieldExpression',
+                            delegate: false,
+                            argument: {type: 'YieldExpression', delegate: false, argument: null},
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('spread yield yield no comma', {
+      code: 'function *g() {x={     ...yield yield    };}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: 'x'},
+                    operator: '=',
+                    right: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {
+                            type: 'YieldExpression',
+                            delegate: false,
+                            argument: {type: 'YieldExpression', delegate: false, argument: null},
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('spread yield comma', {
+      code: 'function *g() {x={     ...yield,    };}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: 'x'},
+                    operator: '=',
+                    right: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {type: 'YieldExpression', delegate: false, argument: null},
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('spread yield x comma', {
+      code: 'function *g() {x={     ...yield x,    };}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: 'x'},
+                    operator: '=',
+                    right: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {
+                            type: 'YieldExpression',
+                            delegate: false,
+                            argument: {type: 'Identifier', name: 'x'},
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('spread yield yield comma', {
+      code: 'function *g() {x={     ...yield yield,    };}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: 'x'},
+                    operator: '=',
+                    right: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {
+                            type: 'YieldExpression',
+                            delegate: false,
+                            argument: {type: 'YieldExpression', delegate: false, argument: null},
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('spread yield yield comma', {
+      code: 'function *g() {yield {     ...yield yield,    };}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'YieldExpression',
+                    delegate: false,
+                    argument: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {
+                            type: 'YieldExpression',
+                            delegate: false,
+                            argument: {type: 'YieldExpression', delegate: false, argument: null},
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    // test('dinges', {
+    //   code: 'function *g() { yield {...(x),}}',
+    // });
+
+    test('dinges', {
+      code: 'function *g() { yield {...(x,y),}}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            expression: false,
+            id: {type: 'Identifier', name: 'g'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'YieldExpression',
+                    delegate: false,
+                    argument: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {
+                            type: 'SequenceExpression',
+                            expressions: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

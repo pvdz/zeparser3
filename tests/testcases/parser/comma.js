@@ -226,12 +226,15 @@ module.exports = (describe, test) =>
                 {
                   type: 'ExpressionStatement',
                   expression: {
-                    type: 'YieldExpression',
-                    delegate: false,
-                    argument: {
-                      type: 'SequenceExpression',
-                      expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-                    },
+                    type: 'SequenceExpression',
+                    expressions: [
+                      {
+                        type: 'YieldExpression',
+                        delegate: false,
+                        argument: {type: 'Identifier', name: 'a'},
+                      },
+                      {type: 'Identifier', name: 'b'},
+                    ],
                   },
                 },
               ],
