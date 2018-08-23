@@ -24,21 +24,30 @@ if (!fs.statSync(PATH262).isDirectory()) {
           skip:
             // these are tests that I choose to ignore while the parser matures
             (has('annexb') && (has('regexp') || has('escape'))) || // TODO: web compat: lots of regex/escape cruft to support
+            has('regexp/u-invalid-quantifiable-assertion') || // TODO: regexp /u edge cases
+            has('property-escapes') || // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
+
             has('__proto__-dup') || has('dup-bound-names') || has('multiple-constructor') || has('names-dup') || // TODO: enable once we check duplicate objlit keys
+
             has('break/S12.8') || has('continue/S12.7_A5') || has('for/S12.7_A5') || has('for/S12.6.3_A1') || has('switch/S12.7_A5') || // TODO: verify labels
+            has('early-undef-break') || has('early-undef-continue') || has('labeled/continue') || has('labeled/value-await-non-module') || // TODO: implement label collection and verification
+
             has('asyncgenerator') || has('await-in-generator') || // TODO: async generators
+
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
             has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
+
             has('redeclare-with-') || has('function/param-eval') || has('generators/param-dflt-yield') || has('param-redecl') || has('early-dup') || // TODO: fix once we fix scoping and duplicate binding checks (class, async)
             has('/early-lex-and-var') || has('parse-err-hoist-lex') || has('redeclaration') || has('head-let-bound-names-in-stmt') || // more scoping
             has('head-const-bound-names-in-stmt') || has('function/13.1') || has('attempt-to-redeclare-let-binding-with') || has('try/early-catch') || // more scoping
-            has('early-undef-break') || has('early-undef-continue') || has('labeled/continue') || has('labeled/value-await-non-module') || // TODO: implement label collection and verification
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
             has('duplicate') || // TODO: duplicate arg bindings
+
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
-            has('regexp/u-invalid-quantifiable-assertion') || // TODO: regexp /u edge cases
+
             has('switch/S12.11_A2_T1') || // TODO: duplicate switch case
-            has('property-escapes') // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
+
+            false
         };
       }
     } else {
