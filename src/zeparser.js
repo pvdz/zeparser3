@@ -5218,7 +5218,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     while (curc !== $$CURLY_R_7D) {
-      destructible |= parseObjectLikePart(lexerFlags, bindingType, isClassMethod, astProp);
+      if (curc === $$COMMA_2C) {
+        // ({,
+        THROW('Objects cant have comma without something preceding it');
+      }
+
+      destructible |= parseObjectLikePart(lexerFlags, bindingType, isClassMethod, undefined, astProp);
 
       if (isClassMethod === IS_CLASS_METHOD) {
         while (curc === $$SEMI_3B) ASSERT_skipAny(';', lexerFlags);
@@ -5239,15 +5244,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return destructible;
   }
-  function parseObjectLikePart(lexerFlags, bindingType, isClassMethod, astProp) {
-    if (curc === $$COMMA_2C) {
-      // ({,
-      THROW('Objects cant have comma without something preceding it');
-    }
-
-    return _parseObjectLikePart(lexerFlags, bindingType, isClassMethod, undefined, astProp);
-  }
-  function _parseObjectLikePart(lexerFlags, bindingType, isClassMethod, staticToken, astProp) {
+  function parseObjectLikePart(lexerFlags, bindingType, isClassMethod, staticToken, astProp) {
     ASSERT(arguments.length === 5, '5 args');
     ASSERT(typeof astProp === 'string', 'astprop string');
     ASSERT(staticToken === undefined || staticToken.str === 'static', 'token or undefined');
@@ -5322,7 +5319,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `({static(){}})`
           destructible = parseObjectLikePartFromIdent(lexerFlags, bindingType, isClassMethod, undefined, currentStaticToken, astProp);
         } else {
-          return _parseObjectLikePart(lexerFlags, bindingType, isClassMethod, currentStaticToken, astProp);
+          return parseObjectLikePart(lexerFlags, bindingType, isClassMethod, currentStaticToken, astProp);
         }
       }
       else {
