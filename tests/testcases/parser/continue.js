@@ -46,6 +46,7 @@ module.exports = (describe, test) =>
               type: 'ForOfStatement',
               left: {type: 'Identifier', name: 'x'},
               right: {type: 'Identifier', name: 'y'},
+              await: false,
               body: {type: 'ContinueStatement', label: null},
             },
           ],
@@ -131,6 +132,7 @@ module.exports = (describe, test) =>
               type: 'ForOfStatement',
               left: {type: 'Identifier', name: 'x'},
               right: {type: 'Identifier', name: 'y'},
+              await: false,
               body: {
                 type: 'ContinueStatement',
                 label: {type: 'Identifier', name: 'foo'},

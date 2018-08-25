@@ -265,6 +265,7 @@ module.exports = (describe, test) =>
               type: 'ForOfStatement',
               left: {type: 'Identifier', name: 'x'},
               right: {type: 'Identifier', name: 'y'},
+              await: false,
               body: {type: 'BreakStatement', label: null},
             },
           ],
@@ -350,6 +351,7 @@ module.exports = (describe, test) =>
               type: 'ForOfStatement',
               left: {type: 'Identifier', name: 'x'},
               right: {type: 'Identifier', name: 'y'},
+              await: false,
               body: {
                 type: 'BreakStatement',
                 label: {type: 'Identifier', name: 'foo'},

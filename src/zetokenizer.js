@@ -223,6 +223,7 @@ const LF_CAN_NEW_TARGET = 1 << ++$flag; // current scope is inside at least one 
 const LF_DO_WHILE_ASI = 1 << ++$flag; // for do-while, can only asi sub-statement if there was a newline before `while`
 const LF_FOR_REGEX = 1 << ++$flag;
 const LF_IN_ASYNC = 1 << ++$flag;
+const LF_IN_ASYGEN = 1 << ++$flag; // async generator, different from in_async/in_generator because those explicitly disallow yield or await where asygen allows both
 const LF_IN_CONSTRUCTOR = 1 << ++$flag; // inside a class constructor (not a regular function) that is not static
 const LF_IN_FOR_LHS = 1 << ++$flag; // inside the initial part of a for-header, prevents `in` being parsed as an operator, hint for checks when destructuring pattern as lhs
 const LF_IN_FUNC_ARGS = 1 << ++$flag; // throws for await expression
@@ -264,6 +265,10 @@ function LF_DEBUG(flags) {
   if (flags & LF_IN_ASYNC) {
     flags ^= LF_IN_ASYNC;
     s.push('LF_IN_ASYNC');
+  }
+  if (flags & LF_IN_ASYGEN) {
+    flags ^= LF_IN_ASYGEN;
+    s.push('LF_IN_ASYGEN');
   }
   if (flags & LF_IN_GENERATOR) {
     flags ^= LF_IN_GENERATOR;
@@ -2840,6 +2845,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   LF_CAN_NEW_TARGET,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
+  LF_IN_ASYGEN,
   LF_IN_CONSTRUCTOR,
   LF_IN_FOR_LHS,
   LF_IN_FUNC_ARGS,

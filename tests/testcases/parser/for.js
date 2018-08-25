@@ -1197,7 +1197,13 @@ module.exports = (describe, test) =>
         code: 'for (a of b);',
         ast: {
           type: 'Program',
-          body: [{type: 'ForOfStatement', left: {type: 'Identifier', name: 'a'}, right: {type: 'Identifier', name: 'b'}, body: {type: 'EmptyStatement'}}],
+          body: [{
+            type: 'ForOfStatement',
+            left: {type: 'Identifier', name: 'a'},
+            right: {type: 'Identifier', name: 'b'},
+            await: false,
+            body: {type: 'EmptyStatement'}
+          }],
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
@@ -1211,6 +1217,7 @@ module.exports = (describe, test) =>
               type: 'ForOfStatement',
               left: {type: 'VariableDeclaration', kind: 'var', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: null}]},
               right: {type: 'Identifier', name: 'b'},
+              await: false,
               body: {type: 'EmptyStatement'},
             },
           ],
@@ -1227,6 +1234,7 @@ module.exports = (describe, test) =>
               type: 'ForOfStatement',
               left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: null}]},
               right: {type: 'Identifier', name: 'b'},
+              await: false,
               body: {type: 'EmptyStatement'},
             },
           ],
@@ -1243,6 +1251,7 @@ module.exports = (describe, test) =>
               type: 'ForOfStatement',
               left: {type: 'VariableDeclaration', kind: 'const', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: null}]},
               right: {type: 'Identifier', name: 'b'},
+              await: false,
               body: {type: 'EmptyStatement'},
             },
           ],
@@ -1264,6 +1273,7 @@ module.exports = (describe, test) =>
                 operator: '=',
                 right: {type: 'Identifier', name: 'c'},
               },
+              await: false,
               body: {type: 'EmptyStatement'},
             },
           ],
@@ -1295,6 +1305,7 @@ module.exports = (describe, test) =>
                 ],
               },
               right: {type: 'Identifier', name: 'c'},
+              await: false,
               body: {
                 type: 'ExpressionStatement',
                 expression: {type: 'Identifier', name: 'd'},
@@ -1329,6 +1340,7 @@ module.exports = (describe, test) =>
                 computed: false,
               },
               right: {type: 'Identifier', name: 'c'},
+              await: false,
               body: {
                 type: 'ExpressionStatement',
                 expression: {type: 'Identifier', name: 'd'},
@@ -1367,6 +1379,7 @@ module.exports = (describe, test) =>
                 ],
               },
               right: {type: 'Identifier', name: 'd'},
+              await: false,
               body: {
                 type: 'ExpressionStatement',
                 expression: {type: 'Identifier', name: 'e'},
@@ -1409,6 +1422,7 @@ module.exports = (describe, test) =>
                 computed: false,
               },
               right: {type: 'Identifier', name: 'd'},
+              await: false,
               body: {
                 type: 'ExpressionStatement',
                 expression: {type: 'Identifier', name: 'e'},
@@ -1426,18 +1440,6 @@ module.exports = (describe, test) =>
       // TODO: cases for yield and await as rhs
     });
 
-    describe('async for', _ => {
-      // https://github.com/tc39/proposal-async-iteration
-      //test('base case', {
-      //  code: `
-      //    async function * fn() {
-      //      for await (x of y) {
-      //      }
-      //    }
-      //  `,
-      //});
-    });
-
     test.pass('allow assignment', {
       code: 'for (foo=10;;);',
     });
@@ -1453,6 +1455,34 @@ module.exports = (describe, test) =>
 
     test.fail('should not over accept an `of` after an `in` 2', {
       code: 'for (x in y of z) ;',
+    });
+
+    test('for await of', {
+      code: 'for await (x of y) {}',
+      callback(ast, tokens, astJson) { return astJson.includes('"await":true'); },
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ForOfStatement',
+            left: {type: 'Identifier', name: 'x'},
+            right: {type: 'Identifier', name: 'y'},
+            await: true,
+            body: {type: 'BlockStatement', body: []},
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('for await in', {
+      code: 'for await (x in y) {}',
+      throws: 'for await',
+    });
+
+    test('for await loop', {
+      code: 'for await (x;y;z) {}',
+      throws: 'for await',
     });
   });
 

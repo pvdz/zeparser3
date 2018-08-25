@@ -776,6 +776,7 @@ module.exports = (describe, test) =>
                   ],
                 },
                 right: {type: 'Identifier', name: 'a'},
+                await: false,
                 body: {
                   type: 'ExpressionStatement',
                   expression: {type: 'Identifier', name: 'b'},
@@ -1639,9 +1640,8 @@ module.exports = (describe, test) =>
               tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
-            test('as async generator in obj', {
+            test.pass('as async generator in obj', {
               code: '({async * ' + ident + '(){}});',
-              throws: true, // TODO: async generators
             });
 
             test('as static getter in obj', {
@@ -2370,6 +2370,7 @@ module.exports = (describe, test) =>
 
         test('object with one async dstring method', {
           code: 'wrap({async "foo"(){}});',
+          callback(ast, tokens, astJson) { return astJson.includes('"async":true'); },
           ast: {
             type: 'Program',
             body: [
@@ -4103,18 +4104,17 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('getter number must be method', {
+        test.fail('getter number must be method', {
           code: 'wrap({get 123: x});',
-          throws: 'func arguments',
         });
 
-        test('getter string must be method', {
+        test.fail('getter string must be method', {
           code: 'wrap({get "abc": x});',
-          throws: 'func arguments',
         });
       });
 
       describe('setters (ident)', _ => {
+
         test('object with one setter method', {
           code: 'wrap({set foo(a){}});',
           ast: {
@@ -4961,14 +4961,12 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('setter number must be method', {
+        test.fail('setter number must be method', {
           code: 'wrap({set 123: x});',
-          throws: 'func arguments',
         });
 
-        test('setter string must be method', {
+        test.fail('setter string must be method', {
           code: 'wrap({set "abc": x});',
-          throws: 'func arguments',
         });
       });
 

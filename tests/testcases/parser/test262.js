@@ -32,8 +32,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('break/S12.8') || has('continue/S12.7_A5') || has('for/S12.7_A5') || has('for/S12.6.3_A1') || has('switch/S12.7_A5') || // TODO: verify labels
             has('early-undef-break') || has('early-undef-continue') || has('labeled/continue') || has('labeled/value-await-non-module') || // TODO: implement label collection and verification
 
-            has('asyncgenerator') || has('await-in-generator') || // TODO: async generators
-
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
             has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
 
@@ -66,7 +64,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
           // particular features (especially new ones) will be mentioned in the header so we can filter en-mass based on that here
           // generated: call arg trailing comma
-          if (/features:.*(?:numeric-separator-literal|bigint|async-iteration|regexp-dotall|regexp-lookbehind|regexp-named-groups|class-fields-public|class-fields-private|optional-catch-binding)/i.test(code)) obj.skip = true;
+          if (/features:.*(?:numeric-separator-literal|bigint|regexp-dotall|regexp-lookbehind|regexp-named-groups|class-fields-public|class-fields-private|optional-catch-binding)/i.test(code)) obj.skip = true;
 
           let headerEndMarker = '---*/';
           let headerEnd = code.indexOf(headerEndMarker);
@@ -103,6 +101,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
               has('reserved-words/await-script') || // tests await as var name in script mode
               has('annexB/language/comments/multi-line-html') || // html comment in strict mode are bad
               has('annexB/language/comments/single-line-html') || // html comments in strict mode are bad
+              has('await-in-generator') || // tests await being an ident inside a generator, which is outright illegal in module goal
             false) {
               testObj.MODULE = {SKIP: true};
             }

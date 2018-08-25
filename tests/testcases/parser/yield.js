@@ -1332,40 +1332,8 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('yield can be name of func expr inside generator', {
+    test.fail_strict('func expr inherits yieldable from itself so parent scope is irrelevant and yield is okay in sloppy', {
       code: 'function* g() { (function yield() {}) }',
-      STRICT: {throws: true},
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'FunctionDeclaration',
-            generator: true,
-            async: false,
-            expression: false,
-            id: {type: 'Identifier', name: 'g'},
-            params: [],
-            body: {
-              type: 'BlockStatement',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'FunctionExpression',
-                    generator: false,
-                    async: false,
-                    expression: true,
-                    id: {type: 'Identifier', name: 'yield'},
-                    params: [],
-                    body: {type: 'BlockStatement', body: []},
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
     });
 
     test.fail('gen expr named yield is okay in sloppy', {
