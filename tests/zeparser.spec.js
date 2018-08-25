@@ -238,6 +238,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   if (TEST262 && testi < TEST262_SKIP_TO) return;
   let {
     ast: expectedAst,
+    callback: expectedCallback,
     SCRIPT: scriptModeObj,
     MODULE: moduleModeObj,
     throws: expectedThrows,
@@ -298,6 +299,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     expectedAst,
     expectedThrows,
     expectedTokens,
+    expectedCallback,
     startInStrictMode,
     _debug,
     SKIP,
@@ -320,12 +322,14 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
   // pass references so we can report partial state in case of a crash
   var ast = {};
+  var path = [];
   var tokens = [];
 
   let goalMode = mode === MODE_MODULE ? GOAL_MODULE : mode === MODE_SCRIPT ? GOAL_SCRIPT : MODE_VALUE_ERROR;
   let wasError = '';
   let stack;
   let tokenizer;
+  let astPath;
   try {
     var obj = Parser(code, goalMode, COLLECT_TOKENS_SOLID, {
       strictMode: startInStrictMode,
@@ -342,6 +346,10 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     var obj = '' + f.stack;
     stack = f.stack;
   }
+
+  astPath = ast.pathNames;
+  delete ast.path; // meh
+  delete ast.pathNames;
 
   if (!expectedTokens) {
     expectedTokens = ['<not given>'];
@@ -400,7 +408,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   } else {
     let mustVerify = checkAST && expectedAst !== true;
     let expectedJson = mustVerify && JSON.stringify(expectedAst);
-    let actualJson = mustVerify && JSON.stringify(obj.ast);
+    let actualJson = (mustVerify  || expectedCallback !== undefined) && JSON.stringify(obj.ast);
     if (mustVerify && expectedJson !== actualJson) {
       let missingAst = expectedJson === '{"<not given>":true}';
 
@@ -464,7 +472,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
       ++fail;
     } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-      LOG_THROW('TOKEN mismatch', code, '', desc, true);
+      LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true);
 
       console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
       console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
@@ -477,6 +485,9 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         .join(', $') +
         '],',
       );
+      ++fail;
+    } else if (expectedCallback && expectedCallback(obj.ast, obj.tokens, actualJson) === false) {
+      LOG_THROW('input parsed properly but ' + BOLD + 'CALLBACK' + RESET + ' rejected', code, undefined, desc);
       ++fail;
     } else {
       console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
@@ -506,7 +517,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     console.log('From:', from);
 
     if (!noPartial) {
-      console.log('Ast so far:', formatAst(ast));
+      console.log('Ast so far (path=['+astPath+']):', formatAst(ast));
       console.log('Tokens so far:[', tokens.map(o => debug_toktype(o.type)).join(', '), ' ...]');
     }
 
