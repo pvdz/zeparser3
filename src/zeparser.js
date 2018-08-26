@@ -1844,6 +1844,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags | LF_DO_WHILE_ASI : lexerFlags) | LF_IN_ITERATION, EXC_DECL, 'body');
     skipAnyOrDie($$W_77, 'while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
+    // > 11.9.1: In ECMAScript 2015, Automatic Semicolon Insertion adds a semicolon at the end of a do-while statement if the
+    // > semicolon is missing. This change aligns the specification with the actual behaviour of most existing implementations.
     parseSemiOrAsi(lexerFlags);
     AST_close('DoWhileStatement');
   }
@@ -2064,7 +2066,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseForHeader(lexerFlags, awaitable, astProp) {
     ASSERT(arguments.length === parseForHeader.length, 'arg count');
-    // TODO: confirm we do this; > It is a Syntax Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
+
+    // TODO: confirm we do this;
+    // > It is a Syntax Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
+
+    // TODO: see next quote; confirm the lhs has no initializer when parsing es6+, but allow in sloppy es7+
+    // > 13.7: Prior to ECMAScript 2015, an initialization expression could appear as part of the VariableDeclaration
+    // > that precedes the in keyword. In ECMAScript 2015, the ForBinding in that same position does not allow the
+    // > occurrence of such an initializer. In ECMAScript 2017, such an initializer is permitted only in non-strict code.
+
     // first parse a simple expression and check whether it's assignable (var or prop)
     let assignable = NOT_ASSIGNABLE;
     let wasNotDecl = false;
@@ -5216,6 +5226,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isClassMethod === IS_CLASS_METHOD) {
       while (curc === $$SEMI_3B) ASSERT_skipAny(';', lexerFlags);
     }
+
+    // > 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object Initializers.
+    // so we don't have to track all properties of object literals to check for dupes, however, we still need to
+    // confirm this for the constructor of a class.
 
     while (curc !== $$CURLY_R_7D) {
       if (curc === $$COMMA_2C) {
