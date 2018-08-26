@@ -253,6 +253,7 @@ const MIGHT_DESTRUCT = 0; // any kind of destructuring or lack thereof is okay
 const CANT_DESTRUCT = 1; // it is impossible to destructure this
 const DESTRUCT_ASSIGN_ONLY = 2; // the only way this can destruct is by assignment
 const MUST_DESTRUCT = 4;
+const DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR = 8; // signal having found a constructor (special case)
 const NO_SPREAD = 0;
 const LAST_SPREAD = 1;
 const MID_SPREAD = 2;
@@ -5231,20 +5232,34 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // so we don't have to track all properties of object literals to check for dupes, however, we still need to
     // confirm this for the constructor of a class.
 
+    let constructors = 0; // must throw if more than one plain constructor was found
     while (curc !== $$CURLY_R_7D) {
       if (curc === $$COMMA_2C) {
         // ({,
         THROW('Objects cant have comma without something preceding it');
       }
 
-      destructible |= parseObjectLikePart(lexerFlags, bindingType, isClassMethod, undefined, astProp);
+      let currentDestruct = parseObjectLikePart(lexerFlags, bindingType, isClassMethod, undefined, astProp);
 
       if (isClassMethod === IS_CLASS_METHOD) {
+        if (hasAnyFlag(currentDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR)) {
+          ++constructors;
+          currentDestruct = sansFlag(currentDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR);
+        }
+
         while (curc === $$SEMI_3B) ASSERT_skipAny(';', lexerFlags);
+        destructible |= currentDestruct;
       } else {
+        destructible |= currentDestruct;
         if (curc !== $$COMMA_2C) break;
         ASSERT_skipAny(',', lexerFlags); // TODO: ident, }, [, number, string
       }
+
+      ASSERT(hasNoFlag(destructible, DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR), 'make sure the piggy was removed at this point');
+    }
+
+    if (constructors > 1) {
+      THROW('Classes may only have one constructor');
     }
 
     // restore in/template flags (`x${+{}}` would fail if you didn't do this before parsing the closing curly)
@@ -5333,7 +5348,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `({static(){}})`
           destructible = parseObjectLikePartFromIdent(lexerFlags, bindingType, isClassMethod, undefined, currentStaticToken, astProp);
         } else {
-          return parseObjectLikePart(lexerFlags, bindingType, isClassMethod, currentStaticToken, astProp);
+          destructible = parseObjectLikePart(lexerFlags, bindingType, isClassMethod, currentStaticToken, astProp);
         }
       }
       else {
@@ -5353,12 +5368,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let identToken = curtok;
         ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
 
-        if (identToken.str === 'async' && curc !== $$PAREN_L_28 && curtok.nl) {
+        if (curc !== $$PAREN_L_28 && curtok.nl && identToken.str === 'async') {
           // this is `{async \n ..(){}}` which is always an error due to async being a restricted production
           THROW('Async methods are a restricted production and cannot have a newline following it');
         }
 
+        let wasConstructor = isClassMethod === IS_CLASS_METHOD && staticToken === undefined && curc === $$PAREN_L_28 && identToken.str === 'constructor';
+
         destructible = parseObjectLikePartFromIdent(lexerFlags, bindingType, isClassMethod, staticToken, identToken, astProp);
+
+        if (wasConstructor) {
+          // this is a constructor method. we need to signal the caller that we parsed one to dedupe them
+          // to signal the caller we piggy back on the destructible which is already a bit-field
+          destructible |= DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR;
+        }
       }
     }
     else if (hasAllFlags(curtype, $NUMBER) || hasAllFlags(curtype, $STRING)) {
@@ -5776,7 +5799,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
           AST_setIdent('value', identToken);
-          parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
         } else  if (curtok.str === '=') {
           // this is destructible iif the ident is not a keyword
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
@@ -5997,8 +6019,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `({x+=y})`
       THROW('Unexpected character after object literal property name ' + curtok);
     }
-
-    if (isClassMethod) return; // no init for class members
 
     return destructible;
   }

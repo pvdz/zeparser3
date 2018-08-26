@@ -8087,4 +8087,38 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    describe('duplicate keys', _ => {
+
+      // https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
+      // 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object Initializers.
+
+      test.pass('base case of duplicate key', {
+        code: '({a: 1, a: 2})',
+      });
+
+      test.pass('first and last', {
+        code: '({a: 1, b: 3, a: 2})',
+      });
+
+      test.pass('last two', {
+        code: '({b: x, a: 1, a: 2})',
+      });
+
+      test.pass('first two', {
+        code: '({a: 1, a: 2, b: 3})',
+      });
+
+      test.pass('shorthand', {
+        code: '({a, a})',
+      });
+
+      test.pass('shorthand and not-shorthand', {
+        code: '({a, a: 1})',
+      });
+
+      test.pass('not-shorthand and shorthand', {
+        code: '({a: 1, a})',
+      });
+    });
   });

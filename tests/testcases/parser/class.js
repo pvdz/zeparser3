@@ -2783,23 +2783,88 @@ module.exports = (describe, test) =>
       desc: 'constructor can not have a modifier',
     });
 
-    /*
-  // string and numeric keys are also valid
-class f {
-  "foo"(){}
-  'bar'(){}
-  15(){}
-  [x](){}
-}
+    describe('duplicate keys', _ => {
 
-// shorthand checks
-class f {
-  get,
-  set,
-  async,
-}
+      // https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
+      // 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object Initializers.
 
-   */
+      test.pass('base case of duplicate key', {
+        code: 'class x {a(){}; a(){}}',
+      });
+
+      test.pass('first and last', {
+        code: 'class x {a(){}; b(){}; a(){}}',
+      });
+
+      test.pass('last two', {
+        code: 'class x {b(){}; a(){}; a(){}}',
+      });
+
+      test.pass('first two', {
+        code: 'class x {a(){}; a(){}; b(){}}',
+      });
+
+      describe('constructor', _ => {
+
+        describe('regular', _ => {
+
+          // https://tc39.github.io/ecma262/#sec-static-semantics-constructormethod
+          // > Early Error rules ensure that there is only one method definition named "constructor" and that it is not an accessor property or generator definition.
+
+          test.pass('base constructor', {
+            code: 'class x {constructor(){}}',
+          });
+
+          test('double constructor', {
+            code: 'class x {constructor(){}; constructor(){}}',
+            throws: 'constructor',
+          });
+
+          test('a double constructor', {
+            code: 'class x {a(){}; constructor(){}; constructor(){}}',
+            throws: 'constructor',
+          });
+
+          test('spread out double constructor', {
+            code: 'class x {a(){}; constructor(){}; a(){}; a(){}; a(){}; constructor(){}; a(){}}',
+            throws: 'constructor',
+          });
+        });
+
+        describe('static', _ => {
+
+          // https://tc39.github.io/ecma262/#sec-static-semantics-constructormethod
+          // > It is a Syntax Error if PrototypePropertyNameList of ClassElementList contains more than one occurrence of "constructor".
+          // static members do not end up on the prototype so should not get this treatment
+
+          test.pass('base constructor', {
+            code: 'class x {static constructor(){}}',
+          });
+
+          test.pass('double constructor', {
+            code: 'class x {static constructor(){}; static constructor(){}}',
+          });
+
+          test.pass('mixed', {
+            code: 'class x {static constructor(){}; constructor(){}}',
+          });
+
+          test('a static constructor does not disable the check', {
+            code: 'class x {static constructor(){}; constructor(){}; constructor(){}}',
+            throws: 'constructor',
+          });
+
+          test.pass('a double constructor', {
+            code: 'class x {a(){}; static constructor(){}; static constructor(){}}',
+          });
+
+          test.pass('spread out double constructor', {
+            code: 'class x {a(){}; static constructor(){}; a(){}; a(){}; a(){}; static constructor(){}; a(){}}',
+          });
+        });
+      });
+    });
+
 
     // export default class extends F {}
     // class extends {} {}
@@ -2812,14 +2877,8 @@ class f {
     //class x{*static(){}}
     //class x{static *static(){}}
     // confirm multiple usages of same member modifier is prevented (async async, static async static, etc)
-
-    // class is always strict mode (note below https://tc39.github.io/ecma262/#prod-ClassBody )
   });
 
-
-// https://tc39.github.io/ecma262/#sec-class-definitions-static-semantics-early-errors
-// > It is a Syntax Error if PropName of MethodDefinition is "constructor" and SpecialMethod of MethodDefinition is true.
-// (so can not do `async constructor` etc)
 
 // > It is a Syntax Error if PropName of MethodDefinition is "prototype".
 // (can not make a static method called "prototype")

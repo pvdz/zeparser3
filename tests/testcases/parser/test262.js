@@ -27,8 +27,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('regexp/u-invalid-quantifiable-assertion') || // TODO: regexp /u edge cases
             has('property-escapes') || // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
 
-            has('__proto__-dup') || has('dup-bound-names') || has('multiple-constructor') || has('names-dup') || // TODO: enable once we check duplicate objlit keys
-
             has('break/S12.8') || has('continue/S12.7_A5') || has('for/S12.7_A5') || has('for/S12.6.3_A1') || has('switch/S12.7_A5') || // TODO: verify labels
             has('early-undef-break') || has('early-undef-continue') || has('labeled/continue') || has('labeled/value-await-non-module') || // TODO: implement label collection and verification
 
@@ -36,10 +34,11 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
 
             has('redeclare-with-') || has('function/param-eval') || has('generators/param-dflt-yield') || has('param-redecl') || has('early-dup') || // TODO: fix once we fix scoping and duplicate binding checks (class, async)
-            has('/early-lex-and-var') || has('parse-err-hoist-lex') || has('redeclaration') || has('head-let-bound-names-in-stmt') || // more scoping
-            has('head-const-bound-names-in-stmt') || has('function/13.1') || has('attempt-to-redeclare-let-binding-with') || has('try/early-catch') || // more scoping
+            has('/early-lex-and-var') || has('parse-err-hoist-lex') || has('redeclaration') || has('head-let-bound-names') || // more scoping
+            has('head-const-bound-names') || has('function/13.1') || has('attempt-to-redeclare-let-binding-with') || has('try/early-catch') || // more scoping
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
             has('duplicate') || // TODO: duplicate arg bindings
+            has('import/dup-bound-names') || // TODO: dupe imports
 
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
 
@@ -102,6 +101,8 @@ if (!fs.statSync(PATH262).isDirectory()) {
               has('annexB/language/comments/multi-line-html') || // html comment in strict mode are bad
               has('annexB/language/comments/single-line-html') || // html comments in strict mode are bad
               has('await-in-generator') || // tests await being an ident inside a generator, which is outright illegal in module goal
+              testFileName.includes('delete/11.4.1-2-6.js') || // delete null
+              testFileName.includes('delete/11.4.1-2-3.js') || // delete true
             false) {
               testObj.MODULE = {SKIP: true};
             }
@@ -117,11 +118,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             if (/^\s*flags:.*?\bmodule\b/m.test(code)) {
               testObj.SCRIPT = {SKIP: true};
             }
-            // test262 tests are opt-in to be tested as module code but most just work anyways. so I blacklist the ones that dont work with module.
-            if (
-              testFileName.includes('delete/11.4.1-2-6.js') || // delete null
-              testFileName.includes('delete/11.4.1-2-3.js')    // delete true
-            ) testObj.MODULE = {SKIP: true};
             testObj.WEB = obj.annexb;
 
             if (/^\s*negative:/m.test(code) && code.indexOf('  phase: runtime') < 0) {
