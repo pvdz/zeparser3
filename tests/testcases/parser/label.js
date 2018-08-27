@@ -45,11 +45,53 @@ module.exports = (describe, test) =>
       });
     });
 
-      describe('regex edge cases', _ => {
+    describe('await', _ => {
+
+      test.pass('in sloppy', {
+        code: 'await: x',
+        MODULE: {throws: true},
+      });
+
+      test.fail_strict('in a generator', {
+        code: 'function *f(){ await: x; }',
+      });
+
+      test.fail('defined outside of generator as break label inside generator', {
+        code: 'await: { function *f(){ break await; } }',
+        desc: 'red herring; await is special for async, not generaotrs ;) but since the label does not exist it still fails',
+      });
+
+      test.fail('in async', {
+        code: 'async function f(){ await: x; }',
+      });
+
+      test.fail('defined outside of async as break label inside async', {
+        code: 'await: { async function f(){ break await; } }',
+        desc: 'red herring; label sets do not cross function boundaries ;) so label is undefined and the break crashes',
+      });
+    });
+
+    describe('regex edge cases', _ => {
       // foo:/bar/
       // foo:\n/bar/
       // foo:\n/bar/g
     });
+
+    test('cannot use the same label twice', {
+      code: 'foo: foo: x',
+      throws: 'same label',
+    });
+
+    test('a b a', {
+      code: 'foo: bar: foo: x',
+      throws: 'same label',
+    });
+
+    test('b a c a', {
+      code: 'bar: foo: ding: foo: x',
+      throws: 'same label',
+    });
+
 
     // TODO: label:functiondecl is explicitly considered a syntax error
     // TODO: labels must be "identifiers", which may not be reserved

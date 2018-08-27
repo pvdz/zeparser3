@@ -85,98 +85,118 @@ module.exports = (describe, test) =>
       });
 
       test('continue with label inside a for-loop', {
-        code: 'for (;;) continue foo',
+        code: 'foo: for (;;) continue foo',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ForStatement',
-              init: null,
-              test: null,
-              update: null,
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'ContinueStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'ForStatement',
+                init: null,
+                test: null,
+                update: null,
+                body: {
+                  type: 'ContinueStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
               },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('continue with label inside a for-in', {
-        code: 'for (x in y) continue foo',
+        code: 'foo: for (x in y) continue foo',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ForInStatement',
-              left: {type: 'Identifier', name: 'x'},
-              right: {type: 'Identifier', name: 'y'},
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'ContinueStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'ForInStatement',
+                left: {type: 'Identifier', name: 'x'},
+                right: {type: 'Identifier', name: 'y'},
+                body: {
+                  type: 'ContinueStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
               },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('continue with label inside a for-of', {
-        code: 'for (x of y) continue foo',
+        code: 'foo: for (x of y) continue foo',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ForOfStatement',
-              left: {type: 'Identifier', name: 'x'},
-              right: {type: 'Identifier', name: 'y'},
-              await: false,
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'ContinueStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'ForOfStatement',
+                left: {type: 'Identifier', name: 'x'},
+                right: {type: 'Identifier', name: 'y'},
+                await: false,
+                body: {
+                  type: 'ContinueStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
               },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('continue with label inside a while', {
-        code: 'while (x) continue foo',
+        code: 'foo: while (x) continue foo',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'WhileStatement',
-              test: {type: 'Identifier', name: 'x'},
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'ContinueStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'WhileStatement',
+                test: {type: 'Identifier', name: 'x'},
+                body: {
+                  type: 'ContinueStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
               },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('continue with label inside a do-while', {
-        code: 'do continue foo; while(foo);',
+        code: 'foo: do continue foo; while(foo);',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'DoWhileStatement',
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'ContinueStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'DoWhileStatement',
+                body: {
+                  type: 'ContinueStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
+                test: {type: 'Identifier', name: 'foo'},
               },
-              test: {type: 'Identifier', name: 'foo'},
             },
           ],
         },
-        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
 
@@ -409,11 +429,11 @@ module.exports = (describe, test) =>
             code: 'for (;;)    if (x) continue   }',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'for (;;)    continue y   }',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'for (;;)    if (x) continue y   }',
           });
         });
@@ -432,11 +452,11 @@ module.exports = (describe, test) =>
             code: 'function f(){ for (;;)       if (x) continue   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'function f(){ for (;;)       continue y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'function f(){ for (;;)       if (x) continue y   }}',
           });
         });
@@ -455,11 +475,11 @@ module.exports = (describe, test) =>
             code: '() => { for (;;)       if (x) continue   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: '() => { for (;;)       continue y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: '() => { for (;;)       if (x) continue y   }}',
           });
         });
@@ -481,11 +501,11 @@ module.exports = (describe, test) =>
             code: 'while (true)    if (x) continue   }',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'while (true)    continue y   }',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'while (true)    if (x) continue y   }',
           });
         });
@@ -504,11 +524,11 @@ module.exports = (describe, test) =>
             code: 'function f(){ while (true)       if (x) continue   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'function f(){ while (true)       continue y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'function f(){ while (true)       if (x) continue y   }}',
           });
         });
@@ -527,11 +547,11 @@ module.exports = (describe, test) =>
             code: '() => { while (true)       if (x) continue   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: '() => { while (true)       continue y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: '() => { while (true)       if (x) continue y   }}',
           });
         });
@@ -553,11 +573,11 @@ module.exports = (describe, test) =>
             code: 'do     if (x) continue   ; while(true);',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'do     continue y   ; while(true);',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'do     if (x) continue y   ; while(true);',
           });
         });
@@ -576,11 +596,11 @@ module.exports = (describe, test) =>
             code: 'function f(){ do        if (x) continue   ; while(true);}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'function f(){ do        continue y   ; while(true);}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'function f(){ do        if (x) continue y   ; while(true);}',
           });
         });
@@ -599,14 +619,105 @@ module.exports = (describe, test) =>
             code: '() => { do        if (x) continue   ; while(true);}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: '() => { do        continue y   ; while(true);}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: '() => { do        if (x) continue y   ; while(true);}',
           });
         });
+      });
+    });
+
+    describe('labels', _ => {
+
+      test.pass('continue to label in while', {
+        code: 'foo: while(true)continue foo;',
+      });
+
+      test.pass('continue to label in do', {
+        code: 'foo: do continue foo; while(true)',
+      });
+
+      test.pass('continue to label in for-loop', {
+        code: 'foo: for (;;) continue foo;',
+      });
+
+      test.pass('continue to label in for-in', {
+        code: 'foo: for (x in y) continue foo;',
+      });
+
+      test.pass('continue to label in for-of', {
+        code: 'foo: for (x of y) continue foo;',
+      });
+
+      test.pass('continue to label in for-await', {
+        code: 'foo: for await (x of y) continue foo;',
+      });
+
+      test.pass('continue to label in nested if', {
+        code: 'foo: while (true) if (x) continue foo;',
+      });
+
+      test.pass('continue to label in nested else', {
+        code: 'foo: while (true) if (x); else continue foo;',
+      });
+
+      test.pass('continue to label in nested if block', {
+        code: 'foo: while (true) if (x) { continue foo; }',
+      });
+
+      test.pass('continue to label in nested block', {
+        code: 'foo: while (true) { continue foo; }',
+      });
+
+      test.pass('continue to label in nested block-if', {
+        code: 'foo: while (true) { if (x) continue foo; }',
+      });
+
+      test.pass('continue to label in nested while', {
+        code: 'foo: while (true) while (x) continue foo;',
+      });
+
+      test.pass('continue to nested inner label', {
+        code: 'bar: foo: while (true) continue foo;',
+      });
+
+      test.pass('continue to nested outer label', {
+        code: 'foo: bar: while (true) continue foo;',
+      });
+
+      test.pass('continue to nested middle label', {
+        code: 'ding: foo: bar: while (true) continue foo;',
+      });
+
+      test('continue with non-existing label', {
+        code: 'while (true) continue x;',
+        throws: 'not defined',
+      });
+
+      test('continue with label not defined in current statement sub-tree', {
+        code: 'x: foo; while (true) continue x;',
+        throws: 'not defined',
+      });
+
+      test('label defined inside current loop', {
+        code: 'while (true) x: continue x;',
+        throws: 'defined inside',
+      });
+
+      test('label defined inside nested loop', {
+        code: 'while (true) while (true) x: continue x;',
+        throws: 'defined inside',
+      });
+
+      test.pass('label defined in outer loop', {
+        code: 'while (true) x: while (true) continue x;',
+      });
+
+      test.pass('label defined before outer loop', {
+        code: 'x: while (true) while (true) continue x;',
       });
     });
   });

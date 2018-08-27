@@ -292,6 +292,8 @@ const NOT_SINGLE_IDENT_WRAP_A = ['NOT_SINGLE_IDENT_WRAP_A'];
 const NOT_SINGLE_IDENT_WRAP_NA = ['NOT_SINGLE_IDENT_WRAP_NA'];
 const INC_DECL = true;
 const EXC_DECL = false;
+const FROM_CONTINUE = true;
+const FROM_BREAK = false;
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
   let {
@@ -1305,7 +1307,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case 'await':
-        parseAwaitStatement(lexerFlags, astProp);
+        parseAwaitStatement(lexerFlags, labelSet, astProp);
         return;
 
       case 'break':
@@ -1627,23 +1629,24 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, asyncIdentToken, checkNewTarget, allowAssignment, astProp);
   }
 
-  function parseAwaitStatement(lexerFlags, astProp) {
+  function parseAwaitStatement(lexerFlags, labelSet, astProp) {
     let identToken = curtok;
+
+    ASSERT_skipRex('await', lexerFlags);
+    if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, labelSet, identToken, astProp);
 
     AST_open(astProp, 'ExpressionStatement');
 
     if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) {
+      // await as a keyword
       if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) {
         THROW('The `await` keyword in arg default must be an await expression but that is not allowed in params');
       }
-      ASSERT_skipRex('await', lexerFlags);
       parseAwaitExpression(lexerFlags, identToken, NO_ASSIGNMENT, 'expression');
       parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, LHS_NOT_PAREN_START, 'expression');
+    } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      THROW('Cannot use `await` outside of `async` functions in strict mode');
     } else {
-      if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-        THROW('Cannot use `await` outside of `async` functions');
-      }
-      ASSERT_skipRex('await', lexerFlags);
       // await as a var name
 
       let assignable = parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, NO_ASSIGNMENT, 'expression');
@@ -1719,6 +1722,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseBreakStatement(lexerFlags, labelSet, astProp) {
     ASSERT(arguments.length === parseBreakStatement.length, 'arg count');
 
+    // TODO: report incorrect reason for failure of test test262/test/language/statements/break/S12.8_A1_T2.js (fails because the label does not appear in the labelSet, since a break with label _can_ be valid)
+
     AST_open(astProp, 'BreakStatement');
     ASSERT_skipRex('break', lexerFlags);
     // a break may be followed by another identifier which must then be a valid label.
@@ -1732,6 +1737,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
       AST_setIdent('label', curtok);
 
+      if (!findLabel(labelSet, curtok.str, FROM_BREAK)) THROW('The label for this `break` was not defined in the current label set, which is illegal');
+
       ASSERT_skipRex($IDENT, lexerFlags);
     } else {
       AST_set('label', null);
@@ -1741,6 +1748,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     parseSemiOrAsi(lexerFlags);
     AST_close('BreakStatement');
+  }
+  function findLabel(labelSet, label, checkIteration) {
+    let id = '#' + label;
+
+    // for `continue` we can only accept labels defined _before_ the inner-most iteration statement that wraps it
+    // this is basically caused by https://tc39.github.io/ecma262/#sec-labelled-statements-static-semantics-containsundefinedcontinuetarget
+    let failIfFound = checkIteration === FROM_CONTINUE;
+    do {
+      if (labelSet[id]) {
+        if (failIfFound) {
+          THROW('Cannot `continue` to this label because it was defined inside the current inner-most loop');
+        }
+        return true;
+      }
+      if (failIfFound && labelSet['##']) failIfFound = false;
+      labelSet = labelSet['#'];
+    } while (labelSet);
+
+    return false;
   }
 
   function parseClassDeclaration(lexerFlags, optionalIdent, astProp) {
@@ -1827,6 +1853,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
 
       AST_setIdent('label', curtok);
+      if (!findLabel(labelSet, curtok.str, FROM_CONTINUE)) THROW('The label for this `continue` was not defined in the current label set, which is illegal');
 
       ASSERT_skipRex($IDENT, lexerFlags);
     } else {
@@ -1851,7 +1878,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex('do', lexerFlags);
     // if the next part does not start with `{` then it is not a block and ASI can not happen. otherwise dont care here
     // note that functions and classes DO get ASI
-    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags | LF_DO_WHILE_ASI : lexerFlags) | LF_IN_ITERATION, labelSet, EXC_DECL, 'body');
+    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags | LF_DO_WHILE_ASI : lexerFlags) | LF_IN_ITERATION, {'##': 'dowhile', '#': labelSet}, EXC_DECL, 'body');
     skipAnyOrDie($$W_77, 'while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
     // > 11.9.1: In ECMAScript 2015, Automatic Semicolon Insertion adds a semicolon at the end of a do-while statement if the
@@ -2073,7 +2100,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
     parseForHeader(lexerFlags | LF_NO_ASI, awaitable, astProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
-    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, labelSet, EXC_DECL, 'body');
+    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, {'##': 'for', '#': labelSet}, EXC_DECL, 'body');
     AST_close(['ForStatement', 'ForInStatement', 'ForOfStatement']);
   }
   function parseForHeader(lexerFlags, awaitable, astProp) {
@@ -2543,7 +2570,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'WhileStatement');
     ASSERT_skipAny('while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
-    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, labelSet, EXC_DECL, 'body');
+    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, {'##': 'while', '#': labelSet}, EXC_DECL, 'body');
     AST_close('WhileStatement');
   }
 
@@ -2836,6 +2863,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'LabeledStatement');
     AST_setIdent('label', identToken);
+    if (labelSet['#' + identToken.str]) THROW('Saw the same label twice which is not allowed');
+    labelSet['#' + identToken.str] = true;
     ASSERT_skipRex(':', lexerFlags);
     parseNestedBodyPart(lexerFlags | LF_CAN_FUNC_STMT, labelSet, EXC_DECL, 'body');
     AST_close('LabeledStatement');

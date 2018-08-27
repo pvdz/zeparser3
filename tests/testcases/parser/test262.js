@@ -27,9 +27,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('regexp/u-invalid-quantifiable-assertion') || // TODO: regexp /u edge cases
             has('property-escapes') || // TODO: regex \P escape https://github.com/tc39/proposal-regexp-unicode-property-escapes
 
-            has('break/S12.8') || has('continue/S12.7_A5') || has('for/S12.7_A5') || has('for/S12.6.3_A1') || has('switch/S12.7_A5') || // TODO: verify labels
-            has('early-undef-break') || has('early-undef-continue') || has('labeled/continue') || has('labeled/value-await-non-module') || // TODO: implement label collection and verification
-
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
             has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
 
@@ -84,8 +81,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
           function has(s) { return testFileName.toLowerCase().includes(s.toLowerCase()); }
 
-          if (obj.skip
-          ) {
+          if (obj.skip) {
             testObj.SKIP = true;
           } else {
             if (
@@ -101,8 +97,10 @@ if (!fs.statSync(PATH262).isDirectory()) {
               has('annexB/language/comments/multi-line-html') || // html comment in strict mode are bad
               has('annexB/language/comments/single-line-html') || // html comments in strict mode are bad
               has('await-in-generator') || // tests await being an ident inside a generator, which is outright illegal in module goal
-              testFileName.includes('delete/11.4.1-2-6.js') || // delete null
-              testFileName.includes('delete/11.4.1-2-3.js') || // delete true
+              has('delete/11.4.1-2-6.js') || // delete null
+              has('delete/11.4.1-2-3.js') || // delete true
+              has('labeled/value-await-non-module-escaped.js') || // asserts `await` can be a label name in sloppy and strict, only valid in SCRIPT goal
+              has('labeled/value-await-non-module.js') || // asserts `await` can be a label name in sloppy and strict, only valid in SCRIPT goal
             false) {
               testObj.MODULE = {SKIP: true};
             }

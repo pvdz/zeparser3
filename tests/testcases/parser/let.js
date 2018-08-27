@@ -13007,18 +13007,18 @@ module.exports = (describe, test) =>
         });
 
         test('as continue arg', {
-          code: 'while (true) let: continue let;',
+          code: 'let: while (true) continue let;',
           throws: 'strict mode',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
               body: [
                 {
-                  type: 'WhileStatement',
-                  test: {type: 'Literal', value: true, raw: 'true'},
+                  type: 'LabeledStatement',
+                  label: {type: 'Identifier', name: 'let'},
                   body: {
-                    type: 'LabeledStatement',
-                    label: {type: 'Identifier', name: 'let'},
+                    type: 'WhileStatement',
+                    test: {type: 'Literal', value: true, raw: 'true'},
                     body: {
                       type: 'ContinueStatement',
                       label: {type: 'Identifier', name: 'let'},
@@ -13027,8 +13027,8 @@ module.exports = (describe, test) =>
                 },
               ],
             },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
           },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
         });
 
         test('as sub-statement statement', {
@@ -13080,31 +13080,6 @@ module.exports = (describe, test) =>
             },
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-        });
-
-        test('as continue arg', {
-          code: 'while (true) let: continue let;',
-          throws: 'strict mode',
-          SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'WhileStatement',
-                  test: {type: 'Literal', value: true, raw: 'true'},
-                  body: {
-                    type: 'LabeledStatement',
-                    label: {type: 'Identifier', name: 'let'},
-                    body: {
-                      type: 'ContinueStatement',
-                      label: {type: 'Identifier', name: 'let'},
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
         });
 
         test('in arrow', {

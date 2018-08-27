@@ -102,122 +102,138 @@ module.exports = (describe, test) =>
       });
 
       test('break with label inside a case', {
-        code: 'switch (x) { case x: break foo; }',
+        code: 'foo: switch (x) { case x: break foo; }',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'SwitchStatement',
-              discriminant: {type: 'Identifier', name: 'x'},
-              cases: [
-                {
-                  type: 'SwitchCase',
-                  test: {type: 'Identifier', name: 'x'},
-                  consequent: [
-                    {
-                      type: 'BreakStatement',
-                      label: {type: 'Identifier', name: 'foo'},
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('break with label inside a default', {
-        code: 'switch (x) { default: break foo; }',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'SwitchStatement',
-              discriminant: {type: 'Identifier', name: 'x'},
-              cases: [
-                {
-                  type: 'SwitchCase',
-                  test: null,
-                  consequent: [
-                    {
-                      type: 'BreakStatement',
-                      label: {type: 'Identifier', name: 'foo'},
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('break with label inside a switch nested block', {
-        code: 'switch (x) { case x: if (foo) {break foo;} }',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'SwitchStatement',
-              discriminant: {type: 'Identifier', name: 'x'},
-              cases: [
-                {
-                  type: 'SwitchCase',
-                  test: {type: 'Identifier', name: 'x'},
-                  consequent: [
-                    {
-                      type: 'IfStatement',
-                      test: {type: 'Identifier', name: 'foo'},
-                      consequent: {
-                        type: 'BlockStatement',
-                        body: [
-                          {
-                            type: 'BreakStatement',
-                            label: {type: 'Identifier', name: 'foo'},
-                          },
-                        ],
-                      },
-                      alternate: null,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('break with label inside a switch nested if', {
-        code: 'switch (x) { case x: if (foo) break foo; }',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'SwitchStatement',
-              discriminant: {type: 'Identifier', name: 'x'},
-              cases: [
-                {
-                  type: 'SwitchCase',
-                  test: {type: 'Identifier', name: 'x'},
-                  consequent: [
-                    {
-                      type: 'IfStatement',
-                      test: {type: 'Identifier', name: 'foo'},
-                      consequent: {
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
+              body: {
+                type: 'SwitchStatement',
+                discriminant: {type: 'Identifier', name: 'x'},
+                cases: [
+                  {
+                    type: 'SwitchCase',
+                    test: {type: 'Identifier', name: 'x'},
+                    consequent: [
+                      {
                         type: 'BreakStatement',
                         label: {type: 'Identifier', name: 'foo'},
                       },
-                      alternate: null,
-                    },
-                  ],
-                },
-              ],
+                    ],
+                  },
+                ],
+              },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('break with label inside a default', {
+        code: 'foo: switch (x) { default: break foo; }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
+              body: {
+                type: 'SwitchStatement',
+                discriminant: {type: 'Identifier', name: 'x'},
+                cases: [
+                  {
+                    type: 'SwitchCase',
+                    test: null,
+                    consequent: [
+                      {
+                        type: 'BreakStatement',
+                        label: {type: 'Identifier', name: 'foo'},
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('break with label inside a switch nested block', {
+        code: 'foo: switch (x) { case x: if (foo) {break foo;} }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
+              body: {
+                type: 'SwitchStatement',
+                discriminant: {type: 'Identifier', name: 'x'},
+                cases: [
+                  {
+                    type: 'SwitchCase',
+                    test: {type: 'Identifier', name: 'x'},
+                    consequent: [
+                      {
+                        type: 'IfStatement',
+                        test: {type: 'Identifier', name: 'foo'},
+                        consequent: {
+                          type: 'BlockStatement',
+                          body: [
+                            {
+                              type: 'BreakStatement',
+                              label: {type: 'Identifier', name: 'foo'},
+                            },
+                          ],
+                        },
+                        alternate: null,
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('break with label inside a switch nested if', {
+        code: 'foo: switch (x) { case x: if (foo) break foo; }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
+              body: {
+                type: 'SwitchStatement',
+                discriminant: {type: 'Identifier', name: 'x'},
+                cases: [
+                  {
+                    type: 'SwitchCase',
+                    test: {type: 'Identifier', name: 'x'},
+                    consequent: [
+                      {
+                        type: 'IfStatement',
+                        test: {type: 'Identifier', name: 'foo'},
+                        consequent: {
+                          type: 'BreakStatement',
+                          label: {type: 'Identifier', name: 'foo'},
+                        },
+                        alternate: null,
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
 
@@ -304,98 +320,118 @@ module.exports = (describe, test) =>
       });
 
       test('break with label inside a for-loop', {
-        code: 'for (;;) break foo',
+        code: 'foo: for (;;) break foo',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ForStatement',
-              init: null,
-              test: null,
-              update: null,
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'BreakStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'ForStatement',
+                init: null,
+                test: null,
+                update: null,
+                body: {
+                  type: 'BreakStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
               },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('break with label inside a for-in', {
-        code: 'for (x in y) break foo',
+        code: 'foo: for (x in y) break foo',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ForInStatement',
-              left: {type: 'Identifier', name: 'x'},
-              right: {type: 'Identifier', name: 'y'},
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'BreakStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'ForInStatement',
+                left: {type: 'Identifier', name: 'x'},
+                right: {type: 'Identifier', name: 'y'},
+                body: {
+                  type: 'BreakStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
               },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('break with label inside a for-of', {
-        code: 'for (x of y) break foo',
+        code: 'foo: for (x of y) break foo',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'ForOfStatement',
-              left: {type: 'Identifier', name: 'x'},
-              right: {type: 'Identifier', name: 'y'},
-              await: false,
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'BreakStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'ForOfStatement',
+                left: {type: 'Identifier', name: 'x'},
+                right: {type: 'Identifier', name: 'y'},
+                await: false,
+                body: {
+                  type: 'BreakStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
               },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('break with label inside a while', {
-        code: 'while (x) break foo',
+        code: 'foo: while (x) break foo',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'WhileStatement',
-              test: {type: 'Identifier', name: 'x'},
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'BreakStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'WhileStatement',
+                test: {type: 'Identifier', name: 'x'},
+                body: {
+                  type: 'BreakStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
               },
             },
           ],
         },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
       });
 
       test('break with label inside a do-while', {
-        code: 'do break foo; while(foo);',
+        code: 'foo: do break foo; while(foo);',
         ast: {
           type: 'Program',
           body: [
             {
-              type: 'DoWhileStatement',
+              type: 'LabeledStatement',
+              label: {type: 'Identifier', name: 'foo'},
               body: {
-                type: 'BreakStatement',
-                label: {type: 'Identifier', name: 'foo'},
+                type: 'DoWhileStatement',
+                body: {
+                  type: 'BreakStatement',
+                  label: {type: 'Identifier', name: 'foo'},
+                },
+                test: {type: 'Identifier', name: 'foo'},
               },
-              test: {type: 'Identifier', name: 'foo'},
             },
           ],
         },
-        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
 
@@ -408,31 +444,39 @@ module.exports = (describe, test) =>
     });
 
     test('break at eof (with label, with semi)', {
-      code: 'break foo;',
+      code: 'foo: break foo;',
       ast: {
         type: 'Program',
         body: [
           {
-            type: 'BreakStatement',
+            type: 'LabeledStatement',
             label: {type: 'Identifier', name: 'foo'},
+            body: {
+              type: 'BreakStatement',
+              label: {type: 'Identifier', name: 'foo'},
+            },
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
     });
 
     test('break at eof (with label, without semi)', {
-      code: 'break foo',
+      code: 'foo: break foo',
       ast: {
         type: 'Program',
         body: [
           {
-            type: 'BreakStatement',
+            type: 'LabeledStatement',
             label: {type: 'Identifier', name: 'foo'},
+            body: {
+              type: 'BreakStatement',
+              label: {type: 'Identifier', name: 'foo'},
+            },
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $ASI],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
     });
 
     test.fail('double break', {
@@ -444,11 +488,11 @@ module.exports = (describe, test) =>
     });
 
     test.fail('double break with label and semi', {
-      code: 'break foo;break;',
+      code: 'foo: break foo;break;',
     });
 
     test.fail('double break with label and asi', {
-      code: 'break foo\nbreak;',
+      code: 'foo: break foo\nbreak;',
     });
     
     describe('nesting', _ => {
@@ -468,39 +512,6 @@ module.exports = (describe, test) =>
           test.fail('nested', {
             code: 'if (x) break',
           });
-
-          test('labeled', {
-            code: 'break y',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'BreakStatement',
-                  label: {type: 'Identifier', name: 'y'},
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $ASI],
-          });
-
-          test('labeled nested', {
-            code: 'if (x) break y',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'IfStatement',
-                  test: {type: 'Identifier', name: 'x'},
-                  consequent: {
-                    type: 'BreakStatement',
-                    label: {type: 'Identifier', name: 'y'},
-                  },
-                  alternate: null,
-                },
-              ],
-            },
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
-          });
         });
 
         describe('function', _ => {
@@ -517,63 +528,12 @@ module.exports = (describe, test) =>
             code: 'function f(){    if (x) break   }',
           });
 
-          test('labeled', {
+          test.fail('labeled', {
             code: 'function f(){    break y   }',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [],
-                  body: {
-                    type: 'BlockStatement',
-                    body: [
-                      {
-                        type: 'BreakStatement',
-                        label: {type: 'Identifier', name: 'y'},
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR],
           });
 
-          test('labeled nested', {
+          test.fail('labeled nested', {
             code: 'function f(){    if (x) break y   }',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [],
-                  body: {
-                    type: 'BlockStatement',
-                    body: [
-                      {
-                        type: 'IfStatement',
-                        test: {type: 'Identifier', name: 'x'},
-                        consequent: {
-                          type: 'BreakStatement',
-                          label: {type: 'Identifier', name: 'y'},
-                        },
-                        alternate: null,
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR],
           });
         });
 
@@ -595,69 +555,12 @@ module.exports = (describe, test) =>
             code: '() => {    if (x) break   }',
           });
 
-          test('labeled', {
+          test.fail('labeled', {
             code: '() => {    break y   }',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {
-                      type: 'BlockStatement',
-                      body: [
-                        {
-                          type: 'BreakStatement',
-                          label: {type: 'Identifier', name: 'y'},
-                        },
-                      ],
-                    },
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR, $ASI],
           });
 
-          test('labeled nested', {
+          test.fail('labeled nested', {
             code: '() => {    if (x) break y   }',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {
-                      type: 'BlockStatement',
-                      body: [
-                        {
-                          type: 'IfStatement',
-                          test: {type: 'Identifier', name: 'x'},
-                          consequent: {
-                            type: 'BreakStatement',
-                            label: {type: 'Identifier', name: 'y'},
-                          },
-                          alternate: null,
-                        },
-                      ],
-                    },
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR, $ASI],
           });
         });
       });
@@ -678,11 +581,11 @@ module.exports = (describe, test) =>
             code: 'switch (x){ case z:    if (x) break   }',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'switch (x){ case z:    break y   }',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'switch (x){ case z:    if (x) break y   }',
           });
         });
@@ -701,11 +604,11 @@ module.exports = (describe, test) =>
             code: 'function f(){ switch (x){ case z:       if (x) break   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'function f(){ switch (x){ case z:       break y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'function f(){ switch (x){ case z:       if (x) break y   }}',
           });
         });
@@ -720,11 +623,11 @@ module.exports = (describe, test) =>
             code: '() => { switch (x){ case z:       if (x) break   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: '() => { switch (x){ case z:       break y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: '() => { switch (x){ case z:       if (x) break y   }}',
           });
         });
@@ -746,11 +649,11 @@ module.exports = (describe, test) =>
             code: 'for (;;)    if (x) break   }',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'for (;;)    break y   }',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'for (;;)    if (x) break y   }',
           });
         });
@@ -769,11 +672,11 @@ module.exports = (describe, test) =>
             code: 'function f(){ for (;;)       if (x) break   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'function f(){ for (;;)       break y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'function f(){ for (;;)       if (x) break y   }}',
           });
         });
@@ -792,11 +695,11 @@ module.exports = (describe, test) =>
             code: '() => { for (;;)       if (x) break   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: '() => { for (;;)       break y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: '() => { for (;;)       if (x) break y   }}',
           });
         });
@@ -818,11 +721,11 @@ module.exports = (describe, test) =>
             code: 'while (true)    if (x) break   }',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'while (true)    break y   }',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'while (true)    if (x) break y   }',
           });
         });
@@ -841,11 +744,11 @@ module.exports = (describe, test) =>
             code: 'function f(){ while (true)       if (x) break   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'function f(){ while (true)       break y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'function f(){ while (true)       if (x) break y   }}',
           });
         });
@@ -864,11 +767,11 @@ module.exports = (describe, test) =>
             code: '() => { while (true)       if (x) break   }}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: '() => { while (true)       break y   }}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: '() => { while (true)       if (x) break y   }}',
           });
         });
@@ -890,11 +793,11 @@ module.exports = (describe, test) =>
             code: 'do     if (x) break   ; while(true);',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'do     break y   ; while(true);',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'do     if (x) break y   ; while(true);',
           });
         });
@@ -913,11 +816,11 @@ module.exports = (describe, test) =>
             code: 'function f(){ do        if (x) break   ; while(true);}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: 'function f(){ do        break y   ; while(true);}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: 'function f(){ do        if (x) break y   ; while(true);}',
           });
         });
@@ -936,16 +839,87 @@ module.exports = (describe, test) =>
             code: '() => { do        if (x) break   ; while(true);}',
           });
 
-          test.pass('labeled', {
+          test.fail('labeled', {
             code: '() => { do        break y   ; while(true);}',
           });
 
-          test.pass('labeled nested', {
+          test.fail('labeled nested', {
             code: '() => { do        if (x) break y   ; while(true);}',
           });
         });
       });
     });
-  });
 
-// break sans loop (with label)
+    describe('labels', _ => {
+
+      test.pass('break to label in while', {
+        code: 'foo: while(true)break foo;',
+      });
+
+      test.pass('break to label in do', {
+        code: 'foo: do break foo; while(true)',
+      });
+
+      test.pass('break to label in for-loop', {
+        code: 'foo: for (;;) break foo;',
+      });
+
+      test.pass('break to label in for-in', {
+        code: 'foo: for (x in y) break foo;',
+      });
+
+      test.pass('break to label in for-of', {
+        code: 'foo: for (x of y) break foo;',
+      });
+
+      test.pass('break to label in for-await', {
+        code: 'foo: for await (x of y) break foo;',
+      });
+
+      test.pass('break to label in nested if', {
+        code: 'foo: while (true) if (x) break foo;',
+      });
+
+      test.pass('break to label in nested else', {
+        code: 'foo: while (true) if (x); else break foo;',
+      });
+
+      test.pass('break to label in nested if block', {
+        code: 'foo: while (true) if (x) { break foo; }',
+      });
+
+      test.pass('break to label in nested block', {
+        code: 'foo: while (true) { break foo; }',
+      });
+
+      test.pass('break to label in nested block-if', {
+        code: 'foo: while (true) { if (x) break foo; }',
+      });
+
+      test.pass('break to label in nested while', {
+        code: 'foo: while (true) while (x) break foo;',
+      });
+
+      test.pass('break to nested inner label', {
+        code: 'bar: foo: while (true) break foo;',
+      });
+
+      test.pass('break to nested outer label', {
+        code: 'foo: bar: while (true) break foo;',
+      });
+
+      test.pass('break to nested middle label', {
+        code: 'ding: foo: bar: while (true) break foo;',
+      });
+
+      test('break with non-existing label', {
+        code: 'break x;',
+        throws: 'not defined',
+      });
+
+      test('break with label not defined in current statement sub-tree', {
+        code: 'x: foo; break x;',
+        throws: 'not defined',
+      });
+    });
+  });
