@@ -2087,4 +2087,111 @@ module.exports = (describe, test) => describe('async keyword', function() {
       code: 'class x {async foo () \n {}}',
     });
   });
+
+  describe('introduced in es8', _ => {
+
+    // these tests only check es7 since there is plenty of coverage for es8+ and es6 is pretty much covered by es7
+
+    test.fail('func decl', {
+      code: 'async function f(){}',
+      ES: 7,
+    });
+
+    test.fail('func expr', {
+      code: 'x = async function(){}',
+      ES: 7,
+    });
+
+    test.fail('func named expr', {
+      code: 'x = async function(){}',
+      ES: 7,
+    });
+
+    test.fail('arrow no args', {
+      code: 'async () => {}',
+      ES: 7,
+    });
+
+    test.fail('arrow one arg', {
+      code: 'async x => {}',
+      ES: 7,
+    });
+
+    test.fail('arrow multiple args', {
+      code: 'async (x, y) => {}',
+      ES: 7,
+    });
+
+    test.pass('obj method name', {
+      code: 'x = {async(){}}',
+      ES: 7,
+    });
+
+    test.fail('async obj method', {
+      code: 'x = {async foo(){}}',
+      ES: 7,
+    });
+
+    test.fail('class async method', {
+      code: 'class x {async foo(){}}',
+      ES: 7,
+    });
+
+    test.pass('class method name', {
+      code: 'class x {async(){}}',
+      ES: 7,
+    });
+
+    test.pass('class named async', {
+      code: 'class async {}',
+      ES: 7,
+    });
+
+    test.pass('call', {
+      code: 'async()',
+      ES: 7,
+    });
+
+    test.pass('multilined call', {
+      code: 'async \n ()',
+      ES: 7,
+    });
+
+    test.pass('async asi ident', {
+      code: 'async \n foo',
+      ES: 7,
+    });
+
+    test.pass('async asi single-arg arrow', {
+      code: 'async \n foo => foo',
+      ES: 7,
+    });
+
+    test.fail('async asi parened arrow', {
+      code: 'async \n () => x',
+      desc: 'troublesome case in es8+ mode but easy here (it fails on the arrow since it force-parses a func call)',
+      ES: 7,
+    });
+
+    test.pass('async asi function', {
+      code: 'async \n function f(){}',
+      ES: 7,
+    });
+
+    test.pass('assign async asi function', {
+      code: 'let x = async \n function f(){}',
+      ES: 7,
+    });
+
+    test.pass('let async asi function', {
+      code: 'let async \n function f(){}',
+      ES: 7,
+    });
+
+    test.fail('async asi method', {
+      code: 'x = {async \n foo(){}}',
+      desc: 'still an error',
+      ES: 7,
+    });
+  });
 });

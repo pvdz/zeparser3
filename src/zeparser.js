@@ -185,6 +185,7 @@ let { default: ZeTokenizer,
 // <BODY>
 
 const VERSION_EXPONENTIATION = 7;
+const VERSION_ASYNC = 8;
 const VERSION_TRAILING_FUNC_COMMAS = 8;
 const VERSION_ASYNC_GEN = 9;
 const VERSION_OBJECTSPREAD = 9;
@@ -311,6 +312,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 or infin');
 
   let allowTrailingFunctionComma = targetEsVersion >= VERSION_TRAILING_FUNC_COMMAS || targetEsVersion === VERSION_WHATEVER;
+  let allowAsyncFunctions = targetEsVersion >= VERSION_ASYNC || targetEsVersion === VERSION_WHATEVER;
   let allowAsyncGenerators = targetEsVersion >= VERSION_ASYNC_GEN || targetEsVersion === VERSION_WHATEVER;
 
   if (getTokenizer) getTokenizer(tok);
@@ -1146,6 +1148,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression');
 
+    ASSERT(!isAsync || allowAsyncFunctions, 'async = es8');
+    ASSERT(!isAsync || !isGenerator || allowAsyncGenerators, 'async generators = es9');
+
     AST_set('generator', isGenerator);
     AST_set('async', isAsync);
     AST_set('expression', isRealFuncExpr);
@@ -1503,7 +1508,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //   - else: `async(..)`
     // - else: `async` as a var name
 
-    if (curtok.str === 'in' || curtok.str === 'instanceof' || curtype === $EOF) {
+    if (curtok.str === 'in' || curtok.str === 'instanceof' || curtype === $EOF || !allowAsyncFunctions) {
       return parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, asyncIdentToken, checkNewTarget, allowAssignment, astProp);
     }
 
@@ -3220,17 +3225,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // conditional keywords (strict mode or context)
       case 'await':
-        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
-        // > IdentifierReference: await
-        // > BindingIdentifier: await
-        // > LabelIdentifier: await
-        // > It is a Syntax Error if the goal symbol of the syntactic grammar is Module.
-        // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
-        if (goalMode === GOAL_MODULE) {
-          return 'Await is illegal outside of async body with module goal';
-        } else {
-          // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
-          if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) return 'Await not allowed here';
+        // await wasnt a keyword before es8, when async was introduced
+        if (allowAsyncFunctions) {
+          // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+          // > IdentifierReference: await
+          // > BindingIdentifier: await
+          // > LabelIdentifier: await
+          // > It is a Syntax Error if the goal symbol of the syntactic grammar is Module.
+          // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
+          if (goalMode === GOAL_MODULE) {
+            return 'Await is illegal outside of async body with module goal';
+          } else {
+            // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
+            if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) return 'Await not allowed here';
+          }
         }
         break;
       case 'yield':
@@ -3346,17 +3354,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // conditional keywords
       case 'await':
-        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
-        // > IdentifierReference: await
-        // > BindingIdentifier: await
-        // > LabelIdentifier: await
-        // > It is a Syntax Error if the goal symbol of the syntactic grammar is Module.
-        // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
-        if (goalMode === GOAL_MODULE) {
-          THROW('Await is illegal outside of async body with module goal');
-        } else {
-          // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
-          if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) THROW('Await not allowed here');
+        // await wasn't a keyword before es8, when async was introduced
+        if (allowAsyncFunctions) {
+          // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+          // > IdentifierReference: await
+          // > BindingIdentifier: await
+          // > LabelIdentifier: await
+          // > It is a Syntax Error if the goal symbol of the syntactic grammar is Module.
+          // (Additionally productions are restricted by the `await` parameter... parser/lexerflags should take care of that)
+          if (goalMode === GOAL_MODULE) {
+            THROW('Await is illegal outside of async body with module goal');
+          } else {
+            // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
+            if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) THROW('Await not allowed here');
+          }
         }
         break;
       case 'yield':
@@ -4502,6 +4513,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(_path[_path.length - 1] && _path[_path.length - 1].params, 'params should be wrapped in arrow node now');
     AST_scanYieldInParams(_path[_path.length - 1].params);
 
+    ASSERT(!isAsync || allowAsyncFunctions, 'async = es8');
+
     AST_set('id', null);
     AST_set('generator', false);
     AST_set('async', isAsync);
@@ -5433,9 +5446,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let identToken = curtok;
         ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
 
-        if (curc !== $$PAREN_L_28 && curtok.nl && identToken.str === 'async') {
-          // this is `{async \n ..(){}}` which is always an error due to async being a restricted production
-          THROW('Async methods are a restricted production and cannot have a newline following it');
+        if (allowAsyncFunctions) {
+          if (curc !== $$PAREN_L_28 && curtok.nl && identToken.str === 'async') {
+            // this is `{async \n ..(){}}` which is always an error due to async being a restricted production
+            THROW('Async methods are a restricted production and cannot have a newline following it');
+          }
         }
 
         let wasConstructor = isClassMethod === IS_CLASS_METHOD && staticToken === undefined && curc === $$PAREN_L_28 && identToken.str === 'constructor';
@@ -5675,9 +5690,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_setIdent(astProp, identToken);
           parseObjectLikeMethodAfterKey(lexerFlags, staticToken, starToken, undefined, identToken, isClassMethod, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
         } else {
-          if (curtok.str === 'async') {
-            // - `({*async x(){}})`     // NOT an async generator! just an error
-            THROW('Found `* async x(){}` but this should be `async * x(){}`'); // provided it's supported at all...
+          if (allowAsyncFunctions) {
+            if (curtok.str === 'async') {
+              // - `({*async x(){}})`     // NOT an async generator! just an error
+              THROW('Found `* async x(){}` but this should be `async * x(){}`'); // provided it's supported at all...
+            }
           }
           if (curtok.str === 'get' || curtok.str === 'set') {
             // - `({*get x(){}})`
@@ -5984,7 +6001,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         kind = IS_GETTER;
       } else if (identToken.str === 'set') {
         kind = IS_SETTER;
-      } else if (identToken.str !== 'async') {
+      } else if (!allowAsyncFunctions || identToken.str !== 'async') {
         if (!isClassMethod || identToken.str !== 'static') {
           THROW('Did not expect another identifier while parsing an object literal property');
         }
@@ -6028,7 +6045,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (identToken.str === 'get') THROW('A getter cannot be a generator');
       if (identToken.str === 'set') THROW('A setter cannot be a generator');
       ASSERT(identToken.str !== 'static', 'this case is caught elsewhere');
-      if (identToken.str !== 'async') THROW('the only method modifier allowed to have a generator is `async`');
+      if (identToken.str !== 'async') THROW('the only method modifier allowed to have a generator is `async` (since es9)');
+      if (!allowAsyncFunctions) THROW('Async functions are not supported by the current targeted language version');
+      if (!allowAsyncGenerators) THROW('Async generators are not supported by the current targeted language version');
 
       if (curtype === $IDENT) {
         // `class x{   async *foo(a){}   }`
@@ -6096,42 +6115,48 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _parseDynamicProperty(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp);
   }
   function _parseDynamicProperty(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp) {
-    console.trace('before parseDynamicProperty:', ''+isGenerator)
     let modifier = modifierIdentToken ? modifierIdentToken.str : '';
+
+    let generatorState = (isGenerator && isGenerator.str === '*') ? WAS_GENERATOR : NOT_GENERATOR;
+    let asyncState = NOT_ASYNC;
+
+    let kind = NOT_GETSET;
+    let kindValue = '';
+    if (modifier === 'get') {
+      kind = IS_GETTER;
+      kindValue = 'get';
+    } else if (modifier === 'set') {
+      kind = IS_SETTER;
+      kindValue = 'set';
+    } else if (modifier === 'async') {
+      if (!allowAsyncFunctions) {
+        THROW('Async functions are not supported in the currently targeted language version');
+      } else if (generatorState === WAS_GENERATOR && !allowAsyncGenerators) {
+        THROW('Async generators are not supported in the currently targeted language version');
+      } else {
+        asyncState = WAS_ASYNC;
+        kindValue = isClassMethod === IS_CLASS_METHOD ? 'method' : 'init';
+      }
+    } else {
+      kind = NOT_GETSET;
+      kindValue = isClassMethod === IS_CLASS_METHOD ? 'method' : 'init';
+    }
+
     if (isClassMethod === IS_CLASS_METHOD) {
       AST_wrapClosed(astProp, 'MethodDefinition', 'key');
       AST_set('static', !!isStatic);
       AST_set('computed', true);
-      let kind = NOT_GETSET;
-      if (modifier === 'get') {
-        AST_set('kind', 'get'); // only getters/setters get special value here
-        kind = IS_GETTER;
-      } else if (modifier === 'set') {
-        AST_set('kind', 'set'); // only getters/setters get special value here
-        kind = IS_SETTER;
-      } else {
-        AST_set('kind', 'method'); // only getters/setters get special value here
-      }
-
+      AST_set('kind', kindValue); // only getters/setters get special value here
       if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
-      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, (isGenerator && isGenerator.str === '*') ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, kind, 'value');
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, kind, 'value');
 
       AST_close('MethodDefinition');
     } else {
       AST_wrapClosed(astProp, 'Property', 'key');
-      let kind = NOT_GETSET;
-      if (modifier === 'get') {
-        AST_set('kind', 'get'); // only getters/setters get special value here
-        kind = IS_GETTER;
-      } else if (modifier === 'set') {
-        AST_set('kind', 'set'); // only getters/setters get special value here
-        kind = IS_SETTER;
-      } else {
-        AST_set('kind', 'init'); // objects get init, classes get method
-      }
+      AST_set('kind', kindValue); // only getters/setters get special value here
       AST_set('method', true);
       AST_set('computed', true);
-      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, (isGenerator && isGenerator.str === '*') ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, kind, 'value');
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, kind, 'value');
       AST_set('shorthand', false);
       AST_close('Property');
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
@@ -6407,11 +6432,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof isDynamic === 'boolean', 'isDynamic is a bool');
 
     let modifier = asyncgetsetToken ? asyncgetsetToken.str : '';
+    let asyncState = NOT_ASYNC;
+    let generatorState = isGenerator ? WAS_GENERATOR : NOT_GENERATOR;
+
+    if (modifier === 'async') {
+      if (!allowAsyncFunctions) {
+        THROW('Async functions are not supported in the currently targeted language version');
+      } else if (isGenerator && !allowAsyncGenerators) {
+        THROW('Async generators are not supported in the currently targeted language version');
+      } else {
+        asyncState = WAS_ASYNC;
+      }
+    }
 
     if (isClassMethod) {
       AST_wrapClosed(astProp, 'MethodDefinition', 'key');
       AST_set('static', !!isStatic);
       AST_set('computed', !!isDynamic);
+
+      let constructorState = NOT_CONSTRUCTOR;
 
       // constructor cant have get/set/*/async but can be static
       let isConstructor = keyToken && (keyToken.str === 'constructor' && !isStatic);
@@ -6421,20 +6460,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // (generator, async, async gen, get, set)
 
         if (modifier !== '' || isGenerator) THROW('The constructor can not be a getter, setter, async, or generator');
+        constructorState = IS_CONSTRUCTOR;
         AST_set('kind', 'constructor');
+      } else if (isGetSet === IS_GETTER) {
+        AST_set('kind', 'get'); // only getters/setters get special value here
+      } else if (isGetSet === IS_SETTER) {
+        AST_set('kind', 'set'); // only getters/setters get special value here
       } else {
-        if (isGetSet === IS_GETTER) {
-          AST_set('kind', 'get'); // only getters/setters get special value here
-        } else if (isGetSet === IS_SETTER) {
-          AST_set('kind', 'set'); // only getters/setters get special value here
-        } else {
-          ASSERT(isGetSet === NOT_GETSET, 'enum');
-          AST_set('kind', 'method'); // only getters/setters get special value here
-        }
+        ASSERT(isGetSet === NOT_GETSET, 'enum');
+        AST_set('kind', 'method'); // only getters/setters get special value here
       }
 
       ASSERT(curc === $$PAREN_L_28, 'should have parsed everything before the method args now');
-      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, isConstructor?IS_CONSTRUCTOR:NOT_CONSTRUCTOR, IS_METHOD, isGetSet, 'value');
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, constructorState, IS_METHOD, isGetSet, 'value');
 
       AST_close('MethodDefinition');
     } else {
@@ -6452,7 +6490,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('computed', !!isDynamic);
 
       ASSERT(curc === $$PAREN_L_28, 'should have parsed everything before the method args now');
-      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, isGenerator ? WAS_GENERATOR : NOT_GENERATOR, modifier === 'async' ? WAS_ASYNC : NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, isGetSet, 'value');
+      parseFunctionAfterKeyword(lexerFlags, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, isGetSet, 'value');
 
       AST_set('shorthand', false);
       AST_close('Property');
