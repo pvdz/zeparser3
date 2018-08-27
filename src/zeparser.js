@@ -1,4 +1,3 @@
-//import {
 let {
   $$A_61,
   $$A_UC_41,
@@ -110,10 +109,8 @@ let {
 
   ASSERT,
   THROW: _THROW,
-} = require('./utils'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from 'utils';
+} = require('./utils');
 
-//import ZeTokenizer, {
 let { default: ZeTokenizer,
   $ASI,
   $EOF,
@@ -179,8 +176,7 @@ let { default: ZeTokenizer,
   WEB_COMPAT_ON,
 
   debug_toktype,
-} = require('../src/zetokenizer'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from '../src/zetokenizer';
+} = require('../src/zetokenizer');
 
 // <BODY>
 
@@ -321,8 +317,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let curtok = null;
   let curtype = 0;
   let curc = 0;
-
-  let webModeWarnings = []; // when parsing anything that is only accepted because of annex B in the spec <token, desc>
 
   let traceast = false;
 

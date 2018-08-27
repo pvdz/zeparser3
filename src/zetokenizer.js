@@ -1,7 +1,6 @@
 // relevant: https://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-lexical-grammar
 // https://tc39.github.io/ecma262/
 
-//import {
 let {
   $$A_61,
   $$A_UC_41,
@@ -112,8 +111,7 @@ let {
   $$BOM_FEFF,
 
   ASSERT,
-} = require('./utils'); // nodejs doesnt support import and wont for a while, it seems (https://medium.com/the-node-js-collection/an-update-on-es6-modules-in-node-js-42c958b890c)
-//} from 'utils';
+} = require('./utils');
 
 // <BODY>
 
@@ -405,100 +403,6 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     tokens = tokenStorage;
     nextToken.tokens = tokens; // probably will want to find a better way..
   }
-
-  //let funcs = [
-  //  //[peek, 'peek'],
-  //  //[peekd, 'peekd',],
-  //  //[peeky, 'peeky',],
-  //  //[peekyd, 'peekyd',],
-  //  //[slice, 'slice',],
-  //  //[peekSkip, 'peekSkip',],
-  //  //[skipPeek, 'skipPeek',],
-  //  //[skip, 'skip',],
-  //  //[eof, 'eof',],
-  //  //[eofd, 'eofd',],
-  //  //[neof, 'neof',],
-  //  //[neofd, 'neofd',],
-  //  //[ASSERT_skip, 'ASSERT_skip',],
-  //  //[nextToken, 'nextToken',],
-  //  //[addAsi, 'addAsi',],
-  //  //[createToken, 'createToken',],
-  //  //[next, 'next',],
-  //  [parseLeadingDot, 'parseLeadingDot',],
-  //  //[parseCR, 'parseCR',],
-  //  //[parseSingleString, 'parseSingleString',],
-  //  //[parseDoubleString, 'parseDoubleString',],
-  //  //[parseAnyString, 'parseAnyString',],
-  //  //[parseStringEscape, 'parseStringEscape',],
-  //  //[parseIdentOrStringEscapeUnicode, 'parseIdentOrStringEscapeUnicode',],
-  //  //[parseStringEscapeUnicodeQuad, 'parseStringEscapeUnicodeQuad',],
-  //  //[parseStringEscapeUnicodeVary, 'parseStringEscapeUnicodeVary',],
-  //  //[skipZeroes, 'skipZeroes',],
-  //  //[parseStringEscapeHex, 'parseStringEscapeHex',],
-  //  //[parseStringEscapeOctal, 'parseStringEscapeOctal',],
-  //  //[parseSameOrCompound, 'parseSameOrCompound',],
-  //  //[parseTemplateString, 'parseTemplateString',],
-  //  //[parseLeadingZero, 'parseLeadingZero',],
-  //  //[parseDecimal, 'parseDecimal',],
-  //  //[skipDigits, 'skipDigits',],
-  //  //[parseExponentMaybe, 'parseExponentMaybe',],
-  //  //[parseFromFractionDot, 'parseFromFractionDot',],
-  //  //[parseHex, 'parseHex',],
-  //  //[isHex, 'isHex',],
-  //  //[parseOctal, 'parseOctal',],
-  //  //[isOctal, 'isOctal',],
-  //  //[parseBinary, 'parseBinary',],
-  //  //[parseExcl, 'parseExcl',],
-  //  //[parseStar, 'parseStar',],
-  //  //[parseIdentifierRest, 'parseIdentifierRest',],
-  //  //[_parseIdentifierRest, '_parseIdentifierRest',],
-  //  //[parseIdentFromUnicodeEscape, 'parseIdentFromUnicodeEscape',],
-  //  //[isIdentStart, 'isIdentStart',],
-  //  //[isIdentRestChr, 'isIdentRestChr',],
-  //  //[isAsciiLetter, 'isAsciiLetter',],
-  //  //[isAsciiNumber, 'isAsciiNumber',],
-  //  //[parseCompoundAssignment, 'parseCompoundAssignment',],
-  //  //[parseFwdSlash, 'parseFwdSlash',],
-  //  //[parseSingleFwdSlash, 'parseSingleFwdSlash',],
-  //  //[parseSingleComment, 'parseSingleComment',],
-  //  //[parseMultiComment, 'parseMultiComment',],
-  //  //[parseEqual, 'parseEqual',],
-  //  //[parseLtPunctuator, 'parseLtPunctuator',],
-  //  //[parseGtPunctuator, 'parseGtPunctuator',],
-  //  //[parseNewline, 'parseNewline',],
-  //  //[parseBackslash, 'parseBackslash',],
-  //  //[parseRegex, 'parseRegex',],
-  //  //[parseRegexBody, 'parseRegexBody',],
-  //  //[_parseRegexBody, '_parseRegexBody',],
-  //  //[parseRegexAtomEscape, 'parseRegexAtomEscape',],
-  //  //[parseBackReference, 'parseBackReference',],
-  //  //[parseRegexUnicodeEscape, 'parseRegexUnicodeEscape',],
-  //  //[parseRegexUnicodeEscapeQuad, 'parseRegexUnicodeEscapeQuad',],
-  //  //[parseRegexUnicodeEscapeVary, 'parseRegexUnicodeEscapeVary',],
-  //  //[parseRegexCharClass, 'parseRegexCharClass',],
-  //  //[parseClassCharEscape, 'parseClassCharEscape',],
-  //  //[hexToNum, 'hexToNum',],
-  //  //[parseRegexFlags, 'parseRegexFlags',],
-  //  //[parseRegexCurlyQuantifier, 'parseRegexCurlyQuantifier',],
-  //  //[isSurrogateLead, 'isSurrogateLead',],
-  //  //[isSurrogateTail, 'isSurrogateTail',],
-  //  //[getSurrogate, 'getSurrogate',],
-  //  //[parseRegexUnicodeEscape2, 'parseRegexUnicodeEscape2',],
-  //  //[parseRegexUnicodeEscapeQuad2, 'parseRegexUnicodeEscapeQuad2',],
-  //  //[parseRegexUnicodeEscapeVary2, 'parseRegexUnicodeEscapeVary2',],
-  //  //[parseOtherUnicode, 'parseOtherUnicode',],
-  //  //[THROW, 'THROW',],
-  //  //[isLfPsLs, 'isLfPsLs',],
-  //  //[debug_toktype, 'debug_toktype',],
-  //];
-
-  //(function(){
-  //  try {
-  //    funcs.forEach(([f]) => eval('%OptimizeFunctionOnNextCall(f);'))
-  //  } catch(e) {
-  //    console.log('the eval on %OptimizeFunctionOnNextCall crashed');
-  //  }
-  //})();
 
   function peek() {
     ASSERT(neof(), 'pointer not oob');
@@ -1630,7 +1534,6 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     return _parseRegexBody(c, 0, ALWAYS_GOOD);
   }
   function _parseRegexBody(c, groupLevel, uflagStatus) {
-//console.log('_parseRegexBody', uflagStatus, groupLevel, '0x' + c.toString(16))
     //ASSERT(typeof c === 'number', 'c is an ord');
     ASSERT(typeof groupLevel === 'number' && groupLevel >= 0, 'valid group level');
     ASSERT(typeof uflagStatus === 'number' && uflagStatus >= 0, 'valid flag');
@@ -1648,9 +1551,6 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     }
 
     do {
-//console.log('_parseRegexBody loop:', c, 'x' + c.toString(16), '[' + String.fromCharCode(c)+']', uflagStatus)
-      //ASSERT(afterAtom = 1, 'making sure afterAtom is set everywhere (will break tests but shouldnt throw at all)');
-
       switch (c) {
         case $$FWDSLASH_2F:
           // end of regex body
@@ -2917,30 +2817,8 @@ function debug_toktype(type, ignoreUnknown) {
   }
 }
 
-// conditional compilation
-//let printStatus = new function(){ // such hacks.
-//  try {
-//    return Function('fn', 'name', `
-//      let s = %GetOptimizationStatus(fn);
-//      switch(s) {
-//        case 1: console.log('Function '+name+' is 1: optimized'); break;
-//        case 2: console.log('Function '+name+' is 2: not optimized'); break;
-//        case 3: console.log('Function '+name+' is 3: always optimized'); break;
-//        case 4: console.log('Function '+name+' is 4: never optimized'); break;
-//        case 6: console.log('Function '+name+' is 6: maybe deoptimized'); break;
-//        case 7: console.log('Function '+name+' is 7: optimized by TurboFan'); break;
-//        default: console.log('Unknown optimization status for '+name); break;
-//      }
-//    `);
-//  } catch(e) {
-//    return function(){};
-//  }
-//};
-
 // </BODY>
 
-//export default ZeTokenizer;
-//export {
 require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   $ASI,
   $COMMENT,
