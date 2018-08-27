@@ -348,8 +348,8 @@ const NON_START = false;
 
 const CHARCLASS_BAD = 0x110000;
 const CHARCLASS_BAD_RANGE = 0x110001;
-const CHARCLASS_BADU = 1<<23;
-const CHARCLASS_BADN = 1<<24;
+const CHARCLASS_BAD_SANS_U_FLAG = 1<<23;
+const CHARCLASS_BAD_WITH_U_FLAG = 1<<24;
 
 const EOF_SYMBOL = 0x10000; // well. it's better than undefined. (todo: write blog post and refer to that)
 
@@ -380,6 +380,8 @@ let NOT_A_REGEX_ERROR = '';
 function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD, tokenStorage = []) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === Infinity, 'only support v6~9 right now');
+
+  const supportRegexPropertyEscapes = targetEsVersion === 9 || targetEsVersion === Infinity;
 
   let pointer = 0;
   let len = input.length;
@@ -1809,7 +1811,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           // explicit quantifier
           ASSERT_skip($$CURLY_L_7B);
           if (afterAtom) {
-            if (!parseRegexCurlyQuantifier()) {
+            if (!parseRegexCurlyQuantifier() && webCompat === WEB_COMPAT_OFF) {
               uflagStatus = regexSyntaxError('Encountered unescaped closing curly `}` while not parsing a quantifier');
             }
             if (neof() && peeky($$QMARK_3F)) {
@@ -1821,10 +1823,21 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           }
           break;
         case $$CURLY_R_7D:
-          // this is always bad since we have a quantifier parser that consumes valid curlies
           ASSERT_skip($$CURLY_R_7D);
-          uflagStatus = regexSyntaxError('Encountered unescaped closing curly `}` while not parsing a quantifier');
-          afterAtom = false;
+          if (webCompat === WEB_COMPAT_OFF) {
+            // this is always bad since we have a quantifier parser that consumes valid curlies
+            uflagStatus = regexSyntaxError('Encountered unescaped closing curly `}` while not parsing a quantifier');
+            afterAtom = false;
+          } else {
+            // in web compat mode you're allowed to have an unescaped curly as atom
+            if (uflagStatus === ALWAYS_GOOD) {
+              uflagStatus = GOOD_SANS_U_FLAG;
+            } else if (uflagStatus === GOOD_WITH_U_FLAG) {
+              uflagStatus = regexSyntaxError('Found a rhs curly as an Atom, only valid without u-flag and with web compat mode, but already found something that invalidates not having the u-flag so cant validate this regex');
+            }
+            // in web compat mode this case is treated as an extended atom
+            afterAtom = false;
+          }
           break;
 
         case $$CR_0D:
@@ -1905,6 +1918,22 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         // "an error occurs if either ClassAtom does not represent a single character (for example, if one is \w)
         ASSERT_skip(c);
         return ALWAYS_GOOD;
+
+      // Unicode property escapes \p{<?...?>} \P{<?...?>}
+      case $$P_70:
+      case $$P_UC_50:
+        let regexPropState = parseRegexPropertyEscape(c);
+        if (regexPropState === ALWAYS_BAD) {
+          return ALWAYS_BAD;
+        } else if (regexPropState === GOOD_SANS_U_FLAG) {
+          // semantically ignored without u-flag, syntactically only okay in web-compat / Annex B mode
+          if (webCompat === WEB_COMPAT_ON) return GOOD_SANS_U_FLAG;
+          return ALWAYS_BAD;
+        } else {
+          ASSERT(regexPropState === GOOD_WITH_U_FLAG, 'parseRegexPropertyEscape should not return ALWAYS_GOOD and this is an enum');
+          if (webCompat === WEB_COMPAT_ON) return ALWAYS_GOOD;
+          return GOOD_WITH_U_FLAG;
+        }
 
       // syntax chars
       case $$XOR_5E:
@@ -2169,20 +2198,26 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         return parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState);
       } else if (c === $$BACKSLASH_5C) {
         ASSERT_skip($$BACKSLASH_5C);
-        c = parseClassCharEscape(); // note: this may lead to c being >0xffff !!
+        c = parseClassCharEscape(); // note: this may lead to c being >0xffff !! can also be 0 for certain escapes
 
         if (c === CHARCLASS_BAD) {
           flagState = regexSyntaxError('Encountered early EOF while parsing char class');
-        } else if (c & CHARCLASS_BADN) {
-          c = c ^ CHARCLASS_BADN; // remove the badn flag (dont use ^= because that deopts... atm; https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean )
+        } else if (c & CHARCLASS_BAD_WITH_U_FLAG) {
+          c = c ^ CHARCLASS_BAD_WITH_U_FLAG; // remove the CHARCLASS_BAD_WITH_U_FLAG flag (dont use ^= because that deopts... atm; https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean )
           ASSERT(c <= 0x110000, 'c should now be valid unicode range or one above for error');
           if (c === CHARCLASS_BAD) flagState = regexSyntaxError('Bad character class body');
           else if (flagState === ALWAYS_GOOD) flagState = GOOD_SANS_U_FLAG;
-          else if (flagState === GOOD_SANS_U_FLAG) flagState = regexSyntaxError('Unknown reason that is only an error with u-flag while parsing a character class');
-          //} else if (c === CHARCLASS_BAD_RANGE) { // check at range time
-          //  console.log('got a class escape that is only bad in range')
-          ASSERT(flagState === GOOD_SANS_U_FLAG, 'either way, the flag state should now reflect badn');
+          else if (flagState === GOOD_WITH_U_FLAG) flagState = regexSyntaxError('Unknown reason that is only an error with u-flag while parsing a character class');
+          ASSERT(flagState === GOOD_SANS_U_FLAG || flagState === ALWAYS_BAD, 'either way, the flag state should now reflect "bad with u-flag", or worse');
+        } else  if (c & CHARCLASS_BAD_SANS_U_FLAG) {
+          // this condition is currently only met when a bad property escape was found
+          if (flagState === GOOD_SANS_U_FLAG) flagState = regexSyntaxError('Unknown reason that is only an error with u-flag while parsing a character class');
+          else if (flagState === ALWAYS_GOOD) flagState = GOOD_WITH_U_FLAG;
+          else {
+            ASSERT(flagState === GOOD_WITH_U_FLAG || flagState === ALWAYS_BAD, 'enum');
+          }
         }
+        // else char class is good :)
       } else if (c === $$CR_0D || c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
         return regexSyntaxError('Encountered newline'); // same as end of input
       } else {
@@ -2259,10 +2294,12 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     let c = peek();
 
     switch (c) {
+      // \u<????> and \u{<?..?>}
       case $$U_75:
         ASSERT_skip($$U_75);
         return parseRegexUnicodeEscape2();
 
+      // \x<??>
       case $$X_78:
         ASSERT_skip($$X_78);
         if (eofd(1)) return CHARCLASS_BAD;
@@ -2274,7 +2311,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         ASSERT_skip(b);
         return (hexToNum(a) << 4) | hexToNum(b);
 
-      // char escapes
+      // char escapes \c<?>
       case $$C_63:
         ASSERT_skip($$C_63);
         if (neof()) {
@@ -2287,13 +2324,14 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         return CHARCLASS_BAD;
 
       // "A ClassAtom can use any of the escape sequences that are allowed in the rest of the regular expression except for \b, \B, and backreferences. Inside a CharacterClass, \b means the backspace character, while \B and backreferences raise errors. Using a backreference inside a ClassAtom causes an error."
+      // \b and \B
       case $$B_62: // "Return the CharSet containing the single character <BS> U+0008 (BACKSPACE)."
         ASSERT_skip($$B_62);
         return 0x0008;
       case $$B_UC_42:
         return CHARCLASS_BAD_RANGE;
 
-      // control escapes
+      // control escapes \f \n \r \t \v
       case $$F_66:
         ASSERT_skip($$F_66);
         return 0x000C;
@@ -2310,7 +2348,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         ASSERT_skip($$V_76);
         return 0x000B;
 
-      // char class escapes
+      // char class escapes \d \D \s \S \w \W
       case $$D_64:
       case $$D_UC_44:
       case $$S_73:
@@ -2323,6 +2361,22 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         // range with or without u flag but not the other. so difficult.
         ASSERT_skip(c);
         return CHARCLASS_BAD_RANGE;
+
+      // Unicode property escapes \p{<?...?>} \P{<?...?>}
+      case $$P_70:
+      case $$P_UC_50:
+        let regexPropState = parseRegexPropertyEscape(c);
+        if (regexPropState === ALWAYS_BAD) {
+          return CHARCLASS_BAD;
+        } else if (regexPropState === GOOD_SANS_U_FLAG) {
+          // semantically ignored without u-flag, syntactically only okay in web-compat / Annex B mode
+          if (webCompat === WEB_COMPAT_ON) return CHARCLASS_BAD_WITH_U_FLAG;
+          return CHARCLASS_BAD;
+        } else {
+          ASSERT(regexPropState === GOOD_WITH_U_FLAG, 'parseRegexPropertyEscape should not return ALWAYS_GOOD and this is an enum');
+          if (webCompat === WEB_COMPAT_ON) return 0; // ok, no flags
+          return CHARCLASS_BAD_SANS_U_FLAG;
+        }
 
       // digits
       case $$0_30:
@@ -2373,7 +2427,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           return $$DASH_2D;
         } else {
           // only valid with u-flag!
-          return $$DASH_2D | CHARCLASS_BADN;
+          return $$DASH_2D | CHARCLASS_BAD_WITH_U_FLAG;
         }
 
       default:
@@ -2385,7 +2439,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         // so we can already not be valid for u flag, we just need to check here whether we can be valid without u-flag
         if (!isIdentRestChr(c)) {
           ASSERT_skip(c);
-          return c | CHARCLASS_BADN;
+          return c | CHARCLASS_BAD_WITH_U_FLAG;
         }
         // else return bad char class because the escape is bad
         console.warn('Tokenizer $ERROR: the char class had an escape that would not be valid with and without u-flag');
@@ -2394,6 +2448,45 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     // bad escapes
     ASSERT_skip(c);
     return CHARCLASS_BAD;
+  }
+  function parseRegexPropertyEscape(c) {
+    ASSERT(c === $$P_70 || c === $$P_UC_50, 'this should be \\p');
+    ASSERT(peek() === c, 'not yet consumed');
+    // introduced in ES9 / ES2018; https://github.com/tc39/proposal-regexp-unicode-property-escapes
+    if (!supportRegexPropertyEscapes) {
+      if (webCompat === WEB_COMPAT_ON) return GOOD_SANS_U_FLAG;
+      return regexSyntaxError('Property escapes are not supported by the currently targeted language version  ');
+    }
+
+    // https://tc39.github.io/ecma262/#prod-CharacterClassEscape
+    // Note: the `\p` is illegal in non-u-flag regexes because `p` and `P` are not part of CharacterClassEscape
+    // Additionally, the parser would trip over the curlies that ought to follow it since it'd be an invalid range.
+    // It would be fine in web-compat because neither is a problem in the escape bit (see the IdentityEscape in
+    // https://tc39.github.io/ecma262/#prod-annexB-CharacterEscape) nor for the braces (see ExtendedPatternCharacter in
+    // https://tc39.github.io/ecma262/#prod-annexB-ExtendedAtom). And since the syntax of `\p` is tightly controlled
+    // this should only change semantics without causing potential syntax errors by ignoring the `\p` escape.
+
+    // skip the p and assert it is immediately followed by a curly
+    if (skipPeek() !== $$CURLY_L_7B) {
+      if (webCompat === WEB_COMPAT_ON) return GOOD_SANS_U_FLAG;
+      return regexSyntaxError('Property escape \\p must be followed by a curly bracket (and would be illegal without u-flag)');
+    }
+
+    // skip the curly which was just asserted
+    if (skipPeek() === $$CURLY_R_7D) {
+      return regexSyntaxError('Cannot have empty property name brackets (and would be illegal without u-flag too)');
+    }
+
+    // now skip the Unicode Property name until the first closing curly
+    while (skipPeek() !== $$CURLY_R_7D) {
+      if (eof()) {
+        if (webCompat === WEB_COMPAT_ON) return GOOD_SANS_U_FLAG;
+        return regexSyntaxError('Unexpected EOF while parsing property escape (which would be illegal without u-flag too)');
+      }
+    }
+
+    ASSERT_skip($$CURLY_R_7D);
+    return GOOD_WITH_U_FLAG;
   }
   function hexToNum(c) {
     ASSERT(isHex(c), 'hexToNum c should be verified hex');
@@ -2617,7 +2710,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       a = skipZeroes();
       if (!isHex(a)) {
         // note: we already asserted a zero
-        return a === $$CURLY_R_7D ? 0 | CHARCLASS_BADN : CHARCLASS_BAD;
+        return a === $$CURLY_R_7D ? 0 | CHARCLASS_BAD_WITH_U_FLAG : CHARCLASS_BAD;
       }
       ASSERT_skip(a);
     }
@@ -2628,7 +2721,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let b = peek();
     if (!isHex(b)) {
-      if (b === $$CURLY_R_7D) return hexToNum(a) | CHARCLASS_BADN;
+      if (b === $$CURLY_R_7D) return hexToNum(a) | CHARCLASS_BAD_WITH_U_FLAG;
       return CHARCLASS_BAD;
     }
     ASSERT_skip(b);
@@ -2639,7 +2732,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let c = peek();
     if (!isHex(c)) {
-      if (c === $$CURLY_R_7D) return (hexToNum(a) << 4) | hexToNum(b) | CHARCLASS_BADN;
+      if (c === $$CURLY_R_7D) return (hexToNum(a) << 4) | hexToNum(b) | CHARCLASS_BAD_WITH_U_FLAG;
       return CHARCLASS_BAD;
     }
     ASSERT_skip(c);
@@ -2650,7 +2743,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let d = peek();
     if (!isHex(d)) {
-      if (d === $$CURLY_R_7D) return (hexToNum(a) << 8) | (hexToNum(b) << 4) | hexToNum(c) | CHARCLASS_BADN;
+      if (d === $$CURLY_R_7D) return (hexToNum(a) << 8) | (hexToNum(b) << 4) | hexToNum(c) | CHARCLASS_BAD_WITH_U_FLAG;
       return CHARCLASS_BAD;
     }
     ASSERT_skip(d);
@@ -2661,7 +2754,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let e = peek();
     if (!isHex(e)) {
-      if (e === $$CURLY_R_7D) return (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d) | CHARCLASS_BADN;
+      if (e === $$CURLY_R_7D) return (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d) | CHARCLASS_BAD_WITH_U_FLAG;
       return CHARCLASS_BAD;
     }
     ASSERT_skip(e);
@@ -2672,7 +2765,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let f = peek();
     if (!isHex(f)) {
-      if (f === $$CURLY_R_7D) return (hexToNum(a) << 16) | (hexToNum(b) << 12) | (hexToNum(c) << 8) | (hexToNum(d) << 4) | hexToNum(e) | CHARCLASS_BADN;
+      if (f === $$CURLY_R_7D) return (hexToNum(a) << 16) | (hexToNum(b) << 12) | (hexToNum(c) << 8) | (hexToNum(d) << 4) | hexToNum(e) | CHARCLASS_BAD_WITH_U_FLAG;
       return CHARCLASS_BAD;
     }
     ASSERT_skip(f);
@@ -2681,7 +2774,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (peek() !== $$CURLY_R_7D) return CHARCLASS_BAD;
 
     let r = (hexToNum(a) << 20) | (hexToNum(b) << 16) | (hexToNum(c) << 12) | (hexToNum(d) << 8) | (hexToNum(e) << 4) | hexToNum(f);
-    return Math.min(0x110000, r) | CHARCLASS_BADN;
+    return Math.min(0x110000, r) | CHARCLASS_BAD_WITH_U_FLAG;
   }
 
   function parseOtherUnicode(c) {
@@ -2702,6 +2795,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   }
 
   function THROW(str) {
+    console.error('Throwing this error:', str);
     _THROW('Tokenizer error! ' + str);
   }
   function _THROW(str) {

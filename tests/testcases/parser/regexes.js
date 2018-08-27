@@ -192,4 +192,224 @@ module.exports = (describe, test) => describe('regexes', _ => {
   test.fail('weird escape in char class is bad with u flag', {
     code: '/[\\ ]/u',
   });
+
+  test.pass('character class escape without arg', {
+    code: '/[\\d]/',
+  });
+
+  describe('property escapes', _ => {
+
+    describe('not web compat', _ => {
+
+      describe('es8 / es2017', _ => {
+
+        // illegal before es9 unless web
+
+        test.fail('property escapes are invalid without u flag', {
+          code: '/a\\p{x}b/',
+          ES: 8,
+        });
+
+        test.fail('property escapes are valid with u flag', {
+          code: '/a\\p{x}b/u',
+          ES: 8,
+        });
+
+        test.fail('class property escapes are illegal without u flag', {
+          code: '/[a\\p{x}b]/',
+          desc: 'illegal escape char sans flag',
+          ES: 8,
+        });
+
+        test.fail('class property escapes are valid with u flag', {
+          code: '/[a\\p{x}b]/u',
+          ES: 8,
+        });
+
+        test.fail('double property escapes sans u flag', {
+          code: '/\\p{Hex}\\P{Hex}/',
+          ES: 8,
+        });
+
+        test.fail('double class property escapes sans u flag', {
+          code: '/[\\p{Hex}\\P{Hex}]/',
+          ES: 8,
+        });
+
+        test.fail('double property escapes with u flag', {
+          code: '/\\p{Hex}\\P{Hex}/u',
+          ES: 8,
+        });
+
+        test.fail('double class property escapes with u flag', {
+          code: '/[\\p{Hex}\\P{Hex}]/u',
+          ES: 8,
+        });
+      });
+
+      describe('es9 / es latest / default', _ => {
+
+        [undefined, 9, Infinity].forEach(ES => {
+
+          test.fail('property escapes are invalid without u flag', {
+            code: '/a\\p{x}b/',
+            ES,
+          });
+
+          test.pass('property escapes are valid with u flag', {
+            code: '/a\\p{x}b/u',
+            ES,
+          });
+
+          test.fail('class property escapes are illegal without u flag', {
+            code: '/[a\\p{x}b]/',
+            desc: 'illegal escape char sans flag',
+            ES,
+          });
+
+          test.pass('class property escapes are valid with u flag', {
+            code: '/[a\\p{x}b]/u',
+            ES,
+          });
+
+          test.fail('double property escapes sans u flag', {
+            code: '/\\p{Hex}\\P{Hex}/',
+            ES,
+          });
+
+          test.fail('double class property escapes sans u flag', {
+            code: '/[\\p{Hex}\\P{Hex}]/',
+            ES,
+          });
+
+          test.pass('double property escapes with u flag', {
+            code: '/\\p{Hex}\\P{Hex}/u',
+            ES,
+          });
+
+          test.pass('double class property escapes with u flag', {
+            code: '/[\\p{Hex}\\P{Hex}]/u',
+            ES,
+          });
+        });
+      });
+    });
+
+    describe('web compat', _ => {
+
+      describe('es8 / es2017', _ => {
+
+        // before es9 only legal in web compat mode and without u flag
+
+        test.pass('property escapes are invalid without u flag', {
+          code: '/a\\p{x}b/',
+          ES: 8,
+          WEB: true,
+        });
+
+        test.fail('property escapes are valid with u flag', {
+          code: '/a\\p{x}b/u',
+          ES: 8,
+          WEB: true,
+        });
+
+        test.pass('class property escapes are illegal without u flag', {
+          code: '/[a\\p{x}b]/',
+          desc: 'illegal escape char sans flag',
+          ES: 8,
+          WEB: true,
+        });
+
+        test.fail('class property escapes are valid with u flag', {
+          code: '/[a\\p{x}b]/u',
+          ES: 8,
+          WEB: true,
+        });
+
+        test.pass('double property escapes sans u flag', {
+          code: '/\\p{Hex}\\P{Hex}/',
+          ES: 8,
+          WEB: true,
+        });
+
+        test.pass('double class property escapes sans u flag', {
+          code: '/[\\p{Hex}\\P{Hex}]/',
+          ES: 8,
+          WEB: true,
+        });
+
+        test.fail('double property escapes with u flag', {
+          code: '/\\p{Hex}\\P{Hex}/u',
+          ES: 8,
+          WEB: true,
+        });
+
+        test.fail('double class property escapes with u flag', {
+          code: '/[\\p{Hex}\\P{Hex}]/u',
+          ES: 8,
+          WEB: true,
+        });
+      });
+
+      describe('es9 / es latest / default', _ => {
+
+        [undefined, 9, Infinity].forEach(ES => {
+
+          test.pass('property escapes are invalid without u flag', {
+            code: '/a\\p{x}b/',
+            ES,
+            WEB: true,
+          });
+
+          test.pass('property escapes are valid with u flag', {
+            code: '/a\\p{x}b/u',
+            ES,
+          });
+
+          test.pass('class property escapes are illegal without u flag', {
+            code: '/[a\\p{x}b]/',
+            desc: 'illegal escape char sans flag',
+            ES,
+            WEB: true,
+          });
+
+          test.pass('class property escapes are valid with u flag', {
+            code: '/[a\\p{x}b]/u',
+            ES,
+            WEB: true,
+          });
+
+          test.pass('double property escapes sans u flag', {
+            code: '/\\p{Hex}\\P{Hex}/',
+            ES,
+            WEB: true,
+          });
+
+          test.pass('double class property escapes sans u flag', {
+            code: '/[\\p{Hex}\\P{Hex}]/',
+            ES,
+            WEB: true,
+          });
+
+          test.pass('double property escapes with u flag', {
+            code: '/\\p{Hex}\\P{Hex}/u',
+            ES,
+            WEB: true,
+          });
+
+          test.pass('double class property escapes with u flag', {
+            code: '/[\\p{Hex}\\P{Hex}]/u',
+            ES,
+            WEB: true,
+          });
+
+          test.pass('edge case', {
+            code: '/[\\d]/',
+            ES,
+            WEB: true,
+          });
+        });
+      });
+    });
+  });
 });
