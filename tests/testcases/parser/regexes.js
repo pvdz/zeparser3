@@ -419,6 +419,72 @@ module.exports = (describe, test) => describe('regexes', _ => {
 
     describe('without u flag', _ => {
 
+      describe('not quantified (litmus)', _ => {
+
+        test.pass('start of line/input', {
+          code: '/^x/',
+        });
+
+        test.pass('end of line/input', {
+          code: '/x$/',
+        });
+
+        test.pass('word break', {
+          code: '/a\\bb/',
+        });
+
+        test.pass('not word break', {
+          code: '/a\\Bb/',
+        });
+
+        test.pass('positive lookahead', {
+          code: '/a(?=x)b/',
+        });
+        test.pass('negative lookahead', {
+          code: '/a(?!x)b/',
+        });
+
+        test.pass('positive lookbehind default', {
+          code: '/a(?<=x)b/',
+        });
+
+        test.fail('positive lookbehind es8', {
+          code: '/a(?<=x)b/',
+          desc: 'added in es9 so fails here',
+          ES: 8,
+        });
+
+        test.pass('positive lookbehind es9', {
+          code: '/a(?<=x)b/',
+          ES: 9,
+        });
+
+        test.pass('positive lookbehind es latest', {
+          code: '/a(?<=x)b/',
+          ES: Infinity,
+        });
+
+        test.pass('negative lookbehind default', {
+          code: '/a(?<!x)b/',
+        });
+
+        test.fail('negative lookbehind es8', {
+          code: '/a(?<!x)b/',
+          desc: 'added in es9 so fails here',
+          ES: 8,
+        });
+
+        test.pass('negative lookbehind es9', {
+          code: '/a(?<!x)b/',
+          ES: 9,
+        });
+
+        test.pass('negative lookbehind es latest', {
+          code: '/a(?<!x)b/',
+          ES: Infinity,
+        });
+      });
+
       describe('not webcompat', _ => {
 
         test.fail('start of line/input', {
@@ -441,7 +507,7 @@ module.exports = (describe, test) => describe('regexes', _ => {
           code: '/a(?=x)?b/',
         });
 
-        test.fail('negaitve lookahead', {
+        test.fail('negative lookahead', {
           code: '/a(?!x)?b/',
         });
 
@@ -449,7 +515,7 @@ module.exports = (describe, test) => describe('regexes', _ => {
           code: '/a(?<=x)?b/',
         });
 
-        test.fail('negaitve lookbehind', {
+        test.fail('negative lookbehind', {
           code: '/a(?<!x)?b/',
         });
       });
@@ -481,7 +547,7 @@ module.exports = (describe, test) => describe('regexes', _ => {
           WEB: true,
         });
 
-        test.pass('negaitve lookahead', {
+        test.pass('negative lookahead', {
           code: '/a(?!x)?b/',
           WEB: true,
         });
@@ -491,7 +557,7 @@ module.exports = (describe, test) => describe('regexes', _ => {
           WEB: true,
         });
 
-        test.fail('negaitve lookbehind', {
+        test.fail('negative lookbehind', {
           code: '/a(?<!x)?b/',
           WEB: true,
         });
@@ -499,6 +565,41 @@ module.exports = (describe, test) => describe('regexes', _ => {
     });
 
     describe('with u flag', _ => {
+
+      describe('not quantified (litmus)', _ => {
+
+        test.pass('start of line/input', {
+          code: '/^x/u',
+        });
+
+        test.pass('end of line/input', {
+          code: '/x$/u',
+        });
+
+        test.pass('word break', {
+          code: '/a\\bb/u',
+        });
+
+        test.pass('not word break', {
+          code: '/a\\Bb/u',
+        });
+
+        test.pass('positive lookahead', {
+          code: '/a(?=x)b/u',
+        });
+
+        test.pass('negative lookahead', {
+          code: '/a(?!x)b/u',
+        });
+
+        test.pass('positive lookbehind', {
+          code: '/a(?<=x)b/u',
+        });
+
+        test.pass('negative lookbehind', {
+          code: '/a(?<!x)b/u',
+        });
+      });
 
       describe('not webcompat', _ => {
 
@@ -522,7 +623,7 @@ module.exports = (describe, test) => describe('regexes', _ => {
           code: '/a(?=x)?b/u',
         });
 
-        test.fail('negaitve lookahead', {
+        test.fail('negative lookahead', {
           code: '/a(?!x)?b/u',
         });
 
@@ -530,7 +631,7 @@ module.exports = (describe, test) => describe('regexes', _ => {
           code: '/a(?<=x)?b/u',
         });
 
-        test.fail('negaitve lookbehind', {
+        test.fail('negative lookbehind', {
           code: '/a(?<!x)?b/u',
         });
       });
@@ -562,7 +663,7 @@ module.exports = (describe, test) => describe('regexes', _ => {
           WEB: true,
         });
 
-        test.fail('negaitve lookahead', {
+        test.fail('negative lookahead', {
           code: '/a(?!x)?b/u',
           WEB: true,
         });
@@ -572,7 +673,7 @@ module.exports = (describe, test) => describe('regexes', _ => {
           WEB: true,
         });
 
-        test.fail('negaitve lookbehind', {
+        test.fail('negative lookbehind', {
           code: '/a(?<!x)?b/u',
           WEB: true,
         });

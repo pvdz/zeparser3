@@ -58,7 +58,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
           // particular features (especially new ones) will be mentioned in the header so we can filter en-mass based on that here
           // generated: call arg trailing comma
-          if (/features:.*(?:numeric-separator-literal|bigint|regexp-dotall|regexp-lookbehind|regexp-named-groups|class-fields-public|class-fields-private|optional-catch-binding)/i.test(code)) obj.skip = true;
+          if (/features:.*(?:numeric-separator-literal|bigint|regexp-dotall|regexp-named-groups|class-fields-public|class-fields-private|optional-catch-binding)/i.test(code)) obj.skip = true;
 
           let headerEndMarker = '---*/';
           let headerEnd = code.indexOf(headerEndMarker);

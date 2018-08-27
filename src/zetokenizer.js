@@ -382,6 +382,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === Infinity, 'only support v6~9 right now');
 
   const supportRegexPropertyEscapes = targetEsVersion === 9 || targetEsVersion === Infinity;
+  const supportRegexLookbehinds = targetEsVersion === 9 || targetEsVersion === Infinity;
 
   let pointer = 0;
   let len = input.length;
@@ -1719,6 +1720,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           // Assertions `(?=` and `(?!` can not have quantifiers (`?`,`*`,etc) except without u-flag and in web-compat mode
           // Since this can also be a non-capturing group `(?:` we need to track that bit.
           let wasAssertion = false;
+          let wasUnfixableAssertion = false; // lookbehind can not get quantified even under webcompat flag (too new)
 
           // parse group (?: (!: (
           ASSERT_skip($$PAREN_L_28);
@@ -1737,10 +1739,24 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
               break;
             }
             c = peek();
-            if (c === $$COLON_3A || c === $$IS_3D || c === $$EXCL_21) {
+            if (c === $$COLON_3A || c === $$IS_3D || c === $$EXCL_21 || c === $$LT_3C) {
               // non capturing group
-              // (?: (?= (?!
-              if (c === $$IS_3D || c === $$EXCL_21) {
+              // (?: (?= (?! (?<= (?<!
+              if (c === $$LT_3C) {
+                // (?<
+                if (!supportRegexLookbehinds) {
+                  THROW('Lookbehinds in regular expressions are not supported in the currently targeted language version');
+                }
+                ASSERT_skip(c);
+                c = peek();
+                if (c === $$IS_3D || c === $$EXCL_21) {
+                  // (?<= (?<!
+                  wasUnfixableAssertion = true;
+                } else {
+                  uflagStatus = regexSyntaxError('The lookbehind group `(?<` must be followed by `=` or `!` but wasnt [ord=' + c + ']');
+                  break;
+                }
+              } else if (c === $$IS_3D || c === $$EXCL_21) {
                 // (?= (?!
                 wasAssertion = true; // lookahead assertion might only be quantified without u-flag and in webcompat mode
               }
@@ -1761,7 +1777,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           let subbad = _parseRegexBody(c, groupLevel + 1, ALWAYS_GOOD);
 
           c = peek();
-          if (wasAssertion && (c === $$QMARK_3F || c === $$CURLY_L_7B || c === $$STAR_2A || c === $$PLUS_2B)) {
+          if ((wasAssertion || wasUnfixableAssertion) && (c === $$QMARK_3F || c === $$CURLY_L_7B || c === $$STAR_2A || c === $$PLUS_2B)) {
             // Found a quantified assertion
             // Only `(?=` and `(?!` can be legal in web compat mode and without the u-flag. Anything else is always bad.
             if (wasAssertion && webCompat === WEB_COMPAT_ON) {
