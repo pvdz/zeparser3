@@ -412,4 +412,171 @@ module.exports = (describe, test) => describe('regexes', _ => {
       });
     });
   });
+
+  describe('assertions have no quantifier unless web and sans u', _ => {
+
+    // production of assertions: https://tc39.github.io/ecma262/#prod-Assertion
+
+    describe('without u flag', _ => {
+
+      describe('not webcompat', _ => {
+
+        test.fail('start of line/input', {
+          code: '/^?x/',
+        });
+
+        test.fail('end of line/input', {
+          code: '/x$?/',
+        });
+
+        test.fail('word break', {
+          code: '/a\\b?b/',
+        });
+
+        test.fail('not word break', {
+          code: '/a\\B?b/',
+        });
+
+        test.fail('positive lookahead', {
+          code: '/a(?=x)?b/',
+        });
+
+        test.fail('negaitve lookahead', {
+          code: '/a(?!x)?b/',
+        });
+
+        test.fail('positive lookbehind', {
+          code: '/a(?<=x)?b/',
+        });
+
+        test.fail('negaitve lookbehind', {
+          code: '/a(?<!x)?b/',
+        });
+      });
+
+      describe('webcompat', _ => {
+
+        test.fail('start of line/input', {
+          code: '/^?x/',
+          WEB: true,
+        });
+
+        test.fail('end of line/input', {
+          code: '/x$?/',
+          WEB: true,
+        });
+
+        test.fail('word break', {
+          code: '/a\\b?b/',
+          WEB: true,
+        });
+
+        test.fail('not word break', {
+          code: '/a\\B?b/',
+          WEB: true,
+        });
+
+        test.pass('positive lookahead', {
+          code: '/a(?=x)?b/',
+          WEB: true,
+        });
+
+        test.pass('negaitve lookahead', {
+          code: '/a(?!x)?b/',
+          WEB: true,
+        });
+
+        test.fail('positive lookbehind', {
+          code: '/a(?<=x)?b/',
+          WEB: true,
+        });
+
+        test.fail('negaitve lookbehind', {
+          code: '/a(?<!x)?b/',
+          WEB: true,
+        });
+      });
+    });
+
+    describe('with u flag', _ => {
+
+      describe('not webcompat', _ => {
+
+        test.fail('start of line/input', {
+          code: '/^?x/u',
+        });
+
+        test.fail('end of line/input', {
+          code: '/x$?/u',
+        });
+
+        test.fail('word break', {
+          code: '/a\\b?b/u',
+        });
+
+        test.fail('not word break', {
+          code: '/a\\B?b/u',
+        });
+
+        test.fail('positive lookahead', {
+          code: '/a(?=x)?b/u',
+        });
+
+        test.fail('negaitve lookahead', {
+          code: '/a(?!x)?b/u',
+        });
+
+        test.fail('positive lookbehind', {
+          code: '/a(?<=x)?b/u',
+        });
+
+        test.fail('negaitve lookbehind', {
+          code: '/a(?<!x)?b/u',
+        });
+      });
+
+      describe('webcompat', _ => {
+
+        test.fail('start of line/input', {
+          code: '/^?x/u',
+          WEB: true,
+        });
+
+        test.fail('end of line/input', {
+          code: '/x$?/u',
+          WEB: true,
+        });
+
+        test.fail('word break', {
+          code: '/a\\b?b/u',
+          WEB: true,
+        });
+
+        test.fail('not word break', {
+          code: '/a\\B?b/u',
+          WEB: true,
+        });
+
+        test.fail('positive lookahead', {
+          code: '/a(?=x)?b/u',
+          WEB: true,
+        });
+
+        test.fail('negaitve lookahead', {
+          code: '/a(?!x)?b/u',
+          WEB: true,
+        });
+
+        test.fail('positive lookbehind', {
+          code: '/a(?<=x)?b/u',
+          WEB: true,
+        });
+
+        test.fail('negaitve lookbehind', {
+          code: '/a(?<!x)?b/u',
+          WEB: true,
+        });
+      });
+    });
+  });
 });

@@ -1648,6 +1648,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     do {
 //console.log('_parseRegexBody loop:', c, 'x' + c.toString(16), '[' + String.fromCharCode(c)+']', uflagStatus)
       //ASSERT(afterAtom = 1, 'making sure afterAtom is set everywhere (will break tests but shouldnt throw at all)');
+
       switch (c) {
         case $$FWDSLASH_2F:
           // end of regex body
@@ -1670,7 +1671,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         case $$XOR_5E:
           // atom; match start of a line/file
           ASSERT_skip($$XOR_5E);
-          afterAtom = true;
+          afterAtom = false; // this Assertion can never have a Quantifier
           break;
 
         case $$DOT_2E:
@@ -1682,13 +1683,14 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         case $$$_24:
           // atom; match the end of a file/line
           ASSERT_skip($$$_24);
-          afterAtom = true;
+          afterAtom = false; // this Assertion can never have a Quantifier
           break;
 
         case $$BACKSLASH_5C:
           // atom escape is different from charclass escape
           ASSERT_skip($$BACKSLASH_5C);
           afterAtom = true; // except in certain cases...
+
 
           if (eof()) {
             uflagStatus = regexSyntaxError('Early EOF');
@@ -1697,7 +1699,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             // \b \B cannot have quantifiers
             if (d === $$B_62 || d === $$B_UC_42) {
               ASSERT_skip(d);
-              afterAtom = false;
+              afterAtom = false; // this Assertion can never have a Quantifier
             } else {
               let escapeStatus = parseRegexAtomEscape(d);
               if (escapeStatus === ALWAYS_BAD) {
@@ -1714,6 +1716,10 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           break;
 
         case $$PAREN_L_28:
+          // Assertions `(?=` and `(?!` can not have quantifiers (`?`,`*`,etc) except without u-flag and in web-compat mode
+          // Since this can also be a non-capturing group `(?:` we need to track that bit.
+          let wasAssertion = false;
+
           // parse group (?: (!: (
           ASSERT_skip($$PAREN_L_28);
           afterAtom = false; // useless. just in case
@@ -1724,6 +1730,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           }
           c = peek();
           if (c === $$QMARK_3F) {
+            // (?
             ASSERT_skip($$QMARK_3F);
             if (eof()) {
               uflagStatus = regexSyntaxError('Encountered early EOF');
@@ -1731,8 +1738,13 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             }
             c = peek();
             if (c === $$COLON_3A || c === $$IS_3D || c === $$EXCL_21) {
-              ASSERT_skip(c);
               // non capturing group
+              // (?: (?= (?!
+              if (c === $$IS_3D || c === $$EXCL_21) {
+                // (?= (?!
+                wasAssertion = true; // lookahead assertion might only be quantified without u-flag and in webcompat mode
+              }
+              ASSERT_skip(c);
               if (eof()) {
                 uflagStatus = regexSyntaxError('Encountered early EOF');
                 break;
@@ -1747,6 +1759,21 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           }
 
           let subbad = _parseRegexBody(c, groupLevel + 1, ALWAYS_GOOD);
+
+          c = peek();
+          if (wasAssertion && (c === $$QMARK_3F || c === $$CURLY_L_7B || c === $$STAR_2A || c === $$PLUS_2B)) {
+            // Found a quantified assertion
+            // Only `(?=` and `(?!` can be legal in web compat mode and without the u-flag. Anything else is always bad.
+            if (wasAssertion && webCompat === WEB_COMPAT_ON) {
+              if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
+              else if (uflagStatus === GOOD_WITH_U_FLAG) {
+                uflagStatus = regexSyntaxError('Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
+              }
+            } else {
+              uflagStatus = regexSyntaxError('Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
+            }
+          }
+
           afterAtom = true;
           if (subbad === ALWAYS_BAD) {
             uflagStatus = ALWAYS_BAD; // should already have THROWn for this

@@ -24,7 +24,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
           skip:
             // these are tests that I choose to ignore while the parser matures
             (has('annexb') && (has('regexp') || has('escape'))) || // TODO: web compat: lots of regex/escape cruft to support
-            has('regexp/u-invalid-quantifiable-assertion') || // TODO: regexp /u edge cases
 
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
             has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
