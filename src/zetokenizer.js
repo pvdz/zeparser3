@@ -383,6 +383,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
 
   const supportRegexPropertyEscapes = targetEsVersion === 9 || targetEsVersion === Infinity;
   const supportRegexLookbehinds = targetEsVersion === 9 || targetEsVersion === Infinity;
+  const supportRegexDotallFlag = targetEsVersion === 9 || targetEsVersion === Infinity;
 
   let pointer = 0;
   let len = input.length;
@@ -2548,6 +2549,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     let m = 0;
     let u = 0;
     let y = 0;
+    let s = 0;
     let bad = 0;
     while (neof()) {
       let c = peek();
@@ -2567,6 +2569,10 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         case $$Y_79:
           ++y;
           break;
+        case $$S_73:
+          if (!supportRegexDotallFlag) THROW('The dotall flag `s` is not supported in the currently targeted language version');
+          ++s; // dotall flag was added in es9 / es2018
+          break;
         case $$BACKSLASH_5C:
           break; // see below
         default:
@@ -2575,7 +2581,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             regexSyntaxError('Unknown regex flag [ord=' + c + ']');
           } else if (bad) {
             return ALWAYS_BAD; // already THROWn for this
-          } else if ((g|i|m|u|y) > 1) {
+          } else if ((g|i|m|u|y|s) > 1) {
             return regexSyntaxError('Encountered at least one regex flag twice');
           } else {
             return u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
@@ -2601,7 +2607,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     // if any flags occurred more than once, the or below will result in >1
     if (bad) {
       return ALWAYS_BAD; // already THROWn for this
-    } else if ((g|i|m|u|y) > 1) {
+    } else if ((g|i|m|u|y|s) > 1) {
       return regexSyntaxError('Encountered at least one regex flag twice');
     } else {
       return u > 0 ? GOOD_WITH_U_FLAG : GOOD_SANS_U_FLAG;
