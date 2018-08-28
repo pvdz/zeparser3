@@ -63,6 +63,8 @@ const $$7_37 = 0x37;
 const $$8_38 = 0x38;
 const $$9_39 = 0x39;
 
+const $$NULL_00 = 0;
+const $$BACKSPACE_08 = 8;
 const $$TAB_09 = 0x09;
 const $$LF_0A = 0x0A; // \n
 const $$VTAB_0B = 0x0B; // whitespace
@@ -184,6 +186,8 @@ require['__./utils'] = module.exports = {
   $$8_38,
   $$9_39,
 
+  $$NULL_00,
+  $$BACKSPACE_08,
   $$TAB_09,
   $$LF_0A,
   $$VTAB_0B,

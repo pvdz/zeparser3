@@ -65,6 +65,8 @@ let {
   $$8_38,
   $$9_39,
 
+  $$NULL_00,
+  $$BACKSPACE_08,
   $$TAB_09,
   $$LF_0A,
   $$VTAB_0B,
@@ -348,6 +350,7 @@ const CHARCLASS_BAD = 0x110000;
 const CHARCLASS_BAD_RANGE = 0x110001;
 const CHARCLASS_BAD_SANS_U_FLAG = 1<<23;
 const CHARCLASS_BAD_WITH_U_FLAG = 1<<24;
+const CHARCLASS_CLASS_ESCAPE = 1<<25; // \d \w \s etc, for webcompat checks in ranges
 
 const EOF_SYMBOL = 0x10000; // well. it's better than undefined. (todo: write blog post and refer to that)
 
@@ -1479,9 +1482,9 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   }
 
   let lastRegexState = NOT_A_REGEX_ERROR; // syntax errors are reported here. empty string means no error. yupyup
-  function regexSyntaxError(desc) {
-    lastRegexState = desc;
-    // console.error('Tokenizer error while parsing regex:', lastRegexState);
+  function regexSyntaxError(desc, ...rest) {
+    lastRegexState = desc + (rest.length ? ': [' + rest.join(', ') + ']' : '');
+    console.warn('Potential tokenizer error:', lastRegexState);
     return ALWAYS_BAD;
   }
 
@@ -1494,7 +1497,12 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     let ustatusBody = parseRegexBody(c);
     let ustatusFlags = parseRegexFlags();
     if (nCapturingParens < largestBackReference) {
-      ustatusBody = regexSyntaxError('Largest back reference index exceeded the number of capturing groups');
+      if (webCompat === WEB_COMPAT_ON) {
+        // skip this check
+        ustatusBody = updateRegexUflagState(ustatusBody, GOOD_SANS_U_FLAG, 'Regex was bad with and without u-flag');
+      } else {
+        ustatusBody = regexSyntaxError('Largest back reference index exceeded the number of capturing groups');
+      }
     }
     if (lastRegexState !== NOT_A_REGEX_ERROR) {
       console.warn('Tokenizer $ERROR: ' + lastRegexState);
@@ -1547,7 +1555,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     // dont start with a quantifier
     let badStart = c === $$STAR_2A || c === $$PLUS_2B || c === $$QMARK_3F || c === $$CURLY_L_7B;
     if (badStart) {
-      uflagStatus = regexSyntaxError('Started with a quantifier but that is not allowed');
+      if (c === $$CURLY_L_7B && webCompat === WEB_COMPAT_ON) {
+        uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex was bad with and without u-flag');
+      } else {
+        uflagStatus = regexSyntaxError('Started with a quantifier but that is not allowed');
+      }
     }
 
     do {
@@ -1607,11 +1619,9 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
               if (escapeStatus === ALWAYS_BAD) {
                 uflagStatus = ALWAYS_BAD;
               } else if (escapeStatus === GOOD_SANS_U_FLAG) {
-                if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
-                else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error with u-flag');
+                uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Unknown reason that is only an error with u-flag');
               } else if (escapeStatus === GOOD_WITH_U_FLAG) {
-                if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
-                else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error without u-flag');
+                uflagStatus = updateRegexUflagState(uflagStatus, GOOD_WITH_U_FLAG, 'Unknown reason that is only an error without u-flag');
               }
             }
           }
@@ -1682,10 +1692,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             // Found a quantified assertion
             // Only `(?=` and `(?!` can be legal in web compat mode and without the u-flag. Anything else is always bad.
             if (wasAssertion && webCompat === WEB_COMPAT_ON) {
-              if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
-              else if (uflagStatus === GOOD_WITH_U_FLAG) {
-                uflagStatus = regexSyntaxError('Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
-              }
+              uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
             } else {
               uflagStatus = regexSyntaxError('Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
             }
@@ -1695,11 +1702,9 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           if (subbad === ALWAYS_BAD) {
             uflagStatus = ALWAYS_BAD; // should already have THROWn for this
           } else if (subbad === GOOD_SANS_U_FLAG) {
-            if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
-            else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error with u-flag');
+            uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Unknown reason that is only an error with u-flag');
           } else if (subbad === GOOD_WITH_U_FLAG) {
-            if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
-            else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error without u-flag');
+            uflagStatus = updateRegexUflagState(uflagStatus, GOOD_WITH_U_FLAG, 'Unknown reason that is only an error without u-flag');
           }
 
           break;
@@ -1719,18 +1724,20 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           if (charClassEscapeStatus === ALWAYS_BAD) {
             uflagStatus = ALWAYS_BAD; // should already have THROWn for this
           } else if (charClassEscapeStatus === GOOD_SANS_U_FLAG) {
-            if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_SANS_U_FLAG;
-            else if (uflagStatus === GOOD_WITH_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error with u-flag');
+            uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Unknown reason that is only an error with u-flag');
           } else if (charClassEscapeStatus === GOOD_WITH_U_FLAG) {
-            if (uflagStatus === ALWAYS_GOOD) uflagStatus = GOOD_WITH_U_FLAG;
-            else if (uflagStatus === GOOD_SANS_U_FLAG) uflagStatus = regexSyntaxError('Unknown reason that is only an error without u-flag');
+            uflagStatus = updateRegexUflagState(uflagStatus, GOOD_WITH_U_FLAG, 'Unknown reason that is only an error without u-flag');
           }
           afterAtom = true;
           break;
         case $$SQUARE_R_5D:
           // this is always bad since we have a quantifier parser that consumes valid curlies
           ASSERT_skip($$SQUARE_R_5D);
-          uflagStatus = regexSyntaxError('Encountered unescaped closing square bracket `]` while not parsing a character class');
+          if (webCompat === WEB_COMPAT_ON) {
+            uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex was bad with and without u-flag');
+          } else {
+            uflagStatus = regexSyntaxError('Encountered unescaped closing square bracket `]` while not parsing a character class');
+          }
           afterAtom = true; // meh
           break;
 
@@ -1763,7 +1770,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             }
             afterAtom = false;
           } else {
-            uflagStatus = regexSyntaxError('Encountered unescaped opening curly `}` and the previous character was not part of something quantifiable');
+            if (webCompat === WEB_COMPAT_ON) {
+              uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex was bad with and without u-flag');
+            } else {
+              uflagStatus = regexSyntaxError('Encountered unescaped opening curly `}` and the previous character was not part of something quantifiable');
+            }
           }
           break;
         case $$CURLY_R_7D:
@@ -1774,11 +1785,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             afterAtom = false;
           } else {
             // in web compat mode you're allowed to have an unescaped curly as atom
-            if (uflagStatus === ALWAYS_GOOD) {
-              uflagStatus = GOOD_SANS_U_FLAG;
-            } else if (uflagStatus === GOOD_WITH_U_FLAG) {
-              uflagStatus = regexSyntaxError('Found a rhs curly as an Atom, only valid without u-flag and with web compat mode, but already found something that invalidates not having the u-flag so cant validate this regex');
-            }
+            uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Found a rhs curly as an Atom, only valid without u-flag and with web compat mode, but already found something that invalidates not having the u-flag so cant validate this regex');
             // in web compat mode this case is treated as an extended atom
             afterAtom = false;
           }
@@ -1823,11 +1830,22 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         ASSERT_skip(c);
         if (eof()) return regexSyntaxError('Encountered early EOF while parsing hex escape (1)');
         let a = peek();
-        if (!isHex(a)) return regexSyntaxError('First char of hex escape not a valid digit');
+        if (!isHex(a))
+          if (webCompat === WEB_COMPAT_ON) {
+            return GOOD_SANS_U_FLAG;
+          } else {
+            return regexSyntaxError('First char of hex escape not a valid digit');
+          }
         ASSERT_skip(a);
         if (eof()) return regexSyntaxError('Encountered early EOF while parsing hex escape (2)');
         let b = peek();
-        if (!isHex(b)) return regexSyntaxError('Second char of hex escape not a valid digit');
+        if (!isHex(b)) {
+          if (webCompat === WEB_COMPAT_ON) {
+            return GOOD_SANS_U_FLAG;
+          } else {
+            return regexSyntaxError('Second char of hex escape not a valid digit');
+          }
+        }
         ASSERT_skip(b);
         return ALWAYS_GOOD;
 
@@ -1840,7 +1858,12 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           ASSERT_skip(d);
           return ALWAYS_GOOD;
         }
-        return regexSyntaxError('Illegal char escape char (ord=' + d);
+        if (webCompat === WEB_COMPAT_ON) {
+          // this is now an `IdentityEscape` and just parses the `c` itself
+          return GOOD_SANS_U_FLAG;
+        } else {
+          return regexSyntaxError('Illegal char escape char (ord=' + d);
+        }
 
       // control escapes
       case $$F_66:
@@ -1852,14 +1875,14 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       case $$T_74:
       case $$V_76:
 
-      // char class escpes
+      // char class escapes
       case $$D_64:
       case $$D_UC_44:
       case $$S_73:
       case $$S_UC_53:
       case $$W_77:
       case $$W_UC_57:
-        // "an error occurs if either ClassAtom does not represent a single character (for example, if one is \w)
+        // "an error occurs if either ClassAtom does not represent a single character (for example, if one is \w)"
         ASSERT_skip(c);
         return ALWAYS_GOOD;
 
@@ -1900,9 +1923,15 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       // digits
       case $$0_30:
         ASSERT_skip($$0_30);
-        // cannot be followed by another digit
+        // cannot be followed by another digit unless webcompat
         if (eof()) return ALWAYS_GOOD; // let error happen elsewhere
-        if (isAsciiNumber(peek())) return regexSyntaxError('Back references can not have more two or more consecutive numbers');
+        if (isAsciiNumber(peek())) {
+          if (webCompat === WEB_COMPAT_ON) {
+            return GOOD_SANS_U_FLAG;
+          } else {
+            return regexSyntaxError('Back references can not have more two or more consecutive numbers');
+          }
+        }
         return ALWAYS_GOOD;
 
       case $$1_31:
@@ -1914,7 +1943,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       case $$7_37:
       case $$8_38:
       case $$9_39:
-        return parseBackReference(c);
+        return parseRegexDecimalEscape(c);
 
       case $$FWDSLASH_2F:
         // explicitly allowed
@@ -1942,38 +1971,49 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         // plus: nonspacing marks, spacing combining marks, decimal number, connector punctuation, other_id_continue sans white_space and syntax
         // or; [[:ID_Start:][:Mn:][:Mc:][:Nd:][:Pc:][:Other_ID_Continue:]--[:Pattern_Syntax:]--[:Pattern_White_Space:]]
         // in ascii, unicode continue is all the ascii letters :(
-        if (isIdentRestChr(c)) return regexSyntaxError('Cannot escape this regular identifier character [ord=' + c + '][' + String.fromCharCode(c) + ']');
+        if (isIdentRestChr(c)) {
+          if (webCompat === WEB_COMPAT_OFF) {
+            return regexSyntaxError('Cannot escape this regular identifier character [ord=' + c + '][' + String.fromCharCode(c) + ']');
+          }
+        }
 
         ASSERT_skip(c);
         return GOOD_SANS_U_FLAG; // TODO: verify that UnicodeIDContinue thing for other characters within ascii range and add specific tests for them
     }
     THROW('dis be dead code');
   }
-  function parseBackReference(c) {
-    // https://www.ecma-international.org/ecma-262/7.0/#sec-decimalescape :
-    // If \ is followed by a decimal number n whose first digit is not 0, then the escape sequence
-    // is considered to be a backreference. It is an error if n is greater than the total number
-    // of left capturing parentheses in the entire regular expression. \0 represents the <NUL>
-    // character and cannot be followed by a decimal digit.
-    // ... crap.
-    // https://www.ecma-international.org/ecma-262/7.0/#sec-regular-expression-patterns-semantics
-    // The production `ClassEscape::DecimalEscape but only if` evaluates as follows:
-    //  Evaluate DecimalEscape to obtain an EscapeValue E.
-    // ... double crap.
-    // so let's make it an option not to throw when the exception happens.
+  function parseRegexDecimalEscape(c) {
+    // parseBackReference
+
+    // https://tc39.github.io/ecma262/#prod-DecimalEscape
+    //   DecimalEscape :: NonZeroDigit DecimalDigits opt [lookahead ∉ DecimalDigit
+
+    // https://tc39.github.io/ecma262/#sec-decimalescape
+    //   If \ is followed by a decimal number n whose first digit is not 0, then the escape sequence is considered to
+    //   be a backreference. It is an error if n is greater than the total number of left-capturing parentheses in
+    //   the entire regular expression.
+    // In web compat mode this extra condition is dropped
 
     ASSERT(c >= $$1_31 && c <= $$9_39, 'should be digit 1~9');
     ASSERT_skip(c);
 
-    let refindex = c - $$0_30;
-    while (neof()) {
-      c = peek();
-      if (!isAsciiNumber(c)) break;
-      refindex = refindex * 10 + (c - $$0_30);
-      ASSERT_skip(c);
+    let d = peek();
+    if (d >= $$0_30 && d <= $$9_39) {
+      ASSERT_skip(d);
+      let e = peek();
+      if (e >= $$0_30 && e <= $$9_39) {
+        if (webCompat === WEB_COMPAT_ON) {
+          return GOOD_SANS_U_FLAG;
+        } else {
+          return regexSyntaxError('Parsed too many digits');
+        }
+      } else {
+        largestBackReference = Math.max(((c - $$0_30) * 10) + (d - $$0_30))
+      }
+    } else {
+      largestBackReference = Math.max(largestBackReference, c - $$0_30)
     }
 
-    largestBackReference = refindex; // can only validate this after completing body parse
     return ALWAYS_GOOD;
   }
   function parseRegexUnicodeEscape() {
@@ -2002,7 +2042,14 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   }
   function parseRegexUnicodeEscapeQuad(a) {
     // we've already consumed a. we must consume 3 more chars for this quad unicode escape
-    if (eofd(3)) return regexSyntaxError('Encountered early EOF while parsing a unicode escape quad');
+    if (eofd(3)) {
+      if (webCompat === WEB_COMPAT_ON) {
+        // can still be `/\u/` so let EOF be checked elsewhere...
+        return GOOD_SANS_U_FLAG;
+      } else {
+        return regexSyntaxError('Encountered early EOF while parsing a unicode escape quad');
+      }
+    }
     let b = peekd(1);
     let c = peekd(2);
     let d = peekd(3);
@@ -2016,7 +2063,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       ASSERT_skip(d);
       return ALWAYS_GOOD; // outside char classes we can ignore surrogates
     } else {
-      return regexSyntaxError('Encountered bad character while trying to parse a unicode escape quad [ords: ' + a + ', ' + b + ', ' + c + ', ' + d + ']');
+      if (webCompat === WEB_COMPAT_ON) {
+        return GOOD_SANS_U_FLAG;
+      } else {
+        return regexSyntaxError('Encountered bad character while trying to parse a unicode escape quad [ords: ' + a + ', ' + b + ', ' + c + ', ' + d + ']');
+      }
     }
   }
   function parseRegexUnicodeEscapeVary() {
@@ -2143,23 +2194,17 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       } else if (c === $$BACKSLASH_5C) {
         ASSERT_skip($$BACKSLASH_5C);
         c = parseClassCharEscape(); // note: this may lead to c being >0xffff !! can also be 0 for certain escapes
-
         if (c === CHARCLASS_BAD) {
           flagState = regexSyntaxError('Encountered early EOF while parsing char class');
         } else if (c & CHARCLASS_BAD_WITH_U_FLAG) {
           c = c ^ CHARCLASS_BAD_WITH_U_FLAG; // remove the CHARCLASS_BAD_WITH_U_FLAG flag (dont use ^= because that deopts... atm; https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean )
           ASSERT(c <= 0x110000, 'c should now be valid unicode range or one above for error');
           if (c === CHARCLASS_BAD) flagState = regexSyntaxError('Bad character class body');
-          else if (flagState === ALWAYS_GOOD) flagState = GOOD_SANS_U_FLAG;
-          else if (flagState === GOOD_WITH_U_FLAG) flagState = regexSyntaxError('Unknown reason that is only an error with u-flag while parsing a character class');
+          else flagState = updateRegexUflagState(flagState, GOOD_SANS_U_FLAG, 'Unknown reason that is only an error with u-flag while parsing a character class');
           ASSERT(flagState === GOOD_SANS_U_FLAG || flagState === ALWAYS_BAD, 'either way, the flag state should now reflect "bad with u-flag", or worse');
         } else  if (c & CHARCLASS_BAD_SANS_U_FLAG) {
           // this condition is currently only met when a bad property escape was found
-          if (flagState === GOOD_SANS_U_FLAG) flagState = regexSyntaxError('Unknown reason that is only an error with u-flag while parsing a character class');
-          else if (flagState === ALWAYS_GOOD) flagState = GOOD_WITH_U_FLAG;
-          else {
-            ASSERT(flagState === GOOD_WITH_U_FLAG || flagState === ALWAYS_BAD, 'enum');
-          }
+          flagState = updateRegexUflagState(flagState, GOOD_WITH_U_FLAG, 'Unknown reason that is only an error with u-flag while parsing a character class');
         }
         // else char class is good :)
       } else if (c === $$CR_0D || c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029) {
@@ -2168,8 +2213,10 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         ASSERT_skip(c);
       }
 
-
-      if (wasSurrogateHead && isSurrogateTail(c)) {
+      if (c === CHARCLASS_CLASS_ESCAPE) {
+        isSurrogate = false;
+        isSurrogateHead = false;
+      } else if (wasSurrogateHead && isSurrogateTail(c)) {
         isSurrogate = true;
         isSurrogateHead = false;
         surrogate = getSurrogate(prev, c);
@@ -2191,11 +2238,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         if (!isSurrogateHead || wasSurrogateHead) {
           urangeOpen = false;
           if (urangeLeft === CHARCLASS_BAD_RANGE || urangeRight === CHARCLASS_BAD_RANGE || urangeLeft > urangeRight) {
-            if (flagState === GOOD_WITH_U_FLAG) flagState = regexSyntaxError('Unknown reason that is an error without u-flag while parsing a character class');
-            else if (flagState !== ALWAYS_BAD) {
-              ASSERT(flagState === ALWAYS_GOOD || flagState === GOOD_SANS_U_FLAG, 'flag only can only have certain states');
-              flagState = GOOD_SANS_U_FLAG;
-            }
+            flagState = updateRegexUflagState(flagState, GOOD_SANS_U_FLAG, 'Encountered incorrect range (bad left, bad right, or left>right) which is illegal with u-flag and for unknown reasons it was also illegal without u-flag');
           }
         }
       } else if (c === $$DASH_2D && n > 0) {
@@ -2206,12 +2249,18 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
 
       if (nrangeOpen) {
         nrangeOpen = false;
-        if (nrangeLeft === CHARCLASS_BAD_RANGE || c === CHARCLASS_BAD_RANGE || nrangeLeft > c) {
-          if (flagState === GOOD_SANS_U_FLAG) flagState = regexSyntaxError('Unknown reason that is an error with u-flag while parsing a character class');
-          else if (flagState !== ALWAYS_BAD) {
-            ASSERT(flagState === ALWAYS_GOOD || flagState === GOOD_WITH_U_FLAG, 'flag only can only have certain states');
-            flagState = GOOD_WITH_U_FLAG;
+        if (nrangeLeft === CHARCLASS_CLASS_ESCAPE || c === CHARCLASS_CLASS_ESCAPE) {
+          // class escapes are illegal for ranges, however, they are allowed and ignored in webcompat mode (TODO: this can be refined further)
+          if (webCompat === WEB_COMPAT_OFF) {
+            // this is the case where you do `/[b-a]/` where the lhs of the range is higher than the rhs
+            // when not in webcompat mode, it may also be the case that a range lhs or rhs is a class escape (\s \d \w etc)
+            flagState = regexSyntaxError('Range error with u-flag and unknown reason why regex is invalid without u-flag so it cannot be a valid regex');
+          } else {
+            // in webcompat mode, sans u-flag, we can allow character class escales (\w \d \s etc) in ranges
+            flagState = updateRegexUflagState(flagState, GOOD_SANS_U_FLAG, 'Range error with u-flag and unknown reason why regex is invalid without u-flag so it cannot be a valid regex');
           }
+        } else if (nrangeLeft === CHARCLASS_BAD_RANGE || c === CHARCLASS_BAD_RANGE || nrangeLeft > c) {
+          flagState = updateRegexUflagState(flagState, GOOD_WITH_U_FLAG, 'Unknown reason that is an error with u-flag while parsing a character class');
         }
       } else if (c === $$DASH_2D && n > 0) {
         nrangeOpen = true;
@@ -2229,6 +2278,17 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     }
     return regexSyntaxError('Unexpected early EOF while parsing character class'); // no end
   }
+
+  function updateRegexUflagState(currentState, newState, error) {
+    ASSERT(newState === GOOD_WITH_U_FLAG || newState === GOOD_SANS_U_FLAG, 'should not be used for all good or bad');
+    if (currentState === (newState === GOOD_WITH_U_FLAG ? GOOD_SANS_U_FLAG : GOOD_WITH_U_FLAG)) currentState = regexSyntaxError(error);
+    else if (currentState === ALWAYS_GOOD) currentState = newState;
+    else {
+      ASSERT(currentState === newState || currentState === ALWAYS_BAD, 'enum');
+    }
+    return currentState;
+  }
+
   function parseClassCharEscape() {
     // atom escape is slightly different from charclass escape
 
@@ -2264,15 +2324,25 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             ASSERT_skip(d);
             return d;
           }
+          if (webCompat === WEB_COMPAT_ON) {
+            // this is now an `IdentityEscape` and just parses the `c` itself
+            return CHARCLASS_BAD_WITH_U_FLAG;
+          }
         }
         return CHARCLASS_BAD;
 
-      // "A ClassAtom can use any of the escape sequences that are allowed in the rest of the regular expression except for \b, \B, and backreferences. Inside a CharacterClass, \b means the backspace character, while \B and backreferences raise errors. Using a backreference inside a ClassAtom causes an error."
       // \b and \B
       case $$B_62: // "Return the CharSet containing the single character <BS> U+0008 (BACKSPACE)."
         ASSERT_skip($$B_62);
         return 0x0008;
+        // https://tc39.github.io/ecma262/#sec-patterns-static-semantics-character-value
+        // ClassEscape :: b
+        //   Return the code point value of U+0008 (BACKSPACE).
+        return $$BACKSPACE_08;
       case $$B_UC_42:
+        // "A ClassAtom can use any of the escape sequences that are allowed in the rest of the regular expression
+        // except for \b, \B, and backreferences. Inside a CharacterClass, \b means the backspace character, while
+        // \B and backreferences raise errors. Using a backreference inside a ClassAtom causes an error."
         return CHARCLASS_BAD_RANGE;
 
       // control escapes \f \n \r \t \v
@@ -2304,7 +2374,9 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         // because we dont know right now whether c is part of a range or not. in fact it may only be part of a
         // range with or without u flag but not the other. so difficult.
         ASSERT_skip(c);
-        return CHARCLASS_BAD_RANGE;
+        // We must ignore the above rule in webcompat mode and so we must signal that the current ClassAtom was such.
+        // Only for d,D,s,S,w,W because p and P are only valid with u-flag, anyways, and where webcompat is ignored.
+        return CHARCLASS_CLASS_ESCAPE;
 
       // Unicode property escapes \p{<?...?>} \P{<?...?>}
       case $$P_70:
@@ -2318,16 +2390,35 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           return CHARCLASS_BAD;
         } else {
           ASSERT(regexPropState === GOOD_WITH_U_FLAG, 'parseRegexPropertyEscape should not return ALWAYS_GOOD and this is an enum');
-          if (webCompat === WEB_COMPAT_ON) return 0; // ok, no flags
+          if (webCompat === WEB_COMPAT_ON) return CHARCLASS_CLASS_ESCAPE; // ok, no flags
           return CHARCLASS_BAD_SANS_U_FLAG;
         }
 
       // digits
+      // https://tc39.github.io/ecma262/#prod-CharacterClass
+      // https://tc39.github.io/ecma262/#prod-ClassRanges
+      // https://tc39.github.io/ecma262/#prod-NonemptyClassRanges
+      // https://tc39.github.io/ecma262/#prod-ClassAtom
+      // https://tc39.github.io/ecma262/#prod-ClassAtomNoDash
+      // https://tc39.github.io/ecma262/#prod-ClassEscape
+      // https://tc39.github.io/ecma262/#prod-CharacterEscape
+      //   the last two are LegacyOctalEscapeSequence (but only ~U) and then IdentityEscape (any other)
+      // - https://tc39.github.io/ecma262/#prod-annexB-LegacyOctalEscapeSequence
+      // - https://tc39.github.io/ecma262/#prod-IdentityEscape
+      //     SourceCharacter but not UnicodeIDContinue
+      //     but;
+      //     https://tc39.github.io/ecma262/#prod-annexB-IdentityEscape
+      //     https://tc39.github.io/ecma262/#prod-annexB-SourceCharacterIdentityEscape
+      //     SourceCharacter but not one of c or k
+      // so; try to parse an octal first. this should work unless it starts with 8 or 8, in that case parse IdentityEscape
       case $$0_30:
         ASSERT_skip(c);
         // cannot be followed by another digit
+        if (webCompat === WEB_COMPAT_ON) {
+          return parseOctalFromSecondDigit(c) | CHARCLASS_BAD_WITH_U_FLAG;
+        }
         if (neof() && isAsciiNumber(peek())) return CHARCLASS_BAD;
-        return 0;
+        return $$NULL_00;
       case $$1_31:
       case $$2_32:
       case $$3_33:
@@ -2335,11 +2426,16 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       case $$5_35:
       case $$6_36:
       case $$7_37:
+        ASSERT_skip(c);
+        if (webCompat === WEB_COMPAT_ON) {
+          return parseOctalFromSecondDigit(c) | CHARCLASS_BAD_WITH_U_FLAG;
+        }
+        // without web compat this is a back reference which is illegal in character classes
+        return CHARCLASS_BAD;
       case $$8_38:
       case $$9_39:
         ASSERT_skip(c);
-        // always illegal in a char class
-        return CHARCLASS_BAD;
+        return parseDecimalEscape(c);
 
       // syntax chars
       case $$XOR_5E:
@@ -2371,7 +2467,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           return $$DASH_2D;
         } else {
           // only valid with u-flag!
-          return $$DASH_2D | CHARCLASS_BAD_WITH_U_FLAG;
+          return $$DASH_2D | CHARCLASS_BAD_SANS_U_FLAG;
         }
 
       default:
@@ -2594,6 +2690,68 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       return GOOD_SANS_U_FLAG;
     }
     return flagState;
+  }
+  function parseDecimalEscape(c) {
+    if (c === $$C_63 || c === $$K_6B) return BAD_ESCAPE;
+    return c | CHARCLASS_BAD_WITH_U_FLAG;
+  }
+  function parseOctalFromSecondDigit(firstChar) {
+
+    // https://tc39.github.io/ecma262/#prod-annexB-LegacyOctalEscapeSequence
+    //   OctalDigit [lookahead ∉ OctalDigit]
+    //   ZeroToThree OctalDigit [lookahead ∉ OctalDigit]
+    //   FourToSeven OctalDigit
+    //   ZeroToThree OctalDigit OctalDigit
+    // 0  ~ 377 (octal -> 0 ~ 255 dec)
+
+    // I'm pretty sure this should be disallowed in
+    // if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+    //   return CHARCLASS_BAD
+    // }
+
+    if (isLowerOctal(firstChar)) {
+      // third char may be any octal
+      let secondChar = peek();
+      if (isOctal(secondChar)) {
+        ASSERT_skip(secondChar);
+
+        let thirdChar = peek();
+        if (isOctal(thirdChar)) {
+          ASSERT_skip(thirdChar);
+          return ((firstChar - $$0_30) * 8 * 8) + ((secondChar - $$0_30) * 8) + (thirdChar - $$0_30);
+        } else {
+          return ((firstChar - $$0_30) * 8) + (thirdChar - $$0_30);
+        }
+      } else {
+        return firstChar - $$0_30;
+      }
+    } else {
+      ASSERT(isUpperOctal(firstChar));
+      // third char may only be the lower octals
+      let secondChar = peek();
+      if (isOctal(secondChar)) {
+        ASSERT_skip(secondChar);
+
+        let thirdChar = peek();
+        if (isLowerOctal(thirdChar)) {
+          ASSERT_skip(thirdChar);
+          return ((firstChar - $$0_30) * 8 * 8) + ((secondChar - $$0_30) * 8) + (thirdChar - $$0_30);
+        } else {
+          return ((firstChar - $$0_30) * 8) + (thirdChar - $$0_30);
+        }
+      } else {
+        return firstChar - $$0_30;
+      }
+    }
+  }
+  function isOctal(c) {
+    return c >= $$0_30 && c <= $$7_37;
+  }
+  function isLowerOctal(c) {
+    return c >= $$0_30 && c <= $$3_33;
+  }
+  function isUpperOctal(c) {
+    return c >= $$4_34 && c <= $$7_37;
   }
 
   function parseRegexUnicodeEscape2() {

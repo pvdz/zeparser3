@@ -680,4 +680,407 @@ module.exports = (describe, test) => describe('regexes', _ => {
       });
     });
   });
+
+  describe('some annexb stuff', _ => {
+
+    describe('octal escape in char class', _ => {
+
+      // https://tc39.github.io/ecma262/#prod-CharacterClass
+      // https://tc39.github.io/ecma262/#prod-ClassRanges
+      // https://tc39.github.io/ecma262/#prod-NonemptyClassRanges
+      // NonemptyClassRanges is extended by annex B:
+      //   https://tc39.github.io/ecma262/#sec-patterns-static-semantics-early-errors-annexb
+      //   NonemptyClassRangesNoDash :: ClassAtomNoDash - ClassAtom ClassRanges
+      // https://tc39.github.io/ecma262/#prod-annexB-ClassAtomNoDash
+      // https://tc39.github.io/ecma262/#prod-annexB-ClassEscape
+      // https://tc39.github.io/ecma262/#prod-annexB-CharacterEscape
+      // https://tc39.github.io/ecma262/#prod-annexB-LegacyOctalEscapeSequence
+      // note:
+      // https://tc39.github.io/ecma262/#sec-literals-string-literals
+      // A conforming implementation, when processing strict mode code, must not extend the syntax of EscapeSequence to include LegacyOctalEscapeSequence as described in B.1.2.
+
+      test.fail('without web compat', {
+        code: `/[\\12-\\14]/`,
+      });
+
+      test.pass('web compat without u-flag', {
+        code: `/[\\12-\\14]/`,
+        WEB: true,
+      });
+
+      test.fail('web compat with u-flag', {
+        code: `/[\\12-\\14]/u`,
+        WEB: true,
+      });
+    });
+
+    describe('8 9 escaped', _ => {
+
+      describe('without web compat', _ => {
+
+        // these fail because the back reference does not have that many groups
+
+        test.fail('escaped 8 single', {
+          code: '/7\\8/',
+        });
+
+        test.fail('escaped 9 single', {
+          code: '/7\\9/',
+        });
+
+        test.fail('escaped 8a', {
+          code: '/7\\8a/',
+        });
+
+        test.fail('escaped 9a', {
+          code: '/7\\9a/',
+        });
+
+        test.fail('escaped 8 double', {
+          code: '/7\\89/',
+        });
+
+        test.fail('escaped 9 double', {
+          code: '/7\\98/',
+        });
+
+        test.fail('escaped 8 too many digits', {
+          code: '/\\8912/',
+        });
+
+        test.fail('escaped 9 too many digits', {
+          code: '/\\986a/',
+        });
+      });
+
+      describe('with web compat without u-flag', _ => {
+
+        test.pass('escaped 8 single', {
+          code: '/7\\8/',
+          WEB: true,
+        });
+
+        test.pass('escaped 9 single', {
+          code: '/7\\9/',
+          WEB: true,
+        });
+
+        test.pass('escaped 8a', {
+          code: '/7\\8a/',
+          WEB: true,
+        });
+
+        test.pass('escaped 9a', {
+          code: '/7\\9a/',
+          WEB: true,
+        });
+
+        test.pass('escaped 8 double', {
+          code: '/7\\89/',
+          WEB: true,
+        });
+
+        test.pass('escaped 9 double', {
+          code: '/7\\98/',
+          WEB: true,
+        });
+
+        test.pass('escaped 8 too many digits', {
+          code: '/\\8912/',
+          WEB: true,
+        });
+
+        test.pass('escaped 9 too many digits', {
+          code: '/\\986a/',
+          WEB: true,
+        });
+      });
+
+      describe('with web compat with u-flag', _ => {
+
+        test.fail('escaped 8 single', {
+          code: '/7\\8/u',
+          WEB: true,
+        });
+
+        test.fail('escaped 9 single', {
+          code: '/7\\9/u',
+          WEB: true,
+        });
+
+        test.fail('escaped 8a', {
+          code: '/7\\8a/u',
+          WEB: true,
+        });
+
+        test.fail('escaped 9a', {
+          code: '/7\\9a/u',
+          WEB: true,
+        });
+
+        test.fail('escaped 8 double', {
+          code: '/7\\89/u',
+          WEB: true,
+        });
+
+        test.fail('escaped 9 double', {
+          code: '/7\\98/u',
+          WEB: true,
+        });
+
+        test.fail('escaped 8 too many digits', {
+          code: '/\\8912/u',
+          WEB: true,
+        });
+
+        test.fail('escaped 9 too many digits', {
+          code: '/\\986a/u',
+          WEB: true,
+        });
+      });
+    });
+
+    describe('00 escaped', _ => {
+
+      test.fail('without webcompat', {
+        code: '/\\00/',
+      });
+
+      test.pass('with webcompat without u-flag', {
+        code: '/\\00/',
+        WEB: true,
+      });
+
+      test.fail('with webcompat with u-flag', {
+        code: '/\\00/u',
+        WEB: true,
+      });
+    });
+
+    describe('500 escaped', _ => {
+
+      test.fail('without webcompat', {
+        code: '/\\500/',
+      });
+
+      test.pass('with webcompat without u-flag', {
+        code: '/\\500/',
+        WEB: true,
+      });
+
+      test.fail('with webcompat with u-flag', {
+        code: '/\\500/u',
+        WEB: true,
+      });
+    });
+
+    describe('non-existing backreference becomes decimal escape', _ => {
+
+      test.fail('without web compat', {
+        code: '/foo \\2 bar/',
+      });
+
+      test.pass('with web compat without u-flag', {
+        code: '/foo \\2 bar/',
+        WEB: true,
+      });
+
+      test.fail('with web compat and u-flag', {
+        code: '/foo \\2 bar/u',
+        WEB: true,
+      });
+
+      test.fail('too many digits', {
+        code: '/foo \\1234 bar/',
+      });
+    });
+
+    describe('invalid escape char', _ => {
+
+      test.fail('non-special char escaped without web compat', {
+        code: '/\\a/',
+      });
+
+      test.pass('non-special char escaped with web compat without u-flag', {
+        code: '/\\a/',
+        WEB: true,
+      });
+
+      test.fail('non-special char escaped with web compat and u-flag', {
+        code: '/\\a/u',
+        WEB: true,
+      });
+    });
+
+    describe('incomplete hex escape', _ => {
+
+      test.fail('only x without web compat', {
+        code: '/\\x/',
+      });
+
+      test.pass('only x with web compat without u-flag', {
+        code: '/\\x/',
+        WEB: true,
+      });
+
+      test.fail('only x with web compat and u-flag', {
+        code: '/\\x/u',
+        WEB: true,
+      });
+
+      test.fail('x and one char without web compat', {
+        code: '/\\xa/',
+      });
+
+      test.pass('x and one char with web compat without u-flag', {
+        code: '/\\xa/',
+        WEB: true,
+      });
+
+      test.fail('x and one char with web compat and u-flag', {
+        code: '/\\xa/u',
+        WEB: true,
+      });
+    });
+
+    describe('incomplete unicode escape', _ => {
+
+      test.fail('only u without web compat', {
+        code: '/\\u/',
+      });
+
+      test.pass('only u with web compat without u-flag', {
+        code: '/\\u/',
+        WEB: true,
+      });
+
+      test.fail('only u with web compat and u-flag', {
+        code: '/\\u/u',
+        WEB: true,
+      });
+
+      test.fail('u and one char without web compat', {
+        code: '/\\ua/',
+      });
+
+      test.pass('u and one char with web compat without u-flag', {
+        code: '/\\ua/',
+        WEB: true,
+      });
+
+      test.fail('u and one char with web compat and u-flag', {
+        code: '/\\ua/u',
+        WEB: true,
+      });
+    });
+
+    describe('incomplete c escape', _ => {
+
+      test.fail('atom only c without web compat', {
+        code: '/\\c/',
+      });
+
+      test.pass('atom only c with web compat without u-flag', {
+        code: '/\\c/',
+        WEB: true,
+      });
+
+      test.fail('atom only c with web compat and u-flag', {
+        code: '/\\c/u',
+        WEB: true,
+      });
+
+      test.fail('charclass only c without web compat', {
+        code: '/[\\c]/',
+      });
+
+      test.pass('charclass only c with web compat without u-flag', {
+        code: '/[\\c]/',
+        WEB: true,
+      });
+
+      test.fail('charclass only c with web compat and u-flag', {
+        code: '/[\\c]/u',
+        WEB: true,
+      });
+    });
+
+    describe('syntax chars without context', _ => {
+
+      [']', '{', '}'].forEach(c => {
+        describe('char=' + c, _ => {
+
+          test.fail('without web compat', {
+            code: '/' + c + '/',
+          });
+
+          test.pass('with web compat without u-flag', {
+            code: '/' + c + '/',
+            WEB: true,
+          });
+
+          test.fail('with web compat and u-flag', {
+            code: '/' +  c + '/u',
+            WEB: true,
+          });
+        });
+      });
+    });
+
+    describe('char class in a range', _ => {
+
+      // https://tc39.github.io/ecma262/#sec-runtime-semantics-characterrangeorunion-abstract-operation
+      // If A does not contain exactly one character or B does not contain exactly one character, then
+
+      test.fail('left without', {
+        code: '/[\\d-a]+/',
+      });
+
+      test.pass('left with web without u-flag', {
+        code: '/[\\d-a]+/',
+        WEB: true,
+      });
+
+      test.fail('left with web with u-flag', {
+        code: '/[\\d-a]+/u',
+        WEB: true,
+      });
+
+      test.fail('right without', {
+        code: '/[a-\\d]+/',
+      });
+
+      test.pass('right with web without u-flag', {
+        code: '/[a-\\d]+/',
+        WEB: true,
+      });
+
+      test.fail('right with web with u-flag', {
+        code: '/[a-\\d]+/u',
+        WEB: true,
+      });
+
+      test.fail('both without web without u-flag', {
+        code: '/[\\s-\\d]+/',
+      });
+
+      test.fail('both without web with u-flag', {
+        code: '/[\\s-\\d]+/u',
+      });
+
+      test.pass('both with web without u-flag', {
+        code: '/[\\s-\\d]+/',
+        WEB: true,
+      });
+
+      test.fail('both with web with u-flag', {
+        code: '/[\\s-\\d]+/u',
+        WEB: true,
+      });
+
+      test.pass('unicode bla', {
+        code: '/[💩-💫]/u',
+      });
+    });
+  });
 });
