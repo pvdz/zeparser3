@@ -27,7 +27,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
             has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
 
-            has('redeclare-with-') || has('function/param-eval') || has('generators/param-dflt-yield') || has('param-redecl') || has('early-dup') || // TODO: fix once we fix scoping and duplicate binding checks (class, async)
+            has('param-redecl') || has('early-dup') || // TODO: fix once we fix scoping and duplicate binding checks (class, async)
             has('/early-lex-and-var') || has('parse-err-hoist-lex') || has('redeclaration') || has('head-let-bound-names') || // more scoping
             has('head-const-bound-names') || has('function/13.1') || has('attempt-to-redeclare-let-binding-with') || has('try/early-catch') || // more scoping
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
