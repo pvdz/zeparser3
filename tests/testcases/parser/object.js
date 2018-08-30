@@ -8121,47 +8121,247 @@ module.exports = (describe, test) =>
         code: '({a: 1, a})',
       });
 
-      // describe('dunderproto', _ => {
-      //
-      //   // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
-      //   // > It is a Syntax Error if PropertyNameList of PropertyDefinitionList contains any duplicate entries for
-      //   //   "__proto__" and at least two of those entries were obtained from productions of the form PropertyDefinition:PropertyName:AssignmentExpression .
-      //
-      //   test('bad case', {
-      //     code: 'x = {__proto__: 1, __proto__: 2}',
-      //   });
-      //
-      //   test('okay with shorthand right', {
-      //     code: 'x = {__proto__: 1, __proto__}',
-      //   });
-      //
-      //   test('okay with shorthand left', {
-      //     code: 'x = {__proto__, __proto__: 2}',
-      //   });
-      //
-      //   test('as string name', {
-      //     code: 'x = {"__proto__": 1, __proto__: 2}',
-      //   });
-      //
-      //   test('computed', {
-      //     code: 'x = {[__proto__]: 1, __proto__: 2}',
-      //   });
-      //
-      //   test('method prop', {
-      //     code: 'x = {__proto__(){}, __proto__: 2}',
-      //   });
-      //
-      //   test('method method', {
-      //     code: 'x = {__proto__(){}, __proto__(){}}',
-      //   });
-      //
-      //   test('async generator', {
-      //     code: 'x = {async __proto__(){}, *__proto__(){}}',
-      //   });
-      //
-      //   test('static getter', {
-      //     code: 'x = {static __proto__(){}, get __proto__(){}}',
-      //   });
-      // });
+      describe('dunderproto', _ => {
+
+        // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+        // > It is a Syntax Error if PropertyNameList of PropertyDefinitionList contains any duplicate entries for
+        //   "__proto__" and at least two of those entries were obtained from productions of the form PropertyDefinition:PropertyName:AssignmentExpression .
+
+        // This restriction only applies to webcompat mode (annex B)
+
+        describe('without webcompat', _ => {
+
+          test.pass('bad case with two idents', {
+            code: 'x = {__proto__: 1, __proto__: 2}',
+          });
+
+          test.pass('bad case with strings', {
+            code: 'x = {\'__proto__\': 1, "__proto__": 2}',
+          });
+
+          test.pass('bad case with ident and string', {
+            code: 'x = {__proto__: 1, "__proto__": 2}',
+          });
+
+          test.pass('bad case with string and ident', {
+            code: 'x = {\'__proto__\': 1, __proto__: 2}',
+          });
+
+          test.pass('okay with shorthand right', {
+            code: 'x = {__proto__: 1, __proto__}',
+          });
+
+          test.pass('okay with shorthand left', {
+            code: 'x = {__proto__, __proto__: 2}',
+          });
+
+          test.pass('computed', {
+            code: 'x = {[__proto__]: 1, __proto__: 2}',
+          });
+
+          test.pass('string computed', {
+            code: 'x = {["__proto__"]: 1, __proto__: 2}',
+          });
+
+          test.pass('method prop', {
+            code: 'x = {__proto__(){}, __proto__: 2}',
+          });
+
+          test.pass('method method', {
+            code: 'x = {__proto__(){}, __proto__(){}}',
+          });
+
+          test.pass('async generator', {
+            code: 'x = {async __proto__(){}, *__proto__(){}}',
+          });
+
+          test.pass('static getter', {
+            code: 'class x {static __proto__(){}; get __proto__(){}}',
+          });
+
+          describe('exceptions', _ => {
+
+            // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+            // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
+            // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
+
+            describe('not async', _ => {
+
+              test.pass('plain group', {
+                code: '({__proto__: a, __proto__: b});',
+              });
+
+              test.pass('destructuring assignment', {
+                code: 'x = {__proto__: a, __proto__: b} = y',
+              });
+
+              test.pass('grouped destructuring assignment', {
+                code: '({__proto__: a, __proto__: b} = x)',
+              });
+
+              test.pass('as an arrow', {
+                code: '({__proto__: a, __proto__: b}) => x;',
+              });
+
+              test.pass('inside a complex destruct in an arrow', {
+                code: '(a, [b, [c, {__proto__: d, __proto__: e}]], f) => x;',
+              });
+
+              test.pass('as a function with obvious pattern', {
+                code: 'function f({__proto__: a, __proto__: b}) {}',
+              });
+
+              test.pass('inside a complex destruct in an arrow', {
+                code: 'function f(a, [b, [c, {__proto__: d, __proto__: e}]], f) {}',
+              });
+            });
+
+            describe('with async', _ => {
+
+              test.pass('plain group', {
+                code: 'async ({__proto__: a, __proto__: b});',
+              });
+
+              test.pass('grouped destructuring assignment', {
+                code: 'async ({__proto__: a, __proto__: b} = x)',
+              });
+
+              test.pass('as an arrow', {
+                code: 'async ({__proto__: a, __proto__: b}) => x;',
+              });
+            });
+          });
+        });
+
+        describe('with webcompat', _ => {
+
+          test('bad case with two idents', {
+            code: 'x = {__proto__: 1, __proto__: 2}',
+            throws: '__proto__',
+            WEB: true,
+          });
+
+          test('bad case with strings', {
+            code: 'x = {\'__proto__\': 1, "__proto__": 2}',
+            throws: '__proto__',
+            WEB: true,
+          });
+
+          test('bad case with ident and string', {
+            code: 'x = {__proto__: 1, "__proto__": 2}',
+            throws: '__proto__',
+            WEB: true,
+          });
+
+          test('bad case with string and ident', {
+            code: 'x = {\'__proto__\': 1, __proto__: 2}',
+            throws: '__proto__',
+            WEB: true,
+          });
+
+          test.pass('okay with shorthand right', {
+            code: 'x = {__proto__: 1, __proto__}',
+            WEB: true,
+          });
+
+          test.pass('okay with shorthand left', {
+            code: 'x = {__proto__, __proto__: 2}',
+            WEB: true,
+          });
+
+          test.pass('computed', {
+            code: 'x = {[__proto__]: 1, __proto__: 2}',
+            WEB: true,
+          });
+
+          test.pass('string computed', {
+            code: 'x = {["__proto__"]: 1, __proto__: 2}',
+            WEB: true,
+          });
+
+          test.pass('method prop', {
+            code: 'x = {__proto__(){}, __proto__: 2}',
+            WEB: true,
+          });
+
+          test.pass('method method', {
+            code: 'x = {__proto__(){}, __proto__(){}}',
+            WEB: true,
+          });
+
+          test.pass('async generator', {
+            code: 'x = {async __proto__(){}, *__proto__(){}}',
+            WEB: true,
+          });
+
+          test.pass('static getter', {
+            code: 'class x {static __proto__(){}; get __proto__(){}}',
+            WEB: true,
+          });
+
+          describe('exceptions', _ => {
+
+            // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+            // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
+            // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
+
+            describe('not async', _ => {
+
+              test.pass('plain group', {
+                code: '({__proto__: a, __proto__: b});',
+                WEB: true,
+              });
+
+              test.pass('destructuring assignment', {
+                code: 'x = {__proto__: a, __proto__: b} = y',
+                WEB: true,
+              });
+
+              test.pass('grouped destructuring assignment', {
+                code: '({__proto__: a, __proto__: b} = x)',
+                WEB: true,
+              });
+
+              test.pass('as an arrow', {
+                code: '({__proto__: a, __proto__: b}) => x;',
+                WEB: true,
+              });
+
+              test.pass('inside a complex destruct in an arrow', {
+                code: '(a, [b, [c, {__proto__: d, __proto__: e}]], f) => x;',
+                WEB: true,
+              });
+
+              test.pass('as a function with obvious pattern', {
+                code: 'function f({__proto__: a, __proto__: b}) {}',
+                WEB: true,
+              });
+
+              test.pass('inside a complex destruct in an arrow', {
+                code: 'function f(a, [b, [c, {__proto__: d, __proto__: e}]], f) {}',
+                WEB: true,
+              });
+            });
+
+            describe('with async', _ => {
+
+              test.pass('plain group', {
+                code: 'async ({__proto__: a, __proto__: b});',
+                WEB: true,
+              });
+
+              test.pass('grouped destructuring assignment', {
+                code: 'async ({__proto__: a, __proto__: b} = x)',
+                WEB: true,
+              });
+
+              test.pass('as an arrow', {
+                code: 'async ({__proto__: a, __proto__: b}) => x;',
+                WEB: true,
+              });
+            });
+          });
+        });
+      });
     });
   });

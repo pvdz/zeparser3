@@ -25,9 +25,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
             // these are tests that I choose to ignore while the parser matures
 
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
-            has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
-
-            has('object/__proto__-duplicate') || // TODO: fix duplicate __proto__ detection (uncomment tests in object.js)
 
             // function statements and dupe bindings
             has('annexB/language/function-code/if-decl-else-decl') ||
@@ -42,6 +39,11 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
 
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
+
+            // TODO: file report; I think the following rule applies here and as such should not throw:
+            // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+            // > it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or
+            has('annexB/language/expressions/object/__proto__-duplicate.js') ||
 
             false
         };
