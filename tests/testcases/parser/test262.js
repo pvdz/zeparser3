@@ -26,16 +26,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
 
-            // function statements and dupe bindings
-            has('annexB/language/function-code/if-decl-else-decl') ||
-            has('annexB/language/function-code/if-decl-else-stmt') ||
-            has('annexB/language/function-code/if-decl-no-else') ||
-            has('annexB/language/function-code/if-stmt-else-decl') ||
-            has('annexB/language/global-code/if-decl-else-decl') ||
-            has('annexB/language/global-code/if-decl-else-stmt') ||
-            has('annexB/language/global-code/if-decl-no-else') ||
-            has('annexB/language/global-code/if-stmt-else-decl') ||
-
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
 
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters

@@ -1681,6 +1681,141 @@ module.exports = (describe, test) =>
         code: '{ var x; } let x;',
         desc: 'this was a tricky case since `var` names share a single scope so something had to be added to still be able to scan downward, retroactively',
       });
+
+      describe('annex b function statement exception', _ => {
+
+        describe('without webcompat', _ => {
+
+          test.fail('in block, illegal without webcompat', {
+            code: '{ function f() {} ; function f() {} }',
+          });
+
+          test.fail('in block under if, illegal without webcompat', {
+            code: '{ if (x) function f() {} ; function f() {} }',
+          });
+
+          test.pass('exception does not apply to global but its legal there regardless', {
+            code: 'function f() {} ; function f() {}',
+            MODULE: {throws: 'bound'},
+          });
+
+          test.pass('exception does not apply to function scope but its legal there regardless', {
+            code: 'function g(){ function f() {} ; function f() {} }',
+          });
+
+          test.fail('func and var', {
+            code: 'function f(){ var f = 123; if (true) function f(){} }',
+          });
+
+          test.fail('function statement gets own special block scope so does not clash with other vars', {
+            code: '{ var f = 123; if (true) function f(){} }',
+            desc: 'only with webcompat, though, so this test fails without it',
+          });
+        });
+
+        describe('with webcompat', _ => {
+
+          test('in block, in webcompat, lexical declarations should not trigger syntax error if only bound to function decl names', {
+            code: '{ function f() {} ; function f() {} }',
+            WEB: true,
+            STRICT: {throws: true},
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'FunctionDeclaration',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: {type: 'Identifier', name: 'f'},
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                    {type: 'EmptyStatement'},
+                    {
+                      type: 'FunctionDeclaration',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: {type: 'Identifier', name: 'f'},
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  ],
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('in block under if, in webcompat, lexical declarations should not trigger syntax error if only bound to function decl names', {
+            code: '{ if (x) function f() {} ; function f() {} }',
+            WEB: true,
+            STRICT: {throws: true},
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'IfStatement',
+                      test: {type: 'Identifier', name: 'x'},
+                      consequent: {
+                        type: 'FunctionDeclaration',
+                        generator: false,
+                        async: false,
+                        expression: false,
+                        id: {type: 'Identifier', name: 'f'},
+                        params: [],
+                        body: {type: 'BlockStatement', body: []},
+                      },
+                      alternate: null,
+                    },
+                    {type: 'EmptyStatement'},
+                    {
+                      type: 'FunctionDeclaration',
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      id: {type: 'Identifier', name: 'f'},
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  ],
+                },
+              ],
+            },
+            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test.pass('exception does not apply to global but its legal there regardless', {
+            code: 'function f() {} ; function f() {}',
+            MODULE: {throws: 'bound'},
+            WEB: true,
+          });
+
+          test.pass('exception does not apply to function scope but its legal there regardless', {
+            code: 'function g(){ function f() {} ; function f() {} }',
+            WEB: true,
+          });
+
+          test.pass('func and var', {
+            code: 'function f(){ var f = 123; if (true) function f(){} }',
+            MODULE: {throws: true},
+            WEB: true,
+          });
+
+          test.fail_strict('function statement gets own special block scope so does not clash with other vars', {
+            code: '{ var f = 123; if (true) function f(){} }',
+            MODULE: {throws: true},
+            WEB: true,
+          });
+        });
+      });
     });
   });
 
