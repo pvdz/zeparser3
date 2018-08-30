@@ -385,6 +385,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   const supportRegexPropertyEscapes = targetEsVersion === 9 || targetEsVersion === Infinity;
   const supportRegexLookbehinds = targetEsVersion === 9 || targetEsVersion === Infinity;
   const supportRegexDotallFlag = targetEsVersion === 9 || targetEsVersion === Infinity;
+  const supportRegexNamedGroups = targetEsVersion === 9 || targetEsVersion === Infinity;
 
   let pointer = 0;
   let len = input.length;
@@ -483,7 +484,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     // note: consider this `skip()` in prod
     ASSERT(neof(), 'should not be oob before the skip');
     ASSERT(arguments.length === 1, 'require explicit char');
-    ASSERT(peeky(chr), 'skip expecting different char');
+    ASSERT(peeky(chr), 'skip expecting different char', chr, peek());
 
     skip();
   }
@@ -1562,6 +1563,9 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       }
     }
 
+    let groupNames = {};
+    let namedBackRefs = [];
+
     do {
       switch (c) {
         case $$FWDSLASH_2F:
@@ -1571,6 +1575,14 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             // all groups must be closed before the floor is closed
             // dont consume the forward slash. let only the root caller do this
             return regexSyntaxError('Unclosed group');
+          }
+
+          if (webCompat === WEB_COMPAT_OFF) {
+            for (let i=0,l=namedBackRefs.length;i<l;++i) {
+              if (groupNames['#' + namedBackRefs[i]] === undefined) {
+                THROW('Named back reference \\k<' + namedBackRefs[i] +'> was not defined in this regex: ' + JSON.stringify(groupNames).replace(/"/g,''));
+              }
+            }
           }
 
           ASSERT_skip($$FWDSLASH_2F);
@@ -1615,7 +1627,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
               ASSERT_skip(d);
               afterAtom = false; // this Assertion can never have a Quantifier
             } else {
-              let escapeStatus = parseRegexAtomEscape(d);
+              let escapeStatus = parseRegexAtomEscape(d, namedBackRefs);
               if (escapeStatus === ALWAYS_BAD) {
                 uflagStatus = ALWAYS_BAD;
               } else if (escapeStatus === GOOD_SANS_U_FLAG) {
@@ -1651,21 +1663,48 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
             }
             c = peek();
             if (c === $$COLON_3A || c === $$IS_3D || c === $$EXCL_21 || c === $$LT_3C) {
-              // non capturing group
-              // (?: (?= (?! (?<= (?<!
+              // non capturing group or named capturing group
+              // (?: (?= (?! (?<= (?<! (?<abc>
               if (c === $$LT_3C) {
                 // (?<
-                if (!supportRegexLookbehinds) {
-                  THROW('Lookbehinds in regular expressions are not supported in the currently targeted language version');
-                }
-                ASSERT_skip(c);
+                ASSERT_skip($$LT_3C);
                 c = peek();
                 if (c === $$IS_3D || c === $$EXCL_21) {
+                  if (!supportRegexLookbehinds) {
+                    THROW('Lookbehinds in regular expressions are not supported in the currently targeted language version');
+                  }
                   // (?<= (?<!
                   wasUnfixableAssertion = true;
-                } else {
+                } else if (!supportRegexNamedGroups) {
                   uflagStatus = regexSyntaxError('The lookbehind group `(?<` must be followed by `=` or `!` but wasnt [ord=' + c + ']');
                   break;
+                } else {
+                  // (?< ...
+                  if (!isIdentStart(c)) {
+                    if (webCompat === WEB_COMPAT_OFF) {
+                      uflagStatus = regexSyntaxError('Could not parse `(?<` as a named capturing group and it was not an assertion; bailing', c);
+                    }
+                    break;
+                  }
+
+                  parseIdentifierRest(c, '');
+                  let name = lastParsedIdent;
+                    if (groupNames['#' + name]) {
+                    uflagStatus = regexSyntaxError('Each group name can only be declared once: `' + name + '`');
+                    break;
+                  }
+                  groupNames['#' + name] = true;
+
+                  // named capturing group
+                  ++nCapturingParens;
+
+                  if (!peeky($$GT_3E)) {
+                    if (webCompat === WEB_COMPAT_OFF) {
+                      uflagStatus = regexSyntaxError('Missing closing angle bracket of name of group');
+                    }
+                    break;
+                  }
+                  c = $$GT_3E;
                 }
               } else if (c === $$IS_3D || c === $$EXCL_21) {
                 // (?= (?!
@@ -1681,7 +1720,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
               uflagStatus = regexSyntaxError('Illegal character after pseudo group marker `(?` [ord=' + c + ']');
             }
           } else {
-            // capturing group
+            // anonymous capturing group
             ++nCapturingParens;
           }
 
@@ -1810,7 +1849,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     // this is a fail because we didnt got to the end of input before the closing /
     return regexSyntaxError('Found EOF before regex was closed');
   }
-  function parseRegexAtomEscape(c) {
+  function parseRegexAtomEscape(c, namedBackRefs) {
     // backslash already parsed
 
     // -- u flag is important
@@ -1944,6 +1983,38 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       case $$8_38:
       case $$9_39:
         return parseRegexDecimalEscape(c);
+
+      case $$K_6B:
+        // named backreference
+        ASSERT_skip($$K_6B);
+        c = peek();
+        if (c !== $$LT_3C) {
+          if (webCompat === WEB_COMPAT_OFF) {
+            return regexSyntaxError('Named back reference \\k; missing group name', c);
+          }
+          return GOOD_SANS_U_FLAG;
+        }
+        ASSERT_skip($$LT_3C);
+        c = peek();
+        if (!isIdentStart(c)) {
+          if (webCompat === WEB_COMPAT_OFF) {
+            return regexSyntaxError('Could not parse `\\k<` as a named back reference; bailing', c);
+          } else {
+            return GOOD_SANS_U_FLAG;
+          }
+        }
+
+        parseIdentifierRest(c, '');
+        namedBackRefs.push(lastParsedIdent); // we can only validate ths after completely parsing the regex body
+
+        if (!peeky($$GT_3E)) {
+          if (webCompat === WEB_COMPAT_OFF) {
+            return regexSyntaxError('Missing closing angle bracket of name of group', c);
+          }
+          return GOOD_SANS_U_FLAG;
+        }
+        ASSERT_skip($$GT_3E);
+        return ALWAYS_GOOD;
 
       case $$FWDSLASH_2F:
         // explicitly allowed

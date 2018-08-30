@@ -26,7 +26,10 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
 
-            has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
+            // TODO: unicode identifier characters
+            has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') ||
+            has('built-ins/RegExp/named-groups/non-unicode-property-names.js') || // pi
+            has('built-ins/RegExp/named-groups/unicode-property-names.js') || // pi
 
             // TODO: file report; I think the following rule applies here and as such should not throw:
             // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
@@ -54,7 +57,7 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
           // particular features (especially new ones) will be mentioned in the header so we can filter en-mass based on that here
           // generated: call arg trailing comma
-          if (/features:.*(?:numeric-separator-literal|bigint|regexp-named-groups|class-fields-public|class-fields-private|optional-catch-binding)/i.test(code)) obj.skip = true;
+          if (/features:.*(?:numeric-separator-literal|bigint|class-fields-public|class-fields-private|optional-catch-binding)/i.test(code)) obj.skip = true;
 
           let headerEndMarker = '---*/';
           let headerEnd = code.indexOf(headerEndMarker);

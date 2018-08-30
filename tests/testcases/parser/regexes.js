@@ -1083,4 +1083,109 @@ module.exports = (describe, test) => describe('regexes', _ => {
       });
     });
   });
+
+  describe('named capturing groups', _ => {
+
+    test.pass('simple group', {
+      code: '/foo(?<x>bar)/',
+    });
+
+    test.pass('start with dollar', {
+      code: '/foo(?<$foo>bar)/',
+    });
+
+    test.pass('start with underscore', {
+      code: '/foo(?<_foo>bar)/',
+    });
+
+    test.pass('contains dollar', {
+      code: '/foo(?<brag$foo>bar)/',
+    });
+
+    test.pass('contains underscore', {
+      code: '/foo(?<brag_foo>bar)/',
+    });
+
+    test.pass('double group', {
+      code: '/(?<a>a).|(?<x>x)/;',
+    });
+
+    test.fail('cannot use a name more than once', {
+      code: '/a (?<foo>b) (?<foo>c)/',
+    });
+
+    describe('k escape', _ => {
+
+      test.pass('must have group', {
+        code: '/(?<x>y)\\k<x>/',
+      });
+
+      test.fail('fails without group', {
+        code: '/(?<x>y)\\k<z>/',
+      });
+    });
+
+    describe('bad syntax cases', _ => {
+
+      test.fail('empty name', {
+        code: '/(?<>a)/',
+      });
+
+      test.fail('missing closing bracket', {
+        code: '/(?<aa)/',
+      });
+
+      test.fail('starting with num', {
+        code: '/(?<42a>a)/',
+      });
+
+      test.fail('starting with colon', {
+        code: '/(?<:a>a)/',
+      });
+
+      test.fail('containing colon', {
+        code: '/(?<a:>a)/',
+      });
+
+      test.fail('dupe name', {
+        code: '/(?<a>a)(?<a>a)/',
+      });
+
+      test.fail('dupe and extra name', {
+        code: '/(?<a>a)(?<b>b)(?<a>a)/',
+      });
+
+      test.fail('k class missing arg', {
+        code: '/(?<a>.)\\k/',
+      });
+
+      test.fail('k arg not closed', {
+        code: '/(?<a>.)\\k<a/',
+      });
+
+      test.fail('k arg empty name', {
+        code: '/(?<a>.)\\k<>/',
+      });
+
+      test.fail('k arg does not exist', {
+        code: '/(?<a>.)\\k<b>/',
+      });
+
+      test.fail('k arg partial match', {
+        code: '/(?<a>a)\\k<ab>/',
+      });
+
+      test.fail('k arg also partial match', {
+        code: '/(?<ab>a)\\k<a>/',
+      });
+
+      test.fail('k before partial match', {
+        code: '/\\k<a>(?<ab>a)/',
+      });
+
+      test.fail('k arg unclosed group', {
+        code: '/\\k<a(?<a>a)/',
+      });
+    });
+  });
 });
