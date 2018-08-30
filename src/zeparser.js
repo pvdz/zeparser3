@@ -914,14 +914,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseTopLevels(lexerFlags) {
     AST_set('body', []);
-    let scoop = createScope('_parseTopLevels');
+    let scoop = SCOPE_create('_parseTopLevels');
     ASSERT(scoop._ = 'root scope'); // debug
     let exportedNames = {};
     ASSERT(exportedNames._ = 'exported names');
     let labelSet = {_: 'labelSet'};
     _parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, ARGS_SIMPLE, NOT_EVAL_OR_ARGS, 'body');
   }
-  function createScope(desc) {
+
+  function SCOPE_create(desc) {
     // while this comment probably gets lost, the name is `scoop` for greppability since `scope` is too generic
     let scoop = {
       var: {},
@@ -934,7 +935,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(scoop._ = 'scope', 'just debugging');
     return scoop;
   }
-  function createLexFrom(scoop, scopeType, desc) {
+  function SCOPE_addLexTo(scoop, scopeType, desc) {
     let scoop2 = {
       var: scoop.var,
       lexvar: {
@@ -949,12 +950,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(scoop2._ = scoop._ + ':lex', 'just debugging');
     return scoop2;
   }
-  function addToScopeAndDedupe(scoop, name, bindingType, originIsVarDecl) {
-    ASSERT(addToScopeAndDedupe.length === arguments.length, 'arg count');
-    return _addToScope(scoop, name, bindingType, CHECK_DUPE_BINDS, originIsVarDecl);
+  function SCOPE_addBindingAndDedupe(scoop, name, bindingType, originIsVarDecl) {
+    ASSERT(SCOPE_addBindingAndDedupe.length === arguments.length, 'arg count');
+    return SCOPE_addBinding(scoop, name, bindingType, CHECK_DUPE_BINDS, originIsVarDecl);
   }
-  function _addToScope(scoop, name, bindingType, dupeChecks, originIsVarDecl) {
-    ASSERT(_addToScope.length === arguments.length, 'arg count');
+  function SCOPE_addBinding(scoop, name, bindingType, dupeChecks, originIsVarDecl) {
+    ASSERT(SCOPE_addBinding.length === arguments.length, 'arg count');
 
     if (scoop === DO_NOT_BIND) return; // for example: toplevel array, function expression, class expression
 
@@ -1009,7 +1010,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let lex = scoop.lex;
 
       if (dupeChecks === CHECK_DUPE_BINDS) {
-        lexParentDupeCheck(lex, scoop.lexvar, hashed);
+        SCOPE_lexParentDupeCheck(lex, scoop.lexvar, hashed);
 
         if (lex[hashed] !== undefined) {
           THROW('Cannot create lexical binding when the name was already bound');
@@ -1027,7 +1028,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       lex[hashed] = x;
     }
   }
-  function verifyLexicalScope(scoop, skipParent) {
+  function SCOPE_verifyLexical(scoop, skipParent) {
     let lex = scoop.lex;
     let lexvar = scoop.lexvar;
     for (let key in lex) {
@@ -1035,13 +1036,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (lex[key] > 1) {
           return true;
         }
-        if (!skipParent) lexParentDupeCheck(lex, lexvar, key);
+        if (!skipParent) SCOPE_lexParentDupeCheck(lex, lexvar, key);
       }
     }
     return false;
   }
-  function lexParentDupeCheck(lex, lexvar, hashed) {
-    ASSERT(lexParentDupeCheck.length === arguments.length, 'arg count');
+  function SCOPE_lexParentDupeCheck(lex, lexvar, hashed) {
+    ASSERT(SCOPE_lexParentDupeCheck.length === arguments.length, 'arg count');
 
     // confirm that given hashed name is not already defined in parent pseudo-lexical scopes of certain kinds (like args)
 
@@ -1059,6 +1060,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // only check inner scopes. var recording also has to check upper lex scopes (`let x; {var x}`)
     if (lexvar[hashed] !== undefined) {
       THROW('Cannot create lexical binding when the name was already `var` bound');
+    }
+  }
+  function SCOPE_verifyArgs(scoop, wereSimpleArgs) {
+    let lex = scoop.lex['#'];
+    ASSERT(lex, 'should be in the body of a function/scope where the args have just been parsed into another layer');
+    _SCOPE_verifyArgs(lex, wereSimpleArgs);
+  }
+  function _SCOPE_verifyArgs(lex, wereSimpleArgs) {
+    for (let key in lex) {
+      if (key[0] === '#' && key.length > 1 && lex[key] > 1) {
+        if (wereSimpleArgs === ARGS_COMPLEX) {
+          THROW('Same param name was bound twice and the args are not simple, this is not allowed');
+        } else {
+          THROW('Same param name `' + key.slice(1) + '` was bound twice, this is not allowed in strict mode');
+        }
+      }
     }
   }
 
@@ -1143,17 +1160,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (!wasStrict && hasAnyFlag(addedLexerFlags, LF_STRICT_MODE) && hasNoFlag(lexerFlags, LF_IN_GLOBAL)) {
-      let lex = scoop.lex['#'];
-      ASSERT(lex, 'should be in the body of a function/scope where the args have just been parsed into another layer');
-      for (let key in lex) {
-        if (key[0] === '#' && key.length > 1 && lex[key] > 1) {
-          if (!wasSimple) {
-            THROW('Same param name was bound twice and the args are not simple, this is not allowed');
-          } else {
-            THROW('Same param name `' + key.slice(1) + '` was bound twice, this is not allowed in strict mode');
-          }
-        }
-      }
+      SCOPE_verifyArgs(scoop, wasSimple);
     }
 
     lexerFlags |= addedLexerFlags;
@@ -1325,7 +1332,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('async', isAsync);
     AST_set('expression', isRealFuncExpr);
 
-    let innerScoop = createScope('parseFunctionAfterKeyword');
+    let innerScoop = SCOPE_create('parseFunctionAfterKeyword');
     ASSERT(innerScoop._ = 'func scope');
 
     // need to track whether the name was eval/args because if the func body is strict mode then it should still throw
@@ -1360,12 +1367,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       name = curtok.str;
       // declarations bind in outer scope, expressions bind in inner scope, methods bind ...  ehh?
       if (isFuncDecl === IS_FUNC_DECL) {
-        addToScopeAndDedupe(outerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL);
+        SCOPE_addBindingAndDedupe(outerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL);
       } else if (isFuncDecl === IS_FUNC_EXPR && isRealFuncExpr) {
-        addToScopeAndDedupe(innerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL);
+        SCOPE_addBindingAndDedupe(innerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL);
       }
       // create new lexical binding to "hide" the function name. this way it wont cause problems when doing `x=function f(){ let f; }`
-      innerScoop = createLexFrom(innerScoop, BLOCK_SCOPE, 'parseFunctionAfterKeyword');
+      innerScoop = SCOPE_addLexTo(innerScoop, BLOCK_SCOPE, 'parseFunctionAfterKeyword');
       ASSERT(innerScoop._ = 'func scope');
 
       functionNameTokenToVerify = curtok; // basically if this was strict mode and bad name, the binding check would throw already
@@ -1467,13 +1474,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseFunctionFromParams(lexerFlags, scoop, bindingFrom, expressionState, isGenerator, isClassConstructor, isGetSet, functionNameTokenToVerify, isMethod) {
     ASSERT(parseFunctionFromParams.length === arguments.length, 'arg count should match');
-    let paramScoop = createLexFrom(scoop, ARG_SCOPE, 'parseFunctionFromParams(arg)');
+    let paramScoop = SCOPE_addLexTo(scoop, ARG_SCOPE, 'parseFunctionFromParams(arg)');
     // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
     let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, paramScoop, bindingFrom, isGetSet, isGenerator, isMethod);
     ASSERT(typeof lexerFlags === 'number');
     _parseBlockStatement(
       sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION),
-      createLexFrom(paramScoop, BLOCK_SCOPE, 'parseFunctionFromParams(body)'),
+      SCOPE_addLexTo(paramScoop, BLOCK_SCOPE, 'parseFunctionFromParams(body)'),
       {},
       expressionState,
       PARSE_DIRECTIVES,
@@ -1509,15 +1516,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (isMethod === IS_METHOD || !wasSimple || hasAnyFlag(lexerFlags, LF_STRICT_MODE)) {
-      for (let key in scoop.lex) {
-        if (key[0] === '#' && key.length > 1 && scoop.lex[key] > 1) {
-          if (!wasSimple) {
-            THROW('Same param name was bound twice and the args are not simple, this is not allowed');
-          } else {
-            THROW('Same param name `' + key.slice(1) + '` was bound twice, this is not allowed in strict mode');
-          }
-        }
-      }
+      _SCOPE_verifyArgs(scoop.lex, wasSimple)
     }
 
     return wasSimple;
@@ -2058,7 +2057,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // eg: it is a `let` binding in outer scope and a `const` binding in inner scope...
       bindingIdentCheck(curtok, BINDING_TYPE_CLASS, lexerFlags);
       bindingName = curtok.str;
-      addToScopeAndDedupe(scoop, bindingName, BINDING_TYPE_LET, ORIGIN_NOT_VAR_DECL);
+      SCOPE_addBindingAndDedupe(scoop, bindingName, BINDING_TYPE_LET, ORIGIN_NOT_VAR_DECL);
       AST_setIdent('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (!optionalIdent) {
@@ -2094,7 +2093,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseConstStatement(lexerFlags, scoop, astProp) {
     ASSERT_skipAny('const', lexerFlags); // next is ident, [, or {
     parseAnyVarDecls(lexerFlags, scoop, BINDING_TYPE_CONST, FROM_STATEMENT_START, SKIP_DUPE_CHECKS, undefined, astProp);
-    if (verifyLexicalScope(scoop)) THROW('Const binding attempted to get at least one name bound more than once');
+    if (SCOPE_verifyLexical(scoop)) THROW('Const binding attempted to get at least one name bound more than once');
     parseSemiOrAsi(lexerFlags);
   }
 
@@ -2267,14 +2266,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // export let <bindings>
         ASSERT_skipAny('let' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{ (even when keyword=let)
         parseAnyVarDecls(lexerFlags, scoop, BINDING_TYPE_LET, FROM_EXPORT_DECL, SKIP_DUPE_CHECKS, exportedNames, 'declaration');
-        if (verifyLexicalScope(scoop)) THROW('Let export binding attempted to get at least one name bound more than once');
+        if (SCOPE_verifyLexical(scoop)) THROW('Let export binding attempted to get at least one name bound more than once');
         AST_set('source', null);
       } else if (curc === $$C_63) {
         if (curtok.str === 'const') {
           // export const <bindings>
           ASSERT_skipAny('const' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{ (even when keyword=let)
           parseAnyVarDecls(lexerFlags, scoop, BINDING_TYPE_CONST, FROM_EXPORT_DECL, SKIP_DUPE_CHECKS, exportedNames, 'declaration');
-          if (verifyLexicalScope(scoop)) THROW('Const export binding attempted to get at least one name bound more than once');
+          if (SCOPE_verifyLexical(scoop)) THROW('Const export binding attempted to get at least one name bound more than once');
         } else if (curtok.str === 'class') {
           // export class ...
           parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, 'declaration');
@@ -2390,7 +2389,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // a semi. we can then proceed parsing down that particular path.
 
     // the for-header adds a special lex scope because there are special let/const/var rules in place we need to verify
-    scoop = createLexFrom(scoop, FOR_SCOPE, 'parseForStatement(header)');
+    scoop = SCOPE_addLexTo(scoop, FOR_SCOPE, 'parseForStatement(header)');
 
     ASSERT_skipAny('for', lexerFlags); // TODO: optimize; next must be `(` or `await`
     let awaitable = curtype === $IDENT && curtok.str === 'await';
@@ -2442,7 +2441,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               AST_setIdent(astProp, curtok);
             } else {
               parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_LET, FROM_FOR_HEADER, CHECK_DUPE_BINDS, undefined, astProp);
-              if (verifyLexicalScope(scoop)) THROW('Let for-binding attempted to get at least one name bound more than once');
+              if (SCOPE_verifyLexical(scoop)) THROW('Let for-binding attempted to get at least one name bound more than once');
             }
             assignable = IS_ASSIGNABLE; // decls are assignable (`let` as a var name should be as well)
           } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
@@ -2460,7 +2459,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         case 'const':
           ASSERT_skipAny('const' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{ (even when keyword=let)
           parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_CONST, FROM_FOR_HEADER, SKIP_DUPE_CHECKS, undefined, astProp);
-          if (verifyLexicalScope(scoop)) THROW('Const for-binding attempted to get at least one name bound more than once');
+          if (SCOPE_verifyLexical(scoop)) THROW('Const for-binding attempted to get at least one name bound more than once');
           assignable = IS_ASSIGNABLE; // i think.
           break;
 
@@ -2654,7 +2653,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open('specifiers', 'ImportDefaultSpecifier');
     AST_setIdent('local', curtok);
     bindingIdentCheck(curtok, BINDING_TYPE_CONST, lexerFlags);
-    addToScopeAndDedupe(scoop, curtok.str, BINDING_TYPE_CONST, ORIGIN_NOT_VAR_DECL);
+    SCOPE_addBindingAndDedupe(scoop, curtok.str, BINDING_TYPE_CONST, ORIGIN_NOT_VAR_DECL);
     ASSERT_skipAny($IDENT, lexerFlags); // next must be `as` comma or `from`
     AST_close('ImportDefaultSpecifier');
   }
@@ -2680,11 +2679,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curtype !== $IDENT) THROW('Alias must be an ident');
         AST_setIdent('local', curtok);
         bindingIdentCheck(curtok, BINDING_TYPE_CONST, lexerFlags);
-        addToScopeAndDedupe(scoop, curtok.str, BINDING_TYPE_CONST, ORIGIN_NOT_VAR_DECL);
+        SCOPE_addBindingAndDedupe(scoop, curtok.str, BINDING_TYPE_CONST, ORIGIN_NOT_VAR_DECL);
         skipAny(lexerFlagsNoTemplate);
       } else {
         bindingIdentCheck(nameToken, BINDING_TYPE_CONST, lexerFlags);
-        addToScopeAndDedupe(scoop, nameToken.str, BINDING_TYPE_CONST, ORIGIN_NOT_VAR_DECL);
+        SCOPE_addBindingAndDedupe(scoop, nameToken.str, BINDING_TYPE_CONST, ORIGIN_NOT_VAR_DECL);
         AST_setIdent('local', nameToken);
       }
 
@@ -2708,7 +2707,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_setIdent('local', curtok);
     bindingIdentCheck(curtok, BINDING_TYPE_CONST, lexerFlags);
-    addToScopeAndDedupe(scoop, curtok.str, BINDING_TYPE_CONST, ORIGIN_NOT_VAR_DECL);
+    SCOPE_addBindingAndDedupe(scoop, curtok.str, BINDING_TYPE_CONST, ORIGIN_NOT_VAR_DECL);
     ASSERT_skipAny($IDENT, lexerFlags); // next must be `as` comma or `from`
     AST_close('ImportNamespaceSpecifier');
 
@@ -2730,7 +2729,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // let declaration
 
       parseAnyVarDecls(lexerFlags, scoop, BINDING_TYPE_LET, FROM_STATEMENT_START, SKIP_DUPE_CHECKS, undefined, astProp);
-      if (verifyLexicalScope(scoop)) THROW('Let binding attempted to get at least one name bound more than once');
+      if (SCOPE_verifyLexical(scoop)) THROW('Let binding attempted to get at least one name bound more than once');
       parseSemiOrAsi(lexerFlags);
     } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       THROW('Let declaration missing binding names and `let` cannot be a regular var name in strict mode');
@@ -2809,7 +2808,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipAnyOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // TODO: optimize; next must be `case` or `default` or `}`
     AST_set('cases', []);
 
-    parseSwitchCases(lexerFlagsNoTemplate | LF_IN_SWITCH, createLexFrom(scoop, SWITCH_SCOPE, 'parseSwitchStatement'), labelSet, 'cases');
+    parseSwitchCases(lexerFlagsNoTemplate | LF_IN_SWITCH, SCOPE_addLexTo(scoop, SWITCH_SCOPE, 'parseSwitchStatement'), labelSet, 'cases');
 
     skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
     AST_close('SwitchStatement');
@@ -2866,7 +2865,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let hasEither = false;
 
     ASSERT_skipAny('try', lexerFlags); // TODO: optimize; next must be {
-    parseBlockStatement(lexerFlags, createLexFrom(scoop, BLOCK_SCOPE, 'parseTryStatement(try)'), {'#':labelSet}, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, INC_DECL, 'block');
+    parseBlockStatement(lexerFlags, SCOPE_addLexTo(scoop, BLOCK_SCOPE, 'parseTryStatement(try)'), {'#':labelSet}, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, INC_DECL, 'block');
 
     if (curc === $$C_63 && curtok.str === 'catch') {
       // parseCatch
@@ -2876,7 +2875,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       skipAnyOrDieSingleChar($$PAREN_L_28, lexerFlags); // TODO: optimize; next MUST be one arg (ident/destructuring)
 
       // record the catch var in its own scope record, we'll then move the args record to be a lexical scope level (hackish)
-      let catchHeadScoop = createLexFrom(scoop, CATCH_SCOPE, 'parseTryStatement(catch-var)');
+      let catchHeadScoop = SCOPE_addLexTo(scoop, CATCH_SCOPE, 'parseTryStatement(catch-var)');
 
       if (curc === $$PAREN_R_29) THROW('Missing catch clause parameter');
       // catch clause cannot have a default
@@ -2885,10 +2884,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseBinding(lexerFlags | LF_NO_ASI, catchHeadScoop, BINDING_TYPE_ARG, FROM_CATCH, ASSIGNMENT_IS_DEFAULT, SKIP_DUPE_CHECKS, undefined, 'param');
 
       // destructuring requires manual checks so do this now for the catch var
-      if (verifyLexicalScope(catchHeadScoop, true)) THROW('Catch binding had at least one duplicate name bound');
+      if (SCOPE_verifyLexical(catchHeadScoop, true)) THROW('Catch binding had at least one duplicate name bound');
 
       // create a scope for the catch body. this way var decls can search for the catch scope to assert new vars
-      let catchBodyScoop = createLexFrom(catchHeadScoop, BLOCK_SCOPE, 'parseTryStatement(catch-body)');
+      let catchBodyScoop = SCOPE_addLexTo(catchHeadScoop, BLOCK_SCOPE, 'parseTryStatement(catch-body)');
 
       if (curc === $$COMMA_2C) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
       if (curc === $$IS_3D && curtok.str === '=') THROW('Catch clause parameter does not support default values');
@@ -2903,7 +2902,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // parseFinally
       hasEither = true;
       ASSERT_skipAny('finally', lexerFlags); // TODO: optimize; next must be {
-      parseBlockStatement(lexerFlags, createLexFrom(scoop, BLOCK_SCOPE, 'parseTryStatement(finally)'), {'#':labelSet}, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, INC_DECL, 'finalizer');
+      parseBlockStatement(lexerFlags, SCOPE_addLexTo(scoop, BLOCK_SCOPE, 'parseTryStatement(finally)'), {'#':labelSet}, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, INC_DECL, 'finalizer');
     } else {
       AST_set('finalizer', null);
     }
@@ -3234,7 +3233,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     switch (curc) {
       case $$CURLY_L_7B:
-        parseBlockStatement(lexerFlags, createLexFrom(scoop, BLOCK_SCOPE, 'parsePunctuatorStatement'), labelSet, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, INC_DECL, astProp);
+        parseBlockStatement(lexerFlags, SCOPE_addLexTo(scoop, BLOCK_SCOPE, 'parsePunctuatorStatement'), labelSet, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, INC_DECL, astProp);
         break;
       case $$SEMI_3B:
         parseEmptyStatement(lexerFlags, astProp);
@@ -3379,7 +3378,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       // normal
       bindingIdentCheck(curtok, bindingType, lexerFlags);
-      _addToScope(
+      SCOPE_addBinding(
         scoop,
         curtok.str,
         bindingType,
@@ -4605,10 +4604,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(curtok.str === '=>', 'punc is arrow');
 
     // - `x => x`
-    let scoop = createScope('parseArrowParenlessFromPunc');
+    let scoop = SCOPE_create('parseArrowParenlessFromPunc');
     scoop.lex.type = ARG_SCOPE;
     ASSERT(scoop._ = 'parenless arrow scope');
-    addToScopeAndDedupe(scoop, identToken.str, BINDING_TYPE_ARG, ORIGIN_NOT_VAR_DECL);
+    SCOPE_addBindingAndDedupe(scoop, identToken.str, BINDING_TYPE_ARG, ORIGIN_NOT_VAR_DECL);
 
     // arrow with single param
     AST_open(astProp, 'ArrowFunctionExpression');
@@ -4894,7 +4893,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('expression', false); // "body of arrow is block"
       parseBlockStatement(
         sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION),
-        createLexFrom(scoop, BLOCK_SCOPE, 'parseArrowFromPunc'),
+        SCOPE_addLexTo(scoop, BLOCK_SCOPE, 'parseArrowFromPunc'),
         {_: 'arrow labels'},
         IS_EXPRESSION,
         PARSE_DIRECTIVES,
@@ -4949,7 +4948,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //     x, [foo + y, bar] = doo;
     // TODO: what about `x = [a, b] = y` and `[a, b] = c = d`
 
-    let scoop = createScope('_parseGroupToplevels');
+    let scoop = SCOPE_create('_parseGroupToplevels');
     scoop.lex.type = ARG_SCOPE;
     ASSERT(scoop._ = 'arrow scope');
 
@@ -5073,7 +5072,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               // if curc is a comma then the group is not assignable but that will fail through the toplevelComma flag
               // if the group is just an identifier then it can be assigned to: `(a) = b`. There's a test. Or two.
               assignable = bindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
-              _addToScope(scoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+              SCOPE_addBinding(scoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
               if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
               AST_setIdent(astProp, identToken);
            }
@@ -5260,7 +5259,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // </SCRUB AST>
 
       // must assert unique parameters now
-      if (verifyLexicalScope(scoop, true)) THROW('Arrow had at least one duplicate parameter name bound');
+      if (SCOPE_verifyLexical(scoop, true)) THROW('Arrow had at least one duplicate parameter name bound');
 
       parseArrowFromPunc(lexerFlags, scoop, asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC, simpleArgs);
 
@@ -5338,7 +5337,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: in strict mode the var must exist otherwise it throws if not an arrow
     // TODO: if name is const bound it is only valid as an arrow
     bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
-    _addToScope(scoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+    SCOPE_addBinding(scoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
 
     // TODO: instead of wrap-closed below we can do ast_open here in one go
     // AST_open(astProp, 'AssignmentExpression');
@@ -5465,7 +5464,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
           else {
-            _addToScope(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+            SCOPE_addBinding(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
             addNameToExports(exportedNames, identToken.str);
           }
 
@@ -5499,7 +5498,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               let yieldAssignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, astProp);
               if (yieldAssignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
               else {
-                _addToScope(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+                SCOPE_addBinding(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
                 addNameToExports(exportedNames, identToken.str);
               }
               break;
@@ -5507,7 +5506,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
               if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
               else {
-                _addToScope(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+                SCOPE_addBinding(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
                 addNameToExports(exportedNames, identToken.str);
               }
           }
@@ -5929,7 +5928,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               let yieldAssignable = parseYieldKeyword(lexerFlags, nameBinding, ALLOW_ASSIGNMENT, astProp);
               if (yieldAssignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
               else {
-                _addToScope(scoop, nameBinding.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+                SCOPE_addBinding(scoop, nameBinding.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
                 addNameToExports(exportedNames, nameBinding.str);
               }
               break;
@@ -5938,7 +5937,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               let assignable = bindingAssignableIdentCheck(nameBinding, bindingType, lexerFlags);
               if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
               else {
-                _addToScope(scoop, nameBinding.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+                SCOPE_addBinding(scoop, nameBinding.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
                 addNameToExports(exportedNames, nameBinding.str);
               }
           }
@@ -6253,7 +6252,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // and `arguments` which are not reserved and which would be allowed here
         bindingIdentCheck(identToken, bindingType, lexerFlags);
       }
-      _addToScope(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+      SCOPE_addBinding(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
       addNameToExports(exportedNames, identToken.str);
 
       AST_open(astProp, 'Property');
@@ -6312,7 +6311,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           let assignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, 'value');
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
           else {
-            _addToScope(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+            SCOPE_addBinding(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
             addNameToExports(exportedNames, identToken.str);
           }
         } else if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
@@ -6320,7 +6319,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
           else {
-            _addToScope(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+            SCOPE_addBinding(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
             addNameToExports(exportedNames, identToken.str);
           }
           AST_setIdent('value', identToken);
@@ -6705,7 +6704,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           bindingIdentCheck(identToken, bindingType, lexerFlags);
           AST_setIdent(astProp, identToken);
         }
-        _addToScope(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+        SCOPE_addBinding(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
         addNameToExports(exportedNames, identToken.str);
       }
       else if (curc === closingCharOrd) {
@@ -6723,7 +6722,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
           AST_setIdent(astProp, identToken);
         }
-        _addToScope(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+        SCOPE_addBinding(scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
         addNameToExports(exportedNames, identToken.str);
       }
       else if (curc === $$COMMA_2C) {
