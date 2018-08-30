@@ -27,12 +27,19 @@ if (!fs.statSync(PATH262).isDirectory()) {
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
             has('let-block-with-newline') || // TODO: crappy let block edge case (similar to the async case)
 
-            has('param-redecl') || has('early-dup') || // TODO: fix once we fix scoping and duplicate binding checks (class, async)
-            has('/early-lex-and-var') || has('parse-err-hoist-lex') || has('redeclaration') || has('head-let-bound-names') || // more scoping
-            has('head-const-bound-names') || has('function/13.1') || has('attempt-to-redeclare-let-binding-with') || has('try/early-catch') || // more scoping
+            has('object/__proto__-duplicate') || // TODO: fix duplicate __proto__ detection (uncomment tests in object.js)
+
+            // function statements and dupe bindings
+            has('annexB/language/function-code/if-decl-else-decl') ||
+            has('annexB/language/function-code/if-decl-else-stmt') ||
+            has('annexB/language/function-code/if-decl-no-else') ||
+            has('annexB/language/function-code/if-stmt-else-decl') ||
+            has('annexB/language/global-code/if-decl-else-decl') ||
+            has('annexB/language/global-code/if-decl-else-stmt') ||
+            has('annexB/language/global-code/if-decl-no-else') ||
+            has('annexB/language/global-code/if-stmt-else-decl') ||
+
             has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
-            has('duplicate') || // TODO: duplicate arg bindings
-            has('import/dup-bound-names') || // TODO: dupe imports
 
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
 
@@ -98,6 +105,18 @@ if (!fs.statSync(PATH262).isDirectory()) {
               has('delete/11.4.1-2-3.js') || // delete true
               has('labeled/value-await-non-module-escaped.js') || // asserts `await` can be a label name in sloppy and strict, only valid in SCRIPT goal
               has('labeled/value-await-non-module.js') || // asserts `await` can be a label name in sloppy and strict, only valid in SCRIPT goal
+
+              // tests that dont work because a func decl in global is assumed to be `var`, which is `lex` in module goal
+              has('RegExp/prototype/exec/S15.10.6.2_A1_T9') ||
+              has('RegExp/prototype/test/S15.10.6.3_A1_T9') ||
+              has('redeclaration-global/allowed-to-redeclare-function-declaration-with-var') ||
+              has('redeclaration-global/allowed-to-redeclare-var-with-function-declaration') ||
+              has('destructuring/binding/syntax/recursive-array-and-object-patterns.js') || // (TODO: report this, it defines fn4 twice for no real reason, probably copy/pasta)
+              has('language/global-code/decl-func-dup') ||
+              has('statements/function/S13.2.1_A6_T3') ||
+              has('language/statements/function/S13_A19_T1') ||
+              has('language/statements/function/S13_A6_T1') ||
+              has('language/statements/function/S13_A6_T2') ||
             false) {
               testObj.MODULE = {SKIP: true};
             }

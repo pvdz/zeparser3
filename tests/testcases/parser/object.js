@@ -8120,5 +8120,48 @@ module.exports = (describe, test) =>
       test.pass('not-shorthand and shorthand', {
         code: '({a: 1, a})',
       });
+
+      // describe('dunderproto', _ => {
+      //
+      //   // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+      //   // > It is a Syntax Error if PropertyNameList of PropertyDefinitionList contains any duplicate entries for
+      //   //   "__proto__" and at least two of those entries were obtained from productions of the form PropertyDefinition:PropertyName:AssignmentExpression .
+      //
+      //   test('bad case', {
+      //     code: 'x = {__proto__: 1, __proto__: 2}',
+      //   });
+      //
+      //   test('okay with shorthand right', {
+      //     code: 'x = {__proto__: 1, __proto__}',
+      //   });
+      //
+      //   test('okay with shorthand left', {
+      //     code: 'x = {__proto__, __proto__: 2}',
+      //   });
+      //
+      //   test('as string name', {
+      //     code: 'x = {"__proto__": 1, __proto__: 2}',
+      //   });
+      //
+      //   test('computed', {
+      //     code: 'x = {[__proto__]: 1, __proto__: 2}',
+      //   });
+      //
+      //   test('method prop', {
+      //     code: 'x = {__proto__(){}, __proto__: 2}',
+      //   });
+      //
+      //   test('method method', {
+      //     code: 'x = {__proto__(){}, __proto__(){}}',
+      //   });
+      //
+      //   test('async generator', {
+      //     code: 'x = {async __proto__(){}, *__proto__(){}}',
+      //   });
+      //
+      //   test('static getter', {
+      //     code: 'x = {static __proto__(){}, get __proto__(){}}',
+      //   });
+      // });
     });
   });

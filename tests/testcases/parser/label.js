@@ -92,6 +92,11 @@ module.exports = (describe, test) =>
       throws: 'same label',
     });
 
+    test('a { a }', {
+      code: 'a: { a: x }',
+      throws: 'same label',
+    });
+
 
     // TODO: label:functiondecl is explicitly considered a syntax error
     // TODO: labels must be "identifiers", which may not be reserved

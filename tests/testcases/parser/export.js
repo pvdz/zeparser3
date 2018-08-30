@@ -64,13 +64,24 @@ module.exports = (describe, test) =>
         body: [
           {
             type: 'ExportNamedDeclaration',
-            specifiers: [{type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}}],
+            specifiers: [
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'a'},
+              },
+            ],
             declaration: null,
             source: null,
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test.fail('export does not use `:`', {
+      code: 'export {x: a}',
+      SCRIPT: {throws: 'module goal'},
     });
 
     test('export one key, trailing comma', {
@@ -115,7 +126,13 @@ module.exports = (describe, test) =>
         body: [
           {
             type: 'ExportNamedDeclaration',
-            specifiers: [{type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}}],
+            specifiers: [
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'a'},
+              },
+            ],
             declaration: null,
             source: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
           },
@@ -149,7 +166,13 @@ module.exports = (describe, test) =>
         body: [
           {
             type: 'ExportNamedDeclaration',
-            specifiers: [{type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}}],
+            specifiers: [
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'a'},
+              },
+            ],
             declaration: null,
             source: null,
           },
@@ -187,8 +210,16 @@ module.exports = (describe, test) =>
           {
             type: 'ExportNamedDeclaration',
             specifiers: [
-              {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}},
-              {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'y'}, exported: {type: 'Identifier', name: 'b'}},
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'a'},
+              },
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'y'},
+                exported: {type: 'Identifier', name: 'b'},
+              },
             ],
             declaration: null,
             source: null,
@@ -227,8 +258,16 @@ module.exports = (describe, test) =>
           {
             type: 'ExportNamedDeclaration',
             specifiers: [
-              {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'a'}},
-              {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'y'}, exported: {type: 'Identifier', name: 'b'}},
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'a'},
+              },
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'y'},
+                exported: {type: 'Identifier', name: 'b'},
+              },
             ],
             declaration: null,
             source: null,

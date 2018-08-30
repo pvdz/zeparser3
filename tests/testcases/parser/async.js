@@ -2194,4 +2194,19 @@ module.exports = (describe, test) => describe('async keyword', function() {
       ES: 7,
     });
   });
+
+  test.pass('async function decl names are var bindings in global', {
+    code: 'async function f() {} var f;',
+    desc: 'global func decls are considered `var` in SCRIPT goal; https://tc39.github.io/ecma262/#sec-block-static-semantics-toplevellexicallydeclarednames',
+    MODULE: {throws: 'bound'},
+  });
+
+  test('async function decl names are lexical bindings in block scope', {
+    code: '{ async function f() {} var f; }',
+    throws: 'bound',
+  });
+
+  test.pass('async function decl names are lexical bindings in function scope', {
+    code: 'function g() {   async function f() {} var f;   }',
+  });
 });

@@ -1804,31 +1804,7 @@ module.exports = (describe, test) =>
 
           test('double destruct on same name in array sans default', {
             code: 'function f([foo], [foo]){}',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'FunctionDeclaration',
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
-                  params: [
-                    {
-                      type: 'ArrayPattern',
-                      elements: [{type: 'Identifier', name: 'foo'}],
-                    },
-                    {
-                      type: 'ArrayPattern',
-                      elements: [{type: 'Identifier', name: 'foo'}],
-                    },
-                  ],
-                  body: {type: 'BlockStatement', body: []},
-                },
-              ],
-            },
-            desc: 'TODO: this is an error because the same name is bound twice',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            throws: 'bound',
           });
 
           test('double destruct in array sans default', {
