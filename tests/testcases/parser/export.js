@@ -40,28 +40,56 @@ module.exports = (describe, test) =>
     });
 
     test('export one key', {
-      code: 'export {x}',
+      code: 'export {x}; var x;',
       SCRIPT: {throws: 'module goal'},
       ast: {
         type: 'Program',
         body: [
           {
             type: 'ExportNamedDeclaration',
-            specifiers: [{type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}}],
+            specifiers: [
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'x'},
+              },
+            ],
             declaration: null,
             source: null,
           },
+          {
+            type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'x'},
+                init: null,
+              },
+            ],
+          },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
     });
 
     test('export one key aliased', {
-      code: 'export {x as a}',
+      code: 'var x; export {x as a}',
       SCRIPT: {throws: 'module goal'},
       ast: {
         type: 'Program',
         body: [
+          {
+            type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'x'},
+                init: null,
+              },
+            ],
+          },
           {
             type: 'ExportNamedDeclaration',
             specifiers: [
@@ -76,29 +104,46 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
     });
 
     test.fail('export does not use `:`', {
-      code: 'export {x: a}',
+      code: 'var x; export {x: a}',
       SCRIPT: {throws: 'module goal'},
     });
 
     test('export one key, trailing comma', {
-      code: 'export {x,}',
+      code: 'var x; export {x,}',
       SCRIPT: {throws: 'module goal'},
       ast: {
         type: 'Program',
         body: [
           {
+            type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'x'},
+                init: null,
+              },
+            ],
+          },
+          {
             type: 'ExportNamedDeclaration',
-            specifiers: [{type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}}],
+            specifiers: [
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'x'},
+              },
+            ],
             declaration: null,
             source: null,
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
 
     test('re-export one key', {
@@ -159,11 +204,22 @@ module.exports = (describe, test) =>
     });
 
     test('export one key aliased, trailing comma', {
-      code: 'export {x as a,}',
+      code: 'var x; export {x as a,}',
       SCRIPT: {throws: 'module goal'},
       ast: {
         type: 'Program',
         body: [
+          {
+            type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'x'},
+                init: null,
+              },
+            ],
+          },
           {
             type: 'ExportNamedDeclaration',
             specifiers: [
@@ -178,35 +234,75 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
 
     test('export two keys', {
-      code: 'export {x, y}',
+      code: 'var x,y; export {x, y}',
       SCRIPT: {throws: 'module goal'},
       ast: {
         type: 'Program',
         body: [
           {
+            type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'x'},
+                init: null,
+              },
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'y'},
+                init: null,
+              },
+            ],
+          },
+          {
             type: 'ExportNamedDeclaration',
             specifiers: [
-              {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}},
-              {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'y'}, exported: {type: 'Identifier', name: 'y'}},
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'x'},
+              },
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'y'},
+                exported: {type: 'Identifier', name: 'y'},
+              },
             ],
             declaration: null,
             source: null,
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
     });
 
     test('export two keys aliased', {
-      code: 'export {x as a, y as b}',
+      code: 'var x,y; export {x as a, y as b}',
       SCRIPT: {throws: 'module goal'},
       ast: {
         type: 'Program',
         body: [
+          {
+            type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'x'},
+                init: null,
+              },
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'y'},
+                init: null,
+              },
+            ],
+          },
           {
             type: 'ExportNamedDeclaration',
             specifiers: [
@@ -226,35 +322,75 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI],
     });
 
     test('export two keys, trailing comma', {
-      code: 'export {x, y,}',
+      code: 'var x,y; export {x, y,}',
       SCRIPT: {throws: 'module goal'},
       ast: {
         type: 'Program',
         body: [
           {
+            type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'x'},
+                init: null,
+              },
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'y'},
+                init: null,
+              },
+            ],
+          },
+          {
             type: 'ExportNamedDeclaration',
             specifiers: [
-              {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'x'}, exported: {type: 'Identifier', name: 'x'}},
-              {type: 'ExportSpecifier', local: {type: 'Identifier', name: 'y'}, exported: {type: 'Identifier', name: 'y'}},
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'x'},
+                exported: {type: 'Identifier', name: 'x'},
+              },
+              {
+                type: 'ExportSpecifier',
+                local: {type: 'Identifier', name: 'y'},
+                exported: {type: 'Identifier', name: 'y'},
+              },
             ],
             declaration: null,
             source: null,
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
 
     test('export two keys aliased, trailing comma', {
-      code: 'export {x as a, y as b,}',
+      code: 'var x,y; export {x as a, y as b,}',
       SCRIPT: {throws: 'module goal'},
       ast: {
         type: 'Program',
         body: [
+          {
+            type: 'VariableDeclaration',
+            kind: 'var',
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'x'},
+                init: null,
+              },
+              {
+                type: 'VariableDeclarator',
+                id: {type: 'Identifier', name: 'y'},
+                init: null,
+              },
+            ],
+          },
           {
             type: 'ExportNamedDeclaration',
             specifiers: [
@@ -274,7 +410,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
 
     test('export var statement, one var', {

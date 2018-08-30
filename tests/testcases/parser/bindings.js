@@ -1298,36 +1298,36 @@ module.exports = (describe, test) =>
       describe('in a single export', _ => {
 
         test.pass('a b', {
-          code: 'export {a, b}',
+          code: 'var a,b; export {a, b}',
           SCRIPT: {throws: 'module'},
         });
 
         test('a a', {
-          code: 'export {a, a}',
+          code: 'var a; export {a, a}',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
 
         test('a b a', {
-          code: 'export {a, b, a}',
+          code: 'var a, b; export {a, b, a}',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
 
         test('b a a', {
-          code: 'export {b, a, a}',
+          code: 'var a, b; export {b, a, a}',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
 
         test('a a b', {
-          code: 'export {a, a, b}',
+          code: 'var a, b; export {a, a, b}',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
 
         test('alias', {
-          code: 'export {a, b as a}',
+          code: 'var a, b; export {a, b as a}',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
@@ -1390,30 +1390,30 @@ module.exports = (describe, test) =>
       describe('multiple exports', _ => {
 
         test.pass('a b', {
-          code: 'export {a}; export {b};',
+          code: 'var a,b; export {a}; export {b};',
           SCRIPT: {throws: 'module'},
         });
 
         test('a a', {
-          code: 'export {a}; export {a};',
+          code: 'var a; export {a}; export {a};',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
 
         test('a b a', {
-          code: 'export {a, b}; export {a};',
+          code: 'var a,b; export {a, b}; export {a};',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
 
         test('b a a', {
-          code: 'export {b, a}; export {a};',
+          code: 'var a,b; export {b, a}; export {a};',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
 
         test('a a b', {
-          code: 'export {a}; export {a, b};',
+          code: 'var a,b; export {a}; export {a, b};',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });
@@ -1428,6 +1428,21 @@ module.exports = (describe, test) =>
           code: 'export {a}; export {b as a};',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
+        });
+
+        test.pass('demand correct name to be declared for export when aliasing, this is correct', {
+          code: 'var mustExist; export {mustExist as canBeUndeclared};',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('demand correct name to be declared for export when aliasing, this is incorrect', {
+          code: 'var canBeUndeclared; export {mustExist as canBeUndeclared};',
+          SCRIPT: {throws: 'module'},
+        });
+
+        test.fail('demand correct name to be declared for export when aliasing, this declared neither', {
+          code: 'export {mustExist as canBeUndeclared};',
+          SCRIPT: {throws: 'module'},
         });
 
         test('double decl', {
@@ -1477,6 +1492,12 @@ module.exports = (describe, test) =>
 
         test('default is just a name', {
           code: 'export default x; export {y as default};',
+          SCRIPT: {throws: 'module'},
+          throws: 'twice',
+        });
+
+        test('make sure exported symbols exist, double default name exported', {
+          code: 'var x, y; export default x; export {y as default};',
           SCRIPT: {throws: 'module'},
           throws: 'twice',
         });

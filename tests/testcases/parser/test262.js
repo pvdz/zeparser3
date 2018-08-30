@@ -26,8 +26,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
 
             has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
 
-            has('early-export-global') || has('early-export-unresolvable') || // TODO: cannot export something that wasnt explicitly bound (implicit globals, built-ins)
-
             has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') || // TODO: unicode identifier characters
 
             // TODO: file report; I think the following rule applies here and as such should not throw:
