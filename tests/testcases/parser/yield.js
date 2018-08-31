@@ -895,7 +895,7 @@ module.exports = (describe, test) =>
       });
     });
 
-    test('confirm LF_NO_YIELD is properly reset with a new Expression 1', {
+    test('confirm LF_NO_YIELD is properly reset with an Expression 1', {
       code: 'function *g(){ return x + f(yield f); }',
       ast: {
         type: 'Program',
@@ -937,7 +937,7 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('confirm LF_NO_YIELD is properly reset with a new Expression 2', {
+    test('confirm LF_NO_YIELD is properly reset with an Expression 2', {
       code: 'function *g(){ return x + (yield f); }',
       ast: {
         type: 'Program',
@@ -1903,6 +1903,14 @@ module.exports = (describe, test) =>
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
+    });
+
+    test.fail('new arg with yield ag', {
+      code: 'function *g() { new yield foo}',
+    });
+
+    test.fail('new arg without yield ag', {
+      code: 'function *g() { new yield }',
     });
   });
 

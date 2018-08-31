@@ -4330,6 +4330,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseValueHeadBodyIdent(lexerFlags, checkNewTarget, bindingType, allowAssignment, astProp) {
     ASSERT(curtype === $IDENT, 'token should not yet have been consumed because the next token depends on its value and so you cant consume this ahead of time...');
     ASSERT(arguments.length === parseValueHeadBodyIdent.length, 'arg count');
+    ASSERT(!checkNewTarget || allowAssignment === NO_ASSIGNMENT, 'new arg does not allow assignments');
     // for new only a subset is accepted;
     // - super
     // - metaproprety
@@ -4432,7 +4433,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         } else {
           // Note: as quoted from the spec: "The syntactic context immediately following yield requires use of the InputElementRegExpOrTemplateTail lexical goal"
           ASSERT_skipRex($IDENT, lexerFlags); // not very likely (but there's probably a use case for this)
-          if (checkNewTarget === IS_NEW_ARG) TODO,THROW('Cannot yield in a new arg');
+          ASSERT(!checkNewTarget || allowAssignment === NO_ASSIGNMENT, 'new arg does not allow assignments so no need to check `new yield x` here');
           return parseYieldKeyword(lexerFlags, identToken, allowAssignment, astProp);
         }
       default:
