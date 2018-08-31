@@ -2209,4 +2209,24 @@ module.exports = (describe, test) => describe('async keyword', function() {
   test.pass('async function decl names are lexical bindings in function scope', {
     code: 'function g() {   async function f() {} var f;   }',
   });
+
+  test('asi in bad place', {
+    code: '(async \n function(){})',
+    throws: 'asi',
+  });
+
+  test('restricted production in statement header', {
+    code: 'if (async \n () => x) x',
+    throws: 'asi',
+  });
+
+  test.fail('export can not just export `async` so asi not allowed for function', {
+    code: 'export async \n function(){}',
+    SCRIPT: {throws: 'module'},
+  });
+
+  test.fail('export can not just export `async` so asi not allowed for arrow', {
+    code: 'export async \n a => b',
+    SCRIPT: {throws: 'module'},
+  });
 });

@@ -1311,4 +1311,9 @@ module.exports = (describe, test) =>
         throws: 'top level',
       });
     })
+
+    test.fail('cannot export a variable without default', {
+      code: 'export foo;',
+      SCRIPT: {throws: 'module'},
+    });
   });

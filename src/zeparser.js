@@ -1811,12 +1811,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           astProp = 'expression'
         }
         AST_setIdent(astProp, asyncIdentToken); // next token cannot be valid so ASI must occur after `async`
-        if (hasAllFlags(lexerFlags, LF_NO_ASI)) TODO,THROW('Newline causes ASI but cannot ASI here');
+        if (hasAllFlags(lexerFlags, LF_NO_ASI)) {
+          // `(async \n function(){})`
+          THROW('Newline causes ASI but cannot ASI here');
+        }
         if (stmtOrExpr === IS_STATEMENT) {
           AST_close('ExpressionStatement');
           parseSemiOrAsi(lexerFlags);
         }
-        if (curtok.str === '=>') TODO,THROW('Cannot have a newline before the arrow');
+        ASSERT(curtok.str !== '=>', 'if this was `async \n => async` then the error would have been thrown at parseAfterVarName');
+        // `async \n`
         return IS_ASSIGNABLE;
       }
       if (curc !== $$PAREN_L_28) {
@@ -2352,7 +2356,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       AST_close('ExportDefaultDeclaration');
-    } else if (curc === $$STAR_2A) {
+    }
+    else if (curc === $$STAR_2A) {
       // export * from "x"
       AST_open(astProp, 'ExportAllDeclaration');
       ASSERT_skipAny('*', lexerFlags);
@@ -2411,7 +2416,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           addNameToExports(exportedBindings, exportedName);
           needsSemi = false;
         } else {
-          THROW('Unknown export type [' + curtok.str +  ']');
+          THROW('Unknown export type [' + curtok.str +  '] (note: you can only export individual vars through `export {foo};)');
         }
         AST_set('source', null);
       } else if (curc === $$F_66 && curtok.str === 'function') {
@@ -2423,13 +2428,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         addNameToExports(exportedBindings, exportedName);
         AST_set('source', null);
         needsSemi = false;
-      } else if (curc === $$A_61 && curtok.str === 'async') {
+      }
+      else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
         // (note: no arrows here because we require a name)
         ASSERT_skipAny('async', lexerFlags);
 
         if (curtok.str !== 'function') {
+          // `export async \n a => b`
           THROW('Can only export async functions (not arrows), did not find a function');
+        }
+        if (curtok.nl) {
+          // `export async \n function(){}`
+          THROW('Async can not be followed by a newline as it results in `export async;`, which is not valid (and probably not what you wanted)');
         }
 
         let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, WAS_ASYNC, IDENT_REQUIRED, NOT_FUNCTION_STATEMENT, 'declaration');
@@ -2437,8 +2448,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         addNameToExports(exportedBindings, exportedName);
         AST_set('source', null);
         needsSemi = false;
-      } else {
-        THROW('Unknown export type [' + curtok.str +  ']');
+      }
+      else {
+        // `export foo;`
+        THROW('Unknown export type [' + curtok.str +  '] (note: you can only export individual vars through `export {'+curtok.str+'};`)');
       }
       AST_close('ExportNamedDeclaration');
     }
@@ -7112,6 +7125,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // instead.
 
     if (hasAllFlags(lexerFlags, LF_NO_ASI)) {
+      // `if (async ↵ () => x) x`
       THROW('Async newline edge case requires ASI but ASI is illegal here');
     }
 
