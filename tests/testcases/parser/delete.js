@@ -302,4 +302,24 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
     });
+
+    test('delete an arrow', {
+      code: 'delete (foo)=>bar',
+      throws: 'arrow',
+    });
+
+    test('delete a parenless arrow', {
+      code: 'delete foo=>bar',
+      throws: 'arrow',
+    });
+
+    test('delete a no-arg arrow', {
+      code: 'delete ()=>bar',
+      throws: 'arrow',
+    });
+
+    test('delete an async arrow', {
+      code: 'delete async (x) => y',
+      throws: 'arrow',
+    });
   });

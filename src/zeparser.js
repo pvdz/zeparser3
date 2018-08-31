@@ -3312,13 +3312,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // at least one rhs paren must appear now
       skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
       if (curtok.str === '=>') {
-        if (parens === 0) {
-          // `delete (foo)=>bar`
-          TODO,THROW('Cannot delete an arrow');
-        } else {
-          // `delete (((x)) => x)`
-          THROW('Arrow is illegal here');
-        }
+        // This means the code is deleting an arrow that is wrapped in parentheses
+        // The case for deleting an unwrapped arrow is handled elsewhere
+        // `delete ((a)) => b)`
+        // `delete (((x)) => x)`
+        THROW('Arrow is illegal here');
       }
     }
 
@@ -4741,7 +4739,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // (in the case of `await`, consider it a regular var)
     if (curc === $$IS_3D && curtok.str === '=>') {
       if (curtok.nl) THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
-      if (allowAssignment === NO_ASSIGNMENT) THROW('Was parsing a value that could not be AssignmentExpression but found an arrow');
+      if (allowAssignment === NO_ASSIGNMENT) {
+        // `delete (foo)=>bar`
+        THROW('Was parsing a value that could not be AssignmentExpression but found an arrow');
+      }
       if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC) && identToken.str === 'yield') THROW('Yield in generator is keyword');
       // TODO: same for await?
       ASSERT(assignable === IS_ASSIGNABLE, 'not sure whether an arrow can be valid if the arg is marked as non-assignable');
