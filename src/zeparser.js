@@ -3291,6 +3291,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let parens = 0;
     let lastLhp;
+    lexerFlags |= LF_NO_ASI; // cannot asi inside `delete (...)`
     do {
       ++parens;
       lastLhp = curtok;
@@ -3327,6 +3328,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('Arrow is illegal here');
       }
     }
+    ASSERT(hasAllFlags(lexerFlags, LF_NO_ASI), 'should not be allowed to parse asi inside a group');
+    lexerFlags = sansFlag(lexerFlags, LF_NO_ASI);
 
     ASSERT(curtok.str !== '=>', 'we checked this in the loop');
 
@@ -3421,7 +3424,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex(curc === $$PLUS_2B ? '++' : '--', lexerFlags); // TODO: optimize; next most likely a varname
     AST_set('prefix', true);
     let assignable = parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
-    if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value');
+    if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value as statement');
     AST_close('UpdateExpression');
     parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'expression');
     AST_close('ExpressionStatement');
@@ -4276,7 +4279,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('prefix', true);
         let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument');
         assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, 'argument');
-        if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value');
+        if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value as prefix');
         AST_close('UpdateExpression');
         return NOT_ASSIGNABLE;
       }
@@ -4943,15 +4946,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       assignable = NOT_ASSIGNABLE;
     }
     else if ((curc === $$PLUS_2B && curtok.str === '++') || (curc === $$DASH_2D && curtok.str === '--')) {
-      if (curtok.nl) return assignable; // restricted production has no tail
-      // note: this is ++/-- SUFFIX. This version DOES have newline restrictions!
-      if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value');
-      parseUpdateExpressionSuffix(lexerFlags, astProp);
-      assignable = NOT_ASSIGNABLE;
+      assignable = parseUpdateExpressionSuffix(lexerFlags, assignable, astProp);
     }
     return assignable;
   }
-  function parseUpdateExpressionSuffix(lexerFlags, astProp) {
+  function parseUpdateExpressionSuffix(lexerFlags, assignable, astProp) {
     ASSERT(curtok.str === '++' || curtok.str === '--', 'only for update unaries');
     // if there is a newline between the previous value and UpdateExpression (++ or --) then it is not postfix
     // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion
@@ -4966,16 +4965,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // ok when inside a: expression statement, return statement, throw statement, var/let/const decl, export (?)
 
-    if (!curtok.nl) {
-      AST_wrapClosed(astProp, 'UpdateExpression', 'argument');
-      AST_set('operator', curtok.str);
-      AST_set('prefix', false);
-      ASSERT_skipDiv($PUNCTUATOR, lexerFlags);
-      AST_close('UpdateExpression');
+    if (curtok.nl) {
+      // note: this is ++/-- SUFFIX. This version DOES have newline restrictions!
+      // a restricted production has no tail
+      // do nothing. nothing further gets parsed. and since next token is ++ or -- there is no risk of "overaccepting" here
+      // caller can return assignability though it won't matter as there's no scenario where the next token causes assignment
+      if (hasAllFlags(lexerFlags, LF_NO_ASI)) {
+        THROW('The postfix ++/-- is a restricted production so ASI must apply but that is not valid in this context');
+      }
+      return assignable;
     }
-    else TODO_RESTRICTED_PRODUCTION; // return assignable; // restricted production
-    // else do nothing. nothing gets parsed. and since next token is ++ or -- there is no risk of "overaccepting" here
-    // caller can return assignability though it won't matter as there's no scenario where the following assigns to it
+
+    // check for this _after_ the newline check, for cases like `"foo"\n++bar`
+    if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value as postfix');
+
+    AST_wrapClosed(astProp, 'UpdateExpression', 'argument');
+    AST_set('operator', curtok.str);
+    AST_set('prefix', false);
+    ASSERT_skipDiv($PUNCTUATOR, lexerFlags);
+    AST_close('UpdateExpression');
+    return NOT_ASSIGNABLE;
   }
   function parseCallArgs(lexerFlags, astProp) {
     if (curc === $$PAREN_R_29) {
@@ -5131,6 +5140,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$PAREN_R_29) {
       // special case; the `()` here must be the arrow header or (possibly) an `async()` function call
       skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags); // must be => except for `async()/foo`
+      lexerFlags = lexerFlagsBeforeParen; // asi can happen again!
       if (curtok.str !== '=>') {
         if (asyncKeywordPrefixed) {
           // `async()` is okay
@@ -5156,7 +5166,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `return async \n () => x`
         // - `(async \n () => x)`
         if (isDeleteArg === IS_DELETE_ARG) TODO;
-        return backtrackForCrappyAsync(lexerFlagsBeforeParen, asyncKeywordPrefixed, lhpToken, astProp);
+        return backtrackForCrappyAsync(lexerFlags, asyncKeywordPrefixed, lhpToken, astProp);
       }
 
       if (allowAssignment === NO_ASSIGNMENT) THROW('Was parsing something that could not be an assignment expression but found an arrow');
@@ -5393,7 +5403,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
 
-    lexerFlags = lexerFlagsBeforeParen;
+    lexerFlags = lexerFlagsBeforeParen; // ASI can happen again
     verifyDestructible(destructible);
 
     if (curtok.str === '=>') {

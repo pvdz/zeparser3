@@ -208,6 +208,23 @@ module.exports = (describe, test) =>
         code: 'delete ((foo)++)',
       });
 
+      test.fail('grouped asi postfix', {
+        code: '(foo \n ++)',
+        desc: 'since ++ is a restricted production, asi must happen, but that is not allowed in the group',
+        throws: 'ASI',
+      });
+
+      test.fail('delete grouped asi postfix', {
+        code: 'delete ((foo) \n ++)',
+        desc: 'the delete is a special case due to the special ident rule',
+        throws: 'ASI',
+      });
+
+      test.fail('async() asi postfix', {
+        code: '(async () \n ++)',
+        desc: 'well the foo()++ case would already throw, anyways, so the test is not super important',
+      });
+
       test.fail('postfix on keyword', {
         code: 'delete ((true)++)',
       });

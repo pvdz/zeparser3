@@ -63,54 +63,45 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
       });
 
-      test('inside header', {
+      test.fail('inside header', {
         code: 'if (b\n++c);',
-        throws: 'Next ord should be',
       });
 
-      test('inside for p1', {
+      test.fail('inside for p1', {
         code: 'for (b\n++c;;);',
-        throws: 'Next ord should be',
       });
 
-      test('inside for p2', {
+      test.fail('inside for p2', {
         code: 'for (;b\n++c;);',
-        throws: 'Next ord should be',
       });
 
-      test('inside for p3', {
+      test.fail('inside for p3', {
         code: 'for (;b\n++c);',
-        throws: 'Next ord should be',
       });
 
-      test('in a group', {
+      test.fail('in a group', {
         code: '(b\n++c);',
-        throws: 'Next ord should be',
       });
 
-      test('in an array', {
+      test.fail('in an array', {
         code: 'z=[b\n++c];',
-        throws: 'Next ord should be',
       });
 
-      test('in an objlit', {
+      test.fail('in an objlit', {
         code: 'z={x:b\n++c};',
         desc: 'the error is nonsensical but the problem is that asi is needed here and cant be applied',
-        throws: true,
       });
 
       test.fail('in a template', {
         code: '`x${b\n++c}y`;',
       });
 
-      test('in a call', {
+      test.fail('in a call', {
         code: 'foo(b\n++c);',
-        throws: 'Next ord should be',
       });
 
-      test('in a func arg default', {
+      test.fail('in a func arg default', {
         code: 'function f(x=b\n++c){}',
-        throws: 'Next ord should be',
       });
 
       test('in a block', {

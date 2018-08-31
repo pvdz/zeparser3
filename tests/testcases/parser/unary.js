@@ -970,43 +970,35 @@ module.exports = (describe, test) =>
         test('base', {
           code: 'a\n++',
           throws: 'Expected to parse a value',
-          tokens: [$PUNCTUATOR, $IDENT, $ASI],
         });
 
         test('func', {
           code: 'function f(){ return a\n++; }',
           throws: 'Expected to parse a value',
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('arrow', {
           code: 'let x = () => a\n++;',
           throws: 'Expected to parse a value',
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
 
-        test('statement header', {
+        test.fail('statement header', {
           code: 'if (a\n++);',
-          throws: 'Next ord should be',
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('sub-statement', {
           code: 'if (a) a\n++;',
           throws: 'Expected to parse a value',
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
 
         test('one group', {
           code: '(x)\n++;',
           throws: 'Expected to parse a value',
-          tokens: [],
         });
 
         test('multi groups', {
           code: '(((x)))\n++;',
           throws: 'Expected to parse a value',
-          tokens: [],
         });
       });
 
@@ -1202,43 +1194,35 @@ module.exports = (describe, test) =>
         test('base', {
           code: 'a\n--',
           throws: 'Expected to parse a value',
-          tokens: [$PUNCTUATOR, $IDENT, $ASI],
         });
 
         test('func', {
           code: 'function f(){ return a\n--; }',
           throws: 'Expected to parse a value',
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('arrow', {
           code: 'let x = () => a\n--;',
           throws: 'Expected to parse a value',
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
 
-        test('statement header', {
+        test.fail('statement header', {
           code: 'if (a\n--);',
-          throws: 'Next ord should be',
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('sub-statement', {
           code: 'if (a) a\n--;',
           throws: 'Expected to parse a value',
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
 
         test('one group', {
           code: '(x)\n--;',
           throws: 'Expected to parse a value',
-          tokens: [],
         });
 
         test('multi groups', {
           code: '(((x)))\n--;',
           throws: 'Expected to parse a value',
-          tokens: [],
         });
       });
 
@@ -1360,24 +1344,19 @@ module.exports = (describe, test) =>
       });
 
       describe('in statement header', _ => {
-        test('asi before', {
+
+        test.fail('asi before', {
           code: 'if (a\n++b);',
-          throws: 'Next ord should be',
           desc: 'postfix is restricted so ASI should happen', // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
-          tokens: [$IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
         });
 
-        test('asi after', {
+        test.fail('asi after', {
           code: 'if (a++\nb);',
-          throws: 'Next ord should be',
-          tokens: [$IDENT, $PUNCTUATOR, $ASI, $IDENT, $ASI],
         });
 
-        test('asi both', {
+        test.fail('asi both', {
           code: 'if (a\n++\nb);',
-          throws: 'Next ord should be',
           desc: 'postfix is restricted so ASI should happen',
-          tokens: [$IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
         });
       });
 
