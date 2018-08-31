@@ -5942,7 +5942,7 @@ module.exports = (describe, test) =>
 
             test('strict-mode only, objlit, keyword=' + keyword, {
               code: '({xxxx:'+keyword+'})',
-              ...(['eval', 'arguments', 'static'].includes(keyword) ? {} : {
+              ...(['eval', 'arguments'].includes(keyword) ? {} : {
                 STRICT: {
                   throws: true,
                 },
@@ -7325,14 +7325,50 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
       });
 
-      test('destruct to keyword with destruct', {
-        code: 's = {s: true = x} = x',
-        throws: 'keyword',
+      describe('ident', _ => {
+
+        test.fail('destruct to keyword with destruct', {
+          code: 's = {s: true = x} = x',
+        });
+
+        test.fail('assignment to keyword without destruct', {
+          code: 's = {s: true = x}',
+        });
+
+        test.fail('using keyword as the value (new)', {
+          code: 's = {s: new}',
+        });
+
+        test.fail('using keyword as the value (typeof)', {
+          code: 's = {s: typeof}',
+        });
+
+        test.pass('using keyword as the value (true)', {
+          code: 's = {s: true}',
+        });
       });
 
-      test('assignment to keyword without destruct', {
-        code: 's = {s: true = x}',
-        throws: 'keyword',
+      describe('string', _ => {
+
+        test.fail('destruct to keyword with destruct', {
+          code: 's = {"foo": true = x} = x',
+        });
+
+        test.fail('assignment to keyword without destruct', {
+          code: 's = {"foo": true = x}',
+        });
+
+        test.fail('using keyword as the value (new)', {
+          code: 's = {"foo": new}',
+        });
+
+        test.fail('using keyword as the value (typeof)', {
+          code: 's = {"foo": typeof}',
+        });
+
+        test.pass('using keyword as the value (true)', {
+          code: 's = {"foo": true}',
+        });
       });
     });
 
