@@ -2620,7 +2620,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     } else if (curc === $$SEMI_3B) {
       if (awaitable) {
-        TODO,THROW('for await only accepts the `for-of` type');
+        // `for await (;`
+        THROW('for await only accepts the `for-of` type');
       }
       emptyInit = true;
     } else {

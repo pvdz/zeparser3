@@ -1484,6 +1484,11 @@ module.exports = (describe, test) =>
       code: 'for await (x;y;z) {}',
       throws: 'for await',
     });
+
+    test('for await empty loop', {
+      code: 'for await (;;) {}',
+      throws: 'for await',
+    });
   });
 
 // lhs can not use paren trick to avoid non-assignability (https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors)
