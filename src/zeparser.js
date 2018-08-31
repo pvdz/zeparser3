@@ -4854,7 +4854,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('computed', false); // x[y] vs x.y
       AST_close('MemberExpression');
       assignable = parseValueTail(lexerFlags, IS_ASSIGNABLE, isNewArg, astProp);
-    } else if (curc === $$SQUARE_L_5B) {
+    }
+    else if (curc === $$SQUARE_L_5B) {
       AST_wrapClosed(astProp, 'MemberExpression', 'object');
       ASSERT_skipRex('[', lexerFlags);
       parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'property');
@@ -4862,7 +4863,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('computed', true); // x[y] vs x.y
       AST_close('MemberExpression');
       assignable = parseValueTail(lexerFlags | LF_NO_ASI, IS_ASSIGNABLE, isNewArg, astProp);
-    } else if (curc === $$PAREN_L_28) {
+    }
+    else if (curc === $$PAREN_L_28) {
       ASSERT(curtype === $PUNCTUATOR && curtok.str === '(');
       ASSERT_skipRex('(', lexerFlags);
       if (isNewArg) { // exception for `new`
@@ -4877,7 +4879,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_close('CallExpression');
         assignable = parseValueTail(lexerFlags | LF_NO_ASI, NOT_ASSIGNABLE, isNewArg, astProp);
       }
-    } else if (curc === $$TICK_60 && isTemplateStart(curtype)) {
+    }
+    else if (curc === $$TICK_60 && isTemplateStart(curtype)) {
       // parseTaggedTemplate
       // note: in es9+ (only) it is legal for _tagged_ templates to contain illegal escapes ($TICK_BAD_ESCAPE)
 
@@ -4927,10 +4930,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('TaggedTemplateExpression');
 
       assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, isNewArg, astProp);
-    } else if (isNewArg === IS_NEW_ARG) {
+    }
+    else if (isNewArg === IS_NEW_ARG) {
       // new rhs only parses a subset of tails
       assignable = NOT_ASSIGNABLE;
-    } else if ((curc === $$PLUS_2B && curtok.str === '++') || (curc === $$DASH_2D && curtok.str === '--')) {
+    }
+    else if ((curc === $$PLUS_2B && curtok.str === '++') || (curc === $$DASH_2D && curtok.str === '--')) {
       if (curtok.nl) return assignable; // restricted production has no tail
       // note: this is ++/-- SUFFIX. This version DOES have newline restrictions!
       if (assignable === NOT_ASSIGNABLE) THROW('Cannot inc/dec a non-assignable value');
