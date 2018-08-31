@@ -469,7 +469,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_wrapOpened(prop, newNodeType, newProp) {
     if (traceast) {
-      console.log('AST_wrapOpened', prop, newNodeType, newProp)
+      console.log('AST_wrapOpened', prop, newNodeType, newProp);
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before:', require('util').inspect(_tree, false, null))
     }
@@ -505,7 +505,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_wrapClosed(prop, newNodeType, newProp) {
     if (traceast) {
-      console.log('AST_wrapClosed', prop, newNodeType, newProp)
+      console.log('AST_wrapClosed', prop, newNodeType, newProp);
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before:', require('util').inspect(_tree, false, null))
     }
@@ -605,7 +605,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_replaceParent(newNodeType, oldNodeType) {
     if (traceast) {
-      console.log('AST_replaceParent', prop, newNodeType, newNodeType)
+      console.log('AST_replaceParent', prop, newNodeType, newNodeType);
       console.log('- path:', _pnames.join(' - '));
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before:', require('util').inspect(_tree, false, null))
@@ -634,7 +634,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_wrapClosedIntoArray(prop, value, newProp) {
     if (traceast) {
-      console.log('AST_wrapClosed', prop, value, newProp)
+      console.log('AST_wrapClosed', prop, value, newProp);
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before:', require('util').inspect(_tree, false, null))
     }
@@ -675,7 +675,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // note: this function is usually called after a few nodes have closed (the literal struct).
 
     if (traceast) {
-      console.log('AST_destruct', prop)
+      console.log('AST_destruct', prop);
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before destruct:', require('util').inspect(_tree, false, null))
     }
@@ -1069,7 +1069,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function SCOPE_verifyLexical(lexerFlags, scoop, skipParent) {
     let lex = scoop.lex;
-    let lexvar = scoop.lexvar;
     for (let key in lex) {
       if (key[0] === '#' && key.length > 1) {
         if (lex[key] > 1) {
@@ -3334,7 +3333,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let afterIdentToken = curtok; // store to assert whether anything after the ident was parsed
 
-    parseValueAfterIdent(lexerFlags, identToken, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument')
+    parseValueAfterIdent(lexerFlags, identToken, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument');
     if (identToken.type === $IDENT && curtok === afterIdentToken && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
       // - It is a Syntax Error if the UnaryExpression is contained in strict mode code and the derived UnaryExpression is PrimaryExpression:IdentifierReference .
@@ -3450,11 +3449,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let many = 0;
     let inited = false;
     let startWasObjectOrArray = curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B;
-    let wasRest = false;
     let wasSimple = ARGS_SIMPLE;
     do {
       ++many;
-      wasRest = curc === $$DOT_2E && curtok.str === '...';
+      let wasRest = curc === $$DOT_2E && curtok.str === '...';
       // ident or destructuring of object/array or rest arg
       let bindingMeta = parseBinding(lexerFlags, scoop, bindingType, bindingOrigin, defaultOptions, skipDoubleBindCheck, exportedNames, exportedBindings, astProp);
       if (bindingMeta === ARG_HAD_INIT) inited = true;
@@ -3749,7 +3747,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function bindingAssignableIdentCheck(identToken, bindingType, lexerFlags) {
     ASSERT(arguments.length === bindingAssignableIdentCheck.length, 'expecting arg count');
-    ASSERT(typeof identToken === 'object', 'token, not name')
+    ASSERT(typeof identToken === 'object', 'token, not name');
     // TODO: a few cases that still use bindingIdentCheck should use this function instead. fix with tests
 
     // this function is called to validate an ident that is the head of a value as an assignable target.
@@ -4284,7 +4282,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // {type: 'NewExpression', arguments: [], callee: WE_ARE_HERE}
           // we will want it to completely replace this with:
           // {type: 'MetaProperty', meta: {type: 'Identifier', name: 'new'}, property: {type: 'Identifier', name: 'target'}}
-          AST_replaceParent('MetaProperty', 'NewExpression')
+          AST_replaceParent('MetaProperty', 'NewExpression');
 
           ASSERT_skipAny('.', lexerFlags); // must be dot
           if (curtok.str !== 'target') THROW('Can only read `new.target`, no other "properties" from `new`');
@@ -4450,7 +4448,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // in module: only if lexerFlags allow await (inside async code)
         // in script: same as module but also as regular var names (only) outside of async code
         // (await when not a keyword is assignable)
-        if (checkNewTarget === IS_NEW_ARG) TODO_AWAIT_INSIDE_NEW
+        if (checkNewTarget === IS_NEW_ARG) TODO_AWAIT_INSIDE_NEW;
         return parseAwaitExpression(lexerFlags, identToken, allowAssignment, astProp);
       case 'class':
         parseClassExpression(lexerFlags, IDENT_OPTIONAL, astProp);
@@ -4490,7 +4488,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseUnary(lexerFlags, identName, astProp);
       case 'yield':
         // Note: as quoted from the spec: "The syntactic context immediately following yield requires use of the InputElementRegExpOrTemplateTail lexical goal"
-        if (checkNewTarget === IS_NEW_ARG) TODO_YIELD_INSIDE_NEW
+        if (checkNewTarget === IS_NEW_ARG) TODO_YIELD_INSIDE_NEW;
         return parseYieldKeyword(lexerFlags, identToken, allowAssignment, astProp);
       default:
         // TODO: verify identifier (note: can be value keywords depending on next token being an arrow)
@@ -4820,7 +4818,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseValueTail(lexerFlags, assignable, isNewArg, astProp) {
-    ASSERT(parseValueTail.length === arguments.length, 'arg coung')
+    ASSERT(parseValueTail.length === arguments.length, 'arg coung');
     ASSERT(typeof isNewArg === 'boolean', 'expecting bool isNewArg arg');
     ASSERT(typeof assignable === 'boolean', 'assignablenum', assignable);
     ASSERT(typeof astProp === 'string', 'should be string');
@@ -5380,7 +5378,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // ASI may not be able to occur (like `[async \n () => x]` is an error) and this is difficult to detect
           // This is one super uncommon edge case I'll just backtrack for
           ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not prefixed by async');
-          return backtrackForCrappyAsync(lexerFlagsBeforeParen, asyncKeywordPrefixed, lhpToken, rootAstProp);
+          return backtrackForCrappyAsync(lexerFlagsBeforeParen);
         }
       }
 
@@ -5605,7 +5603,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           // TODO: in strict mode the var must exist (if not an arrow) otherwise it throws if not an arrow
           // TODO: if name is const bound it is only valid as an arrow
-          if (identToken.str === 'true') TODO
+          if (identToken.str === 'true') TODO;
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
           else {
@@ -5914,7 +5912,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (doubleDunderProto === 1) return sansFlag(destructible, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO);
-    ASSERT(hasAnyFlag(destructible, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO) === doubleDunderProto > 1, 'either dunder was not found and the piggy is not there or proto was found multiple times and the piggy is still in the destructible field')
+    ASSERT(hasAnyFlag(destructible, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO) === doubleDunderProto > 1, 'either dunder was not found and the piggy is not there or proto was found multiple times and the piggy is still in the destructible field');
     return destructible;
   }
   function parseObjectLikePart(lexerFlags, scoop, bindingType, isClassMethod, staticToken, exportedNames, exportedBindings, astProp) {
@@ -6082,7 +6080,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               }
               break;
             default:
-              if (nameBinding.str === 'new') TODO // `{x: typeof}` is always an error but `{x: true}` may not be
+              if (nameBinding.str === 'new') TODO; // `{x: typeof}` is always an error but `{x: true}` may not be
               let assignable = bindingAssignableIdentCheck(nameBinding, bindingType, lexerFlags);
               if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
               else {
@@ -6988,7 +6986,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
         else TODO
       }
-      else TODO
+      else TODO;
 
       return destructible;
     }
@@ -7107,7 +7105,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
-  function backtrackForCrappyAsync(lexerFlags, asyncKeywordPrefixed, lhpToken, astProp) {
+  function backtrackForCrappyAsync(lexerFlags) {
     // heads up. difficult situation to explain here.
     // this is the particular case of `async \n (..) => ..` which means `async` is an actually a plain `ident` (I
     // think this is always dead code?). We need to reset the parser/lexer state and parse the group as call params
@@ -7161,9 +7159,8 @@ function getGenericTokenType(type) {
     (($STRING_DOUBLE | $STRING_SINGLE | $STRING) ^ $STRING) |
     (($TICK_BODY | $TICK_HEAD | $TICK_PURE | $TICK_TAIL | $TICK_BAD_ESCAPE | $TICK) ^ $TICK);
   // (x|y)^y : the or will first make sure the bits are set (regardless) and the xor then unsets them
-  let flag = (type | redundantFlags) ^ redundantFlags;
-  //ASSERT((1 << Math.clz(flag)) === flag, 'should only have one bit set');
-  return flag;
+  //ASSERT((1 << Math.clz((type | redundantFlags) ^ redundantFlags)) === ((type | redundantFlags) ^ redundantFlags), 'should only have one bit set');
+  return (type | redundantFlags) ^ redundantFlags;
 }
 
 function isTemplateStart(curtype) {
