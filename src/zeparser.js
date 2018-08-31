@@ -4708,7 +4708,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (allowAssignment === NO_ASSIGNMENT) THROW('Did not expect to parse an AssignmentExpression but found `yield`');
         AST_open(astProp, 'YieldExpression');
         AST_set('delegate', false); // TODO ??
-        parseYieldArgument(lexerFlags, allowAssignment, 'argument'); // takes care of newline check
+        parseYieldArgument(lexerFlags, 'argument'); // takes care of newline check
         AST_close('YieldExpression');
 
         if (curc === $$QMARK_3F) {
@@ -4729,15 +4729,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, allowAssignment, astProp);
     return IS_ASSIGNABLE;
   }
-  function parseYieldArgument(lexerFlags, allowAssignment, astProp) {
+  function parseYieldArgument(lexerFlags, astProp) {
     let wasParen = curc === $$PAREN_L_28;
     // there can be no newline between keyword `yield` and its argument (restricted production)
-    let hadValue = curtok.nl ? false : parseYieldValueMaybe(lexerFlags, allowAssignment, astProp);
+    let hadValue = curtok.nl ? false : parseYieldValueMaybe(lexerFlags, ALLOW_ASSIGNMENT, astProp);
     if (hadValue === YIELD_WITHOUT_VALUE) {
       AST_set(astProp, null);
     } else {
-
-      if (allowAssignment === NO_ASSIGNMENT) TODO; // propagate allowAssignment? is that still relevant at this point?
       parseExpressionFromOp(lexerFlags, hadValue === WITH_ASSIGNABLE ? IS_ASSIGNABLE : NOT_ASSIGNABLE, wasParen? LHS_WAS_PAREN_START : LHS_NOT_PAREN_START, astProp);
     }
   }
