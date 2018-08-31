@@ -6504,6 +6504,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
 
         if (identToken.str === 'yield') {
+          // - `{ident: yield}`
+          // - `{ident: yield foo}`
           let assignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, 'value');
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
           else {
@@ -6511,8 +6513,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             addNameToExports(exportedNames, identToken.str);
             addNameToExports(exportedBindings, identToken.str);
           }
-        } else if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
+        }
+        else if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
           // this is destructible iif the ident is not a keyword
+          // - `{ident: ident}`
+          // - `{ident: ident,...}`
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
           if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
           else {
@@ -6521,13 +6526,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             addNameToExports(exportedBindings, identToken.str);
           }
           AST_setIdent('value', identToken);
-        } else  if (curtok.str === '=') {
+        }
+        else if (curtok.str === '=') {
           // this is destructible iif the ident is not a keyword
+          // - `{ident: ident = expr}`
+          // - `{ident: ident = expr,...}`
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
-          if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+          if (assignable === NOT_ASSIGNABLE) THROW('Cannot assign to or destruct a keyword');
           AST_setIdent('value', identToken);
           parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
-        } else {
+        }
+        else {
           // this part is tricky;
           // the idea here is that we need to confirm whether this is a "simple assignment" as those are the only
           // things that can be destructed. But it's totally fine for things not to be destructible here, provided
@@ -6541,11 +6550,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (curc === $$CURLY_R_7D || curc === $$COMMA_2C) {
             if (assignable === IS_ASSIGNABLE) destructible |= DESTRUCT_ASSIGN_ONLY;
             else  destructible |= CANT_DESTRUCT;
-          } else if (curtok.str === '=') {
-            if (assignable === IS_ASSIGNABLE) destructible |= DESTRUCT_ASSIGN_ONLY;
+          }
+          else if (curtok.str === '=') {
+            if (assignable === IS_ASSIGNABLE) THROW('Cannot assign to or destruct to the lhs');
             else TODO,destructible |= CANT_DESTRUCT;
             parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
-          } else {
+          }
+          else {
             destructible |= CANT_DESTRUCT;
             parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, 'value');
           }

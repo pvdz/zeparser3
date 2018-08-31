@@ -7324,6 +7324,16 @@ module.exports = (describe, test) =>
         },
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
       });
+
+      test('destruct to keyword with destruct', {
+        code: 's = {s: true = x} = x',
+        throws: 'keyword',
+      });
+
+      test('assignment to keyword without destruct', {
+        code: 's = {s: true = x}',
+        throws: 'keyword',
+      });
     });
 
     describe('non-ident key with keyword value', _ => {
