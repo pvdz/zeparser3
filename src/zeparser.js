@@ -3480,6 +3480,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc !== $$COMMA_2C) break;
       ASSERT_skipAny(',', lexerFlags); // TODO: next must be ident or comma or [ or { or .
       if (curc === $$PAREN_R_29) {
+        // `function f(a,)`
+        // (arrows do not go through here)
         if (bindingType === BINDING_TYPE_ARG) {
           if (allowTrailingFunctionComma) {
             // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-issimpleparameterlist
@@ -3489,8 +3491,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           }
           THROW('Targeted language version does not support trailing function arg comma');
         }
-        // can this even? in which non-arg case do you see rhp here?
-        TODO,THROW('Trailing comma is not supported here');
       }
     } while (true);
     if (many !== 1 && isGetSet === IS_SETTER) {

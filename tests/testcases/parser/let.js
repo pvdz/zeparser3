@@ -13309,6 +13309,22 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    test.fail('double trailing comma no init', {
+      code: 'let foo,,'
+    });
+
+    test.fail('double middle comma no init', {
+      code: 'let foo,,bar'
+    });
+
+    test.fail('silly case when parsing binding not in function', {
+      code: 'let foo,)',
+    });
+
+    test.fail('silly case when parsing binding in for', {
+      code: 'for (let foo,)',
+    });
   });
 
 // duplicate keys = error
