@@ -2408,5 +2408,15 @@ module.exports = (describe, test) =>
       test.pass('destructuring an arrlit with computed property in an array', {
         code: '[[][x]] = y',
       });
+
+      test('destruct to keyword', {
+        code: '[true = x] = x',
+        throws: 'keyword',
+      });
+
+      test('assignment to keyword without destruct', {
+        code: '[true = x]',
+        throws: 'keyword',
+      });
     });
   });

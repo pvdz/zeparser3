@@ -5653,16 +5653,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           AST_setIdent(astProp, identToken);
 
-          // TODO: in strict mode the var must exist (if not an arrow) otherwise it throws if not an arrow
-          // TODO: if name is const bound it is only valid as an arrow
-          if (identToken.str === 'true') TODO;
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
-          if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
-          else {
-            SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
-            addNameToExports(exportedNames, identToken.str);
-            addNameToExports(exportedBindings, identToken.str);
-          }
+          if (assignable === NOT_ASSIGNABLE) THROW('Cannot assign or destruct to keyword [' + identToken.str + ']');
+          SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+          addNameToExports(exportedNames, identToken.str);
+          addNameToExports(exportedBindings, identToken.str);
 
           AST_wrapClosed(astProp, 'AssignmentExpression', 'left');
           AST_set('operator', '=');
