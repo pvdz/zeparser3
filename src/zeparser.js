@@ -185,6 +185,7 @@ const VERSION_ASYNC = 8;
 const VERSION_TRAILING_FUNC_COMMAS = 8;
 const VERSION_ASYNC_GEN = 9;
 const VERSION_OBJECTSPREAD = 9;
+const VERSION_TAGGED_TEMPLATE_BAD_ESCAPES = 9;
 const VERSION_WHATEVER = Infinity;
 
 const LHS_NOT_PAREN_START = false;
@@ -325,6 +326,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let allowTrailingFunctionComma = targetEsVersion >= VERSION_TRAILING_FUNC_COMMAS || targetEsVersion === VERSION_WHATEVER;
   let allowAsyncFunctions = targetEsVersion >= VERSION_ASYNC || targetEsVersion === VERSION_WHATEVER;
   let allowAsyncGenerators = targetEsVersion >= VERSION_ASYNC_GEN || targetEsVersion === VERSION_WHATEVER;
+  let allowBadEscapesInTaggedTemplates = targetEsVersion >= VERSION_TAGGED_TEMPLATE_BAD_ESCAPES || targetEsVersion === VERSION_WHATEVER;
 
   if (getTokenizer) getTokenizer(tok);
 
@@ -4897,7 +4899,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // curtok skipped in loop or afterwards if loop is skipped
       AST_close('TemplateElement');
 
-      if ((targetEsVersion >= 6 && targetEsVersion < 9) && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
+      if (!allowBadEscapesInTaggedTemplates && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
         THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
       }
       if (hasAllFlags(curtype, $TICK_HEAD)) {
