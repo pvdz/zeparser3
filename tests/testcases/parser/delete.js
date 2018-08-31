@@ -339,4 +339,12 @@ module.exports = (describe, test) =>
       code: 'delete async (x) => y',
       throws: 'arrow',
     });
+
+    test.fail('delete async arrow with newline', {
+      code: 'delete (async \n () => x)',
+    });
+
+    test.pass('delete newline before regular arrow', {
+      code: 'delete ( \n () => x)',
+    });
   });

@@ -5161,12 +5161,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else if (curtok.nl) {
         // this is a little bit of a weird error since there can't be ambiguity if this is an error anyways *shrug*
         THROW('The arrow token `=>` is a restricted production and cannot have a newline preceeding it');
-      } else if (lhpToken.nl) {
-        // - `async \n () => x`
-        // - `return async \n () => x`
+      } else if (asyncKeywordPrefixed && lhpToken.nl) {
+        ASSERT(asyncKeywordPrefixed.str === 'async', 'async keyword');
+        ASSERT(curtok.str === '=>', 'this is an async arrow function');
+        ASSERT(lhpToken.str === '(', 'this is the lhp of the parameter of the arrow');
+        // - `( async \n () => x )`
+        // - `return  ( async \n () => x )`
         // - `(async \n () => x)`
-        if (isDeleteArg === IS_DELETE_ARG) TODO;
+        ASSERT(isDeleteArg === NOT_DELETE_ARG, 'the async newline delete case should be handled elsewhere');
         return backtrackForCrappyAsync(lexerFlags, asyncKeywordPrefixed, lhpToken, astProp);
+      } else {
+        // - `f(async ()=>c)`
+        // - `( \n () => x )`
+        // - `return  ( \n () => x )`
+        // - `( \n () => x)`
       }
 
       if (allowAssignment === NO_ASSIGNMENT) THROW('Was parsing something that could not be an assignment expression but found an arrow');
