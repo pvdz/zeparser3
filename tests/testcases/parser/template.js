@@ -961,5 +961,13 @@ module.exports = (describe, test) =>
       });
     });
 
+    test.fail('bad template expr', {
+      code: '`foo ${a b} bar`',
+    });
+
+    test.fail('bad tagged template expr', {
+      code: 'x`foo ${a b} bar`',
+    });
+
     // empty template `${}`
   });

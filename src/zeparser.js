@@ -4804,14 +4804,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('value', {raw: curtok.str, cooked: '<TODO>'});
         AST_close('TemplateElement');
         if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
-          THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
+          THROW('Template contained an illegal escape, these are only allowed in _tagged_ templates');
+        }
+        if (!hasAllFlags(curtype, $TICK_BODY) && !hasAllFlags(curtype, $TICK_TAIL)) {
+          THROW('The first token after the template expression should be a continuation of the template');
         }
         if (hasAllFlags(curtype, $TICK_BODY)) {
           ASSERT_skipRex(curtok.str, lexerFlags | LF_IN_TEMPLATE); // first token in template expression can be regex
-        } else  if (hasAllFlags(curtype, $TICK_TAIL)) {
+        }
+        else if (hasAllFlags(curtype, $TICK_TAIL)) {
           ASSERT_skipDiv(curtok.str, lexerFlags); // first token after template expression can be div
           break;
-        } else {
+        }
+        else {
           THROW('Unclosed template');
         }
       } while (true);
@@ -4914,7 +4919,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
           }
           if (!hasAllFlags(curtype, $TICK_BODY) && !hasAllFlags(curtype, $TICK_TAIL)) {
-            TODO; //??
+            THROW('The first token after the tagged template expression should be a continuation of the template');
           }
 
           AST_open('quasis', 'TemplateElement');

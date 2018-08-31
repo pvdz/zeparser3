@@ -99,9 +99,8 @@ module.exports = (describe, test) =>
         throws: true,
       });
 
-      test('in a template', {
+      test.fail('in a template', {
         code: '`x${b\n++c}y`;',
-        throws: 'Unclosed template',
       });
 
       test('in a call', {
