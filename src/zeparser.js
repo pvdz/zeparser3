@@ -1955,9 +1955,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       parseAwaitExpression(lexerFlags, identToken, NO_ASSIGNMENT, 'expression');
       parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, LHS_NOT_PAREN_START, 'expression');
-    } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+    }
+    else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       THROW('Cannot use `await` outside of `async` functions in strict mode');
-    } else {
+    }
+    else {
       // await as a var name
 
       let assignable = parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, NO_ASSIGNMENT, 'expression');
@@ -1970,11 +1972,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseAwaitExpression(lexerFlags, awaitIdentToken, allowAssignment, astProp) {
+    ASSERT(parseAwaitExpression.length === arguments.length, 'arg count');
     // in an awaitable context this must always be considered a keyword. outside of it it should never be considered a keyword
 
     // TODO: lexerFlags should tell us whether we are currently in an async body. strict mode tells us how to handle "no".
     // TODO: if lexerFlags indicate this is generator code, await is an error
     // TODO: it is an error if goal is Module and await is an identifierreference, bindingidentifier, or labelidentifier
+
+    ASSERT(awaitIdentToken.str === 'await', 'await token');
+    ASSERT(awaitIdentToken !== curtok, 'await should have been skipped');
 
     if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) {
       if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) THROW('Await is illegal as default arg value');
@@ -4350,8 +4356,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // in module: only if lexerFlags allow await (inside async code)
         // in script: same as module but also as regular var names (only) outside of async code
         // (await when not a keyword is assignable)
-        if (checkNewTarget === IS_NEW_ARG) TODO,THROW('Cannot await inside `new`');
-        if (curtok.nl) TODO; // do we have tests that check the restriction?
+        if (checkNewTarget === IS_NEW_ARG) {
+          // `async function f(){ new await x; }`
+          // `async function f(){ [new await foo] }`
+          // `async function f(){ (new await foo) }`
+          THROW('Cannot await inside `new`');
+        }
         // note: await is unary that wants unary as arg so they can be chained
         return parseAwaitExpression(lexerFlags, identToken, allowAssignment, astProp);
       case 'class':
@@ -4460,7 +4470,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // in module: only if lexerFlags allow await (inside async code)
         // in script: same as module but also as regular var names (only) outside of async code
         // (await when not a keyword is assignable)
-        if (checkNewTarget === IS_NEW_ARG) TODO_AWAIT_INSIDE_NEW;
+        ASSERT(checkNewTarget !== IS_NEW_ARG, 'new arg is never parsed through this function');
         return parseAwaitExpression(lexerFlags, identToken, allowAssignment, astProp);
       case 'class':
         parseClassExpression(lexerFlags, IDENT_OPTIONAL, astProp);

@@ -655,6 +655,33 @@ module.exports = (describe, test) =>
         throws: 'await',
       });
     });
+
+    test('inside a new', {
+      code: 'async function f(){ new await x; }',
+      throws: 'new',
+    });
+
+    test.pass('newline after await in func is ok', {
+      code: 'async function f(){ await \n x; }',
+    });
+
+    test.pass('newline after await in stmt header is ok', {
+      code: 'async function f(){ if (await \n x) {} }',
+    });
+
+    test('new await inside array', {
+      code: 'async function f(){ [new await foo] }',
+      throws: 'new',
+    });
+
+    test('new await inside group', {
+      code: 'async function f(){ (new await foo) }',
+      throws: 'new',
+    });
+
+    test.pass('new await nested inside group', {
+      code: 'async function f(){ new (await foo) }',
+    });
   });
 
 // > Unlike YieldExpression, it is a Syntax Error to omit the operand of an AwaitExpression. You must await something.
