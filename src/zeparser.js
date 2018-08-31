@@ -4928,8 +4928,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_close('TemplateElement');
           if (hasAllFlags(curtype, $TICK_TAIL)) lexerFlags = lfbak; // should happen only once and always
         } while (!hasAllFlags(curtype, $TICK_TAIL)); // also fixes $EOF check so no infi loop
-      } else if (!hasAnyFlag(curtype, $TICK_PURE)) {
-        TODO; //??
+      } else {
+        ASSERT(hasAllFlags(curtype, $TICK_PURE), 'isTemplateStart should have asserted that the type was either tick pure or head');
       }
 
       ASSERT_skipRex($TICK, lexerFlags); // f`x`\n/foo/
