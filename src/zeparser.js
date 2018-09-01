@@ -5908,8 +5908,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$SQUARE_R_5D, bindingType, NOT_GROUP_TOPLEVEL, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
         destructible |= subDestruct;
+        if (curc !== $$COMMA_2C && curc !== $$SQUARE_R_5D) THROW('Encountered unexpected token after parsing spread/rest argument ');
         ASSERT(curc !== $$COMMA_2C || hasAllFlags(subDestruct, CANT_DESTRUCT), 'if comma then cannot destruct, should be dealt with in function');
-        ASSERT(curc === $$COMMA_2C || curc === $$SQUARE_R_5D, 'abstraction should parse whole rest/spread goal');
         // if there are any other elements after this then this cannot be a destructible since that demands rest as last
         if (spreadStage === NO_SPREAD) spreadStage = LAST_SPREAD;
       }
@@ -7115,12 +7115,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // [.../x/+y]
           destructible |= DESTRUCT_ASSIGN_ONLY;
 
-          if (curc !== $$COMMA_2C && curc !== closingCharOrd) {
-            parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
-            destructible |= CANT_DESTRUCT;
-          }
-          else TODO
-        } else if (bindingType !== BINDING_TYPE_NONE || assignable === NOT_ASSIGNABLE) {
+          parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
+          destructible |= CANT_DESTRUCT;
+        }
+        else if (bindingType !== BINDING_TYPE_NONE || assignable === NOT_ASSIGNABLE) {
           // rest arg was a value without tail and we can't destructure it
           destructible |= CANT_DESTRUCT;
         }

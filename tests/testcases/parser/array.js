@@ -1282,6 +1282,28 @@ module.exports = (describe, test) =>
           tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
 
+        test('spread with just a regex', {
+          code: '[.../x/]',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {type: 'Literal', value: '<TODO>', raw: '/x/'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+        });
+
         test('spread with regex-plus', {
           code: '[.../x/+y]',
           ast: {
@@ -1361,6 +1383,10 @@ module.exports = (describe, test) =>
             ],
           },
           tokens: [$PUNCTUATOR, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test.fail('spread with a regex and weird followu', {
+          code: '[.../x/ y]',
         });
       });
 
