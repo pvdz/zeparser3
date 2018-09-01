@@ -6363,7 +6363,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('computed', true);
         AST_set('kind', 'method'); // get/set/constructor/etc but dynamic key is always method
 
-        if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
         parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, NOT_GETSET, NOT_FUNCTION_STATEMENT, 'value');
 
         AST_close('MethodDefinition');

@@ -2865,6 +2865,13 @@ module.exports = (describe, test) =>
       });
     });
 
+    test.pass('assert the paren', {
+      code: 'class x {[x](){}}',
+    });
+
+    test.fail('assert the paren', {
+      code: 'class x {[x]z){}}',
+    });
 
     // export default class extends F {}
     // class extends {} {}
