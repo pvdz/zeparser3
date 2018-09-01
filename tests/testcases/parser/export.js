@@ -1310,10 +1310,95 @@ module.exports = (describe, test) =>
         SCRIPT: {throws: 'module'},
         throws: 'top level',
       });
-    })
+    });
 
     test.fail('cannot export a variable without default', {
       code: 'export foo;',
       SCRIPT: {throws: 'module'},
+    });
+
+    describe('export object is not generic', _ => {
+
+      test('cannot destructure a rest', {
+        code: 'var foo, bar; export {foo, ...bar}',
+        SCRIPT: {throws: 'module'},
+        throws: 'spread',
+      });
+
+      test('cannot destructure an array', {
+        code: 'var foo, bar; export {[foo]}',
+        SCRIPT: {throws: 'module'},
+        throws: 'export object',
+      });
+
+      test('cannot destructure an object 1', {
+        code: 'var foo, bar; export {{foo}}',
+        SCRIPT: {throws: 'module'},
+        throws: 'export object',
+      });
+
+      test('cannot destructure an object 2', {
+        code: 'var foo, bar, x; export {{foo: x}}',
+        SCRIPT: {throws: 'module'},
+        throws: 'export object',
+      });
+
+      test('cannot contain a method', {
+        code: 'var foo; export {foo(){}}',
+        SCRIPT: {throws: 'module'},
+        throws: 'export object',
+      });
+
+      test('cannot contain a dynamic prop', {
+        code: 'var foo; export {[foo]}',
+        SCRIPT: {throws: 'module'},
+        throws: 'export object',
+      });
+
+      test('cannot contain a dynamic method', {
+        code: 'var foo; export {[foo](){}}',
+        SCRIPT: {throws: 'module'},
+        throws: 'export object',
+      });
+
+      test.fail('cannot contain an async', {
+        code: 'var foo; export {async foo(){}}',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test.fail('cannot contain a generator', {
+        code: 'var foo; export {*foo(){}}',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test.fail('cannot contain an async generator', {
+        code: 'var foo; export {async *foo(){}}',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test.fail('cannot export `new` as binding', {
+        code: 'export {new}',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test.pass('can export `new` as export name', {
+        code: 'var foo; export {foo as new}',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test.fail('cannot export `new` as property', {
+        code: 'var foo; export {foo: new}',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test.fail('cannot export new expression as property', {
+        code: 'var foo; export {foo: new foo}',
+        SCRIPT: {throws: 'module'},
+      });
+
+      test.pass('exported name can be weird keywords', {
+        code: 'let x; export {x as new}; import {new as foo} from "bar";',
+        SCRIPT: {throws: 'module'},
+      });
     });
   });

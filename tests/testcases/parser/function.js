@@ -557,7 +557,7 @@ module.exports = (describe, test) =>
 
         test('rest has no assignment expression', {
           code: 'function f(...rest = x){}',
-          throws: 'rest',
+          throws: 'destructible',
         });
 
         test('rest cannot be addition', {
@@ -572,7 +572,7 @@ module.exports = (describe, test) =>
 
         test('rest cannot be a group', {
           code: 'function f(...(x)){}',
-          throws: 'rest arg',
+          throws: 'destructible',
         });
       });
 
@@ -2994,32 +2994,32 @@ module.exports = (describe, test) =>
 
             test('rest with arg after it sans default', {
               code: 'function f([...foo, bar]){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with arg after it with default', {
               code: 'function f([...foo, bar] = obj){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with trailing comma sans default', {
               code: 'function f([...foo,]){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with trailing comma with default', {
               code: 'function f([...foo,] = obj){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with double trailing comma sans default', {
               code: 'function f([...foo,,]){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with double trailing comma with default', {
               code: 'function f([...foo,,] = obj){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with destruct with two ident sans default', {
@@ -3124,22 +3124,22 @@ module.exports = (describe, test) =>
 
             test('rest with destruct with two ident with trailing comma sans default', {
               code: 'function f([...[a, b],]){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with destruct with two ident with trailing comma with default', {
               code: 'function f([...[a, b],] = obj){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with destruct with two ident with double trailing comma sans default', {
               code: 'function f([...[a, b],,] = obj){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with destruct with two ident with double trailing comma with default', {
               code: 'function f([...[a, b],,] = obj){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('nested rest as second sans default', {
@@ -3250,12 +3250,12 @@ module.exports = (describe, test) =>
 
             test('rest with local default sans default', {
               code: 'function f([...bar = foo]){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('rest with local default with default', {
               code: 'function f([...bar = foo] = obj){}',
-              throws: 'rest arg',
+              throws: 'destructible',
             });
 
             test('double rest sans default', {

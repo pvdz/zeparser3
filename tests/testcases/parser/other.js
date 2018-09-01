@@ -8,4 +8,12 @@ module.exports = (describe, test) =>
       throws: 'Tokenizer error',
       tokens: [$ERROR],
     });
+
+    test.pass('reading from eval', {
+      code: 'eval; log(eval); eval.foo; eval[foo]; eval.foo = bar; eval[foo] = bar;',
+    });
+
+    test.pass('reading from arguments', {
+      code: 'arguments; log(arguments); arguments.foo; arguments[foo]; arguments.foo = bar; arguments[foo] = bar;',
+    });
   });

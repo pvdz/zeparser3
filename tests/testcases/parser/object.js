@@ -7370,6 +7370,11 @@ module.exports = (describe, test) =>
           code: 's = {"foo": true}',
         });
       });
+
+      test('object rest with assign cannot destruct', {
+        code: 'x={...x=y}=z',
+        throws: 'destructible',
+      });
     });
 
     describe('non-ident key with keyword value', _ => {

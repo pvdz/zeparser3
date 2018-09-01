@@ -2418,5 +2418,34 @@ module.exports = (describe, test) =>
         code: '[true = x]',
         throws: 'keyword',
       });
+
+      describe('spreadrest keywords', _ => {
+
+        test.pass('spread a value keyword', {
+          code: '[...true]',
+          desc: 'runtime error',
+        });
+
+        test('destruct assign rest a value keyword', {
+          code: '[...true] = x',
+          throws: 'destructible',
+        });
+
+        test.fail('arrow rest a value keyword', {
+          code: '[...true] => x',
+        });
+
+        test.fail('spread a bad keyword', {
+          code: '[...new]',
+        });
+
+        test.fail('destruct assign rest a bad keyword', {
+          code: '[...new] = x',
+        });
+
+        test.fail('arrow rest a bad keyword', {
+          code: '[...new] => x',
+        });
+      });
     });
   });

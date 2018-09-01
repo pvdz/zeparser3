@@ -3169,17 +3169,17 @@ module.exports = (describe, test) => describe('parens', _ => {
 
       test('middle is bad', {
         code: '(x, ...y, z) => x',
-        throws: 'rest arg',
+        throws: 'destructible',
       });
 
       test('first but not last is bad', {
         code: '(...x, y) => x',
-        throws: 'rest arg',
+        throws: 'destructible',
       });
 
       test('cannot have init', {
         code: '(...x = y) => x',
-        throws: 'rest arg',
+        throws: 'destructible',
       });
 
       test('can not spread member', {
