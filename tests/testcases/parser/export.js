@@ -1401,4 +1401,9 @@ module.exports = (describe, test) =>
         SCRIPT: {throws: 'module'},
       });
     });
+
+    test.pass('export the same symbol twice under different names', {
+      code: 'var x; export { x as a }; export { x as b };',
+      SCRIPT: {throws: 'module'},
+    });
   });

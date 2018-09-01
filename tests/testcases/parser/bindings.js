@@ -1484,10 +1484,9 @@ module.exports = (describe, test) =>
           throws: 'twice',
         });
 
-        test('default still exports symbol too', {
+        test.pass('default still exports symbol too but the export does not add another binding', {
           code: 'export default function f(){}; export {f};',
           SCRIPT: {throws: 'module'},
-          throws: 'twice',
         });
 
         test('default is just a name', {

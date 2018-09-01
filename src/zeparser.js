@@ -1885,7 +1885,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `export default function x(){}`
           // the "default" and "*default*" cases are handled in the export parser
           // if this func has a name, record it by reference because return values are already used by something else
-          addNameToExports(exportedBindings, name);
+          addBindingToExports(exportedBindings, name);
         }
 
         return NOT_ASSIGNABLE;
@@ -2290,8 +2290,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // exported names: "default"
         SCOPE_addBindingAndDedupe(lexerFlags, scoop, '*default*', BLOCK_SCOPE, ORIGIN_NOT_VAR_DECL);
         addNameToExports(exportedNames, 'default');
-        addNameToExports(exportedBindings, '*default*');
-        addNameToExports(exportedBindings, exportedName);
+        addBindingToExports(exportedBindings, '*default*');
+        addBindingToExports(exportedBindings, exportedName);
 
         needsSemi = false;
       } else if (curc === $$F_66 && curtok.str === 'function') {
@@ -2307,8 +2307,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // exported names: "default"
         SCOPE_addBindingAndDedupe(lexerFlags, scoop, '*default*', BLOCK_SCOPE, ORIGIN_NOT_VAR_DECL);
         addNameToExports(exportedNames, 'default');
-        addNameToExports(exportedBindings, '*default*');
-        addNameToExports(exportedBindings, exportedName);
+        addBindingToExports(exportedBindings, '*default*');
+        addBindingToExports(exportedBindings, exportedName);
 
         needsSemi = false;
       } else if (curc === $$A_61 && curtok.str === 'async') {
@@ -2332,7 +2332,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // exported names: "default"
           SCOPE_addBindingAndDedupe(lexerFlags, scoop, '*default*', BLOCK_SCOPE, ORIGIN_NOT_VAR_DECL);
           addNameToExports(exportedNames, 'default');
-          addNameToExports(exportedBindings, '*default*');
+          addBindingToExports(exportedBindings, '*default*');
 
           needsSemi = false;
         } else {
@@ -2352,7 +2352,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // exported names: "default"
           SCOPE_addBindingAndDedupe(lexerFlags, scoop, '*default*', BLOCK_SCOPE, ORIGIN_NOT_VAR_DECL);
           addNameToExports(exportedNames, 'default');
-          addNameToExports(exportedBindings, '*default*');
+          addBindingToExports(exportedBindings, '*default*');
         }
       } else {
         // `export default 15`
@@ -2365,7 +2365,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // exported names: "default"
         SCOPE_addBindingAndDedupe(lexerFlags, scoop, '*default*', BLOCK_SCOPE, ORIGIN_NOT_VAR_DECL);
         addNameToExports(exportedNames, 'default');
-        addNameToExports(exportedBindings, '*default*');
+        addBindingToExports(exportedBindings, '*default*');
       }
 
       AST_close('ExportDefaultDeclaration');
@@ -2403,7 +2403,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_set('source', null);
           // pump the names in now
           for (let i=0,l=tmpExportedNames.length; i<l; ++i) addNameToExports(exportedNames, tmpExportedNames[i]);
-          for (let i=0,l=tmpExportedBindings.length; i<l; ++i) addNameToExports(exportedBindings, tmpExportedBindings[i]);
+          for (let i=0,l=tmpExportedBindings.length; i<l; ++i) addBindingToExports(exportedBindings, tmpExportedBindings[i]);
         }
       } else if (curc === $$V_76 && curtok.str === 'var') {
         // export var <bindings>
@@ -2426,7 +2426,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // export class ...
           let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, 'declaration');
           addNameToExports(exportedNames, exportedName);
-          addNameToExports(exportedBindings, exportedName);
+          addBindingToExports(exportedBindings, exportedName);
           needsSemi = false;
         } else {
           THROW('Unknown export type [' + curtok.str +  '] (note: you can only export individual vars through `export {foo};)');
@@ -2438,7 +2438,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // (anonymous should not be allowed but parsers seem to do it anyways)
         let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_REQUIRED, NOT_FUNCTION_STATEMENT, 'declaration');
         addNameToExports(exportedNames, exportedName);
-        addNameToExports(exportedBindings, exportedName);
+        addBindingToExports(exportedBindings, exportedName);
         AST_set('source', null);
         needsSemi = false;
       }
@@ -2458,7 +2458,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, WAS_ASYNC, IDENT_REQUIRED, NOT_FUNCTION_STATEMENT, 'declaration');
         addNameToExports(exportedNames, exportedName);
-        addNameToExports(exportedBindings, exportedName);
+        addBindingToExports(exportedBindings, exportedName);
         AST_set('source', null);
         needsSemi = false;
       }
@@ -2478,6 +2478,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (exportList !== undefined && exportedName !== '') {
       let hashed = '#' + exportedName;
       if (exportList[hashed]) THROW('Tried to export the name `' + exportedName + '` twice');
+      exportList[hashed] = 1;
+    }
+  }
+  function addBindingToExports(exportList, exportedName) {
+    if (exportList !== undefined && exportedName !== '') {
+      let hashed = '#' + exportedName;
       exportList[hashed] = 1;
     }
   }
@@ -3559,7 +3565,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         (bindingOrigin === FROM_STATEMENT_START || bindingOrigin === FROM_FOR_HEADER || bindingOrigin === FROM_EXPORT_DECL) && bindingType === BINDING_TYPE_VAR ? ORIGIN_IS_VAR_DECL : ORIGIN_NOT_VAR_DECL
       );
       addNameToExports(exportedNames, curtok.str);
-      addNameToExports(exportedBindings, curtok.str);
+      addBindingToExports(exportedBindings, curtok.str);
       let identToken = curtok;
       AST_setIdent(astProp, curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
@@ -5797,7 +5803,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (assignable === NOT_ASSIGNABLE) THROW('Cannot assign or destruct to keyword [' + identToken.str + ']');
           SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
           addNameToExports(exportedNames, identToken.str);
-          addNameToExports(exportedBindings, identToken.str);
+          addBindingToExports(exportedBindings, identToken.str);
 
           AST_wrapClosed(astProp, 'AssignmentExpression', 'left');
           AST_set('operator', '=');
@@ -5831,7 +5837,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               else {
                 SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
                 addNameToExports(exportedNames, identToken.str);
-                addNameToExports(exportedBindings, identToken.str);
+                addBindingToExports(exportedBindings, identToken.str);
               }
               break;
             default:
@@ -5840,7 +5846,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               else {
                 SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
                 addNameToExports(exportedNames, identToken.str);
-                addNameToExports(exportedBindings, identToken.str);
+                addBindingToExports(exportedBindings, identToken.str);
               }
           }
         }
@@ -6262,7 +6268,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               else {
                 SCOPE_addBinding(lexerFlags, scoop, nameBinding.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
                 addNameToExports(exportedNames, nameBinding.str);
-                addNameToExports(exportedBindings, nameBinding.str);
+                addBindingToExports(exportedBindings, nameBinding.str);
               }
               break;
             default:
@@ -6271,7 +6277,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               else {
                 SCOPE_addBinding(lexerFlags, scoop, nameBinding.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
                 addNameToExports(exportedNames, nameBinding.str);
-                addNameToExports(exportedBindings, nameBinding.str);
+                addBindingToExports(exportedBindings, nameBinding.str);
               }
           }
 
@@ -6589,7 +6595,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
       addNameToExports(exportedNames, identToken.str);
-      addNameToExports(exportedBindings, identToken.str);
+      addBindingToExports(exportedBindings, identToken.str);
 
       AST_open(astProp, 'Property');
       AST_setIdent('key', identToken);
@@ -6661,7 +6667,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         } else if (willBeSimple) {
           SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
           addNameToExports(exportedNames, identToken.str);
-          addNameToExports(exportedBindings, identToken.str);
+          addBindingToExports(exportedBindings, identToken.str);
         }
 
         AST_set('shorthand', false);
@@ -7049,7 +7055,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // `let [...foo] = bar`            (exports will be empty)
         // `export let [...foo] = bar`     (will have scoop & exports)
         addNameToExports(exportedNames, identToken.str);
-        addNameToExports(exportedBindings, identToken.str);
+        addBindingToExports(exportedBindings, identToken.str);
       } else {
         // `[...a.b]=c`
         destructible |= DESTRUCT_ASSIGN_ONLY;
