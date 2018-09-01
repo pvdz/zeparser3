@@ -2873,6 +2873,30 @@ module.exports = (describe, test) =>
       code: 'class x {[x]z){}}',
     });
 
+    test.fail('classes only have methods for now', {
+      code: 'class x {foo, bar(){}}',
+    });
+
+    test.fail('classes do not have shorthands', {
+      code: 'class x {foo}',
+    });
+
+    test.fail('class members do not have initializers', {
+      code: 'class x {foo = x}',
+    });
+
+    test.fail('class members do not have colons', {
+      code: 'class x {foo: x}',
+    });
+
+    test.fail('async class generator members can not be called `prototype`', {
+      code: 'class x {async *prototype(){}}',
+    });
+
+    test.fail('dynamic class member paren check', {
+      code: 'class x { async [x]s){}}',
+    });
+
     // export default class extends F {}
     // class extends {} {}
     // async constructor ?

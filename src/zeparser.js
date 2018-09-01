@@ -6518,7 +6518,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let destructible = MIGHT_DESTRUCT;
 
     if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
-      if (isClassMethod) TODO,THROW('Class members have to be methods, for now');
+      if (isClassMethod) {
+        if (curc === $$COMMA_2C) THROW('Classes do not use commas');
+        THROW('Class members have to be methods, for now');
+      }
 
       // property shorthand; `{ident}=x` is valid, x={y} is also valid
       // - {a}
@@ -6762,7 +6765,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtype === $IDENT) {
         // `class x{   async *foo(a){}   }`
         // `class x{   async *prototype(a){}   }`
-        if (curtok.str === 'prototype') TODO,THROW('Class methods can not be called `prototype`');
+        if (curtok.str === 'prototype') THROW('Class async generator methods can not be called `prototype`');
 
         AST_setIdent(astProp, curtok);
         ASSERT_skipAny($IDENT, lexerFlags);
@@ -6860,7 +6863,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('static', !!isStatic);
       AST_set('computed', true);
       AST_set('kind', kindValue); // only getters/setters get special value here
-      if (curc !== $$PAREN_L_28) TODO; // confirm this is explicitly checked then drop this line
       parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, kind, NOT_FUNCTION_STATEMENT, 'value');
 
       AST_close('MethodDefinition');
