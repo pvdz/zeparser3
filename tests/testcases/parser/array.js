@@ -406,6 +406,14 @@ module.exports = (describe, test) =>
           ast: true,
           tokens: true,
         });
+
+        test.fail('spread on string assignment', {
+          code: '[..."foo"=x]',
+        });
+
+        test.pass('spread on string property assignment', {
+          code: '[..."foo".foo=x]',
+        });
       });
     });
 
@@ -2472,6 +2480,26 @@ module.exports = (describe, test) =>
         test.fail('arrow rest a bad keyword', {
           code: '[...new] => x',
         });
+      });
+
+      test('rest on string assignment to destruct assignment', {
+        code: '[..."foo"=x] = x',
+        throws: 'destructible',
+      });
+
+      test('spread on string property assignment to destruct assignment', {
+        code: '[..."foo".foo=x] = x',
+        throws: 'destructible',
+      });
+
+      test('rest on string assignment to arrow', {
+        code: '([..."foo"=x]) => x',
+        throws: 'destructible',
+      });
+
+      test('spread on string property assignment to arrow', {
+        code: '([..."foo".foo=x]) => x',
+        throws: 'destructible',
       });
     });
   });

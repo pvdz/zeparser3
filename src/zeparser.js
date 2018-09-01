@@ -7106,25 +7106,52 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `[...a=b]`
       // - `[...(x)]`
       // - `[...(x,y)]`
+      // - `[.../x/+y]`
 
       let assignable = parseValue(lexerFlags, ALLOW_ASSIGNMENT, astProp);
       if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
 
-      if (curtok.str !== '=') {
+      if (curtok.str === '=') {
+        if (assignable === NOT_ASSIGNABLE) {
+          // - `[..."x"=b]`
+          THROW('Cannot assign to lhs, not destructible with this initializer');
+        }
+
+        // - `[..."x".foo=b]`
+        parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
+        destructible |= CANT_DESTRUCT; // assignments are not assignment destructible
+      } else {
+        // - `[.../x//y]`
+        // - `[.../x/g/y]`
+        // - `[...50]`
+        // - `[..."foo".bar]`
+        // - `[...(x)]`
+        // - `[...(x,y)]`
+        // - `[.../x/+y]`
+
         if (curc !== $$COMMA_2C && curc !== closingCharOrd) {
-          // [.../x/+y]
+          // - `[.../x//y]`
+          // - `[.../x/g/y]`
+          // - `[..."foo".bar]`
+          // - `[...(x)]`
+          // - `[...(x,y)]`
+          // - `[.../x/+y]`
           destructible |= DESTRUCT_ASSIGN_ONLY;
 
           parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
           destructible |= CANT_DESTRUCT;
         }
-        else if (bindingType !== BINDING_TYPE_NONE || assignable === NOT_ASSIGNABLE) {
+        else {
+          ASSERT(assignable === NOT_ASSIGNABLE, 'the only assignables are identifiers or propeties, idents are caught elsewhere and properties will be caught above so this cannot be assignable');
+
           // rest arg was a value without tail and we can't destructure it
+          // - `[.../x/]`
+          // - `[.../x/g]`
+          // - `[...50]`
+          // - `[..."foo"]`
           destructible |= CANT_DESTRUCT;
         }
-        else TODO
       }
-      else TODO;
 
       return destructible;
     }
