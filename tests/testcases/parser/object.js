@@ -7375,6 +7375,55 @@ module.exports = (describe, test) =>
         code: 'x={...x=y}=z',
         throws: 'destructible',
       });
+
+      describe('spreadrest keywords', _ => {
+
+        test.pass('spread a value keyword', {
+          code: 'x={...true}',
+          desc: 'runtime error',
+        });
+
+        test('destruct assign rest a value keyword', {
+          code: 'x={...true} = x',
+          throws: 'destructible',
+        });
+
+        test.fail('arrow rest a value keyword', {
+          code: 'x={...true} => x',
+        });
+
+        test.fail('spread a bad keyword', {
+          code: 'x={...new}',
+        });
+
+        test.fail('destruct assign rest a bad keyword', {
+          code: 'x={...new} = x',
+        });
+
+        test.fail('arrow rest a bad keyword', {
+          code: 'x={...new} => x',
+        });
+      });
+
+      test('rest on string assignment to destruct assignment', {
+        code: 'x={..."foo"=x} = x',
+        throws: 'destructible',
+      });
+
+      test('spread on string property assignment to destruct assignment', {
+        code: 'x={..."foo".foo=x} = x',
+        throws: 'destructible',
+      });
+
+      test('rest on string assignment to arrow', {
+        code: '({..."foo"=x}) => x',
+        throws: 'destructible',
+      });
+
+      test('spread on string property assignment to arrow', {
+        code: '({..."foo".foo=x}) => x',
+        throws: 'destructible',
+      });
     });
 
     describe('non-ident key with keyword value', _ => {
