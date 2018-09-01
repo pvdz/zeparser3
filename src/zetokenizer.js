@@ -377,6 +377,22 @@ const FOR_TEMPLATE = true; // templates are never not allowed to have octal esca
 const NOT_TEMPLATE = false;
 
 let NOT_A_REGEX_ERROR = '';
+let CODEPOINT_FROM_ESCAPE = -1;
+
+let INVALID_IDENT_CHAR = 0;
+let VALID_SINGLE_CHAR = 1;
+let VALID_DOUBLE_CHAR = 2;
+
+let ID_START_REGEX = /|/;
+let ID_CONTINUE_REGEX = /|/;
+(function(){
+  try {
+    ID_START_REGEX = new RegExp('^\\p{ID_Start}$','u');
+    ID_CONTINUE_REGEX = new RegExp('^\\p{ID_Continue}$','u');
+  } catch(e) {
+    console.warn('Unable to create regexes with unicode property escapes; unicode support disabled');
+  }
+})();
 
 function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, collectTokens = COLLECT_TOKENS_NONE, webCompat = WEB_COMPAT_ON, gracefulErrors = FAIL_HARD, tokenStorage = []) {
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
@@ -395,6 +411,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   let consumedComment = false; // needed to confirm requirement to parse --> closing html comment
   let finished = false; // generated an $EOF?
   let lastParsedIdent = ''; // updated after parsing an ident. used to canonalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
+  let lastRegexUnicodeEscapeOrd = 0; // need this to validate unicode escapes in named group identifiers :/
 
   let cache = input.charCodeAt(0);
 
@@ -413,6 +430,15 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     ASSERT(!arguments.length, 'no args');
     ASSERT(cache === input.charCodeAt(pointer), 'cache should be up to date');
 
+    return cache;
+  }
+  function peekUnicode() {
+    // returns codePointAt if and only if charCodeAt returned >127 (UNCACHED!)
+    ASSERT(neof(), 'pointer not oob');
+    ASSERT(!arguments.length, 'no args');
+    ASSERT(cache === input.charCodeAt(pointer), 'cache should be up to date');
+
+    if (cache > 127) return input.codePointAt(pointer);
     return cache;
   }
   function peekd(delta) {
@@ -1211,23 +1237,60 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     return $PUNCTUATOR;
   }
 
-  function parseIdentifierRest(c, prev) {
-    ASSERT(typeof c === 'number', 'should get the parsed ident start');
-    ASSERT(isIdentStart(c), 'ident start should already have been confirmed');
+  function parseIdentifierRest(cLeading, prev) {
+    ASSERT(typeof cLeading === 'number', 'should get the parsed ident start');
+    ASSERT(isIdentStart(cLeading, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR, 'ident start should already have been confirmed');
     ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
-    return _parseIdentifierRest(c, prev);
+    return _parseIdentifierRest(cLeading, prev);
   }
   function _parseIdentifierRest(c, prev) {
     ASSERT(typeof c === 'number', 'c is an ord');
     ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
     if (neof()) {
       let c = peek();
-      while (isIdentRestChr(c)) { // super hot
-        prev += String.fromCharCode(c); // TODO: if this affects perf we can try a slice after the loop
-        ASSERT_skip(c);
+      do {
+        if (c === $$BACKSLASH_5C) {
+          // this ident is part of an identifier. if the backslash is invalid or the escaped codepoint not valid for the
+          // identifier then an $ERROR token should be yielded since the backslash cannot be valid in any other way here
+          if (peekd(1) === $$U_75) {
+            ASSERT_skip($$BACKSLASH_5C);
+            ASSERT_skip($$U_75);
+            c = parseRegexUnicodeEscape2();
+            if (c === INVALID_IDENT_CHAR || c === CHARCLASS_BAD) {
+              regexSyntaxError('Found invalid quad unicode escape, the escape must be part of the ident so the ident is an error');
+              return $ERROR;
+            }
+            if ((c & CHARCLASS_BAD_SANS_U_FLAG) === CHARCLASS_BAD_SANS_U_FLAG) {
+              c = c ^ CHARCLASS_BAD_SANS_U_FLAG;
+            }
+            let wide = isIdentRestChr(c, CODEPOINT_FROM_ESCAPE);
+            if (wide === INVALID_IDENT_CHAR) {
+              regexSyntaxError('An escape that might be part of an identifier cannot be anything else so if it is invalid it must be an error');
+              return $ERROR;
+            }
+            if (wide === VALID_SINGLE_CHAR) prev += String.fromCharCode(c);
+            else prev += String.fromCodePoint(c);
+          } else {
+            regexSyntaxError('Only unicode escapes are legal in identifier names');
+            return $ERROR;
+          }
+        }
+        else {
+          let wide = isIdentRestChr(c, pointer);
+          if (wide === INVALID_IDENT_CHAR) break;
+          if (wide === VALID_DOUBLE_CHAR) {
+            prev += input.slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
+            skip();
+            skip();
+          } else {
+            ASSERT(wide === VALID_SINGLE_CHAR, 'enum');
+            ASSERT_skip(c);
+            prev += String.fromCharCode(c); // TODO: if this affects perf we can try a slice after the loop
+          }
+        }
         if (eof()) break;
         c = peek();
-      }
+      } while (true);
       // slow path, dont test this inside the super hot loop above
       if (c === $$BACKSLASH_5C) {
         ASSERT_skip($$BACKSLASH_5C);
@@ -1278,15 +1341,14 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       ASSERT(data.charCodeAt(data.length - 1) !== $$CURLY_R_7D && isHex(data.charCodeAt(data.length - 1)), 'if wrapped, the closer should not be consumed yet');
 
       let ord = parseInt(data, 16);
-      prev += String.fromCharCode(ord);
-      //ASSERT(parseInt(data, 16).toString(16) === data, 'data should only contain ascii chars...'); // this can fail if there were leading zeroes in the escaped hex...
-
+      if (ord > 0xffff) prev += String.fromCodePoint(ord); // there's a test... but if ord is >0xffff then fromCharCode can't properly deal with it
+      else prev += String.fromCharCode(ord);
       // the escaped char must still be a valid identifier character. then and only
       // then can we proceed to parse an identifier. otherwise we'll still parse
       // into an error token.
-      if (fromStart === FIRST_CHAR && isIdentStart(ord)) {
+      if (fromStart === FIRST_CHAR && isIdentStart(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
         return _parseIdentifierRest(ord, prev);
-      } else if (fromStart === NON_START && isIdentRestChr(ord)) {
+      } else if (fromStart === NON_START && isIdentRestChr(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
         return _parseIdentifierRest(ord, prev);
       } else {
         lastParsedIdent = prev;
@@ -1300,17 +1362,46 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     return $ERROR;
   }
 
-  function isIdentStart(c){
-    if (isAsciiLetter(c)) return true;
-    if (c === $$$_24 || c === $$LODASH_5F) return true;
-    // todo: unicode escape
-    return false;
+  function isIdentStart(c, offset){
+    ASSERT(isIdentStart.length === arguments.length, 'all args');
+    if (isAsciiLetter(c)) return VALID_SINGLE_CHAR;
+    if (c === $$$_24 || c === $$LODASH_5F) return VALID_SINGLE_CHAR;
+    if (c > 127) {
+      // now we have to do an expensive... but proper unicode check
+      return veryExpensiveUnicodeCheck(c, offset, ID_START_REGEX);
+    }
+    return INVALID_IDENT_CHAR;
   }
-  function isIdentRestChr(c){
-    if (isAsciiLetter(c)) return true;
-    if (isAsciiNumber(c)) return true;
-    if (c === $$$_24 || c === $$LODASH_5F) return true;
-    return false;
+  function isIdentRestChr(c, offset){
+    ASSERT(isIdentRestChr.length === arguments.length, 'all args');
+    if (isAsciiLetter(c)) return VALID_SINGLE_CHAR;
+    if (isAsciiNumber(c)) return VALID_SINGLE_CHAR;
+    if (c === $$$_24 || c === $$LODASH_5F) return VALID_SINGLE_CHAR;
+    if (c > 127) {
+      // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters
+      // U+200C (ZERO WIDTH NON-JOINER) and U+200D (ZERO WIDTH JOINER) are format-control characters that are used to
+      // make necessary distinctions when forming words or phrases in certain languages. In ECMAScript source text
+      // these code points may also be used in an IdentifierName after the first character.
+      if (c === $$ZWNJ_200C || c === $$ZWJ_200D) return VALID_SINGLE_CHAR;
+
+      // now we have to do an expensive... but proper unicode check
+      return veryExpensiveUnicodeCheck(c, offset, ID_CONTINUE_REGEX);
+    }
+    return INVALID_IDENT_CHAR;
+  }
+  function veryExpensiveUnicodeCheck(c, offset, regexScanner) {
+    // offset is skipped for escapes. we can assert `c` is correct in those cases.
+    if (offset !== CODEPOINT_FROM_ESCAPE) {
+      // this is a slow path that only validates if unicode chars are used in an identifier
+      // since that is pretty uncommon I don't mind doing an extra codepoint lookup here
+      c = input.codePointAt(offset);
+    }
+    let s = String.fromCodePoint(c);
+    ASSERT(s.length === 1 || s.length === 2, 'up to four bytes...'); // js strings are 16bit
+    if (regexScanner.test(s)) {
+      return s.length === 1 ? VALID_SINGLE_CHAR : VALID_DOUBLE_CHAR;
+    }
+    return INVALID_IDENT_CHAR;
   }
   function isAsciiLetter(c) {
     // make upper and lower case the same value (for the sake of the isletter check).
@@ -1650,7 +1741,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           afterAtom = false; // useless. just in case
 
           if (eof()) {
-            uflagStatus = regexSyntaxError('Encountered early EOF');;
+            uflagStatus = regexSyntaxError('Encountered early EOF');
             break;
           }
           c = peek();
@@ -1674,43 +1765,74 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
                     THROW('Lookbehinds in regular expressions are not supported in the currently targeted language version');
                   }
                   // (?<= (?<!
+                  ASSERT_skip(c);
                   wasUnfixableAssertion = true;
                 } else if (!supportRegexNamedGroups) {
+                  ASSERT_skip(c);
                   uflagStatus = regexSyntaxError('The lookbehind group `(?<` must be followed by `=` or `!` but wasnt [ord=' + c + ']');
                   break;
+                } else if (c === $$BACKSLASH_5C) {
+                  // parseRegexNamedGroup
+                  ASSERT_skip($$BACKSLASH_5C);
+                  ASSERT_skip($$U_75);
+
+                  c = parseRegexUnicodeEscape2();
+                  if (c === INVALID_IDENT_CHAR || c === CHARCLASS_BAD) {
+                    uflagStatus = regexSyntaxError('Found invalid quad unicode escape');
+                    break;
+                  }
+                  let wasExtendedEscape = false;
+                  if ((c & CHARCLASS_BAD_SANS_U_FLAG) === CHARCLASS_BAD_SANS_U_FLAG) {
+                    uflagStatus = updateRegexUflagStateCharClass(uflagStatus, CHARCLASS_BAD_SANS_U_FLAG, 'Encountered extended unicode escape `\\u{}` which is only valid with u-flag but this regex is invalid with u-flag');
+                    c = c ^ CHARCLASS_BAD_SANS_U_FLAG;
+                    wasExtendedEscape = true;
+                  }
+
+                  let wide = isIdentStart(c, CODEPOINT_FROM_ESCAPE);
+                  if (wide === INVALID_IDENT_CHAR) {
+                    uflagStatus = regexSyntaxError('Named capturing group named contained an invalid unicode escaped char');
+                    break;
+                  }
+                  let result = parseRegexCapturingGroupNameRemainder(c, groupNames);
+                  if (result !== ALWAYS_GOOD) {
+                    uflagStatus = result;
+                    break;
+                  }
+
+                  c = $$GT_3E;
                 } else {
                   // (?< ...
-                  if (!isIdentStart(c)) {
+                  let wide = isIdentStart(c, pointer);
+
+                  if (wide === VALID_DOUBLE_CHAR) {
+                    skip();
+                    skip();
+                  } else {
+                    ASSERT(wide === VALID_SINGLE_CHAR || wide === INVALID_IDENT_CHAR, 'enum');
+                    ASSERT_skip(c);
+                  }
+
+                  if (wide === INVALID_IDENT_CHAR) {
                     if (webCompat === WEB_COMPAT_OFF) {
                       uflagStatus = regexSyntaxError('Could not parse `(?<` as a named capturing group and it was not an assertion; bailing', c);
                     }
                     break;
                   }
 
-                  parseIdentifierRest(c, '');
-                  let name = lastParsedIdent;
-                    if (groupNames['#' + name]) {
-                    uflagStatus = regexSyntaxError('Each group name can only be declared once: `' + name + '`');
+                  let result = parseRegexCapturingGroupNameRemainder(c, groupNames);
+                  if (result !== ALWAYS_GOOD) {
+                    uflagStatus = result;
                     break;
                   }
-                  groupNames['#' + name] = true;
 
-                  // named capturing group
-                  ++nCapturingParens;
-
-                  if (!peeky($$GT_3E)) {
-                    if (webCompat === WEB_COMPAT_OFF) {
-                      uflagStatus = regexSyntaxError('Missing closing angle bracket of name of group');
-                    }
-                    break;
-                  }
                   c = $$GT_3E;
                 }
               } else if (c === $$IS_3D || c === $$EXCL_21) {
                 // (?= (?!
+                ASSERT_skip(c);
                 wasAssertion = true; // lookahead assertion might only be quantified without u-flag and in webcompat mode
               }
-              ASSERT_skip(c);
+
               if (eof()) {
                 uflagStatus = regexSyntaxError('Encountered early EOF');
                 break;
@@ -1849,8 +1971,37 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     // this is a fail because we didnt got to the end of input before the closing /
     return regexSyntaxError('Found EOF before regex was closed');
   }
+  function parseRegexCapturingGroupNameRemainder(firstCharOrd, groupNames) {
+    // pointer should be up to date
+    // the first char of the group name should have been confirmed and parsed
+
+    if (peek() === $$GT_3E) {
+      // name is one character
+      lastParsedIdent = String.fromCodePoint(firstCharOrd);
+    } else {
+      parseIdentifierRest(firstCharOrd, '');
+    }
+
+    let name = lastParsedIdent;
+    if (groupNames['#' + name]) {
+      return regexSyntaxError('Each group name can only be declared once: `' + name + '`');
+    }
+    groupNames['#' + name] = true;
+
+    // named capturing group
+    ++nCapturingParens;
+
+    if (!peeky($$GT_3E)) {
+      if (webCompat === WEB_COMPAT_OFF) {
+        return regexSyntaxError('Missing closing angle bracket of name of group');
+      }
+    }
+
+    ASSERT(input[pointer] === '>', 'to be clear, call site assumes this');
+    return ALWAYS_GOOD;
+  }
   function parseRegexAtomEscape(c, namedBackRefs) {
-    // backslash already parsed
+    // backslash already parsed, c is peeked
 
     // -- u flag is important
     // -- u flag can affect range (surrogate pairs in es5 vs es6)
@@ -1986,6 +2137,8 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
 
       case $$K_6B:
         // named backreference
+
+
         ASSERT_skip($$K_6B);
         c = peek();
         if (c !== $$LT_3C) {
@@ -1996,7 +2149,18 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         }
         ASSERT_skip($$LT_3C);
         c = peek();
-        if (!isIdentStart(c)) {
+
+        let wider = isIdentStart(c, pointer);
+
+        if (wider === VALID_DOUBLE_CHAR) {
+          skip();
+          skip();
+        } else {
+          ASSERT(wider === VALID_SINGLE_CHAR || wider === INVALID_IDENT_CHAR, 'enum');
+          ASSERT_skip(c);
+        }
+
+        if (wider === INVALID_IDENT_CHAR) {
           if (webCompat === WEB_COMPAT_OFF) {
             return regexSyntaxError('Could not parse `\\k<` as a named back reference; bailing', c);
           } else {
@@ -2004,7 +2168,17 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
           }
         }
 
-        parseIdentifierRest(c, '');
+        if (peek() === $$GT_3E) {
+          // name is one character
+          if (wider === VALID_DOUBLE_CHAR) {
+            lastParsedIdent = input.slice(pointer - 2, pointer);
+          } else {
+            lastParsedIdent = String.fromCharCode(c);
+          }
+        } else {
+          parseIdentifierRest(c, '');
+        }
+
         namedBackRefs.push(lastParsedIdent); // we can only validate ths after completely parsing the regex body
 
         if (!peeky($$GT_3E)) {
@@ -2036,20 +2210,24 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         //   [+U] /
         //   [~U] SourceCharacter but not UnicodeIDContinue
 
-        // unicodeidcontinue is;
-        // (idstart=) uppercase letters, lowercase letters, titlecase letters, modifier letters, other letters, letter numbers, other_id_start without white_space
-        // or; [[:L:][:Ni:][:Other_ID_Start:]--[:Pattern_Syntax:]--[:Patter_White_Space:]]
-        // plus: nonspacing marks, spacing combining marks, decimal number, connector punctuation, other_id_continue sans white_space and syntax
-        // or; [[:ID_Start:][:Mn:][:Mc:][:Nd:][:Pc:][:Other_ID_Continue:]--[:Pattern_Syntax:]--[:Pattern_White_Space:]]
-        // in ascii, unicode continue is all the ascii letters :(
-        if (isIdentRestChr(c)) {
+        let wide = isIdentRestChr(c, pointer);
+        if (wide !== INVALID_IDENT_CHAR) { // backslash is parsed, c is peeked
           if (webCompat === WEB_COMPAT_OFF) {
             return regexSyntaxError('Cannot escape this regular identifier character [ord=' + c + '][' + String.fromCharCode(c) + ']');
           }
         }
 
-        ASSERT_skip(c);
-        return GOOD_SANS_U_FLAG; // TODO: verify that UnicodeIDContinue thing for other characters within ascii range and add specific tests for them
+        if (wide === VALID_DOUBLE_CHAR) {
+          c = input.codePointAt(pointer);
+          skip();
+          skip();
+        } else {
+          if (wide === INVALID_IDENT_CHAR) console.warn('Tokenizer potential $ERROR: was invalid ident but accepting anyways');
+          ASSERT_skip(c);
+        }
+
+        // ok unicode escape was acceptable
+        return GOOD_SANS_U_FLAG;
     }
     THROW('dis be dead code');
   }
@@ -2097,6 +2275,8 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     // so we must parse as loose as possible and keep track of parsing specific u-flag or non-u-flag stuff
     // then after flag parsing confirm that the flag presence conforms to expectations
 
+    lastRegexUnicodeEscapeOrd = 0;
+
     if (eof()) return BAD_ESCAPE;
     let c = peek(); // dont read. we dont want to consume a bad \n here
     if (c === $$CURLY_L_7B) {
@@ -2132,12 +2312,55 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       ASSERT_skip(b);
       ASSERT_skip(c);
       ASSERT_skip(d);
+      let firstPart = hexToNum(a) << 12 | hexToNum(b) << 8 | hexToNum(c) << 4 | hexToNum(d);
+
+      // Is this a surrogate high byte? then we'll try another one; https://en.wikipedia.org/wiki/UTF-16
+      if (firstPart >= 0xD800 && firstPart <= 0xDBFF) {
+        // pretty slow path but we're constructing a low+hi surrogate pair together here
+        if (!eofd(5) && peek() === $$BACKSLASH_5C && peekd(1) === $$U_75 && isHex(peekd(2)) && isHex(peekd(3)) && isHex(peekd(4)) && isHex(peekd(5))) {
+          let a = peekd(2);
+          let b = peekd(3);
+          let c = peekd(4);
+          let d = peekd(5);
+          let secondPart = hexToNum(a) << 12 | hexToNum(b) << 8 | hexToNum(c) << 4 | hexToNum(d);
+
+          if (secondPart >= 0xDC00 && secondPart <= 0xDFFF) {
+            /*
+              https://en.wikipedia.org/wiki/UTF-16
+              To decode U+10437 (𐐷) from UTF-16:
+              Take the high surrogate (0xD801) and subtract 0xD800, then multiply by 0x400, resulting in 0x0001 * 0x400 = 0x0400.
+              Take the low surrogate (0xDC37) and subtract 0xDC00, resulting in 0x37.
+              Add these two results together (0x0437), and finally add 0x10000 to get the final decoded UTF-32 code point, 0x10437.
+             */
+            // firstPart = 0xD801;
+            // secondPart = 0xDC37;
+            // let expected = 0x10437;
+
+            // now skip `\uxxxx` (6)
+            ASSERT_skip($$BACKSLASH_5C);
+            ASSERT_skip($$U_75);
+            skip();
+            skip();
+            skip();
+            skip();
+
+            // we have a matching low+hi, combine them
+            lastRegexUnicodeEscapeOrd = (((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000;
+            return ALWAYS_GOOD; // even without u-flag? how does that work...?
+          }
+          return regexSyntaxError('Second quad did not yield a valid surrogate pair value');
+        }
+        return regexSyntaxError('Encountered illegal quad escaped surrogate pair; the second part of the pair did not meet the requirements');
+      }
+
+      lastRegexUnicodeEscapeOrd = firstPart;
       return ALWAYS_GOOD; // outside char classes we can ignore surrogates
     } else {
       if (webCompat === WEB_COMPAT_ON) {
+        lastRegexUnicodeEscapeOrd = parseInt(a+b+c+d, 16); // *shrug*
         return GOOD_SANS_U_FLAG;
       } else {
-        return regexSyntaxError('Encountered bad character while trying to parse a unicode escape quad [ords: ' + a + ', ' + b + ', ' + c + ', ' + d + ']');
+        return regexSyntaxError('Encountered bad character while trying to parse a unicode escape quad [ords: ' + a + ', ' + b + ', ' + c + ', ' + d + '] -> is hex? ' + [isHex(a) , isHex(b) , isHex(c) , isHex(d)] +' hex=' + String.fromCharCode(a,b,c,d));
       }
     }
   }
@@ -2161,7 +2384,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       a = skipZeroes();
       if (!isHex(a)) {
         // note: we already asserted a zero
-        return a === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+        if (a === $$CURLY_R_7D) {
+          lastRegexUnicodeEscapeOrd = 0;
+          return GOOD_ESCAPE
+        }
+        return BAD_ESCAPE;
       }
       ASSERT_skip(a);
     }
@@ -2171,7 +2398,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return BAD_ESCAPE;
     let b = peek();
     if (!isHex(b)) {
-      return b === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+      if (b === $$CURLY_R_7D) {
+        lastRegexUnicodeEscapeOrd = hexToNum(a);
+        return GOOD_ESCAPE
+      }
+      return BAD_ESCAPE;
     }
     ASSERT_skip(b);
     return ____parseRegexUnicodeEscapeVary(a, b);
@@ -2180,7 +2411,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return BAD_ESCAPE;
     let c = peek();
     if (!isHex(c)) {
-      return c === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+      if (c === $$CURLY_R_7D) {
+        lastRegexUnicodeEscapeOrd = hexToNum(a) << 4 | hexToNum(b);
+        return GOOD_ESCAPE
+      }
+      return BAD_ESCAPE;
     }
     ASSERT_skip(c);
     return _____parseRegexUnicodeEscapeVary(a, b, c);
@@ -2189,7 +2424,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return BAD_ESCAPE;
     let d = peek();
     if (!isHex(d)) {
-      return d === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+      if (d === $$CURLY_R_7D) {
+        lastRegexUnicodeEscapeOrd = hexToNum(a) << 8 | hexToNum(b) << 4 | hexToNum(c);
+        return GOOD_ESCAPE
+      }
+      return BAD_ESCAPE;
     }
     ASSERT_skip(d);
     return ______parseRegexUnicodeEscapeVary(a, b, c, d);
@@ -2198,7 +2437,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return BAD_ESCAPE;
     let e = peek();
     if (!isHex(e)) {
-      return e === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+      if (e === $$CURLY_R_7D) {
+        lastRegexUnicodeEscapeOrd = hexToNum(a) << 12 | hexToNum(b) << 8 | hexToNum(c) << 4 | hexToNum(d);
+        return GOOD_ESCAPE
+      }
+      return BAD_ESCAPE;
     }
     ASSERT_skip(e);
     return _______parseRegexUnicodeEscapeVary(a, b, c, d, e);
@@ -2207,7 +2450,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return BAD_ESCAPE;
     let f = peek();
     if (!isHex(f)) {
-      return f === $$CURLY_R_7D ? GOOD_ESCAPE : BAD_ESCAPE;
+      if (f === $$CURLY_R_7D) {
+        lastRegexUnicodeEscapeOrd = hexToNum(a) << 16 | hexToNum(b) << 12 | hexToNum(c) << 8 | hexToNum(d) << 4 | hexToNum(e);
+        return GOOD_ESCAPE
+      }
+      return BAD_ESCAPE;
     }
     ASSERT_skip(f);
     return ________parseRegexUnicodeEscapeVary(a, b, c, d, e, f);
@@ -2218,6 +2465,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (codePoint > 0x10ffff) return BAD_ESCAPE;
     if (eof()) return BAD_ESCAPE;
     if (peek() !== $$CURLY_R_7D) return BAD_ESCAPE;
+    lastRegexUnicodeEscapeOrd = codePoint;
     return GOOD_ESCAPE;
   }
 
@@ -2264,9 +2512,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         return parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState);
       } else if (c === $$BACKSLASH_5C) {
         ASSERT_skip($$BACKSLASH_5C);
-        c = parseClassCharEscape(); // note: this may lead to c being >0xffff !! can also be 0 for certain escapes
-        if (c === CHARCLASS_BAD) {
+        c = parseRegexClassCharEscape(); // note: this may lead to c being >0xffff !! can also be 0 for certain escapes
+        if (c === INVALID_IDENT_CHAR || c === CHARCLASS_BAD) {
           flagState = regexSyntaxError('Encountered early EOF while parsing char class');
+        } else if (c === INVALID_IDENT_CHAR) {
+          flagState = regexSyntaxError('Encountered unicode escape that did not represent a proper character');
         } else if (c & CHARCLASS_BAD_WITH_U_FLAG) {
           c = c ^ CHARCLASS_BAD_WITH_U_FLAG; // remove the CHARCLASS_BAD_WITH_U_FLAG flag (dont use ^= because that deopts... atm; https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean )
           ASSERT(c <= 0x110000, 'c should now be valid unicode range or one above for error');
@@ -2360,7 +2610,17 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     return currentState;
   }
 
-  function parseClassCharEscape() {
+  function updateRegexUflagStateCharClass(currentState, newState, error) {
+    ASSERT(newState === CHARCLASS_BAD || newState === CHARCLASS_BAD_WITH_U_FLAG || newState === CHARCLASS_BAD_SANS_U_FLAG, 'charclass state enum');
+
+    if (newState === CHARCLASS_BAD_WITH_U_FLAG) return updateRegexUflagState(currentState, GOOD_SANS_U_FLAG, error)
+    if (newState === CHARCLASS_BAD_SANS_U_FLAG) return updateRegexUflagState(currentState, GOOD_WITH_U_FLAG, error)
+    if (newState === CHARCLASS_BAD) return updateRegexUflagState(currentState, ALWAYS_BAD, error)
+    ASSERT(newState === 0, 'I guess?');
+    return currentState;
+  }
+
+  function parseRegexClassCharEscape() {
     // atom escape is slightly different from charclass escape
 
     // https://www.ecma-international.org/ecma-262/7.0/#sec-classescape
@@ -2403,9 +2663,8 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         return CHARCLASS_BAD;
 
       // \b and \B
-      case $$B_62: // "Return the CharSet containing the single character <BS> U+0008 (BACKSPACE)."
+      case $$B_62:
         ASSERT_skip($$B_62);
-        return 0x0008;
         // https://tc39.github.io/ecma262/#sec-patterns-static-semantics-character-value
         // ClassEscape :: b
         //   Return the code point value of U+0008 (BACKSPACE).
@@ -2548,12 +2807,25 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         ASSERT(![$$BACKSLASH_5C, $$XOR_5E, $$$_24, $$DOT_2E, $$STAR_2A, $$PLUS_2B, $$QMARK_3F, $$PAREN_L_28, $$PAREN_R_29, $$SQUARE_L_5B, $$SQUARE_R_5D, $$CURLY_L_7B, $$CURLY_R_7D, $$OR_7C].includes(c), 'all these u-flag chars should be checked above');
 
         // so we can already not be valid for u flag, we just need to check here whether we can be valid without u-flag
-        if (!isIdentRestChr(c)) {
+        // (any unicode continue char would be a problem)
+        let wide = isIdentRestChr(c, pointer); // c is peeked
+        if (wide === INVALID_IDENT_CHAR) {
+          // c is not unicode continue char
           ASSERT_skip(c);
           return c | CHARCLASS_BAD_WITH_U_FLAG;
         }
         // else return bad char class because the escape is bad
         console.warn('Tokenizer $ERROR: the char class had an escape that would not be valid with and without u-flag');
+        if (wide === VALID_DOUBLE_CHAR) {
+          skip();
+          skip();
+          return CHARCLASS_BAD;
+        }
+        if (wide === VALID_SINGLE_CHAR) {
+          // bad escapes
+          ASSERT_skip(c);
+          return CHARCLASS_BAD;
+        }
     }
 
     // bad escapes
@@ -2840,8 +3112,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (c === $$CURLY_L_7B) {
       ASSERT_skip($$CURLY_L_7B);
       let r = parseRegexUnicodeEscapeVary2();
-      if (r !== CHARCLASS_BAD || (neof() && peeky($$CURLY_R_7D))) ASSERT_skip($$CURLY_R_7D);
-      return r;
+      if (r === CHARCLASS_BAD || eof()) return CHARCLASS_BAD;
+      let x = peek();
+      if (x !== $$CURLY_R_7D) return CHARCLASS_BAD;
+      ASSERT_skip($$CURLY_R_7D);
+      return r | CHARCLASS_BAD_SANS_U_FLAG; // `\u{}` in regexes is restricted to +u flag
     } else {
       return parseRegexUnicodeEscapeQuad2(c);
     }
@@ -2852,7 +3127,6 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     let b = peekd(1);
     let c = peekd(2);
     let d = peekd(3);
-
     // if this is a bad escape then dont consume the chars. one of them could be a closing quote
     if (isHex(a) && isHex(b) && isHex(c) && isHex(d)) {
       // okay, _now_ consume them
@@ -2861,9 +3135,47 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       ASSERT_skip(c);
       ASSERT_skip(d);
 
-      let r = (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d);
-      //console.log(r, hexToNum(a).toString(16) + hexToNum(b).toString(16) + hexToNum(c).toString(16) + hexToNum(d).toString(16),'->', r.toString(16))
-      return r;
+      let firstPart = (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d);
+
+      // Is this a surrogate high byte? then we'll try another one; https://en.wikipedia.org/wiki/UTF-16
+      if (firstPart >= 0xD800 && firstPart <= 0xDBFF) {
+        // pretty slow path but we're constructing a low+hi surrogate pair together here
+        if (!eofd(5) && peek() === $$BACKSLASH_5C && peekd(1) === $$U_75 && isHex(peekd(2)) && isHex(peekd(3)) && isHex(peekd(4)) && isHex(peekd(5))) {
+          let a = peekd(2);
+          let b = peekd(3);
+          let c = peekd(4);
+          let d = peekd(5);
+          let secondPart = hexToNum(a) << 12 | hexToNum(b) << 8 | hexToNum(c) << 4 | hexToNum(d);
+
+          if (secondPart >= 0xDC00 && secondPart <= 0xDFFF) {
+            /*
+              https://en.wikipedia.org/wiki/UTF-16
+              To decode U+10437 (𐐷) from UTF-16:
+              Take the high surrogate (0xD801) and subtract 0xD800, then multiply by 0x400, resulting in 0x0001 * 0x400 = 0x0400.
+              Take the low surrogate (0xDC37) and subtract 0xDC00, resulting in 0x37.
+              Add these two results together (0x0437), and finally add 0x10000 to get the final decoded UTF-32 code point, 0x10437.
+             */
+            // firstPart = 0xD801;
+            // secondPart = 0xDC37;
+            // let expected = 0x10437;
+
+            // now skip `\uxxxx` (6)
+            ASSERT_skip($$BACKSLASH_5C);
+            ASSERT_skip($$U_75);
+            skip();
+            skip();
+            skip();
+            skip();
+
+            // we have a matching low+hi, combine them
+            return (((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000;
+          }
+          regexSyntaxError('Second quad did not yield a valid surrogate pair value');
+        }
+        regexSyntaxError('Encountered illegal quad escaped surrogate pair; the second part of the pair did not meet the requirements');
+        return CHARCLASS_BAD;
+      }
+      return firstPart;
     } else {
       return CHARCLASS_BAD;
     }
@@ -2888,7 +3200,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       a = skipZeroes();
       if (!isHex(a)) {
         // note: we already asserted a zero
-        return a === $$CURLY_R_7D ? 0 | CHARCLASS_BAD_WITH_U_FLAG : CHARCLASS_BAD;
+        return 0;
       }
       ASSERT_skip(a);
     }
@@ -2899,8 +3211,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let b = peek();
     if (!isHex(b)) {
-      if (b === $$CURLY_R_7D) return hexToNum(a) | CHARCLASS_BAD_WITH_U_FLAG;
-      return CHARCLASS_BAD;
+      return hexToNum(a);
     }
     ASSERT_skip(b);
 
@@ -2910,8 +3221,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let c = peek();
     if (!isHex(c)) {
-      if (c === $$CURLY_R_7D) return (hexToNum(a) << 4) | hexToNum(b) | CHARCLASS_BAD_WITH_U_FLAG;
-      return CHARCLASS_BAD;
+      return (hexToNum(a) << 4) | hexToNum(b);
     }
     ASSERT_skip(c);
 
@@ -2921,8 +3231,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let d = peek();
     if (!isHex(d)) {
-      if (d === $$CURLY_R_7D) return (hexToNum(a) << 8) | (hexToNum(b) << 4) | hexToNum(c) | CHARCLASS_BAD_WITH_U_FLAG;
-      return CHARCLASS_BAD;
+      return (hexToNum(a) << 8) | (hexToNum(b) << 4) | hexToNum(c);
     }
     ASSERT_skip(d);
 
@@ -2932,8 +3241,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let e = peek();
     if (!isHex(e)) {
-      if (e === $$CURLY_R_7D) return (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d) | CHARCLASS_BAD_WITH_U_FLAG;
-      return CHARCLASS_BAD;
+      return (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d);
     }
     ASSERT_skip(e);
 
@@ -2943,16 +3251,12 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     if (eof()) return CHARCLASS_BAD;
     let f = peek();
     if (!isHex(f)) {
-      if (f === $$CURLY_R_7D) return (hexToNum(a) << 16) | (hexToNum(b) << 12) | (hexToNum(c) << 8) | (hexToNum(d) << 4) | hexToNum(e) | CHARCLASS_BAD_WITH_U_FLAG;
-      return CHARCLASS_BAD;
+      return (hexToNum(a) << 16) | (hexToNum(b) << 12) | (hexToNum(c) << 8) | (hexToNum(d) << 4) | hexToNum(e);
     }
     ASSERT_skip(f);
 
-    if (eof()) return CHARCLASS_BAD;
-    if (peek() !== $$CURLY_R_7D) return CHARCLASS_BAD;
-
     let r = (hexToNum(a) << 20) | (hexToNum(b) << 16) | (hexToNum(c) << 12) | (hexToNum(d) << 8) | (hexToNum(e) << 4) | hexToNum(f);
-    return Math.min(0x110000, r) | CHARCLASS_BAD_WITH_U_FLAG;
+    return Math.min(0x110000, r);
   }
 
   function parseOtherUnicode(c) {
@@ -2965,6 +3269,26 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
         return parseNewline();
 
       default:
+
+        // assert identifiers starting with >ascii unicode chars
+        // > any Unicode code point with the Unicode property “ID_Start”
+        // since we have to take multi-byte characters into account here (and consider this the slow path, anyways), we
+        // apply a regex on the input string with a sticky flag and the ES9-released \p flag. This requires cutting
+        // edge JS engines, but it beats the alternative of having to manually compile and ship these unicode ranges.
+
+        let cu = input.codePointAt(pointer - 1);
+        let wide = isIdentStart(cu, pointer - 1);
+        if (wide !== INVALID_IDENT_CHAR) {
+          if (wide === VALID_DOUBLE_CHAR) skip(); // c was skipped but cu was two (16bit) positions
+          return parseIdentifierRest(cu, String.fromCodePoint(cu));
+        }
+
+        // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters
+        // >  In ECMAScript source text <ZWNBSP> code points are treated as white space characters (see 11.2).
+        if (c === $$BOM_FEFF) {
+          return $WHITE;
+        }
+
         console.warn('Tokenizer $ERROR: unexpected unicode character: ' + c + ' (' + String.fromCharCode(c) + ')');
         return $ERROR;
         --pointer;

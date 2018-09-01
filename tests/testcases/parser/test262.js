@@ -24,12 +24,8 @@ if (!fs.statSync(PATH262).isDirectory()) {
           skip:
             // these are tests that I choose to ignore while the parser matures
 
-            has('async-arrow-function/early-errors-arrow-await-in-formals') || // TODO: crappy async edge case check
-
-            // TODO: unicode identifier characters
-            has('other_id_continue') || has('other_id_start') || has('vals-rus-alpha') || has('own-property-keys-sort') ||
-            has('built-ins/RegExp/named-groups/non-unicode-property-names.js') || // pi
-            has('built-ins/RegExp/named-groups/unicode-property-names.js') || // pi
+            // TODO: this test is doing `async\n();` which requires a retroactive AST morph that I didn't want to implement
+            has('async-arrow-function/early-errors-arrow-await-in-formals') ||
 
             // TODO: file report; I think the following rule applies here and as such should not throw:
             // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
