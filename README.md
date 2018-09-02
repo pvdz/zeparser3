@@ -1,13 +1,15 @@
 # ZeParser 3
 
-A JavaScript parser written in JavaScript, parsing ES6+.
+A JavaScript parser written in JavaScript, parsing ES6-ES9.
 
-This is very much a WIP (work in progress).
+The parser itself is currently feature complete but not ready for production. 
 
-The parser is over-accepting and will parse most but not all JS yet. Many edge cases yet to be covered. All in due time.
+Test262 is passing and there are thousands of local tests to improve coverage.
+
+This means that anything stage 4 is supported by this parser, opted in by default (but you can request to parse in a specific version).
 
 ```
-# Tokenizer tests:
+# Tokenizer tests (probably broken at the moment):
 ./tests/zetokenizer.spec.js
 
 # Tokenizer fuzz testing (broken atm)
@@ -15,6 +17,10 @@ The parser is over-accepting and will parse most but not all JS yet. Many edge c
 
 # Parser tests
 ./tests/zeparser.spec.js
+# Run all tests and ignore failures
+./tests/zeparser.spec.js -F
+# Run test262 tests (needs setup)
+./tests/zeparser.spec.js -t
 
 # Generated combinator non-crash tests
 ./tests/generated
@@ -51,10 +57,21 @@ See above for configuring the build script. In the perf script you can adjust th
 
 # TODO
 
-Well, finish it, of course. Besides that;
+The parser itself supports ES5-ES9 but is not production ready;
 
+- Add location to AST nodes
+- Setup a test running that confirms AST nodes against other engines (Babel/Flow/etc)
+- Setup tests on a "prod" build, sans assertions
+- Wire up the fuzzer
 - Tighter integration between parser and tokenizer of pre-known tokens
   - This ties into enforcing reserved keyword checks
 - Make build dir automatically
-- Sync `class` with the exotic ways of building an object literal (already supported for objlits)
-- Find more things that I've overlooked. Clamp down on the over-accepting.
+- Work on perf, the fun stuff
+  - Add better benchmarking
+  - Do perf traces to find hot code
+  - Make sure the parser works without AST building
+- Improve code coverage
+- Add a way to put input test cases inline and assert they reach that point. Helps with understanding why something is doing what.
+- Setup a repl
+- Find out what the memory footprint is like, how much can it parse before bailing
+
