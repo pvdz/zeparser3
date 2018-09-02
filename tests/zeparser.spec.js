@@ -90,7 +90,6 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 // passed: 55526, crashed: 0, failed: 0, skipped: 3311
 // passed: 55528, crashed: 0, failed: 0, skipped: 3309
 // passed: 55574, crashed: 0, failed: 0, skipped: 3263
-// passed: 55597, crashed: 0, failed: 0, skipped: 3240
 // passed: 55599, crashed: 0, failed: 0, skipped: 3238
 
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
