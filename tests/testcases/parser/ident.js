@@ -103,5 +103,25 @@ module.exports = (describe, test) =>
         ],
       },
       tokens: [$IDENT, $ASI],
-    })
+    });
+
+    test('confirm that canonical name ends up in ast', {
+      code: 'pa\\u0073s();',
+      desc: 'do not make the name include the escape',
+      callback(_a, _b, astJson) { return astJson.includes(':"pass"')},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'pass'},
+              arguments: [],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
   });

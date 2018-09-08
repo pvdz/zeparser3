@@ -452,7 +452,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(token.type === $IDENT, 'token must be ident');
 
     AST_open(astProp, 'Identifier');
-    AST_set('name', token.str);
+    AST_set('name', token.canon); // doesn't seem to be specced in estree but it makes sense to use the canonical name here
     AST_close('Identifier');
   }
   function AST_setLiteral(astProp, token) {
