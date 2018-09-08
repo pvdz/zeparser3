@@ -90,4 +90,18 @@ module.exports = (describe, test) =>
         code: 'xxx\\A',
       });
     });
+
+    test('the `this` keyword should result in a `ThisExpresson` node', {
+      code: 'this',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {type: 'ThisExpression'},
+          },
+        ],
+      },
+      tokens: [$IDENT, $ASI],
+    })
   });

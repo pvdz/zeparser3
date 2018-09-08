@@ -167,8 +167,20 @@ module.exports = (describe, test) =>
 
       test('can contain this', {
         code: '[this];',
-        ast: true,
-        tokens: true,
+        desc: 'assert that the keyword is a ThisExpression in the ast... (regression)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrayExpression',
+                elements: [{type: 'ThisExpression'}],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       describe('spread', _ => {

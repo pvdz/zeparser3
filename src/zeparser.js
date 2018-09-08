@@ -5799,6 +5799,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - [x = y]
           // - [x = y, z]
 
+          // note: we don't have to worry about `ThisExpression` kinds of cases because no keyword can (currently)
+          // be assigned to. As such we don't have to use `parseValueHeadBodyAfterIdent` here. So this is faster.
           AST_setIdent(astProp, identToken);
 
           let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
@@ -5818,38 +5820,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         else if (curc === $$COMMA_2C || curc === $$SQUARE_R_5D) {
           // - [x]
           // - [x, z]
+          // - [this]      note: must have ThisExpression in ast
 
-          AST_setIdent(astProp, identToken);
-
-          // destructible is determined by the ident being a reserved keyword
-          // we know the ident is followed by a comma so `typeof` would lead to an error anyways
-          switch (identToken.str) {
-            case 'true':
-            case 'false':
-            case 'null':
-            case 'this':
-            case 'super':
-              // reserved keyword, not destructible
-              // cant destruct regardless of bindingtype
-              destructible |= CANT_DESTRUCT;
-              break;
-            case 'yield':
-              let yieldAssignable = parseYieldKeyword(lexerFlags, identToken, ALLOW_ASSIGNMENT, astProp);
-              if (yieldAssignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
-              else {
-                SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
-                addNameToExports(exportedNames, identToken.str);
-                addBindingToExports(exportedBindings, identToken.str);
-              }
-              break;
-            default:
-              let assignable = bindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
-              if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
-              else {
-                SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
-                addNameToExports(exportedNames, identToken.str);
-                addBindingToExports(exportedBindings, identToken.str);
-              }
+          let assignable = parseValueHeadBodyAfterIdent(lexerFlags, identToken, bindingType, ALLOW_ASSIGNMENT, astProp);
+          if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
+          else {
+            SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+            addNameToExports(exportedNames, identToken.str);
+            addBindingToExports(exportedBindings, identToken.str);
           }
         }
         else {
