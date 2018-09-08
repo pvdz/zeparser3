@@ -45,7 +45,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {type: 'BlockStatement', body: []},
@@ -81,7 +80,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {
@@ -129,7 +127,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {type: 'BlockStatement', body: []},
@@ -170,7 +167,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {
@@ -226,7 +222,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {
@@ -289,7 +284,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [
                           {
@@ -335,7 +329,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [
                           {
@@ -390,7 +383,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [
                           {
@@ -441,7 +433,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {
@@ -497,7 +488,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {
@@ -545,7 +535,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {
@@ -609,7 +598,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: false,
                         id: null,
                         params: [],
                         body: {

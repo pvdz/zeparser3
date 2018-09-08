@@ -258,7 +258,6 @@ module.exports = (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: false,
                 async: false,
-                expression: false,
                 id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
@@ -290,7 +289,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {
@@ -329,7 +327,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: true,
                         id: null,
                         params: [],
                         body: {
@@ -364,7 +361,6 @@ module.exports = (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: false,
                 async: false,
-                expression: false,
                 id: {type: 'Identifier', name: 'f'},
                 params: [{type: 'Identifier', name: 'x'}],
                 body: {
@@ -396,7 +392,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [{type: 'Identifier', name: 'x'}],
                     body: {
@@ -435,7 +430,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: true,
                         id: null,
                         params: [{type: 'Identifier', name: 'x'}],
                         body: {
@@ -470,7 +464,6 @@ module.exports = (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: false,
                 async: false,
-                expression: false,
                 id: {type: 'Identifier', name: 'f'},
                 params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                 body: {
@@ -502,7 +495,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                     body: {
@@ -541,7 +533,6 @@ module.exports = (describe, test) =>
                         type: 'FunctionExpression',
                         generator: false,
                         async: false,
-                        expression: true,
                         id: null,
                         params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                         body: {
@@ -883,7 +874,6 @@ module.exports = (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: false,
                 async: false,
-                expression: false,
                 id: {type: 'Identifier', name: 'eval'},
                 params: [],
                 body: {type: 'BlockStatement', body: []},
@@ -905,7 +895,6 @@ module.exports = (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: false,
                 async: true,
-                expression: false,
                 id: {type: 'Identifier', name: 'eval'},
                 params: [],
                 body: {type: 'BlockStatement', body: []},
@@ -927,7 +916,6 @@ module.exports = (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: true,
                 async: false,
-                expression: false,
                 id: {type: 'Identifier', name: 'eval'},
                 params: [],
                 body: {type: 'BlockStatement', body: []},
@@ -949,7 +937,6 @@ module.exports = (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: false,
                 async: false,
-                expression: false,
                 id: {type: 'Identifier', name: 'f'},
                 params: [{type: 'Identifier', name: 'eval'}],
                 body: {type: 'BlockStatement', body: []},

@@ -268,7 +268,6 @@ module.exports = (describe, test) => describe('parens', _ => {
                       type: 'FunctionExpression',
                       generator: false,
                       async: false,
-                      expression: false,
                       id: null,
                       params: [],
                       body: {
@@ -322,7 +321,6 @@ module.exports = (describe, test) => describe('parens', _ => {
                       type: 'FunctionExpression',
                       generator: false,
                       async: false,
-                      expression: false,
                       id: null,
                       params: [],
                       body: {
@@ -825,7 +823,6 @@ module.exports = (describe, test) => describe('parens', _ => {
                       type: 'FunctionExpression',
                       generator: false,
                       async: false,
-                      expression: false,
                       id: null,
                       params: [],
                       body: {
@@ -879,7 +876,6 @@ module.exports = (describe, test) => describe('parens', _ => {
                       type: 'FunctionExpression',
                       generator: false,
                       async: false,
-                      expression: false,
                       id: null,
                       params: [],
                       body: {
@@ -3078,7 +3074,6 @@ module.exports = (describe, test) => describe('parens', _ => {
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: false,
                     id: null,
                     params: [],
                     body: {type: 'BlockStatement', body: []},

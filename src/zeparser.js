@@ -1408,7 +1408,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_set('generator', isGenerator);
     AST_set('async', isAsync);
-    AST_set('expression', isRealFuncExpr);
 
     let innerScoop = SCOPE_create('parseFunctionAfterKeyword');
     ASSERT(innerScoop._ = 'func scope');

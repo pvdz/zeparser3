@@ -774,9 +774,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -1309,7 +1307,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: true,
-                    expression: true,
                     id: null,
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -1569,7 +1566,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: true,
                     id: null,
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -1596,7 +1592,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: true,
                     id: null,
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -1711,9 +1706,7 @@ module.exports = (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,
-                        expression: false,
-                        id: null,
+                        async: false,                        id: null,
                         params: [],
                         body: {
                           type: 'BlockStatement',
@@ -1765,9 +1758,7 @@ module.exports = (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,
-                        expression: false,
-                        id: null,
+                        async: false,                        id: null,
                         params: [],
                         body: {
                           type: 'BlockStatement',
@@ -1905,9 +1896,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -1936,9 +1925,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -1983,9 +1970,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2029,9 +2014,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2069,9 +2052,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2127,7 +2108,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: true,
                     id: null,
                     params: [],
                     body: {
@@ -2181,9 +2161,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2217,9 +2195,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2253,9 +2229,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2306,9 +2280,7 @@ module.exports = (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,
-                            expression: false,
-                            id: null,
+                            async: false,                            id: null,
                             params: [],
                             body: {
                               type: 'BlockStatement',
@@ -2359,9 +2331,7 @@ module.exports = (describe, test) =>
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
-                          async: false,
-                          expression: false,
-                          id: null,
+                          async: false,                          id: null,
                           params: [],
                           body: {
                             type: 'BlockStatement',
@@ -2407,9 +2377,7 @@ module.exports = (describe, test) =>
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
-                          async: false,
-                          expression: false,
-                          id: null,
+                          async: false,                          id: null,
                           params: [],
                           body: {
                             type: 'BlockStatement',
@@ -2455,9 +2423,7 @@ module.exports = (describe, test) =>
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
-                          async: false,
-                          expression: false,
-                          id: null,
+                          async: false,                          id: null,
                           params: [],
                           body: {
                             type: 'BlockStatement',
@@ -2493,9 +2459,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {
                     type: 'AssignmentPattern',
@@ -2530,7 +2494,6 @@ module.exports = (describe, test) =>
                       type: 'FunctionExpression',
                       generator: false,
                       async: false,
-                      expression: true,
                       id: {type: 'Identifier', name: 'f'},
                       params: [
                         {
@@ -2580,9 +2543,7 @@ module.exports = (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,
-                        expression: false,
-                        id: null,
+                        async: false,                        id: null,
                         params: [
                           {
                             type: 'AssignmentPattern',
@@ -2639,9 +2600,7 @@ module.exports = (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,
-                        expression: false,
-                        id: null,
+                        async: false,                        id: null,
                         params: [
                           {
                             type: 'AssignmentPattern',
@@ -2681,9 +2640,7 @@ module.exports = (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,
-                        expression: false,
-                        id: null,
+                        async: false,                        id: null,
                         params: [
                           {
                             type: 'AssignmentPattern',
@@ -2723,9 +2680,7 @@ module.exports = (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,
-                        expression: false,
-                        id: null,
+                        async: false,                        id: null,
                         params: [
                           {
                             type: 'AssignmentPattern',
@@ -2754,9 +2709,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2793,9 +2746,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2829,9 +2780,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',

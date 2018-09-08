@@ -15,9 +15,7 @@ module.exports = (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: false,
-              async: false,
-              expression: false,
-              id: {type: 'Identifier', name: 'f'},
+              async: false,              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {
                 type: 'BlockStatement',
@@ -45,8 +43,7 @@ module.exports = (describe, test) =>
       //               type: 'FunctionDeclaration',
       //               generator: false,
       //               async: false,
-      //               expression: false,
-      //               id: {type: 'Identifier', name: 'g'},
+      //      //               id: {type: 'Identifier', name: 'g'},
       //               params: [],
       //               body: {type: 'BlockStatement', body: []},
       //             },
@@ -144,8 +141,7 @@ module.exports = (describe, test) =>
       //               type: 'FunctionDeclaration',
       //               generator: false,
       //               async: false,
-      //               expression: false,
-      //               id: {type: 'Identifier', name: 'g'},
+      //      //               id: {type: 'Identifier', name: 'g'},
       //               params: [],
       //               body: {
       //                 type: 'BlockStatement',
@@ -178,8 +174,7 @@ module.exports = (describe, test) =>
       //                       type: 'FunctionDeclaration',
       //                       generator: false,
       //                       async: false,
-      //                       expression: false,
-      //                       id: {type: 'Identifier', name: 'g'},
+      //      //                       id: {type: 'Identifier', name: 'g'},
       //                       params: [],
       //                       body: {
       //                         type: 'BlockStatement',
@@ -225,8 +220,7 @@ module.exports = (describe, test) =>
       //               type: 'FunctionDeclaration',
       //               generator: false,
       //               async: false,
-      //               expression: false,
-      //               id: {type: 'Identifier', name: 'g'},
+      //      //               id: {type: 'Identifier', name: 'g'},
       //               params: [],
       //               body: {type: 'BlockStatement', body: []},
       //             },
@@ -254,8 +248,7 @@ module.exports = (describe, test) =>
       //                 type: 'FunctionDeclaration',
       //                 generator: false,
       //                 async: false,
-      //                 expression: false,
-      //                 id: {type: 'Identifier', name: 'g'},
+      //      //                 id: {type: 'Identifier', name: 'g'},
       //                 params: [],
       //                 body: {type: 'BlockStatement', body: []},
       //               },
@@ -299,8 +292,7 @@ module.exports = (describe, test) =>
       //                 type: 'FunctionDeclaration',
       //                 generator: false,
       //                 async: false,
-      //                 expression: false,
-      //                 id: {type: 'Identifier', name: 'g'},
+      //      //                 id: {type: 'Identifier', name: 'g'},
       //                 params: [],
       //                 body: {type: 'BlockStatement', body: []},
       //               },
@@ -353,7 +345,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: true,
                     id: null,
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -381,7 +372,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: false,
-                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -404,7 +394,7 @@ module.exports = (describe, test) =>
               expression: {
                 type: 'CallExpression',
                 callee: {type: 'Identifier', name: 'foo'},
-                arguments: [{type: 'FunctionExpression', generator: true, async: false, expression: true, id: null, params: [], body: {type: 'BlockStatement', body: []}}],
+                arguments: [{type: 'FunctionExpression', generator: true, async: false, id: null, params: [], body: {type: 'BlockStatement', body: []}}],
               },
             },
           ],
@@ -427,7 +417,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: true,
                     async: false,
-                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -454,7 +443,6 @@ module.exports = (describe, test) =>
                   type: 'FunctionExpression',
                   generator: false,
                   async: true,
-                  expression: true,
                   id: null,
                   params: [],
                   body: {type: 'BlockStatement', body: []}
@@ -481,7 +469,6 @@ module.exports = (describe, test) =>
                     type: 'FunctionExpression',
                     generator: false,
                     async: true,
-                    expression: true,
                     id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
@@ -503,9 +490,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {
                     type: 'RestElement',
@@ -527,9 +512,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {type: 'Identifier', name: 'a'},
                   {type: 'Identifier', name: 'b'},
@@ -587,9 +570,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -611,9 +592,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -656,7 +635,6 @@ module.exports = (describe, test) =>
                             type: 'FunctionExpression',
                             generator: false,
                             async: false,
-                            expression: true,
                             id: {type: 'Identifier', name: 'f'},
                             params: [],
                             body: {type: 'BlockStatement', body: []},
@@ -688,9 +666,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: true,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: true,                    id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -712,9 +688,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: true,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: true,                    id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -757,7 +731,6 @@ module.exports = (describe, test) =>
                             type: 'FunctionExpression',
                             generator: false,
                             async: true,
-                            expression: true,
                             id: {type: 'Identifier', name: 'f'},
                             params: [],
                             body: {type: 'BlockStatement', body: []},
@@ -793,9 +766,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [{type: 'Identifier', name: 'a'}],
                 body: {type: 'BlockStatement', body: []},
               },
@@ -812,9 +783,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
                 body: {type: 'BlockStatement', body: []},
               },
@@ -848,9 +817,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [{type: 'Identifier', name: 'a'}],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -868,9 +835,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -893,9 +858,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -924,9 +887,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -949,9 +910,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ObjectPattern',
@@ -989,9 +948,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -1018,9 +975,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -1125,9 +1080,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {
                     type: 'AssignmentPattern',
@@ -1150,9 +1103,7 @@ module.exports = (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,
-                expression: false,
-                id: {type: 'Identifier', name: 'f'},
+                async: false,                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {
                     type: 'AssignmentPattern',
@@ -1314,9 +1265,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [{type: 'ArrayPattern', elements: []}],
                   body: {type: 'BlockStatement', body: []},
                 },
@@ -1333,9 +1282,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1358,9 +1305,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [{type: 'ArrayPattern', elements: [null]}],
                   body: {type: 'BlockStatement', body: []},
                 },
@@ -1377,9 +1322,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1402,9 +1345,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [{type: 'ArrayPattern', elements: [null, null]}],
                   body: {type: 'BlockStatement', body: []},
                 },
@@ -1421,9 +1362,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1446,9 +1385,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1470,9 +1407,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1498,9 +1433,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1522,9 +1455,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1550,9 +1481,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1574,9 +1503,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1602,9 +1529,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1626,9 +1551,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1654,9 +1577,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1678,9 +1599,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1706,9 +1625,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1730,9 +1647,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1758,9 +1673,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1782,9 +1695,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1815,9 +1726,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1843,9 +1752,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1897,9 +1804,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1922,9 +1827,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1951,9 +1854,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1980,9 +1881,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2029,9 +1928,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {type: 'Identifier', name: 'x'},
                     {
@@ -2054,9 +1951,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {type: 'Identifier', name: 'x'},
                     {
@@ -2083,9 +1978,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2132,9 +2025,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2161,9 +2052,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2191,9 +2080,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2225,9 +2112,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2256,9 +2141,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2307,9 +2190,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2338,9 +2219,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2389,9 +2268,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2440,9 +2317,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2497,9 +2372,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2532,9 +2405,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2567,9 +2438,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2622,9 +2491,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ObjectPattern',
@@ -2656,9 +2523,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2695,9 +2560,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2752,9 +2615,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'fk'},
+                  async: false,                  id: {type: 'Identifier', name: 'fk'},
                   params: [
                     {
                       type: 'ObjectPattern',
@@ -2826,9 +2687,7 @@ module.exports = (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,
-                  expression: false,
-                  id: {type: 'Identifier', name: 'f'},
+                  async: false,                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2874,9 +2733,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -2903,9 +2760,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -2936,9 +2791,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -2966,9 +2819,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -3030,9 +2881,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -3077,9 +2926,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -3150,9 +2997,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -3200,9 +3045,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -3306,9 +3149,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -3366,9 +3207,7 @@ module.exports = (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,
-                    expression: false,
-                    id: {type: 'Identifier', name: 'f'},
+                    async: false,                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -3447,9 +3286,7 @@ module.exports = (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: false,
-              async: false,
-              expression: false,
-              id: {type: 'Identifier', name: 'f'},
+              async: false,              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {
                 type: 'BlockStatement',
@@ -3469,9 +3306,7 @@ module.exports = (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: false,
-              async: false,
-              expression: false,
-              id: {type: 'Identifier', name: 'f'},
+              async: false,              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {
                 type: 'BlockStatement',
@@ -3494,9 +3329,7 @@ module.exports = (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: false,
-              async: true,
-              expression: false,
-              id: {type: 'Identifier', name: 'f'},
+              async: true,              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {type: 'BlockStatement', body: []},
             },
@@ -3516,9 +3349,7 @@ module.exports = (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: true,
-              async: false,
-              expression: false,
-              id: {type: 'Identifier', name: 'f'},
+              async: false,              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {type: 'BlockStatement', body: []},
             },

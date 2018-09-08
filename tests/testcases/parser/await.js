@@ -23,7 +23,6 @@ module.exports = (describe, test) =>
             type: 'FunctionDeclaration',
             generator: false,
             async: true,
-            expression: false,
             id: {type: 'Identifier', name: 'f'},
             params: [],
             body: {
@@ -54,7 +53,6 @@ module.exports = (describe, test) =>
             type: 'FunctionDeclaration',
             generator: false,
             async: true,
-            expression: false,
             id: {type: 'Identifier', name: 'f'},
             params: [],
             body: {
@@ -279,7 +277,6 @@ module.exports = (describe, test) =>
               type: 'FunctionDeclaration',
               generator: false,
               async: false,
-              expression: false,
               id: {type: 'Identifier', name: 'call'},
               params: [{type: 'Identifier', name: 'await'}],
               body: {type: 'BlockStatement', body: []},
@@ -301,7 +298,6 @@ module.exports = (describe, test) =>
               type: 'FunctionDeclaration',
               generator: false,
               async: false,
-              expression: false,
               id: {type: 'Identifier', name: 'call'},
               params: [
                 {
@@ -586,7 +582,6 @@ module.exports = (describe, test) =>
               type: 'FunctionDeclaration',
               generator: false,
               async: true,
-              expression: false,
               id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {
