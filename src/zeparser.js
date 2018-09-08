@@ -3298,7 +3298,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // `delete ((foo).x)`
       // `delete ((((foo))).x)`
       // `delete (a, b).c`
-      parseDeleteParenSpecialCase(lexerFlags, astProp);
+      parseDeleteParenSpecialCase(lexerFlags, 'argument');
     } else {
       // `delete "x".y`
       // `delete [].x`
@@ -3353,7 +3353,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // `delete ((true)++)`       -- (this is why we juggle `assignable`)
         assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
         assignable = parseExpressionFromOp(lexerFlags, assignable, LHS_NOT_PAREN_START, astProp);
-        if (curc === $$COMMA_2C) _parseExpressions(lexerFlags, 'expression');
+        if (curc === $$COMMA_2C) _parseExpressions(lexerFlags, astProp);
         canBeErrorCase = false;
       }
       // at least one rhs paren must appear now

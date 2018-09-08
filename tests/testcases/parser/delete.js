@@ -305,7 +305,7 @@ module.exports = (describe, test) =>
                     type: 'UnaryExpression',
                     operator: 'delete',
                     prefix: true,
-                    expression: {type: 'Identifier', name: 'x'},
+                    argument: {type: 'Identifier', name: 'x'},
                   },
                   operator: '/',
                   right: {type: 'Identifier', name: 'f'},
