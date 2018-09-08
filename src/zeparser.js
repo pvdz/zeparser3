@@ -397,9 +397,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let newnode = {type};
     if (Array.isArray(node[prop])) {
       node[prop].push(newnode);
-    } else if (node[prop] === undefined || fromWrap) {
+    }
+    else if (node[prop] === undefined || fromWrap) {
       node[prop] = newnode;
-    } else {
+    }
+    else {
       THROW(`AST_open(${prop}, ${type}, ${fromWrap}); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`);
     }
     _path.push(newnode);

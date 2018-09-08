@@ -4,94 +4,6 @@
 
 Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
-// progress on the test262 test suite;
-// passed: 23166, crashed: 719, failed: 442, skipped: 11364
-// passed: 23196, crashed: 701, failed: 430, skipped: 11364
-// passed: 23246, crashed: 618, failed: 463, skipped: 11364
-// passed: 45354, crashed: 1211, failed: 956, skipped: 11410
-// passed: 45347, crashed: 1210, failed: 964, skipped: 11410
-// passed: 45345, crashed: 1210, failed: 957, skipped: 11424
-// passed: 15875, crashed: 1200, failed: 951, skipped: 8123
-// passed: 15886, crashed: 1191, failed: 949, skipped: 8123
-// passed: 15893, crashed: 1108, failed: 949, skipped: 8201
-// passed: 16112, crashed: 1110, failed: 728, skipped: 8201
-// passed: 16159, crashed: 1111, failed: 680, skipped: 8201
-// passed: 16226, crashed: 1119, failed: 595, skipped: 8213
-// passed: 16223, crashed: 1104, failed: 571, skipped: 8263
-// passed: 16201, crashed: 1126, failed: 571, skipped: 8263
-// passed: 16163, crashed: 640, failed: 547, skipped: 8811
-// passed: 16171, crashed: 636, failed: 539, skipped: 8815
-// passed: 16177, crashed: 636, failed: 533, skipped: 8815
-// passed: 16174, crashed: 640, failed: 531, skipped: 8816
-// passed: 16174, crashed: 639, failed: 531, skipped: 8817
-// passed: 13133, crashed: 619, failed: 517, skipped: 6031
-// passed: 13141, crashed: 615, failed: 513, skipped: 6031
-// passed: 13141, crashed: 613, failed: 515, skipped: 6031
-// passed: 13140, crashed: 613, failed: 516, skipped: 6031
-// passed: 13131, crashed: 617, failed: 514, skipped: 6045
-// passed: 13144, crashed: 602, failed: 512, skipped: 6049
-// passed: 13145, crashed: 602, failed: 511, skipped: 6049
-// passed: 13153, crashed: 602, failed: 503, skipped: 6049
-// passed: 13175, crashed: 602, failed: 481, skipped: 6049
-// passed: 13177, crashed: 602, failed: 479, skipped: 6049
-// passed: 13178, crashed: 602, failed: 478, skipped: 6049
-// passed: 13184, crashed: 596, failed: 472, skipped: 6055
-// passed: 13190, crashed: 590, failed: 472, skipped: 6055
-// passed: 13189, crashed: 587, failed: 471, skipped: 6055 // fixed a filter test
-// passed: 13192, crashed: 587, failed: 468, skipped: 6055
-// passed: 13198, crashed: 581, failed: 468, skipped: 6055
-// passed: 13199, crashed: 581, failed: 467, skipped: 6055
-// passed: 10071, crashed: 578, failed: 442, skipped: 5342
-// passed: 10079, crashed: 558, failed: 433, skipped: 5363
-// passed: 10081, crashed: 558, failed: 431, skipped: 5363
-// passed: 10043, crashed: 494, failed: 427, skipped: 5469
-// passed: 10046, crashed: 494, failed: 424, skipped: 5469
-// passed: 10054, crashed: 485, failed: 413, skipped: 5481
-// passed: 10137, crashed: 484, failed: 324, skipped: 5488
-// passed: 10110, crashed: 471, failed: 294, skipped: 5558
-// passed: 10084, crashed: 433, failed: 282, skipped: 5634
-// passed: 5227, crashed: 433, failed: 254, skipped: 2858
-// passed: 5422, crashed: 440, failed: 52, skipped: 2858 ! statements/declaration :D
-// passed: 5329, crashed: 439, failed: 36, skipped: 2970
-// passed: 5328, crashed: 425, failed: 44, skipped: 2984
-// passed: 5329, crashed: 425, failed: 43, skipped: 2984
-// passed: 5336, crashed: 425, failed: 36, skipped: 2984
-// passed: 5332, crashed: 423, failed: 20, skipped: 3006
-// passed: 5334, crashed: 421, failed: 20, skipped: 3006
-// passed: 5692, crashed: 63, failed: 20, skipped: 3006 ! Patterns in for-header lhs
-// passed: 5702, crashed: 53, failed: 20, skipped: 3006
-// passed: 5741, crashed: 14, failed: 20, skipped: 3006
-// passed: 5747, crashed: 14, failed: 14, skipped: 3006
-// passed: 5733, crashed: 12, failed: 12, skipped: 3042
-// passed: 5734, crashed: 11, failed: 12, skipped: 3042
-// passed: 5711, crashed: 0, failed: 0, skipped: 3088 ! remaining tests were todos (really..)
-// passed: 46051, crashed: 194, failed: 1, skipped: 12733 ! no longer skip the first 22k cases
-// passed: 46047, crashed: 9, failed: 1, skipped: 13107 ! ignoring more cases which are todos
-// passed: 46046, crashed: 0, failed: 0, skipped: 13119 ! now the long road to stop skipping tests begins... 75% and counting!
-// passed: 46057, crashed: 0, failed: 0, skipped: 13107
-// passed: 46093, crashed: 0, failed: 0, skipped: 13071
-// passed: 46177, crashed: 0, failed: 0, skipped: 12987
-// passed: 46493, crashed: 0, failed: 0, skipped: 12669
-// passed: 46687, crashed: 0, failed: 0, skipped: 12285
-// passed: 46747, crashed: 0, failed: 0, skipped: 12225
-// passed: 46749, crashed: 0, failed: 0, skipped: 12223
-// passed: 46929, crashed: 0, failed: 0, skipped: 12031
-// passed: 53973, crashed: 0, failed: 0, skipped: 4922 (async generators)
-// passed: 53967, crashed: 0, failed: 0, skipped: 4932
-// passed: 54053, crashed: 0, failed: 0, skipped: 4844
-// passed: 54815, crashed: 0, failed: 0, skipped: 4082
-// passed: 54817, crashed: 0, failed: 0, skipped: 4080
-// passed: 54851, crashed: 0, failed: 0, skipped: 4046
-// passed: 54879, crashed: 0, failed: 0, skipped: 4018
-// passed: 55014, crashed: 0, failed: 0, skipped: 3880
-// passed: 55025, crashed: 0, failed: 0, skipped: 3862
-// passed: 55336, crashed: 0, failed: 0, skipped: 3689
-// passed: 55346, crashed: 0, failed: 0, skipped: 3671
-// passed: 55526, crashed: 0, failed: 0, skipped: 3311
-// passed: 55528, crashed: 0, failed: 0, skipped: 3309
-// passed: 55574, crashed: 0, failed: 0, skipped: 3263
-// passed: 55599, crashed: 0, failed: 0, skipped: 3238
-
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
 const TEST262_SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
@@ -422,8 +334,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     );
   } else {
     let mustVerify = checkAST && expectedAst !== true;
-    let expectedJson = mustVerify && JSON.stringify(expectedAst);
-    let actualJson = (mustVerify  || expectedCallback !== undefined) && JSON.stringify(obj.ast);
+    let expectedJson = mustVerify && serializeAst(expectedAst);
+    let actualJson = (mustVerify  || expectedCallback !== undefined) && serializeAst(obj.ast);
     if (mustVerify && expectedJson !== actualJson) {
       let missingAst = expectedJson === '{"<not given>":true}';
 
@@ -433,9 +345,9 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       console.log(
         'tokens: [$' +
         obj.tokens
-        .slice(0, -1)
-        .map(o => debug_toktype(o.type))
-        .join(', $') +
+          .slice(0, -1)
+          .map(o => debug_toktype(o.type))
+          .join(', $') +
         '],',
       );
 
@@ -538,6 +450,32 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
     if (_debug) console.log('Debug:', _debug);
   }
+}
+
+function orderAst(ast, banned) {
+  let keys = Object.getOwnPropertyNames(ast);
+  keys.filter(key => !banned.includes(key)).forEach(key => {
+    if (typeof ast[key] === 'object') {
+      if (ast[key] instanceof Array) {
+        ast[key].forEach(e => e && orderAst(e, banned));
+      }
+      else if (ast[key] !== null) {
+        orderAst(ast[key], banned);
+      }
+    }
+  });
+  // by re-assigning the keys in order they will (json)-serialize in that order too
+  // this way the order in which keys are defined is not relevant (makes ast's comparable to other parsers)
+  keys.sort().forEach(key => banned.includes(key) ? delete ast[key] : (ast[key] = ast[key]));
+}
+function serializeAst(ast) {
+  let banned = [];
+  if (false) {
+    banned = ['foo'];
+    ast = JSON.parse(JSON.stringify(ast));
+  }
+  orderAst(ast, banned); // remove things we don't care to compare
+  return JSON.stringify(ast);
 }
 
 function formatAst(ast) {
