@@ -263,7 +263,11 @@ module.exports = (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{type: 'Directive', directive: 'use strict'}],
+                  body: [{
+                    type: 'ExpressionStatement',
+                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                    directive: 'use strict',
+                  }],
                 },
               },
             ],
@@ -291,7 +295,11 @@ module.exports = (describe, test) =>
                     params: [],
                     body: {
                       type: 'BlockStatement',
-                      body: [{type: 'Directive', directive: 'use strict'}],
+                      body: [{
+                        type: 'ExpressionStatement',
+                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                        directive: 'use strict',
+                      }],
                     },
                   },
                 },
@@ -326,7 +334,11 @@ module.exports = (describe, test) =>
                         params: [],
                         body: {
                           type: 'BlockStatement',
-                          body: [{type: 'Directive', directive: 'use strict'}],
+                          body: [{
+                            type: 'ExpressionStatement',
+                            expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                            directive: 'use strict',
+                          }],
                         },
                       },
                       shorthand: false,
@@ -357,7 +369,11 @@ module.exports = (describe, test) =>
                 params: [{type: 'Identifier', name: 'x'}],
                 body: {
                   type: 'BlockStatement',
-                  body: [{type: 'Directive', directive: 'use strict'}],
+                  body: [{
+                    type: 'ExpressionStatement',
+                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                    directive: 'use strict',
+                  }],
                 },
               },
             ],
@@ -385,7 +401,11 @@ module.exports = (describe, test) =>
                     params: [{type: 'Identifier', name: 'x'}],
                     body: {
                       type: 'BlockStatement',
-                      body: [{type: 'Directive', directive: 'use strict'}],
+                      body: [{
+                        type: 'ExpressionStatement',
+                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                        directive: 'use strict',
+                      }],
                     },
                   },
                 },
@@ -420,7 +440,11 @@ module.exports = (describe, test) =>
                         params: [{type: 'Identifier', name: 'x'}],
                         body: {
                           type: 'BlockStatement',
-                          body: [{type: 'Directive', directive: 'use strict'}],
+                          body: [{
+                            type: 'ExpressionStatement',
+                            expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                            directive: 'use strict',
+                          }],
                         },
                       },
                       shorthand: false,
@@ -451,7 +475,11 @@ module.exports = (describe, test) =>
                 params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                 body: {
                   type: 'BlockStatement',
-                  body: [{type: 'Directive', directive: 'use strict'}],
+                  body: [{
+                    type: 'ExpressionStatement',
+                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                    directive: 'use strict',
+                  }],
                 },
               },
             ],
@@ -479,7 +507,11 @@ module.exports = (describe, test) =>
                     params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                     body: {
                       type: 'BlockStatement',
-                      body: [{type: 'Directive', directive: 'use strict'}],
+                      body: [{
+                        type: 'ExpressionStatement',
+                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                        directive: 'use strict',
+                      }],
                     },
                   },
                 },
@@ -514,7 +546,11 @@ module.exports = (describe, test) =>
                         params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                         body: {
                           type: 'BlockStatement',
-                          body: [{type: 'Directive', directive: 'use strict'}],
+                          body: [{
+                            type: 'ExpressionStatement',
+                            expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                            directive: 'use strict',
+                          }],
                         },
                       },
                       shorthand: false,

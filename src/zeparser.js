@@ -319,6 +319,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     getTokenizer,
     allowGlobalReturn = false, // you may need this to parse arbitrary code or eval code for example
     targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, Infinity
+
+    // ast compatibility stuff?
+
+    // Should we parse directives as their own AST nodes? (Other parsers do not, they just use ExpressionStatement)
+    // I'm super confused since I read https://github.com/estree/estree/pull/99 as that directives get their own node
+    // and in https://github.com/estree/estree/issues/6 many authors indicate to have adopted this PR, yet none of the
+    // parsers use Directive nodes. So I'm clearly overlooking something silly. *shrug*
+    AST_directiveNodes = false,
   } = options;
 
   let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
@@ -1167,11 +1175,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseDirectivePrologue(lexerFlags, stringToken, astProp) {
     ASSERT(arguments.length === parseDirectivePrologue.length, 'arg count');
-    AST_open(astProp, 'Directive');
+
     let dir = stringToken.str.slice(1, -1);
     if (dir === 'use strict') lexerFlags = lexerFlags | LF_STRICT_MODE;
-    AST_set('directive', dir);
-    AST_close('Directive');
+
+    if (AST_directiveNodes) {
+      AST_open(astProp, 'Directive');
+      AST_set('directive', dir);
+      AST_close('Directive');
+    } else {
+      AST_open(astProp, 'ExpressionStatement');
+      AST_setLiteral('expression', stringToken);
+      AST_set('directive', dir);
+      AST_close('ExpressionStatement');
+    }
+
     parseSemiOrAsi(lexerFlags);
 
     return lexerFlags;
