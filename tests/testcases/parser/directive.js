@@ -282,6 +282,7 @@ module.exports = (describe, test) =>
               {
                 type: 'ExpressionStatement',
                 expression: {type: 'Literal', value: '<TODO>', raw: '"ignore me"'},
+                directive: 'ignore me',
               },
               {
                 type: 'ExpressionStatement',
@@ -1029,10 +1030,7 @@ module.exports = (describe, test) =>
           ast: {
             type: 'Program',
             body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {type: 'Literal', value: '<TODO>', raw: '"ignore me"'},
-              },
+              {type: 'Directive', directive: 'ignore me'},
               {
                 type: 'ExpressionStatement',
                 expression: {

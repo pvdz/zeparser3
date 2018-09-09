@@ -1202,7 +1202,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtype === $EOF) return true; // meh. useless in global, leads to an error in any other case. but okay!
       return false; // no chance to ASI
     }
-    if (curtok.str === '++' || curtok.str === '--') return false;
+    if (curtok.str === '++' || curtok.str === '--') return true; // "foo" \n ++bar
     if (curtype !== $PUNCTUATOR) {
       if (curtok.str === 'in' || curtok.str === 'instanceof') {
         return false;
