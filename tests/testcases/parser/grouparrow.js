@@ -2172,6 +2172,77 @@ module.exports = (describe, test) => describe('parens', _ => {
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
     });
 
+    test('true should be a literal (base case)', {
+      code: 'true',
+      desc: '(just to proof this is a group specific regression)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {type: 'Literal', value: true, raw: 'true'},
+          },
+        ],
+      },
+      tokens: [$IDENT, $ASI],
+    });
+
+    test('true in group should yield a literal, not ident', {
+      code: '(true)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {type: 'Literal', value: true, raw: 'true'},
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test('false in group should yield a literal, not ident', {
+      code: '(false)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {type: 'Literal', value: false, raw: 'false'},
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test('null in group should yield a literal, not ident', {
+      code: '(null)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {type: 'Literal', value: null, raw: 'null'},
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test('this in group should not yield an ident', {
+      code: '(this)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {type: 'ThisExpression'},
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
     describe('invalid arrow header things that are valid in a group', _ => {
 
       // see counter-test in arrow where this stuff is disallowed
@@ -2185,7 +2256,7 @@ module.exports = (describe, test) => describe('parens', _ => {
         'function(){}',
         'new x',
         'null',
-        'super',
+        // 'super', // setup too annoying, simply assuming this works too
         'true',
         'this',
         'typeof x',
@@ -2196,11 +2267,15 @@ module.exports = (describe, test) => describe('parens', _ => {
         '{}.length',
         '{x: y}.length',
       ].forEach(str => {
-        test('[' + str + '] in group', {
+        test.pass('[' + str + '] in group', {
           code: '('+str+');',
-          ast: true,
-          tokens: true,
         });
+
+        if (str !== 'arguments' && str !== 'eval') { // tested elsewhere
+          test.fail('[' + str + '] in arrow', {
+            code: '('+str+') => x;',
+          });
+        }
       });
 
       // soe things are special
@@ -2911,24 +2986,14 @@ module.exports = (describe, test) => describe('parens', _ => {
     });
 
     describe('keywords ok in group not allowed in arrow header', _ => {
-      ['true', 'false', 'null', 'this', 'super'].forEach(keyword => {
+      ['true', 'false', 'null', 'this'].forEach(keyword => {
         test('arrow; keyword=' + keyword, {
           code: '(' + keyword +') => x',
           throws: 'not destructible',
         });
 
-        test('group; keyword=' + keyword, {
+        test.pass('group; keyword=' + keyword, {
           code: '(' + keyword +');',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {type: 'Identifier', name: keyword},
-              },
-            ],
-          },
-          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
     });
@@ -3305,9 +3370,20 @@ module.exports = (describe, test) => describe('parens', _ => {
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       });
 
-      test('compound assignment should fail', {
+      test.pass('bin op should pass as prop value', {
+        code: '({ident: [foo, bar] + x})',
+      });
+
+      test.pass('compound assignment should pass as prop value', {
         code: '({ident: [foo, bar] += x})',
-        throws: 'next ord',
+      });
+
+      test.fail('bin op should fail as assign destruct', {
+        code: '({ident: [foo, bar] + x} = y)',
+      });
+
+      test.fail('compound assignment should fail as assign destruct', {
+        code: '({ident: [foo, bar] += x} = y)',
       });
 
       test('method call as arrow', {
@@ -3652,9 +3728,12 @@ module.exports = (describe, test) => describe('parens', _ => {
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       });
 
-      test('compound assignment should fail', {
+      test.pass('compound assignment should pass as value', {
         code: '({ident: {x:y} += x})',
-        throws: 'next ord',
+      });
+
+      test.fail('compound assignment should fail as destruct assign', {
+        code: '({ident: {x:y} += x} = y)',
       });
 
       test('method call as arrow', {
@@ -3785,7 +3864,7 @@ module.exports = (describe, test) => describe('parens', _ => {
         // 'let',
         'new x',
         'null',
-        'super',
+        // 'super',
         'true',
         'this',
         'typeof x',

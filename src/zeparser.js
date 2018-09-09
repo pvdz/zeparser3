@@ -5392,35 +5392,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             foundSingleIdentWrap = true; // move on to the arrow
           }
 
-          // destructible is determined by the ident being a reserved keyword
-          // we know the ident is followed by a comma so `typeof` would lead to an error anyways
-          switch (identToken.str) {
-            case 'true':
-            case 'false':
-            case 'null':
-            case 'this':
-            case 'super':
-              // reserved keyword, not destructible
-              destructible |= CANT_DESTRUCT;
-              simpleArgs = ARGS_COMPLEX;
-              AST_setIdent(astProp, identToken);
-              break;
-
-            case 'yield':
-              if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYGEN)) {
-                parseYieldKeyword(lexerFlags, identToken, allowAssignment, astProp);
-                destructible |= CANT_DESTRUCT;
-                break;
-              }
-              // fall-through
-            default:
-              // if curc is a comma then the group is not assignable but that will fail through the toplevelComma flag
-              // if the group is just an identifier then it can be assigned to: `(a) = b`. There's a test. Or two.
-              assignable = bindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
-              SCOPE_addBinding(lexerFlags, scoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
-              if (assignable === NOT_ASSIGNABLE) destructible |= CANT_DESTRUCT;
-              AST_setIdent(astProp, identToken);
-           }
+          // if curc is a comma then the group is not assignable but that will fail through the toplevelComma flag
+          // if the group is just an identifier then it can be assigned to: `(a) = b`. There's a test. Or two.
+          // If the group is not assignable then it can't become an arrow and we can skip a few related cases
+          assignable = parseValueHeadBodyAfterIdent(lexerFlags, identToken, BINDING_TYPE_NONE, ALLOW_ASSIGNMENT, astProp);
+          if (assignable === NOT_ASSIGNABLE) {
+            destructible |= CANT_DESTRUCT;
+          } else {
+            simpleArgs = ARGS_COMPLEX; // if we can't assign to it then the name is a keyword of sorts
+            SCOPE_addBinding(lexerFlags, scoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+          }
         }
         else {
           // the token following this ident is not one valid in a destructuring assignment (unlike array/object)
@@ -5867,6 +5848,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - [[..]=x]
         // - [[..].foo] = x
         // - [[..][foo]] = x
+        // - `[[foo].food()] = x`               -- error
+        // - `[[foo].length] = x`               -- ok
+        // - `[[foo].food() = x] = x`           -- error
+        // - `[[foo].length = x] = x`           -- ok
         // note: grouped object/array literals are never assignable
         let nowDestruct = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, astProp);
         destructible |= nowDestruct;
@@ -6635,19 +6620,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // use the rhs of the colon as identToken now
         identToken = curtok;
         skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
-        let willBeSimple = curc === $$CURLY_R_7D || curc === $$COMMA_2C || curtok.str === '=';
-        let assignable = parseValueAfterIdent(lexerFlags, identToken, bindingType, ALLOW_ASSIGNMENT, 'value');
         let wasAssign = curtok.str === '=';
+        let willBeSimple = curc === $$CURLY_R_7D || curc === $$COMMA_2C || wasAssign;
+        let assignable = parseValueAfterIdent(lexerFlags, identToken, bindingType, ALLOW_ASSIGNMENT, 'value');
         if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D) {
           parseExpressionFromOp(lexerFlags, assignable, 'value');
-          if (wasAssign) {
-            if (assignable === NOT_ASSIGNABLE) THROW('Tried to assign to a value that was not assignable in obj lit/patt');
-          }
-          else destructible |= CANT_DESTRUCT;
+          if (!wasAssign) destructible |= CANT_DESTRUCT;
         }
-        if (assignable === NOT_ASSIGNABLE) {
+        else if (assignable === NOT_ASSIGNABLE)  {
+          if (wasAssign) THROW('Tried to assign to a value that was not assignable in obj lit/patt');
           destructible |= CANT_DESTRUCT;
-        } else if (willBeSimple) {
+        }
+        else if (willBeSimple) {
           SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
           addNameToExports(exportedNames, identToken.str);
           addBindingToExports(exportedBindings, identToken.str);
@@ -6658,35 +6642,35 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$SQUARE_L_5B) {
         // ({ident: <array destruct>
+        // `({ident: [foo, bar].join('')} = x)`        -- error
+        // `({ident: [foo].length} = x)`               -- ok
+        // `({ident: [foo, bar].join('') = x} = x)`    -- error
+        // `({ident: [foo].length = x} = x)`           -- ok
         AST_open(astProp, 'Property');
         AST_setIdent('key', identToken);
         AST_set('kind', 'init'); // only getters/setters get special value here
         AST_set('method', false);
         AST_set('computed', false);
-        destructible |= parseArrayLiteralPattern(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, 'value');
-        // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
-        if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
-          destructible |= CANT_DESTRUCT;
-          let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, 'value');
-          parseExpressionFromOp(lexerFlags, assignable, 'value');
-        }
+        let nowDestruct = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, 'value');
+        destructible |= nowDestruct;
+        destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $$CURLY_R_7D, 'value');
         AST_set('shorthand', false);
         AST_close('Property');
       }
       else if (curc === $$CURLY_L_7B) {
         // ({ident: <object destruct>
+        // `({ident: {}.food()} = x)`           -- error
+        // `({ident: {}.length} = x)`           -- ok
+        // `({ident: {}.food() + x} = x)`       -- error
+        // `({ident: {}.length = x} = x)`       -- ok
         AST_open(astProp, 'Property');
         AST_setIdent('key', identToken);
         AST_set('kind', 'init'); // only getters/setters get special value here
         AST_set('method', false);
         AST_set('computed', false);
-        destructible |= parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, 'value');
-        // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
-        if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
-          destructible |= CANT_DESTRUCT;
-          let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, 'value');
-          parseExpressionFromOp(lexerFlags, assignable, 'value');
-        }
+        let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, 'value');
+        destructible |= nowDestruct;
+        destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $$CURLY_R_7D, 'value');
         AST_set('shorthand', false);
         AST_close('Property');
       }
@@ -6930,19 +6914,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
 
-      if (curtok.str !== '=' && (bindingType !== BINDING_TYPE_NONE || assignable === NOT_ASSIGNABLE)) {
-        // this is a binding with binary operator that is not just `=`
-        // - if destructuring a binding, current path is not destructible
-        // - if not assignable, also not destructible
-        // - if next token is not the end then also not destructible (but assign is okay)
-        destructible |= CANT_DESTRUCT;
-      }
-
+      let notAssign = curtok.str !== '=';
       if (curc !== $$COMMA_2C && curc !== closingCharOrd) {
-        if (curtok.str !== '=') {
-          destructible |= CANT_DESTRUCT;
-        }
+        if (notAssign) destructible |= CANT_DESTRUCT;
         parseExpressionFromOp(lexerFlags, assignable, astProp);
+      } else if (notAssign) {
+        if (bindingType !== BINDING_TYPE_NONE || assignable === NOT_ASSIGNABLE) {
+          // this is a binding with binary operator that is not just `=`
+          // - if destructuring a binding, current path is not destructible
+          // - if not assignable, also not destructible
+          // - if next token is not the end then also not destructible (but assign is okay)
+          destructible |= CANT_DESTRUCT;
+        } else {
+          destructible |= DESTRUCT_ASSIGN_ONLY;
+        }
       }
     }
     return destructible;

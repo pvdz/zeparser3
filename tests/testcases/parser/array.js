@@ -2513,4 +2513,43 @@ module.exports = (describe, test) =>
         throws: 'destructible',
       });
     });
+
+    describe('keywords should not parse as regular idents in awkward places', _ => {
+
+      // see counter-test in arrow where this stuff is disallowed
+      [
+        'async ()=>x',
+        'class{}',
+        'delete x.y',
+        'false',
+        'function(){}',
+        'new x',
+        'null',
+        'true',
+        'this',
+        'typeof x',
+        'void x',
+        'x + y',
+        '[].length',
+        '[x].length',
+        '{}.length',
+        '{x: y}.length',
+      ].forEach(str => {
+
+        test.fail('[' + str + '] in destructuring assignment as shorthand', {
+          code: '['+str+'] = x;',
+          throws: str.includes('.length') ? undefined : true,
+          ast: str.includes('.length') ? true : undefined, // property is valid assignment target so should work
+          tokens: str.includes('.length') ? true : undefined,
+        });
+
+        test.pass('[' + str + '] in array', {
+          code: '['+str+']',
+        });
+
+        test.fail('[' + str + '] in arrow head', {
+          code: '(['+str+']) => x;',
+        });
+      });
+    });
   });

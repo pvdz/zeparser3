@@ -8292,4 +8292,60 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    describe('keywords should not parse as regular idents in awkward places', _ => {
+
+      // see counter-test in arrow where this stuff is disallowed
+      [
+        'async ()=>x',
+        'class{}',
+        'delete x.y',
+        'false',
+        'function(){}',
+        'new x',
+        'null',
+        'true',
+        'this',
+        'typeof x',
+        'void x',
+        'x + y',
+        '[].length',
+        '[x].length',
+        '{}.length',
+        '{x: y}.length',
+      ].forEach(str => {
+
+        test.fail('[' + str + '] in destructuring assignment as shorthand', {
+          code: '({'+str+'} = x);',
+        });
+
+        // (can't really test these as property names because half of the input values are not a single ident)
+        test.pass('[' + str + '] in destructuring assignment as property value', {
+          code: '({x: '+str+'} = x);',
+          throws: str.includes('.length') ? undefined : true,
+          ast: str.includes('.length') ? true : undefined, // property is valid assignment target so should work
+          tokens: str.includes('.length') ? true : undefined,
+        });
+
+        // `({function(){}})` is quite beautiful in its own way. and valid.
+        test('[' + str + '] in object as shorthand', {
+          code: '({'+str+'});',
+          throws: str === 'function(){}' ? undefined : true,
+          ast: str !== 'function(){}' ? undefined : true,
+          tokens: str !== 'function(){}' ? undefined : true,
+        });
+
+        test.pass('[' + str + '] in object as value', {
+          code: '({x: '+str+'});',
+        });
+
+        test.fail('[' + str + '] in arrow head as shorthand', {
+          code: '({'+str+'}) => x;',
+        });
+
+        test.fail('[' + str + '] in arrow head as alias', {
+          code: '({x: '+str+'}) => x;',
+        });
+      });
+    });
   });
