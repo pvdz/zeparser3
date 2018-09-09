@@ -243,13 +243,9 @@ module.exports = (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
       });
 
-      test('bad exmaple of nested expression', {
+      test('bad example of nested expression', {
         code: 'a * +a ** a ** 3',
         throws: '**',
-      });
-
-      test('good exmaple of nested expression', {
-        code: '+a * a ** a ** 3',
         ast: {
           type: 'Program',
           body: [
@@ -266,14 +262,48 @@ module.exports = (describe, test) =>
                 operator: '*',
                 right: {
                   type: 'BinaryExpression',
-                  left: {
-                    type: 'BinaryExpression',
-                    left: {type: 'Identifier', name: 'a'},
-                    operator: '**',
-                    right: {type: 'Identifier', name: 'a'},
-                  },
+                  left: {type: 'Identifier', name: 'b'},
                   operator: '**',
-                  right: {type: 'Literal', value: '<TODO>', raw: '3'},
+                  right: {
+                    type: 'BinaryExpression',
+                    left: {type: 'Identifier', name: 'c'},
+                    operator: '**',
+                    right: {type: 'Literal', value: '<TODO>', raw: '3'},
+                  },
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $ASI],
+      });
+
+      test('good example of nested expression', {
+        code: '+a * b ** c ** 3',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'UnaryExpression',
+                  operator: '+',
+                  prefix: true,
+                  argument: {type: 'Identifier', name: 'a'},
+                },
+                operator: '*',
+                right: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'b'},
+                  operator: '**',
+                  right: {
+                    type: 'BinaryExpression',
+                    left: {type: 'Identifier', name: 'c'},
+                    operator: '**',
+                    right: {type: 'Literal', value: '<TODO>', raw: '3'},
+                  },
                 },
               },
             },
@@ -554,7 +584,8 @@ module.exports = (describe, test) =>
       });
 
       test('good exmaple of nested expression', {
-        code: '(+a * a ** a ** 3)',
+        code: '(+c * b ** a ** 3)',
+        desc: 'note that a**3 must be the inner-most node, then b**that then +c * that as the outer-most node',
         ast: {
           type: 'Program',
           body: [
@@ -566,19 +597,19 @@ module.exports = (describe, test) =>
                   type: 'UnaryExpression',
                   operator: '+',
                   prefix: true,
-                  argument: {type: 'Identifier', name: 'a'},
+                  argument: {type: 'Identifier', name: 'c'},
                 },
                 operator: '*',
                 right: {
                   type: 'BinaryExpression',
-                  left: {
+                  left: {type: 'Identifier', name: 'b'},
+                  operator: '**',
+                  right: {
                     type: 'BinaryExpression',
                     left: {type: 'Identifier', name: 'a'},
                     operator: '**',
-                    right: {type: 'Identifier', name: 'a'},
+                    right: {type: 'Literal', value: '<TODO>', raw: '3'},
                   },
-                  operator: '**',
-                  right: {type: 'Literal', value: '<TODO>', raw: '3'},
                 },
               },
             },
