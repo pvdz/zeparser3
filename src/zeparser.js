@@ -2840,6 +2840,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipRex(lexerFlags);
 
     AST_close('ImportDeclaration');
+
+    parseSemiOrAsi(lexerFlags);
   }
   function parseImportDefault(lexerFlags, scoop) {
     ASSERT(parseImportDefault.length === arguments.length, 'arg count');

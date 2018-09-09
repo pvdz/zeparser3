@@ -1,4 +1,4 @@
-let {$IDENT, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE} = require('../../../src/zetokenizer');
+let {$ASI, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE} = require('../../../src/zetokenizer');
 
 module.exports = (describe, test) =>
   describe('import declarations', _ => {
@@ -24,7 +24,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $IDENT, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with single string', {
@@ -49,7 +49,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $IDENT, $STRING_SINGLE],
+      tokens: [$IDENT, $IDENT, $IDENT, $STRING_SINGLE, $ASI],
     });
 
     test('simple import of an aliased default', {
@@ -74,7 +74,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of an aliased default', {
@@ -103,7 +103,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -123,7 +123,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -143,7 +143,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -169,7 +169,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -195,7 +195,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -221,7 +221,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -247,7 +247,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -278,7 +278,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -309,7 +309,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -340,7 +340,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -371,7 +371,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -402,7 +402,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('simple import of a default with double string', {
@@ -433,7 +433,7 @@ module.exports = (describe, test) =>
           },
         ],
       },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $ASI],
     });
 
     test('the `as` keyword cannot contain escape sequence', {
