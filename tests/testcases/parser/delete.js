@@ -347,4 +347,8 @@ module.exports = (describe, test) =>
     test.pass('delete newline before regular arrow', {
       code: 'delete ( \n () => x)',
     });
+
+    test.fail('cannot asi', {
+      code: '(delete (((x))) \n x)',
+    });
   });

@@ -282,16 +282,6 @@ module.exports = (describe, test) => describe('async keyword', function() {
     throws: true,
   });
 
-  test('illegal async arrow expression without paren because of newline', {
-    code: 'f(async\nfoo=>c)',
-    throws: true,
-  });
-
-  test('illegal async function expression because of newline', {
-    code: 'f(async\nfunction(){})',
-    throws: true,
-  });
-
   test('calling async as a function (so not an async function but async as a var name)', {
     code: 'f(async ())',
     ast: {
@@ -937,10 +927,38 @@ module.exports = (describe, test) => describe('async keyword', function() {
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
   });
 
-  test('async can not have line terminator after it; SCRIPT mode will throw after pasing the `async()` as a regular call', {
+  test('async can not have line terminator after it; ', {
     code: 'let f = async\n(g) => g',
-    throws: 'async', // this is legal but ZeParser can't backtrack and recover
-    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    desc: 'this one uses a super ugly hack to get it to work',
+    ast: {
+      type: 'Program',
+      body: [
+        {
+          type: 'VariableDeclaration',
+          kind: 'let',
+          declarations: [
+            {
+              type: 'VariableDeclarator',
+              id: {type: 'Identifier', name: 'f'},
+              init: {type: 'Identifier', name: 'async'},
+            },
+          ],
+        },
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'ArrowFunctionExpression',
+            params: [{type: 'Identifier', name: 'g'}],
+            id: null,
+            generator: false,
+            async: false,
+            expression: true,
+            body: {type: 'Identifier', name: 'g'},
+          },
+        },
+      ],
+    },
+    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
   });
 
   test('not pretty but this should be legal in SCRIPT mode, `in` is edge case to single-param arrow functions', {
@@ -1568,7 +1586,29 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('newline after async', {
           code: 'async \n () => {}',
-          throws: 'async', // valid but zeparser cant recover
+          desc: 'works through hacks',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'async'},
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  body: {type: 'BlockStatement', body: []},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('newline after parens', {
@@ -1669,7 +1709,28 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('newline after async', {
           code: 'async \n (x) => x',
-          throws: 'async', // valid but zeparser cant recover
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'async'},
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [{type: 'Identifier', name: 'x'}],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
         });
 
         test('newline after args', {
@@ -1709,7 +1770,28 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('newline after async', {
           code: 'async \n (x, y) => x',
-          throws: 'async', // valid but zeparser cant recover
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'async'},
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
         });
 
         test('newline after args', {
@@ -1821,35 +1903,196 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('toplevel statement', {
           code: 'async \n () => x',
-          throws: 'async', // valid but zeparser cant recover
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Identifier', name: 'async'},
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
         });
 
         test('return arg', {
           code: 'function f(){   return async \n () => x    }',
-          throws: 'async', // valid but zeparser cant recover
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: false,
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ReturnStatement',
+                      argument: {type: 'Identifier', name: 'async'},
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'ArrowFunctionExpression',
+                        params: [],
+                        id: null,
+                        generator: false,
+                        async: false,
+                        expression: true,
+                        body: {type: 'Identifier', name: 'x'},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
 
-        // test('break label', {
-        //   code: 'break async \n () => x',
-        // });
+        test.fail('break undefined label', {
+          code: 'break async \n () => x',
+        });
 
-        // test('continue label', {
-        //   code: 'continue async \n () => x',
-        // });
+        test.pass('break defined label', {
+          code: 'async: for (;;) break async \n () => x',
+        });
 
-        test('var decl init', {
+        test.fail('continue undefined label', {
+          code: 'continue async \n () => x',
+        });
+
+        test.pass('continue defined label', {
+          code: 'async: for (;;) continue async \n () => x',
+        });
+
+        test('var decl init with arrow', {
+          code: 'var x = async \n () => x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'VariableDeclaration',
+                kind: 'var',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'x'},
+                    init: {type: 'Identifier', name: 'async'},
+                  },
+                ],
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+        });
+
+        test.fail('var decl init with trailing decl', {
           code: 'var x = async \n () => x, y',
-          throws: 'async', // valid but zeparser cant recover
+          desc: 'it is an error because `() =>x, y` would be an error'
         });
 
-        test('let decl init', {
+        test('let decl init with arrow', {
+          code: 'let x = async \n () => x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'x'},
+                    init: {type: 'Identifier', name: 'async'},
+                  },
+                ],
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+        });
+
+        test.fail('let decl init with another decl', {
           code: 'let x = async \n () => x, y',
-          throws: 'async', // valid but zeparser cant recover
+          desc: 'it is an error because `() =>x, y` would be an error'
         });
 
-        test('const decl init', {
+        test('const decl init with an arrow', {
+          code: 'const x = async \n () => x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'VariableDeclaration',
+                kind: 'const',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'x'},
+                    init: {type: 'Identifier', name: 'async'},
+                  },
+                ],
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+        });
+
+        test.fail('const decl init with another decl', {
           code: 'const x = async \n () => x, y',
-          throws: 'async', // valid but zeparser cant recover
+          desc: 'it is an error because `() =>x, y` would be an error'
         });
 
         test('export decl', {
@@ -1860,103 +2103,81 @@ module.exports = (describe, test) => describe('async keyword', function() {
           },
         });
 
-        test('in a group', {
+        test.fail('in a group', {
           code: '(async \n () => x)',
-          throws: 'ASI is illegal here',
         });
 
-        test('in an array', {
+        test.fail('in an array', {
           code: '[async \n () => x]',
-          throws: 'async',
         });
 
-        test('in an object', {
+        test.fail('in an object', {
           code: 'x={x: async \n () => x}',
-          throws: 'ASI is illegal here',
         });
 
-        test('in a dynamic property name', {
+        test.fail('in a dynamic property name', {
           code: 'x[async \n () => x]',
-          throws: 'async',
         });
 
-        test('in call args', {
+        test.fail('in call args', {
           code: 'x(async \n () => x)',
-          throws: 'async',
         });
 
-        test('function args', {
+        test.fail('function args', {
           code: 'function f(x = async \n () => x){}',
-          throws: 'ASI is illegal here',
         });
 
-        test('template literal dynamic parts', {
+        test.fail('template literal dynamic parts', {
           code: '`${async \n () => x}`',
-          throws: 'async',
         });
 
-        test('do statement', {
+        test.fail('do statement', {
           code: 'do async \n () => x while (x);',
-          throws: 'async',
         });
 
-        test('if statement', {
+        test.fail('if statement', {
           code: 'if (async \n () => x) x',
-          throws: 'ASI is illegal here',
         });
 
-        test('while statement', {
+        test.fail('while statement', {
           code: 'while (async \n () => x) x',
-          throws: 'ASI is illegal here',
         });
 
-        test('for loop statement 1', {
+        test.fail('for loop statement 1', {
           code: 'for (async \n () => x;;) x',
-          throws: 'ASI is illegal here',
         });
 
-        test('for loop statement 2', {
+        test.fail('for loop statement 2', {
           code: 'for (;async \n () => x;) x',
-          throws: 'ASI is illegal here',
         });
 
-        test('for loop statement 3', {
+        test.fail('for loop statement 3', {
           code: 'for (;;async \n () => x) x',
-          throws: 'ASI is illegal here',
         });
 
-        test('for-in statement', {
+        test.fail('for-in statement', {
           code: 'for (x in async \n () => x) x',
-          throws: 'ASI is illegal here',
         });
 
-        test('for-of statement', {
+        test.fail('for-of statement', {
           code: 'for (x of async \n () => x) x',
-          throws: 'ASI is illegal here',
         });
 
-        test('try catch var init', {
+        test.fail('try catch var init', {
           code: 'try {} catch(e = async \n () => x) {}',
           desc: 'okay, bad test',
-          throws: 'cannot have a default',
         });
 
-        test('between if and else ', {
+        test.fail('between if and else ', {
           code: 'if (x) async \n () => x else y',
-          throws: 'async',
         });
 
-        test('class extend value', {
+        test.fail('class extend value', {
           code: 'class x extends async \n () => x {}',
-          throws: 'ASI is illegal here',
         });
 
-        test('with header', {
+        test.fail('with header', {
           code: 'with (async \n () => x) {}',
-          throws: 'strict mode',
-          SLOPPY_SCRIPT: {
-            throws: 'ASI is illegal here',
-          },
         });
       });
     });
@@ -2199,14 +2420,12 @@ module.exports = (describe, test) => describe('async keyword', function() {
     code: 'function g() {   async function f() {} var f;   }',
   });
 
-  test('asi in bad place', {
+  test.fail('asi in bad place', {
     code: '(async \n function(){})',
-    throws: 'asi',
   });
 
-  test('restricted production in statement header', {
+  test.fail('restricted production in statement header', {
     code: 'if (async \n () => x) x',
-    throws: 'asi',
   });
 
   test.fail('export can not just export `async` so asi not allowed for function', {
@@ -2217,5 +2436,29 @@ module.exports = (describe, test) => describe('async keyword', function() {
   test.fail('export can not just export `async` so asi not allowed for arrow', {
     code: 'export async \n a => b',
     SCRIPT: {throws: 'module'},
+  });
+
+  test.pass('statement async => async', {
+    code: 'async => async',
+  });
+
+  test.fail('statement async \n => async', {
+    code: 'async \n => async',
+  });
+
+  test.pass('expr async => async', {
+    code: '(async => async)',
+  });
+
+  test.fail('expr async \n => async', {
+    code: '(async \n => async)',
+  });
+
+  test.fail('let async => async', {
+    code: 'let async => async',
+  });
+
+  test.fail('let async \n => async', {
+    code: 'let async \n => async',
   });
 });

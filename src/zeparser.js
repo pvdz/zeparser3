@@ -190,7 +190,10 @@ const VERSION_WHATEVER = Infinity;
 
 const WAS_ASYNC = true;
 const NOT_ASYNC = false;
+const IS_ASYNC_PREFIXED = true;
+const NOT_ASYNC_PREFIXED = false;
 const UNDEF_ASYNC = undefined;
+const UNDEF_LHP = undefined;
 const WAS_GENERATOR = true;
 const IS_GENERATOR = true;
 const NOT_GENERATOR = false;
@@ -375,26 +378,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     options_astRoot.path = _path;
     options_astRoot.pathNames = _pnames;
   }
-  function AST_open(prop, type, fromWrap = false) {
+  function AST_open(prop, type, explictlyOverwrite = false) {
     if (traceast) {
-      console.log('AST_open; write type='+type+' to prop=' + prop, fromWrap);
+      console.log('AST_open; write type='+type+' to prop=' + prop, explictlyOverwrite);
       console.log('- path (before):', _path.map(o => o.type).join(' - '));
       console.log('- AST:', require('util').inspect(_tree, false, null))
     }
     ASSERT(arguments.length === 2 || arguments.length === 3, '2 args');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
+    ASSERT(typeof prop === 'string' && prop !== 'undefined', 'prop should be string');
+    ASSERT(typeof type === 'string' && type !== 'undefined', 'type should be string');
 
     let node = _path[_path.length - 1];
     let newnode = {type};
     if (Array.isArray(node[prop])) {
       node[prop].push(newnode);
     }
-    else if (node[prop] === undefined || fromWrap) {
+    else if (node[prop] === undefined || explictlyOverwrite) {
       node[prop] = newnode;
     }
     else {
-      THROW(`AST_open(${prop}, ${type}, ${fromWrap}); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`);
+      THROW(`AST_open(${prop}, ${type}, ${explictlyOverwrite}); bad tree? node[${prop}] should be \`undefined\` but wasnt (child=${node}, prop=${prop}, type=${type}, node[prop]=${node[prop]})`);
     }
     _path.push(newnode);
     _pnames.push(prop);
@@ -428,14 +433,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     _path[_path.length - 1][prop] = value;
   }
-  function AST_setIdent(astProp, token) {
+  function AST_setIdent(astProp, token, overwrite = false) {
     ASSERT(typeof astProp === 'string', 'prop should be an string');
     ASSERT(typeof token === 'object', 'token should be an obj');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
     ASSERT(token.type === $IDENT, 'token must be ident');
 
-    AST_open(astProp, 'Identifier');
+    AST_open(astProp, 'Identifier', overwrite);
     AST_set('name', token.canon); // doesn't seem to be specced in estree but it makes sense to use the canonical name here
     AST_close('Identifier');
   }
@@ -630,9 +635,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return oldNode;
   }
-  function AST_wrapClosedIntoArray(prop, value, newProp) {
+  function AST_wrapClosedIntoArray(prop, value, newProp, skipArrCheck) {
     if (traceast) {
-      console.log('AST_wrapClosed', prop, value, newProp);
+      console.log('AST_wrapClosedIntoArray', prop, value, newProp);
       console.log('- path:', _path.map(o => o.type).join(' - '));
       console.log('- tree before:', require('util').inspect(_tree, false, null))
     }
@@ -645,7 +650,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let child = null;
     if (traceast) console.log(' - prop:', prop, ', parent:', parent);
 
-    if (Array.isArray(parent[prop])) {
+    if (!skipArrCheck && Array.isArray(parent[prop])) {
       child = parent[prop].pop();
     } else {
       child = parent[prop];
@@ -1288,6 +1293,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === parseBodyPart.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(hasNoFlag(curtype, $ERROR | $EOF), 'should not have error or eof at this point');
+
+    // async edge case :'(
+    if (asyncExceptionStack !== undefined) {
+      parsePlainArrowAfterAsyncNewline(lexerFlags, scoop, astProp);
+      return;
+    }
+
     switch (getGenericTokenType(curtype)) { // TODO: convert to flag index to have perfect hash in the switch
       case $IDENT:
         parseIdentStatement(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, includeDeclarations, astProp);
@@ -1315,6 +1327,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           , curtok
         );
     }
+  }
+  function parsePlainArrowAfterAsyncNewline(lexerFlags, scoop, astProp) {
+    ASSERT(curtok.str === '=>', 'if the hack is used the next token must be an arrow');
+    ASSERT(!!asyncExceptionStack, 'this should have been asserted at callsite');
+    // the stack contains args to be used in an arrow so just construct it now...
+    // - `let f = async \n (g) => g`
+
+    // restore curtok.nl
+    curtok.nl = false; // the arrow .nl was checked so we can reset to false here
+
+    // TODO: verify the args
+
+    AST_open(astProp, 'ExpressionStatement');
+    astProp = 'expression';
+
+    AST_open(astProp, 'ArrowFunctionExpression');
+    AST_set('params', asyncExceptionStack instanceof Array ? asyncExceptionStack : [asyncExceptionStack]);
+    asyncExceptionStack = undefined; // prevent recursion on this
+    parseArrowFromPunc(lexerFlags, scoop, NOT_ASYNC, asyncExceptionSimple);
+    AST_close('ArrowFunctionExpression');
+
+    AST_close('ExpressionStatement');
   }
 
   // ### functions
@@ -1350,6 +1384,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return parseFunctionAfterKeyword(lexerFlags, scoop, isFuncDecl, isRealFuncExpr, isGenerator, isAsync, optionalIdent, NOT_CONSTRUCTOR, NOT_METHOD, NOT_GETSET, isFunctionStatement, astProp);
   }
   function parseFunctionExpression(lexerFlags, isAsync, astProp) {
+    ASSERT(typeof isAsync === 'boolean', 'enum');
     let isGenerator = NOT_GENERATOR;
     if (skipAnyIf('*', lexerFlags)) {
       if (isAsync && !allowAsyncGenerators) {
@@ -1359,9 +1394,41 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, IS_FUNC_EXPR, isGenerator, isAsync, IDENT_REQUIRED, NOT_CONSTRUCTOR, NOT_METHOD, NOT_GETSET, NOT_FUNCTION_STATEMENT, astProp);
   }
+  function parseAsyncFunctionDecl(lexerFlags, fromStmtOrExpr, includeDeclarations, scoop, isExport, exportedBindings, astProp) {
+    ASSERT(parseAsyncFunctionDecl.length === arguments.length, 'arg count');
+    ASSERT(curtok.str === 'function', 'already checked, not yet consumed');
+
+    // `async function ...`
+    if (fromStmtOrExpr === IS_STATEMENT && includeDeclarations === EXC_DECL) {
+      THROW('Cannot parse a async function declaration here, only expecting statements here');
+    }
+
+    let name = parseFunction(
+      lexerFlags,
+      scoop,
+      fromStmtOrExpr === IS_EXPRESSION ? NOT_FUNC_DECL : IS_FUNC_DECL,
+      fromStmtOrExpr === IS_EXPRESSION ? IS_FUNC_EXPR : NOT_FUNC_EXPR,
+      WAS_ASYNC,
+      (isExport === IS_EXPORT || fromStmtOrExpr === IS_EXPRESSION) ? IDENT_OPTIONAL : IDENT_REQUIRED,
+      NOT_FUNCTION_STATEMENT,
+      astProp
+    );
+
+    if (isExport) {
+      // - `export async function x(){}`
+      // - `export default async function x(){}`
+      // - `export default function x(){}`
+      // the "default" and "*default*" cases are handled in the export parser
+      // if this func has a name, record it by reference because return values are already used by something else
+      addBindingToExports(exportedBindings, name);
+    }
+
+    return NOT_ASSIGNABLE;
+  }
   function parseFunctionAfterKeyword(lexerFlags, outerScoop, isFuncDecl, isRealFuncExpr, isGenerator, isAsync, isIdentOptional, isClassConstructor, isMethod, isGetSet, isFunctionStatement, astProp) {
     ASSERT(arguments.length === parseFunctionAfterKeyword.length, 'arg count must match');
     ASSERT(isGenerator === IS_GENERATOR || isGenerator === NOT_GENERATOR, 'gen enum');
+    ASSERT(typeof isAsync === 'boolean', 'enum');
 
     /*
     These are the cfg productions for func decls and exprs with various modifiers and how they are inherited.
@@ -1761,7 +1828,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // parsed the `async` keyword (-> identToasyncIdentTokenken)
     return _parseAsync(lexerFlags, scoop, IS_EXPRESSION, asyncIdentToken, checkNewTarget, isExport, allowAssignment, EXC_DECL, UNDEF_EXPORTS, astProp);
   }
-  function _parseAsync(lexerFlags, scoop, stmtOrExpr, asyncIdentToken, checkNewTarget, isExport, allowAssignment, includeDeclarations, exportedBindings, astProp) {
+  function _parseAsync(lexerFlags, scoop, fromStmtOrExpr, asyncIdentToken, checkNewTarget, isExport, allowAssignment, includeDeclarations, exportedBindings, astProp) {
     ASSERT(_parseAsync.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astprop = string', astProp);
     // this function will parse tail but NOT parse op and rhs.
@@ -1781,6 +1848,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `a + b + async + c + d`  ((((a + b) + async) + c) + d)
     // this last example shows `async` parser shouldn't just parse the op immediately but the statement that
     // is not a function should not just ASI after the async bit (that yields ((a+b)+(async+d)), so it needs more info.
+    // - `new async()`
+    // - `new async() => x`
+    // - `new async() \n => x`
+    // - `new async \n ();`
 
     // parser decision tree based on tokens:
     // - `in`: this is `async in y` and is "okay" regardless of newlines
@@ -1808,146 +1879,79 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - else: `async` as a var name
 
     if (curtok.str === 'in' || curtok.str === 'instanceof' || curtype === $EOF || !allowAsyncFunctions) {
-      return parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, asyncIdentToken, checkNewTarget, allowAssignment, astProp);
+      return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, checkNewTarget, allowAssignment, astProp);
     }
 
-    if (curtok.nl) {
-      if (curtype === $IDENT) {
-        // this includes `ident`, `function`, etc
-        // - `async \n x => y`
-        // - `async \n function f(){}`
-        if (stmtOrExpr === IS_STATEMENT) {
-          AST_open(astProp, 'ExpressionStatement');
-          astProp = 'expression'
-        }
-        AST_setIdent(astProp, asyncIdentToken); // next token cannot be valid so ASI must occur after `async`
-        if (hasAllFlags(lexerFlags, LF_NO_ASI)) {
-          // `(async \n function(){})`
-          THROW('Newline causes ASI but cannot ASI here');
-        }
-        if (stmtOrExpr === IS_STATEMENT) {
-          AST_close('ExpressionStatement');
-          parseSemiOrAsi(lexerFlags);
-        }
-        ASSERT(curtok.str !== '=>', 'if this was `async \n => async` then the error would have been thrown at parseAfterVarName');
-        // `async \n`
-        return IS_ASSIGNABLE;
-      }
-      if (curc !== $$PAREN_L_28) {
-        // this includes `ident`, `function`, etc
-        return parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, asyncIdentToken, checkNewTarget, allowAssignment, astProp);
-      }
-
-      // next is a group which may lead to this becoming an `async(..)=>..` arrow or
-      // an `async(..);` call (the latter is more likely as the first makes no sense)
-      // If it turns out to be a call then this function handles wrapping it in a CallExpression
-      ASSERT(curc === $$PAREN_L_28, 'to be clear; this was asserted before');
-
-
-      // Note: not a func decl because of the newline and we already asserted this is not `async function ...`
-      if (stmtOrExpr === IS_STATEMENT) {
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression'
-      }
-      parseGroupToplevels(lexerFlags, asyncIdentToken, stmtOrExpr, allowAssignment, astProp);
-      if (stmtOrExpr === IS_STATEMENT) {
-        AST_close('ExpressionStatement');
-        parseSemiOrAsi(lexerFlags);
-      }
-      // an async prefixed group is never assignable:
-      // - `async(x) = y`
-      // - `async \n (x) = y` -> `async(x) = y`
-      // - `async(x) => y`
-      // - `async \n (x) => y` -> `async; (x) => y`
-      return NOT_ASSIGNABLE;
-    }
+    let newlineAfterAsync = curtok.nl;
 
     if (curtype === $IDENT) {
-      // - async foo => ..             ok
-      // - async foo \n ..             error
-      // - export async foo => ..      ok
+
+      if (newlineAfterAsync) {
+        // This _must_ mean async is a regular var name so just parse an expression now.
+        // - `async \n ident...` ->
+        //   - `async; foo;`
+        //   - `async in obj`
+        //   - `async instanceof obj`
+        //   - `async; function f(){}`
+        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, checkNewTarget, allowAssignment, astProp);
+      }
 
       if (curtok.str === 'function') {
-        if (stmtOrExpr === IS_STATEMENT && includeDeclarations === EXC_DECL) {
-          THROW('Cannot parse a async function declaration here, only expecting statements here');
-        }
-        let name = parseFunction(
-          lexerFlags,
-          scoop,
-          stmtOrExpr === IS_EXPRESSION ? NOT_FUNC_DECL : IS_FUNC_DECL,
-          stmtOrExpr === IS_EXPRESSION ? IS_FUNC_EXPR : NOT_FUNC_EXPR,
-          WAS_ASYNC,
-          (isExport === IS_EXPORT || stmtOrExpr === IS_EXPRESSION) ? IDENT_OPTIONAL : IDENT_REQUIRED,
-          NOT_FUNCTION_STATEMENT,
-          astProp
-        );
-
-        if (isExport) {
-          // - `export async function x(){}`
-          // - `export default async function x(){}`
-          // - `export default function x(){}`
-          // the "default" and "*default*" cases are handled in the export parser
-          // if this func has a name, record it by reference because return values are already used by something else
-          addBindingToExports(exportedBindings, name);
-        }
-
-        return NOT_ASSIGNABLE;
+        // - `async function f(){}`
+        return parseAsyncFunctionDecl(lexerFlags, fromStmtOrExpr, includeDeclarations, scoop, isExport, exportedBindings, astProp);
       }
+
+      // - `async foo => ..`                        ok
+      // - `async foo \n ..`                        error
+      // - `async \n foo => ..`                     ok
+      // - `async \n foo \n ..`                     error
+      // - `export default async foo => ..`         ok (but only as default)
 
       // note that the function above is okay... just the arrow is not.
       if (allowAssignment === NO_ASSIGNMENT) {
+        TODO
+        ASSERT(curtype === $IDENT, 'already confirmed that the next token is an ident');
+        ASSERT(!curtok.nl, 'already confirmed that the next token is on the sae line as `async`');
+        // `async foo` would only be valid with an arrow (`async foo => foo`) arrow is not allowed here
         THROW('Was not allowed to parse an AssignmentExpression but had to parse an arrow (which is considered to be one)');
       }
 
-      let argIdentToken = curtok;
-      ASSERT_skipAny($IDENT, lexerFlags); // arrow or bust...
-
-      if (curtok.str !== '=>') THROW('Missing rest of async arrow');
-      if (curtok.nl) THROW('Can not have newline between arrow arg and actual arrow');
-
-      if (stmtOrExpr === IS_STATEMENT) {
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression'
-      }
-      AST_open(astProp, 'ArrowFunctionExpression');
-      AST_set('params', []);
-      AST_setIdent('params', argIdentToken);
-      parseArrowFromPunc(lexerFlags, scoop, WAS_ASYNC, ARGS_SIMPLE);
-      AST_close('ArrowFunctionExpression');
-      if (stmtOrExpr === IS_STATEMENT) {
-        AST_close('ExpressionStatement');
-        parseSemiOrAsi(lexerFlags); // this is not a func decl!
-      }
-
-      return NOT_ASSIGNABLE;
+      // - `new async()`
+      return parseParenlessArrowAfterAsync(lexerFlags, scoop, fromStmtOrExpr, astProp);
     }
 
     if (curc === $$PAREN_L_28) {
-      // `async () => x`
-      // `async ()`          (not followed by `=>`)
+      // - `async (y);`
+      // - `async (x) => x`
+      // - `async \n (foo);`                   --> `async(foo)`
+      // - `async \n (foo) => foo`             --> `async; (foo) => foo;`
+      // - `(async \n (foo);`                  --> `(async(foo))`
+      // - `(async \n (foo) => foo)`           --> error, cannot apply asi
+      // - `let x = async \n (foo);`           --> `let x = async(foo);`
+      // - `let x = async \n (foo) => foo`     --> `let x = async; (foo) => foo;`
 
-      // (this function also deals with errors for async-as-varname-in-module-mode)
-      // If it turns out to be a call then this function handles wrapping it in a CallExpression
-      if (stmtOrExpr === IS_STATEMENT) {
+      if (fromStmtOrExpr === IS_STATEMENT) {
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression'
       }
-      parseGroupToplevels(lexerFlags, asyncIdentToken, stmtOrExpr, allowAssignment, astProp);
-      // TODO: `new (x)()` -> call should be part of `new` not of group
-      if (stmtOrExpr === IS_STATEMENT) {
+
+      let r = parseGroupToplevels(lexerFlags, fromStmtOrExpr, allowAssignment, asyncIdentToken, newlineAfterAsync, astProp);
+
+      if (fromStmtOrExpr === IS_STATEMENT) {
         AST_close('ExpressionStatement');
-        parseSemiOrAsi(lexerFlags);
       }
-      // an async prefixed group is never assignable:
-      // - `async(x) = y`
-      // - `async \n (x) = y` -> `async(x) = y`
-      // - `async(x) => y`
-      // - `async \n (x) => y` -> `async; (x) => y`
-      return NOT_ASSIGNABLE;
+
+      return r;
     }
 
-    // async as a var name (but since it's a statement it may also be a label...)
-    return parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, asyncIdentToken, checkNewTarget, allowAssignment, astProp);
+    // async as a var name (if statement it may also be a label!)
+    // - `async \n x => y`
+    // - `async \n function f(){}`
+    // - `x = async \n a => b`
+    // - `x = async \n function f(){}`
+    // - `async \n [x]`
+    // - `(async \n [x])`
+    return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, checkNewTarget, allowAssignment, astProp);
   }
 
   function parseAwaitStatement(lexerFlags, scoop, labelSet, astProp) {
@@ -1963,7 +1967,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) {
         THROW('The `await` keyword in arg default must be an await expression but that is not allowed in params');
       }
-      parseAwaitExpression(lexerFlags, identToken, NO_ASSIGNMENT, 'expression');
+      parseAwaitExpression(lexerFlags, identToken, NOT_NEW_TARGET, NO_ASSIGNMENT, 'expression');
       parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, 'expression');
     }
     else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
@@ -1981,7 +1985,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseSemiOrAsi(lexerFlags);
   }
 
-  function parseAwaitExpression(lexerFlags, awaitIdentToken, allowAssignment, astProp) {
+  function parseAwaitExpression(lexerFlags, awaitIdentToken, checkNewTarget, allowAssignment, astProp) {
     ASSERT(parseAwaitExpression.length === arguments.length, 'arg count');
     // in an awaitable context this must always be considered a keyword. outside of it it should never be considered a keyword
 
@@ -2006,7 +2010,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // consider `await` a regular var name, not a keyword
       // should throw an error if used as an await anyways
       let assignable = parseAfterVarName(lexerFlags, awaitIdentToken, IS_ASSIGNABLE, allowAssignment, astProp);
-      assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
+      assignable = parseValueTail(lexerFlags, assignable, checkNewTarget, astProp);
       if (allowAssignment === NO_ASSIGNMENT) assignable = NOT_ASSIGNABLE;
       return parseExpressionFromOp(lexerFlags, assignable, astProp);
     }
@@ -2478,6 +2482,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function addNameToExports(exportList, exportedName) {
+    ASSERT(exportList !== DO_NOT_BIND, 'use UNDEF_EXPORTS not DO_NOT_BIND');
     if (exportList !== undefined && exportedName !== '') {
       let hashed = '#' + exportedName;
       if (exportList[hashed]) THROW('Tried to export the name `' + exportedName + '` twice');
@@ -2485,6 +2490,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function addBindingToExports(exportList, exportedName) {
+    ASSERT(exportList !== DO_NOT_BIND, 'use UNDEF_EXPORTS not DO_NOT_BIND');
     if (exportList !== undefined && exportedName !== '') {
       let hashed = '#' + exportedName;
       exportList[hashed] = 1;
@@ -3144,7 +3150,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // in script: same as module but also as regular var names (only) outside of async code
         // (await when not a keyword is assignable)
         AST_open(astProp, 'ExpressionStatement');
-        parseAwaitExpression(lexerFlags, identToken, ALLOW_ASSIGNMENT, 'expression');
+        parseAwaitExpression(lexerFlags, identToken, NOT_NEW_TARGET, ALLOW_ASSIGNMENT, 'expression');
         // TODO: what about multiple expressions?
         AST_close('ExpressionStatement');
         parseSemiOrAsi(lexerFlags);
@@ -3312,17 +3318,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(curc === $$PAREN_L_28, 'this is why we are here');
 
     let parens = 0;
-    let lastLhp;
     lexerFlags |= LF_NO_ASI; // cannot asi inside `delete (...)`
     do {
       ++parens;
-      lastLhp = curtok;
       ASSERT_skipRex('(', lexerFlags); // `delete (/x/.y)`, for bonus points
     } while (curc === $$PAREN_L_28);
 
     // Now parse a group and pass it a special flag that changes the semantics of the return value
     // It's an ugly hack :( all caused by `delete ((((a, b) => c).d))` being hard to custom parse
-    let assignableOrJustIdent = _parseGroupToplevels(lexerFlags, NOT_ASYNC, IS_EXPRESSION, parens === 1 ? NO_ASSIGNMENT : ALLOW_ASSIGNMENT, lastLhp, IS_DELETE_ARG, astProp);
+    let assignableOrJustIdent = _parseGroupToplevels(
+      lexerFlags,
+      IS_EXPRESSION, parens === 1 ? NO_ASSIGNMENT : ALLOW_ASSIGNMENT,
+      IS_DELETE_ARG,
+      UNDEF_ASYNC,
+      NOT_ASYNC_PREFIXED,
+      astProp
+    );
     ASSERT(assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_NA || assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_NA, 'exception enum');
     let assignable = assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_A;
 
@@ -3351,7 +3362,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     ASSERT(hasAllFlags(lexerFlags, LF_NO_ASI), 'should not be allowed to parse asi inside a group');
-    lexerFlags = sansFlag(lexerFlags, LF_NO_ASI);
+    lexerFlags = sansFlag(lexerFlags, LF_NO_ASI); // TODO: `(delete (((x))) \n x)` can still not ASI
 
     ASSERT(curtok.str !== '=>', 'we checked this in the loop');
 
@@ -3379,16 +3390,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let afterIdentToken = curtok; // store to assert whether anything after the ident was parsed
 
     parseValueAfterIdent(lexerFlags, identToken, BINDING_TYPE_NONE, NO_ASSIGNMENT, 'argument');
-    if (identToken.type === $IDENT && curtok === afterIdentToken && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
-      // - It is a Syntax Error if the UnaryExpression is contained in strict mode code and the derived UnaryExpression is PrimaryExpression:IdentifierReference .
-      // - It is a Syntax Error if the derived UnaryExpression is PrimaryExpression: CoverParenthesizedExpressionAndArrowParameterList and CoverParenthesizedExpressionAndArrowParameterList ultimately derives a phrase that, if used in place of UnaryExpression, would produce a Syntax Error according to these rules. This rule is recursively applied.
-      // (So in strict mode you can't do `delete foo;` and `delete (foo);` and `delete (((foo)));` etc)
 
-      // Due to ASI this is a tad difficult to do without AST or even token stream but we can just confirm whether
-      // the object reference to curtok remains the same. In that case only identToken was parsed as the value.
+    if (identToken.type === $IDENT) {
+      if (curtok === afterIdentToken && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+        // https://tc39.github.io/ecma262/#sec-delete-operator-static-semantics-early-errors
+        // - It is a Syntax Error if the UnaryExpression is contained in strict mode code and the derived UnaryExpression is PrimaryExpression:IdentifierReference .
+        // - It is a Syntax Error if the derived UnaryExpression is PrimaryExpression: CoverParenthesizedExpressionAndArrowParameterList and CoverParenthesizedExpressionAndArrowParameterList ultimately derives a phrase that, if used in place of UnaryExpression, would produce a Syntax Error according to these rules. This rule is recursively applied.
+        // (So in strict mode you can't do `delete foo;` and `delete (foo);` and `delete (((foo)));` etc)
 
-      THROW('Cannot delete an identifier without tail, in strict mode');
+        // Due to ASI this is a tad difficult to do without AST or even token stream but we can just confirm whether
+        // the object reference to curtok remains the same. In that case only identToken was parsed as the value.
+
+        THROW('Cannot delete an identifier without tail, in strict mode');
+      } else if (afterIdentToken.nl && afterIdentToken.str === '(' && identToken.str === 'async' && curtok.str === '=>' && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+        // - `delete async \n (...) => x`
+        // which is effectively `delete async; () => x;`, which is still an error
+        THROW('Cannot delete an identifier without tail, in strict mode');
+      }
     }
 
   }
@@ -3412,7 +3430,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parsePunctuatorStatement(lexerFlags, scoop, labelSet, astProp) {
     ASSERT(arguments.length === parsePunctuatorStatement.length, 'arg count');
-
     switch (curc) {
       case $$CURLY_L_7B:
         parseBlockStatement(lexerFlags, SCOPE_addLexTo(scoop, BLOCK_SCOPE, 'parsePunctuatorStatement'), labelSet, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, INC_DECL, astProp);
@@ -3929,16 +3946,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Things like `true`, `this`, `eval` and `arguments` should always be fine here.
     return isUsableKeyword(lexerFlags, bindingType, CHECK_TO_READ, identToken)
   }
-  function isBindableIdentifier(lexerFlags, bindingType, identToken) {
-    // isBindingIdentifier
-    // Can we currently create a binding to this identifier?
-    // Some identifiers are always keywords, `this`, `new`, for them the answer is always "no"
-    // Some identifiers are only considered a keyword in certain contexts (`yield` in strict, `await` in module goal, etc)
-    // If an ident is considered keyword and it has an escape whose canon!=ident it will throw. `arguments` and `eval` are never keywords.
-    // Notable is that `yield` and `await` may return true in some cases.
-    // Things like `true`, `this`, `eval` and `arguments` should always return false here.
-    return isUsableKeyword(lexerFlags, bindingType, CHECK_TO_BIND, identToken)
-  }
   function isUsableKeyword(lexerFlags, bindingType, checkBindOrRead, identToken) {
     ASSERT(isUsableKeyword.length === arguments.length, 'expecting arg count');
     // "is given ident a valid source of value on its own?", are these valid: `log(foo)` `log(break)` `log(true)`
@@ -4047,6 +4054,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   // ### expressions (functions below should not call functions above)
 
+
   function parseExpression(lexerFlags, allowAssignment, astProp) {
     ASSERT(arguments.length === parseExpression.length, 'expecting all args');
 
@@ -4094,6 +4102,37 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseSemiOrAsi(lexerFlags);
     }
     return assignable;
+  }
+  function parseParenlessArrowAfterAsync(lexerFlags, scoop, fromStmtOrExpr, astProp) {
+    // We must parse an async arrow without parens now. We still have to validate the arg name too.
+    // - `async foo => foo`
+    // - `async foo => { }`
+    // - `async foo \n => foo`
+    // - `async foo \n => { }`
+    ASSERT(curtype === $IDENT);
+    ASSERT(curtok.str !== 'function');
+
+    if (fromStmtOrExpr === IS_STATEMENT) {
+      AST_open(astProp, 'ExpressionStatement');
+      astProp = 'expression'
+    }
+    AST_open(astProp, 'ArrowFunctionExpression');
+    AST_set('params', []);
+
+    let paramScoop = SCOPE_addLexTo(scoop, ARG_SCOPE, '_parseAsync(parenless-arrow)');
+    parseBinding(lexerFlags, paramScoop, BINDING_TYPE_ARG, FROM_ASYNC_ARG, ASSIGNMENT_IS_DEFAULT, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'params');
+
+    if (curtok.str !== '=>') THROW('Missing rest of async arrow');
+    if (curtok.nl) THROW('Can not have newline between arrow arg and actual arrow');
+
+    parseArrowFromPunc(lexerFlags, scoop, WAS_ASYNC, ARGS_SIMPLE);
+    AST_close('ArrowFunctionExpression');
+    if (fromStmtOrExpr === IS_STATEMENT) {
+      AST_close('ExpressionStatement');
+      parseSemiOrAsi(lexerFlags); // this is not a func decl!
+    }
+
+    return NOT_ASSIGNABLE;
   }
   function parseExpressionFromOp(lexerFlags, assignable, astProp) {
     ASSERT(parseExpressionFromOp.length === arguments.length, 'arg count');
@@ -4419,7 +4458,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curc === $$PAREN_L_28) {
         // do not parse arrow/group tail, regardless
-        return parseGroupToplevels(lexerFlags, NOT_ASYNC, IS_STATEMENT, allowAssignment, astProp);
+        return parseGroupToplevels(lexerFlags, IS_STATEMENT, allowAssignment, UNDEF_ASYNC, NOT_ASYNC_PREFIXED, astProp);
       }
       else if (curtok.str === '++' || curtok.str === '--') {
         // note: this is ++/-- PREFIX. This version does NOT have newline restrictions!
@@ -4515,13 +4554,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // in script: same as module but also as regular var names (only) outside of async code
         // (await when not a keyword is assignable)
         if (checkNewTarget === IS_NEW_ARG) {
-          // `async function f(){ new await x; }`
-          // `async function f(){ [new await foo] }`
-          // `async function f(){ (new await foo) }`
-          THROW('Cannot await inside `new`');
+          if (hasAnyFlag(lexerFlags, LF_STRICT_MODE | LF_IN_ASYNC)) {
+            // - `async function f(){ new await x; }`
+            // - `async function f(){ [new await foo] }`
+            // - `async function f(){ (new await foo) }`
+            // - `function f(){ "use strict"; new await; }`
+            // - `function *f(){ "use strict"; new await; }`
+            // - `async function *f(){ new await; }`
+            THROW('Cannot await inside `new`');
+          } else {
+            // (sloppy mode):
+            // - `function f(){ new await; }`
+            // - `function *f(){ new await; }`
+            // - `new await;`
+          }
         }
         // note: await is unary that wants unary as arg so they can be chained
-        return parseAwaitExpression(lexerFlags, identToken, allowAssignment, astProp);
+        return parseAwaitExpression(lexerFlags, identToken, checkNewTarget, allowAssignment, astProp);
       case 'class':
         ASSERT_skipAny('class', lexerFlags); // TODO: next token is ident or curly
         parseClassExpression(lexerFlags, IDENT_OPTIONAL, astProp);
@@ -4627,7 +4676,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // in module: only if lexerFlags allow await (inside async code)
         // in script: same as module but also as regular var names (only) outside of async code
         // (await when not a keyword is assignable)
-        return parseAwaitExpression(lexerFlags, identToken, allowAssignment, astProp);
+        return parseAwaitExpression(lexerFlags, identToken, NOT_NEW_TARGET, allowAssignment, astProp);
       case 'class':
         parseClassExpression(lexerFlags, IDENT_OPTIONAL, astProp);
         return NOT_ASSIGNABLE;
@@ -4811,6 +4860,60 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //   - regex
     //   - template
     //   - group (but not arrow as per the Supplemental Syntax)
+
+    if (curtype === $IDENT) {
+      let asyncToken = curtok;
+      if (curc === $$A_61) {
+        if (curtok.str === 'await') {
+          let identToken = curtok;
+          ASSERT_skipDiv('await', lexerFlags); // `new await / foo`
+          parseAwaitExpression(lexerFlags, identToken, IS_NEW_ARG, NO_ASSIGNMENT, 'callee');
+          return;
+        } else if (curtok.str === 'async') {
+
+          ASSERT_skipDiv('async', lexerFlags); // `new async / foo`
+
+          if (curc === $$PAREN_L_28) {
+            // hack to quickly detect the `new async()` edge case
+            // - `new async();`
+            // - `new async() => x`     (error because arrow is an AssignmentExpression and new does not accept that)
+
+            AST_setIdent(astProp, asyncToken);
+            // we already know what's going to be parsed next so let's just get to it
+            parseCallArgs(lexerFlags | LF_NO_ASI, 'arguments');
+
+            if (curtok.str === '=>') THROW('The `new` keyword can not be applied to an arrow');
+            return;
+          } else if (curc === $$F_66 && curtok.str === 'function') {
+            // - `new async function`
+
+            // can async functions even serve as constructors?
+            // and if the answer is "no", is this syntactically restricted somehow?
+
+            if (curtok.nl) {
+              // This _must_ mean async is a regular var name so just parse an expression now.
+              // - `async \n ident...` ->
+              //   - `async; foo;`
+              //   - `async in obj`
+              //   - `async instanceof obj`
+              //   - `async; function f(){}`
+              return parseExpressionAfterAsyncAsVarName(lexerFlags, IS_EXPRESSION, asyncToken, IS_NEW_ARG, NO_ASSIGNMENT, astProp);
+            }
+
+            // - `async function f(){}`
+
+            ASSERT_skipAny('function', lexerFlags); // ident or `(`
+
+            parseFunctionExpression(lexerFlags, asyncToken ? WAS_ASYNC : NOT_ASYNC, astProp);
+
+            return;
+          } else {
+            parseExpressionAfterAsyncAsVarName(lexerFlags, IS_EXPRESSION, asyncToken, IS_NEW_ARG, NO_ASSIGNMENT, astProp);
+            return;
+          }
+        }
+      }
+    }
 
     // parse at least a headbody
     // then parse any number of dot/dynamic properties up to and including but not necessary one call
@@ -5019,7 +5122,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (curc === $$SQUARE_L_5B) {
       AST_wrapClosed(astProp, 'MemberExpression', 'object');
       ASSERT_skipRex('[', lexerFlags);
-      parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'property');
+      parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'property'); // no comma (!)
       skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
       AST_set('computed', true); // x[y] vs x.y
       AST_close('MemberExpression');
@@ -5027,7 +5130,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curc === $$PAREN_L_28) {
       ASSERT(curtype === $PUNCTUATOR && curtok.str === '(');
-      ASSERT_skipRex('(', lexerFlags);
       if (isNewArg) { // exception for `new`
         parseCallArgs(lexerFlags | LF_NO_ASI, 'arguments');
         // new stops parsing the rhs after the first call args
@@ -5138,6 +5240,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function parseCallArgs(lexerFlags, astProp) {
+    ASSERT_skipRex('(', lexerFlags);
     if (curc === $$PAREN_R_29) {
       ASSERT_skipDiv(')', lexerFlags);
     } else {
@@ -5242,34 +5345,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'body');
     }
   }
-  function parseGroupToplevels(lexerFlags, asyncKeywordPrefixed, asyncStmtOrExpr, allowAssignment, astProp) {
+  function parseGroupToplevels(lexerFlags, asyncStmtOrExpr, allowAssignment, asyncToken, newlineAfterAsync, astProp) {
     ASSERT(parseGroupToplevels.length === arguments.length, 'expecting args');
+    skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags); // `(/x/);`
+    return _parseGroupToplevels(lexerFlags, asyncStmtOrExpr, allowAssignment, NOT_DELETE_ARG, asyncToken, newlineAfterAsync, astProp);
+  }
+  function _parseGroupToplevels(lexerFlagsBeforeParen, asyncStmtOrExpr, allowAssignment, isDeleteArg, asyncToken, newlineAfterAsync, astProp) {
+    ASSERT(arguments.length === _parseGroupToplevels.length, 'arg count');
     ASSERT(typeof astProp === 'string');
+
     // = parseGroup, = parseArrow
-    // will parse `=>` tail if it exists
+    // will parse `=>` tail if it exists (except in async edge cases)
     // must return IS_ASSIGNABLE or NOT_ASSIGNABLE
     // returns whether the parsed expression is assignable
-    // if async prefixed, it parses whether it was an arrow or not
-    // (meh, this should be fine as an async prefixed group is never assignable ->
-    //   `async\n(x)=y` -> `async(x)=y`
-    //   `async\n(x)=>y` -> async; (x)=>y`
+    // If this was `async` prefixed then the callsite will deal with the tail, arrow or not. This is because
+    // it needs to take care of the `async \n (x) => z` case and clean up the AST properly.
 
     // notable remarks;
     // - empty group `()` is the only one that must be followed by an arrow (`=>`) unless async
-    // - if a group has a top level ident it is only assignable if it doesn't also have a comma, otherwise it never is
-    // - the `(x)` case is the only case to be compoundable
-    // - if rest-pattern occurs anywhere as part of the group the group _must_ be an arrow
+    // - if a group has a top level assignable it is only ever assignable if the group does not have a comma
+    // - the `(x)` case is the only case to be compoundable (so `(x.y)+=z` is not valid)
+    // - if rest-pattern occurs anywhere as part of the group then the group _must_ be an arrow
     // - objects and arrows in a group are never assignable (you can only destructure by <arr/obj, `=`, init>, no group)
 
-    let lhpToken = curtok; // used to check .nl in case of async arrow
-
-    skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags); // `(/x/);`
-
-    return _parseGroupToplevels(lexerFlags, asyncKeywordPrefixed, asyncStmtOrExpr, allowAssignment, lhpToken, NOT_DELETE_ARG, astProp);
-  }
-  function _parseGroupToplevels(lexerFlagsBeforeParen, asyncKeywordPrefixed, asyncStmtOrExpr, allowAssignment, lhpToken, isDeleteArg, astProp) {
-    ASSERT(arguments.length === _parseGroupToplevels.length, 'arg count');
-    ASSERT(typeof astProp === 'string');
     // this function assumes you've just skipped the paren and are now in the first token of a group/arrow/async-call
     // this is either the arg of a delete, or any other group opener that may or may not have been prefixed with async
     let lexerFlags = lexerFlagsBeforeParen | LF_NO_ASI;
@@ -5290,60 +5388,54 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc === $$PAREN_R_29) {
       // special case; the `()` here must be the arrow header or (possibly) an `async()` function call
-      skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags); // must be => except for `async()/foo`
-      lexerFlags = lexerFlagsBeforeParen; // asi can happen again!
-      if (curtok.str !== '=>') {
-        if (asyncKeywordPrefixed) {
-          // `async()` is okay
-          // - `async \n ()`
-          // - `return async \n ()`
-          // - `(async \n ())`
-          AST_setIdent(astProp, asyncKeywordPrefixed);
-          AST_wrapClosed(astProp, 'CallExpression', 'callee');
-          AST_set('arguments', []);
-          AST_close('CallExpression');
-          let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
-          // TODO: do we need to fix `(foo + (bar + boo) + ding)` ? propagating the lhs-paren state
-          if (asyncStmtOrExpr === IS_STATEMENT) assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
-          ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not async prefixed');
-          return assignable;
-        }
-        THROW('Empty group must indicate an arrow'); // or async() or await()...
-      } else if (curtok.nl) {
-        // this is a little bit of a weird error since there can't be ambiguity if this is an error anyways *shrug*
-        THROW('The arrow token `=>` is a restricted production and cannot have a newline preceeding it');
-      } else if (asyncKeywordPrefixed && lhpToken.nl) {
-        ASSERT(asyncKeywordPrefixed.str === 'async', 'async keyword');
-        ASSERT(curtok.str === '=>', 'this is an async arrow function');
-        ASSERT(lhpToken.str === '(', 'this is the lhp of the parameter of the arrow');
-        // - `( async \n () => x )`
-        // - `return  ( async \n () => x )`
+
+      if (asyncToken !== UNDEF_ASYNC) {
+        skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags); // can be `async() / x`
+        // all async prefixed cases are handled by special async call site
+        // - `async ();`
+        // - `async () => x`
+        // - `async \n ();`
+        // - `async \n () => x`
+        // - `async () \n => x`
+        // - `(async ());`
+        // - `(async () => x)`
+        // - `(async \n ());`
         // - `(async \n () => x)`
-        ASSERT(isDeleteArg === NOT_DELETE_ARG, 'the async newline delete case should be handled elsewhere');
-        return backtrackForCrappyAsync(lexerFlags, asyncKeywordPrefixed, lhpToken, astProp);
-      } else {
-        // - `f(async ()=>c)`
-        // - `( \n () => x )`
-        // - `return  ( \n () => x )`
-        // - `( \n () => x)`
+        // - `(async () \n => x)`
+
+        return parseAfterAsyncGroup(lexerFlagsBeforeParen, scoop, asyncStmtOrExpr, allowAssignment, ARGS_SIMPLE, false, newlineAfterAsync, MIGHT_DESTRUCT, true, asyncToken, astProp);
       }
 
-      if (allowAssignment === NO_ASSIGNMENT) THROW('Was parsing something that could not be an assignment expression but found an arrow');
+      skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags); // next must be `=>`
+
+      lexerFlags = lexerFlagsBeforeParen; // reset no_asi state to before the group
+      if (curtok.str !== '=>') {
+        THROW('Empty group must indicate an arrow, async(), or await()');
+      } else if (curtok.nl) {
+        // arrows with newlines are always an error
+        // - `() \n => x`
+        THROW('The arrow token `=>` is a restricted production and cannot have a newline preceding it');
+      }
+
+      // - `() => x`
+      // - `( () => x )`
+      // - `return () => x`
+
+      if (allowAssignment === NO_ASSIGNMENT) {
+        THROW('Was parsing something that could not be an assignment expression but found an arrow');
+      }
+
       AST_open(astProp, 'ArrowFunctionExpression');
       AST_set('params', []);
-      parseArrowFromPunc(
-        lexerFlags,
-        scoop,
-        asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC,
-        ARGS_SIMPLE
-      );
+      parseArrowFromPunc(lexerFlags, scoop, NOT_ASYNC, ARGS_SIMPLE);
       AST_close('ArrowFunctionExpression');
+
       if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
       return NOT_ASSIGNABLE;
     }
 
     let foundSingleIdentWrap = false; // did we find `(foo)` ?
-    let rootAstProp = astProp; // astprop changes after the first comma when the group becomes a sequenceexpression
+    let rootAstProp = astProp; // astprop changes after the first comma when the group becomes a SequenceExpression
     let destructible = MIGHT_DESTRUCT; // this function checks so many things :(
     let assignable = NOT_ASSIGNABLE; // true iif first expr is assignable, always false if the group has a comma
     let toplevelComma = false;
@@ -5407,7 +5499,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // the token following this ident is not one valid in a destructuring assignment (unlike array/object)
           // parse a regular ident expression here
           // - `(typeof x)`
-          simpleArgs = ARGS_COMPLEX;
           destructible |= CANT_DESTRUCT;
           assignable = parseExpressionAfterIdent(lexerFlags, identToken, BINDING_TYPE_NONE, allowAssignment, astProp);
         }
@@ -5459,23 +5550,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
-        // top level group dots kinda have to bo rest but there is an `async` edge case where it could be spread
+        // top level group dots kinda have to be rest but there is an `async` edge case where it could be spread
         simpleArgs = ARGS_COMPLEX;
-        destructible |= parseArrowableTopRest(lexerFlags, scoop, asyncKeywordPrefixed, astProp);
-        if (asyncKeywordPrefixed) {
-          // could be `async (...x) => x` and `async(...x);`
+        destructible |= parseArrowableTopRest(lexerFlags, scoop, asyncToken !== UNDEF_ASYNC, astProp);
+        if (asyncToken !== UNDEF_ASYNC) {
+          // - `async(...x);`
+          // - `async (...x) => x`
           if (curc !== $$PAREN_R_29) {
             destructible |= CANT_DESTRUCT; // now the dots in async toplevel must mean spread/call
           }
         } else {
+          // - `(...x);`
+          // - `(...x) => x`
           destructible |= MUST_DESTRUCT; // dots in async-less toplevel group must mean arrow
-          break; // must be last element in arrow header
+          // must be last element in arrow header
+          break;
         }
       }
       else {
         // arbitrary expression that is not destructible at the toplevel of a group
         destructible |= CANT_DESTRUCT;
-        simpleArgs = ARGS_COMPLEX;
 
         assignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, astProp);
         if (curc === $$COMMA_2C) {
@@ -5492,24 +5586,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
         skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
 
-        if (asyncKeywordPrefixed) {
-          // `async(x,y,z)` without arrow
+        if (asyncToken !== UNDEF_ASYNC) {
+          // the next token can not start something that appears in an arrow head so must be an async call
+          // `async("foo".bar);`
+          // `async("foo".bar) => x`
 
-          // <SCRUB AST>
-          let node = AST_replaceClosed(rootAstProp, 'CallExpression', toplevelComma ? 'SequenceExpression' : _path[_path.length - 1][astProp].type);
-          AST_setIdent('callee', asyncKeywordPrefixed);
-          AST_set('arguments', toplevelComma ? node.expressions : [node]);
-          AST_close('CallExpression');
-          // </SCRUB AST>
-
-          assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
-          if (asyncStmtOrExpr === IS_STATEMENT) assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
-
-          ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not prefixed with async');
-          return NOT_ASSIGNABLE
+          return parseAfterAsyncGroup(lexerFlagsBeforeParen, scoop, asyncStmtOrExpr, allowAssignment, simpleArgs, toplevelComma, newlineAfterAsync, CANT_DESTRUCT, false, asyncToken, rootAstProp);
         }
 
-        if (isDeleteArg === IS_DELETE_ARG) return assignable === IS_ASSIGNABLE ? NOT_SINGLE_IDENT_WRAP_A : NOT_SINGLE_IDENT_WRAP_NA;
+        if (isDeleteArg === IS_DELETE_ARG) {
+          return assignable === IS_ASSIGNABLE ? NOT_SINGLE_IDENT_WRAP_A : NOT_SINGLE_IDENT_WRAP_NA;
+        }
         return assignable;
       }
 
@@ -5546,6 +5633,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = lexerFlagsBeforeParen; // ASI can happen again
     verifyDestructible(destructible);
 
+    if (asyncToken !== UNDEF_ASYNC) {
+      // `async(a);`
+      // `async(a) => x`
+      return parseAfterAsyncGroup(lexerFlags, scoop, asyncStmtOrExpr, allowAssignment, simpleArgs, toplevelComma, newlineAfterAsync, destructible, false, asyncToken, rootAstProp);
+    }
+
     if (curtok.str === '=>') {
       // arrow function
       if (curtok.nl) {
@@ -5555,60 +5648,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (allowAssignment === NO_ASSIGNMENT) THROW('Was parsing a value that could not be AssignmentExpression but found an arrow');
       if (hasAllFlags(destructible, CANT_DESTRUCT)) THROW('The left hand side of the arrow is not destructible so arrow is illegal');
       if (hasAllFlags(destructible, DESTRUCT_ASSIGN_ONLY)) THROW('The left hand side of the arrow can only be destructed through assignment so arrow is illegal');
-      if (asyncKeywordPrefixed) {
-        ASSERT(lhpToken.str === '(', 'the first token in this parsing function should be `(`, it was: ' + lhpToken);
-        if (lhpToken.nl) {
-          // this is `async \n () => x` which means `async` is now an ident and ASI has to occur.
-          // ASI may not be able to occur (like `[async \n () => x]` is an error) and this is difficult to detect
-          // This is one super uncommon edge case I'll just backtrack for
-          ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not prefixed by async');
-          return backtrackForCrappyAsync(lexerFlagsBeforeParen);
-        }
-      }
-
-      // <SCRUB AST>
-      AST_wrapClosedIntoArray(rootAstProp, 'ArrowFunctionExpression', 'params');
-
-      let top = _path[_path.length - 1];
-      if (toplevelComma) {
-        ASSERT(top.params instanceof Array, 'these params should be an array');
-        let params = top.params[top.params.length - 1];
-        ASSERT(params.type === 'SequenceExpression', 'if toplevelComma then this is a sequence', rootAstProp, params);
-        ASSERT(params.expressions instanceof Array, 'if toplevelComma then node is a sequence and .expressions should be an array');
-        top.params = params.expressions;
-      }
-      ASSERT(Array.isArray(top.params), 'params should now be an array in any case');
-      let params = top.params;
-      for (let i=0; i<params.length; ++i) {
-        AST__destruct(params[i]);
-      }
-      // </SCRUB AST>
-
-      // must assert unique parameters now
-      if (SCOPE_verifyLexical(lexerFlags, scoop, true)) THROW('Arrow had at least one duplicate parameter name bound');
-
-      parseArrowFromPunc(lexerFlags, scoop, asyncKeywordPrefixed ? WAS_ASYNC : NOT_ASYNC, simpleArgs);
-
-      AST_close('ArrowFunctionExpression');
+      parseArrowAfterGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, rootAstProp);
 
       if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
       return NOT_ASSIGNABLE;
-    }
-    else if (asyncKeywordPrefixed) {
-      // `async(x,y,z)` without arrow
-
-      // <SCRUB AST>
-      let node = AST_replaceClosed(rootAstProp, 'CallExpression', toplevelComma ? 'SequenceExpression' : _path[_path.length - 1][astProp].type);
-      AST_setIdent('callee', asyncKeywordPrefixed);
-      AST_set('arguments', toplevelComma ? node.expressions : [node]);
-      AST_close('CallExpression');
-      // </SCRUB AST>
-
-      assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, rootAstProp);
-      if (asyncStmtOrExpr === IS_STATEMENT) parseExpressionFromOp(lexerFlags, assignable, rootAstProp);
-
-      ASSERT(isDeleteArg === NOT_DELETE_ARG, 'delete args are not prefixed by async');
-      return NOT_ASSIGNABLE
     }
     else if (hasAllFlags(destructible, MUST_DESTRUCT)) {
       THROW('The group had to be destructed but was not followed by an arrow (this is an invalid assignment target)');
@@ -5652,6 +5695,167 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     // a group. those still exist?
     return assignable;
+  }
+  let asyncExceptionStack = undefined;
+  let asyncExceptionSimple = false;
+  function parseAfterAsyncGroup(lexerFlags, scoop, fromStmtOrExpr, allowAssignment, simpleArgs, toplevelComma, newlineAfterAsync, groupDestructible, zeroArgs, asyncToken, astProp) {
+    ASSERT(parseAfterAsyncGroup.length === arguments.length, 'arg count');
+    ASSERT(typeof groupDestructible === 'number', 'destructible num')
+
+    // this is called after parsing a group that followed an `async` when it might be an async arrow
+    if (curtok.str === '=>') {
+      if (curtok.nl) {
+        THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
+      } else if (newlineAfterAsync) {
+        // retrofix ast, make async a var name, apply asi, and start a regular arrow in a new statement
+        // - `async \n (foo) => foo`
+        // - `let x = async \n (foo) => foo`
+        // - `(async \n (foo) => foo)`
+
+        // So the problem right now is that there could be any number of nodes open and they will be asserted to
+        // close. So even though we could easily close everything here and now, we can't prevent those closes from
+        // triggering an assertion error. We also can't reliably rewind the lexer since that'd be way too much
+        // work for this case. And we have already parsed the group which may be of any size.
+        // What we could do is introduce some kind of toplevel stack where we stash the group we just parsed. We already
+        // know the next token will be an arrow. There's no valid prodution that might parse it so we can just return
+        // here and let the current toplevel cause an asi. Then the next toplevel would first check this stack and use
+        // its contents as an exception to start parsing an arrow.
+
+        // <SCRUB AST>
+        if (zeroArgs) {
+          asyncExceptionStack = []; // next toplevel should pick this up
+        } else {
+          let node = _path[_path.length - 1];
+          let args = node[astProp];
+          if (args instanceof Array) args = args[0];
+          ASSERT(args, 'should have parsed someting v1');
+          if (args.type === 'SequenceExpression') args = args.expressions;
+          ASSERT(args, 'should have parsed someting v2');
+          asyncExceptionStack = args; // next toplevel should pick this up
+          if (node[astProp] instanceof Array) node[astProp].lengh = 0;
+          else node[astProp] = undefined;
+        }
+        asyncExceptionSimple = simpleArgs;
+        curtok.nl = true; // enable ASI because we knew opening paren had it. we also know hte arrow had no nl so restore is easy.
+        // </SCRUB AST>
+
+        AST_setIdent(astProp, asyncToken, true);
+      } else if (allowAssignment === NO_ASSIGNMENT) {
+        THROW('Was parsing a value that could not be AssignmentExpression but found an arrow');
+      } else if (hasAnyFlag(groupDestructible, CANT_DESTRUCT | DESTRUCT_ASSIGN_ONLY)) {
+        // - `async (...x, y) => x`            (rest must be last element and spread cannot be in arrow head)
+        // - `async ({x=z}, y) => x;`          (shorthand default only valid as assign, never valid here)
+        if (curtok.str === '=>') {
+          // - `async (a, ...b=fail) => a;`
+          THROW('The group was not destructible and yet the next token is an arrow');
+        }
+        TODO
+      } else if (zeroArgs) {
+        // - `async () => foo`
+        parseArrowAfterAsyncNoArgGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, astProp);
+      } else {
+        // - `async (foo) => foo`
+        parseArrowAfterGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, astProp);
+      }
+    }
+    else {
+
+      if (zeroArgs) {
+        // - `async ();`
+        // - `async \n ();`
+
+        AST_open(astProp, 'CallExpression');
+        AST_setIdent('callee', asyncToken);
+        AST_set('arguments', []);
+        AST_close('CallExpression');
+      } else {
+        // - `async (a, b, c);`
+        // - `async \n (a, b, c);`
+
+        // <SCRUB AST>
+        let node = _path[_path.length - 1];
+        let args = node[astProp];
+        if (args instanceof Array) args = args[0];
+        ASSERT(args, 'should have parsed someting v1');
+        if (args.type === 'SequenceExpression') args = args.expressions;
+        else args = [args];
+        ASSERT(args, 'should have parsed someting v2');
+        if (node[astProp] instanceof Array) node[astProp] = [];
+        else node[astProp] = undefined;
+
+        // TODO: verify the args
+
+        AST_open(astProp, 'CallExpression', true);
+        AST_setIdent('callee', asyncToken);
+        AST_set('arguments', args);
+        AST_close('CallExpression');
+        // </SCRUB AST>
+      }
+
+      let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_TARGET, astProp);
+      if (fromStmtOrExpr === IS_STATEMENT) {
+        // in expressions operator precedence is handled elsewhere. in statements this is the start,
+        assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
+        parseSemiOrAsi(lexerFlags);
+      }
+
+      return assignable;
+
+      // return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncToken, NOT_NEW_TARGET, ALLOW_ASSIGNMENT, astProp)
+    }
+
+    if (fromStmtOrExpr === IS_STATEMENT) {
+      parseSemiOrAsi(lexerFlags);
+    }
+
+    // an async prefixed group is never assignable:
+    // - `async(x) = y`
+    // - `async \n (x) = y` -> `async(x) = y`
+    // - `async(x) => y`
+    // - `async \n (x) => y` -> `async; (x) => y`
+    return NOT_ASSIGNABLE;
+  }
+  function parseArrowAfterAsyncNoArgGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, astProp) {
+    ASSERT(parseArrowAfterAsyncNoArgGroup.length === arguments.length, 'arg count');
+
+    // The ast should look something like this now:
+    // {
+    //   type: 'ExpressionStatement',
+    //     expression: {type: 'ArrayExpression', elements: []},
+    // },
+    // The `async` has not yet been consumed and we don't really need to do anything to fix it. Just parse an arrow
+    // that has no arguments and move on.
+
+    AST_open(astProp, 'ArrowFunctionExpression');
+    AST_set('params', []);
+    parseArrowFromPunc(lexerFlags, scoop, WAS_ASYNC, ARG_WAS_SIMPLE);
+    AST_close('ArrowFunctionExpression');
+  }
+  function parseArrowAfterGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, astProp) {
+    // <SCRUB AST>
+    AST_wrapClosedIntoArray(astProp, 'ArrowFunctionExpression', 'params');
+
+    let top = _path[_path.length - 1];
+    if (toplevelComma) {
+      ASSERT(top.params instanceof Array, 'these params should be an array');
+      let params = top.params[top.params.length - 1];
+      ASSERT(params.type === 'SequenceExpression', 'if toplevelComma then this is a sequence', astProp, params);
+      ASSERT(params.expressions instanceof Array, 'if toplevelComma then node is a sequence and .expressions should be an array');
+      top.params = params.expressions;
+    }
+    ASSERT(Array.isArray(top.params), 'params should now be an array in any case');
+    let params = top.params;
+    for (let i=0; i<params.length; ++i) {
+      AST__destruct(params[i]);
+    }
+    // </SCRUB AST>
+
+    // must assert unique parameters now
+    if (SCOPE_verifyLexical(lexerFlags, scoop, true)) THROW('Arrow had at least one duplicate parameter name bound');
+
+    parseArrowFromPunc(lexerFlags, scoop, !!asyncToken, simpleArgs);
+
+    AST_close('ArrowFunctionExpression');
   }
   function parseArrowableTopIdentAssign(lexerFlags, scoop, identToken, astProp) {
     ASSERT(parseArrowableTopIdentAssign.length === arguments.length, 'arg count');

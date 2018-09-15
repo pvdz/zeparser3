@@ -1274,9 +1274,30 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $IDENT, $ASI],
         });
 
-        test('async keyword', {
-          code: 'new async',
-          desc: 'okay in sloppy mode...',
+        describe('new async', _ => {
+
+          test('async keyword sans parens', {
+            code: 'new async',
+            desc: 'okay in sloppy mode...',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {type: 'Identifier', name: 'async'}
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $ASI],
+          });
+
+          test('new async empty parens', {
+            code: 'new async ()',
+            desc: 'make sure the async does not end up as a callexpression in the ast',
             ast: {
               type: 'Program',
               body: [
@@ -1290,11 +1311,569 @@ module.exports = (describe, test) =>
                 },
               ],
             },
-            tokens: [$IDENT, $IDENT, $ASI],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('new async full parens', {
+            code: 'new async (x, y)',
+            desc: 'make sure the async does not end up as a callexpression in the ast',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                    callee: {type: 'Identifier', name: 'async'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+
+          test('new async spread', {
+            code: 'new async (...x)',
+            desc: 'spread, not rest',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [
+                      {
+                        type: 'SpreadElement',
+                        argument: {type: 'Identifier', name: 'x'},
+                      },
+                    ],
+                    callee: {type: 'Identifier', name: 'async'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+
+          test('new async newline parens', {
+            code: 'new async \n ()',
+            desc: 'async function is a restricted prod and cannot have newline after it, but this is always just a call',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {type: 'Identifier', name: 'async'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test.fail('async arrow', {
+            code: 'new async () => x',
+            desc: 'cannot parse an assignment and an arrow is considered that',
+          });
+
+          test.fail('async newline arrow', {
+            code: 'new async \n () => x',
+          });
+
+          test.fail('async arrow newline', {
+            code: 'new async () \n => x',
+          });
+
+
+          test('async func', {
+            code: 'new async function(){}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('asi check async newline paren', {
+            code: 'let x = new async \n (x)',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations: [
+                    {
+                      type: 'VariableDeclarator',
+                      id: {type: 'Identifier', name: 'x'},
+                      init: {
+                        type: 'NewExpression',
+                        arguments: [{type: 'Identifier', name: 'x'}],
+                        callee: {type: 'Identifier', name: 'async'},
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+
+          test('asi check async newline arrow', {
+            code: 'let x = new async \n (x) => x',
+            throws: 'arrow',
+          });
+
+          test('asi check async paren newline arrow', {
+            code: 'let x = new async (x) \n => x',
+            throws: 'arrow',
+          });
         });
 
-        test('async func', {
-          code: 'new async function(){}',
+        describe('typeof async', _ => {
+
+          test('async keyword sans parens', {
+            code: 'typeof async',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'typeof',
+                    prefix: true,
+                    argument: {type: 'Identifier', name: 'async'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $ASI],
+          });
+
+          test('typeof async parens', {
+            code: 'typeof async ()',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'typeof',
+                    prefix: true,
+                    argument: {
+                      type: 'CallExpression',
+                      callee: {type: 'Identifier', name: 'async'},
+                      arguments: [],
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('typeof async newline parens', {
+            code: 'typeof async \n ()',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'typeof',
+                    prefix: true,
+                    argument: {
+                      type: 'CallExpression',
+                      callee: {type: 'Identifier', name: 'async'},
+                      arguments: [],
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('async arrow', {
+            code: 'typeof async () => x',
+            throws: 'arrow',
+          });
+
+          test('async newline arrow', {
+            code: 'typeof async \n () => x',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'typeof',
+                    prefix: true,
+                    argument: {type: 'Identifier', name: 'async'},
+                  },
+                },
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          });
+
+          test('async arrow newline', {
+            code: 'typeof async () \n => x',
+            throws: 'arrow',
+          });
+
+          test('async func', {
+            code: 'typeof async function(){}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'typeof',
+                    prefix: true,
+                    argument: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('asi check async newline paren', {
+            code: 'let x = typeof async \n (x)',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations: [
+                    {
+                      type: 'VariableDeclarator',
+                      id: {type: 'Identifier', name: 'x'},
+                      init: {
+                        type: 'UnaryExpression',
+                        operator: 'typeof',
+                        prefix: true,
+                        argument: {
+                          type: 'CallExpression',
+                          callee: {type: 'Identifier', name: 'async'},
+                          arguments: [{type: 'Identifier', name: 'x'}],
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+
+          test('asi check async newline arrow', {
+            code: 'let x = typeof async \n (x) => x',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations: [
+                    {
+                      type: 'VariableDeclarator',
+                      id: {type: 'Identifier', name: 'x'},
+                      init: {
+                        type: 'UnaryExpression',
+                        operator: 'typeof',
+                        prefix: true,
+                        argument: {type: 'Identifier', name: 'async'},
+                      },
+                    },
+                  ],
+                },
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'x'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          });
+
+          test('asi check async paren newline arrow', {
+            code: 'let x = typeof async (x) \n => x',
+            throws: 'arrow',
+          });
+        });
+
+        describe('delete async', _ => {
+
+          test('async keyword sans parens', {
+            code: 'delete async',
+            STRICT: {throws: 'without tail'},
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {type: 'Identifier', name: 'async'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $ASI],
+          });
+
+          test('delete async parens', {
+            code: 'delete async ()',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {
+                      type: 'CallExpression',
+                      callee: {type: 'Identifier', name: 'async'},
+                      arguments: [],
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('delete async newline parens', {
+            code: 'delete async \n ()',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {
+                      type: 'CallExpression',
+                      callee: {type: 'Identifier', name: 'async'},
+                      arguments: [],
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('async arrow', {
+            code: 'delete async () => x',
+            throws: 'arrow',
+          });
+
+          test('async newline arrow', {
+            code: 'delete async \n () => x',
+            STRICT: {throws: 'tail'},
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {type: 'Identifier', name: 'async'},
+                  },
+                },
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          });
+
+          test('async arrow newline', {
+            code: 'delete async () \n => x',
+            throws: 'arrow',
+          });
+
+          test('async func', {
+            code: 'delete async function(){}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'UnaryExpression',
+                    operator: 'delete',
+                    prefix: true,
+                    argument: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+
+          test('asi check async newline paren', {
+            code: 'let x = delete async \n (x)',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations: [
+                    {
+                      type: 'VariableDeclarator',
+                      id: {type: 'Identifier', name: 'x'},
+                      init: {
+                        type: 'UnaryExpression',
+                        operator: 'delete',
+                        prefix: true,
+                        argument: {
+                          type: 'CallExpression',
+                          callee: {type: 'Identifier', name: 'async'},
+                          arguments: [{type: 'Identifier', name: 'x'}],
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+          });
+
+          test('asi check async newline arrow', {
+            code: 'let x = delete async \n (x) => x',
+            desc: 'super edge case but `delete async; in strict mode is illegal like `delete foo;` would be',
+            STRICT: {throws: 'tail'},
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'VariableDeclaration',
+                  kind: 'let',
+                  declarations: [
+                    {
+                      type: 'VariableDeclarator',
+                      id: {type: 'Identifier', name: 'x'},
+                      init: {
+                        type: 'UnaryExpression',
+                        operator: 'delete',
+                        prefix: true,
+                        argument: {type: 'Identifier', name: 'async'},
+                      },
+                    },
+                  ],
+                },
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'x'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'x'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          });
+
+          test('asi check async paren newline arrow', {
+            code: 'let x = delete async (x) \n => x',
+            throws: 'arrow',
+          });
+        });
+
+        test('await var', {
+          code: 'new await',
+          STRICT: {throws: 'await'},
           ast: {
             type: 'Program',
             body: [
@@ -1303,23 +1882,18 @@ module.exports = (describe, test) =>
                 expression: {
                   type: 'NewExpression',
                   arguments: [],
-                  callee: {
-                    type: 'FunctionExpression',
-                    generator: false,
-                    async: true,
-                    id: null,
-                    params: [],
-                    body: {type: 'BlockStatement', body: []},
-                  },
+                  callee: {type: 'Identifier', name: 'await'},
                 },
               },
             ],
           },
-          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          tokens: [$IDENT, $IDENT, $ASI],
         });
 
-        test('async parens', {
-          code: 'new async()',
+        test('await call', {
+          code: 'new await()',
+          desc: 'NOT a call expression!',
+          STRICT: {throws: true},
           ast: {
             type: 'Program',
             body: [
@@ -1328,11 +1902,7 @@ module.exports = (describe, test) =>
                 expression: {
                   type: 'NewExpression',
                   arguments: [],
-                  callee: {
-                    type: 'CallExpression',
-                    callee: {type: 'Identifier', name: 'async'},
-                    arguments: [],
-                  },
+                  callee: {type: 'Identifier', name: 'await'},
                 },
               },
             ],
@@ -1340,22 +1910,144 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
         });
 
-        // TODO: one rabbit hole at a time please
-        // test('await var', {
-        //   code: 'new await',
-        // });
+        test('await expression fail', {
+          code: 'new await foo',
+          desc: 'not await expression so await is var name so it needs asi after `await` which fails',
+          STRICT: {throws: 'await'},
+          throws: 'asi',
+        });
 
-        // test('await call', {
-        //   code: 'new await()',
-        // });
+        test('await expression in async arrow in new', {
+          code: 'async () => new await x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: true,
+                  expression: true,
+                  body: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'AwaitExpression',
+                      argument: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $ASI],
+        });
 
-        // test('await expression fail', {
-        //   code: 'new await foo',
-        // });
+        test('new await call who gets parens', {
+          code: 'async () => new await x()',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: true,
+                  expression: true,
+                  body: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'AwaitExpression',
+                      argument: {
+                        type: 'CallExpression',
+                        callee: {type: 'Identifier', name: 'x'},
+                        arguments: [],
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
 
-        // test('await expression good', {
-        //   code: 'async function f(){ new await foo }',
-        // });
+        test('calling the new await call', {
+          code: 'async () => new await x()()',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: true,
+                  expression: true,
+                  body: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'AwaitExpression',
+                      argument: {
+                        type: 'CallExpression',
+                        callee: {
+                          type: 'CallExpression',
+                          callee: {type: 'Identifier', name: 'x'},
+                          arguments: [],
+                        },
+                        arguments: [],
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('await expression in async func in new', {
+          code: 'async function f(){ new await foo }',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: false,
+                async: true,
+                id: {type: 'Identifier', name: 'f'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'NewExpression',
+                        arguments: [],
+                        callee: {
+                          type: 'AwaitExpression',
+                          argument: {type: 'Identifier', name: 'foo'},
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $ASI, $PUNCTUATOR],
+        });
 
         test('class sans body', {
           code: 'new class',

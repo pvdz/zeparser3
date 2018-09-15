@@ -653,7 +653,35 @@ module.exports = (describe, test) =>
 
     test('inside a new', {
       code: 'async function f(){ new await x; }',
-      throws: 'new',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'AwaitExpression',
+                      argument: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test.pass('newline after await in func is ok', {
@@ -666,12 +694,73 @@ module.exports = (describe, test) =>
 
     test('new await inside array', {
       code: 'async function f(){ [new await foo] }',
-      throws: 'new',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrayExpression',
+                    elements: [
+                      {
+                        type: 'NewExpression',
+                        arguments: [],
+                        callee: {
+                          type: 'AwaitExpression',
+                          argument: {type: 'Identifier', name: 'foo'},
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR],
     });
 
     test('new await inside group', {
       code: 'async function f(){ (new await foo) }',
-      throws: 'new',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'AwaitExpression',
+                      argument: {type: 'Identifier', name: 'foo'},
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR],
     });
 
     test.pass('new await nested inside group', {
