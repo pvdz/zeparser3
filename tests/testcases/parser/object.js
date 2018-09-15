@@ -1543,7 +1543,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: ident},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -1576,12 +1576,13 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: ident},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'x'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3281,7 +3282,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -3320,7 +3321,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'get'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -3359,7 +3360,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -3374,7 +3375,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'bar'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -3433,7 +3434,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -3521,7 +3522,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'bar'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -3585,7 +3586,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -3639,7 +3640,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -3654,7 +3655,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'bar'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -3717,7 +3718,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -3809,7 +3810,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'bar'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -3873,7 +3874,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -3912,7 +3913,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -3951,7 +3952,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Literal', value: '<TODO>', raw: '123'},
                           kind: 'get',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -4001,12 +4002,13 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'a'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4040,12 +4042,13 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'get'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'a'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4079,7 +4082,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -4094,7 +4097,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'bar'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -4155,7 +4158,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -4244,7 +4247,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'bar'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -4313,7 +4316,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -4368,7 +4371,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -4383,7 +4386,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'bar'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -4448,7 +4451,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -4541,7 +4544,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'bar'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -4629,7 +4632,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Identifier', name: 'foo'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: true,
                           value: {
                             type: 'FunctionExpression',
@@ -4690,7 +4693,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -4729,7 +4732,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -4768,7 +4771,7 @@ module.exports = (describe, test) =>
                           type: 'Property',
                           key: {type: 'Literal', value: '<TODO>', raw: '123'},
                           kind: 'set',
-                          method: true,
+                          method: false,
                           computed: false,
                           value: {
                             type: 'FunctionExpression',
@@ -4824,18 +4827,17 @@ module.exports = (describe, test) =>
         throws: 'Must have left paren',
       });
 
-      // test('getters with non-zero param count', {
-      //   code: '({get foo(x){}});',
-      //   throws: 'Missing method arg',
-      // });
+      test.fail('getters with non-zero param count', {
+        code: '({get foo(x){}});',
+      });
 
-      // test('setters with zero param count', {
-      //   code: '({get foo(){}});',
-      //  });
+      test.pass('setters with zero param count', {
+        code: '({get foo(){}});',
+       });
 
-      // test('setters with two params', {
-      //   code: '({get foo(x,y){}});',
-      // });
+      test.fail('setters with two params', {
+        code: '({get foo(x,y){}});',
+      });
 
       describe('dont allow semi because it shares code with class', _ => {
 
@@ -7171,8 +7173,70 @@ module.exports = (describe, test) =>
           code: 's = {s: typeof}',
         });
 
-        test.pass('using keyword as the value (true)', {
+        test('using keyword as the value (true)', {
           code: 's = {s: true}',
+          desc: 'must be literal',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 's'},
+                  operator: '=',
+                  right: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 's'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Literal', value: true, raw: 'true'},
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('using keyword as the value (this)', {
+          code: 's = {s: this}',
+          desc: 'must be ThisExpression',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 's'},
+                  operator: '=',
+                  right: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 's'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'ThisExpression'},
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
       });
 
@@ -7194,8 +7258,70 @@ module.exports = (describe, test) =>
           code: 's = {"foo": typeof}',
         });
 
-        test.pass('using keyword as the value (true)', {
+        test('using keyword as the value (true)', {
           code: 's = {"foo": true}',
+          desc: 'must be literal',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 's'},
+                  operator: '=',
+                  right: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Literal', value: true, raw: 'true'},
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
+
+        test('using keyword as the value (this)', {
+          code: 's = {"foo": this}',
+          desc: 'must be ThisExpression',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 's'},
+                  operator: '=',
+                  right: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'ThisExpression'},
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
         });
       });
 

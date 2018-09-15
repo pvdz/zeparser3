@@ -702,6 +702,862 @@ module.exports = (describe, test) =>
       });
     });
 
+    describe('string methods', _ => {
+
+      test('class with simple ident method', {
+        code: 'class A {"x"(){}}',
+        desc: 'should parse as class method',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static ident method', {
+        code: 'class A {static "x"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                    static: true,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('regular constructor', {
+        code: 'class A {"constructor"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"constructor"'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static constructor', {
+        code: 'class A {static "constructor"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"constructor"'},
+                    static: true,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async method', {
+        code: 'class A {async "foo"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('generator method', {
+        code: 'class A {*"foo"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: true,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('getter method', {
+        code: 'class A {get "foo"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                    static: false,
+                    computed: false,
+                    kind: 'get',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('getter named set', {
+        code: 'class A {get "set"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"set"'},
+                    static: false,
+                    computed: false,
+                    kind: 'get',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static getter', {
+        code: 'class A {static get "foo"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                    static: true,
+                    computed: false,
+                    kind: 'get',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async getter method', {
+        code: 'class A {async get "foo"(){}}',
+        throws: 'left paren',
+        desc: 'setters dont syntactically support async/generator modifiers',
+      });
+
+      test('generator getter method', {
+        code: 'class A {* get "foo"(){}}',
+        throws: 'can not be generator',
+        desc: 'setters dont syntactically support async/generator modifiers',
+      });
+
+      test('setter method', {
+        code: 'class A {set "foo"(x){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                    static: false,
+                    computed: false,
+                    kind: 'set',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [{type: 'Identifier', name: 'x'}],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('setter named get', {
+        code: 'class A {set "get"(x){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"get"'},
+                    static: false,
+                    computed: false,
+                    kind: 'set',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [{type: 'Identifier', name: 'x'}],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static setter method', {
+        code: 'class A {static set "foo"(x){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                    static: true,
+                    computed: false,
+                    kind: 'set',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [{type: 'Identifier', name: 'x'}],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async setter method', {
+        code: 'class A {async set "foo"(x){}}',
+        throws: 'left paren',
+        desc: 'setters dont syntactically support async/generator modifiers',
+      });
+
+      test('generator setter method', {
+        code: 'class A {* set "foo"(x){}}',
+        throws: 'can not be generator',
+        desc: 'setters dont syntactically support async/generator modifiers',
+      });
+
+      test('class with non-special method named get, set, and async', {
+        code: 'class A {"set"(){} "get"(){} "async"(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"set"'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"get"'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '"async"'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+    });
+
+    describe('number methods', _ => {
+
+      test('class with simple ident method', {
+        code: 'class A {1(){}}',
+        desc: 'should parse as class method',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '1'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static ident method', {
+        code: 'class A {static 2(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '2'},
+                    static: true,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async method', {
+        code: 'class A {async 3(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '3'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('generator method', {
+        code: 'class A {*4(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '4'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: true,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async generator method', {
+        code: 'class A {async * 34(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '34'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: true,
+                      async: true,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('getter method', {
+        code: 'class A {get 5(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '5'},
+                    static: false,
+                    computed: false,
+                    kind: 'get',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static getter', {
+        code: 'class A {static get 6(){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '6'},
+                    static: true,
+                    computed: false,
+                    kind: 'get',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async getter method', {
+        code: 'class A {async get 7(){}}',
+        throws: 'left paren',
+        desc: 'setters dont syntactically support async/generator modifiers',
+      });
+
+      test('generator getter method', {
+        code: 'class A {* get 8(){}}',
+        throws: 'can not be generator',
+        desc: 'setters dont syntactically support async/generator modifiers',
+      });
+
+      test('setter method', {
+        code: 'class A {set 9(x){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '9'},
+                    static: false,
+                    computed: false,
+                    kind: 'set',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [{type: 'Identifier', name: 'x'}],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static setter method', {
+        code: 'class A {static set 10(x){}}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'A'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Literal', value: '<TODO>', raw: '10'},
+                    static: true,
+                    computed: false,
+                    kind: 'set',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [{type: 'Identifier', name: 'x'}],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async setter method', {
+        code: 'class A {async set 11(x){}}',
+        throws: 'left paren',
+        desc: 'setters dont syntactically support async/generator modifiers',
+      });
+
+      test('generator setter method', {
+        code: 'class A {* set 12(x){}}',
+        throws: 'can not be generator',
+        desc: 'setters dont syntactically support async/generator modifiers',
+      });
+    });
+
     describe('dynamic methods', _ => {
 
       test('without modifier', {

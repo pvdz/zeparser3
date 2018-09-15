@@ -333,6 +333,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let curc = 0;
 
   let catchforofhack = false;
+  let asyncExceptionStack = undefined;
+  let asyncExceptionSimple = false;
 
   let traceast = false;
 
@@ -5696,8 +5698,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // a group. those still exist?
     return assignable;
   }
-  let asyncExceptionStack = undefined;
-  let asyncExceptionSimple = false;
   function parseAfterAsyncGroup(lexerFlags, scoop, fromStmtOrExpr, allowAssignment, simpleArgs, toplevelComma, newlineAfterAsync, groupDestructible, zeroArgs, asyncToken, astProp) {
     ASSERT(parseAfterAsyncGroup.length === arguments.length, 'arg count');
     ASSERT(typeof groupDestructible === 'number', 'destructible num')
@@ -6431,7 +6431,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             case 'null':
             case 'this':
             case 'super':
-              // reserved keyword, not destructible. will throw if current state must destruct
               destructible |= CANT_DESTRUCT;
               break;
             case 'yield':
@@ -6456,32 +6455,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           ASSERT_skipDiv($IDENT, lexerFlags); // this is `{foo: bar` and could be `{foo: bar/x`
           if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=') {
             destructible |= CANT_DESTRUCT;
-
-            AST_open(astProp, 'Property');
-            AST_setLiteral('key', litToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            parseExpressionAfterIdent(lexerFlags, nameBinding, bindingType, ALLOW_ASSIGNMENT, 'value');
-            AST_set('shorthand', false);
-            AST_close('Property');
-          } else {
-            AST_open(astProp, 'Property');
-            AST_setLiteral('key', litToken);
-            AST_set('kind', 'init'); // only getters/setters get special value here
-            AST_set('method', false);
-            AST_set('computed', false);
-            parseExpressionAfterIdent(lexerFlags, nameBinding, bindingType, ALLOW_ASSIGNMENT, 'value');
-            AST_set('shorthand', false);
-            AST_close('Property');
           }
-        }
-        else if (curc === $$SQUARE_L_5B) {
-          // ({35: <array destruct>
+
           AST_open(astProp, 'Property');
           AST_setLiteral('key', litToken);
           AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', false);
+          AST_set('method', false); // only the {x(){}} shorthand gets true here
+          AST_set('computed', false);
+          parseExpressionAfterIdent(lexerFlags, nameBinding, bindingType, ALLOW_ASSIGNMENT, 'value');
+          AST_set('shorthand', false);
+          AST_close('Property');
+        }
+        else if (curc === $$SQUARE_L_5B) {
+          // ({ident: <array destruct>
+          AST_open(astProp, 'Property');
+          AST_setLiteral('key', litToken);
+          AST_set('kind', 'init'); // only getters/setters get special value here
+          AST_set('method', false); // only the {x(){}} shorthand gets true here
           AST_set('computed', false);
           destructible |= parseArrayLiteralPattern(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, 'value');
           // BUT, could also be ({ident: [foo, bar].join('')}) which is not destructible, so confirm next token
@@ -6497,7 +6487,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_open(astProp, 'Property');
           AST_setLiteral('key', litToken);
           AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', false);
+          AST_set('method', false); // only the {x(){}} shorthand gets true here
           AST_set('computed', false);
           destructible |= parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, 'value');
           // BUT, could also be ({ident: {foo:bar}.toString()) which is not destructible, so confirm next token
@@ -6515,7 +6505,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_open(astProp, 'Property');
           AST_setLiteral('key', litToken);
           AST_set('kind', 'init'); // only getters/setters get special value here
-          AST_set('method', false);
+          AST_set('method', false); // only the {x(){}} shorthand gets true here
           AST_set('computed', false);
           parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'value');
           AST_set('shorthand', false);
@@ -6671,7 +6661,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
 
         ASSERT(starToken.str === '*');
-        _parseDynamicProperty(lexerFlags, isClassMethod, staticToken, starToken, undefined, astProp);
+        _parseComputedModifierMethod(lexerFlags, isClassMethod, staticToken, starToken, undefined, astProp);
       }
       else {
         THROW('Invalid objlit key character after generator star');
@@ -6736,16 +6726,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let destructible = MIGHT_DESTRUCT;
 
     if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
+      // property shorthand; `{ident}=x` is valid, x={y} is also valid
+      // - `{ident}`
+      // - `{ident = expr}`
+      // - `{true}`           illegal
+      // - `{eval}`           ok as it is not a "reserved word"
+
       if (isClassMethod) {
         if (curc === $$COMMA_2C) THROW('Classes do not use commas');
         THROW('Class members have to be methods, for now');
       }
-
-      // property shorthand; `{ident}=x` is valid, x={y} is also valid
-      // - {a}
-      // - {a, ...}
-      // - {true}       illegal
-      // - {eval}       ok, it is not a "reserved word"
 
       // https://tc39.github.io/ecma262/#prod-ObjectLiteral
       // https://tc39.github.io/ecma262/#prod-PropertyDefinitionList
@@ -6772,7 +6762,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_open(astProp, 'Property');
       AST_setIdent('key', identToken);
       AST_set('kind', 'init'); // only getters/setters get special value here
-      AST_set('method', false);
+      AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
       AST_set('computed', false);
       AST_setIdent('value', identToken);
       if (curc === $$IS_3D && curtok.str === '=') {
@@ -6818,7 +6808,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'Property');
         AST_setIdent('key', identToken);
         AST_set('kind', 'init'); // only getters/setters get special value here
-        AST_set('method', false);
+        AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
         AST_set('computed', false);
 
         // use the rhs of the colon as identToken now
@@ -6853,7 +6843,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'Property');
         AST_setIdent('key', identToken);
         AST_set('kind', 'init'); // only getters/setters get special value here
-        AST_set('method', false);
+        AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
         AST_set('computed', false);
         let nowDestruct = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, 'value');
         destructible |= nowDestruct;
@@ -6870,7 +6860,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'Property');
         AST_setIdent('key', identToken);
         AST_set('kind', 'init'); // only getters/setters get special value here
-        AST_set('method', false);
+        AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
         AST_set('computed', false);
         let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, 'value');
         destructible |= nowDestruct;
@@ -6885,7 +6875,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'Property');
         AST_setIdent('key', identToken);
         AST_set('kind', 'init'); // only getters/setters get special value here
-        AST_set('method', false);
+        AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
         AST_set('computed', false);
         parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'value');
         AST_set('shorthand', false);
@@ -6905,7 +6895,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       destructible |= CANT_DESTRUCT;
 
-      parseDynamicProperty(lexerFlags, isClassMethod, isStatic, undefined, identToken, astProp);
+      parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, undefined, identToken, astProp);
     }
     else if (curc === $$PAREN_L_28) {
       // method shorthand
@@ -6993,7 +6983,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, identToken, curtok, isClassMethod, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
       } else if (curc === $$SQUARE_L_5B) {
         // `class x {    async *[y](){}    }`
-        parseDynamicProperty(lexerFlags, isClassMethod, isStatic, starToken, identToken, astProp);
+        parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, starToken, identToken, astProp);
       } else {
         THROW('Invalid key token');
       }
@@ -7036,18 +7026,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return destructible;
   }
-  function parseDynamicProperty(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp) {
-    ASSERT(parseDynamicProperty.length === arguments.length, 'arg count');
+  function parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp) {
+    ASSERT(parseComputedModifierMethod.length === arguments.length, 'arg count');
 
     // skip dynamic part first because we need to assert that we're parsing a method
     ASSERT_skipRex('[', lexerFlags); // next is expression
     parseExpression(lexerFlags, ALLOW_ASSIGNMENT, astProp);
-    skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is (
+    skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is ( or :
 
-    _parseDynamicProperty(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp);
+    _parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp);
   }
-  function _parseDynamicProperty(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp) {
-    ASSERT(_parseDynamicProperty.length === arguments.length, 'arg count');
+  function _parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp) {
+    ASSERT(_parseComputedModifierMethod.length === arguments.length, 'arg count');
     let modifier = modifierIdentToken ? modifierIdentToken.str : '';
 
     let generatorState = (isGenerator && isGenerator.str === '*') ? WAS_GENERATOR : NOT_GENERATOR;
@@ -7071,7 +7061,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         kindValue = isClassMethod === IS_CLASS_METHOD ? 'method' : 'init';
       }
     } else {
-      kind = NOT_GETSET;
       kindValue = isClassMethod === IS_CLASS_METHOD ? 'method' : 'init';
     }
 
@@ -7086,7 +7075,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       AST_wrapClosed(astProp, 'Property', 'key');
       AST_set('kind', kindValue); // only getters/setters get special value here
-      AST_set('method', true);
+      AST_set('method', kind === NOT_GETSET);
       AST_set('computed', true);
       parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, kind, NOT_FUNCTION_STATEMENT, 'value');
       AST_set('shorthand', false);
@@ -7437,7 +7426,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else {
         AST_set('kind', 'init'); // classes get methods, objects get init
       }
-      AST_set('method', true);
+      AST_set('method', isGetSet === NOT_GETSET); // getters and setters are not considered methods here
       AST_set('computed', !!isDynamic);
 
       ASSERT(curc === $$PAREN_L_28, 'should have parsed everything before the method args now');
@@ -7446,25 +7435,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('shorthand', false);
       AST_close('Property');
     }
-  }
-
-  function backtrackForCrappyAsync(lexerFlags) {
-    // heads up. difficult situation to explain here.
-    // this is the particular case of `async \n (..) => ..` which means `async` is an actually a plain `ident` (I
-    // think this is always dead code?). We need to reset the parser/lexer state and parse the group as call params
-    // instead.
-
-    if (hasAllFlags(lexerFlags, LF_NO_ASI)) {
-      // `if (async ↵ () => x) x`
-      THROW('Async newline edge case requires ASI but ASI is illegal here');
-    }
-
-    if (hasAllFlags(lexerFlags, LF_DO_WHILE_ASI)) {
-      THROW('Tried to parse async arrow inside do-while with newlines in bad positions inside the header... (best guess)');
-    }
-
-    // I can't easily fix the AST. :(
-    THROW('Stop using `async` as a var name. Or remove that newline as it is not legal.');
   }
 
   // <SCRUB AST>
