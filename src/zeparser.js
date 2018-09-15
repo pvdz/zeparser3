@@ -6355,7 +6355,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `({static, y}=x)`
           // - `({static(){}})`
           destructible = parseObjectLikePartFromIdent(lexerFlags, scoop, bindingType, isClassMethod, undefined, currentStaticToken, exportedNames, exportedBindings, astProp);
-        } else {
+        }
+        else {
           destructible = parseObjectLikePart(lexerFlags, scoop, bindingType, isClassMethod, currentStaticToken, exportedNames, exportedBindings, astProp);
         }
       }
@@ -6383,7 +6384,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           }
         }
 
-        let wasConstructor = isClassMethod === IS_CLASS_METHOD && staticToken === undefined && curc === $$PAREN_L_28 && identToken.str === 'constructor';
+        let wasConstructor = isClassMethod === IS_CLASS_METHOD && staticToken === undefined && curc === $$PAREN_L_28 && identToken.canon === 'constructor';
 
         destructible = parseObjectLikePartFromIdent(lexerFlags, scoop, bindingType, isClassMethod, staticToken, identToken, exportedNames, exportedBindings, astProp);
 
@@ -6517,8 +6518,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - ({5(){}})
         // - ({'foo'(){}})
         AST_setLiteral(astProp, litToken);
-        // let isConstructor = litToken.str.slice(1, -1) === 'constructor';
+
+        let wasConstructor =
+          isClassMethod === IS_CLASS_METHOD &&
+          staticToken === undefined &&
+          hasAllFlags(litToken.type, $STRING) && // technically not really necessary as numbers would never be able to contain "constructor" :)
+          litToken.str.slice(1, -1) === 'constructor';
+
         parseObjectLikeMethodAfterKey(lexerFlags, staticToken, undefined, undefined, undefined, isClassMethod, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
+
+        destructible = CANT_DESTRUCT;
+        if (wasConstructor) {
+          // this is a constructor method. we need to signal the caller that we parsed one to dedupe them
+          // to signal the caller we piggy back on the destructible which is already a bit-field
+          destructible |= DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR;
+        }
       } else {
         THROW('Object literal keys that are strings or numbers must be a method or have a colon: ' + curtok);
       }
@@ -6648,7 +6662,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         destructible |= CANT_DESTRUCT;
 
         AST_setLiteral(astProp, litToken);
-        // let isConstructor = litToken.str.slice(1, -1) === 'constructor';
         parseObjectLikeMethodAfterKey(lexerFlags, staticToken, starToken, undefined, undefined, isClassMethod, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
       }
       else if (curc === $$SQUARE_L_5B) {
@@ -7013,7 +7026,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex(litToken.str, lexerFlags); // next is `(`
 
       AST_setLiteral(astProp, litToken);
-      // let isConstructor = identToken.str.slice(1, -1) === 'constructor';
       parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, identToken, curtok, isClassMethod, NOT_DyNAMIC_PROPERTY, kind, astProp);
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
     }
@@ -7393,7 +7405,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let constructorState = NOT_CONSTRUCTOR;
 
       // constructor cant have get/set/*/async but can be static
-      let isConstructor = keyToken && (keyToken.str === 'constructor' && !isStatic);
+      // https://tc39.github.io/ecma262/#sec-object-initializer-static-semantics-propname
+      // > LiteralPropertyName:StringLiteral
+      // >   Return the String value whose code units are the SV of the StringLiteral.
+      // In other words; `class x{"constructor"(){}}` is also a proper constructor
+      let isConstructor = keyToken && !isStatic && (
+        (keyToken.type === $IDENT && keyToken.str === 'constructor') ||
+        (hasAllFlags(keyToken.type, $STRING) && keyToken.str.slice(1, -1) === 'constructor')
+      );
       if (isConstructor) {
         // https://tc39.github.io/ecma262/#sec-class-definitions-static-semantics-early-errors
         // > It is a Syntax Error if PropName of MethodDefinition is "constructor" and SpecialMethod of MethodDefinition is true.

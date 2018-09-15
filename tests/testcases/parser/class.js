@@ -3692,6 +3692,80 @@ module.exports = (describe, test) =>
       code: 'class x { async [x]s){}}',
     });
 
+    test.fail('classes dont support shorthand just end', {
+      code: 'class x { y }',
+    });
+
+    test.fail('classes dont support shorthand with semi', {
+      code: 'class x { y; }',
+    });
+
+    describe('constructor name checks', _ => {
+
+      test('double constructor is illegal', {
+        code: 'class x { constructor(){}; constructor(){}; }',
+        throws: 'constructor',
+      });
+
+      test('string literals can also be constructor AB', {
+        code: 'class x { "constructor"(){}; constructor(){}; }',
+        throws: 'constructor',
+      });
+
+      test('string literals can also be constructor BA', {
+        code: 'class x { "constructor"(){}; constructor(){}; }',
+        throws: 'constructor',
+      });
+
+      test('two string literals named constructor should also cause an error', {
+        code: 'class x { \'constructor\'(){}; "constructor"(){}; }',
+        throws: 'constructor',
+      });
+
+      test.fail('templates are not valid key types', {
+        code: 'class x { `constructor`(){} }',
+      });
+
+      test.pass('constructor ident can have unicode escape', {
+        code: 'class x { \\u0063onstructor(){} }',
+      });
+
+      test('unicode escapes should not circumvent the double constructor check AB', {
+        code: 'class x { \\u0063onstructor(){}; constructor(){} }',
+        throws: 'constructor',
+      });
+
+      test('unicode escapes should not circumvent the double constructor check BA', {
+        code: 'class x { constructor(){}; \\u0063onstructor(){}; }',
+        throws: 'constructor',
+      });
+
+      test('two unicode escaped constructors should still fail', {
+        code: 'class x { \u0063onstructor(){}; \\u0063onstructor(){}; }',
+        throws: 'constructor',
+      });
+
+      test('string ident with escape can still be constructor so should still fail the check AB', {
+        code: 'class x { "\u0063onstructor"(){}; constructor(){}; }',
+        throws: 'constructor',
+      });
+
+      test('string ident with old unicode escape can still be constructor so should still fail the check BA', {
+        code: 'class x { constructor(){}; "\u0063onstructor"(){}; }',
+        throws: 'constructor',
+      });
+
+      test('string ident with new unicode escape can still be constructor so should still fail the check BA', {
+        code: 'class x { constructor(){}; "\u{0063}onstructor"(){}; }',
+        throws: 'constructor',
+      });
+
+      test('string ident with hex escape can still be constructor so should still fail the check BA', {
+        code: 'class x { constructor(){}; "\x63onstructor"(){}; }',
+        throws: 'constructor',
+      });
+    });
+
     // export default class extends F {}
     // class extends {} {}
     // async constructor ?
