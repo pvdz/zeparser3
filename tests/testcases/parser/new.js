@@ -1525,33 +1525,7 @@ module.exports = (describe, test) =>
 
           test('async newline arrow', {
             code: 'typeof async \n () => x',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'UnaryExpression',
-                    operator: 'typeof',
-                    prefix: true,
-                    argument: {type: 'Identifier', name: 'async'},
-                  },
-                },
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: true,
-                    body: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+            throws: 'async',
           });
 
           test('async arrow newline', {
@@ -1617,40 +1591,7 @@ module.exports = (describe, test) =>
 
           test('asi check async newline arrow', {
             code: 'let x = typeof async \n (x) => x',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [
-                    {
-                      type: 'VariableDeclarator',
-                      id: {type: 'Identifier', name: 'x'},
-                      init: {
-                        type: 'UnaryExpression',
-                        operator: 'typeof',
-                        prefix: true,
-                        argument: {type: 'Identifier', name: 'async'},
-                      },
-                    },
-                  ],
-                },
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [{type: 'Identifier', name: 'x'}],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: true,
-                    body: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+            throws: 'async',
           });
 
           test('asi check async paren newline arrow', {
@@ -1734,34 +1675,7 @@ module.exports = (describe, test) =>
 
           test('async newline arrow', {
             code: 'delete async \n () => x',
-            STRICT: {throws: 'tail'},
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'UnaryExpression',
-                    operator: 'delete',
-                    prefix: true,
-                    argument: {type: 'Identifier', name: 'async'},
-                  },
-                },
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: true,
-                    body: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+            throws: 'async',
           });
 
           test('async arrow newline', {
@@ -1827,42 +1741,7 @@ module.exports = (describe, test) =>
 
           test('asi check async newline arrow', {
             code: 'let x = delete async \n (x) => x',
-            desc: 'super edge case but `delete async; in strict mode is illegal like `delete foo;` would be',
-            STRICT: {throws: 'tail'},
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [
-                    {
-                      type: 'VariableDeclarator',
-                      id: {type: 'Identifier', name: 'x'},
-                      init: {
-                        type: 'UnaryExpression',
-                        operator: 'delete',
-                        prefix: true,
-                        argument: {type: 'Identifier', name: 'async'},
-                      },
-                    },
-                  ],
-                },
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [{type: 'Identifier', name: 'x'}],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: true,
-                    body: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+            throws: 'async',
           });
 
           test('asi check async paren newline arrow', {

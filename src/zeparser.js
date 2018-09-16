@@ -1833,8 +1833,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _parseAsync(lexerFlags, scoop, fromStmtOrExpr, asyncIdentToken, checkNewTarget, isExport, allowAssignment, includeDeclarations, exportedBindings, astProp) {
     ASSERT(_parseAsync.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astprop = string', astProp);
+    ASSERT(asyncIdentToken.str === 'async', 'pass on the async keyword');
+    ASSERT(curtok !== asyncIdentToken, 'should have consumed the async keyword');
     // this function will parse tail but NOT parse op and rhs.
-    // parsed the `async` keyword (-> asyncIdentToken)
 
     // consider these;
     // - `async x => x`
@@ -1855,6 +1856,35 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `new async() \n => x`
     // - `new async \n ();`
 
+    // https://tc39.github.io/ecma262/#prod-AsyncArrowFunction
+    // AsyncArrowFunction [In, Yield, Await]:
+    //   async [no LineTerminator here] AsyncArrowBindingIdentifier [?Yield] [no LineTerminator here] => AsyncConciseBody [?In]
+    //   CoverCallExpressionAndAsyncArrowHead [?Yield, ?Await] [no LineTerminator here] => AsyncConciseBody [?In]
+    // CoverCallExpressionAndAsyncArrowHead [Yield, Await]:
+    //   MemberExpression[?Yield, ?Await] Arguments[?Yield, ?Await]
+    //
+    // Supplemental Syntax
+    //   The interpretation of CoverCallExpressionAndAsyncArrowHead is refined using:
+    //     AsyncArrowHead:
+    //       async [no LineTerminator here] ArrowFormalParameters [~Yield, +Await]
+    //
+    // Early Errors:
+    //   It is a Syntax Error if CoverCallExpressionAndAsyncArrowHead is not covering an AsyncArrowHead.
+    //
+    //
+    // In human language there are two cases when parsing an async arrow; the arrow without parens and the arrow with.
+    // When there is no paren, the newline immediately causes ASI and that's that. So `async \n x => y` is fine.
+    // When there is a paren, the initial grammar has no newline condition. If the input matches the grammar, with or
+    // without a newline after `async` (but definitely without a newline before the arrow!) then a mandatory extra
+    // condition applies that there cannot be a newline after `async` and to treat it a syntax error if there is one.
+    // However, note that there are contextual cases where an arrow would not be allowed in the first place, like unary
+    // operators (you can't do `void () => x` or `void async () => x`). In those cases you would just parse async as a
+    // call regardless. An arrow would be a syntax error by default but we can ignore the async-newline (again, either
+    // way because it would be fine for the call). The tricky part is the case where an arrow is allowed but simply
+    // not present. `let x = async \n (y);` is fine and not a syntax error. Only when the arrow is present we can
+    // and should immediately throw an error when there was a newline after async. So this means we must parse through
+    // to the arrow. At least it also means we won't have to "fix up" the AST retroactively.
+
     // parser decision tree based on tokens:
     // - `in`: this is `async in y` and is "okay" regardless of newlines
     // - `instanceof`: this is `async instanceof y` and is "okay" regardless of newlines
@@ -1865,10 +1895,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //   - paren open, parse group
     //     - newline: this is `async(..)` and the newline is ignored
     //     - eof: this is `async(..)` and the newline is ignored
-    //     - `=>`: the `async` ident is considered a regular var, ASI must happen, arrow is non-async
+    //     - `=>`: no ASI, this is an error (see comment block above) because the cover grammar can't be applied
     //     - else: this is `async(..)` and the newline is ignored
     //   - else: `ASI after `async`
-    // - `function`: ASI after `async`, must be non-async function
+    // - `function`: must be async function
     // - ident
     //   - newline: error (because ASI must occur and `async foo;` is illegal)
     //   - eof: error (because ASI must occur and `async foo;` is illegal)
@@ -1926,11 +1956,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `async (y);`
       // - `async (x) => x`
       // - `async \n (foo);`                   --> `async(foo)`
-      // - `async \n (foo) => foo`             --> `async; (foo) => foo;`
+      // - `async \n (foo) => foo`             --> error, cannot apply cover grammar
       // - `(async \n (foo);`                  --> `(async(foo))`
-      // - `(async \n (foo) => foo)`           --> error, cannot apply asi
+      // - `(async \n (foo) => foo)`           --> error, cannot apply cover grammar
       // - `let x = async \n (foo);`           --> `let x = async(foo);`
-      // - `let x = async \n (foo) => foo`     --> `let x = async; (foo) => foo;`
+      // - `let x = async \n (foo) => foo`     --> error, cannot apply cover grammar
 
       if (fromStmtOrExpr === IS_STATEMENT) {
         AST_open(astProp, 'ExpressionStatement');
@@ -5706,43 +5736,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtok.str === '=>') {
       if (curtok.nl) {
         THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
-      } else if (newlineAfterAsync) {
-        // retrofix ast, make async a var name, apply asi, and start a regular arrow in a new statement
-        // - `async \n (foo) => foo`
-        // - `let x = async \n (foo) => foo`
-        // - `(async \n (foo) => foo)`
-
-        // So the problem right now is that there could be any number of nodes open and they will be asserted to
-        // close. So even though we could easily close everything here and now, we can't prevent those closes from
-        // triggering an assertion error. We also can't reliably rewind the lexer since that'd be way too much
-        // work for this case. And we have already parsed the group which may be of any size.
-        // What we could do is introduce some kind of toplevel stack where we stash the group we just parsed. We already
-        // know the next token will be an arrow. There's no valid prodution that might parse it so we can just return
-        // here and let the current toplevel cause an asi. Then the next toplevel would first check this stack and use
-        // its contents as an exception to start parsing an arrow.
-
-        // <SCRUB AST>
-        if (zeroArgs) {
-          asyncExceptionStack = []; // next toplevel should pick this up
+      }
+      else if (newlineAfterAsync) {
+        // - `async \n () => x`
+        // - `async \n (x) => x`
+        if (allowAsyncFunctions) {
+          // see parseAsync for details on this error
+          THROW('A newline after async is always a syntax error if the rhs turns to be an arrow function');
         } else {
-          let node = _path[_path.length - 1];
-          let args = node[astProp];
-          if (args instanceof Array) args = args[0];
-          ASSERT(args, 'should have parsed someting v1');
-          if (args.type === 'SequenceExpression') args = args.expressions;
-          ASSERT(args, 'should have parsed someting v2');
-          asyncExceptionStack = args; // next toplevel should pick this up
-          if (node[astProp] instanceof Array) node[astProp].lengh = 0;
-          else node[astProp] = undefined;
+          // In <=ES7 the parser would force to parse a call, not knowing that a newline after `async` might trigger
+          // ASI. As such this case is still an error but for different reasons; It's parsed as `async(); => x`.
+          THROW('Encountered unexpected arrow; <=ES7 the `async \\n (x) => x` case was always parsed as `async(x); => x`');
         }
-        asyncExceptionSimple = simpleArgs;
-        curtok.nl = true; // enable ASI because we knew opening paren had it. we also know hte arrow had no nl so restore is easy.
-        // </SCRUB AST>
-
-        AST_setIdent(astProp, asyncToken, true);
-      } else if (allowAssignment === NO_ASSIGNMENT) {
+      }
+      else if (allowAssignment === NO_ASSIGNMENT) {
         THROW('Was parsing a value that could not be AssignmentExpression but found an arrow');
-      } else if (hasAnyFlag(groupDestructible, CANT_DESTRUCT | DESTRUCT_ASSIGN_ONLY)) {
+      }
+      else if (hasAnyFlag(groupDestructible, CANT_DESTRUCT | DESTRUCT_ASSIGN_ONLY)) {
         // - `async (...x, y) => x`            (rest must be last element and spread cannot be in arrow head)
         // - `async ({x=z}, y) => x;`          (shorthand default only valid as assign, never valid here)
         if (curtok.str === '=>') {
@@ -5750,10 +5760,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('The group was not destructible and yet the next token is an arrow');
         }
         TODO
-      } else if (zeroArgs) {
+      }
+      else if (zeroArgs) {
         // - `async () => foo`
         parseArrowAfterAsyncNoArgGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, astProp);
-      } else {
+      }
+      else {
         // - `async (foo) => foo`
         parseArrowAfterGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, astProp);
       }
@@ -5805,6 +5817,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     if (fromStmtOrExpr === IS_STATEMENT) {
+      // if this is an async arrow at the statement start then we should allow to parse a sequence here
+      if (curc === $$COMMA_2C) {
+        _parseExpressions(lexerFlags, astProp);
+      }
       parseSemiOrAsi(lexerFlags);
     }
 

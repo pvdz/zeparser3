@@ -279,7 +279,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
   test('illegal async arrow expression with paren because of newline', {
     code: 'f(async\n()=>c)',
-    throws: true,
+    throws: 'async',
   });
 
   test('calling async as a function (so not an async function but async as a var name)', {
@@ -887,6 +887,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
   test('async can not have line terminator after it; arrow expression wont be async', {
     code: 'let f = async\ng => g',
+    desc: 'this is different from the `async (x) => x` case which would be a syntax error',
     ast: {
       type: 'Program',
       body: [
@@ -918,47 +919,15 @@ module.exports = (describe, test) => describe('async keyword', function() {
     tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
   });
 
-  test('async can not have line terminator after it; should throw at await because arrow expression wont be async', {
+  test.fail('async can not have line terminator after it; should throw at await because arrow expression wont be async', {
     code: 'let f = async\ng => await g',
-    throws: 'await',
-    SLOPPY_SCRIPT: {
-      throws: true, // this is legal but ZeParser3 doesnt backtrack and can't recover
-    },
-    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    STRICT: {throws: 'await'},
   });
 
   test('async can not have line terminator after it; ', {
     code: 'let f = async\n(g) => g',
-    desc: 'this one uses a super ugly hack to get it to work',
-    ast: {
-      type: 'Program',
-      body: [
-        {
-          type: 'VariableDeclaration',
-          kind: 'let',
-          declarations: [
-            {
-              type: 'VariableDeclarator',
-              id: {type: 'Identifier', name: 'f'},
-              init: {type: 'Identifier', name: 'async'},
-            },
-          ],
-        },
-        {
-          type: 'ExpressionStatement',
-          expression: {
-            type: 'ArrowFunctionExpression',
-            params: [{type: 'Identifier', name: 'g'}],
-            id: null,
-            generator: false,
-            async: false,
-            expression: true,
-            body: {type: 'Identifier', name: 'g'},
-          },
-        },
-      ],
-    },
-    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+    desc: 'an error triggers for the newline once the arrow is found',
+    throws: 'async',
   });
 
   test('not pretty but this should be legal in SCRIPT mode, `in` is edge case to single-param arrow functions', {
@@ -1358,7 +1327,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
     /*
 
-    // legal:
+    // always an error to have an arrow with newline after async
     async \n () => x
     foo + async \n () => x
     return async \n () => x
@@ -1367,23 +1336,21 @@ module.exports = (describe, test) => describe('async keyword', function() {
     let x = async \n () => x, y
     const x = async \n () => x, y
     export async \n () => x
-
-    // illegal:
-    v (async \n () => x)
-    v [async \n () => x]
-    v {x: async \n () => x}
-    v x[async \n () => x]
-    v x(async \n () => x)
-    v function f(x = async \n () => x){}
-    v `${async \n () => x}`
-    v do async \n () => x while (x);
-    v if (async \n () => x) x
-    v try {} catch(e = async \n () => x) {}   (if that's even legal)
-    v if (x) async \n () => x else y
-    v class x extends async \n () => x {}
+    (async \n () => x)
+    [async \n () => x]
+    {x: async \n () => x}
+    x[async \n () => x]
+    x(async \n () => x)
+    function f(x = async \n () => x){}
+    `${async \n () => x}`
+    do async \n () => x while (x);
+    if (async \n () => x) x
+    try {} catch(e = async \n () => x) {}   (if that's even legal)
+    if (x) async \n () => x else y
+    class x extends async \n () => x {}
 
 
-    // other forms
+    // "legal" other forms, though it won't create async functions
     (async \n x => x)
     (async \n function(){})
 
@@ -1586,29 +1553,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('newline after async', {
           code: 'async \n () => {}',
-          desc: 'works through hacks',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {type: 'Identifier', name: 'async'},
-              },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: false,
-                  body: {type: 'BlockStatement', body: []},
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          throws: 'async',
         });
 
         test('newline after parens', {
@@ -1709,28 +1654,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('newline after async', {
           code: 'async \n (x) => x',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {type: 'Identifier', name: 'async'},
-              },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: 'x'}],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'x'},
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          throws: 'async',
         });
 
         test('newline after args', {
@@ -1770,28 +1694,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('newline after async', {
           code: 'async \n (x, y) => x',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {type: 'Identifier', name: 'async'},
-              },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'x'},
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          throws: 'async',
         });
 
         test('newline after args', {
@@ -1903,66 +1806,12 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('toplevel statement', {
           code: 'async \n () => x',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {type: 'Identifier', name: 'async'},
-              },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'x'},
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          throws: 'async',
         });
 
         test('return arg', {
           code: 'function f(){   return async \n () => x    }',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'FunctionDeclaration',
-                generator: false,
-                async: false,
-                id: {type: 'Identifier', name: 'f'},
-                params: [],
-                body: {
-                  type: 'BlockStatement',
-                  body: [
-                    {
-                      type: 'ReturnStatement',
-                      argument: {type: 'Identifier', name: 'async'},
-                    },
-                    {
-                      type: 'ExpressionStatement',
-                      expression: {
-                        type: 'ArrowFunctionExpression',
-                        params: [],
-                        id: null,
-                        generator: false,
-                        async: false,
-                        expression: true,
-                        body: {type: 'Identifier', name: 'x'},
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+          throws: 'async',
         });
 
         test.fail('break undefined label', {
@@ -1983,6 +1832,22 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
         test('var decl init with arrow', {
           code: 'var x = async \n () => x',
+          throws: 'async',
+        });
+
+        test.pass('toplevel async arrow with trailing comma', {
+          code: 'async () => x, y',
+          desc: 'expression statement parses a sequence expression so the trailing comma is fine',
+        });
+
+        test.fail('trailing arrow comma in place where sequence expression is not allowed', {
+          code: 'let x = {[async () => x, y]: z}',
+          desc: 'the computed property does NOT parse a sequence and the comma is not parsed as the arrow body it causes a crash',
+        });
+
+        test('var decl init with trailing decl without', {
+          code: 'var x = async () => x, y',
+          desc: 'here it is not an error because the comma is part of the var decl',
           ast: {
             type: 'Program',
             body: [
@@ -1993,34 +1858,41 @@ module.exports = (describe, test) => describe('async keyword', function() {
                   {
                     type: 'VariableDeclarator',
                     id: {type: 'Identifier', name: 'x'},
-                    init: {type: 'Identifier', name: 'async'},
+                    init: {
+                      type: 'ArrowFunctionExpression',
+                      params: [],
+                      id: null,
+                      generator: false,
+                      async: true,
+                      expression: true,
+                      body: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                  {
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'y'},
+                    init: null,
                   },
                 ],
               },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'x'},
-                },
-              },
             ],
           },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
 
-        test.fail('var decl init with trailing decl', {
+        test.fail('var decl init with trailing decl with', {
           code: 'var x = async \n () => x, y',
-          desc: 'it is an error because `() =>x, y` would be an error'
+          throws: 'async',
         });
 
         test('let decl init with arrow', {
           code: 'let x = async \n () => x',
+          throws: 'async',
+        });
+
+        test('let decl init with another decl without', {
+          code: 'let x = async () => x, y',
+          desc: 'it is not an error because the comma is part of the decl',
           ast: {
             type: 'Program',
             body: [
@@ -2031,73 +1903,59 @@ module.exports = (describe, test) => describe('async keyword', function() {
                   {
                     type: 'VariableDeclarator',
                     id: {type: 'Identifier', name: 'x'},
-                    init: {type: 'Identifier', name: 'async'},
+                    init: {
+                      type: 'ArrowFunctionExpression',
+                      params: [],
+                      id: null,
+                      generator: false,
+                      async: true,
+                      expression: true,
+                      body: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                  {
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'y'},
+                    init: null,
                   },
                 ],
               },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'x'},
-                },
-              },
             ],
           },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
 
-        test.fail('let decl init with another decl', {
+        test.fail('let decl init with another decl with', {
           code: 'let x = async \n () => x, y',
-          desc: 'it is an error because `() =>x, y` would be an error'
+          throws: 'async',
         });
 
         test('const decl init with an arrow', {
           code: 'const x = async \n () => x',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'VariableDeclaration',
-                kind: 'const',
-                declarations: [
-                  {
-                    type: 'VariableDeclarator',
-                    id: {type: 'Identifier', name: 'x'},
-                    init: {type: 'Identifier', name: 'async'},
-                  },
-                ],
-              },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'x'},
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR, $IDENT],
+          throws: 'async',
         });
 
-        test.fail('const decl init with another decl', {
-          code: 'const x = async \n () => x, y',
+        test.fail('const decl init with another decl without', {
+          code: 'const x = async () => x, y',
           desc: 'it is an error because `() =>x, y` would be an error'
         });
 
-        test('export decl', {
-          code: 'export async \n () => x',
+        test.fail('const decl init with another decl with', {
+          code: 'const x = async \n () => x, y',
+          throws: 'async',
+        });
+
+        test('export decl without', {
+          code: 'export async () => x',
           throws: 'Can only export async functions (not arrows)',
+          SLOPPY_SCRIPT: {
+            throws: 'module',
+          },
+        });
+
+        test('export decl with', {
+          code: 'export async \n () => x',
+          throws: 'async',
           SLOPPY_SCRIPT: {
             throws: 'module',
           },
@@ -2379,7 +2237,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
     test.fail('async asi parened arrow', {
       code: 'async \n () => x',
-      desc: 'troublesome case in es8+ mode but easy here (it fails on the arrow since it force-parses a func call)',
+      desc: 'fails on the arrow since it force-parses a func call',
       ES: 7,
     });
 
@@ -2420,7 +2278,19 @@ module.exports = (describe, test) => describe('async keyword', function() {
     code: 'function g() {   async function f() {} var f;   }',
   });
 
-  test.fail('asi in bad place', {
+  test.fail('stmt: missing function name either way without', {
+    code: 'async function(){}',
+  });
+
+  test.fail('stmt: missing function name either way with', {
+    code: 'async \n function(){}',
+  });
+
+  test.pass('expr: missing function name either way without', {
+    code: '(async function(){})',
+  });
+
+  test.fail('expr: missing function name either way with', {
     code: '(async \n function(){})',
   });
 
@@ -2444,6 +2314,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
   test.fail('statement async \n => async', {
     code: 'async \n => async',
+    desc: 'arrow can never have newline before it, this error is unrelated to `async`',
   });
 
   test.pass('expr async => async', {
@@ -2460,5 +2331,10 @@ module.exports = (describe, test) => describe('async keyword', function() {
 
   test.fail('let async \n => async', {
     code: 'let async \n => async',
+  });
+
+  test.fail('trailing trash', {
+    code: 'async () => x, y`',
+    desc: 'flow seems fine with this? logging to report it later',
   });
 });
