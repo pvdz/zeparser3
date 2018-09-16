@@ -792,7 +792,7 @@ module.exports = (describe, test) =>
                     key: {type: 'Literal', value: '<TODO>', raw: '"constructor"'},
                     static: false,
                     computed: false,
-                    kind: 'method',
+                    kind: 'constructor',
                     value: {
                       type: 'FunctionExpression',
                       generator: false,
@@ -3536,48 +3536,6 @@ module.exports = (describe, test) =>
       code: 'class x extends a = b {}',
     });
 
-    test('constructor as dynamic property should be a method', {
-      code: 'class x { [constructor](){} }',
-      desc: 'checking the token name of the key is insufficient if the dynamic aspect is left unchecked',
-      callback(ast, tokens, astJson) { return astJson.includes('"computed":true') && astJson.includes('"kind":"method"'); },
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ClassDeclaration',
-            id: {type: 'Identifier', name: 'x'},
-            superClass: null,
-            body: {
-              type: 'ClassBody',
-              body: [
-                {
-                  type: 'MethodDefinition',
-                  key: {type: 'Identifier', name: 'constructor'},
-                  static: false,
-                  computed: true,
-                  kind: 'method',
-                  value: {
-                    type: 'FunctionExpression',
-                    generator: false,
-                    async: false,
-                    id: null,
-                    params: [],
-                    body: {type: 'BlockStatement', body: []},
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test.fail('getter named "constructor"', {
-      code: 'class x { get constructor(){} }',
-      desc: 'constructor can not have a modifier',
-    });
-
     describe('duplicate keys', _ => {
 
       // https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
@@ -3701,6 +3659,218 @@ module.exports = (describe, test) =>
     });
 
     describe('constructor name checks', _ => {
+
+      describe('as ident', _ => {
+
+        test('constructor as dynamic property should be a method', {
+          code: 'class x { [constructor](){} }',
+          desc: 'checking the token name of the key is insufficient if the dynamic aspect is left unchecked',
+          callback(ast, tokens, astJson) { return astJson.includes('"computed":true') && astJson.includes('"kind":"method"'); },
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: null,
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'constructor'},
+                      static: false,
+                      computed: true,
+                      kind: 'method',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {type: 'BlockStatement', body: []},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('static constructor is ok and just a method', {
+          code: 'class x { static constructor(){} }',
+          callback(ast, tokens, astJson) { return astJson.includes('"static":true') && astJson.includes('"kind":"method"'); },
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: null,
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'constructor'},
+                      static: true,
+                      computed: false,
+                      kind: 'method',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {type: 'BlockStatement', body: []},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('getter named "constructor"', {
+          code: 'class x { get constructor(){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+
+        test('setter named "constructor"', {
+          code: 'class x { set constructor(x){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+
+        test('async named "constructor"', {
+          code: 'class x { async constructor(){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+
+        test('generator named "constructor"', {
+          code: 'class x { *constructor(){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+
+        test('async generator named "constructor"', {
+          code: 'class x { async *constructor(){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+      });
+
+      describe('as string', _ => {
+
+        test('constructor as dynamic property should be a method', {
+          code: 'class x { ["constructor"](){} }',
+          desc: 'checking the token name of the key is insufficient if the dynamic aspect is left unchecked',
+          callback(ast, tokens, astJson) { return astJson.includes('"computed":true') && astJson.includes('"kind":"method"'); },
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: null,
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Literal', value: '<TODO>', raw: '"constructor"'},
+                      static: false,
+                      computed: true,
+                      kind: 'method',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {type: 'BlockStatement', body: []},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('static constructor is ok and just a method', {
+          code: 'class x { static "constructor"(){} }',
+          callback(ast, tokens, astJson) { return astJson.includes('"static":true') && astJson.includes('"kind":"method"'); },
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: null,
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Literal', value: '<TODO>', raw: '"constructor"'},
+                      static: true,
+                      computed: false,
+                      kind: 'method',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {type: 'BlockStatement', body: []},
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('getter named "constructor"', {
+          code: 'class x { get "constructor"(){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+
+        test('setter named "constructor"', {
+          code: 'class x { set "constructor"(x){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+
+        test('async named "constructor"', {
+          code: 'class x { async "constructor"(){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+
+        test('generator named "constructor"', {
+          code: 'class x { *"constructor"(){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+
+        test('async generator named "constructor"', {
+          code: 'class x { async *"constructor"(){} }',
+          desc: 'it is a syntax error for non-static constructor to have a modifier (get/set/async/generator)',
+          throws: 'constructor',
+        });
+      });
 
       test('double constructor is illegal', {
         code: 'class x { constructor(){}; constructor(){}; }',
