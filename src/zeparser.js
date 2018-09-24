@@ -204,8 +204,6 @@ const IS_FUNC_EXPR = true;
 const NOT_FUNC_EXPR = false;
 const IDENT_OPTIONAL = true;
 const IDENT_REQUIRED = false;
-const NOT_ASSIGNABLE = false;
-const IS_ASSIGNABLE = true;
 const PARSE_VALUE_MAYBE = true;
 const PARSE_VALUE_MUST = false;
 const YIELD_WITHOUT_VALUE = 0;
@@ -240,6 +238,8 @@ const MIGHT_DESTRUCT = 0; // any kind of destructuring or lack thereof is okay
 const CANT_DESTRUCT = 1; // it is impossible to destructure this
 const DESTRUCT_ASSIGN_ONLY = 2; // the only way this can destruct is by assignment
 const MUST_DESTRUCT = 4;
+const NOT_ASSIGNABLE = CANT_DESTRUCT;
+const IS_ASSIGNABLE = MIGHT_DESTRUCT;
 const DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR = 8; // signal having found a constructor (special case)
 const DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO = 16; // signal that a `__proto__: x` was parsed (do detect double occurrence)
 const NO_SPREAD = 0;
@@ -1987,12 +1987,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function isAssignable(state) {
+    ASSERT(state === IS_ASSIGNABLE || state === NOT_ASSIGNABLE, 'assignable enum');
     return state === IS_ASSIGNABLE;
-    // return hasAllFlags(state & F_ASSIGNABLE);
   }
   function notAssignable(state) {
+    ASSERT(state === IS_ASSIGNABLE || state === NOT_ASSIGNABLE, 'assignable enum');
     return state === NOT_ASSIGNABLE;
-    // return hasNoFlag(state & F_ASSIGNABLE);
   }
   function initAssignable() {
     return IS_ASSIGNABLE;
@@ -3382,7 +3382,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       astProp
     );
     ASSERT(assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_NA || assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_NA, 'exception enum');
-    let assignable = assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_A;
+    let assignable = (assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === NOT_SINGLE_IDENT_WRAP_A) ? initAssignable(): initNotAssignable();
 
     // the group parser parses one rhs paren so there may not be any parens left to consume here
     let canBeErrorCase = assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_A || assignableOrJustIdent === IS_SINGLE_IDENT_WRAP_NA;
@@ -4117,9 +4117,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseExpressionAfterIdent.length === arguments.length, 'arg count');
 
     let assignable = parseValueAfterIdent(lexerFlags, identToken, bindingType, allowAssignment, astProp);
-    ASSERT(typeof assignable === 'boolean', 'assignanum', assignable);
+    ASSERT(typeof assignable === 'number', 'assignanum', assignable);
     assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
-    ASSERT(typeof assignable === 'boolean', 'assignanum', assignable);
+    ASSERT(typeof assignable === 'number', 'assignanum', assignable);
     return assignable;
   }
   function parseExpressionAfterPlainVarName(lexerFlags, identToken, allowAssignment, astProp) {
@@ -4183,7 +4183,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseExpressionFromOp(lexerFlags, assignable, astProp) {
     ASSERT(parseExpressionFromOp.length === arguments.length, 'arg count');
-    ASSERT(typeof assignable === 'boolean', 'assignable num');
+    ASSERT(typeof assignable === 'number', 'assignable num');
 
     if (isAssignable(assignable) && isAssignBinOp()) {
       assignable = parseExpressionFromAssignmentOp(lexerFlags, assignable, astProp);
@@ -4223,7 +4223,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('operator', curtok.str);
     skipRex(lexerFlags);
     assignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
-    ASSERT(typeof assignable === 'boolean', 'assignanum', assignable);
+    ASSERT(typeof assignable === 'number', 'assignanum', assignable);
     AST_close('AssignmentExpression');
 
     return assignable;
@@ -5153,7 +5153,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseValueTail(lexerFlags, assignable, isNewArg, astProp) {
     ASSERT(parseValueTail.length === arguments.length, 'arg coung');
     ASSERT(typeof isNewArg === 'boolean', 'expecting bool isNewArg arg');
-    ASSERT(typeof assignable === 'boolean', 'assignablenum', assignable);
+    ASSERT(typeof assignable === 'number', 'assignablenum', assignable);
     ASSERT(typeof astProp === 'string', 'should be string');
 
     if (curc === $$DOT_2E && curtok.str === '.') {
