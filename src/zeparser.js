@@ -2022,7 +2022,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else {
       // await as a var name
-
       let assignable = parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, NO_ASSIGNMENT, 'expression');
       assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, 'expression');
       parseExpressionFromOp(lexerFlags, assignable, 'expression');
@@ -2700,13 +2699,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
           wasNotDecl = true;
       }
-    } else if (curc === $$SEMI_3B) {
+    }
+    else if (curc === $$SEMI_3B) {
       if (awaitable) {
-        // `for await (;`
+        // this is the semi in `for await (;`
         THROW('for await only accepts the `for-of` type');
       }
       emptyInit = true;
-    } else {
+    }
+    else {
       startedWithArrObj = curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B;
       assignable = parseValue(lexerFlags | LF_IN_FOR_LHS, ALLOW_ASSIGNMENT, astProp);
       wasNotDecl = true;
@@ -3484,15 +3485,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case $$SEMI_3B:
         parseEmptyStatement(lexerFlags, astProp);
         break;
-      case $$PLUS_2B:
-      case $$DASH_2D:
-        if (curtok.str.charCodeAt(1) === curc) {
-          // '++' and '--'
-          // circumvents restricted production checks at start of statement by doing it here
-          parseIncDecStatement(lexerFlags, astProp);
-          return;
-        }
-        // fall-through
       default:
         AST_open(astProp, 'ExpressionStatement');
         // Note: an arrow would create a new scope and there is no other way to introduce a new binding from here on out
@@ -3500,21 +3492,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_close('ExpressionStatement');
         parseSemiOrAsi(lexerFlags);
     }
-  }
-
-  function parseIncDecStatement(lexerFlags, astProp) {
-    // TODO: for all --/++ confirm we properly do > It is an early Reference Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
-    AST_open(astProp, 'ExpressionStatement');
-    AST_open('expression', 'UpdateExpression');
-    AST_set('operator', curtok.str);
-    ASSERT_skipRex(curc === $$PLUS_2B ? '++' : '--', lexerFlags); // TODO: optimize; next most likely a varname
-    AST_set('prefix', true);
-    let assignable = parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
-    if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as statement');
-    AST_close('UpdateExpression');
-    parseExpressionFromOp(lexerFlags, assignable, 'expression');
-    AST_close('ExpressionStatement');
-    parseSemiOrAsi(lexerFlags);
   }
 
   function parseEmptyStatement(lexerFlags, astProp) {
@@ -4438,7 +4415,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // do not include the suffix (property, call, etc)
 
-    // return a boolean whether the value is assignable (only for regular var names)
+    // return whether the value is assignable (only for regular var names)
     if (curtype === $IDENT) {
       return parseValueHeadBodyIdent(lexerFlags, checkNewTarget, BINDING_TYPE_NONE, allowAssignment, astProp);
     }
