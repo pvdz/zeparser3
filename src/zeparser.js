@@ -1,3 +1,33 @@
+
+// in all cases either; parse a var, let, const, or assignment expression
+// there can be multiple vars and inits
+// for-in and for-of can only have one var without inits (invalidate after)
+
+/*
+if script mode, these should all work:
+- `(yield)`
+- `(yield = x)`
+- `(x = yield)`
+- `(x = yield = x)`
+- `yield`
+- `yield = x`
+- `([yield])`
+- `(x = a + yield)`
+- `([x = yield])`
+- `([x, {y: [yield]}] = z)`
+- `([x, {y: [yield]}])`
+And these should all fail:
+- `(yield) => x`
+- `(yield = x) => x`
+- `(x = yield) => x`
+- `(x = yield = x) => x`
+- `yield => x`
+- `([yield]) => x`
+- `([x = yield]) => x`
+- `([x = yield y]) => x`
+- `([x, {y: [yield]}]) => x`
+*/
+
 let {
   $$A_61,
   $$A_UC_41,
@@ -1675,10 +1705,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseAsyncStatement(lexerFlags, scoop, identToken, NOT_EXPORT, includeDeclarations, UNDEF_EXPORTS, astProp);
         return;
 
-      case 'await':
-        parseAwaitStatement(lexerFlags, scoop, labelSet, astProp);
-        return;
-
       case 'break':
         parseBreakStatement(lexerFlags, scoop, labelSet, astProp);
         return;
@@ -1988,47 +2014,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function isAssignable(state) {
     ASSERT(state === IS_ASSIGNABLE || state === NOT_ASSIGNABLE, 'assignable enum');
-    return state === IS_ASSIGNABLE;
+    return (state & CANT_DESTRUCT) !== CANT_DESTRUCT;
   }
   function notAssignable(state) {
     ASSERT(state === IS_ASSIGNABLE || state === NOT_ASSIGNABLE, 'assignable enum');
-    return state === NOT_ASSIGNABLE;
+    return (state & CANT_DESTRUCT) === CANT_DESTRUCT;
   }
   function initAssignable() {
     return IS_ASSIGNABLE;
   }
   function initNotAssignable() {
     return NOT_ASSIGNABLE;
-  }
-
-  function parseAwaitStatement(lexerFlags, scoop, labelSet, astProp) {
-    let identToken = curtok;
-
-    ASSERT_skipRex('await', lexerFlags);
-    if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-
-    AST_open(astProp, 'ExpressionStatement');
-
-    if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) {
-      // await as a keyword
-      if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) {
-        THROW('The `await` keyword in arg default must be an await expression but that is not allowed in params');
-      }
-      parseAwaitExpression(lexerFlags, identToken, NOT_NEW_TARGET, NO_ASSIGNMENT, 'expression');
-      parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, 'expression');
-    }
-    else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      THROW('Cannot use `await` outside of `async` functions in strict mode');
-    }
-    else {
-      // await as a var name
-      let assignable = parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, NO_ASSIGNMENT, 'expression');
-      assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, 'expression');
-      parseExpressionFromOp(lexerFlags, assignable, 'expression');
-    }
-
-    AST_close('ExpressionStatement');
-    parseSemiOrAsi(lexerFlags);
   }
 
   function parseAwaitExpression(lexerFlags, awaitIdentToken, checkNewTarget, allowAssignment, astProp) {
@@ -2045,11 +2041,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) {
       if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) THROW('Await is illegal as default arg value');
       AST_open(astProp, 'AwaitExpression');
+      // TODO: what about `await ()=>x` ? Is the rhs of await a non assignable?
       parseValue(lexerFlags, NO_ASSIGNMENT, 'argument'); // await expr arg is never optional
       AST_close('AwaitExpression');
       if (curtok.str === '**') {
         THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
       }
+      parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, 'expression');
       return NOT_ASSIGNABLE; // an await should gobble all assignments so this is not assignable
     }
     else if (hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
@@ -2058,6 +2056,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let assignable = parseAfterVarName(lexerFlags, awaitIdentToken, IS_ASSIGNABLE, allowAssignment, astProp);
       assignable = parseValueTail(lexerFlags, assignable, checkNewTarget, astProp);
       if (allowAssignment === NO_ASSIGNMENT) assignable = initNotAssignable();
+      // may be assignable if var name
+      // - `(await)=x`
       return parseExpressionFromOp(lexerFlags, assignable, astProp);
     }
     else {
@@ -3189,17 +3189,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let identName = curtok.str;
     switch (identName) {
       case 'await':
-        THROW('expecting the ident statement path to take this and this not to proc, search for await');
-        // FIXME: delete this code, it is dead code.
-        // we parse await here because it can be a valid label
-        ASSERT_skipRex('await', lexerFlags); // not very likely
+
+        ASSERT_skipRex('await', lexerFlags);
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        // in module: only if lexerFlags allow await (inside async code)
-        // in script: same as module but also as regular var names (only) outside of async code
-        // (await when not a keyword is assignable)
+
         AST_open(astProp, 'ExpressionStatement');
+
+        // await as a keyword
         parseAwaitExpression(lexerFlags, identToken, NOT_NEW_TARGET, ALLOW_ASSIGNMENT, 'expression');
-        // TODO: what about multiple expressions?
+
         AST_close('ExpressionStatement');
         parseSemiOrAsi(lexerFlags);
         return;
@@ -4889,6 +4887,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let asyncToken = curtok;
       if (curc === $$A_61) {
         if (curtok.str === 'await') {
+          // - `new await`
+          // - `new await x`
+          // - `new await()`
+          // - `new await()()`
+          // - `new await x()`
+          // - `new await x()()`
           let identToken = curtok;
           ASSERT_skipDiv('await', lexerFlags); // `new await / foo`
           parseAwaitExpression(lexerFlags, identToken, IS_NEW_ARG, NO_ASSIGNMENT, 'callee');
@@ -7254,6 +7258,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         addBindingToExports(exportedBindings, identToken.str);
       } else {
         // `[...a.b]=c`
+        // `let [...a.b]=c`
+        // `for ([...a.b] in c) d`
+        // `for (let [...a.b] in c) d`
+        // `try {} catch ([...a.b]) {}`
+        // `[...a.b] = c`
+        // `([...a.b] = c)`
+        // `([...a.b]) => c`
         destructible |= DESTRUCT_ASSIGN_ONLY;
       }
     }
