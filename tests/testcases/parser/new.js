@@ -1752,7 +1752,7 @@ module.exports = (describe, test) =>
 
         test('await var', {
           code: 'new await',
-          STRICT: {throws: 'await'},
+          STRICT: {throws: 'new'},
           ast: {
             type: 'Program',
             body: [
@@ -1772,7 +1772,7 @@ module.exports = (describe, test) =>
         test('await call', {
           code: 'new await()',
           desc: 'NOT a call expression!',
-          STRICT: {throws: true},
+          STRICT: {throws: 'new'},
           ast: {
             type: 'Program',
             body: [
@@ -1791,141 +1791,33 @@ module.exports = (describe, test) =>
 
         test('await expression fail', {
           code: 'new await foo',
-          desc: 'not await expression so await is var name so it needs asi after `await` which fails',
-          STRICT: {throws: 'await'},
+          desc: 'not await expression so await is var name so it wants asi after `await` which fails',
+          STRICT: {throws: 'new'},
           throws: 'asi',
         });
 
         test('await expression in async arrow in new', {
           code: 'async () => new await x',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: true,
-                  expression: true,
-                  body: {
-                    type: 'NewExpression',
-                    arguments: [],
-                    callee: {
-                      type: 'AwaitExpression',
-                      argument: {type: 'Identifier', name: 'x'},
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $ASI],
+          desc: '`new` expects a NewExpression as arg, which is itself or a MemberExpression which can not lead to AwaitExpression',
+          throws: 'new',
         });
 
         test('new await call who gets parens', {
           code: 'async () => new await x()',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: true,
-                  expression: true,
-                  body: {
-                    type: 'NewExpression',
-                    arguments: [],
-                    callee: {
-                      type: 'AwaitExpression',
-                      argument: {
-                        type: 'CallExpression',
-                        callee: {type: 'Identifier', name: 'x'},
-                        arguments: [],
-                      },
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          desc: '`new` expects a NewExpression as arg, which is itself or a MemberExpression which can not lead to AwaitExpression',
+          throws: 'new',
         });
 
         test('calling the new await call', {
           code: 'async () => new await x()()',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [],
-                  id: null,
-                  generator: false,
-                  async: true,
-                  expression: true,
-                  body: {
-                    type: 'NewExpression',
-                    arguments: [],
-                    callee: {
-                      type: 'AwaitExpression',
-                      argument: {
-                        type: 'CallExpression',
-                        callee: {
-                          type: 'CallExpression',
-                          callee: {type: 'Identifier', name: 'x'},
-                          arguments: [],
-                        },
-                        arguments: [],
-                      },
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          desc: '`new` expects a NewExpression as arg, which is itself or a MemberExpression which can not lead to AwaitExpression',
+          throws: 'new',
         });
 
         test('await expression in async func in new', {
           code: 'async function f(){ new await foo }',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'FunctionDeclaration',
-                generator: false,
-                async: true,
-                id: {type: 'Identifier', name: 'f'},
-                params: [],
-                body: {
-                  type: 'BlockStatement',
-                  body: [
-                    {
-                      type: 'ExpressionStatement',
-                      expression: {
-                        type: 'NewExpression',
-                        arguments: [],
-                        callee: {
-                          type: 'AwaitExpression',
-                          argument: {type: 'Identifier', name: 'foo'},
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $ASI, $PUNCTUATOR],
+          desc: '`new` expects a NewExpression as arg, which is itself or a MemberExpression which can not lead to AwaitExpression',
+          throws: 'new',
         });
 
         test('class sans body', {

@@ -239,8 +239,6 @@ const PARSE_VALUE_MUST = false;
 const YIELD_WITHOUT_VALUE = 0;
 const WITH_ASSIGNABLE = 1;
 const WITH_NON_ASSIGNABLE = 2;
-const NOT_NEW_TARGET = false;
-const CHECK_NEW_TARGET = true;
 const IS_ARROW = true;
 const NOT_ARROW = false;
 const FROM_STATEMENT_START = 1;
@@ -260,6 +258,8 @@ const ASSIGNMENT_IS_DEFAULT = false; // (foo = bar) => foo  (parsed by parseBind
 const IS_EXPRESSION = true;
 const NOT_EXPRESSION = false;
 const IS_STATEMENT = false;
+const NOT_NEW_TARGET = false;
+const CHECK_NEW_TARGET = true;
 const IS_NEW_ARG = true;
 const NOT_NEW_ARG = false;
 const PARSE_DIRECTIVES = true;
@@ -2038,6 +2038,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(awaitIdentToken.str === 'await', 'await token');
     ASSERT(awaitIdentToken !== curtok, 'await should have been skipped');
 
+    // in module: only if lexerFlags allow await (inside async code)
+    // in script: must be considered an await-expression when inside async, must be considered a var name otherwise
+    // (`await` when not a keyword _is_ assignable)
+    if (checkNewTarget === IS_NEW_ARG) {
+      if (hasAnyFlag(lexerFlags, LF_STRICT_MODE | LF_IN_ASYNC)) {
+        // - `async function f(){ new await x; }`
+        // - `async function f(){ [new await foo] }`
+        // - `async function f(){ (new await foo) }`
+        // - `function f(){ "use strict"; new await; }`
+        // - `function *f(){ "use strict"; new await; }`
+        // - `async function *f(){ new await; }`
+        THROW('Cannot await inside `new`');
+      }
+      // (sloppy mode):
+      // - `function f(){ new await; }`
+      // - `function *f(){ new await; }`
+      // - `new await;`
+    }
+
     if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) {
       if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) THROW('Await is illegal as default arg value');
       AST_open(astProp, 'AwaitExpression');
@@ -2110,7 +2129,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // break with label is only valid if the label exists in the current statement tree
 
     // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
-    if (curtype === $IDENT && !(curtok.nl || curtype === $EOF || curtok.value === ';')) {
+    if (curtype === $IDENT && !curtok.nl) {
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
       AST_setIdent('label', curtok);
 
@@ -4489,8 +4508,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('operator', curtok.str);
         ASSERT_skipAny($PUNCTUATOR, lexerFlags); // TODO: optimize; next token can not start with a fwd slash
         AST_set('prefix', true);
-        let assignable = parseValueHeadBody(lexerFlags, PARSE_VALUE_MUST, NOT_NEW_TARGET, NO_ASSIGNMENT, 'argument');
-        assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, 'argument');
+
+        let assignable = parseValue(lexerFlags, NO_ASSIGNMENT, 'argument');
         if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as prefix');
         AST_close('UpdateExpression');
         return NOT_ASSIGNABLE;
@@ -4572,25 +4591,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseAsyncExpression(lexerFlags, DO_NOT_BIND, identToken, checkNewTarget, NOT_EXPORT, allowAssignment, astProp);
       case 'await':
         ASSERT_skipRex($IDENT, lexerFlags); // not very likely
-        // in module: only if lexerFlags allow await (inside async code)
-        // in script: same as module but also as regular var names (only) outside of async code
-        // (await when not a keyword is assignable)
-        if (checkNewTarget === IS_NEW_ARG) {
-          if (hasAnyFlag(lexerFlags, LF_STRICT_MODE | LF_IN_ASYNC)) {
-            // - `async function f(){ new await x; }`
-            // - `async function f(){ [new await foo] }`
-            // - `async function f(){ (new await foo) }`
-            // - `function f(){ "use strict"; new await; }`
-            // - `function *f(){ "use strict"; new await; }`
-            // - `async function *f(){ new await; }`
-            THROW('Cannot await inside `new`');
-          } else {
-            // (sloppy mode):
-            // - `function f(){ new await; }`
-            // - `function *f(){ new await; }`
-            // - `new await;`
-          }
-        }
+
         // note: await is unary that wants unary as arg so they can be chained
         return parseAwaitExpression(lexerFlags, identToken, checkNewTarget, allowAssignment, astProp);
       case 'class':
@@ -5808,8 +5809,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       return assignable;
-
-      // return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncToken, NOT_NEW_TARGET, ALLOW_ASSIGNMENT, astProp)
     }
 
     if (fromStmtOrExpr === IS_STATEMENT) {

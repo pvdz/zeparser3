@@ -34,7 +34,7 @@ module.exports = (describe, test) =>describe('unicode', _ => {
         },
       });
 
-      test.fail('quad number with 3 digits', {
+      test.fail('quad number with 3 digits (auto-fails under node<10)', {
         code: '\\u0B6EPASS', // https://codepoints.net/U+0B6E (decimal number)
         callback(ast, tokens, astJson) {
           return JSON.stringify(tokens[0]).includes('\u0B6EPASS');
@@ -139,7 +139,7 @@ module.exports = (describe, test) =>describe('unicode', _ => {
         },
       });
 
-      test.pass('quad number with 3 digits', {
+      test.pass('quad number with 3 digits (auto-fails under node<10)', {
         code: 'PASS\\u0B6EPASS', // https://codepoints.net/U+0B6E (decimal number)
         callback(ast, tokens, astJson) {
           return JSON.stringify(tokens[0]).includes('PASS\u0B6EPASS');

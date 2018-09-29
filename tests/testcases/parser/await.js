@@ -87,7 +87,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'await',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -99,7 +99,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'await()',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -120,7 +120,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'await[x]',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -142,7 +142,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'await = 16',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -164,7 +164,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'await - 25',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -186,7 +186,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'call(await)',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -198,7 +198,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'call(await())',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -219,7 +219,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'call(await[1])',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -247,7 +247,7 @@ module.exports = (describe, test) =>
 
     test('await is a valid identifier in script mode', {
       code: 'call(await.foo)',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -289,8 +289,8 @@ module.exports = (describe, test) =>
 
     test('dont throw for await in param default value if not an actual await expression and in script mode', {
       code: 'function call(foo=await){}',
-      throws: 'Cannot use `await` outside of `async` functions',
-      SLOPPY_SCRIPT: {
+      throws: 'await',
+      SCRIPT: {
         ast: {
           type: 'Program',
           body: [
@@ -316,7 +316,7 @@ module.exports = (describe, test) =>
 
     test('can never use await expression as default arg value', {
       code: 'function call(foo=await bar){}',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
       },
@@ -325,7 +325,7 @@ module.exports = (describe, test) =>
 
     test('arg with default that is awaitable that is an assignment (tests assignability check of an await expr)', {
       code: 'function call(foo=await bar=10){}',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
       },
@@ -334,7 +334,7 @@ module.exports = (describe, test) =>
 
     test('await var name in a group', {
       code: '(await())',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         ast: {
           type: 'Program',
@@ -373,7 +373,7 @@ module.exports = (describe, test) =>
 
     test('something with grouping', {
       code: '(await bar())',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
       },
@@ -399,7 +399,7 @@ module.exports = (describe, test) =>
 
     test('something with rhs grouping', {
       code: '5 + (await bar())',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
       },
@@ -425,7 +425,7 @@ module.exports = (describe, test) =>
 
     test('can never use await expression as default arg value (slightly more complex)', {
       code: 'function call(foo= 5 + (await bar())){}',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
       },
@@ -451,7 +451,7 @@ module.exports = (describe, test) =>
 
     test('make failing code is inside async function, should still fail for being in parameter head', {
       code: 'async function x(){ function y(s=await foo){}}',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
       },
@@ -478,7 +478,7 @@ module.exports = (describe, test) =>
 
     test('the async property is not inherited from parent functions', {
       code: 'async function f(){ let y = x => await x; }',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         throws: 'Unable to ASI',
       },
@@ -487,7 +487,7 @@ module.exports = (describe, test) =>
 
     test('using await inside the arg header of a function inside async should always fail', {
       code: 'let f = () => (y=await foo) => y;',
-      throws: 'Cannot use `await` outside of `async` functions',
+      throws: 'await',
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 ())', // it's by far too much effort to proc a nice message here
       },
@@ -653,35 +653,8 @@ module.exports = (describe, test) =>
 
     test('inside a new', {
       code: 'async function f(){ new await x; }',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'FunctionDeclaration',
-            generator: false,
-            async: true,
-            id: {type: 'Identifier', name: 'f'},
-            params: [],
-            body: {
-              type: 'BlockStatement',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'NewExpression',
-                    arguments: [],
-                    callee: {
-                      type: 'AwaitExpression',
-                      argument: {type: 'Identifier', name: 'x'},
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      desc: '`new` expects a NewExpression as arg, which is itself or a MemberExpression which can not lead to AwaitExpression',
+      throws: 'new',
     });
 
     test.pass('newline after await in func is ok', {
@@ -694,79 +667,21 @@ module.exports = (describe, test) =>
 
     test('new await inside array', {
       code: 'async function f(){ [new await foo] }',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'FunctionDeclaration',
-            generator: false,
-            async: true,
-            id: {type: 'Identifier', name: 'f'},
-            params: [],
-            body: {
-              type: 'BlockStatement',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrayExpression',
-                    elements: [
-                      {
-                        type: 'NewExpression',
-                        arguments: [],
-                        callee: {
-                          type: 'AwaitExpression',
-                          argument: {type: 'Identifier', name: 'foo'},
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR],
+      desc: '`new` expects a NewExpression as arg, which is itself or a MemberExpression which can not lead to AwaitExpression',
+      throws: 'new',
     });
 
     test('new await inside group', {
       code: 'async function f(){ (new await foo) }',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'FunctionDeclaration',
-            generator: false,
-            async: true,
-            id: {type: 'Identifier', name: 'f'},
-            params: [],
-            body: {
-              type: 'BlockStatement',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'NewExpression',
-                    arguments: [],
-                    callee: {
-                      type: 'AwaitExpression',
-                      argument: {type: 'Identifier', name: 'foo'},
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $ASI, $PUNCTUATOR],
+      desc: '`new` expects a NewExpression as arg, which is itself or a MemberExpression which can not lead to AwaitExpression',
+      throws: 'new',
     });
 
     test.pass('new await nested inside group', {
       code: 'async function f(){ new (await foo) }',
     });
+
+    test.fail('cannot omit yield arg', {
+      code: 'async function f(){ await; }',
+    });
   });
-
-// > Unlike YieldExpression, it is a Syntax Error to omit the operand of an AwaitExpression. You must await something.
-
