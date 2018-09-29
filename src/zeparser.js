@@ -220,10 +220,9 @@ const VERSION_WHATEVER = Infinity;
 
 const WAS_ASYNC = true;
 const NOT_ASYNC = false;
-const IS_ASYNC_PREFIXED = true;
-const NOT_ASYNC_PREFIXED = false;
+const IS_ASYNC_PREFIXED = {};
+const NOT_ASYNC_PREFIXED = {};
 const UNDEF_ASYNC = undefined;
-const UNDEF_LHP = undefined;
 const WAS_GENERATOR = true;
 const IS_GENERATOR = true;
 const NOT_GENERATOR = false;
@@ -2004,7 +2003,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
       }
 
-      let r = parseGroupToplevels(lexerFlags, fromStmtOrExpr, allowAssignment, asyncIdentToken, newlineAfterAsync, astProp);
+      let r = parseGroupToplevels(lexerFlags, fromStmtOrExpr, allowAssignment, asyncIdentToken, newlineAfterAsync ? IS_ASYNC_PREFIXED : NOT_ASYNC_PREFIXED, astProp);
 
       if (fromStmtOrExpr === IS_STATEMENT) {
         AST_close('ExpressionStatement');
@@ -4205,7 +4204,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           parseExpressionFromBinaryOp(lexerFlags, astProp);
         }
 
-        // note: this is for `5+5=10`
+        // note: this is a nice error message for `5+5=10`
         if (curc === $$IS_3D && curtok.str === '=') {
           THROW('Cannot assign a value to non-assignable value');
         }
@@ -5369,6 +5368,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function _parseGroupToplevels(lexerFlagsBeforeParen, asyncStmtOrExpr, allowAssignment, isDeleteArg, asyncToken, newlineAfterAsync, astProp) {
     ASSERT(arguments.length === _parseGroupToplevels.length, 'arg count');
+    ASSERT(newlineAfterAsync === NOT_ASYNC_PREFIXED || newlineAfterAsync === IS_ASYNC_PREFIXED);
     ASSERT(typeof astProp === 'string');
 
     // = parseGroup, = parseArrow
@@ -5722,7 +5722,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.nl) {
         THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
       }
-      else if (newlineAfterAsync) {
+      else if (newlineAfterAsync === IS_ASYNC_PREFIXED) {
         // - `async \n () => x`
         // - `async \n (x) => x`
         if (allowAsyncFunctions) {
