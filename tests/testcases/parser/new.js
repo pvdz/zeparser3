@@ -2597,10 +2597,8 @@ module.exports = (describe, test) =>
       });
 
       describe('expression', _ => {
-        test('not assignable', {
+        test.fail('not assignable', {
           code: 'function f(){ new.target = foo }',
-          throws: 'non-assignable value',
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
         });
 
         test('not incremental', {
@@ -2609,12 +2607,10 @@ module.exports = (describe, test) =>
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
         });
 
-        // TODO: enable once postfix works
-        //test('not decremental', {
-        //  code: 'function f(){ new.target-- }',
-        //  throws: 'non-assignable value',
-        //  tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
-        //});
+        test('not decremental', {
+         code: 'function f(){ new.target-- }',
+         throws: 'non-assignable value',
+        });
 
         test('operable left', {
           code: 'function f(){ new.target + foo }',

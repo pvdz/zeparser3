@@ -1941,6 +1941,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let newlineAfterAsync = curtok.nl;
 
     if (curtype === $IDENT) {
+      //   - `async foo ...`
+      //   - `async function f(){}`
+      //   - `async \n function f(){}`
 
       if (newlineAfterAsync) {
         // This _must_ mean async is a regular var name so just parse an expression now.
@@ -1985,10 +1988,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `(async \n (foo) => foo)`           --> error, cannot apply cover grammar
       // - `let x = async \n (foo);`           --> `let x = async(foo);`
       // - `let x = async \n (foo) => foo`     --> error, cannot apply cover grammar
+      // - `new async;`
+      // - `new async();`
+      // - `new async() =>x`                   --> error, arrow not allowed as new arg
 
       if (fromStmtOrExpr === IS_STATEMENT) {
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression'
+      }
+
+      if (isNewArg === IS_NEW_ARG) {
+        // - `new async();`
+        // - `new async() => x`     (error because arrow is an AssignmentExpression and new does not accept that)
+        // Note that if it turns out to be an arrow, the parser will throw when seeing `=>` unexpectedly
+        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
       }
 
       let r = parseGroupToplevels(lexerFlags, fromStmtOrExpr, allowAssignment, asyncIdentToken, newlineAfterAsync, astProp);
@@ -4124,15 +4137,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (allowAssignment === NO_ASSIGNMENT) assignable = initNotAssignable();
     return parseExpressionFromOp(lexerFlags, assignable, astProp);
   }
-  function parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, identToken, isNewArg, allowAssignment, astProp) {
+  function parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp) {
     ASSERT(arguments.length === parseExpressionAfterAsyncAsVarName.length, 'arg count');
+    ASSERT(asyncToken.str === 'async');
+
     if (stmtOrExpr === IS_STATEMENT) {
       AST_open(astProp, 'ExpressionStatement');
       astProp = 'expression'
     }
-    // identToken is 'async', is validated to be a regular var name and not a keyword, but not yet added to AST
-    let assignable = parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, allowAssignment, astProp);
+    // asyncToken is not yet added to AST
+    let assignable = parseAfterVarName(lexerFlags, asyncToken, IS_ASSIGNABLE, allowAssignment, astProp);
     assignable = parseValueTail(lexerFlags, assignable, isNewArg, astProp);
+
+    ASSERT((isNewArg !== IS_NEW_ARG) || (stmtOrExpr !== IS_STATEMENT), 'this can not be a new arg if it is a statement');
     if (stmtOrExpr === IS_STATEMENT) {
       // in expressions operator precedence is handled elsewhere. in statements this is the start,
       assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
@@ -4855,41 +4872,38 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `new foo()();`
     // - `new await foo;`   (illegal)
 
-    if (curtok.str === '.') {
-      // new.target
-      if (hasNoFlag(lexerFlags, LF_CAN_NEW_DOT_TARGET)) {
-        // only valid if at least one scope in the scope tree is a regular function
-        // - `() => new.target`
-        THROW('Must be inside/nested a regular function to use `new.target`');
-      }
+    if (curtok.str === '.') return parseNewDotTarget(lexerFlags, astProp);
+    return parseNewExpression(lexerFlags, astProp);
+  }
+  function parseNewDotTarget(lexerFlags, astProp) {
+    // - `new.target`
+    // - `new.foo`
 
-      ASSERT_skipAny('.', lexerFlags); // already asserted the dot, next token must be `target`
-      if (curtok.str !== 'target') THROW('Can only read `new.target`, no other "properties" from `new`');
-      AST_open(astProp, 'MetaProperty');
-      AST_open('meta', 'Identifier');
-      AST_set('name', 'new');
-      AST_close('Identifier');
-      AST_open('property', 'Identifier');
-      AST_set('name', 'target');
-      AST_close('Identifier');
-      ASSERT_skipDiv('target', lexerFlags); // new.target / foo
-      AST_close('MetaProperty');
-
-      // note: this is some minor "sugar" for `new.target=10`, not further checking for compound ops...
-      if (curc === $$IS_3D && curtok.str === '=') {
-        THROW('Cannot assign a value to non-assignable value');
-      }
-
-      return NOT_ASSIGNABLE;
+    if (hasNoFlag(lexerFlags, LF_CAN_NEW_DOT_TARGET)) {
+      // only valid if there is at least one scope in the scope tree that is not an arrow scope
+      // - `() => new.target`
+      // - TODO: `function f(x=() => new.target) {}`
+      THROW('Must be inside/nested a regular function to use `new.target`');
     }
 
-    AST_open(astProp, 'NewExpression');
-    AST_set('arguments', []);
-    parseNewArgValue(lexerFlags, 'callee');
-    AST_close(['NewExpression', 'MetaProperty']);
+    ASSERT_skipAny('.', lexerFlags); // already asserted the dot, next token must be `target`
+    if (curtok.str !== 'target') THROW('Can only read `new.target`, no other "properties" from `new`');
+    AST_open(astProp, 'MetaProperty');
+    AST_open('meta', 'Identifier');
+    AST_set('name', 'new');
+    AST_close('Identifier');
+    AST_open('property', 'Identifier');
+    AST_set('name', 'target');
+    AST_close('Identifier');
+    ASSERT_skipDiv('target', lexerFlags); // new.target / foo
+    AST_close('MetaProperty');
+
     return NOT_ASSIGNABLE;
   }
-  function parseNewArgValue(lexerFlags, astProp) {
+  function parseNewExpression(lexerFlags, astProp) {
+    AST_open(astProp, 'NewExpression');
+    AST_set('arguments', []);
+
     // new can parse a MemberExpression (https://tc39.github.io/ecma262/#prod-MemberExpression)
     // member expressions are quite limited;
     // - a.b             (where a is recursively a memberexpression)
@@ -4911,73 +4925,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //   - regex
     //   - template
     //   - group (but not arrow as per the Supplemental Syntax)
+    // the `new await` legacy cases are handled in the await-parser
+    // - `new await`
+    // - `new await x`
+    // - `new await()`
+    // - `new await()()`
+    // - `new await x()`
+    // - `new await x()()`
 
-    if (curtype === $IDENT) {
-      let asyncToken = curtok;
-      if (curc === $$A_61) {
-        if (curtok.str === 'await') {
-          // - `new await`
-          // - `new await x`
-          // - `new await()`
-          // - `new await()()`
-          // - `new await x()`
-          // - `new await x()()`
-          let identToken = curtok;
-          ASSERT_skipDiv('await', lexerFlags); // `new await / foo`
-          parseAwaitExpression(lexerFlags, identToken, IS_NEW_ARG, NO_ASSIGNMENT, 'callee');
-          return;
-        } else if (curtok.str === 'async') {
+    // Note: te `isNewArg` state will make sure the `parseValueTail` function properly deals with the first call arg
+    parseValue(lexerFlags, NO_ASSIGNMENT, IS_NEW_ARG, 'callee');
 
-          ASSERT_skipDiv('async', lexerFlags); // `new async / foo`
-
-          if (curc === $$PAREN_L_28) {
-            // hack to quickly detect the `new async()` edge case
-            // - `new async();`
-            // - `new async() => x`     (error because arrow is an AssignmentExpression and new does not accept that)
-
-            AST_setIdent(astProp, asyncToken);
-            // we already know what's going to be parsed next so let's just get to it
-            parseCallArgs(lexerFlags | LF_NO_ASI, 'arguments');
-
-            if (curtok.str === '=>') THROW('The `new` keyword can not be applied to an arrow');
-            return;
-          } else if (curc === $$F_66 && curtok.str === 'function') {
-            // - `new async function`
-
-            // can async functions even serve as constructors?
-            // and if the answer is "no", is this syntactically restricted somehow?
-
-            if (curtok.nl) {
-              // This _must_ mean async is a regular var name so just parse an expression now.
-              // - `async \n ident...` ->
-              //   - `async; foo;`
-              //   - `async in obj`
-              //   - `async instanceof obj`
-              //   - `async; function f(){}`
-              return parseExpressionAfterAsyncAsVarName(lexerFlags, IS_EXPRESSION, asyncToken, IS_NEW_ARG, NO_ASSIGNMENT, astProp);
-            }
-
-            // - `async function f(){}`
-
-            ASSERT_skipAny('function', lexerFlags); // ident or `(`
-
-            parseFunctionExpression(lexerFlags, asyncToken ? WAS_ASYNC : NOT_ASYNC, astProp);
-
-            return;
-          } else {
-            parseExpressionAfterAsyncAsVarName(lexerFlags, IS_EXPRESSION, asyncToken, IS_NEW_ARG, NO_ASSIGNMENT, astProp);
-            return;
-          }
-        }
-      }
-    }
-
-    parseValue(lexerFlags, NO_ASSIGNMENT, IS_NEW_ARG, astProp);
-    // parse at least a headbody
-    // then parse any number of dot/dynamic properties up to and including but not necessary one call
-    // stop immediately after the call, or when the next token is not one of `.`, `[`, `(`.
-    // now accept a restricted set of value tails
-    // note that the value is not assignable, this prevents `new x++` cases
+    AST_close('NewExpression');
+    return NOT_ASSIGNABLE;
   }
   function parseThisKeyword(astProp) {
     AST_open(astProp, 'ThisExpression');
@@ -5186,6 +5146,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curtype === $PUNCTUATOR && curtok.str === '(');
       if (isNewArg === IS_NEW_ARG) { // exception for `new`
         parseCallArgs(lexerFlags | LF_NO_ASI, 'arguments');
+        if (curtok.str === '=>') {
+          THROW('The `new` keyword can not be applied to an arrow');
+        }
         // new stops parsing the rhs after the first call args
         assignable = initNotAssignable();
       } else {
