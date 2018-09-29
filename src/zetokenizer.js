@@ -219,7 +219,7 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 $flag = 0;
 const LF_NO_FLAGS = 0;
 const LF_CAN_FUNC_STMT = 1 << ++$flag; // currently nesting inside at least one statement that is not a block/body
-const LF_CAN_NEW_TARGET = 1 << ++$flag; // current scope is inside at least one regular (non-arrow) function
+const LF_CAN_NEW_DOT_TARGET = 1 << ++$flag; // current scope is inside at least one regular (non-arrow) function
 const LF_DO_WHILE_ASI = 1 << ++$flag; // for do-while, can only asi sub-statement if there was a newline before `while`
 const LF_FOR_REGEX = 1 << ++$flag;
 const LF_IN_ASYNC = 1 << ++$flag;
@@ -302,9 +302,9 @@ function LF_DEBUG(flags) {
     flags ^= LF_IN_SWITCH;
     s.push('LF_IN_SWITCH');
   }
-  if (flags & LF_CAN_NEW_TARGET) {
-    flags ^= LF_CAN_NEW_TARGET;
-    s.push('LF_CAN_NEW_TARGET');
+  if (flags & LF_CAN_NEW_DOT_TARGET) {
+    flags ^= LF_CAN_NEW_DOT_TARGET;
+    s.push('LF_CAN_NEW_DOT_TARGET');
   }
   if (flags & LF_IN_FOR_LHS) {
     flags ^= LF_IN_FOR_LHS;
@@ -3416,7 +3416,7 @@ require['__./zetokenizer'] = module.exports = { default: ZeTokenizer,
   GOAL_SCRIPT,
 
   LF_CAN_FUNC_STMT,
-  LF_CAN_NEW_TARGET,
+  LF_CAN_NEW_DOT_TARGET,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
   LF_IN_ASYGEN,
