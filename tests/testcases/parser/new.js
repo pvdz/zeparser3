@@ -1752,7 +1752,7 @@ module.exports = (describe, test) =>
 
         test('await var', {
           code: 'new await',
-          STRICT: {throws: 'new'},
+          STRICT: {throws: true},
           ast: {
             type: 'Program',
             body: [
@@ -1772,7 +1772,7 @@ module.exports = (describe, test) =>
         test('await call', {
           code: 'new await()',
           desc: 'NOT a call expression!',
-          STRICT: {throws: 'new'},
+          STRICT: {throws: true},
           ast: {
             type: 'Program',
             body: [
@@ -1792,7 +1792,7 @@ module.exports = (describe, test) =>
         test('await expression fail', {
           code: 'new await foo',
           desc: 'not await expression so await is var name so it wants asi after `await` which fails',
-          STRICT: {throws: 'new'},
+          STRICT: {throws: true},
           throws: 'asi',
         });
 

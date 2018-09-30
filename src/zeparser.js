@@ -181,7 +181,6 @@ let { default: ZeTokenizer,
   LF_DO_WHILE_ASI,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
-  LF_IN_ASYGEN,
   LF_IN_CONSTRUCTOR,
   LF_IN_FOR_LHS,
   LF_IN_FUNC_ARGS,
@@ -265,8 +264,8 @@ const MIGHT_DESTRUCT = 0; // any kind of destructuring or lack thereof is okay
 const CANT_DESTRUCT = 1; // it is impossible to destructure this
 const DESTRUCT_ASSIGN_ONLY = 2; // the only way this can destruct is by assignment
 const MUST_DESTRUCT = 4;
-const NOT_ASSIGNABLE = CANT_DESTRUCT;
-const IS_ASSIGNABLE = MIGHT_DESTRUCT;
+const NOT_ASSIGNABLE = 1;
+const IS_ASSIGNABLE = 2;
 const DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR = 8; // signal having found a constructor (special case)
 const DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO = 16; // signal that a `__proto__: x` was parsed (do detect double occurrence)
 const NO_SPREAD = 0;
@@ -1500,7 +1499,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       // properly inherit the async/gen state from the outer scope (func decls) or current function (func expr)
       let bindingFlags = (
-        sansFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC | LF_IN_ASYGEN)
+        sansFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC)
         |
         getFuncIdentAsyncGenState(isRealFuncExpr, lexerFlags, isGenerator, isAsync)
       );
@@ -1594,14 +1593,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(enclosingScopeFlags, LF_STRICT_MODE)) return LF_IN_GENERATOR;
 
     if (isFuncExpr) return currentScopeIsGenerator ? LF_IN_GENERATOR : 0;
-    return hasAnyFlag(enclosingScopeFlags, LF_IN_GENERATOR | LF_IN_ASYGEN) ? LF_IN_GENERATOR : 0;
+    return hasAnyFlag(enclosingScopeFlags, LF_IN_GENERATOR) ? LF_IN_GENERATOR : 0;
   }
   function getFuncIdentAsyncState(isFuncExpr, enclosingScopeFlags, currentScopeIsGenerator) {
     // function idents can never be `await` with the module goal
     if (goalMode === GOAL_MODULE) return LF_IN_ASYNC;
 
     if (isFuncExpr) return currentScopeIsGenerator ? LF_IN_ASYNC : 0;
-    return hasAnyFlag(enclosingScopeFlags, LF_IN_ASYNC | LF_IN_ASYGEN) ? LF_IN_ASYNC : 0;
+    return hasAnyFlag(enclosingScopeFlags, LF_IN_ASYNC) ? LF_IN_ASYNC : 0;
   }
   function getFuncIdentAsyncGenState(isFuncExpr, enclosingScopeFlags, currentScopeGenerator, currentScopeAsync) {
     return getFuncIdentGeneratorState(isFuncExpr, enclosingScopeFlags, currentScopeGenerator) |
@@ -1613,7 +1612,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // this resets lexerflags for parsing a function from the arguments onwards or for the body of an arrow
     lexerFlags = sansFlag(lexerFlags,
       LF_IN_ASYNC |
-      LF_IN_ASYGEN |
       LF_IN_GENERATOR |
       LF_IN_FUNC_ARGS
     );
@@ -1621,9 +1619,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // the function name can inherit this state from the enclosing scope but all other parts of a function will
     // be parsed according to the state of hte currently defined function
     if (isAsync) {
-      if (isGenerator) lexerFlags |= LF_IN_ASYGEN;
-      else lexerFlags |= LF_IN_ASYNC;
-    } else if (isGenerator) {
+      lexerFlags |= LF_IN_ASYNC;
+    }
+    if (isGenerator) {
       lexerFlags |= LF_IN_GENERATOR;
     }
 
@@ -2037,8 +2035,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
 
-  function parseAwaitExpression(lexerFlags, awaitIdentToken, isNewArg, allowAssignment, astProp) {
-    ASSERT(parseAwaitExpression.length === arguments.length, 'arg count');
+  function parseAwait(lexerFlags, awaitIdentToken, isNewArg, allowAssignment, astProp) {
+    ASSERT(parseAwait.length === arguments.length, 'arg count');
     // in an awaitable context this must always be considered a keyword. outside of it it should never be considered a keyword
 
     // TODO: lexerFlags should tell us whether we are currently in an async body. strict mode tells us how to handle "no".
@@ -2051,47 +2049,75 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // in module: only if lexerFlags allow await (inside async code)
     // in script: must be considered an await-expression when inside async, must be considered a var name otherwise
     // (`await` when not a keyword _is_ assignable)
-    if (isNewArg === IS_NEW_ARG) {
-      if (hasAnyFlag(lexerFlags, LF_STRICT_MODE | LF_IN_ASYNC)) {
-        // - `async function f(){ new await x; }`
-        // - `async function f(){ [new await foo] }`
-        // - `async function f(){ (new await foo) }`
-        // - `function f(){ "use strict"; new await; }`
-        // - `function *f(){ "use strict"; new await; }`
-        // - `async function *f(){ new await; }`
-        THROW('Cannot await inside `new`');
-      }
-      // (sloppy mode):
-      // - `function f(){ new await; }`
-      // - `function *f(){ new await; }`
-      // - `new await;`
-    }
 
-    if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) {
-      if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) THROW('Await is illegal as default arg value');
-      AST_open(astProp, 'AwaitExpression');
-      // TODO: what about `await ()=>x` ? Is the rhs of await a non assignable?
-      parseValue(lexerFlags, NO_ASSIGNMENT, NOT_NEW_ARG, 'argument'); // await expr arg is never optional
-      AST_close('AwaitExpression');
-      if (curtok.str === '**') {
-        THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
-      }
-      parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, 'expression');
-      return NOT_ASSIGNABLE; // an await should gobble all assignments so this is not assignable
+    if (hasAnyFlag(lexerFlags, LF_IN_ASYNC)) {
+      return parseAwaitKeyword(lexerFlags, isNewArg, astProp);
     }
     else if (hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
-      // consider `await` a regular var name, not a keyword
-      // should throw an error if used as an await anyways
-      let assignable = parseAfterVarName(lexerFlags, awaitIdentToken, IS_ASSIGNABLE, allowAssignment, astProp);
-      assignable = parseValueTail(lexerFlags, assignable, isNewArg, astProp);
-      if (allowAssignment === NO_ASSIGNMENT) assignable = initNotAssignable();
-      // may be assignable if var name
-      // - `(await)=x`
-      return parseExpressionFromOp(lexerFlags, assignable, astProp);
+      return parseAwaitBinding(lexerFlags, awaitIdentToken, isNewArg, allowAssignment, astProp)
     }
     else {
       THROW('Cannot use `await` outside of `async` functions');
     }
+  }
+  function parseAwaitKeyword(lexerFlags, isNewArg, astProp) {
+    if (isNewArg === IS_NEW_ARG) {
+      // - `async function f(){ new await x; }`
+      // - `async function f(){ [new await foo] }`
+      // - `async function f(){ (new await foo) }`
+      // - `function f(){ "use strict"; new await; }`
+      // - `function *f(){ "use strict"; new await; }`
+      // - `async function *f(){ new await; }`
+      THROW('Cannot `await` as the arg of `new`');
+    }
+
+    if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) {
+      // Illegal without arg (would already fail for that reason alone)
+      // - `function f(x = await){}`
+      // - `function *f(x = await){}`
+      // - `async function f(x = await){}`
+      // - `async function *f(x = await){}`
+      // Illegal with arg
+      // - `function f(x = await y){}`
+      // - `function *f(x = await y){}`
+      // - `async function f(x = await y){}`
+      // - `async function *f(x = await y){}`
+      // Illegal as arg name
+      // - `function f(await){}`
+      // - `function *f(await){}`
+      // - `async function f(await){}`
+      // - `async function *f(await){}`
+      THROW('Await is illegal as default arg value');
+    }
+
+    // - `async function f(){ new await; }`
+    // - `async function *f(){ new await; }`
+
+    AST_open(astProp, 'AwaitExpression');
+    // TODO: what about `await ()=>x` ? Is the rhs of await a non assignable?
+    parseValue(lexerFlags, NO_ASSIGNMENT, NOT_NEW_ARG, 'argument'); // await expr arg is never optional
+    AST_close('AwaitExpression');
+    if (curtok.str === '**') {
+      THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
+    }
+    parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, 'expression');
+    return NOT_ASSIGNABLE; // an await should gobble all assignments so this is not assignable
+  }
+  function parseAwaitBinding(lexerFlags, awaitIdentToken, isNewArg, allowAssignment, astProp) {
+    // Consider `await` a regular var name, not a keyword
+    // Should throw an error if used as an await anyways
+
+    // - `await;`
+    // - `await.x;`
+    // - `new await;`
+    // - `typeof await;`
+
+    let assignable = parseAfterVarName(lexerFlags, awaitIdentToken, IS_ASSIGNABLE, allowAssignment, astProp);
+    assignable = parseValueTail(lexerFlags, assignable, isNewArg, astProp);
+    if (allowAssignment === NO_ASSIGNMENT) assignable = initNotAssignable();
+    // may be assignable if var name
+    // - `(await)=x`
+    return parseExpressionFromOp(lexerFlags, assignable, astProp);
   }
 
   function parseBlockStatement(lexerFlags, scoop, labelSet, blockType, parseDirectives, wasSimple, includeDeclarations, astProp) {
@@ -3219,15 +3245,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let identName = curtok.str;
     switch (identName) {
       case 'await':
-
         ASSERT_skipRex('await', lexerFlags);
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-
         AST_open(astProp, 'ExpressionStatement');
-
-        // await as a keyword
-        parseAwaitExpression(lexerFlags, identToken, NOT_NEW_ARG, ALLOW_ASSIGNMENT, 'expression');
-
+        parseAwait(lexerFlags, identToken, NOT_NEW_ARG, ALLOW_ASSIGNMENT, 'expression');
         AST_close('ExpressionStatement');
         parseSemiOrAsi(lexerFlags);
         return;
@@ -3838,7 +3859,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             return 'Await is illegal outside of async body with module goal';
           } else {
             // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
-            if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) return 'Await not allowed here';
+            if (hasAnyFlag(lexerFlags, LF_IN_ASYNC)) return 'Await not allowed here';
           }
         }
         break;
@@ -3849,7 +3870,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
           return 'Cannot use this reserved word as a variable name in strict mode';
           // in sloppy mode you cant use it inside a generator function (and inside params defaults?)
-        } else if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYGEN)) {
+        } else if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR)) {
           return 'Cannot use this reserved word as a variable name inside a generator';
         }
         break;
@@ -3968,7 +3989,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             THROW('Await is illegal outside of async body with module goal');
           } else {
             // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
-            if (hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) THROW('Await not allowed here');
+            if (hasAnyFlag(lexerFlags, LF_IN_ASYNC)) THROW('Await not allowed here');
           }
         }
         break;
@@ -4083,7 +4104,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // conditional keywords
       case 'await':
         if (allowAsyncFunctions) {
-          if (goalMode === GOAL_MODULE || hasAnyFlag(lexerFlags, LF_IN_ASYNC | LF_IN_ASYGEN)) {
+          if (goalMode === GOAL_MODULE || hasAnyFlag(lexerFlags, LF_IN_ASYNC)) {
             break;
           }
         }
@@ -4597,9 +4618,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseAsyncExpression(lexerFlags, DO_NOT_BIND, identToken, isNewArg, NOT_EXPORT, allowAssignment, astProp);
       case 'await':
         ASSERT_skipRex($IDENT, lexerFlags); // not very likely
-
-        // note: await is unary that wants unary as arg so they can be chained
-        return parseAwaitExpression(lexerFlags, identToken, isNewArg, allowAssignment, astProp);
+        return parseAwait(lexerFlags, identToken, isNewArg, allowAssignment, astProp);
       case 'class':
         ASSERT_skipAny('class', lexerFlags); // TODO: next token is ident or curly
         parseClassExpression(lexerFlags, IDENT_OPTIONAL, astProp);
@@ -4701,10 +4720,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'async':
         return parseAsyncExpression(lexerFlags, DO_NOT_BIND, identToken, NOT_NEW_ARG, NOT_EXPORT, allowAssignment, astProp);
       case 'await':
-        // in module: only if lexerFlags allow await (inside async code)
-        // in script: same as module but also as regular var names (only) outside of async code
-        // (await when not a keyword is assignable)
-        return parseAwaitExpression(lexerFlags, identToken, NOT_NEW_ARG, allowAssignment, astProp);
+        return parseAwait(lexerFlags, identToken, NOT_NEW_ARG, allowAssignment, astProp);
       case 'class':
         parseClassExpression(lexerFlags, IDENT_OPTIONAL, astProp);
         return NOT_ASSIGNABLE;
@@ -4972,7 +4988,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // not be able to satisfy the required `[+Yield]` parameter to parse it as a yield expression and so it goes to ident
     // Note that `yield` var names are never allowed inside generator scopes, which only resets between func name and args
 
-    if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYGEN)) {
+    if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR)) {
       if (hasAllFlags(lexerFlags, LF_IN_FUNC_ARGS)) {
         THROW('The `yield` keyword in arg default must be a var name but that is not allowed inside a generator');
       } else {
