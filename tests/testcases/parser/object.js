@@ -6364,9 +6364,8 @@ module.exports = (describe, test) =>
               tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
 
-            test('destructing', {
+            test.fail('destructing', {
               code: '({"x": [y].slice(0)} = x)',
-              throws: true,
             });
 
             test('arrow', {
@@ -6718,9 +6717,8 @@ module.exports = (describe, test) =>
               tokens: [$PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
 
-            test('destructing', {
+            test.pass('destructing', {
               code: '({"x": 600..xyz} = x)',
-              throws: true,
             });
 
             test('arrow', {
@@ -7377,6 +7375,26 @@ module.exports = (describe, test) =>
       test('spread on string property assignment to arrow', {
         code: '({..."foo".foo=x}) => x',
         throws: 'destructible',
+      });
+
+      test.pass('destruct assignment that starts with number', {
+        code: '({l: 50..foo} = x)',
+      });
+
+      test.pass('destruct assignment that starts with string', {
+        code: '({s: "foo".foo} = x)',
+      });
+
+      test.pass('destruct assignment when value is property of arrlit ', {
+        code: '({"foo": [x].foo}=y)',
+      });
+
+      test.pass('destruct assignment when value is property of objlit', {
+        code: '({"foo": {x}.foo}=y)',
+      });
+
+      test.pass('destruct assignment when value is property of number', {
+        code: '({"foo": 15..foo}=y)',
       });
     });
 

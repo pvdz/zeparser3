@@ -3065,6 +3065,14 @@ module.exports = (describe, test) =>
                 tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               }
                 :
+              ident === 'await'
+                ?
+              {
+                MODULE: {throws: true},
+                ast: true,
+                tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+              }
+                :
               {
                 throws: true,
               }
@@ -3934,6 +3942,19 @@ module.exports = (describe, test) =>
         code: 'class x { constructor(){}; "\x63onstructor"(){}; }',
         throws: 'constructor',
       });
+    });
+
+    test.pass('class expression with body sans tail', {
+      code: '(class x{}.foo)',
+    });
+
+    test.pass('class expression with body and tail', {
+      code: '(class x{}.foo())',
+    });
+
+    test.pass('class expression with tail', {
+      code: '(class x{}())',
+      desc: 'this will be a runtime error but not a syntax error',
     });
 
     // export default class extends F {}

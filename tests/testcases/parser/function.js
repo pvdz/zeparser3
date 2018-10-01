@@ -3828,7 +3828,6 @@ module.exports = (describe, test) =>
 
             test.fail('class method await', {
               code: 'class A {f(x=await foo) {}}',
-              throws: 'await',
             });
 
             test.fail('async class method await', {
@@ -3838,7 +3837,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator class method await', {
               code: 'class A {*f(x=await foo) {}}',
-              throws: 'await',
             });
 
             test('async generator class method await', {
@@ -3989,7 +3987,6 @@ module.exports = (describe, test) =>
 
             test.fail('class method await', {
               code: 'class A {f() { return await foo; }}',
-              throws: 'await',
             });
 
             test.pass('async class method await', {
@@ -3998,7 +3995,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator class method await', {
               code: 'class A {*f() { return await foo; }}',
-              throws: 'await',
             });
 
             test.pass('async generator class method containing await', {
@@ -4477,7 +4473,6 @@ module.exports = (describe, test) =>
 
             test.fail('class method await', {
               code: 'async function as(){ class A {f(x=await foo) {}} }',
-              throws: 'await',
             });
 
             test.fail('async class method await', {
@@ -4632,7 +4627,6 @@ module.exports = (describe, test) =>
 
             test.fail('class method await', {
               code: 'async function as(){ class A {f() { return await foo; }} }',
-              throws: 'await',
             });
 
             test.pass('async class method await', {
@@ -4641,7 +4635,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator class method await', {
               code: 'async function as(){ class A {*f() { return await foo; }} }',
-              throws: 'await',
             });
 
             test.pass('async generator class method containing await', {
@@ -5098,7 +5091,6 @@ module.exports = (describe, test) =>
 
             test.fail('class method await', {
               code: 'function *as(){ class A {f(x=await foo) {}} }',
-              throws: 'await',
             });
 
             test.fail('async class method await', {
@@ -5251,7 +5243,6 @@ module.exports = (describe, test) =>
 
             test.fail('class method await', {
               code: 'function *as(){ class A {f() { return await foo; }} }',
-              throws: 'await',
             });
 
             test.pass('async class method await', {
@@ -5260,7 +5251,6 @@ module.exports = (describe, test) =>
 
             test.fail('generator class method await', {
               code: 'function *as(){ class A {*f() { return await foo; }} }',
-              throws: 'await',
             });
 
             test.pass('async generator class method containing await', {

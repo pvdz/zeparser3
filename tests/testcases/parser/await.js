@@ -314,6 +314,65 @@ module.exports = (describe, test) =>
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
+    test('await var in an async call', {
+      code: 'async(await);',
+      MODULE: {throws: 'await'},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {type: 'Identifier', name: 'async'},
+              arguments: [{type: 'Identifier', name: 'await'}],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('argless await expression in async', {
+      code: 'async function f(){ async(await); }',
+      throws: 'value',
+    });
+
+    test('await expression in async', {
+      code: 'async function f(){ async(await x); }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: false,
+            async: true,
+            id: {type: 'Identifier', name: 'f'},
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'CallExpression',
+                    callee: {type: 'Identifier', name: 'async'},
+                    arguments: [
+                      {
+                        type: 'AwaitExpression',
+                        argument: {type: 'Identifier', name: 'x'},
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
     test('can never use await expression as default arg value', {
       code: 'function call(foo=await bar){}',
       throws: 'await',
@@ -681,7 +740,753 @@ module.exports = (describe, test) =>
       code: 'async function f(){ new (await foo) }',
     });
 
-    test.fail('cannot omit yield arg', {
+    test.fail('cannot omit await arg', {
       code: 'async function f(){ await; }',
+    });
+
+    describe('await as func id', _ => {
+
+      test.pass('plain function decl', {
+        code: 'function await(){}',
+        MODULE: {throws: 'await'},
+      });
+
+      test.pass('async function decl', {
+        code: 'async function await(){}',
+        MODULE: {throws: 'await'},
+      });
+
+      test.pass('generator function decl', {
+        code: 'function *await(){}',
+        MODULE: {throws: 'await'},
+      });
+
+      test.pass('async generator function decl', {
+        code: 'async function *await(){}',
+        MODULE: {throws: 'await'},
+      });
+
+      test.pass('plain function expr', {
+        code: 'let x = function await(){}',
+        MODULE: {throws: 'await'},
+      });
+
+      test('async function expr', {
+        code: 'let x = async function await(){}',
+        throws: 'await',
+      });
+
+      test.pass('generator function expr', {
+        code: 'let x = function *await(){}',
+        MODULE: {throws: 'await'},
+      });
+
+      test('async generator function expr', {
+        code: 'let x = async function *await(){}',
+        throws: 'await',
+      });
+
+      test.pass('plain obj method', {
+        code: 'let o = {await(){}}',
+      });
+
+      test.pass('async obj method', {
+        code: 'let o = {async await(){}}',
+      });
+
+      test.pass('generator obj method', {
+        code: 'let o = {*await(){}}',
+      });
+
+      test.pass('async generator obj method', {
+        code: 'let o = {async *await(){}}',
+      });
+
+      test.pass('plain class method', {
+        code: 'class x {await(){}}',
+      });
+
+      test.pass('async class method', {
+        code: 'class x {async await(){}}',
+      });
+
+      test.pass('generator class method', {
+        code: 'class x {*await(){}}',
+      });
+
+      test.pass('async generator class method', {
+        code: 'class x {async *await(){}}',
+      });
+    });
+
+    describe('await as arg name', _ => {
+
+      describe('non-arrow', _ => {
+
+        test.pass('plain function decl', {
+          code: 'function f(await){}',
+          MODULE: {throws: 'await'},
+        });
+
+        test('async function decl', {
+          code: 'async function f(await){}',
+          throws: 'await',
+        });
+
+        test.pass('generator function decl', {
+          code: 'function *f(await){}',
+          MODULE: {throws: 'await'},
+        });
+
+        test('async generator function decl', {
+          code: 'async function *f(await){}',
+          throws: 'await',
+        });
+
+        test.pass('plain function expr', {
+          code: 'let x = function f(await){}',
+          MODULE: {throws: 'await'},
+        });
+
+        test('async function expr', {
+          code: 'let x = async function f(await){}',
+          throws: 'await',
+        });
+
+        test.pass('generator function expr', {
+          code: 'let x = function *f(await){}',
+          MODULE: {throws: 'await'},
+        });
+
+        test('async generator function expr', {
+          code: 'let x = async function *f(await){}',
+          throws: 'await',
+        });
+
+        test.pass('plain obj method', {
+          code: 'let o = {f(await){}}',
+          MODULE: {throws: 'await'},
+        });
+
+        test('async obj method', {
+          code: 'let o = {async f(await){}}',
+          throws: 'await',
+        });
+
+        test.pass('generator obj method', {
+          code: 'let o = {*f(await){}}',
+          MODULE: {throws: 'await'},
+        });
+
+        test('async generator obj method', {
+          code: 'let o = {async *f(await){}}',
+          throws: 'await',
+        });
+
+        test.pass('plain class method', {
+          code: 'class x {f(await){}}',
+          MODULE: {throws: 'await'},
+        });
+
+        test('async class method', {
+          code: 'class x {async f(await){}}',
+          throws: 'await',
+        });
+
+        test.pass('generator class method', {
+          code: 'class x {*f(await){}}',
+          MODULE: {throws: 'await'},
+        });
+
+        test('async generator class method', {
+          code: 'class x {async *f(await){}}',
+          throws: 'await',
+        });
+      });
+
+      describe('arrow', _ => {
+
+        test.pass('plain arrow in global', {
+          code: '(await) => x',
+          MODULE: {throws: 'await'},
+        });
+
+        test.fail('async arrow in global', {
+          code: 'async (await) => x',
+        });
+
+        test.pass('async call in global', {
+          code: 'async(await)',
+          MODULE: {throws: 'await'},
+        });
+
+        test('plain arrow in async', {
+          code: 'async function f(){  (await) => x  }',
+          throws: 'value',
+        });
+
+        test('make sure await with arg is not accepted as arg just because the await parses now', {
+          code: 'async function f(){  (await fail) => x  }',
+          throws: 'destructible',
+        });
+
+        test.fail('async arrow in async', {
+          code: 'async function f(){  async (await) => x  }',
+        });
+
+        test('call with await in async', {
+          code: 'async function f(){  foo(await)  }',
+          throws: 'value',
+        });
+
+        test.pass('plain arrow in generator', {
+          code: 'function *f(){  (await) => x  }',
+          MODULE: {throws: 'await'},
+        });
+
+        test.fail('async arrow in generator', {
+          code: 'function *f(){  async (await) => x  }',
+        });
+
+        test.pass('call with await in generator', {
+          code: 'function *f(){  foo(await)  }',
+          MODULE: {throws: 'await'},
+        });
+      });
+    });
+
+    describe('await as arg default', _ => {
+
+      describe('argless await', _ => {
+
+        describe('non-arrow', _ => {
+
+          test.pass('plain function decl', {
+            code: 'function f(foo = await){}',
+            MODULE: {throws: 'await'},
+          });
+
+          test('async function decl', {
+            code: 'async function f(foo = await){}',
+            throws: 'await',
+          });
+
+          test.pass('generator function decl', {
+            code: 'function *f(foo = await){}',
+            MODULE: {throws: 'await'},
+          });
+
+          test('async generator function decl', {
+            code: 'async function *f(foo = await){}',
+            throws: 'await',
+          });
+
+          test.pass('plain function expr', {
+            code: 'let x = function f(foo = await){}',
+            MODULE: {throws: 'await'},
+          });
+
+          test('async function expr', {
+            code: 'let x = async function f(foo = await){}',
+            throws: 'await',
+          });
+
+          test.pass('generator function expr', {
+            code: 'let x = function *f(foo = await){}',
+            MODULE: {throws: 'await'},
+          });
+
+          test('async generator function expr', {
+            code: 'let x = async function *f(foo = await){}',
+            throws: 'await',
+          });
+
+          test.pass('plain obj method', {
+            code: 'let o = {f(foo = await){}}',
+            MODULE: {throws: 'await'},
+          });
+
+          test('async obj method', {
+            code: 'let o = {async f(foo = await){}}',
+            throws: 'await',
+          });
+
+          test.pass('generator obj method', {
+            code: 'let o = {*f(foo = await){}}',
+            MODULE: {throws: 'await'},
+          });
+
+          test('async generator obj method', {
+            code: 'let o = {async *f(foo = await){}}',
+            throws: 'await',
+          });
+
+          test.pass('plain class method', {
+            code: 'class x {f(foo = await){}}',
+            MODULE: {throws: 'await'},
+          });
+
+          test('async class method', {
+            code: 'class x {async f(foo = await){}}',
+            throws: 'await',
+          });
+
+          test.pass('generator class method', {
+            code: 'class x {*f(foo = await){}}',
+            MODULE: {throws: 'await'},
+          });
+
+          test('async generator class method', {
+            code: 'class x {async *f(foo = await){}}',
+            throws: 'await',
+          });
+        });
+      });
+
+      describe('await with arg', _ => {
+
+        describe('in global', _ => {
+
+          describe('non-arrow, just an await', _ => {
+
+            test.fail('plain function decl', {
+              code: 'function f(foo = await bar){}',
+            });
+
+            test.fail('async function decl', {
+              code: 'async function f(foo = await bar){}',
+            });
+
+            test.fail('generator function decl', {
+              code: 'function *f(foo = await bar){}',
+            });
+
+            test.fail('async generator function decl', {
+              code: 'async function *f(foo = await bar){}',
+            });
+
+            test.fail('plain function expr', {
+              code: 'let x = function f(foo = await bar){}',
+            });
+
+            test.fail('async function expr', {
+              code: 'let x = async function f(foo = await bar){}',
+            });
+
+            test.fail('generator function expr', {
+              code: 'let x = function *f(foo = await bar){}',
+            });
+
+            test.fail('async generator function expr', {
+              code: 'let x = async function *f(foo = await bar){}',
+            });
+
+            test.fail('plain obj method', {
+              code: 'let o = {f(foo = await bar){}}',
+            });
+
+            test.fail('async obj method', {
+              code: 'let o = {async f(foo = await bar){}}',
+            });
+
+            test.fail('generator obj method', {
+              code: 'let o = {*f(foo = await bar){}}',
+            });
+
+            test.fail('async generator obj method', {
+              code: 'let o = {async *f(foo = await bar){}}',
+            });
+
+            test.fail('plain class method', {
+              code: 'class x {f(foo = await bar){}}',
+            });
+
+            test.fail('async class method', {
+              code: 'class x {async f(foo = await bar){}}',
+            });
+
+            test.fail('generator class method', {
+              code: 'class x {*f(foo = await bar){}}',
+            });
+
+            test.fail('async generator class method', {
+              code: 'class x {async *f(foo = await bar){}}',
+            });
+          });
+
+          describe('non-arrow, complex nested await', _ => {
+
+            test.fail('plain function decl', {
+              code: 'function f(foo = [{m: t(await bar)}]){}',
+            });
+
+            test.fail('async function decl', {
+              code: 'async function f(foo = [{m: t(await bar)}]){}',
+            });
+
+            test.fail('generator function decl', {
+              code: 'function *f(foo = [{m: t(await bar)}]){}',
+            });
+
+            test.fail('async generator function decl', {
+              code: 'async function *f(foo = [{m: t(await bar)}]){}',
+            });
+
+            test.fail('plain function expr', {
+              code: 'let x = function f(foo = [{m: t(await bar)}]){}',
+            });
+
+            test.fail('async function expr', {
+              code: 'let x = async function f(foo = [{m: t(await bar)}]){}',
+            });
+
+            test.fail('generator function expr', {
+              code: 'let x = function *f(foo = [{m: t(await bar)}]){}',
+            });
+
+            test.fail('async generator function expr', {
+              code: 'let x = async function *f(foo = [{m: t(await bar)}]){}',
+            });
+
+            test.fail('plain obj method', {
+              code: 'let o = {f(foo = [{m: t(await bar)}]){}}',
+            });
+
+            test.fail('async obj method', {
+              code: 'let o = {async f(foo = [{m: t(await bar)}]){}}',
+            });
+
+            test.fail('generator obj method', {
+              code: 'let o = {*f(foo = [{m: t(await bar)}]){}}',
+            });
+
+            test.fail('async generator obj method', {
+              code: 'let o = {async *f(foo = [{m: t(await bar)}]){}}',
+            });
+
+            test.fail('plain class method', {
+              code: 'class x {f(foo = [{m: t(await bar)}]){}}',
+            });
+
+            test.fail('async class method', {
+              code: 'class x {async f(foo = [{m: t(await bar)}]){}}',
+            });
+
+            test.fail('generator class method', {
+              code: 'class x {*f(foo = [{m: t(await bar)}]){}}',
+            });
+
+            test.fail('async generator class method', {
+              code: 'class x {async *f(foo = [{m: t(await bar)}]){}}',
+            });
+          });
+
+          describe('arrow, just an await', _ => {
+
+            test.fail('plain arrow', {
+              code: '(foo = await bar) => {}',
+            });
+
+            test.fail('async arrow', {
+              code: 'async (foo = await bar) => {}',
+            });
+
+            test.fail('async call', {
+              code: 'async (foo = await bar);',
+            });
+
+            test.fail('destructuring obj args arrow', {
+              code: '({x} = await bar) => {}',
+            });
+
+            test.fail('async destructuring obj args arrow', {
+              code: 'async ({x} = await bar) => {}',
+            });
+
+            test.fail('async destructuring obj args call', {
+              code: 'async ({x} = await bar);',
+            });
+
+            test.fail('destructuring arr args arrow', {
+              code: '([x] = await bar) => {}',
+            });
+
+            test.fail('async destructuring arr args arrow', {
+              code: 'async ([x] = await bar) => {}',
+            });
+
+            test.fail('async destructuring arr args call', {
+              code: 'async ([x] = await bar);',
+            });
+          });
+
+          describe('arrow, complex await', _ => {
+
+            test.fail('plain arrow', {
+              code: '(foo = [{m: 5 + t(await bar)}]) => {}',
+            });
+
+            test.fail('async arrow', {
+              code: 'async (foo = [{m: 5 + t(await bar)}]) => {}',
+            });
+
+            test.fail('async call', {
+              code: 'async (foo = [{m: 5 + t(await bar)}]);',
+            });
+
+            test.fail('destruct obj arrow', {
+              code: '({o} = [{m: 5 + t(await bar)}]) => {}',
+            });
+
+            test.fail('async destruct obj arrow', {
+              code: 'async ({o} = [{m: 5 + t(await bar)}]) => {}',
+            });
+
+            test.fail('async destruct obj call', {
+              code: 'async ({o} = [{m: 5 + t(await bar)}]);',
+            });
+
+            test.fail('destruct arr arrow', {
+              code: '([p] = [{m: 5 + t(await bar)}]) => {}',
+            });
+
+            test.fail('async destruct arr arrow', {
+              code: 'async ([p] = [{m: 5 + t(await bar)}]) => {}',
+            });
+
+            test.fail('async destruct arr call', {
+              code: 'async ([p] = [{m: 5 + t(await bar)}]);',
+            });
+          });
+        });
+
+        describe('in async', _ => {
+
+          describe('non-arrow, just an await', _ => {
+
+            test.fail('plain function decl', {
+              code: 'async function g(){    function f(foo = await bar){}    }',
+            });
+
+            test.fail('async function decl', {
+              code: 'async function g(){async function f(foo = await bar){}    }',
+            });
+
+            test.fail('generator function decl', {
+              code: 'async function g(){function *f(foo = await bar){}    }',
+            });
+
+            test.fail('async generator function decl', {
+              code: 'async function g(){async function *f(foo = await bar){}    }',
+            });
+
+            test.fail('plain function expr', {
+              code: 'async function g(){let x = function f(foo = await bar){}    }',
+            });
+
+            test.fail('async function expr', {
+              code: 'async function g(){let x = async function f(foo = await bar){}    }',
+            });
+
+            test.fail('generator function expr', {
+              code: 'async function g(){let x = function *f(foo = await bar){}    }',
+            });
+
+            test.fail('async generator function expr', {
+              code: 'async function g(){let x = async function *f(foo = await bar){}    }',
+            });
+
+            test.fail('plain obj method', {
+              code: 'async function g(){let o = {f(foo = await bar){}}    }',
+            });
+
+            test.fail('async obj method', {
+              code: 'async function g(){let o = {async f(foo = await bar){}}    }',
+            });
+
+            test.fail('generator obj method', {
+              code: 'async function g(){let o = {*f(foo = await bar){}}    }',
+            });
+
+            test.fail('async generator obj method', {
+              code: 'async function g(){let o = {async *f(foo = await bar){}}    }',
+            });
+
+            test.fail('plain class method', {
+              code: 'async function g(){class x {f(foo = await bar){}}    }',
+            });
+
+            test.fail('async class method', {
+              code: 'async function g(){class x {async f(foo = await bar){}}    }',
+            });
+
+            test.fail('generator class method', {
+              code: 'async function g(){class x {*f(foo = await bar){}}    }',
+            });
+
+            test.fail('async generator class method', {
+              code: 'async function g(){class x {async *f(foo = await bar){}}    }',
+            });
+          });
+
+          describe('non-arrow, complex nested await', _ => {
+
+            test.fail('plain function decl', {
+              code: 'async function g(){    function f(foo = [h, {m: t(await bar)}]){}    }',
+            });
+
+            test.fail('async function decl', {
+              code: 'async function g(){async function f(foo = [h, {m: t(await bar)}]){}    }',
+            });
+
+            test.fail('generator function decl', {
+              code: 'async function g(){function *f(foo = [h, {m: t(await bar)}]){}    }',
+            });
+
+            test.fail('async generator function decl', {
+              code: 'async function g(){async function *f(foo = [h, {m: t(await bar)}]){}    }',
+            });
+
+            test.fail('plain function expr', {
+              code: 'async function g(){let x = function f(foo = [h, {m: t(await bar)}]){}    }',
+            });
+
+            test.fail('async function expr', {
+              code: 'async function g(){let x = async function f(foo = [h, {m: t(await bar)}]){}    }',
+            });
+
+            test.fail('generator function expr', {
+              code: 'async function g(){let x = function *f(foo = [h, {m: t(await bar)}]){}    }',
+            });
+
+            test.fail('async generator function expr', {
+              code: 'async function g(){let x = async function *f(foo = [h, {m: t(await bar)}]){}    }',
+            });
+
+            test.fail('plain obj method', {
+              code: 'async function g(){let o = {f(foo = [h, {m: t(await bar)}]){}}    }',
+            });
+
+            test.fail('async obj method', {
+              code: 'async function g(){let o = {async f(foo = [h, {m: t(await bar)}]){}}    }',
+            });
+
+            test.fail('generator obj method', {
+              code: 'async function g(){let o = {*f(foo = [h, {m: t(await bar)}]){}}    }',
+            });
+
+            test.fail('async generator obj method', {
+              code: 'async function g(){let o = {async *f(foo = [h, {m: t(await bar)}]){}}    }',
+            });
+
+            test.fail('plain class method', {
+              code: 'async function g(){class x {f(foo = [h, {m: t(await bar)}]){}}    }',
+            });
+
+            test.fail('async class method', {
+              code: 'async function g(){class x {async f(foo = [h, {m: t(await bar)}]){}}    }',
+            });
+
+            test.fail('generator class method', {
+              code: 'async function g(){class x {*f(foo = [h, {m: t(await bar)}]){}}    }',
+            });
+
+            test.fail('async generator class method', {
+              code: 'async function g(){class x {async *f(foo = [h, {m: t(await bar)}]){}}    }',
+            });
+          });
+
+          describe('arrow, just an await', _ => {
+
+            test.fail('plain arrow', {
+              // https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
+              code: 'async function a(){     (foo = await bar) => {}     }',
+            });
+
+            test.fail('async arrow', {
+              code: 'async function a(){     async (foo = await bar) => {}     }',
+            });
+
+            test.pass('async call', {
+              code: 'async function a(){     async (foo = await bar);     }',
+            });
+
+            test.fail('destruct obj arrow', {
+              code: 'async function a(){     ({r} = await bar) => {}     }',
+            });
+
+            test.fail('async destruct obj arrow', {
+              code: 'async function a(){     async ({r} = await bar) => {}     }',
+            });
+
+            test.pass('async destruct obj call', {
+              code: 'async function a(){     async ({r} = await bar);     }',
+            });
+
+            test.fail('destruct arr arrow', {
+              code: 'async function a(){     ([v] = await bar) => {}     }',
+            });
+
+            test.fail('async destruct arr arrow', {
+              code: 'async function a(){     async ([v] = await bar) => {}     }',
+            });
+
+            test.pass('async destruct arr call', {
+              code: 'async function a(){     async ([v] = await bar);     }',
+            });
+          });
+
+          describe('arrow, complex await', _ => {
+
+            test.fail('plain arrow', {
+              code: 'async function a(){     (foo = [{m: 5 + t(await bar)}]) => {}     }',
+            });
+
+            test.fail('async arrow', {
+              code: 'async function a(){     async (foo = [{m: 5 + t(await bar)}]) => {}     }',
+            });
+
+            test.pass('async call', {
+              code: 'async function a(){     async (foo = [{m: 5 + t(await bar)}]);     }',
+            });
+
+            test.fail('destruct obj arrow', {
+              code: 'async function a(){     ({g} = [{m: 5 + t(await bar)}]) => {}     }',
+            });
+
+            test.fail('async destruct obj arrow', {
+              code: 'async function a(){     async ({g} = [{m: 5 + t(await bar)}]) => {}     }',
+            });
+
+            test.pass('async destruct obj call', {
+              code: 'async function a(){     async ({g} = [{m: 5 + t(await bar)}]);     }',
+            });
+
+            test.fail('destruct arr arrow', {
+              code: 'async function a(){     ([y] = [{m: 5 + t(await bar)}]) => {}     }',
+            });
+
+            test.fail('async destruct arr arrow', {
+              code: 'async function a(){     async ([y] = [{m: 5 + t(await bar)}]) => {}     }',
+            });
+
+            test.pass('async destruct arr call', {
+              code: 'async function a(){     async ([y] = [{m: 5 + t(await bar)}]);     }',
+            });
+
+            test.fail('await as the property to delete', {
+              code: 'async function a(){     async ([y] = delete foo[await x]) => {};     }',
+            });
+
+            test.fail('complex delete property', {
+              code: 'async function a(){     async ([y] = delete ((foo[await x]))) => {};     }',
+            });
+
+            test.fail('complexer delete property', {
+              code: 'async function a(){     async ([y] = delete ((((foo))[await x]))) => {};     }',
+            });
+          });
+        });
+      });
     });
   });

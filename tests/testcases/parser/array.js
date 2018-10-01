@@ -2512,6 +2512,22 @@ module.exports = (describe, test) =>
         code: '([..."foo".foo=x]) => x',
         throws: 'destructible',
       });
+
+      test.pass('destruct assignment to rest on a property', {
+        code: '[..."foo".bar] = x',
+      });
+
+      test.fail('destruct assignment to rest on an addition', {
+        code: '[..."foo"+bar] = x',
+      });
+
+      test.pass('destruct assignment that starts with number', {
+        code: '[50..foo] = x',
+      });
+
+      test.pass('destruct assignment that starts with string', {
+        code: '["foo".foo] = x',
+      });
     });
 
     describe('keywords should not parse as regular idents in awkward places', _ => {

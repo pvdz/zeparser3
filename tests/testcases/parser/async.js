@@ -2312,7 +2312,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
     code: 'async => async',
   });
 
-  test.fail('statement async \n => async', {
+  test.fail('statement async \\n => async', {
     code: 'async \n => async',
     desc: 'arrow can never have newline before it, this error is unrelated to `async`',
   });
@@ -2321,7 +2321,7 @@ module.exports = (describe, test) => describe('async keyword', function() {
     code: '(async => async)',
   });
 
-  test.fail('expr async \n => async', {
+  test.fail('expr async \\n => async', {
     code: '(async \n => async)',
   });
 
@@ -2329,12 +2329,61 @@ module.exports = (describe, test) => describe('async keyword', function() {
     code: 'let async => async',
   });
 
-  test.fail('let async \n => async', {
+  test.fail('let async \\n => async', {
     code: 'let async \n => async',
+  });
+
+  test.fail('let f = async \\n (g) => g', {
+    code: 'let f = async \n (g) => g',
+  });
+
+  test.fail('let f = async \\n (g = await foo) => g', {
+    code: 'let f = async \n (g = await foo) => g',
   });
 
   test.fail('trailing trash', {
     code: 'async () => x, y`',
     desc: 'flow seems fine with this? logging to report it later',
+  });
+
+  test('regression: await was parsing operators when it shouldnt', {
+    code: 'async function f() { let y = await x * x }',
+    ast: {
+      type: 'Program',
+      body: [
+        {
+          type: 'FunctionDeclaration',
+          generator: false,
+          async: true,
+          id: {type: 'Identifier', name: 'f'},
+          params: [],
+          body: {
+            type: 'BlockStatement',
+            body: [
+              {
+                type: 'VariableDeclaration',
+                kind: 'let',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    id: {type: 'Identifier', name: 'y'},
+                    init: {
+                      type: 'BinaryExpression',
+                      left: {
+                        type: 'AwaitExpression',
+                        argument: {type: 'Identifier', name: 'x'},
+                      },
+                      operator: '*',
+                      right: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    },
+    tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
   });
 });
