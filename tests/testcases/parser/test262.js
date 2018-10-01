@@ -22,11 +22,6 @@ if (!fs.statSync(PATH262).isDirectory()) {
           contents: fs.readFileSync(combo),
           annexb: lcname.indexOf('annexb') >= 0,
           skip:
-            // these are tests that I choose to ignore while the parser matures
-
-            // TODO: this test is doing `async\n();` which requires a retroactive AST morph that I didn't want to implement
-            has('async-arrow-function/early-errors-arrow-await-in-formals') ||
-
             // TODO: file report; I think the following rule applies here and as such should not throw:
             // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
             // > it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or
