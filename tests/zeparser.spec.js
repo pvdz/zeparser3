@@ -5,11 +5,19 @@
 Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
-const TEST262_SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
+const SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
 
 let fs = require('fs');
-let Prettier = (function(){ try { return require('prettier'); } catch (e) {} })(); // ignore if not installed
+let Prettier = (function(){ try { return require('prettier'); } catch (e) {
+  // ignore if not installed
+  console.log('Prettier not found. Run `yarn add prettier` or `npm install prettier` if you want to run Prettier on the AST output');
+}})();
+
+let {parse: babelParse} = process.argv.includes('-b') ? (() => {try { return require('@babel/parser'); } catch (e) {
+  // ignore if not installed
+  console.log('Babel parser not found. Run `yarn add @babel/parser` or `npm install @babel/parser` if you want to run with `-b` (tests against Babel)');
+}})() : {};
 
 let {
   MODE_MODULE,
@@ -162,7 +170,7 @@ function override(wantObj, baseObj) {
   return baseObj;
 }
 function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
-  if (TEST262 && testi < TEST262_SKIP_TO) return;
+  if (testi < SKIP_TO) return;
   let {
     ast: expectedAst,
     callback: expectedCallback,
@@ -220,17 +228,6 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (moduleModeObj.tokens) expectedTokens = moduleModeObj.tokens;
     if (moduleModeObj.startInStrictMode !== undefined) startInStrictMode = moduleModeObj.startInStrictMode;
   }
-
-  let finalTestOptions = {
-    code,
-    expectedAst,
-    expectedThrows,
-    expectedTokens,
-    expectedCallback,
-    startInStrictMode,
-    _debug,
-    SKIP,
-  };
 
   // https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
   let prefix = BOLD + parserDesc + ': ' + testi + testSuffix;
@@ -326,16 +323,16 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     console.log('Actual ast:', formatAst(obj.ast) + ',');
     console.log(
       'tokens: [$' +
-        obj.tokens
-          .slice(0, -1)
-          .map(o => debug_toktype(o.type))
-          .join(', $') +
-        '],',
+      obj.tokens
+      .slice(0, -1)
+      .map(o => debug_toktype(o.type))
+      .join(', $') +
+      '],',
     );
   } else {
     let mustVerify = checkAST && expectedAst !== true;
-    let expectedJson = mustVerify && serializeAst(expectedAst);
-    let actualJson = (mustVerify  || expectedCallback !== undefined) && serializeAst(obj.ast);
+    let expectedJson = mustVerify && JSON.stringify(expectedAst); // note: do not ignore prop order because there are perf implications if the order is not fixed
+    let actualJson = (mustVerify  || expectedCallback !== undefined) && JSON.stringify(obj.ast);
     if (mustVerify && expectedJson !== actualJson) {
       let missingAst = expectedJson === '{"<not given>":true}';
 
@@ -345,56 +342,16 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       console.log(
         'tokens: [$' +
         obj.tokens
-          .slice(0, -1)
-          .map(o => debug_toktype(o.type))
-          .join(', $') +
+        .slice(0, -1)
+        .map(o => debug_toktype(o.type))
+        .join(', $') +
         '],',
       );
 
-      let s1 = expectedJson;
       if (missingAst) {
         console.log('(No expected AST given...)');
       } else {
-        let s2 = actualJson;
-        let max = Math.max(s1.length, s2.length);
-        let n = 0;
-        let step = 200;
-        let steps = 0;
-        while (n < max) {
-          let x1 = s1.slice(Math.min(n, s1.length), Math.min(n + step, s1.length));
-          let x2 = s2.slice(Math.min(n, s2.length), Math.min(n + step, s2.length));
-          if (x1 === x2) {
-            console.log('want[' + steps + ']: SAME', x1);
-            console.log('real[' + steps + ']: SAME', x2);
-          } else {
-            // try to highlight the difference area
-
-            let start = 0;
-            for (; start<x1.length; ++start) {
-              if (x1[start] !== x2[start]) {
-                break;
-              }
-            }
-            if (start > 0 && /[\w\d]/.test(x1[start])) {
-              do --start; while (start > 0 && /[\w\d]/.test(x1[start]));
-            }
-            let stop = x1.length;
-            for (; stop-1 > start; --stop) {
-              if (x1[stop-1] !== x2[stop-1]) {
-                break;
-              }
-            }
-            if (stop < x1.length && /[\w\d]/.test(x1[stop])) {
-              do ++stop; while (stop < x1.length && /[\w\d]/.test(x1[stop]));
-            }
-
-            console.log('want[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
-            console.log(BOLD+'real'+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
-          }
-
-          n += step;
-          ++steps;
-        }
+        printComparedAstStrings(expectedJson, actualJson);
       }
 
       ++fail;
@@ -417,8 +374,69 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       LOG_THROW('input parsed properly but ' + BOLD + 'CALLBACK' + RESET + ' rejected', code, undefined, desc);
       ++fail;
     } else {
-      console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
-      ++pass;
+
+      let babelAst;
+      if (
+        babelParse
+        && ES === undefined // Babel parser simply supports the latest so no point testing older es versions
+        && WEB === undefined // Actually I think Babel implicitly does this by default...? Should check
+        && OPTIONS === undefined // Don't test special cases
+      ) try {
+        // https://babeljs.io/docs/en/babel-parser
+        babelAst = babelParse(code, {
+          sourceType: goalMode === GOAL_MODULE ? 'module' : 'script',
+          strictMode: startInStrictMode ? true : false,
+          plugins: ['estree'],
+        }).program;
+      } catch (e) {
+        // Ignore babel exceptions for now. We should confirm and could then report them upstream later.
+        console.log('Babel crashed on this input:' + e.message);
+      }
+      if (
+        babelAst
+      ) {
+        let banned = {
+          always: [
+            'extra', 'start', 'end', 'loc', 'sourceType', 'interpreter', 'directives', 'cooked', 'raw',
+          ],
+          FunctionDeclaration: ['expression'],
+          FunctionExpression: ['expression'],
+          Literal: [
+            'regex', // on regex literals
+            'value', // TODO: fix literal nodes
+          ],
+          TryStatement: [
+            'guardedHandlers', // dropped from estree spec very early on (some provide it to maintain backwards compat); https://github.com/jquery/esprima/issues/1030
+          ],
+        };
+        let actualJson = serializeAst(obj.ast, banned);
+        let babelJson = serializeAst(babelAst, banned);
+        if (babelJson !== actualJson && ![
+          // (It's annoying to use an index because as soon as I add a test before it all the numbers need to be updated. But it is easy...)
+          77, // babel sets expressions=false for a function expression (TODO: all astexplorer parsers that _have expression_ also do this...?)
+          516, // async arrow newline edge case (TODO: report to babel)
+          549, // async arrow newline edge case (TODO: report to babel)
+          1291, // regex asi case (TODO: report to babel)
+          3492, // typoef async func regex edge case (TODO: report to babel)
+        ].includes(testi)) {
+          LOG_THROW('BABEL AST mismatch', code, '', desc, true);
+
+          printComparedAstStrings(actualJson, babelJson, 'zePar', 'babel');
+
+          console.log('ZeParser   AST:');
+          console.dir(obj.ast, {depth: null});
+          console.log('BabelParsr AST:');
+          console.dir(orderAst(babelAst, banned), {depth: null});
+
+          ++fail; // I guess...
+        } else {
+          babelAst = null;
+        }
+      }
+      if (!babelAst) {
+        console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
+        ++pass;
+      }
     }
   }
 
@@ -434,9 +452,9 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       console.log(
         'Stack:',
         stack
-          .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
-          .replace(/\n.* at (THROW|ASSERT\().*?\n/s, '\nExplicit '+BOLD+'$1'+RESET+' at:\n')
-          .replace(/(zeparser.spec.js.*?)\n.*/s, '$1 (trunced remainder of trace)')
+        .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
+        .replace(/\n.* at (THROW|ASSERT\().*?\n/s, '\nExplicit '+BOLD+'$1'+RESET+' at:\n')
+        .replace(/(zeparser.spec.js.*?)\n.*/s, '$1 (trunced remainder of trace)')
       );
     }
     //console.log('Final test options:\n', finalTestOptions);
@@ -452,29 +470,67 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   }
 }
 
+function printComparedAstStrings(want, real, n1 = 'want', n2 = 'real') {
+  let max = Math.max(want.length, real.length);
+  let n = 0;
+  let step = 200;
+  let steps = 0;
+  while (n < max) {
+    let x1 = want.slice(Math.min(n, want.length), Math.min(n + step, want.length));
+    let x2 = real.slice(Math.min(n, real.length), Math.min(n + step, real.length));
+    if (x1 === x2) {
+      console.log(n1 + '[' + steps + ']: SAME', x1);
+      console.log(n2 + '[' + steps + ']: SAME', x2);
+    } else {
+      // try to highlight the difference area
+
+      let start = 0;
+      for (; start<x1.length; ++start) {
+        if (x1[start] !== x2[start]) {
+          break;
+        }
+      }
+      if (start > 0 && /[\w\d]/.test(x1[start])) {
+        do --start; while (start > 0 && /[\w\d]/.test(x1[start]));
+      }
+      let stop = x1.length;
+      for (; stop-1 > start; --stop) {
+        if (x1[stop-1] !== x2[stop-1]) {
+          break;
+        }
+      }
+      if (stop < x1.length && /[\w\d]/.test(x1[stop])) {
+        do ++stop; while (stop < x1.length && /[\w\d]/.test(x1[stop]));
+      }
+
+      console.log(n1 + '[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
+      console.log(BOLD+n2+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
+    }
+
+    n += step;
+    ++steps;
+  }
+}
+
 function orderAst(ast, banned) {
-  let keys = Object.getOwnPropertyNames(ast);
-  keys.filter(key => !banned.includes(key)).forEach(key => {
-    if (typeof ast[key] === 'object') {
-      if (ast[key] instanceof Array) {
-        ast[key].forEach(e => e && orderAst(e, banned));
-      }
-      else if (ast[key] !== null) {
-        orderAst(ast[key], banned);
-      }
+  let bannedByType = banned[ast.type] || [];
+  let keys = Object.getOwnPropertyNames(ast).filter(key => !banned.always.includes(key) && !bannedByType.includes(key));
+  let newobj = {};
+  keys.sort((a,b) => a === 'type' ? -1 : b === 'type' ? 1 : a < b ? -1 : a > b ? 1 : 0).forEach(key => {
+    if (ast[key] instanceof Array) {
+      newobj[key] = ast[key].map(e => e && orderAst(e, banned));
+    }
+    else if (typeof ast[key] === 'object' && ast[key] !== null) {
+      newobj[key] = orderAst(ast[key], banned);
+    }
+    else {
+      newobj[key] = ast[key];
     }
   });
-  // by re-assigning the keys in order they will (json)-serialize in that order too
-  // this way the order in which keys are defined is not relevant (makes ast's comparable to other parsers)
-  keys.sort().forEach(key => banned.includes(key) ? delete ast[key] : (ast[key] = ast[key]));
+  return newobj;
 }
-function serializeAst(ast) {
-  let banned = [];
-  if (false) {
-    banned = ['foo'];
-    ast = JSON.parse(JSON.stringify(ast));
-  }
-  orderAst(ast, banned); // remove things we don't care to compare
+function serializeAst(ast, banned = []) {
+  ast = orderAst(ast, banned); // remove things we don't care to compare
   return JSON.stringify(ast);
 }
 
@@ -491,11 +547,12 @@ function formatAst(ast) {
     singleQuote: true,
     trailingComma: 'all',
     bracketSpacing: false,
+    parser: 'babylon',
   }).replace(/(?:^;?\(?)|(?:\)[\s\n]*$)/g, '');
 }
 
 if (TEST262) console.log('Running test262 provided tests instead');
-if (TEST262_SKIP_TO) console.log('Warning: Skipping the first', TEST262_SKIP_TO, 'tests');
+if (SKIP_TO) console.log('Warning: Skipping the first', SKIP_TO, 'tests');
 
 let pass = 0;
 let fail = 0;
