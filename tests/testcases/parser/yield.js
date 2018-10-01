@@ -1207,6 +1207,24 @@ module.exports = (describe, test) =>
           STRICT: {throws: true},
         });
 
+        test.pass('yield var legal in async call', {
+          code: 'async (yield)',
+          STRICT: {throws: true},
+        });
+
+        test.pass('yield var legal in async assignment call', {
+          code: 'async (x = yield)',
+          STRICT: {throws: true},
+        });
+
+        test.fail('yield expr illegal in async call', {
+          code: 'async (yield x)',
+        });
+
+        test.fail('yield expr illegal in async assignment call', {
+          code: 'async (x = yield y)',
+        });
+
         test.pass('grouped yield var legal in arrow arg default', {
           code: 'async (x = (yield)) => {}',
           STRICT: {throws: true},
@@ -1239,6 +1257,35 @@ module.exports = (describe, test) =>
 
         test.fail('assigned arged yield expr is illegal in arrow arg default', {
           code: 'function *f(){ async (x = z = yield y) => {} }',
+        });
+
+        test.fail('yield expr illegal in async arrow arg default', {
+          code: 'async (x = yield y) => {}',
+        });
+
+        test.fail('grouped yield expr illegal in arrow arg default', {
+          code: 'async (x = (yield x)) => {}',
+        });
+
+        test.fail('grouped yield expr illegal in async call', {
+          code: 'async (x = (yield x))',
+        });
+
+        test.pass('assigned yield var legal in async call', {
+          code: 'async (x = z = yield)',
+          STRICT: {throws: true},
+        });
+
+        test.pass('no arg yield expr in async call', {
+          code: 'function *f(){ async (yield) }',
+        });
+
+        test.pass('no arg yield expr in async assignment call', {
+          code: 'function *f(){ async (x = yield) }',
+        });
+
+        test.pass('arged yield expr in async assignment call', {
+          code: 'function *f(){ async (x = yield y) }',
         });
       });
     });
