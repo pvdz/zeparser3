@@ -1287,6 +1287,11 @@ module.exports = (describe, test) =>
         test.pass('arged yield expr in async assignment call', {
           code: 'function *f(){ async (x = yield y) }',
         });
+
+        test.pass('regression', {
+          code: 'iter = yield();',
+          STRICT: {throws: true},
+        });
       });
     });
 

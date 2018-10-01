@@ -2056,7 +2056,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return (state | IS_ASSIGNABLE | NOT_ASSIGNABLE) ^ NOT_ASSIGNABLE;
   }
   function setNotAssignable(state) {
-    ASSERT(state === 0 || (state & IS_ASSIGNABLE) === IS_ASSIGNABLE || (state & NOT_ASSIGNABLE) === NOT_ASSIGNABLE, 'assignable enum', state);
     // set both flags then unset the one we dont want
     return (state | IS_ASSIGNABLE | NOT_ASSIGNABLE) ^ IS_ASSIGNABLE;
   }
@@ -3780,7 +3779,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (curc === $$CURLY_L_7B) {
       ASSERT(bindingType !== BINDING_TYPE_NONE, 'must bind as something');
       let destructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, SKIP_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, astProp);
-      verifyDestructibleForBinding(destructible);
+      verifyDestructibleForBinding(destructible, bindingType);
       AST_destruct(astProp);
       // note: throw for `const {};` and `for (const {};;);` but not `for (const {} in obj);`
       if (
@@ -3793,7 +3792,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curc === $$SQUARE_L_5B) {
       let destructible = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
-      verifyDestructibleForBinding(destructible);
+      verifyDestructibleForBinding(destructible, bindingType);
       AST_destruct(astProp);
       // note: throw for `const {};` and `for (const {};;);` but not `for (const {} in obj);`
       if (
@@ -3807,7 +3806,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (curc === $$DOT_2E && curtok.str === '...') {
       ASSERT(bindingType === BINDING_TYPE_ARG, 'other binding types should catch this sooner?');
       let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, bindingType, IS_GROUP_TOPLEVEL, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
-      verifyDestructibleForBinding(subDestruct);
+      verifyDestructibleForBinding(subDestruct, bindingType);
     }
     else if (curc !== $$PAREN_R_29) {
       THROW('Expected to parse a(nother) binding but none was found');
@@ -4366,7 +4365,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let rhsAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
     AST_close('AssignmentExpression');
 
-    return setNotAssignable(lhsAssignable | rhsAssignable);
+    return mergeAssignable(rhsAssignable, lhsAssignable);
   }
   function parseExpressionFromBinaryOp(lexerFlags, astProp) {
     // parseBinary
@@ -6935,17 +6934,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curc === $$COMMA_2C || curc === $$CURLY_R_7D, 'abstraction should parse whole rest/spread goal; ' + curtok);
     }
     else if (curc === $$SQUARE_L_5B) {
-      // dynamic property (is valid in destructuring assignment! but not binding)
-      // - {[foo]: x} = y
-      // - {[foo]() {}} = y
+      // dynamic property (is valid in destructuring assignment!
+      // - `({[foo]: x} = y)`
+      // - `({[foo]() {}} = y)`            fail
+      // - `const {[x]: y} = z;`
+      // - `({[x]: y}) => z;`
 
       // skip dynamic part first because we need to figure out whether we're parsing a method
       ASSERT_skipRex('[', lexerFlags); // next is expression
       let nowAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, astProp);
-      assignable = mergeAssignable(nowAssignable, assignable);
+      assignable = setNotAssignable(nowAssignable | assignable);
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
 
       if (isClassMethod === IS_CLASS_METHOD) {
+        destructible |= CANT_DESTRUCT;
 
         AST_wrapClosed(astProp, 'MethodDefinition', 'key');
         AST_set('static', staticToken !== undefined);
@@ -6966,14 +6968,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           destructible |= CANT_DESTRUCT;
           parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, NOT_GETSET, NOT_FUNCTION_STATEMENT, 'value');
         } else {
+          // - `({[foo]: bar} = baz)`
+          // - `({[foo]: bar()} = baz)`
+          // - `({[foo]: a + b} = baz)`
+          // - `({[foo]: bar}) => baz`
+          // - `({[foo]: bar()}) => baz`
+          // - `({[foo]: a + b}) => baz`
+          // - `let {[foo]: bar} = baz`
+          // - `let {[foo]: bar()} = baz`
+          // - `let {[foo]: a + b} = baz`
           if (curc !== $$COLON_3A) THROW('A computed property name must be followed by a colon or paren');
-          skipRexOrDieSingleChar($$COLON_3A, lexerFlags);
-          let nowAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'value');
-          assignable = mergeAssignable(nowAssignable, assignable);
+          ASSERT_skipRex(':', lexerFlags);
+
+          let lhsAssignable = parseValue(lexerFlags, ALLOW_ASSIGNMENT, NOT_NEW_ARG, 'value');
+          if (notAssignable(lhsAssignable) || (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=')) {
+            destructible |= CANT_DESTRUCT;
+          }
+
+          // Note: we don't care about the assignability of the initializer value, but we do care about await/yield here
+          let rhsAssignable = parseExpressionFromOp(lexerFlags, lhsAssignable, 'value');
+          assignable = assignable | lhsAssignable | rhsAssignable; // assignable itself is not used beyond this point
         }
         AST_set('shorthand', false);
         AST_close('Property');
-        ASSERT(curc !== $$IS_3D, 'if the array was destructured then that should have been parsed by now');
       }
     }
     else if (curc === $$STAR_2A) {
@@ -7513,10 +7530,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Found a part that cant destruct and a part that must destruct so it is not destructible');
     }
   }
-  function verifyDestructibleForBinding(destructible) {
-    if (hasAnyFlag(destructible, CANT_DESTRUCT | DESTRUCT_ASSIGN_ONLY)) {
-      if (hasAnyFlag(destructible, DESTRUCT_ASSIGN_ONLY)) THROW('The destructuring is only valid in an assignment, not destructible a binding');
+  function verifyDestructibleForBinding(destructible, bindingType) {
+    if (hasAnyFlag(destructible, CANT_DESTRUCT)) {
       THROW('The binding declaration is not destructible');
+    }
+    if (bindingType === BINDING_TYPE_ARG && hasAnyFlag(destructible, DESTRUCT_ASSIGN_ONLY)) {
+      THROW('This binding an not be used in function parameters because it is not destructible');
     }
   }
   function parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, assignable, destructible, closingCharOrd, astProp) {

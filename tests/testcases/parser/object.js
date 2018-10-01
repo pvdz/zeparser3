@@ -8492,4 +8492,20 @@ module.exports = (describe, test) =>
         });
       });
     });
+
+    test.pass('dynamic property is not arrowable', {
+      code: '({[foo]: x} = x) => y',
+    });
+
+    test.fail('call is not arrowable', {
+      code: '({a: b()} = x) => y',
+    });
+
+    test.fail('dynamic property should not make call arrowable', {
+      code: '({[foo]: x()} = x) => y',
+    });
+
+    test.fail('dynamic method is not assignable', {
+      code: '({[foo]() {}} = y)',
+    });
   });

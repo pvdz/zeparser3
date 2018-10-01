@@ -12423,6 +12423,14 @@ module.exports = (describe, test) =>
       desc: 'source: test262/test/annexB/language/comments/single-line-html-close-asi.js (the html comment acts as // and the rest is ignored)',
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $ASI],
     });
+
+    test.pass('destructuring edge case', {
+      code: 'var {[2]: y} = {2:3}',
+    });
+
+    test.pass('destructuring case', {
+      code: 'var {[2]: y = 1} = {2:3}',
+    });
   });
 
 // forbid "let" and "static" only in strict mode
