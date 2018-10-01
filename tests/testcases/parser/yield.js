@@ -725,159 +725,521 @@ module.exports = (describe, test) =>
       });
     });
 
-    describe('destructuring and ident disambiguation', _ => {
+    describe('arguments checks', _ => {
 
-      // https://tc39.github.io/ecma262/#prod-YieldExpression
-      // YieldExpression cannot be used within the FormalParameters of a generator function because any expressions that are part of FormalParameters are evaluated before the resulting generator object is in a resumable state.
-      // It is a Syntax Error if UniqueFormalParameters Contains YieldExpression is true.
+      describe('arrow func args inside generator', _ => {
 
+        test.fail('as assignment target', {
+          code: 'function *g() { yield = {}; }',
+        });
 
-      // test('yield as an arg of a generator', {
-      //   code: 'function *f(yield){}',
-      //   desc: 'explicitly not allowed',
-      //   throws: 'generator',
-      // });
-      //
-      // test('yield as arg inside a generator', {
-      //   code: 'function *f({x: x}) { function f({x: yield}) {} }',
-      // });
-    });
+        test('in assigned group', {
+          code: 'function *g() { (x = yield) = {}; }',
+          throws: 'invalid assignment',
+        });
 
-    describe('arrow func args', _ => {
+        test.fail('as parenless arg name', {
+          code: 'function *g() { yield => {}; }',
+        });
 
-      test('yield in generator in assigned group', {
-        code: 'function *g() { (x = yield) = {}; }',
-        desc: 'dont think this legal, babylon thinks so',
-        throws: 'invalid assignment',
-      });
+        test('in arrow arg default', {
+          code: 'function *g() { (x = yield) => {}; }',
+          throws: 'yield',
+        });
 
-      test('yield in generator in arrow arg default', {
-        code: 'function *g() { (x = yield) => {}; }',
-        throws: 'yield',
-      });
+        test.fail('in arrow arg must track assignable as well', {
+          code: 'function *g() { (x = y = yield z) => {}; }',
+        });
 
-      test('yield in generator in arrow arg must track assignable as well', {
-        code: 'function *g() { (x = y = yield z) => {}; }',
-        throws: 'yield',
-      });
+        test.pass('in group must track assignable as well', {
+          code: 'function *g() { (x = y = yield z) }',
+        });
 
-      test('yield in generator in group must track assignable as well', {
-        code: 'function *g() { (x = y = yield z) => {}; }',
-        throws: 'yield',
-      });
+        test('in complex arrow arg default', {
+          code: 'function *g() { (x = u + yield z) => {}; }',
+          throws: 'yield',
+        });
 
-      test('yield in generator in complex arrow arg default', {
-        code: 'function *g() { (x = u + yield z) => {}; }',
-        throws: 'yield',
-      });
-
-      test('yield in generator in weird group', {
-        code: 'function *g() { (x = yield); }',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'FunctionDeclaration',
-              generator: true,
-              async: false,
-              id: {type: 'Identifier', name: 'g'},
-              params: [],
-              body: {
-                type: 'BlockStatement',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {
-                      type: 'AssignmentExpression',
-                      left: {type: 'Identifier', name: 'x'},
-                      operator: '=',
-                      right: {type: 'YieldExpression', delegate: false, argument: null},
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('group yield as rhs sans arg', {
-        code: 'function *g() { (x = x + yield); }',
-        desc: 'yield inside generator is never a var',
-        throws: true,
-      });
-
-      test('group yield as rhs with arg', {
-        code: 'function *g() { (x = x + yield y); }',
-        desc: 'yield inside generator is never a var',
-        throws: true,
-      });
-
-      test('arrow yield as rhs sans arg', {
-        code: 'function *g() { (x = x + yield) => x; }',
-        desc: 'yield inside generator is never a var',
-        throws: true,
-      });
-
-      test('arrow yield as rhs with arg', {
-        code: 'function *g() { (x = x + yield y) => x; }',
-        desc: 'yield inside generator is never a var',
-        throws: true,
-      });
-
-      test('yield in second call arg as arrow', {
-        code: 'function *g() { (x = x + foo(a, yield y)) => x; }',
-        desc: 'yield inside generator is never a var and should throw in func header',
-        throws: true,
-      });
-
-      test('yield in second call arg as group', {
-        code: 'function *g() { (x = x + foo(a, yield y)); }',
-        desc: 'yield inside generator is never a var',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'FunctionDeclaration',
-              generator: true,
-              async: false,
-              id: {type: 'Identifier', name: 'g'},
-              params: [],
-              body: {
-                type: 'BlockStatement',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {
-                      type: 'AssignmentExpression',
-                      left: {type: 'Identifier', name: 'x'},
-                      operator: '=',
-                      right: {
-                        type: 'BinaryExpression',
+        test('in weird group', {
+          code: 'function *g() { (x = yield); }',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: true,
+                async: false,
+                id: {type: 'Identifier', name: 'g'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'AssignmentExpression',
                         left: {type: 'Identifier', name: 'x'},
-                        operator: '+',
-                        right: {
-                          type: 'CallExpression',
-                          callee: {type: 'Identifier', name: 'foo'},
-                          arguments: [
-                            {type: 'Identifier', name: 'a'},
-                            {
-                              type: 'YieldExpression',
-                              delegate: false,
-                              argument: {type: 'Identifier', name: 'y'},
-                            },
-                          ],
-                        },
+                        operator: '=',
+                        right: {type: 'YieldExpression', delegate: false, argument: null},
                       },
                     },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('group yield as rhs sans arg', {
+          code: 'function *g() { (x = x + yield); }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('group yield as rhs with arg', {
+          code: 'function *g() { (x = x + yield y); }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('arrow yield as rhs sans arg', {
+          code: 'function *g() { (x = x + yield) => x; }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('arrow yield as rhs with arg', {
+          code: 'function *g() { (x = x + yield y) => x; }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('yield in second call arg as arrow', {
+          code: 'function *g() { (x = x + foo(a, yield y)) => x; }',
+          desc: 'yield inside generator is never a var and should throw in func header',
+          throws: true,
+        });
+
+        test.pass('yield in second call arg as group', {
+          code: 'function *g() { (x = x + foo(a, yield y)); }',
+          desc: 'should be fine in group',
+        });
+
+        test.pass('argless yield in computed property in group', {
+          code: 'function *g(){ (x = {[yield]: 1}) }',
+        });
+
+        test.pass('arged yield in computed property in group', {
+          code: 'function *g(){ (x = {[yield y]: 1}) }',
+        });
+
+        test('argless yield in computed property in arrow arg default', {
+          code: 'function *g(){ (x = {[yield]: 1}) => z }',
+          throws: 'yield',
+        });
+
+        test('arged yield in computed property in arrow arg default', {
+          code: 'function *g(){ (x = {[yield y]: 1}) => z }',
+          throws: 'yield',
+        });
+
+        test.pass('argless yield in array in group', {
+          code: 'function *g(){ (x = [yield]) }',
+        });
+
+        test.pass('arged yield in array in group', {
+          code: 'function *g(){ (x = [yield y]) }',
+        });
+
+        test('argless yield in array in arrow arg default', {
+          code: 'function *g(){ (x = [yield]) => z }',
+          throws: 'yield',
+        });
+
+        test('arged yield in array in arrow arg default', {
+          code: 'function *g(){ (x = [yield y]) => z }',
+          throws: 'yield',
+        });
+      });
+
+      describe('arrow func args in block scope', _ => {
+
+        test('as assignment target', {
+          code: '{ yield = {}; }',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'AssignmentExpression',
+                      left: {type: 'Identifier', name: 'yield'},
+                      operator: '=',
+                      right: {type: 'ObjectExpression', properties: []},
+                    },
                   },
                 ],
               },
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('in assigned group', {
+          code: '{ (x = yield) = {}; }',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'AssignmentExpression',
+                        left: {type: 'Identifier', name: 'x'},
+                        operator: '=',
+                        right: {type: 'Identifier', name: 'yield'},
+                      },
+                      operator: '=',
+                      right: {type: 'ObjectExpression', properties: []},
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test.pass('as parenless arg name', {
+          code: '{ yield => {}; }',
+          STRICT: {throws: 'strict mode'},
+        });
+
+        test.pass('in arrow arg default', {
+          code: '{ (x = yield) => {}; }',
+          STRICT: {throws: 'strict mode'},
+        });
+
+        test.fail('in arrow arg must track assignable as well', {
+          code: '{ (x = y = yield z) => {}; }',
+        });
+
+        test.fail('in group must track assignable as well', {
+          code: '{ (x = y = yield z); }',
+        });
+
+        test.fail('in complex arrow arg default', {
+          code: '{ (x = u + yield z) => {}; }',
+        });
+
+        test('in weird group', {
+          code: '{ (x = yield); }',
+          STRICT: {throws: 'strict mode'},
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'AssignmentExpression',
+                      left: {type: 'Identifier', name: 'x'},
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'yield'},
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test.pass('group yield as rhs sans arg', {
+          code: '{ (x = x + yield); }',
+          desc: 'yield inside generator is never a var',
+          STRICT: {throws: 'strict mode'},
+        });
+
+        test('group yield as rhs with arg', {
+          code: '{ (x = x + yield y); }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test.pass('arrow yield as rhs sans arg', {
+          code: '{ (x = x + yield) => x; }',
+          desc: 'yield inside generator is never a var',
+          STRICT: {throws: 'strict mode'},
+        });
+
+        test('arrow yield as rhs with arg', {
+          code: '{ (x = x + yield y) => x; }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('yield in second call arg as arrow', {
+          code: '{ (x = x + foo(a, yield y)) => x; }',
+          desc: 'yield inside generator is never a var and should throw in func header',
+          throws: true,
+        });
+
+        test.pass('yield in second call arg as group', {
+          code: '{ (x = x + foo(a, yield y)); }',
+          desc: 'should be fine in group',
+          throws: true,
+        });
+
+        test.pass('argless yield in computed property in group', {
+          code: '{ (x = {[yield]: 1}) }',
+          STRICT: {throws: 'strict mode'},
+        });
+
+        test.fail('arged yield in computed property in group', {
+          code: '{ (x = {[yield y]: 1}) }',
+        });
+
+        test.pass('argless yield in computed property in arrow arg default', {
+          code: '{ (x = {[yield]: 1}) => z }',
+          STRICT: {throws: 'strict mode'},
+        });
+
+        test.fail('arged yield in computed property in arrow arg default', {
+          code: '{ (x = {[yield y]: 1}) => z }',
+        });
+
+        test.pass('argless yield in array in group', {
+          code: '{ (x = [yield]) }',
+          STRICT: {throws: 'strict mode'},
+        });
+
+        test.fail('arged yield in array in group', {
+          code: '{ (x = [yield y]) }',
+        });
+
+        test.pass('argless yield in array in arrow arg default', {
+          code: '{ (x = [yield]) => z }',
+          STRICT: {throws: 'strict mode'},
+        });
+
+        test.fail('arged yield in array in arrow arg default', {
+          code: '{ (x = [yield y]) => z }',
+        });
+      });
+
+      describe('async arrow func args', _ => {
+
+        test.fail('as assignment target', {
+          code: 'function *g() { async yield = {}; }',
+        });
+
+        test.fail('in assigned group', {
+          code: 'function *g() { async (x = yield) = {}; }',
+        });
+
+        test('as parenless arg name', {
+          code: 'function *g() { async yield => {}; }',
+          throws: 'yield',
+        });
+
+        test('in arrow arg default', {
+          code: 'function *g() { async (x = yield) => {}; }',
+          throws: 'yield',
+        });
+
+        test('in arrow arg must track assignable as well', {
+          code: 'function *g() { async (x = y = yield z) => {}; }',
+          throws: 'yield',
+        });
+
+        test('in group must track assignable as well', {
+          code: 'function *g() { async (x = y = yield z) => {}; }',
+          throws: 'yield',
+        });
+
+        test('in complex arrow arg default', {
+          code: 'function *g() { async (x = u + yield z) => {}; }',
+          throws: 'yield',
+        });
+
+        test('in weird group', {
+          code: 'function *g() { async (x = yield); }',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'FunctionDeclaration',
+                generator: true,
+                async: false,
+                id: {type: 'Identifier', name: 'g'},
+                params: [],
+                body: {
+                  type: 'BlockStatement',
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {
+                        type: 'CallExpression',
+                        callee: {type: 'Identifier', name: 'async'},
+                        arguments: [
+                          {
+                            type: 'AssignmentExpression',
+                            left: {type: 'Identifier', name: 'x'},
+                            operator: '=',
+                            right: {type: 'YieldExpression', delegate: false, argument: null},
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('group yield as rhs sans arg', {
+          code: 'function *g() { async (x = x + yield); }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('group yield as rhs with arg', {
+          code: 'function *g() { async (x = x + yield y); }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('arrow yield as rhs sans arg', {
+          code: 'function *g() { async (x = x + yield) => x; }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('arrow yield as rhs with arg', {
+          code: 'function *g() { async (x = x + yield y) => x; }',
+          desc: 'yield inside generator is never a var',
+          throws: true,
+        });
+
+        test('yield in second call arg as arrow', {
+          code: 'function *g() { async (x = x + foo(a, yield y)) => x; }',
+          desc: 'yield inside generator is never a var and should throw in func header',
+          throws: true,
+        });
+
+        test.pass('yield in second call arg as group', {
+          code: 'function *g() { async (x = x + foo(a, yield y)); }',
+          desc: 'should be fine in group',
+        });
+
+        test.pass('argless yield in computed property in group', {
+          code: 'function *g(){ async (x = {[yield]: 1}) }',
+        });
+
+        test.pass('arged yield in computed property in group', {
+          code: 'function *g(){ async (x = {[yield y]: 1}) }',
+        });
+
+        test('argless yield in computed property in arrow arg default', {
+          code: 'function *g(){ async (x = {[yield]: 1}) => z }',
+          throws: 'yield',
+        });
+
+        test('arged yield in computed property in arrow arg default', {
+          code: 'function *g(){ async (x = {[yield y]: 1}) => z }',
+          throws: 'yield',
+        });
+
+        test.pass('argless yield in array in group', {
+          code: 'function *g(){ async (x = [yield]) }',
+        });
+
+        test.pass('arged yield in array in group', {
+          code: 'function *g(){ async (x = [yield y]) }',
+        });
+
+        test('argless yield in array in arrow arg default', {
+          code: 'function *g(){ async (x = [yield]) => z }',
+          throws: 'yield',
+        });
+
+        test('arged yield in array in arrow arg default', {
+          code: 'function *g(){ async (x = [yield y]) => z }',
+          throws: 'yield',
+        });
+      });
+
+      describe('more arg checks', _ => {
+
+        // https://tc39.github.io/ecma262/#prod-YieldExpression
+        // YieldExpression cannot be used within the FormalParameters of a generator function because any expressions that are part of FormalParameters are evaluated before the resulting generator object is in a resumable state.
+        // It is a Syntax Error if UniqueFormalParameters Contains YieldExpression is true.
+
+        test.fail('yield as an arg of a generator', {
+          code: 'function *f(yield){}',
+          desc: 'explicitly not allowed',
+        });
+
+        test.pass('yield as arg inside a generator', {
+          code: 'function *f({x: x}) { function f({x: yield}) {} }',
+          desc: 'the inner function resets the state',
+          STRICT: {throws: true},
+        });
+
+        test.pass('yield var legal in async arrow arg default', {
+          code: 'async (x = yield) => {}',
+          desc: 'allowed because the AsyncArrowHead prod uses ArrowFormalParameters [~Yield, +Await], meaning `_no_await` but yield is fine',
+          STRICT: {throws: true},
+        });
+
+        test.pass('grouped yield var legal in arrow arg default', {
+          code: 'async (x = (yield)) => {}',
+          STRICT: {throws: true},
+        });
+
+        test.pass('assigned yield var legal in arrow arg default', {
+          code: 'async (x = z = yield) => {}',
+          STRICT: {throws: true},
+        });
+
+        test.fail('no arg yield expr is in arrow arg default', {
+          code: 'function *f(){ async (x = yield) => {} }',
+        });
+
+        test.fail('arged yield expr is illegal in arrow arg default', {
+          code: 'function *f(){ async (x = yield y) => {} }',
+        });
+
+        test.fail('grouped no arg yield expr is illegal in arrow arg default', {
+          code: 'function *f(){ async (x = (yield)) => {} }',
+        });
+
+        test.fail('grouped arged yield expr is illegal in arrow arg default', {
+          code: 'function *f(){ async (x = (yield y)) => {} }',
+        });
+
+        test.fail('assigned no arg yield expr is illegal in arrow arg default', {
+          code: 'function *f(){ async (x = z = yield) => {} }',
+        });
+
+        test.fail('assigned arged yield expr is illegal in arrow arg default', {
+          code: 'function *f(){ async (x = z = yield y) => {} }',
+        });
       });
     });
 
@@ -1895,3 +2257,26 @@ module.exports = (describe, test) =>
 // yield\n/foo/ should not apply ASI because the next line starts with forward slash (error always)
 // sanity check; yield with and without argument in an expressions (the comma thing) as start/middle/end part
 // test all the exceptions noted in https://tc39.github.io/ecma262/#sec-generator-function-definitions-static-semantics-early-errors
+//
+// +if script mode, these should all work:
+//   +- `(yield)`
+//   +- `(yield = x)`
+//   +- `(x = yield)`
+//   +- `(x = yield = x)`
+//   +- `yield`
+//   +- `yield = x`
+//   +- `([yield])`
+//   +- `(x = a + yield)`
+//   +- `([x = yield])`
+//   +- `([x, {y: [yield]}] = z)`
+//   +- `([x, {y: [yield]}])`
+//   +And these should all fail:
+//   +- `(yield) => x`
+//   +- `(yield = x) => x`
+//   +- `(x = yield) => x`
+//   +- `(x = yield = x) => x`
+//   +- `yield => x`
+//   +- `([yield]) => x`
+//   +- `([x = yield]) => x`
+//   +- `([x = yield y]) => x`
+//   +- `([x, {y: [yield]}]) => x`
