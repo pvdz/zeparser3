@@ -376,7 +376,20 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       ) {
         let banned = {
           always: [
-            'extra', 'start', 'end', 'loc', 'sourceType', 'interpreter', 'directives', 'cooked', 'raw',
+            'start',
+            'end',
+            'loc',
+            'directives',
+            'cooked',
+            'raw',
+            'extra',
+            'leadingComments',
+            'innerComments',
+            'trailingComments',
+          ],
+          Program: [
+            'sourceType',
+            'interpreter',
           ],
           FunctionDeclaration: ['expression'],
           FunctionExpression: ['expression'],
@@ -391,13 +404,13 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         let actualJson = serializeAst(obj.ast, banned);
         let babelJson = serializeAst(babelAst, banned);
         if (babelJson !== actualJson && ![
-          // (It's annoying to use an index because as soon as I add a test before it all the numbers need to be updated. But it is easy...)
-          77, // babel sets expressions=false for a function expression (TODO: all astexplorer parsers that _have expression_ also do this...?)
-          516, // async arrow newline edge case (TODO: report to babel)
-          549, // async arrow newline edge case (TODO: report to babel)
-          1291, // regex asi case (TODO: report to babel)
-          3492, // typoef async func regex edge case (TODO: report to babel)
-        ].includes(testi)) {
+          'let f = async\ng => g', // async arrow newline edge case (TODO: report to babel)
+          'async \n x => x', // async arrow newline edge case (TODO: report to babel)
+          '(x = yield) = {};', // Babel thinks the outer assignment is a pattern
+          '{ (x = yield) = {}; }', // same as prev
+          'typeof class{}\n/foo/g', // regex asi case (TODO: report to babel)
+          'typeof async function f(){}\n/foo/g', // typeof async func regex edge case (TODO: report to babel)
+        ].includes(code)) {
           LOG_THROW('BABEL AST mismatch', code, '', desc, true);
 
           printComparedAstStrings(actualJson, babelJson, 'zePar', 'babel');
