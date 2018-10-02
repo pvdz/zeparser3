@@ -1,32 +1,51 @@
 # ZeParser 3
 
-A JavaScript parser written in JavaScript, parsing ES6-ES9.
+A 100% spec compliant JavaScript parser written in JavaScript, parsing ES6-ES9.
 
 The parser itself is currently feature complete but not ready for production. 
 
-Test262 is passing and there are thousands of local tests to improve coverage.
+Test262 is passing and there are thousands of additional unit tests to improve coverage.
 
-This means that anything stage 4 is supported by this parser, opted in by default (but you can request to parse in a specific version).
+Anything stage 4 is supported by this parser, opted in by default (but you can request to parse in a specific version).
+
+## ES modules
+
+Note that the files use `import` and `export` declarations and `import()`, which requires node 10+ or a cutting edge browsers.
+
+At the time of writing node requires an experimental flag (rendering shebang useless).
+
+It's a burden in some ways and nice in others. A prod build would not have any modules.
+
+## Usage
 
 ```
-# Tokenizer tests (probably broken at the moment):
-./tests/zetokenizer.spec.js
+# Tokenizer tests (broken at the moment):
+./tests/zetokenizer.spec.mjs
 
 # Tokenizer fuzz testing (broken atm)
-./tests/fuzz_tokens.js
+./tests/fuzz_tokens.mjs
 
 # Parser tests
 ./tests/zeparser.spec.js
+node --experimental-modules tests/zeparser.spec.mjs
+
 # Run all tests and ignore failures
 ./tests/zeparser.spec.js -F
+node --experimental-modules tests/zeparser.spec.mjs -F
+
 # Run test262 tests (needs setup)
 ./tests/zeparser.spec.js -t
+node --experimental-modules tests/zeparser.spec.mjs -t
 
-# Generated combinator non-crash tests
-./tests/generated
+# Generated combinator non-crash tests (broken)
+./tests/generated.js
 ```
 
+You can find a REPL in `tests/web/repl.html`, github link tbd. Will need very new browser due to es module syntax.
+
 # Building
+
+_(This is broken at the moment)_
 
 While the parser runs perfectly fine in dev mode it will be a bit slow. To generate a build (stored in `build/build.js`) run this in the project root:
 
@@ -44,6 +63,8 @@ The [build script](cli/build.js):
 You can toggle asserts and AST at the top of the build file.
 
 # Perf testing
+
+_(This is broken at the moment)_
 
 Still setting up a more rigid way of perf testing but for now;
 

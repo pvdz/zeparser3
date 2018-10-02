@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 
-let {
+import {
   PASS,
   FAIL,
   MODE_MODULE,
@@ -26,10 +26,9 @@ let {
 
   LOG,
   THROW,
-} = require('./utils');
+} from './utils.mjs';
 
-let {
-  default: ZeTokenizer,
+import ZeTokenizer, {
   $CRLF,
   $EOF,
   $NL,
@@ -50,7 +49,7 @@ let {
 
   debug_toktype,
   LF_DEBUG,
-} = require('../src/zetokenizer');
+} from '../src/zetokenizer';
 
 const FAIL_FAST = true;
 
