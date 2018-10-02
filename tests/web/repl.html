@@ -13,6 +13,17 @@
             }
             body {
                 display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #top {
+                margin: 5px;
+            }
+            #body {
+                display: flex;
                 flex-direction: row;
                 width: 100%;
                 height: 100%;
@@ -26,13 +37,18 @@
         </style>
     </head>
     <body>
-        <textarea id="ta_input">
+        <div id="top">ZeParser3 REPL &mdash; &copy; October 2018 &mdash; <a href="https://pvdz.ee">Peter van der Zee</a> &mdash; <a href="https://github.com/pvdz/zeparser3">Github</a></div>
+        <div id="body">
+            <textarea id="ta_input">
+// Note: Firefox (&lt;=63) crashes as long as it does not support `import()`.
+// Same for any browser not supporting es modules (`import`/`export`).
 hello.world;
 how('are').you().doing ? oh: right;
-        </textarea>
-        <textarea id="ta_ast"></textarea>
-        <textarea id="ta_output"></textarea>
+            </textarea>
+            <textarea id="ta_ast"></textarea>
+            <textarea id="ta_output"></textarea>
 
-        <script src="./repl.js" type="module"></script>
+            <script src="./repl.js" type="module"></script>
+        </div>
     </body>
 </html>
