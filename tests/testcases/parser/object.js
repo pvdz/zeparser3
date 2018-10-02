@@ -8508,4 +8508,28 @@ module.exports = (describe, test) =>
     test.fail('dynamic method is not assignable', {
       code: '({[foo]() {}} = y)',
     });
+
+    test.fail('arrow; initializer of literal key should not override assignability of value', {
+      code: '({3200: fail() = x}) => x',
+    });
+
+    test.fail('assignment; initializer of literal key should not override assignability of value', {
+      code: '({3200: fail() = x} = x)',
+    });
+
+    test.fail('assignment and arrow; initializer of literal key should not override assignability of value', {
+      code: '({3200: fail() = a} = b) => c',
+    });
+
+    test.fail('arrow; initializer of ident key should not override assignability of value', {
+      code: '({foo: fail() = x}) => x',
+    });
+
+    test.fail('assignment; initializer of ident key should not override assignability of value', {
+      code: '({foo: fail() = x} = x)',
+    });
+
+    test.fail('assignment and arrow; initializer of ident key should not override assignability of value', {
+      code: '({foo: fail() = a} = b) => c',
+    });
   });
