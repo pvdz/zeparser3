@@ -890,9 +890,8 @@ export default (describe, test) =>
           tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('in assigned group', {
-          code: '(x = yield) = {};',
-          STRICT: {throws: 'strict mode'},
+        test('babel case', {
+          code: '(x = x) = x;',
           ast: {
             type: 'Program',
             body: [
@@ -904,15 +903,15 @@ export default (describe, test) =>
                     type: 'AssignmentExpression',
                     left: {type: 'Identifier', name: 'x'},
                     operator: '=',
-                    right: {type: 'Identifier', name: 'yield'},
+                    right: {type: 'Identifier', name: 'x'},
                   },
                   operator: '=',
-                  right: {type: 'ObjectExpression', properties: []},
+                  right: {type: 'Identifier', name: 'x'},
                 },
               },
             ],
           },
-          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
 
         test('blocked in assigned group', {

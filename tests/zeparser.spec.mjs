@@ -406,7 +406,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         if (babelJson !== actualJson && ![
           'let f = async\ng => g', // async arrow newline edge case (TODO: report to babel)
           'async \n x => x', // async arrow newline edge case (TODO: report to babel)
-          '(x = yield) = {};', // Babel thinks the outer assignment is a pattern
+          '(x = x) = x;', // Babel thinks the outer assignment is a pattern
           '{ (x = yield) = {}; }', // same as prev
           'typeof class{}\n/foo/g', // regex asi case (TODO: report to babel)
           'typeof async function f(){}\n/foo/g', // typeof async func regex edge case (TODO: report to babel)

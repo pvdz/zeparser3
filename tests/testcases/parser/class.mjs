@@ -3957,6 +3957,98 @@ export default (describe, test) =>
       desc: 'this will be a runtime error but not a syntax error',
     });
 
+    test('babel case A', {
+      code: 'x = class{} \n / foo / g',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'x'},
+              operator: '=',
+              right: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'BinaryExpression',
+                  left: {
+                    type: 'ClassExpression',
+                    id: null,
+                    superClass: null,
+                    body: {type: 'ClassBody', body: []},
+                  },
+                  operator: '/',
+                  right: {type: 'Identifier', name: 'foo'},
+                },
+                operator: '/',
+                right: {type: 'Identifier', name: 'g'},
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('babel case B', {
+      code: 'x = class{} / x',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'x'},
+              operator: '=',
+              right: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'ClassExpression',
+                  id: null,
+                  superClass: null,
+                  body: {type: 'ClassBody', body: []},
+                },
+                operator: '/',
+                right: {type: 'Identifier', name: 'x'},
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('babel case C', {
+      code: '(class{} \n / foo / g)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'ClassExpression',
+                  id: null,
+                  superClass: null,
+                  body: {type: 'ClassBody', body: []},
+                },
+                operator: '/',
+                right: {type: 'Identifier', name: 'foo'},
+              },
+              operator: '/',
+              right: {type: 'Identifier', name: 'g'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
     // export default class extends F {}
     // class extends {} {}
     // async constructor ?
