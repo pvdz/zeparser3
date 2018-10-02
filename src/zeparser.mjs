@@ -2037,11 +2037,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function isAssignable(state) {
-    ASSERT((state & IS_ASSIGNABLE) === IS_ASSIGNABLE || (state & NOT_ASSIGNABLE) === NOT_ASSIGNABLE, 'assignable enum', state);
     return (state & IS_ASSIGNABLE) === IS_ASSIGNABLE;
   }
   function notAssignable(state) {
-    ASSERT(state === 0 || (state & IS_ASSIGNABLE) === IS_ASSIGNABLE || (state & NOT_ASSIGNABLE) === NOT_ASSIGNABLE, 'assignable enum', state);
     return (state & NOT_ASSIGNABLE) === NOT_ASSIGNABLE;
   }
   function initAssignable(previous) {
@@ -2053,7 +2051,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function setAssignable(state) {
-    ASSERT(state === 0 || (state & IS_ASSIGNABLE) === IS_ASSIGNABLE || (state & NOT_ASSIGNABLE) === NOT_ASSIGNABLE, 'assignable enum', state);
     // set both flags then unset the one we dont want
     return (state | IS_ASSIGNABLE | NOT_ASSIGNABLE) ^ NOT_ASSIGNABLE;
   }
@@ -6155,8 +6152,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseArrowableTopIdentAssign.length === arguments.length, 'arg count');
 
     // assignment / default init
-    // - (x = y) => z
     // - (x = y);
+    // - (x = y) => z
+    // - (x = y) = z;         error
     // must be valid bindable var name
     bindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
     SCOPE_addBinding(lexerFlags, scoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
@@ -6170,7 +6168,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let rhsAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
 
     AST_close('AssignmentExpression');
-    return mergeAssignable(rhsAssignable, assignable);
+
+    // https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-assignmenttargettype
+    // an assignment is NOT assignable (it's right associative which makes `x=x=x` work but not `(x=x)=x`)
+    return setNotAssignable(mergeAssignable(assignable, rhsAssignable));
   }
   function parseArrowableTopRest(lexerFlags, scoop, asyncKeywordPrefixed, astProp) {
     // rest (can not be spread)

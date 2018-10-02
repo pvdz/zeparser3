@@ -890,58 +890,14 @@ export default (describe, test) =>
           tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
-        test('babel case', {
+        test.fail('babel case', {
           code: '(x = x) = x;',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'AssignmentExpression',
-                  left: {
-                    type: 'AssignmentExpression',
-                    left: {type: 'Identifier', name: 'x'},
-                    operator: '=',
-                    right: {type: 'Identifier', name: 'x'},
-                  },
-                  operator: '=',
-                  right: {type: 'Identifier', name: 'x'},
-                },
-              },
-            ],
-          },
-          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+          desc: 'assignments are not assignable and as such a wrapped assignment cannot be assigned to; almost all parsers allowed this though and babel considered the inner assignment a Pattern',
         });
 
-        test('blocked in assigned group', {
+        test.fail('blocked in assigned group', {
           code: '{ (x = yield) = {}; }',
-          STRICT: {throws: 'strict mode'},
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'BlockStatement',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {
-                      type: 'AssignmentExpression',
-                      left: {
-                        type: 'AssignmentExpression',
-                        left: {type: 'Identifier', name: 'x'},
-                        operator: '=',
-                        right: {type: 'Identifier', name: 'yield'},
-                      },
-                      operator: '=',
-                      right: {type: 'ObjectExpression', properties: []},
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          desc: 'assignments are not assignable and as such a wrapped assignment cannot be assigned to',
         });
 
         test.pass('as parenless arg name', {
