@@ -12,17 +12,18 @@ window.$ = $;
 window.ta_input.onchange = window.ta_input.onkeyup = e => {
   console.log('crunching', window.ta_input.value);
   let ast = {};
-  let out = ZeParser(window.ta_input.value, $.MODE_MODULE, $.COLLECT_TOKENS_SOLID, {
+  let tokens = [];
+  let out = ZeParser(window.ta_input.value, Tok.GOAL_MODULE, Tok.COLLECT_TOKENS_ALL, {
     // strictMode: startInStrictMode,
     // webCompat: !!WEB,
     // trailingArgComma: testDetails.options && testDetails.options.trailingArgComma,
     astRoot: ast,
-    // tokenStorage: tokens,
+    tokenStorage: tokens,
     // getTokenizer: tok => tokenizer = tok,
     // targetEsVersion: ES || Infinity,
   });
   window.ta_ast.value = JSON.stringify(ast.root);
-  window.ta_output.value = JSON.stringify(out);
+  window.ta_output.value = JSON.stringify(tokens);
   console.log(['out:', out, 'ast:', ast])
 };
 window.ta_input.onchange();
