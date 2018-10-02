@@ -41,7 +41,7 @@ node --experimental-modules tests/zeparser.spec.mjs -t
 ./tests/generated.js
 ```
 
-You can find a REPL in `tests/web/repl.html`, github link tbd. Will need very new browser due to es module syntax.
+The REPL needs a very new browser due to es module syntax. You can find the REPL in [`tests/web/repl.html`](./zeparser3/blob/master/tests/web/repl.js), github link: https://pvdz.github.io/zeparser3/tests/web/repl.html
 
 # Building
 
