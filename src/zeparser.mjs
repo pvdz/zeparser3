@@ -5898,11 +5898,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME) && (
         hasAllFlags(destructible, LF_IN_ASYNC) || goalMode === GOAL_MODULE
       )) THROW('The arguments of an arrow cannot be named `await` if inside an async function or parsing against the module goal');
-      if (hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME) && hasAnyFlag(destructible, LF_IN_GENERATOR | LF_STRICT_MODE)) {
+      if (hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME) && hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE)) {
         THROW('The arguments of an arrow cannot be named `yield` if inside a generator or strict mode');
       }
       parseArrowAfterGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, rootAstProp);
-
       // we just parsed an arrow. Whatever the state of await/yield was we can ignore that here.
       if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
       return NOT_ASSIGNABLE; // reset after the arrow
