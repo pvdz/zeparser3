@@ -2354,7 +2354,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // _now_ enable super props, super call is already set up correctly
     lexerFlags |= LF_SUPER_PROP;
     // note: generator and async state is not reset because computed method names still use the outer state
-    parseClassbody(lexerFlags, scoop, BINDING_TYPE_NONE, isExpression, 'body');
+    assignable |= parseClassbody(lexerFlags, scoop, BINDING_TYPE_NONE, isExpression, 'body');
 
     return assignable;
   }
@@ -6484,8 +6484,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'ClassBody');
     AST_set('body', []);
-    parseObjectLikePatternSansAssign(lexerFlags, scoop, bindingType, IS_CLASS_METHOD, isExpression, UNDEF_EXPORTS, UNDEF_EXPORTS, 'body');
+    let destructible = parseObjectLikePatternSansAssign(lexerFlags, scoop, bindingType, IS_CLASS_METHOD, isExpression, UNDEF_EXPORTS, UNDEF_EXPORTS, 'body');
     AST_close('ClassBody');
+    return destructible;
   }
   function parseObjectLikePatternSansAssign(_lexerFlags, scoop, bindingType, isClassMethod, isExpression, exportedNames, exportedBindings, astProp) {
     ASSERT(parseObjectLikePatternSansAssign.length === arguments.length, 'arg count');
@@ -6524,15 +6525,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ++doubleDunderProto;
       }
 
+      destructible |= currentDestruct;
       if (isClassMethod === IS_CLASS_METHOD) {
         if (hasAnyFlag(currentDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR)) {
           ++constructors;
         }
 
         while (curc === $$SEMI_3B) ASSERT_skipAny(';', lexerFlags);
-        destructible |= currentDestruct;
       } else {
-        destructible |= currentDestruct;
         if (curc !== $$COMMA_2C) break;
         ASSERT_skipAny(',', lexerFlags); // TODO: ident, }, [, number, string
       }
@@ -6932,10 +6932,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           let rhsAssignable = parseExpressionFromOp(lexerFlags, lhsAssignable, 'value');
           destructible |= lhsAssignable | rhsAssignable;
         }
-        destructible |= computedKeyAssignable;
         AST_set('shorthand', false);
         AST_close('Property');
       }
+      destructible |= computedKeyAssignable;
     }
     else if (curc === $$STAR_2A) {
       // generator shorthand (invalid for bindings)

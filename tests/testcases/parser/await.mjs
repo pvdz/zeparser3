@@ -1486,11 +1486,10 @@ export default (describe, test) =>
               code: 'async function a(){     async ([y] = delete ((((foo))[await x]))) => {};     }',
             });
 
-            // TODO:
-            // test('class with computed method containing await followed by a simple ident method that should not clobber the state', {
-            //   code: 'async function f(){    class A {[await foo](){}; "x"(){}}    }',
-            //   desc: 'there was a bug where a regular method would plainly clobber the state flags',
-            // });
+            test.fail('class with computed method containing await followed by a simple ident method that should not clobber the state', {
+              code: 'async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }',
+              desc: 'there was a bug where a regular method would plainly clobber the state flags',
+            });
 
             test.fail('class extending await should be illegal as arg default', {
               code: 'async function f(){    (fail = class A extends await foo {}) => fail    }',
