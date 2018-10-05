@@ -4049,6 +4049,26 @@ export default (describe, test) =>
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
     });
 
+    test.pass('class as arg default A', {
+      code: 'f = ([cls = class {}]) => {}',
+    });
+
+    test.pass('class as arg default B', {
+      code: 'f = ([xCls = class X {}]) => {}',
+    });
+
+    test.pass('class as arg default C1', {
+      code: 'f = ([xCls2 = class { name() {} }]) => {}',
+    });
+
+    test.pass('class as arg default C2', {
+      code: 'f = ([xCls2 = class { static name() {} }]) => {}',
+    });
+
+    test.pass('class as arg default ABC', {
+      code: 'f = ([cls = class {}, xCls = class X {}, xCls2 = class { static name() {} }]) => {}',
+    });
+
     // export default class extends F {}
     // class extends {} {}
     // async constructor ?

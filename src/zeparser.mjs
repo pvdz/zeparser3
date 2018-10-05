@@ -255,9 +255,8 @@ const BINDING_TYPE_CONST = 4;
 const BINDING_TYPE_CLASS = 5;
 const ASSIGNMENT_IS_INIT = true; // var foo = bar;  (not to be parsed by parseBinding
 const ASSIGNMENT_IS_DEFAULT = false; // (foo = bar) => foo  (parsed by parseBinding)
-const IS_EXPRESSION = true;
-const NOT_EXPRESSION = false;
-const IS_STATEMENT = false;
+const IS_EXPRESSION = {};
+const IS_STATEMENT = {};
 const IS_NEW_ARG = 3;
 const NOT_NEW_ARG = 4;
 const PARSE_DIRECTIVES = true;
@@ -2289,6 +2288,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseClassId(lexerFlags, IDENT_OPTIONAL, DO_NOT_BIND);
 
     let assignable = _parseClass(lexerFlags, DO_NOT_BIND, IS_EXPRESSION);
+
     AST_close('ClassExpression');
 
     // The `await/yield` flags only describe the `extends` part. Additionally the class as a whole is not assignable.
@@ -6266,9 +6266,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // I don't think the actual expression matters at this point
           // TODO: except for strict-mode specific stuff in function args... (might already have solved this :) )
           let rhsAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
-          lhsAssignable = resetDestructibility(lhsAssignable);
           AST_close('AssignmentExpression');
-          destructible |= mergeAssignable(lhsAssignable, rhsAssignable);
+          destructible |= mergeAssignable(lhsAssignable, resetDestructibility(rhsAssignable));
         }
         else if (curc === $$COMMA_2C || curc === $$SQUARE_R_5D) {
           // - [x]
@@ -6889,51 +6888,38 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let computedKeyAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, astProp);
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
 
-      if (isClassMethod === IS_CLASS_METHOD) {
-        destructible |= CANT_DESTRUCT;
+      if (curc === $$COLON_3A) {
+        // - `({[foo]: bar} = baz)`
+        // - `({[foo]: bar()} = baz)`
+        // - `({[foo]: a + b} = baz)`
+        // - `({[foo]: bar}) => baz`
+        // - `({[foo]: bar()}) => baz`
+        // - `({[foo]: a + b}) => baz`
+        // - `let {[foo]: bar} = baz`
+        // - `let {[foo]: bar()} = baz`
+        // - `let {[foo]: a + b} = baz`
+        ASSERT_skipRex(':', lexerFlags);
+        if (isClassMethod === IS_CLASS_METHOD) THROW('fail')
 
-        AST_wrapClosed(astProp, 'MethodDefinition', 'key');
-        AST_set('static', staticToken !== undefined);
-        AST_set('computed', true);
-        AST_set('kind', 'method'); // get/set/constructor/etc but dynamic key is always method
-
-        parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, NOT_GETSET, NOT_FUNCTION_STATEMENT, 'value');
-
-        AST_close('MethodDefinition');
-      } else {
         AST_wrapClosed(astProp, 'Property', 'key');
         AST_set('kind', 'init'); // only getters/setters get special value here
         AST_set('method', curc === $$PAREN_L_28);
         AST_set('computed', true);
 
-        // assert next char here so we don't over accept
-        if (curc === $$PAREN_L_28) {
+        let lhsAssignable = parseValue(lexerFlags, ALLOW_ASSIGNMENT, NOT_NEW_ARG, 'value');
+        if (notAssignable(lhsAssignable) || (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=')) {
           destructible |= CANT_DESTRUCT;
-          parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, NOT_GENERATOR, NOT_ASYNC, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, NOT_GETSET, NOT_FUNCTION_STATEMENT, 'value');
-        } else {
-          // - `({[foo]: bar} = baz)`
-          // - `({[foo]: bar()} = baz)`
-          // - `({[foo]: a + b} = baz)`
-          // - `({[foo]: bar}) => baz`
-          // - `({[foo]: bar()}) => baz`
-          // - `({[foo]: a + b}) => baz`
-          // - `let {[foo]: bar} = baz`
-          // - `let {[foo]: bar()} = baz`
-          // - `let {[foo]: a + b} = baz`
-          if (curc !== $$COLON_3A) THROW('A computed property name must be followed by a colon or paren');
-          ASSERT_skipRex(':', lexerFlags);
-
-          let lhsAssignable = parseValue(lexerFlags, ALLOW_ASSIGNMENT, NOT_NEW_ARG, 'value');
-          if (notAssignable(lhsAssignable) || (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=')) {
-            destructible |= CANT_DESTRUCT;
-          }
-
-          // Note: we don't care about the assignability of the initializer value, but we do care about await/yield here
-          let rhsAssignable = parseExpressionFromOp(lexerFlags, lhsAssignable, 'value');
-          destructible |= lhsAssignable | rhsAssignable;
         }
+
+        // Note: we don't care about the assignability of the initializer value, but we do care about await/yield here
+        let rhsAssignable = parseExpressionFromOp(lexerFlags, lhsAssignable, 'value');
+        destructible |= lhsAssignable | rhsAssignable;
         AST_set('shorthand', false);
         AST_close('Property');
+      } else {
+        if (curc !== $$PAREN_L_28) THROW('A computed property name must be followed by a colon or paren');
+        destructible |= parseObjectLikeMethodAfterKey(lexerFlags, staticToken, UNDEF_ASYNC, UNDEF_ASYNC, undefined, isClassMethod, NOT_CONSTRUCTOR, IS_DyNAMIC_PROPERTY, NOT_GETSET, astProp)
+        destructible |= CANT_DESTRUCT;
       }
       destructible |= computedKeyAssignable;
     }
