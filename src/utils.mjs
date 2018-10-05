@@ -111,8 +111,7 @@ const $$PS_2028 = 0x2028; // valid newline
 const $$BOM_FEFF = 0xFEFF; // considered a space
 
 async function inspect() {
-  // first time: load async, then replace global with static version
-  import('util').then(util => (inspect = (...args) => util.inspect(...args))());
+  (await import('util')).inspect(...arguments);
 }
 
 function ASSERT(bool, desc, ...rest) {
@@ -120,8 +119,8 @@ function ASSERT(bool, desc, ...rest) {
 }
 
 function THROW(str, ...rest) {
-  console.log('error args:', rest.length ? inspect(rest, false, null) : '<none>');
-  throw new Error(`Parser error! ${str} ${rest.length ? inspect(rest, false, null) : ''}`);
+  console.log('error args:', rest.length ? rest : '<none>');
+  throw new Error(`Parser error! ${str} ${rest.length ? rest : ''}`);
 }
 
 // </BODY>

@@ -1485,6 +1485,39 @@ export default (describe, test) =>
             test.fail('complexer delete property', {
               code: 'async function a(){     async ([y] = delete ((((foo))[await x]))) => {};     }',
             });
+
+            // TODO:
+            // test('class with computed method containing await followed by a simple ident method that should not clobber the state', {
+            //   code: 'async function f(){    class A {[await foo](){}; "x"(){}}    }',
+            //   desc: 'there was a bug where a regular method would plainly clobber the state flags',
+            // });
+
+            test.fail('class extending await should be illegal as arg default', {
+              code: 'async function f(){    (fail = class A extends await foo {}) => fail    }',
+              throws: 'await',
+            });
+
+            test.fail('class extending wrapped await should be illegal as arg default', {
+              code: 'async function f(){    (fail = class A extends (await foo) {}) => fail    }',
+              throws: 'await',
+            });
+
+            test.fail('anonymous class extending await should be illegal as arg default', {
+              code: 'async function f(){    (fail = class extends await foo {}) => fail    }',
+              throws: 'await',
+            });
+
+            test.fail('obj with computed method containing await followed by a simple ident method that should not clobber the state', {
+              code: 'async function f(){    async function f(){   (a= {[await foo](){}, "x"(){}} ) => a    }    }',
+              desc: 'there was a bug where a regular method would plainly clobber the state flags',
+              throws: 'await',
+            });
+
+            test.fail('obj with computed property containing await followed by a simple ident method that should not clobber the state', {
+              code: 'async function f(){    async function f(){   (a= {[await foo](){}, "x"(){}} ) => a    }    }',
+              desc: 'there was a bug where a regular method would plainly clobber the state flags',
+              throws: 'await',
+            });
           });
         });
       });

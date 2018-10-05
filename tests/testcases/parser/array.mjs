@@ -2528,6 +2528,19 @@ export default (describe, test) =>
       test.pass('destruct assignment that starts with string', {
         code: '["foo".foo] = x',
       });
+
+      test.pass('assignment should not copy rhs state', {
+        code: '[x = true] = y',
+        desc: 'the rhs is not assignable nor destructible but that should be reset due to the assignment',
+      });
+
+      test.pass('nested assignment should not copy rhs state', {
+        code: '[[x] = true] = y',
+      });
+
+      test.pass('more nested assignment should not copy rhs state', {
+        code: '[[x = true] = true] = y',
+      });
     });
 
     describe('keywords should not parse as regular idents in awkward places', _ => {

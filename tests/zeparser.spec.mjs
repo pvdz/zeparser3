@@ -15,7 +15,7 @@ import path from 'path';
 import util from 'util';
 
 let prettierFormat = () => { return 'prettier not loaded'; }; // if available, loaded through import() below
-let babelParse = () => { throw new Error('Babel is not loaded...'); }; // if available, loaded through import() below
+let babelParse = undefined; // if available, loaded through import() below
 
 import {
   MODE_MODULE,

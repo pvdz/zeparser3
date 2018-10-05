@@ -124,7 +124,7 @@ export default (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
 
-    test('bin or', {
+    test('bin mod', {
       code: 'a%b',
       ast: {
         type: 'Program',
@@ -142,4 +142,28 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
+
+    test('bin or', {
+      code: 'a|b',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'a'},
+              operator: '|',
+              right: {type: 'Identifier', name: 'b'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test.fail('non-assignment binary op is not assignable', {
+      code: 'a|b = c',
+    });
+
   });

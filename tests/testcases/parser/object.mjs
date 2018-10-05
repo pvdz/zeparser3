@@ -7240,8 +7240,73 @@ export default (describe, test) =>
 
       describe('string', _ => {
 
-        test.fail('destruct to keyword with destruct', {
+        test.fail('destruct to `true` with destruct', {
           code: 's = {"foo": true = x} = x',
+        });
+
+        test.fail('destruct to `false` with destruct', {
+          code: 's = {"foo": false = x} = x',
+        });
+
+        test.fail('destruct to `null` with destruct', {
+          code: 's = {"foo": null = x} = x',
+        });
+
+        test.fail('destruct to `this` with destruct', {
+          code: 's = {"foo": this = x} = x',
+        });
+
+        test.fail('destruct to `super` with destruct', {
+          code: 's = {"foo": super = x} = x',
+        });
+
+        test.fail_strict('destruct to `yield` with destruct', {
+          code: 's = {"foo": yield = x} = x',
+        });
+
+        test.fail('destruct to `yield a` with destruct', {
+          code: 's = {"foo": yield a = x} = x',
+        });
+
+        test.fail('destruct to `yield regex` should not end up with division', {
+          code: 's = {"foo": yield /fail/g = x} = x',
+        });
+
+        test.fail('destruct to generatored `yield` with destruct', {
+          code: 'function *g() {   s = {"foo": yield = x} = x   }',
+        });
+
+        test.fail('destruct to generatored `yield a` with destruct', {
+          code: 'function *g() {   s = {"foo": yield a = x} = x   }',
+        });
+
+        test.fail('destruct to generatored `yield regex` with regex check', {
+          code: 'function *g() {   s = {"foo": yield /brains/ = x} = x   }',
+        });
+
+        test.pass('destruct to `await` with destruct', {
+          code: 's = {"foo": await = x} = x',
+          MODULE: {throws: 'await'},
+        });
+
+        test.fail('destruct to `await a` with destruct', {
+          code: 's = {"foo": await a = x} = x',
+        });
+
+        test.fail('destruct to `await regex` should not end up with division', {
+          code: 's = {"foo": await /fail/g = x} = x',
+        });
+
+        test.fail('destruct to async `await` with destruct', {
+          code: 'async function g() {   s = {"foo": await = x} = x   }',
+        });
+
+        test.fail('destruct to async `await a` with destruct', {
+          code: 'async function g() {   s = {"foo": await a = x} = x   }',
+        });
+
+        test.fail('destruct to async `await regex` with regex check', {
+          code: 'async function g() {   s = {"foo": await /brains/ = x} = x   }',
         });
 
         test.fail('assignment to keyword without destruct', {
@@ -7395,6 +7460,19 @@ export default (describe, test) =>
 
       test.pass('destruct assignment when value is property of number', {
         code: '({"foo": 15..foo}=y)',
+      });
+
+      test.pass('assignment should not copy rhs state', {
+        code: '({a: x = true} = y)',
+        desc: 'the rhs is not assignable nor destructible but that should be reset due to the assignment',
+      });
+
+      test.pass('nested assignment should not copy rhs state', {
+        code: '({a: {x} = true} = y)',
+      });
+
+      test.pass('more nested assignment should not copy rhs state', {
+        code: '({a: {x = true} = true} = y)',
       });
     });
 
@@ -8531,5 +8609,87 @@ export default (describe, test) =>
 
     test.fail('assignment and arrow; initializer of ident key should not override assignability of value', {
       code: '({foo: fail() = a} = b) => c',
+    });
+
+    describe('ident key with yield values', _ => {
+
+      describe('global', _ => {
+
+        test.fail_strict('string key sans yield arg', {
+          code: 's = {foo: yield}',
+        });
+
+        test.fail_strict('string key with yield div', {
+          code: 's = {foo: yield / x}',
+        });
+
+        test.fail('string key with yield arg', {
+          code: 's = {foo: yield /x/}',
+        });
+
+        test.fail_strict('string key with yield divs', {
+          code: 's = {foo: yield /x/g}',
+        });
+      });
+
+      describe('generator', _ => {
+
+        test.pass('string key sans yield arg', {
+          code: 'function *f(){   s = {foo: yield}   }',
+        });
+
+        test.fail('string key with yield div', {
+          code: 'function *f(){   s = {foo: yield / x}   }',
+        });
+
+        test.pass('string key with yield arg', {
+          code: 'function *f(){   s = {foo: yield /x/}   }',
+        });
+
+        test.pass('string key with yield regex', {
+          code: 'function *f(){   s = {foo: yield /x/g}   }',
+        });
+      });
+    });
+
+    describe('string key with yield values', _ => {
+
+      describe('global', _ => {
+
+        test.fail_strict('string key sans yield arg', {
+          code: 's = {"foo": yield}',
+        });
+
+        test.fail_strict('string key with yield div', {
+          code: 's = {"foo": yield / x}',
+        });
+
+        test.fail('string key with yield arg', {
+          code: 's = {"foo": yield /x/}',
+        });
+
+        test.fail_strict('string key with yield divs', {
+          code: 's = {"foo": yield /x/g}',
+        });
+      });
+
+      describe('generator', _ => {
+
+        test.pass('string key sans yield arg', {
+          code: 'function *f(){   s = {"foo": yield}   }',
+        });
+
+        test.fail('string key with yield div', {
+          code: 'function *f(){   s = {"foo": yield / x}   }',
+        });
+
+        test.pass('string key with yield arg', {
+          code: 'function *f(){   s = {"foo": yield /x/}   }',
+        });
+
+        test.pass('string key with yield regex', {
+          code: 'function *f(){   s = {"foo": yield /x/g}   }',
+        });
+      });
     });
   });
