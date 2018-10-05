@@ -7593,8 +7593,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `[...[x].foo] = x`
       destructible |= parseArrayLiteralPattern(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
       destructible |= hasAllFlags(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
-
-      if (curtok.str !== '=') {
+      if (curtok.str !== '=' && curc !== closingCharOrd && curc !== $$COMMA_2C) {
         destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, destructible, destructible, closingCharOrd, astProp);
       }
     }
@@ -7609,8 +7608,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, SKIP_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, astProp);
       destructible |= hasAllFlags(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
 
-      if (curtok.str !== '=') {
+      if (curtok.str !== '=' && curc !== closingCharOrd && curc !== $$COMMA_2C) {
         destructible = parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, destructible, destructible, closingCharOrd, astProp);
+        console.log('after op', ''+curtok, D_DEBUG(destructible))
       }
     }
     else if (curc === closingCharOrd) {
@@ -7642,7 +7642,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       let assignable = parseValue(lexerFlags, ALLOW_ASSIGNMENT, NOT_NEW_ARG, astProp);
 
-      if (curtok.str === '=') {
+      if (curtok.str === '=' && curc !== closingCharOrd && curc !== $$COMMA_2C) {
         if (notAssignable(assignable)) {
           // - `[..."x"=b]`
           THROW('Cannot assign to lhs, not destructible with this initializer');
@@ -7704,10 +7704,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           else THROW('The rest argument must the be last parameter');
         }
       }
+
       if (curc === $$IS_3D && curtok.str === '=') {
         // this assignment resets the destructible state
-        // for example; `({a = b})` must destruct because of the shorthand. `[...a=b]` can't destruct because rest is only
-        // legal on a simple identifier. So combining them you get `[...{a = b} = c]` where the inside must destruct and the outside cannot. (there's a test)
+        // - `[...a=b] = x`
+        // - `{a = b} = x`
+        // - `[...{a = b}] = x`
+        // for example; `({a = b})` must destruct because of the shorthand. `[...a=b]` can't destruct because rest is
+        // only legal on a simple identifier. So combining them you get `[...{a = b} = c]` where the inside must
+        // destruct and the outside cannot. (there's a test)
         verifyDestructible(destructible | MUST_DESTRUCT); // this is to assert the above _can_ be destructed
         destructible = CANT_DESTRUCT;
 

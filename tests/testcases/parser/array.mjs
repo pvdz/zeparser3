@@ -2541,6 +2541,14 @@ export default (describe, test) =>
       test.pass('more nested assignment should not copy rhs state', {
         code: '[[x = true] = true] = y',
       });
+
+      test.fail_strict('rest with yield default destructible assignment', {
+        code: 'result = [...{ x = yield }] = y;',
+      });
+
+      test.pass('yield is not illegal in destruct assignment', {
+        code: `function* g() {   [...{ x = yield }] = y   }`,
+      });
     });
 
     describe('keywords should not parse as regular idents in awkward places', _ => {
