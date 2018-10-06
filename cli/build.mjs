@@ -1,23 +1,25 @@
 #!/usr/bin/env node
 
-let fs = require('fs');
+import fs from 'fs';
+import path from 'path';
 
 const ASSERTS = false;
 const AST = false;
+const COMMENTS = true;
 
-let utils = scrub(fs.readFileSync('src/utils.js'));
-let zeparser = scrub(fs.readFileSync('src/zeparser.js'));
-let zetokenizer = scrub(fs.readFileSync('src/zetokenizer.js'));
+// node does not expose __dirname under module mode, but we can use import.meta to get it
+let filePath = import.meta.url.replace(/^file:\/\//,'');
+let dirname = path.dirname(filePath);
 
-/*
-// some day ...
+(async() => {
 
-let utils = scrub(await fs.readFile('src/utils.js'));
-let zeparser = scrub(await fs.readFile('src/zeparser.js'));
-let zetokenizer = scrub(await fs.readFile('src/zetokenizer.js'));
-*/
+  let [utils, zetokenizer, zeparser] = (await Promise.all([
+    await fs.promises.readFile(path.join(dirname, '../src/utils.mjs')),
+    await fs.promises.readFile(path.join(dirname, '../src/zetokenizer.mjs')),
+    await fs.promises.readFile(path.join(dirname, '../src/zeparser.mjs')),
+  ])).map(scrub);
 
-let build = `
+  let build = `
 "use strict";
 
 // <utils.js>
@@ -40,28 +42,36 @@ module.exports = {
 };
 `;
 
-fs.writeFileSync('build/build.js', build);
+  await fs.promises.writeFile('build/build.js', build);
 
-function scrub(s) {
-  s = s
-    .toString('utf-8')
-    .match(/\/\/ <BODY>([\s\S]*)\/\/ <\/BODY>/)[1]
-    .replace(/\/\/ <SCRUB DEV>([\s\S]*?)\/\/ <\/SCRUB DEV>/g, '// scrubbed dev\n')
-  ;
-  if (!ASSERTS) {
+  function scrub(s) {
     s = s
-      .replace(/\/\/ <SCRUB ASSERTS>([\s\S]*?)\/\/ <\/SCRUB ASSERTS>/g, '0x003')
-      .replace(/^\s*ASSERT\(.*/mg, '0x001')
-      .replace(/ASSERT_(skip\w+)\(.*?, (\w+)/g, '$1($2')
-      .replace(/ASSERT_skip\(.*?\)/g, 'skip()')
+      .toString('utf-8')
+      .match(/\/\/ <BODY>([\s\S]*)\/\/ <\/BODY>/)[1]
+      .replace(/\/\/ <SCRUB DEV>([\s\S]*?)\/\/ <\/SCRUB DEV>/g, '// scrubbed dev\n')
     ;
-  }
-  if (!AST) {
-    s = s
-      .replace(/\/\/ <SCRUB AST>([\s\S]*?)\/\/ <\/SCRUB AST>/g, '0x004')
-      .replace(/^\s*AST_.*/mg, '0x002')
-    ;
+    if (!ASSERTS) {
+      s = s
+        .replace(/\/\/ <SCRUB ASSERTS>([\s\S]*?)\/\/ <\/SCRUB ASSERTS>/g, '0x003')
+        .replace(/^\s*ASSERT\(.*/mg, '0x001')
+        .replace(/ASSERT_(skip\w+)\(.*?, (\w+)/g, '$1($2')
+        .replace(/ASSERT_skip\(.*?\)/g, 'skip()')
+      ;
+    }
+    if (!AST) {
+      s = s
+        .replace(/\/\/ <SCRUB AST>([\s\S]*?)\/\/ <\/SCRUB AST>/g, '0x004')
+        // .replace(/^\s*AST_.*/mg, '0x002')
+        .replace(/^\s*AST_.*/mg, '0x002')
+      ;
+    }
+    if (!COMMENTS) {
+      s = s
+        .replace(/^\s*\/\/.*\n/mg, '');
+    }
+
+    return s;
   }
 
-  return s;
-}
+  console.log('finished');
+})();
