@@ -110,8 +110,11 @@ const $$LS_2029 = 0x2029; // valid newline
 const $$PS_2028 = 0x2028; // valid newline
 const $$BOM_FEFF = 0xFEFF; // considered a space
 
-async function inspect() {
-  (await import('util')).inspect(...arguments);
+// async function inspect() {
+//   (await import('util')).inspect(...arguments);
+// }
+function inspect(...args) {
+  console.dir(args.length===1?args[0]:args, {depth: null});
 }
 
 function ASSERT(bool, desc, ...rest) {

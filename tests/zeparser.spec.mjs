@@ -4,6 +4,8 @@
 //     node --experimental-modules tests/zeparser.spec.mjs
 //
 
+if (process.version.slice(0, 3) !== 'v10') throw new Error('Requires node 10+, did you forget `nvm use 10`?');
+
 Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
@@ -18,9 +20,6 @@ let prettierFormat = () => { return 'prettier not loaded'; }; // if available, l
 let babelParse = undefined; // if available, loaded through import() below
 
 import {
-  MODE_MODULE,
-  MODE_SCRIPT,
-
   toPrint,
 } from './utils.mjs';
 
@@ -33,8 +32,6 @@ import ZeParser, {
   GOAL_SCRIPT,
 } from '../src/zeparser.mjs';
 
-// let ZeParserBuild = require('../build/build.js').default;
-
 import {
   $EOF,
 
@@ -44,6 +41,9 @@ import {
 // node does not expose __dirname under module mode, but we can use import.meta to get it
 let filePath = import.meta.url.replace(/^file:\/\//,'');
 let dirname = path.dirname(filePath);
+
+const RUN_MODE_MODULE = {};
+const RUN_MODE_SCRIPT = {};
 
 const BOLD = '\x1b[;1;1m';
 const BLINK = '\x1b[;5;1m';
@@ -112,11 +112,11 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
   }
 
   // test both module and script parsing modes. if a test should have different outcomes between them then it should use
-  [MODE_SCRIPT, MODE_MODULE].forEach(goal => {
+  [RUN_MODE_SCRIPT, RUN_MODE_MODULE].forEach(goal => {
     // similarly, run all tests in both sloppy and strict mode. use STRICT and SLOPPY to add exceptions.
-    let ms = '[' + (goal === MODE_SCRIPT ? 'Script' : 'Module') + ']';
+    let ms = '[' + (goal === RUN_MODE_SCRIPT ? 'Script' : 'Module') + ']';
     // goal + strict test
-    if (goal === MODE_MODULE) {
+    if (goal === RUN_MODE_MODULE) {
       // the MODULE_MODE and SCRIPT_MODE properties to override the expectations.
       let totalTestOptions = override(testObj.STRICT, Object.assign({startInStrictMode: true}, testObj));
       // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
@@ -129,7 +129,7 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
     }
     // goal + sloppy test
     // module mode is ALWAYS strict mode so skip sloppy
-    if (goal === MODE_SCRIPT && (!testObj.SLOPPY || !testObj.SLOPPY.SKIP)) {
+    if (goal === RUN_MODE_SCRIPT && (!testObj.SLOPPY || !testObj.SLOPPY.SKIP)) {
       let totalTestOptions = override(testObj.SLOPPY, Object.assign({startInStrictMode: false}, testObj));
       // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
       // TODO: replace startInStrictMode with expectations of sloppy mode
@@ -177,7 +177,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   // goal specific overrides
   // (throws override ast and ast overrides throws)
   let brake = testDetails.brake;
-  if (mode === MODE_SCRIPT && scriptModeObj) {
+  if (mode === RUN_MODE_SCRIPT && scriptModeObj) {
     if (scriptModeObj.STRICT || scriptModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
     if (scriptModeObj.throws) {
       expectedAst = undefined;
@@ -192,7 +192,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (scriptModeObj.tokens) expectedTokens = scriptModeObj.tokens;
     if (scriptModeObj.startInStrictMode !== undefined) startInStrictMode = scriptModeObj.startInStrictMode;
   }
-  if (mode === MODE_MODULE && moduleModeObj) {
+  if (mode === RUN_MODE_MODULE && moduleModeObj) {
     if (moduleModeObj.SKIP !== undefined) SKIP = moduleModeObj.SKIP;
     if (moduleModeObj.STRICT || moduleModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
     if (moduleModeObj.throws) {
@@ -212,7 +212,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   let prefix = BOLD + parserDesc + ': ' + testi + testSuffix;
   let suffix = RESET;
 
-  if (mode === MODE_MODULE && !startInStrictMode) {
+  if (mode === RUN_MODE_MODULE && !startInStrictMode) {
     throw new Error('Should not test module goal in sloppy mode because that is impossible anyways; ' + SKIP);
   }
 
@@ -228,13 +228,13 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   let path = [];
   let tokens = [];
 
-  let goalMode = mode === MODE_MODULE ? GOAL_MODULE : mode === MODE_SCRIPT ? GOAL_SCRIPT : MODE_VALUE_ERROR;
+  let goalMode = mode === RUN_MODE_MODULE ? GOAL_MODULE : mode === RUN_MODE_SCRIPT ? GOAL_SCRIPT : MODE_VALUE_ERROR;
   let wasError = '';
   let stack;
   let tokenizer;
   let astPath;
   try {
-    var obj = Parser(code, goalMode, COLLECT_TOKENS_SOLID, {
+    var obj = Parser.parse(code, goalMode, COLLECT_TOKENS_SOLID, {
       strictMode: startInStrictMode,
       webCompat: !!WEB,
       trailingArgComma: testDetails.options && testDetails.options.trailingArgComma,
@@ -308,10 +308,30 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       .join(', $') +
       '],',
     );
+  } else if (!checkAST) {
+    if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
+      LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true);
+
+      console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
+      console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
+      // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
+      console.log(
+        'tokens: [$' +
+        obj.tokens
+        .slice(0, -1)
+        .map(o => debug_toktype(o.type))
+        .join(', $') +
+        '],',
+      );
+      ++fail;
+    } else {
+      console.log(`${prefix} ${GREEN}PASS${RESET} (skipped ast check): \`${toPrint(code)}\`${suffix}`);
+      ++pass;
+    }
   } else {
     let mustVerify = checkAST && expectedAst !== true;
     let expectedJson = mustVerify && JSON.stringify(expectedAst); // note: do not ignore prop order because there are perf implications if the order is not fixed
-    let actualJson = (mustVerify  || expectedCallback !== undefined) && JSON.stringify(obj.ast);
+    let actualJson = (mustVerify || expectedCallback !== undefined) && JSON.stringify(obj.ast);
     if (mustVerify && expectedJson !== actualJson) {
       let missingAst = expectedJson === '{"<not given>":true}';
 
@@ -552,10 +572,34 @@ let testj = 0;
 let skips = 0;
 let completed = false;
 
+let parsers = [];
 const start = async () => {
   await Promise.all([
+    (async () => {
+      let tok = await import(path.join(dirname, '../src/zetokenizer.mjs'));
+      let par = await import(path.join(dirname, '../src/zeparser.mjs'));
+      parsers.push({parser: {tok, par, parse(...args){ return par.default(...args)}}, hasAst: true, desc: 'dev build'});
+    })(),
+    (async () => {
+      try {
+        let par = await import(path.join(dirname, '../build/build_w_ast.js'));
+        parsers.push({parser: {par, parse(...args){ return par.default.default(...args); }}, hasAst: true, desc: 'prod build'});
+      } catch(e) {
+        console.log('Ignoring prod build test; file could not be loaded');
+      }
+    })(),
+    (async () => {
+      try {
+        let par = await import(path.join(dirname, '../build/build_no_ast.js'));
+        parsers.push({parser: {par, parse(...args){ return par.default.default(...args); }}, hasAst: false, desc: 'prod build'});
+      } catch(e) {8
+        console.log('Ignoring prod build test; file could not be loaded');
+      }
+    })(),
+
     (async () => { try { ({format: prettierFormat} = (await import('prettier')).default); } catch(e) {} })(),
     (async () => process.argv.includes('-b') ? ({parse: babelParse} = (await import('@babel/parser')).default) : {})(),
+
     ...files.map(async path => {
       let moduleExports = (await import(path)).default;
 
@@ -580,12 +624,10 @@ const start = async () => {
   ]);
 
   try {
-    [
-      [ZeParser, true, 'dev build'],
-      //[ZeParserBuild, false, 'prod build'],
-    ].forEach(([parser, hasAst, desc], i) => {
+    parsers.forEach(({parser, hasAst, desc}, i) => {
+      console.log('----->', parser, hasAst, desc);
       checkAST = hasAst;
-      parserDesc = '## ' + desc;
+      parserDesc = (parsers.length ? '##' + desc : '') + '## ' + desc;
       all(parser, cases);
     });
     completed = true;

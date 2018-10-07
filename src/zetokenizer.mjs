@@ -500,7 +500,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     return pointer < len - d;
   }
 
-  // <SCRUB AST>
+  // <SCRUB ASSERTS>
   function ASSERT_skip(chr) { // these calls are replaced with skip() in a build step
     // note: consider this `skip()` in prod
     ASSERT(neof(), 'should not be oob before the skip');
@@ -509,7 +509,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
 
     skip();
   }
-  // </SCRUB AST>
+  // </SCRUB ASSERTS>
 
   function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=RETURN_SOLID_TOKENS) {
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');

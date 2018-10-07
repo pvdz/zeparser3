@@ -675,9 +675,8 @@ export default (describe, test) =>
       describe('keyword', _ => {
         test('division', {
           code: 'function* f(){ yield\n/foo }',
-          throws: 'Tried to apply ASI but next token starts with forward slash',
+          throws: 'ASI',
           desc: 'note: spec requires a regex after the yield identifier so a division can never happen here',
-          tokens: [],
         });
 
         test('sans flag', {
@@ -700,7 +699,7 @@ export default (describe, test) =>
           code: 'yield\n/foo',
           throws: 'yield',
           SLOPPY_SCRIPT: {
-            throws: 'Tried to apply ASI but next token starts with forward slash',
+            throws: 'ASI',
           },
           desc: 'even in sloppy mode, this should not lead to a division (backwards compat breaking I guess)',
         });

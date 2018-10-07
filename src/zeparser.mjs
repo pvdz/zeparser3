@@ -349,7 +349,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // I'm super confused since I read https://github.com/estree/estree/pull/99 as that directives get their own node
     // and in https://github.com/estree/estree/issues/6 many authors indicate to have adopted this PR, yet none of the
     // parsers use Directive nodes. So I'm clearly overlooking something silly. *shrug*
-    AST_directiveNodes = false,
+    /**/AST_directiveNodes = false,
   } = options;
 
   let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
@@ -3524,12 +3524,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       NOT_ASYNC_PREFIXED,
       astProp
     );
-    ASSERT(
-      (assignableOrJustIdent&0b1111) === NOT_SINGLE_IDENT_WRAP_A ||
-      (assignableOrJustIdent&0b1111) === NOT_SINGLE_IDENT_WRAP_NA ||
-      (assignableOrJustIdent&0b1111) === IS_SINGLE_IDENT_WRAP_A ||
-      (assignableOrJustIdent&0b1111) === IS_SINGLE_IDENT_WRAP_NA
-    , 'exception enum');
+    ASSERT((assignableOrJustIdent&0b1111) === NOT_SINGLE_IDENT_WRAP_A || (assignableOrJustIdent&0b1111) === NOT_SINGLE_IDENT_WRAP_NA || (assignableOrJustIdent&0b1111) === IS_SINGLE_IDENT_WRAP_A || (assignableOrJustIdent&0b1111) === IS_SINGLE_IDENT_WRAP_NA, 'exception enum');
 
     // "decode" the return value back into an assignable
     let assignable = hasAnyFlag(assignableOrJustIdent, IS_SINGLE_IDENT_WRAP_A | NOT_SINGLE_IDENT_WRAP_A) ? initAssignable(): initNotAssignable();

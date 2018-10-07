@@ -252,7 +252,7 @@ export default (describe, test) =>
       describe('catch', _ => {
         test('division', {
           code: 'try {} catch (e) {}\n/foo',
-          throws: 'Unexpected token: ERROR',
+          throws: 'Unexpected token',
           desc: 'try (/catch/finally) is a statement (not a value) so division is illegal',
           tokens: [],
         });
@@ -311,7 +311,7 @@ export default (describe, test) =>
       describe('finally', _ => {
         test('sans flag', {
           code: 'try {} finally {}\n/foo',
-          throws: 'Unexpected token: ERROR',
+          throws: 'Unexpected token',
           desc: 'no ASI is attempted because the finally does not expect a semi so this is fine',
           tokens: [],
         });

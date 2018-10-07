@@ -108,7 +108,10 @@ export default (describe, test) =>
     test('confirm that canonical name ends up in ast', {
       code: 'pa\\u0073s();',
       desc: 'do not make the name include the escape',
-      callback(_a, _b, astJson) { return astJson.includes(':"pass"')},
+      callback(_a, _b, astJson) {
+        console.log(astJson)
+        return astJson.includes(':"pass"');
+      },
       ast: {
         type: 'Program',
         body: [

@@ -45,9 +45,7 @@ The REPL needs a very new browser due to es module syntax. You can find the REPL
 
 # Building
 
-_(This is broken at the moment)_
-
-While the parser runs perfectly fine in dev mode it will be a bit slow. To generate a build (stored in `build/build.js`) run this in the project root:
+While the parser runs perfectly fine in dev mode it will be a bit slow. To generate a build run this in the project root:
 
 ```
 mkdir build
@@ -60,7 +58,16 @@ The [build script](cli/build.js):
 - can remove inline asserts (lines that start with `ASSERT`)
 - can remove all the AST generation from the build (lines that start with `AST`)
 
-You can toggle asserts and AST at the top of the build file.
+You can toggle asserts and comments at the top of the build file.
+
+The script will write two files:
+
+```
+build/build_w_ast.js
+biuld/build_no_ast.js
+```
+
+When available these are picked up automatically by the test runner.
 
 # Perf testing
 
