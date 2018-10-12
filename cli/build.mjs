@@ -44,9 +44,13 @@ ${zeparser}
 
 module.exports = {
   default: ZeParser,
+
   COLLECT_TOKENS_NONE,
   COLLECT_TOKENS_SOLID,
   COLLECT_TOKENS_ALL,
+
+  GOAL_MODULE,
+  GOAL_SCRIPT,
 };
 `;
 

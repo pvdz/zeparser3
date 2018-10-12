@@ -592,7 +592,7 @@ const start = async () => {
       try {
         let par = await import(path.join(dirname, '../build/build_no_ast.js'));
         parsers.push({parser: {par, parse(...args){ return par.default.default(...args); }}, hasAst: false, desc: 'prod build'});
-      } catch(e) {8
+      } catch(e) {
         console.log('Ignoring prod build test; file could not be loaded');
       }
     })(),
