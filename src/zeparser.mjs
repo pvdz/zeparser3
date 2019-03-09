@@ -342,6 +342,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     getTokenizer,
     allowGlobalReturn = false, // you may need this to parse arbitrary code or eval code for example
     targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, Infinity
+    astUids = false, // add an incremental uid to all ast nodes for debugging
 
     // ast compatibility stuff?
 
@@ -402,6 +403,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return (flags & flag) === 0;
   }
 
+  let uid_counter = 0;
+
   // https://github.com/estree/estree
   // https://github.com/estree/estree/blob/master/es5.md
   // https://github.com/estree/estree/blob/master/es2015.md
@@ -429,7 +432,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof type === 'string' && type !== 'undefined', 'type should be string');
 
     let node = _path[_path.length - 1];
-    let newnode = {type};
+    let newnode = { // all ast nodes are created here
+      type,
+    };
+    if (astUids) newnode.$uid = uid_counter++;
     if (Array.isArray(node[prop])) {
       node[prop].push(newnode);
     }
@@ -1006,6 +1012,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       },
     };
     ASSERT(scoop._ = 'scope', 'just debugging');
+    if (astUids) scoop.$uid = uid_counter++;
     return scoop;
   }
   function SCOPE_addLexTo(scoop, scopeType, desc) {
