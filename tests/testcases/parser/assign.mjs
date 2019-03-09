@@ -78,6 +78,22 @@ export default (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
 
+    test.fail('regression with invalid lhs of compound assignment', {
+      // https://github.com/pvdz/zeparser3/issues/3
+      code: '({x:y} += x)',
+    });
+
+    test.fail('do not be fooled by compound assigning to a grouped object', {
+      // https://github.com/pvdz/zeparser3/issues/3
+      // Basically, this proofs merely asserting the previous token is insufficient
+      code: '(({x:y}) += x)',
+    });
+
+    test.fail('regression with invalid lhs that looks like destructuring', {
+      // https://github.com/pvdz/zeparser3/issues/3
+      code: '({foo: {x:y} += x})',
+    });
+
     test('bin -=', {
       code: 'a -= b',
       ast: {
@@ -684,5 +700,15 @@ export default (describe, test) =>
           STRICT: keyword === 'eval' || keyword === 'arguments' ? {throws: keyword} : undefined,
         });
       });
+    });
+
+    test.fail('assignment to array pattern with grouped assignment is illegal', {
+      // https://github.com/pvdz/zeparser3/issues/3#issuecomment-471157627
+      code: '[(a = 0)] = 1',
+    });
+
+    test.pass('assignment to paren wrapped ident in array is okay', {
+      // https://github.com/pvdz/zeparser3/issues/3#issuecomment-471157627
+      code: '[(a)] = 1',
     });
   });

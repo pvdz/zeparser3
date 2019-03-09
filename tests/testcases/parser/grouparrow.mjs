@@ -3374,7 +3374,7 @@ export default (describe, test) => describe('parens', _ => {
         code: '({ident: [foo, bar] + x})',
       });
 
-      test.pass('compound assignment should pass as prop value', {
+      test.fail('compound assignment should fail when assigning to an array', {
         code: '({ident: [foo, bar] += x})',
       });
 
@@ -3728,7 +3728,7 @@ export default (describe, test) => describe('parens', _ => {
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       });
 
-      test.pass('compound assignment should pass as value', {
+      test.fail('compound assignment should fail when assigning to an object', {
         code: '({ident: {x:y} += x})',
       });
 
