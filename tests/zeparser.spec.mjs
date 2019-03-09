@@ -4,7 +4,7 @@
 //     node --experimental-modules tests/zeparser.spec.mjs
 //
 
-if (process.version.slice(0, 3) !== 'v10') throw new Error('Requires node 10+, did you forget `nvm use 10`?');
+if (!(process.version.slice(1, 3) >= 10)) throw new Error('Requires node 10+, did you forget `nvm use 10`?');
 
 Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
