@@ -1189,6 +1189,16 @@ export default (describe, test) => describe('regexes', _ => {
     });
   });
 
+  test.pass('hex escaped zero in character class should not be considered an error', {
+    // regression: was comparing the decoded escape to absolute error codes
+    code: 'x = /[\\x00]/;',
+  });
+  test.pass('shorter lodash case', {
+    code: 'x = /[^\\x00-\\x2f]+/g;',
+  });
+  test.pass('shorter lodash case', {
+    code: 'x = /[^\\x00-\\x2f]+/g;',
+  });
   test.pass('lodash case', {
     code: 'x = /[^\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\x7f]+/g;',
   });

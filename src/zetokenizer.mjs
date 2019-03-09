@@ -374,9 +374,10 @@ const NOT_TEMPLATE = false;
 let NOT_A_REGEX_ERROR = '';
 let CODEPOINT_FROM_ESCAPE = -1;
 
-let INVALID_IDENT_CHAR = 0;
-let VALID_SINGLE_CHAR = 1;
-let VALID_DOUBLE_CHAR = 2;
+// These error codes must be negative as not to be ambiguous with decoded escape values
+let INVALID_IDENT_CHAR = -1;
+let VALID_SINGLE_CHAR = -2;
+let VALID_DOUBLE_CHAR = -3;
 
 let ID_START_REGEX = /|/;
 let ID_CONTINUE_REGEX = /|/;
@@ -2492,11 +2493,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
 
     let flagState = ALWAYS_GOOD;
 
-    if (eof()) return regexSyntaxError('Encountered early EOF while parsing char class');
+    if (eof()) return regexSyntaxError('Encountered early EOF while parsing char class (1)');
     let c = peek();
     if (c === $$XOR_5E) { // the separate inverting caret check is important for surrogate range checks in super edge cases (there's a test)
       ASSERT_skip($$XOR_5E);
-      if (eof()) return regexSyntaxError('Encountered early EOF while parsing char class');
+      if (eof()) return regexSyntaxError('Encountered early EOF while parsing char class (2)');
       c = peek();
     }
 
@@ -2506,10 +2507,11 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       if (c === $$SQUARE_R_5D) {
         return parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState);
       } else if (c === $$BACKSLASH_5C) {
+        console.log('b=',c)
         ASSERT_skip($$BACKSLASH_5C);
         c = parseRegexClassCharEscape(); // note: this may lead to c being >0xffff !! can also be 0 for certain escapes
         if (c === INVALID_IDENT_CHAR || c === CHARCLASS_BAD) {
-          flagState = regexSyntaxError('Encountered early EOF while parsing char class');
+          flagState = regexSyntaxError('Encountered early EOF while parsing char class (3)');
         } else if (c === INVALID_IDENT_CHAR) {
           flagState = regexSyntaxError('Encountered unicode escape that did not represent a proper character');
         } else if (c & CHARCLASS_BAD_WITH_U_FLAG) {
@@ -2632,12 +2634,21 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       // \x<??>
       case $$X_78:
         ASSERT_skip($$X_78);
-        if (eofd(1)) return CHARCLASS_BAD;
+        if (eofd(1)) {
+          regexSyntaxError('First character of hex escape was EOF');
+          return CHARCLASS_BAD;
+        }
         let a = peek();
-        if (!isHex(a)) return CHARCLASS_BAD;
+        if (!isHex(a)) {
+          regexSyntaxError('First character of hex escape was invalid');
+          return CHARCLASS_BAD;
+        }
         ASSERT_skip(a);
         let b = peek();
-        if (!isHex(b)) return CHARCLASS_BAD;
+        if (!isHex(b)) {
+          regexSyntaxError('Second character of hex escape was invalid');
+          return CHARCLASS_BAD;
+        }
         ASSERT_skip(b);
         return (hexToNum(a) << 4) | hexToNum(b);
 
