@@ -578,20 +578,33 @@ const start = async () => {
     (async () => {
       let tok = await import(path.join(dirname, '../src/zetokenizer.mjs'));
       let par = await import(path.join(dirname, '../src/zeparser.mjs'));
-      parsers.push({parser: {tok, par, parse(...args){ return par.default(...args)}}, hasAst: true, desc: 'dev build'});
+      // Make sure the dev version of the parser is tested first
+      parsers.unshift({parser: {tok, par, parse(...args){ return par.default(...args); }}, hasAst: true, desc: 'dev build'});
     })(),
     (async () => {
+      // node --experimental-modules cli/build.mjs
+      // TODO: should I just run that by default first?
       try {
         let par = await import(path.join(dirname, '../build/build_w_ast.js'));
-        parsers.push({parser: {par, parse(...args){ return par.default.default(...args); }}, hasAst: true, desc: 'prod build'});
+        parsers.push({
+          parser: {par, parse(...args){ return par.default.default(...args); }},
+          hasAst: true,
+          desc: 'prod build [ast:yes]'
+        });
       } catch(e) {
         console.log('Ignoring prod build test; file could not be loaded');
       }
     })(),
     (async () => {
+      // node --experimental-modules cli/build.mjs
+      // TODO: should I just run that by default first?
       try {
         let par = await import(path.join(dirname, '../build/build_no_ast.js'));
-        parsers.push({parser: {par, parse(...args){ return par.default.default(...args); }}, hasAst: false, desc: 'prod build'});
+        parsers.push({
+          parser: {par, parse(...args){ return par.default.default(...args); }},
+          hasAst: false,
+          desc: 'prod build [ast:no]'
+        });
       } catch(e) {
         console.log('Ignoring prod build test; file could not be loaded');
       }
