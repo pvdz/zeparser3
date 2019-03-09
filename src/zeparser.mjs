@@ -342,6 +342,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     getTokenizer,
     allowGlobalReturn = false, // you may need this to parse arbitrary code or eval code for example
     targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, Infinity
+    exposeScopes = false, // put scopes in the AST under `$scope` property?
     astUids = false, // add an incremental uid to all ast nodes for debugging
 
     // ast compatibility stuff?
@@ -969,7 +970,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseTopLevels(lexerFlags) {
     let scoop = SCOPE_create('_parseTopLevels');
-    ASSERT(scoop._ = 'root scope'); // debug
+    if (exposeScopes) AST_set('$scope', scoop);
     let exportedNames = {}; // how other modules refer to something
     ASSERT(exportedNames._ = 'exported names');
     let exportedBindings = {}; // which binding an exported name refers to
@@ -998,10 +999,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function SCOPE_create(desc) {
     // while this comment probably gets lost, the name is `scoop` for greppability since `scope` is too generic
     let scoop = {
-      var: {},
+      var: {}, // copied from parent unless this is main scope for function or global
       lexvar: {}, // track the lexical scope in which a `var` was defined. need this to do proper lexical checks.
       lex: {
-        '#': undefined,
+        '#': undefined, // parent
         // this will be function or global, but that's not very relevant
         type: BLOCK_SCOPE,
         // for https://tc39.github.io/ecma262/#sec-block-duplicates-allowed-static-semantics
@@ -1011,8 +1012,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         funcs: {},
       },
     };
-    ASSERT(scoop._ = 'scope', 'just debugging');
     if (astUids) scoop.$uid = uid_counter++;
+    ASSERT(scoop._ = desc); // debug
+    ASSERT(scoop.lex._ = desc); // debug
     return scoop;
   }
   function SCOPE_addLexTo(scoop, scopeType, desc) {
@@ -1027,8 +1029,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         funcs: [],
       },
     };
-
+    ASSERT(scoop2._ = desc + '.scope');
     ASSERT(scoop2._ = scoop._ + ':lex', 'just debugging');
+    ASSERT(scoop2.lex._ = desc + '.lex');
     return scoop2;
   }
   function SCOPE_addBindingAndDedupe(lexerFlags, scoop, name, bindingType, originIsVarDecl) {
@@ -1518,8 +1521,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('generator', isGenerator);
     AST_set('async', isAsync);
 
-    let innerScoop = SCOPE_create('parseFunctionAfterKeyword');
-    ASSERT(innerScoop._ = 'func scope');
+    let innerScoop = SCOPE_create('parseFunctionAfterKeyword_main_func_scope');
 
     // need to track whether the name was eval/args because if the func body is strict mode then it should still throw
     // retroactively for having that name. a bit annoying.
@@ -1558,11 +1560,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (isFuncDecl === IS_FUNC_DECL) {
         SCOPE_addFuncDeclName(lexerFlags, outerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL);
       } else if (isFuncDecl === IS_FUNC_EXPR && isRealFuncExpr) {
+        // FIXME: this approach may work but means the exposed scope cannot be used to find func expr names (probably same for other similar cases like class exprs)
         SCOPE_addBindingAndDedupe(lexerFlags, innerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL);
       }
-      // create new lexical binding to "hide" the function name. this way it wont cause problems when doing `x=function f(){ let f; }`
-      innerScoop = SCOPE_addLexTo(innerScoop, BLOCK_SCOPE, 'parseFunctionAfterKeyword');
-      ASSERT(innerScoop._ = 'func scope');
+      // create new lexical binding to "hide" the function name.
+      // this way it wont cause problems when doing `x=function f(){ let f; }`
+      innerScoop = SCOPE_addLexTo(innerScoop, BLOCK_SCOPE, 'parseFunctionAfterKeyword_hide_func_name');
 
       functionNameTokenToVerify = curtok; // basically if this was strict mode and bad name, the binding check would throw already
       AST_setIdent('id', curtok);
@@ -1666,9 +1669,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
     let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, paramScoop, bindingFrom, isGetSet, isGenerator, isMethod);
     ASSERT(typeof lexerFlags === 'number');
+    let finalFuncScope = SCOPE_addLexTo(paramScoop, BLOCK_SCOPE, 'parseFunctionFromParams(body)');
+    if (exposeScopes) AST_set('$scope', finalFuncScope);
     _parseBlockStatement(
       sansFlag(lexerFlags | LF_IN_SCOPE_ROOT, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION),
-      SCOPE_addLexTo(paramScoop, BLOCK_SCOPE, 'parseFunctionFromParams(body)'),
+      finalFuncScope,
       {},
       expressionState,
       PARSE_DIRECTIVES,
@@ -2189,6 +2194,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI | LF_DO_WHILE_ASI);
 
     AST_open(astProp, 'BlockStatement');
+    if (exposeScopes) AST_set('$scope', scoop);
     AST_set('body', []);
     ASSERT_skipRex('{', lexerFlagsNoTemplate);
     if (parseDirectives === PARSE_DIRECTIVES) {
@@ -5238,6 +5244,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // - `x => x`
     let scoop = SCOPE_create('parseArrowParenlessFromPunc');
+    if (exposeScopes) AST_set('$scope', scoop);
     scoop.lex.type = ARG_SCOPE;
     ASSERT(scoop._ = 'parenless arrow scope');
     SCOPE_addBindingAndDedupe(lexerFlags, scoop, identToken.str, BINDING_TYPE_ARG, ORIGIN_NOT_VAR_DECL);
@@ -5510,6 +5517,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(_path[_path.length - 1] && _path[_path.length - 1].params, 'params should be wrapped in arrow node now');
     ASSERT(!isAsync || allowAsyncFunctions, 'async = es8');
 
+    if (exposeScopes) AST_set('$scope', scoop);
     AST_set('id', null);
     AST_set('generator', false);
     AST_set('async', isAsync);
@@ -5576,8 +5584,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: what about `x = [a, b] = y` and `[a, b] = c = d`
 
     let scoop = SCOPE_create('_parseGroupToplevels');
+    if (exposeScopes) AST_set('$scope', scoop);
     scoop.lex.type = ARG_SCOPE;
-    ASSERT(scoop._ = 'arrow scope');
 
     if (curc === $$PAREN_R_29) {
       // special case; the `()` here must be the arrow header or (possibly) an `async()` function call
@@ -7947,6 +7955,12 @@ export {
 
   GOAL_MODULE,
   GOAL_SCRIPT,
+
+  FOR_SCOPE,
+  BLOCK_SCOPE,
+  ARG_SCOPE,
+  CATCH_SCOPE,
+  SWITCH_SCOPE,
 
   VERSION_EXPONENTIATION,
   VERSION_WHATEVER,
