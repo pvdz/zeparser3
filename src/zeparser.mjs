@@ -6585,11 +6585,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('properties', []);
     let destructible = parseObjectLikePatternSansAssign(lexerFlags | LF_NO_ASI, scoop, bindingType, isClassMethod, IS_EXPRESSION, exportedNames, exportedBindings, 'properties');
     AST_close('ObjectExpression');
-
     // this is immediately after the top-level object literal closed that we started parsing
     if (skipInit === PARSE_INIT) {
       if (curc === $$IS_3D && curtok.str === '=') {
         // - `{x} = y`
+        if (hasAnyFlag(destructible, CANT_DESTRUCT)) THROW('Unable to assignment destructure the lhs because it is not destructible');
         verifyDestructible(destructible | MUST_DESTRUCT); // this is to assert the above _can_ be destructed
 
         // if the object MUST destructure, it now MIGHT again
@@ -6675,6 +6675,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       destructible |= currentDestruct;
+
       if (isClassMethod === IS_CLASS_METHOD) {
         if (hasAnyFlag(currentDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR)) {
           ++constructors;
@@ -6886,7 +6887,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (targetEsVersion < VERSION_OBJECTSPREAD && targetEsVersion !== VERSION_WHATEVER) {
         THROW('Object spread/rest requires the requested version to be ES9+');
       }
-
       // rest/spread (supported in objects since es9)
       // unlike arrays it can appear in any property index in an object
       // note that an object spread, if the last element, CAN have a trailing comma
@@ -7632,6 +7632,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // Arrays:
     // https://tc39.github.io/ecma262/#prod-SpreadElement
+    // can be any pattern
+
+    // Objects:
+    // https://tc39.github.io/ecma262/#prod-BindingRestProperty
+    // can only be idents
 
     // Bindings, Args, Destructurings: in no production is rest allowing an init:
     // var
@@ -7676,7 +7681,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // - `[...new x];`      // ok, cannot destruct
       // - `[...new];`        // bad
-      // - `[...(x)];`        // ok in all cases
+      // - `[...(x)];`        // ok, not arrowable
       // - `[...(x,y)];`      // ok, cannot destruct
 
       // - `[...x = x];` (valid but never destructible)
@@ -7732,6 +7737,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `[...[x].foo] = x`
       // - `[...[x]=y]`             - yes (spread can be assignment, the assignment isn't default/init)
       // - `[...[x]=y] = z`         - no (rest cannot have default)
+      // Note: rest param can be on arr/obj
+      // - `(...[x,y]) => {}`
+      // - `([...[x,y]]) => {}`
       let nowDestruct = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
       ASSERT(curtok.str !== '=' || (nowDestruct|CANT_DESTRUCT), 'rest can never have default so if there was an assignment dont let it be destructible');
       if (curtok.str !== '=' && curc !== closingCharOrd && curc !== $$COMMA_2C) {
@@ -7739,6 +7747,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       assignable = hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...[x]=y];`
       destructible |= nowDestruct;
+
+      // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
+      if (closingCharOrd === $$CURLY_R_7D) destructible |= DESTRUCT_ASSIGN_ONLY;
     }
     else if (curc === $$CURLY_L_7B) {
       // - `(...{x}) => x`
@@ -7747,6 +7758,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `([...{x}]) => x`
       // - `[...{x}/y]`
       // - `[...{x}.foo] = x`
+      // Note: rest param can be on arr/obj
+      // - `(...{x:y}) => {}`
+      // - `([...{x:y}]) => {}`
       // (and object)
       let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, SKIP_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, astProp);
       ASSERT(curtok.str !== '=' || (nowDestruct|CANT_DESTRUCT), 'rest can never have default so if there was an assignment dont let it be destructible');
@@ -7755,6 +7769,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       assignable = hasAllFlags(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
       destructible |= nowDestruct;
+      // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
+      if (closingCharOrd === $$CURLY_R_7D) destructible |= DESTRUCT_ASSIGN_ONLY;
     }
     else if (curc === closingCharOrd) {
       // `[...]`
@@ -7834,6 +7850,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           destructible |= CANT_DESTRUCT;
         }
       }
+
+      // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
+      if (closingCharOrd === $$CURLY_R_7D) destructible |= DESTRUCT_ASSIGN_ONLY;
 
       // TODO: come up with test cases that cover these checks
       if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;

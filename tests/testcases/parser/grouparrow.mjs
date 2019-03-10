@@ -4237,6 +4237,19 @@ export default (describe, test) => describe('parens', _ => {
       test.fail('obj wrapped in array with alias to property obj init', {
         code: '([{x: y.z} = a]) => b',
       });
+
+      test.fail('obj destructuring rest with complex obj arg', {
+        code: '({...{x} }) => {}',
+      });
+
+      test.fail('obj destructuring rest with paren wrapped arg', {
+        // Arrow cover grammar is not determined by "AssignmentTargetType" so these parens are not "okay"
+        code: '({...(x) }) => {}',
+      });
+
+      test.fail('obj destructuring rest with complex arr arg', {
+        code: '({...[x] }) => {}',
+      });
     });
 
     // TODO

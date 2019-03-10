@@ -8030,83 +8030,14 @@ export default (describe, test) =>
             code: '({...a+b} = x)',
           });
 
-          test('object array', {
+          test.pass('object array is legal for assignment (not arrow)', {
+            desc: 'valid per https://tc39.github.io/ecma262/#prod-AssignmentRestProperty',
             code: '({...[a, b]} = x)',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'AssignmentExpression',
-                    left: {
-                      type: 'ObjectPattern',
-                      properties: [
-                        {
-                          type: 'RestElement',
-                          argument: {
-                            type: 'ArrayPattern',
-                            elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-                          },
-                        },
-                      ],
-                    },
-                    operator: '=',
-                    right: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
           });
 
-          test('object object', {
+          test.pass('object object is legal for assignment (not arrow)', {
+            desc: 'valid per https://tc39.github.io/ecma262/#prod-AssignmentRestProperty',
             code: '({...{a, b}} = x)',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'AssignmentExpression',
-                    left: {
-                      type: 'ObjectPattern',
-                      properties: [
-                        {
-                          type: 'RestElement',
-                          argument: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'a'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'a'},
-                                shorthand: true,
-                              },
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'b'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'b'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                    operator: '=',
-                    right: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
           });
 
           test.fail('can not have two rest elements', {
@@ -8156,93 +8087,14 @@ export default (describe, test) =>
             code: '({...a+b}) => x',
           });
 
-          test('object array', {
+          test.fail('object array', {
             code: '({...[a, b]}) => x',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [
-                      {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'RestElement',
-                            argument: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-                            },
-                          },
-                        ],
-                      },
-                    ],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: true,
-                    body: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+            desc: 'obj rest can only have ident for param destructuring',
           });
 
-          test('object object', {
+          test.fail('object object', {
             code: '({...{a, b}}) => x',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [
-                      {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'RestElement',
-                            argument: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'a'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'a'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'b'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'b'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
-                          },
-                        ],
-                      },
-                    ],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: true,
-                    body: {type: 'Identifier', name: 'x'},
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+            desc: 'obj rest can only have ident for param destructuring',
           });
 
           test.fail('can not have two rest elements', {
