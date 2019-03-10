@@ -2549,6 +2549,30 @@ export default (describe, test) =>
       test.pass('yield is not illegal in destruct assignment', {
         code: `function* g() {   [...{ x = yield }] = y   }`,
       });
+
+      test.fail_strict('spread with await var', {
+        code: '[...await]',
+      });
+
+      test.fail_strict('spread with yield var', {
+        code: '[...yield]',
+      });
+
+      test.pass('spread with await keyword', {
+        code: 'async x => [...await x]',
+      });
+
+      test.pass('spread with argless yield keyword', {
+        code: 'function *f(){ return [...yield]; }',
+      });
+
+      test.pass('spread with arged yield keyword', {
+        code: 'function *f(){ return [...yield x]; }',
+      });
+
+      test.fail_strict('spread with await in divison', {
+        code: '[.../x//yield]',
+      });
     });
 
     describe('keywords should not parse as regular idents in awkward places', _ => {

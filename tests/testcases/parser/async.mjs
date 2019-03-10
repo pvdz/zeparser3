@@ -2386,4 +2386,20 @@ export default (describe, test) => describe('async keyword', function() {
     },
     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
   });
+
+  test.fail_strict('async call with nested await', {
+    code: 'async(await);',
+  });
+
+  test.fail_strict('async call with nested await', {
+    code: 'async(yield);',
+  });
+
+  test.pass('async call in generator with var', {
+    code: 'function *f(){ async(x); }',
+  });
+
+  test.fail_strict('async call in generator with nested yield', {
+    code: 'function *f(){ async(await); }',
+  });
 });

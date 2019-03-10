@@ -351,4 +351,62 @@ export default (describe, test) =>
     test.fail('cannot asi', {
       code: '(delete (((x))) \n x)',
     });
+
+    test.fail_strict('delete a prop on await', {
+      code: `delete await.foo`,
+    });
+
+    test.fail_strict('delete a prop on yield', {
+      code: `delete yield.foo`,
+    });
+
+    test.fail_strict('delete arg with noop group that contains await var', {
+      code: `delete (((((foo(await)))))).bar`,
+    });
+
+    test.fail_strict('delete arg with noop group that contains yield var', {
+      code: `delete (((((foo(yield)))))).bar`,
+    });
+
+    test.pass('delete arg with noop group that contains await keyword', {
+      code: `async x => delete (((((foo(await x)))))).bar`,
+    });
+
+    test.pass('delete arg with noop group that contains yield keyword', {
+      code: `function *f(){ delete (((((foo(yield)))))).bar }`,
+    });
+
+    test.pass('delete arg with noop group that contains yield+arg keyword', {
+      code: `function *f(){ delete (((((foo(yield y)))))).bar }`,
+    });
+
+    test.fail_strict('delete with assignment of await that contains await var', {
+      code: 'delete (x=await)',
+    });
+
+    test.fail_strict('delete with assignment to await that contains await var', {
+      code: 'delete (await=x)',
+    });
+
+    test.fail('delete cannot be rhs of delete', {
+      code: 'delete x = await',
+    });
+
+    test.fail_strict('detect await var in weird delete construct 1', {
+      code: 'delete ("x"[(await)])',
+    });
+
+    test.fail_strict('detect yield var in weird delete construct 1', {
+      code: 'delete ("x"[(yield)])',
+    });
+
+    test.pass('detect await keyword in weird delete construct 1', {
+      code: 'async x => delete ("x"[(await x)])',
+    });
+
+    test.pass('detect yield keyword in weird delete construct 1', {
+      code: 'function *f(){ delete ("x"[(yield)]) }',
+    });
+
+
   });

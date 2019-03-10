@@ -1272,6 +1272,26 @@ export default (describe, test) =>
           STRICT: {throws: true},
         });
       });
+
+      test.fail_strict('yield without generator as an arrow param default', {
+        code: '({x} = yield) => {}',
+      });
+
+      test.fail('yield inside generator as an arrow param default', {
+        code: 'function *f(){ ({x} = yield) => {} }',
+      });
+
+      test.fail('yield as the generator param name', {
+        code: 'function *f(yield){ }',
+      });
+
+      test.fail('yield as the generator param default', {
+        code: 'function *f(x=yield){ }',
+      });
+
+      test.fail('yield+arg inside generator as an arrow param default', {
+        code: 'function *f(){ ({x} = yield x) => {} }',
+      });
     });
 
     test('confirm LF_NO_YIELD is properly reset with an Expression 1', {

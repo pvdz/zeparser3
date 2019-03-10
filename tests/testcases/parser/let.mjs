@@ -13324,6 +13324,10 @@ export default (describe, test) =>
     test.fail('silly case when parsing binding in for', {
       code: 'for (let foo,)',
     });
+
+    test.fail('let in destructuring', {
+      code: 'let [a, let, b] = [1, 2, 3];',
+    });
   });
 
 // duplicate keys = error

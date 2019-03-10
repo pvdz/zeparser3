@@ -953,6 +953,18 @@ export default (describe, test) =>
           MODULE: {throws: 'await'},
         });
       });
+
+      test.fail_strict('var inside array lit', {
+        code: '{ (x = [await]) }',
+      });
+
+      test.fail('var+arg inside array lit', {
+        code: '{ (x = [await x]) }',
+      });
+
+      test.pass('keyword inside array lit', {
+        code: 'async g => (x = [await y])',
+      });
     });
 
     describe('await as arg default', _ => {
@@ -1519,6 +1531,14 @@ export default (describe, test) =>
             });
           });
         });
+      });
+
+      test.fail_strict('var inside rest', {
+        code: 'result = [...{ x = await }] = y;',
+      });
+
+      test.pass('keyword inside rest', {
+        code: 'async r => result = [...{ x = await x }] = y;',
       });
     });
   });

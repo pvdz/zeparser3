@@ -515,6 +515,65 @@ export default (describe, test) =>
           code: 'function f() { "use strict"; (await = "sentinal 7533336"); }',
           MODULE: {throws: true},
         });
+
+        test.fail_strict('assign to paren-wrapped await var', {
+          code: '(await) = 1',
+        });
+
+        test.fail('assign to paren-wrapped await var', {
+          code: 'async x => (await) = 1',
+        });
+
+        test.fail_strict('assign to paren-wrapped await var in param default', {
+          code: '(x = (await) = f) => {}',
+        });
+
+        test.fail('assign to paren-wrapped await keyword in param default', {
+          code: 'async (x = (await) = f) => {}',
+        });
+
+        test.fail_strict('assign to paren-wrapped await var inside delete in param default', {
+          code: '(x = delete ((await) = f)) => {}',
+        });
+
+        test.fail('assign to paren-wrapped await keyword inside delete in param default', {
+          code: 'async (x = delete ((await) = f)) => {}',
+        });
+      });
+
+      describe('yield is not keyword', _ => {
+
+        test.fail_strict('assign to yield as a var name', {
+          code: 'yield = 1;',
+        });
+
+        test.fail('assign to yield as a keyword', {
+          code: 'function *f(){ yield = 1; }',
+        });
+
+        test.fail_strict('assign to paren-wrapped yield as a var name', {
+          code: '(yield) = 1;',
+        });
+
+        test.fail('assign to yield as a keyword', {
+          code: 'function *f(){ (yield) = 1; }',
+        });
+
+        test.fail_strict('assign to paren-wrapped yield var in param default', {
+          code: '(x = (yield) = f) => {}',
+        });
+
+        test.fail('assign to paren-wrapped yield keyword in param default', {
+          code: 'function *f(x = (yield) = f) {}',
+        });
+
+        test.fail_strict('assign to paren-wrapped yield var inside delete in param default', {
+          code: '(x = delete ((yield) = f)) => {}',
+        });
+
+        test.fail('assign to paren-wrapped yield keyword inside delete in param default', {
+          code: 'function *f(x = delete ((yield) = f)) {}',
+        });
       });
 
       // should be fine for non-keywords
@@ -710,5 +769,138 @@ export default (describe, test) =>
     test.pass('assignment to paren wrapped ident in array is okay', {
       // https://github.com/pvdz/zeparser3/issues/3#issuecomment-471157627
       code: '[(a)] = 1',
+    });
+
+    test.pass('destruct assignment to a noop-grouped ident', {
+      code: '[(a), b] = [];',
+    });
+
+    test.pass('destruct assignment to noop-groups ident', {
+      code: '[((((a)))), b] = [];',
+    });
+
+    test.fail_strict('rest with await var', {
+      code: '[...await] = obj',
+    });
+
+    test.fail_strict('rest with yield var', {
+      code: '[...yield] = obj',
+    });
+
+    test.fail('rest with await keyword', {
+      code: 'async x => [...await x] = obj',
+    });
+
+    test.fail('rest with argless yield keyword', {
+      code: 'function *f(){ return [...yield] = obj; }',
+    });
+
+    test.fail('rest with arged yield keyword', {
+      code: 'function *f(){ return [...yield x] = obj; }',
+    });
+
+    test.fail_strict('obj rest with await', {
+      code: '({...await} = obj)',
+    });
+
+    test.fail_strict('obj rest with yield', {
+      code: '({...yield} = obj)',
+    });
+
+    test.pass('destruct assign after comma', {
+      code: 'x, [foo, bar] = doo;',
+    });
+
+    test('destruct assign with default after comma', {
+      code: 'x, [foo = y, bar] = doo',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'SequenceExpression',
+              expressions: [
+                {type: 'Identifier', name: 'x'},
+                {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
+                        type: 'AssignmentPattern',
+                        left: {type: 'Identifier', name: 'foo'},
+                        right: {type: 'Identifier', name: 'y'},
+                      },
+                      {type: 'Identifier', name: 'bar'},
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'doo'},
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test.fail('destruct assign with illegal content after comma', {
+      code: 'x, [foo + y, bar] = doo;',
+    });
+
+    test('destructuring between equal signs', {
+      code: 'x = [a, b] = y',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {type: 'Identifier', name: 'x'},
+              operator: '=',
+              right: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('destructuring assignment with two rhs assigns', {
+      code: '[a, b] = c = d',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'AssignmentExpression',
+              left: {
+                type: 'ArrayPattern',
+                elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+              },
+              operator: '=',
+              right: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'c'},
+                operator: '=',
+                right: {type: 'Identifier', name: 'd'},
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
   });
