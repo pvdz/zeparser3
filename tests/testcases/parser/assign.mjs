@@ -771,6 +771,22 @@ export default (describe, test) =>
       code: '[(a)] = 1',
     });
 
+    test.pass('assignment destructuring with noop-group with default being an assignable', {
+      code: '({a:(b) = c})',
+    });
+
+    test.pass('assignment destructuring with noop-group with double default being an assignable', {
+      code: '({a:(b) = c} = 1)',
+    });
+
+    test.pass('assignment destructuring with noop-group with double default being non-assignable', {
+      code: '({a:(b) = 0} = 1)',
+    });
+
+    test.fail('assignment destructuring with real group', {
+      code: '({a:(a,y) = 0} = 1)',
+    });
+
     test.pass('destruct assignment to a noop-grouped ident', {
       code: '[(a), b] = [];',
     });

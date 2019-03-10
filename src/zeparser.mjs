@@ -5892,7 +5892,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     allowAssignment = backup_allowAssignment;
-
     if (toplevelComma) {
       assignable = setNotAssignable(assignable);
       AST_close('SequenceExpression');
@@ -5981,7 +5980,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let nowAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
       // - `async (x = (x) = await f) => {}`
       // - `async (x = (x) += await f) => {}`
-      assignable = mergeAssignable(nowAssignable, assignable);
+      // - `({a:(b) = c} = 1)`
+      // Note: the assignability of the default expr is irrelevant, but we have to propagate the await/yield flags
+      assignable |= nowAssignable & (ASSIGNABLE_HAD_AWAIT_VARNAME|ASSIGNABLE_HAD_YIELD_VARNAME|ASSIGNABLE_HAD_AWAIT_KEYWORD|ASSIGNABLE_HAD_YIELD_KEYWORD);
       AST_close('AssignmentExpression');
 
       if (isDeleteArg === IS_DELETE_ARG) {
@@ -5996,7 +5997,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) extraFlags |= DELETE_PIGGY_YIELD_KEYWORD;
         return NOT_SINGLE_IDENT_WRAP_NA | extraFlags;
       }
-      return setNotAssignable(assignable);
+      return assignable;
     }
 
     if (isDeleteArg === IS_DELETE_ARG) {
@@ -6656,7 +6657,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       destructible |= currentDestruct;
-
       if (isClassMethod === IS_CLASS_METHOD) {
         if (hasAnyFlag(currentDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR)) {
           ++constructors;
