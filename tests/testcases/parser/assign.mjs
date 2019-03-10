@@ -807,6 +807,14 @@ export default (describe, test) =>
       code: '[...[{a: b}.c]] = [];',
     });
 
+    test.pass('prop on obj that is assign destructed', {
+      code: '[...[{prop: 1}.prop]] = []',
+    });
+
+    test.pass('prop on nested obj that is assign destructed', {
+      code: '({ a: {prop: 1}.prop } = {})',
+    });
+
     test.fail('cannot destruct when the aliased key is invalid (group)', {
       code: '({a: 1} = []);',
     });
