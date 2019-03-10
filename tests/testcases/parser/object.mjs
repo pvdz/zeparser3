@@ -7516,6 +7516,8 @@ export default (describe, test) =>
         // https://tc39.github.io/ecma262/#sec-super-keyword-runtime-semantics-evaluation
         // So it should syntactically be ok to use inside a property as long as it's inside a proper constructor
         // The rules for a super property are even more relaxed
+        // Note: super properties are "simple" (heh) and should be valid in destructuring assignments
+        // -> https://tc39.github.io/ecma262/#sec-static-semantics-static-semantics-assignmenttargettype
         ['super()', 'super.cool', 'super[cool]'].forEach(keyword => {
           describe('string key', _ => {
 
@@ -7523,8 +7525,12 @@ export default (describe, test) =>
               code: `class x extends y {constructor(){    ({"foo": ${keyword}})    }}`,
             });
 
-            test.fail('destructuring', {
+            test('destructuring', {
               code: `class x extends y {constructor(){    ({"foo": ${keyword}} = x)    }}`,
+              // Note: super property is valid here, like any other property
+              throws: keyword === 'super()',
+              ast: true,
+              tokens: true,
             });
 
             test.fail('arrow', {
@@ -7538,8 +7544,12 @@ export default (describe, test) =>
               code: `class x extends y {constructor(){    ({790: ${keyword}})    }}`,
             });
 
-            test.fail('destructuring', {
+            test('destructuring', {
               code: `class x extends y {constructor(){    ({790: ${keyword}} = x)    }}`,
+              // Note: super property is valid here, like any other property
+              throws: keyword === 'super()',
+              ast: true,
+              tokens: true,
             });
 
             test.fail('arrow', {

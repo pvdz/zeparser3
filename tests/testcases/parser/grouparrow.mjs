@@ -4212,6 +4212,33 @@ export default (describe, test) => describe('parens', _ => {
       });
     });
 
+    describe('arrow param destructuring should not do the same as assignment destructuring', _ => {
+
+      test.fail('obj with alias to property sans init', {
+        code: '({x: y.z}) => b',
+      });
+
+      test.pass('confirm destructuring assignment still works', {
+        code: '({x: y.z} = b)',
+      });
+
+      test.fail('obj with alias to property with init', {
+        code: '({x: y.z} = a) => b',
+      });
+
+      test.fail('obj wrapped in array with alias to property sans init', {
+        code: '([{x: y.z}]) => b',
+      });
+
+      test.fail('obj wrapped in array with alias to property array init', {
+        code: '([{x: y.z}] = a) => b',
+      });
+
+      test.fail('obj wrapped in array with alias to property obj init', {
+        code: '([{x: y.z} = a]) => b',
+      });
+    });
+
     // TODO
     // test('arrow with block cannot be lhs of binary expression', {
     //   code: 'a => {} + x',
