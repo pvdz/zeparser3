@@ -286,6 +286,18 @@ export default (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
 
+    test.pass('spread of an obj destructuring assignment with property', {
+      code: '[...{a: b.b} = c]',
+    });
+
+    test.pass('rest of an obj with property that is a destructuring assignment', {
+      code: '[...{a: b.b}] = c',
+    });
+
+    test.pass('rest of an obj with property with a prop that is a destructuring assignment', {
+      code: '[...{a: b.b}.d] = c',
+    });
+
     test('inside must destruct, outside cant', {
       code: '[...{a = b} = c];',
       desc: 'shorthand prop can only appear in Pattern, rest arg can only be an ident, this tests proper nesting',

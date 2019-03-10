@@ -2573,6 +2573,10 @@ export default (describe, test) =>
       test.fail_strict('spread with await in divison', {
         code: '[.../x//yield]',
       });
+
+      test.pass('rest that is member expression is assignable', {
+        code: '[...a.b] = c',
+      });
     });
 
     describe('keywords should not parse as regular idents in awkward places', _ => {

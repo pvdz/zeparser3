@@ -768,7 +768,7 @@ export default (describe, test) =>
 
     test.pass('assignment to paren wrapped ident in array is okay', {
       // https://github.com/pvdz/zeparser3/issues/3#issuecomment-471157627
-      code: '[(a)] = 1',
+      code: '[(a)] = x',
     });
 
     test.pass('assignment destructuring with noop-group with default being an assignable', {
@@ -793,6 +793,58 @@ export default (describe, test) =>
 
     test.pass('destruct assignment to noop-groups ident', {
       code: '[((((a)))), b] = [];',
+    });
+
+    test.fail('this is not destructuring', {
+      code: '(...{a: b}.c = [])',
+    });
+
+    test.pass('destruct to arr wrapped property of obj lit that is a rest', {
+      code: '[...{a: b}.c] = []',
+    });
+
+    test.pass('destruct assignment to prop of rest of obj-lit inside arr', {
+      code: '[...[{a: b}.c]] = [];',
+    });
+
+    test.fail('cannot destruct when the aliased key is invalid (group)', {
+      code: '({a: 1} = []);',
+    });
+
+    test.fail('cannot destruct when the aliased key is invalid (arr)', {
+      code: '[{a: 1} = []];',
+    });
+
+    test.fail('cannot destruct when the aliased key is invalid (obj)', {
+      code: 'x, {a: {a: 1} = []};',
+    });
+
+    test.fail('cannot destruct when the aliased key is invalid (comma)', {
+      code: 'x, {a: 1} = [];',
+    });
+
+    test.pass('destruct assignment to prop of obj pattern where alias is number is valid', {
+      // Regression: the number was causing the whole obj pattern to be marked non-destructible
+      code: '[{a: 1}.c] = [];',
+    });
+
+    test.pass('noop-group edge case for destruct assignment to prop of obj pattern where alias is number is valid', {
+      code: '[({a: 1}.c)] = [];',
+    });
+
+    test.fail('cannot destruct arr pattern with a number', {
+      code: '[[1]] = [];',
+    });
+
+    test.pass('destruct assignment to prop of arr pattern where alias is number is valid', {
+      code: '[[1].c] = [];',
+    });
+    test.pass('noop-group edge case for destruct assignment to prop of arr pattern where alias is number is valid', {
+      code: '[([1].c)] = [];',
+    });
+
+    test.pass('destruct assignment to prop of nested object', {
+      code: '({ a: {prop: 1}.prop } = {})',
     });
 
     test.fail_strict('rest with await var', {

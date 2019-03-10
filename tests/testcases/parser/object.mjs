@@ -7474,6 +7474,10 @@ export default (describe, test) =>
       test.pass('more nested assignment should not copy rhs state', {
         code: '({a: {x = true} = true} = y)',
       });
+
+      test.pass('rest that is member expression is assignable', {
+        code: '({...a.b} = c)',
+      });
     });
 
     describe('non-ident key with keyword value', _ => {
