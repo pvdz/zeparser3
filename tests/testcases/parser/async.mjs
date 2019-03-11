@@ -1218,7 +1218,19 @@ export default (describe, test) => describe('async keyword', function() {
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
 
-    test('dots with arrow must be rest which can not have init', {
+    test.fail('dots with arrow must be rest which can not have init 1', {
+      code: 'async (a, ...b+b=c) => a;',
+    });
+
+    test.fail('dots with arrow must be rest which can not have init 1', {
+      code: 'async (a, ...b=true) => a;',
+    });
+
+    test.fail('dots with arrow must be rest which can not have init 2', {
+      code: 'async (a, ...true=b) => a;',
+    });
+
+    test('dots with arrow must be rest which can not have init 3', {
       code: 'async (a, ...b=fail) => a;',
       throws: 'not destructible',
     });

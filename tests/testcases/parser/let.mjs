@@ -2,6 +2,7 @@ import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer';
 
 export default (describe, test) =>
   describe('let declaration', _ => {
+
     describe('binding generic', _ => {
       // for destructuring, these are the array pattern tests to check for all places where we'd want to check it:
       // let [] = x;
@@ -11950,6 +11951,25 @@ export default (describe, test) =>
 
         test.fail('ummmm no', {
           code: 'let ...x = y',
+        });
+
+        // Note: object rest can only be on an ident (this can be any pattern in assignment destructuring)
+        [
+          'let {...obj1,} = foo',
+          'let {...obj1,a} = foo',
+          'let {...obj1,...obj2} = foo',
+          'let {...(obj)} = foo',
+          'let {...(a,b)} = foo',
+          'let {...{a,b}} = foo',
+          'let {...[a,b]} = foo',
+        ].forEach((tcase, i) => {
+          test.fail('invalid obj rest case ' + i, {
+            code: tcase,
+          });
+        });
+
+        test.pass('another object destructuring case', {
+          code: 'let {...x} = y',
         });
       });
 

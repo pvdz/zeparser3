@@ -4253,9 +4253,17 @@ export default (describe, test) => describe('parens', _ => {
     });
 
     // TODO
-    // test('arrow with block cannot be lhs of binary expression', {
+    // test.fail('arrow with block cannot be lhs of binary expression', {
     //   code: 'a => {} + x',
     // });
+
+    test.fail('async arrow with param named true sans init', {
+      code: 'async (a, ...true) => a;',
+    });
+
+    test.fail('async arrow with param named true with init', {
+      code: 'async (a, ...true=fail) => a;',
+    });
   });
 });
 

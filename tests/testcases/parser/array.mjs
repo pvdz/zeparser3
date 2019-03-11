@@ -430,6 +430,7 @@ export default (describe, test) =>
     });
 
     describe('destructuring', _ => {
+
       test('one var, no init, semi', {
         code: '[foo] = arr;',
         ast: {
@@ -2576,6 +2577,22 @@ export default (describe, test) =>
 
       test.pass('rest that is member expression is assignable', {
         code: '[...a.b] = c',
+      });
+
+      test.pass('spread an assignment in array', {
+        code: '([...x=y])',
+      });
+
+      test.fail('assignment destruct rest an assignment in array', {
+        code: '([...x=y]) = z',
+      });
+
+      test.fail('arrow destruct rest an assignment in array', {
+        code: '([...x=y]) => z',
+      });
+
+      test.fail('let destruct rest an assignment in array', {
+        code: 'let [...x=y] = z',
       });
     });
 

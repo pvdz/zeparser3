@@ -3281,7 +3281,16 @@ export default (describe, test) =>
 
         test.fail('param with array rest in obj', {
           code: 'function f({...[a, b]}){}',
-          desc: 'illegal because obj desturcturing only allows ident'
+          desc: 'illegal because obj destructuring only allows ident'
+        });
+
+        test.fail('param with obj rest in obj', {
+          code: 'function f({...{a: b}}){}',
+          desc: 'illegal because obj destructuring only allows ident'
+        });
+
+        test.fail('param with member rest in obj', {
+          code: 'function f({...a.b}){}',
         });
 
         test.pass('param with ident rest in obj', {

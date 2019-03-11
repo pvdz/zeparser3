@@ -4126,7 +4126,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             return 'Await is illegal outside of async body with module goal';
           } else {
             // in sloppy mode you cant use it inside an async function (and inside params defaults of arrows)
-            if (hasAnyFlag(lexerFlags, LF_IN_ASYNC)) THROW('Await not allowed here');
+            if (hasAnyFlag(lexerFlags, LF_IN_ASYNC)) return 'Await not allowed as ident here';
           }
         }
         return IS_ASSIGNABLE | ASSIGNABLE_HAD_AWAIT_VARNAME;
@@ -6343,7 +6343,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - if assignable/compoundable then the ident must do a binding check
         // - in all other cases the binding must be a valid value ident (including true, false, typeof, etc)
         //   - some valid idents can not be assigned (`true`, `typeof`, etc) and are not destructible, not assignable
-
         // first scan next token to see what potential checks we need to apply (wrt the above comments)
         const identToken = curtok;
         skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
@@ -7655,7 +7654,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // Objects:
     // https://tc39.github.io/ecma262/#prod-BindingRestProperty
-    // can only be idents
+    // can only be idents if bindingType is not NONE (same as array in assignment)
 
     // Bindings, Args, Destructurings: in no production is rest allowing an init:
     // var
@@ -7681,42 +7680,70 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let destructible = MIGHT_DESTRUCT;
     let assignable = initAssignable(); // required for parsing the tail of the arg
-
     if (curtype === $IDENT) {
       // - `[...x];`
       // - `[...x/y];`
       // - `[...x, y];`       // cant destruct (array rest must be last)
       // - `[...this, y];`    // cant destruct (array rest must be last)
+      // - `{...x};`
+      // - `{...x/y};`
+      // - `{...x, y};`       // cant destruct (obj rest must be last)
+      // - `{...this, y};`    // cant destruct (obj rest must be last)
 
       // - `async(...x/y);`   // async call
 
       // basically three ways this can be followed up (not, arrow, assign)
       // - `[...x];`          // ok
-      // - `[...x] => y;`     // ok
+      // - `{...x};`          // ok
+      // - `([...x]) => y;`   // ok
+      // - `({...x}) => y;`   // ok
       // - `[...x] = y;`      // ok ("destructuring assignment")
+      // - `{...x} = y;`      // ok ("destructuring assignment")
       // - `[...this];`       // ok
+      // - `{...this};`       // ok
       // - `[...this] = x;`   // bad
-      // - `[...this] => x;`  // bad
+      // - `{...this} = x;`   // bad
+      // - `([...this]) => x;`  // bad
+      // - `({...this}) => x;`  // bad
 
       // - `[...new x];`      // ok, cannot destruct
+      // - `{...new x};`      // ok, cannot destruct
       // - `[...new];`        // bad
+      // - `{...new};`        // bad
       // - `[...(x)];`        // ok, not arrowable
-      // - `[...(x,y)];`      // ok, cannot destruct
+      // - `{...(x)};`        // ok, not arrowable
+      // - `[...(x,y)];`      // ok (!)
+      // - `{...(x,y)};`      // ok, cannot destruct
+      // - `[...x = x];`      // (valid but never destructible)
+      // - `{...x = x};`      // (valid but never destructible)
 
-      // - `[...x = x];` (valid but never destructible)
       // don't update destructible here. assignment is handled at the end of this function (!)
-      // TODO: what about `([...x=y])`? this shouldn't throw, just check and update destructible
 
       let identToken = curtok;
+      let assignableOrErrorMsg = nonFatalBindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
       skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
       let assignBefore = curtok.str === '=';
       let willBeSimple = curc === closingCharOrd || curc === $$COMMA_2C || assignBefore;
+      if (willBeSimple && !isAssignable(assignableOrErrorMsg)) {
+        // - `[...await] = obj`
+        // - `[...this];`
+        destructible |= CANT_DESTRUCT;
+      }
+      if (!willBeSimple && closingCharOrd === $$CURLY_R_7D && bindingType !== BINDING_TYPE_NONE) {
+        // - `function f({...a.b}){}`
+        THROW('The rest argument of an object binding pattern must always be a simple ident');
+      }
       assignable = parseValueAfterIdent(lexerFlags, identToken, bindingType, ALLOW_ASSIGNMENT, astProp);
       ASSERT(!assignBefore || curtok.str === '=', 'parseValueAfterIdent should not consume the assignment');
       let assignAfter = curtok.str === '=';
       if (curc !== $$COMMA_2C && curc !== closingCharOrd) {
         if (assignAfter) {
-          if (notAssignable(assignable)) THROW('Tried to assign to a value that was not assignable in arr lit/patt');
+          // - `async (a, ...b=fail) => a;`
+          // - `[x, y, ...z = arr]`
+          if (notAssignable(assignable)) {
+            // - `async (a, ...true=fail) => a;`
+            THROW('Tried to assign to a value that was not assignable in arr/obj lit/patt');
+          }
         }
         // this will parse the assignment too
         // note: rest cannot have an initializer so any suffix invalidates destructuring
@@ -7768,7 +7795,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible |= nowDestruct;
 
       // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
+      // (The object rest in any binding pattern can only be a simple ident)
       if (closingCharOrd === $$CURLY_R_7D) {
+        if (bindingType !== BINDING_TYPE_NONE) {
+          // - `function f({...[a, b]}){}`
+          THROW('The rest argument of an object binding pattern must always be a simple ident and not an object pattern');
+        }
         // - `({...[x] }) => {}`
         destructible |= DESTRUCT_ASSIGN_ONLY;
       }
@@ -7792,7 +7824,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       assignable = hasAllFlags(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
       destructible |= nowDestruct;
       // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
+      // (The object rest in any binding pattern can only be a simple ident)
       if (closingCharOrd === $$CURLY_R_7D) {
+        if (bindingType !== BINDING_TYPE_NONE) {
+          // - `let {...{a,b}} = foo`
+          THROW('The rest argument of an object binding pattern must always be a simple ident and not an array pattern');
+        }
         // - `({...{x} }) => {}`
         destructible |= DESTRUCT_ASSIGN_ONLY;
       }
@@ -7805,11 +7842,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else {
       // - `(...<expr>) => x`
       // - `function f(... <expr>) {}`
-
       // - `const [x] = y`
       // - `const [...,] = x`
       // - `let [..."foo"] = x`
-      if (bindingType !== BINDING_TYPE_NONE) THROW('The rest arg was not destructible as it can only apply to an identifier or array/object pattern arg');
+
+      if (bindingType !== BINDING_TYPE_NONE) {
+        // - `const {...[a]} = x`
+        // - `const {...{a}} = x`
+        // - `const {...a=b} = x`
+        // - `const {...a+b} = x`
+        THROW('The rest arg was not destructible as it can only apply to an identifier or array/object pattern arg');
+      }
 
       // - `[.../x//y]`
       // - `[.../x/g/y]`
