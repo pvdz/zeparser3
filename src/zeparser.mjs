@@ -3455,7 +3455,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         astProp = 'expression';
 
         if (!checkIdentReadable(lexerFlags, BINDING_TYPE_NONE, identToken)) THROW('Illegal keyword encountered; is not a value [' + identToken.str + ']');
-        assignable = nonFatalBindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
+        assignable = fatalBindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
         if (notAssignable(assignable)) {
           // just a nice error. can/will probably clean this up later. probably.
           if (identName === 'arguments' || identName === 'eval') {
@@ -6379,9 +6379,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - [x, z]
           // - [this]      note: must have ThisExpression in ast
 
+          let identAssignableOrErrorMsg = nonFatalBindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
+          // I guess we still need to parse it "properly" because something like `new` could just be a syntax error now
+          // Not sure whether we care about the assignable that this call returns, though. We already have the above.
           let nowAssignable = parseValueHeadBodyAfterIdent(lexerFlags, identToken, bindingType, ALLOW_ASSIGNMENT, astProp);
           assignableYieldAwaitState |= nowAssignable;
-          if (notAssignable(nowAssignable)) destructible |= CANT_DESTRUCT;
+          if (!isAssignable(identAssignableOrErrorMsg) || notAssignable(nowAssignable)) destructible |= CANT_DESTRUCT;
           else {
             SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
             addNameToExports(exportedNames, identToken.str);
@@ -7116,7 +7119,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // use the rhs of the colon as identToken now
       let identToken = curtok;
 
-      skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
+      let identAssignableOrErrMsg = nonFatalBindingAssignableIdentCheck(identToken, bindingType, lexerFlags);
 
       // - `{key: bar}`
       // - `{key: bar/x`
@@ -7124,26 +7127,42 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `{key: await /foo}`
       // - `{key: await /foo/}`
       // - `{key: await /foo/g}`
+      skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
 
+      // - `{key: bar = x}`
+      // - `{key: bar + x}`
+      // - `{key: bar.foo = x}`
+      // - `{key: bar.foo + x}`
       let wasAssign = curtok.str === '=';
-      let validExportSyntax = keyToken.type === $IDENT && (curc === $$CURLY_R_7D || curc === $$COMMA_2C || wasAssign);
+      // - `{key: bar}`
+      // - `{key: bar, koo: baa}`
+      let validExportSyntax = keyToken.type === $IDENT && (curc === $$CURLY_R_7D || curc === $$COMMA_2C);
       let valueAssignable = parseValueAfterIdent(lexerFlags, identToken, bindingType, ALLOW_ASSIGNMENT, 'value');
       assignableOnlyForYieldAwaitFlags |= valueAssignable;
       if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D) {
-        assignableOnlyForYieldAwaitFlags |= parseExpressionFromOp(lexerFlags, valueAssignable, 'value');
-        if (!wasAssign) destructible |= CANT_DESTRUCT;
+        // - `({x:y;a:b})`
+        let rhsAssignable = parseExpressionFromOp(lexerFlags, valueAssignable, 'value');
+        assignableOnlyForYieldAwaitFlags |= rhsAssignable;
+        if (!wasAssign && !isAssignable(rhsAssignable)) {
+          // - `({foo: true / false});`
+          destructible |= CANT_DESTRUCT;
+        }
       }
       else if (notAssignable(valueAssignable))  {
-        if (wasAssign) THROW('Tried to assign to a value that was not assignable in obj lit/patt');
+        // - `[...{a: true} = c]`
+        // - `({ *g1() {   return {x: yield}  }})`
+        // - `({x:function(){"use strict";}})`
         destructible |= CANT_DESTRUCT;
       }
       else if (validExportSyntax) {
+        // - `[a, {b:d}, c] = obj`
         // If this isn't an export of some kind then the exportedNames and bindings are null so don't worry :)
         SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
         addNameToExports(exportedNames, identToken.str);
         addBindingToExports(exportedBindings, identToken.str);
       } else {
         // It is assignable but not simple so it is only destructible in assignments
+        // - `[...{a: b.b} = c]`
         destructible |= DESTRUCT_ASSIGN_ONLY;
       }
     }
@@ -7283,7 +7302,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else {
         // must throw for reserved words but binding check also checks for `eval`
         // and `arguments` which are not reserved and which would be allowed here
-        // TODO: yield and await as var names here are not propagated to caller...
+        // Since this is an assignment the `yield` and `await` checks are implicitly done when doing binding name checks
         fatalBindingIdentCheck(identToken, bindingType, lexerFlags);
       }
       SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
@@ -8060,7 +8079,7 @@ function isTemplateStart(curtype) {
 
 function D_DEBUG(d) {
   if (d === 0) {
-    return '(d)=MIGHT_DESTRUCT';
+    return 'D=MIGHT_DESTRUCT';
   }
 
   let arr = [];
@@ -8113,7 +8132,7 @@ function D_DEBUG(d) {
     _THROW('D_DEBUG: unknown flags left:', d.toString(2));
   }
 
-  return arr.join(', ');
+  return 'D='+arr.join(', ');
 }
 
 // </BODY>

@@ -1965,6 +1965,11 @@ export default (describe, test) =>
       code: '({ *g1() {   [yield 1]  }})',
     });
 
+    test.fail('destructure into yield while it is considered a keyword', {
+      code: 'function *f(){  ({yield} = x)  }',
+      desc: 'can never assign to yield-keyword, not even destruct',
+    });
+
     test.fail_strict('yield as shorthand object destruct assign in global', {
       code: '({yield} = x)',
       desc: 'in sloppy this is fine',

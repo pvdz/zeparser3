@@ -80,6 +80,41 @@ export default (describe, test) =>
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
     });
 
+    test.fail('destructuring with default to keyword', {
+      code: '({x:true = 5})',
+    });
+    test.fail('second attempt at desturcturing with default to keyword', {
+      code: '[...{a: true=x} = c]',
+    });
+    test.fail('second.2 attempt at desturcturing with default to keyword', {
+      code: '[...{a: function=x} = c]',
+    });
+    test.fail('third attempt at desturcturing with default to keyword', {
+      code: '[...{true} = c]',
+    });
+    test.fail('4th attempt at desturcturing with default to keyword', {
+      code: '[...{a: true=x} = c]',
+    });
+    test.fail('5th attempt at desturcturing with default to keyword', {
+      code: '[...{true=x} = c]',
+    });
+
+    test.fail('6th destructuring with default to keyword', {
+      code: '({x:0 = 5})',
+    });
+    test.fail('7yh attempt at desturcturing with default to keyword', {
+      code: '[...{a: 0} = c]',
+    });
+    test.fail('8th attempt at desturcturing with default to keyword', {
+      code: '[...{0} = c]',
+    });
+    test.fail('9th attempt at desturcturing with default to keyword', {
+      code: '[...{a: 0=x} = c]',
+    });
+    test.fail('10th attempt at desturcturing with default to keyword', {
+      code: '[...{0=x} = c]',
+    });
+
     test('object with computed property inside array', {
       code: '[a, {[b]:d}, c] = obj',
       ast: {

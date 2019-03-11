@@ -11151,6 +11151,14 @@ export default (describe, test) =>
     test.fail('must have init both vars', {
       code: 'const foo, bar;',
     });
+
+    test.fail('let in destructuring', {
+      code: 'const [a, let, b] = [1, 2, 3];',
+    });
+
+    test.fail('let in destructed prop name', {
+      code: 'const {let} = 1;',
+    });
   });
 
 // TODO: const probably has some constant-specific rules to test from the parser's perspective?
