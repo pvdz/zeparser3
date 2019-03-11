@@ -3274,6 +3274,19 @@ export default (describe, test) =>
             });
           });
         });
+
+        test.pass('param with nested array rest', {
+          code: 'function f([...[a, b]]){}',
+        });
+
+        test.fail('param with array rest in obj', {
+          code: 'function f({...[a, b]}){}',
+          desc: 'illegal because obj desturcturing only allows ident'
+        });
+
+        test.pass('param with ident rest in obj', {
+          code: 'function f({...a}){}',
+        });
       });
     });
 

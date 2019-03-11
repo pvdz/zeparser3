@@ -7768,7 +7768,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible |= nowDestruct;
 
       // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
-      if (closingCharOrd === $$CURLY_R_7D) destructible |= DESTRUCT_ASSIGN_ONLY;
+      if (closingCharOrd === $$CURLY_R_7D) {
+        // - `({...[x] }) => {}`
+        destructible |= DESTRUCT_ASSIGN_ONLY;
+      }
     }
     else if (curc === $$CURLY_L_7B) {
       // - `(...{x}) => x`
@@ -7789,7 +7792,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       assignable = hasAllFlags(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
       destructible |= nowDestruct;
       // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
-      if (closingCharOrd === $$CURLY_R_7D) destructible |= DESTRUCT_ASSIGN_ONLY;
+      if (closingCharOrd === $$CURLY_R_7D) {
+        // - `({...{x} }) => {}`
+        destructible |= DESTRUCT_ASSIGN_ONLY;
+      }
     }
     else if (curc === closingCharOrd) {
       // `[...]`
