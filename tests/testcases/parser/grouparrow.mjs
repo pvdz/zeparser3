@@ -3247,6 +3247,27 @@ export default (describe, test) => describe('parens', _ => {
         desc: 'would be valid in group; `[...x.y];`',
         throws: 'illegal',
       });
+
+      [
+        '({...(obj)}) => {}',
+        '({...(a,b)}) => {}',
+        '({...{a,b}}) => {}',
+        '({...[a,b]}) => {}',
+      ].forEach((tcase,i) => {
+        test.fail('bad arrow destruct of obj case ' + i, {
+          code: tcase,
+        });
+      });
+      [
+        '({a:b,...obj}) => {}',
+        '({...obj} = {}) => {}',
+        '({...(a,b),c})',
+        '({...a,b,c})',
+      ].forEach((tcase,i) => {
+        test.pass('bad arrow destruct of obj case ' + i, {
+          code: tcase,
+        });
+      });
     });
 
     test('non-destructible should throw when attempted anyways', {

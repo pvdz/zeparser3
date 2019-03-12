@@ -7802,7 +7802,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('The rest argument of an object binding pattern must always be a simple ident and not an object pattern');
         }
         // - `({...[x] }) => {}`
-        destructible |= DESTRUCT_ASSIGN_ONLY;
+        destructible |= CANT_DESTRUCT;
       }
     }
     else if (curc === $$CURLY_L_7B) {
@@ -7831,7 +7831,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('The rest argument of an object binding pattern must always be a simple ident and not an array pattern');
         }
         // - `({...{x} }) => {}`
-        destructible |= DESTRUCT_ASSIGN_ONLY;
+        destructible |= CANT_DESTRUCT;
       }
     }
     else if (curc === closingCharOrd) {
@@ -7919,8 +7919,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
 
-      // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
-      if (closingCharOrd === $$CURLY_R_7D) destructible |= DESTRUCT_ASSIGN_ONLY;
+      // A param object pattern can only have a rest with ident, this was not just an ident, cant destruct to a rest
+      if (closingCharOrd === $$CURLY_R_7D && !isAssignable(assignable)) destructible |= CANT_DESTRUCT;
 
       // TODO: come up with test cases that cover these checks
       if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;

@@ -8030,13 +8030,11 @@ export default (describe, test) =>
             code: '({...a+b} = x)',
           });
 
-          test.pass('object array is legal for assignment (not arrow)', {
-            desc: 'valid per https://tc39.github.io/ecma262/#prod-AssignmentRestProperty',
+          test.fail('object array is illegal for assign destruct', {
             code: '({...[a, b]} = x)',
           });
 
-          test.pass('object object is legal for assignment (not arrow)', {
-            desc: 'valid per https://tc39.github.io/ecma262/#prod-AssignmentRestProperty',
+          test.fail('object object is illegal for assign destruct', {
             code: '({...{a, b}} = x)',
           });
 

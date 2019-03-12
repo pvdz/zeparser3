@@ -979,4 +979,25 @@ export default (describe, test) =>
       },
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
+
+    // https://tc39.github.io/ecma262/#sec-destructuring-assignment-static-semantics-early-errors
+    // It is a Syntax Error if LeftHandSideExpression is neither an ObjectLiteral nor an ArrayLiteral and AssignmentTargetType(LeftHandSideExpression) is not simple.
+    [
+      '({...obj1,} = foo)',
+      '({...obj1,a} = foo)',
+      '({...obj1,...obj2} = foo)',
+      '({...(a,b)} = foo)',
+    ].forEach((tcase,i) => {
+      test.fail('bad destruct assign of obj case ' + i, {
+        code: tcase,
+      });
+    });
+    [
+      '({...(obj)} = foo)', // rest arg must be "simple" assignment. parenthesized expr is simple if its arg is. so ok.
+      '({...obj} = foo)',
+    ].forEach((tcase,i) => {
+      test.pass('good destruct assign of obj case ' + i, {
+        code: tcase,
+      });
+    });
   });
