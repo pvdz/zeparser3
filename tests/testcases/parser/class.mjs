@@ -164,6 +164,10 @@ export default (describe, test) =>
         desc: 'the name of the function is also considered strict mode so `let` is outlawed',
         tokens: [],
       });
+
+      test.fail('can not extend arrows because it is not a valid lhs', {
+        code: 'class x extends () => x {}',
+      });
     });
 
     describe('ident methods', _ => {
