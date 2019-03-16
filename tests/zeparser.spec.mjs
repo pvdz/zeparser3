@@ -8,6 +8,14 @@ if (!(process.version.slice(1, 3) >= 10)) throw new Error('Requires node 10+, di
 
 Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
+const INPUT_OVERRIDE = process.argv.includes('-i')
+  ? (
+    [
+      process.argv.slice(process.argv.indexOf('-i')+1).join(' '),
+      process.argv = process.argv.slice(0, process.argv.indexOf('-i')),
+    ][0]
+  )
+  : '';
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
 const SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
@@ -77,6 +85,8 @@ files.sort((a, b) => {
 
 let cases = [];
 let descStack = [];
+
+if (INPUT_OVERRIDE) cases.push({obj: {code: INPUT_OVERRIDE}});
 
 let checkAST = true;
 let parserDesc = '';
@@ -638,7 +648,7 @@ const start = async () => {
 
   try {
     parsers.forEach(({parser, hasAst, desc}, i) => {
-      console.log('----->', parser, hasAst, desc);
+      // console.log('----->', parser, hasAst, desc);
       checkAST = hasAst;
       parserDesc = (parsers.length ? '##' + desc : '') + '## ' + desc;
       all(parser, cases);
