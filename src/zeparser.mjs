@@ -4357,7 +4357,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseExpressionFromOp.length === arguments.length, 'arg count');
     ASSERT(typeof assignable === 'number', 'assignable num');
 
-    if (isAssignable(assignable) && isAssignBinOp()) {
+    if (isAssignBinOp()) {
+      if (!isAssignable(assignable)) {
+        THROW('Cannot assign to lhs because it is not a valid assignment target');
+      }
       assignable = parseExpressionFromAssignmentOp(lexerFlags, assignable, astProp);
     } else {
       let first = true;
@@ -4383,6 +4386,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseExpressionFromAssignmentOp(lexerFlags, lhsAssignable, astProp) {
     // <SCRUB AST>
+    // Conditionally convert the lhs in the AST to a Pattern
     if (curc === $$IS_3D && curtok.str === '=') {
       let node = _path[_path.length - 1][astProp];
       if (Array.isArray(node)) node = node[node.length - 1];
@@ -4393,13 +4397,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // </SCRUB AST>
 
     // Note: assignment to object/array is caught elsewhere
-
     AST_wrapClosed(astProp, 'AssignmentExpression', 'left');
     AST_set('operator', curtok.str);
     skipRex(lexerFlags);
+
     let rhsAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, 'right');
     AST_close('AssignmentExpression');
 
+    // Keep the assignability of the rhs (x=y and x=y=z but not x=5 and x=5=y)
     return mergeAssignable(rhsAssignable, lhsAssignable);
   }
   function parseExpressionFromBinaryOp(lexerFlags, astProp) {
@@ -5834,6 +5839,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         destructible |= CANT_DESTRUCT;
 
         let exprAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, astProp);
+        // - `((a)) = b;`
         assignable = mergeAssignable(exprAssignable, assignable);
         if (curc === $$COMMA_2C) {
           if (!toplevelComma) {
@@ -5964,6 +5970,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('The group had to be destructed but was not followed by an arrow (this is an invalid assignment target)');
     }
     else if (curtok.str === '=' || isCompoundAssignment(curtok.str)) {
+      // Note: the assignment is not parsed here. This block only applies some group-specific assignment edge case checks.
+      // - `(x) = (y) = z`
+      // - `(x) = (1) = z`  // bad
+
       // cannot assign to destructible since that is only allowed as AssignmentPattern and a group is not exempted
       // can only assign to a grouped reference when expr is "IsValidSimpleAssignmentTarget";
       // ONLY SUCH CASES ARE:
@@ -5972,10 +5982,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - (foo[x])
       // Compound expression is also valid
       // - (foo) += 3
-      if (allowAssignment === NO_ASSIGNMENT) THROW('Was parsing a value that could not be AssignmentExpression but found an arrow');
+      if (allowAssignment === NO_ASSIGNMENT) THROW('Was parsing a value that could not be AssignmentExpression but found an assignment after the group');
       if (toplevelComma) THROW('Cannot assign to list of expressions in a group');
       // TODO: need to make sure we can't do `(eval) = x` and `(arguments) = x` in strict mode (only); it's an explicit error
-      if (notAssignable(assignable)) THROW('Invalid assignment because group does not wrap a valid var name or just a property access');
+      if (notAssignable(assignable)) THROW('Invalid assignment because group does not wrap a valid assignment target');
 
       AST_wrapClosed(rootAstProp, 'AssignmentExpression', 'left');
       AST_set('operator', curtok.str);

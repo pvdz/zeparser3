@@ -987,6 +987,7 @@ export default (describe, test) =>
       '({...obj1,a} = foo)',
       '({...obj1,...obj2} = foo)',
       '({...(a,b)} = foo)',
+      '({...{}} = {})',
     ].forEach((tcase,i) => {
       test.fail('bad destruct assign of obj case ' + i, {
         code: tcase,
@@ -998,6 +999,41 @@ export default (describe, test) =>
     ].forEach((tcase,i) => {
       test.pass('good destruct assign of obj case ' + i, {
         code: tcase,
+      });
+    });
+
+    describe('assignment to number', _ => {
+
+      test.fail('base case should fail', {
+        code: '1 = x',
+      });
+
+      test.fail('wrapped in noop-parens should fail', {
+        code: '(1) = x',
+      });
+
+      test.fail('wrapped in noop-parens in the middle should fail', {
+        code: 'y = (1) = x',
+      });
+
+      test.fail('wrapped in noop-parens in the middle with left wrapped too should fail', {
+        code: '(y) = (1) = x',
+      });
+
+      test.fail('wrapped in noop-parens in the left should fail', {
+        code: '(1) = y = x',
+      });
+
+      test.fail('wrapped in noop-parens in the left with middle wrapped too should fail', {
+        code: '(1) = (y) = x',
+      });
+
+      test.fail('obj prop value; base case should fail', {
+        code: '({a: 1 = x })',
+      });
+
+      test.fail('obj prop value; wrapped in noop-parens should fail', {
+        code: '({a: (1) = x })',
       });
     });
   });

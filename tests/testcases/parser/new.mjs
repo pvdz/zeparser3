@@ -563,16 +563,12 @@ export default (describe, test) =>
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
 
-        test('are not assignable', {
+        test.fail('are not assignable', {
           code: 'new x() = y',
-          throws: 'Unable to ASI',
-          tokens: [],
         });
 
-        test('can not have prefix inc on its own', {
+        test.fail('can not have prefix inc on its own', {
           code: '++new x()',
-          throws: 'Cannot inc/dec a non-assignable value',
-          tokens: [],
         });
 
         test('can have prefix inc with property', {
