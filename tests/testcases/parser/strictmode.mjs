@@ -1078,52 +1078,156 @@ export default (describe, test) =>
 
       // these tests should cover cases where the header is fine in sloppy mode and throw when finding a use strict in the body
 
-      test.fail_strict('eval name w/o directive', {
-        code: 'function eval(){ }',
-      });
+      [
+        // Explicitly forbidden binding names in strict mode
+        'eval', 'arguments',
+        // Idents that are only keywords in strict mode
+        'package',
+        // Yield is always the YieldExpression in strict mode
+        'yield',
+      ].forEach(ident => {
+        describe('ident = [' + ident + ']', _ => {
 
-      test.fail('eval name w directive', {
-        code: 'function eval(){ "use strict"; }',
-      });
+          describe('function decl', _ => {
 
-      test.fail_strict('arguments name w/o directive', {
-        code: 'function arguments(){ }',
-      });
+            test.fail_strict('as func name w/o directive', {
+              code: 'function '+ident+'(){ }',
+            });
 
-      test.fail('arguments name w directive', {
-        code: 'function arguments(){ "use strict"; }',
-      });
+            test.fail('as func name w directive', {
+              code: 'function '+ident+'(){ "use strict"; }',
+            });
 
-      test.fail_strict('eval as arg w/o directive', {
-        code: 'function f(eval){ }',
-      });
+            test.fail_strict('as param name w/o directive', {
+              code: 'function f('+ident+'){ }',
+            });
 
-      test.fail('eval as arg w directive', {
-        code: 'function f(eval){ "use strict"; }',
-      });
+            test.fail('as param name w directive', {
+              code: 'function f('+ident+'){ "use strict"; }',
+            });
 
-      test.fail_strict('arguments as arg w/o directive', {
-        code: 'function f(arguments){ }',
-      });
+            test.fail_strict('assigned to in param default w/o directive', {
+              code: 'function f(x='+ident+'=10){ }',
+              desc: 'the default causes the error, not the usage, but whatever',
+            });
 
-      test.fail('arguments as arg w directive', {
-        code: 'function f(arguments){ "use strict"; }',
-      });
+            test.fail('assigned to in param default w/o directive', {
+              code: 'function f(x='+ident+'=10){ "use strict"; }',
+              desc: 'the default causes the error, not the usage, but whatever',
+            });
+          });
 
-      test.fail_strict('eval as arg init w/o directive', {
-        code: 'function f(x=eval=10){ }',
-      });
+          describe('function expr', _ => {
 
-      test.fail('eval as arg init w directive', {
-        code: 'function f(x=eval=10){ "use strict"; }',
-      });
+            test.fail_strict('as func name w/o directive', {
+              code: 'f = function '+ident+'(){ }',
+            });
 
-      test.fail_strict('arguments as arg init w/o directive', {
-        code: 'function f(x=arguments=10){ }',
-      });
+            test.fail('as func name w directive', {
+              code: 'f = function '+ident+'(){ "use strict"; }',
+            });
 
-      test.fail('arguments as arg init w directive', {
-        code: 'function f(x=arguments=10){ "use strict"; }',
+            test.fail_strict('as param name w/o directive', {
+              code: 'f = function f('+ident+'){ }',
+            });
+
+            test.fail('as param name w directive', {
+              code: 'f = function f('+ident+'){ "use strict"; }',
+            });
+
+            test.fail_strict('assigned to in param default w/o directive', {
+              code: 'f = function f(x='+ident+'=10){ }',
+              desc: 'the default causes the error, not the usage, but whatever',
+            });
+
+            test.fail('assigned to in param default w/o directive', {
+              code: 'f = function f(x='+ident+'=10){ "use strict"; }',
+              desc: 'the default (always) causes the error, not the usage, but whatever',
+            });
+          });
+
+          describe('arrow', _ => {
+
+            test.fail_strict('as param name w/o directive', {
+              code: '('+ident+') => {}',
+            });
+
+            test.fail('as param name w directive', {
+              code: 'f = ('+ident+') => { "use strict"; }',
+            });
+
+            test.fail_strict('assigned to in param default w/o directive', {
+              code: '(x='+ident+'=10) => { }',
+              desc: 'the default causes the error, not the usage, but whatever',
+            });
+
+            test.fail('assigned to in param default w/o directive', {
+              code: 'f(x='+ident+'=10) => { "use strict"; }',
+              desc: 'the default (always) causes the error, not the usage, but whatever',
+            });
+          });
+
+          describe('obj method', _ => {
+            // Note: method names are irrelevant in this context
+
+            test.pass('as method name w/o directive', {
+              code: 'o = {'+ident+'(){ }}',
+            });
+
+            test.pass('as method name w directive', {
+              code: 'o = {'+ident+'(){ "use strict"; }}',
+            });
+
+            test.fail_strict('as param name w/o directive', {
+              code: 'o = {foo('+ident+'){ }}',
+            });
+
+            test.fail('as param name w directive', {
+              code: 'o = {foo('+ident+'){ "use strict"; }}',
+            });
+
+            test.fail_strict('assigned to in param default w/o directive', {
+              code: 'o = {foo(x='+ident+'=y){ }}',
+              desc: 'the default causes the error, not the usage, but whatever',
+            });
+
+            test.fail('assigned to in param default w/o directive', {
+              code: 'o = {foo(x='+ident+'=y){ "use strict"; }}',
+              desc: 'the default (always) causes the error, not the usage, but whatever',
+            });
+          });
+
+          describe('class method', _ => {
+            // Note: method names are irrelevant in this context
+            // Note: classes are always strict so these tests are a liiiitle redundant
+
+            test.pass('as method name w/o directive', {
+              code: 'class c {'+ident+'(){ }}',
+            });
+
+            test.pass('as method name w directive', {
+              code: 'class c {'+ident+'(){ "use strict"; }}',
+            });
+
+            test.fail('as param name w/o directive', {
+              code: 'class c {foo('+ident+'){ }}',
+            });
+
+            test.fail('as param name w directive', {
+              code: 'class c {foo('+ident+'){ "use strict"; }}',
+            });
+
+            test.fail('assigned to in param default w/o directive', {
+              code: 'class c {foo(x='+ident+'=y){ }}',
+              desc: 'the default causes the error, not the usage, but whatever',
+            });
+
+            test.fail('assigned to in param default w/o directive', {
+              code: 'class c {foo(x='+ident+'=y){ "use strict"; }}',
+              desc: 'the default (always) causes the error, not the usage, but whatever',
+            });
+          });
+        });
       });
     });
   });

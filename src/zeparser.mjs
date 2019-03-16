@@ -1290,8 +1290,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // and IsSimpleParameterList is only true the params are "es5" (no destructuring, no defaults, just idents)
         THROW('Can only declare use strict if func params are "simple"');
       }
-      if (functionNameTokenToVerify && (functionNameTokenToVerify.str === 'eval' || functionNameTokenToVerify.str === 'arguments')) {
-        THROW('Can not use `eval` or `arguments` for a strict mode function');
+      if (functionNameTokenToVerify) {
+        // the binding type is not used in conjunction with strict mode
+        fatalBindingIdentCheck(functionNameTokenToVerify, BINDING_TYPE_VAR, lexerFlags | LF_STRICT_MODE);
       }
     }
 
@@ -1561,6 +1562,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // either a function scope or the goal is script. Otherwise it is to be considered a lexical (let) binding.
       let nameBindingType = (isFuncDecl === IS_FUNC_DECL && ((hasNoFlag(lexerFlags, LF_IN_GLOBAL) || goalMode === GOAL_SCRIPT) && hasAllFlags(lexerFlags, LF_IN_SCOPE_ROOT))) ? BINDING_TYPE_VAR : BINDING_TYPE_LET;
 
+      // TODO: this func could return another state: "valid in sloppy mode, invalid in strict mode"
+      //       that would be better because currently the checks have to run twice in infrequent the worst case
       fatalBindingIdentCheck(curtok, nameBindingType, bindingFlags);
       name = curtok.str;
       if (isFunctionStatement) {
@@ -1578,7 +1581,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       innerScoop = SCOPE_addLexTo(innerScoop, BLOCK_SCOPE, 'parseFunctionAfterKeyword_hide_func_name');
       ASSERT(innerScoop._ = 'func scope');
 
-      functionNameTokenToVerify = curtok; // basically if this was strict mode and bad name, the binding check would throw already
+      functionNameTokenToVerify = curtok; // if not strict mode yet but this func has a directive, check it again
       AST_setIdent('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (isFuncDecl === IS_FUNC_DECL && !isIdentOptional) {
@@ -3779,7 +3782,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       // normal
-      fatalBindingIdentCheck(curtok, bindingType, lexerFlags);
+      let bindingTok = curtok;
+      fatalBindingIdentCheck(bindingTok, bindingType, lexerFlags);
       SCOPE_addBinding(
         lexerFlags,
         scoop,
@@ -3793,12 +3797,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let identToken = curtok;
       AST_setIdent(astProp, curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
-      if (identToken.str !== 'eval' && identToken.str !== 'arguments') {
-        // The name `eval` and `arguments` are illegal in param names in strict mode. However, the function body could
-        // retroactively enforce this so we won't know right now. We do already have to scan whether or not the params
-        // are "simple" for the same sole reason that if the body has a strict mode header that an error is thrown so
-        // we'll just piggyback on that. This does make the thrown error a bit conflated :( Maybe we can fix that later.
 
+      if (
+        hasNoFlag(lexerFlags, LF_STRICT_MODE) &&
+        !isAssignable(nonFatalBindingAssignableIdentCheck(bindingTok, bindingType, lexerFlags | LF_STRICT_MODE))
+      ) {
+        // In this case we are in sloppy mode but the name would fail in strict mode. It is still possible for this
+        // function to become strict mode if it turns out it has the "use strict" flag. So check for that, and throw an
+        // error when we discover the function to be strict after all.
+
+        // - `function foo(eval) { "use strict"; }`
+        // - `function foo(package) { "use strict"; }`
+      } else {
         wasSimple = ARG_WAS_SIMPLE; // could still be complex if init
       }
     }
@@ -3874,7 +3884,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function fatalBindingIdentCheck(identToken, bindingType, lexerFlags) {
     ASSERT(fatalBindingIdentCheck.length === arguments.length, 'arg count');
-    ASSERT(identToken.type === $IDENT, 'ident check on ident tokens ok');
+    ASSERT(identToken.type === $IDENT, 'ident check on ident tokens ok', identToken);
     let str = nonFatalBindingIdentCheck(identToken, bindingType, lexerFlags);
     if (str !== '') THROW(`Cannot use this name (${identToken.str}) as a variable name because: ${str}`);
   }
