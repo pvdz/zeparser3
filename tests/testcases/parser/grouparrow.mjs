@@ -3421,6 +3421,22 @@ export default (describe, test) => describe('parens', _ => {
         code: '({ident: [foo, bar]/x/g}) => x',
         throws: 'not destructible',
       });
+
+      test.fail('arr with numbers', {
+        code: '([0])=>0;',
+      });
+
+      test.fail('arr with numbers', {
+        code: '([0])=>0;',
+      });
+
+      test.fail('property is not arrowable', {
+        code: '({a:b[0]}) => x',
+      });
+
+      test.fail('property wrapped in arrs is still not arrowable', {
+        code: '([[[[[[[[[[[[[[[[[[[[{a:b[0]}]]]]]]]]]]]]]]]]]]]])=>0;',
+      });
     });
 
     test('nested objects', {
