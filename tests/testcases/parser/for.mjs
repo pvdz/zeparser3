@@ -200,6 +200,81 @@ export default (describe, test) =>
       test.pass('you can have `in` inside the ternary', {
         code: 'for (true ? a in b : {}; false; ) ;',
       });
+
+      describe('destructuring non-binding cases', _ => {
+
+        test.pass('array that would be valid to destructure', {
+          code: 'for ([x];;);',
+        });
+
+        test.pass('array that would be valid to assign-destructure', {
+          code: 'for ([x.y];;);',
+        });
+
+        test.pass('array that would not be destructible', {
+          code: 'for ([x + y];;);',
+        });
+
+        test.pass('array+init that would be valid to destructure', {
+          code: 'for ([x] = z;;);',
+        });
+
+        test.pass('array+init that would be valid to assign-destructure', {
+          code: 'for ([x.y] = z;;);',
+        });
+
+        test.fail('array+init that would not be destructible', {
+          code: 'for ([x + y] = z;;);',
+        });
+
+        test.pass('object that would be valid to destructure', {
+          code: 'for ({x};;);',
+        });
+
+        test.pass('object that would be valid to assign-destructure', {
+          code: 'for ({x: a.b};;);',
+        });
+
+        test.pass('object that would not be destructible', {
+          code: 'for ({a: x + y};;);',
+        });
+
+        test.pass('object+init that would be valid to destructure', {
+          code: 'for ({x} = z;;);',
+        });
+
+        test.pass('object+init that would be valid to assign-destructure', {
+          code: 'for ({a: x.y} = z;;);',
+        });
+
+        test.fail('object+init that would not be destructible', {
+          code: 'for ({a: x + y} = z;;);',
+        });
+
+        test.pass('silly case with string property', {
+          code: 'for ("foo".bar;;);',
+        });
+
+        test.pass('silly case with string property and assignment', {
+          code: 'for ("foo".bar = x ;;);',
+        });
+
+        test.pass('silly good case with obj property', {
+          code: 'for ({}.bar ;;);',
+        });
+
+        test.pass('silly bad case with obj property and assignment', {
+          code: 'for ({}.bar = x ;;);',
+        });
+
+        test.pass('silly good case with arr property', {
+          code: 'for ([].bar ;;);',
+        });
+
+        test.pass('silly bad case with arr property and assignment', {
+          code: 'for ([].bar = x ;;);',
+        });
+      });
     });
 
     describe('var decls', _ => {
@@ -508,6 +583,7 @@ export default (describe, test) =>
     });
 
     describe('for-in', _ => {
+
       test('empty for-in', {
         code: 'for (a in b);',
         ast: {
@@ -1110,7 +1186,6 @@ export default (describe, test) =>
         tokens: true,
       });
 
-
       test('obj destructuring without binding', {
         code: 'for ({a: b.c} in d) e',
         desc: '{a: b.c} is destructible so should be fine as lhs of any for loop. note: the lhs must be a Pattern with `in` or `of`!',
@@ -1189,6 +1264,103 @@ export default (describe, test) =>
           ],
         },
         tokens: true,
+      });
+
+      test.fail('lhs cannot be an assignment', {
+        // https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors
+        // It is a Syntax Error if AssignmentTargetType of LeftHandSideExpression is not simple.
+        code: 'for (x = y in z) ;',
+      });
+
+      test.fail('lhs cannot be a paren wrapped assignment', {
+        // https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors
+        code: 'for ((x = y) in z) ;',
+      });
+
+      describe('destructuring edge cases', _ => {
+        // https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors
+        // "It is a Syntax Error if LeftHandSideExpression is either an ObjectLiteral or an ArrayLiteral and
+        // if LeftHandSideExpression is not covering an AssignmentPattern."
+
+        test.pass('array that would be valid to destructure', {
+          code: 'for ([x] in obj);',
+        });
+
+        test.pass('array that would be valid to assign-destructure', {
+          code: 'for ([x.y] in obj);',
+        });
+
+        test.fail('array that would not be destructible', {
+          code: 'for ([x + y] in obj);',
+        });
+
+        test.fail('array+init that would be valid to destructure', {
+          code: 'for ([x] = z in obj);',
+        });
+
+        test.fail('array+init that would be valid to assign-destructure', {
+          code: 'for ([x.y] = z in obj);',
+        });
+
+        test.fail('array+init that would not be destructible', {
+          code: 'for ([x + y] = z in obj);',
+        });
+
+        test.pass('object that would be valid to destructure', {
+          code: 'for ({x} in obj);',
+        });
+
+        test.pass('object that would be valid to assign-destructure', {
+          code: 'for ({x: a.b} in obj);',
+        });
+
+        test.fail('object that would not be destructible', {
+          code: 'for ({a: x + y} in obj);',
+        });
+
+        test.fail('object+init that would be valid to destructure', {
+          code: 'for ({x} = z in obj);',
+        });
+
+        test.fail('object+init that would be valid to assign-destructure', {
+          code: 'for ({a: x.y} = z in obj);',
+        });
+
+        test.fail('object+init that would not be destructible', {
+          code: 'for ({a: x + y} = z in obj);',
+        });
+
+        test.fail('let bound names cannot contain let', {
+          code: 'for (let [let] in obj);',
+        });
+
+        test.fail('const bound names cannot contain let', {
+          code: 'for (const [let] in obj);',
+        });
+
+        test.pass('silly good case with string property', {
+          code: 'for ("foo".bar in obj);',
+        });
+
+        test.fail('silly bad case with string property and assignment', {
+          code: 'for ("foo".bar = x in obj);',
+        });
+
+        test.pass('silly good case with obj property', {
+          code: 'for ({}.bar in obj);',
+        });
+
+        test.fail('silly bad case with obj property and assignment', {
+          code: 'for ({}.bar = x in obj);',
+        });
+
+        test.pass('silly good case with arr property', {
+          code: 'for ([].bar in obj);',
+        });
+
+        test.fail('silly bad case with arr property and assignment', {
+          code: 'for ([].bar = x in obj);',
+        });
       });
     });
 

@@ -2767,8 +2767,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // markers;
     // - semi (-> normal for)
-    // - of at operator time (-> for-of)
-    // - in at operator time (-> for-in)
+    // - `of` at operator time (-> for-of)
+    // - `in` at operator time (-> for-in)
     // - var initializer (-> normal for)
     // - more than one var declared (-> normal for)
     // - expression that cannot be a LeftHandSideExpression (-> normal for)
@@ -2797,17 +2797,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // TODO: confirm we do this;
     // > It is a Syntax Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
-
-    // TODO: see next quote; confirm the lhs has no initializer when parsing es6+, but allow in sloppy es7+
-    // > 13.7: Prior to ECMAScript 2015, an initialization expression could appear as part of the VariableDeclaration
-    // > that precedes the in keyword. In ECMAScript 2015, the ForBinding in that same position does not allow the
-    // > occurrence of such an initializer. In ECMAScript 2017, such an initializer is permitted only in non-strict code.
+    // And https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-assignmenttargettype
+    // clearly states the regular assignment itself is not a valid (so not a simple one either) assignment target
+    // (This doesn't prevent a=b=c because assignments are right-associative)
 
     // first parse a simple expression and check whether it's assignable (var or prop)
     let assignable = 0;
     let wasNotDecl = false;
     let emptyInit = false;
     let startedWithArrObj = false; // `for ([x] in y)` or `for ({x} of y)` etc. need this to turn lhs into Pattern.
+    let hadAssign = false;
     catchforofhack = false;
     if (curtype === $IDENT) {
       switch (curtok.str) {
@@ -2857,6 +2856,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         default:
           ASSERT(curtype === $IDENT, 'should be ident');
           assignable = parseValueHeadBodyIdent(lexerFlags | LF_IN_FOR_LHS, NOT_NEW_ARG, BINDING_TYPE_NONE, NO_ASSIGNMENT, astProp);
+          hadAssign = curc === $$IS_3D && curtok.str === '=';
           assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
           wasNotDecl = true;
       }
@@ -2871,8 +2871,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else {
       // - `for ("foo" `
+      // - `for ("foo";;); `
+      // - `for ("foo".x in y `
+      // - `for ("foo".x = y in y `
+      // - `for ({}.x in y `
+      // - `for ({}.x = y in y `
+      // - `for ([].x in y `
+      // - `for ([].x = y in y `
       startedWithArrObj = curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B;
-      assignable = parseValue(lexerFlags | LF_IN_FOR_LHS, ALLOW_ASSIGNMENT, NOT_NEW_ARG, astProp);
+      assignable = parseValue(lexerFlags | LF_IN_FOR_LHS, NO_ASSIGNMENT, NOT_NEW_ARG, astProp);
       wasNotDecl = true;
     }
 
@@ -2885,6 +2892,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       if (curtok.str === 'of') {
         if (catchforofhack) THROW('Encountered `var` declaration for a name used in catch binding which in web compat mode is still not allowed in a `for-of`');
+        if (hadAssign) THROW('The lhs of a `for-of` cannot have an assignment');
         if (startedWithArrObj) AST_destruct(astProp);
         AST_wrapClosed(astProp, 'ForOfStatement', 'left');
         if (notAssignable(assignable)) THROW('Left part of for-of must be assignable');
@@ -2897,6 +2905,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       if (awaitable) THROW('`for await` only accepts the `for-of` type');
       if (curtok.str === 'in') {
+        if (hadAssign) THROW('The lhs of a `for-in` cannot have an assignment');
         if (startedWithArrObj) AST_destruct(astProp);
         AST_wrapClosed(astProp, 'ForInStatement', 'left');
         if (notAssignable(assignable)) {
@@ -4666,7 +4675,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
-        let wasDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        let wasDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, allowAssignment ? PARSE_INIT : SKIP_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) {
           // fail: `({x=y});`
           // pass: `for ({x=y} in a) b;`
@@ -4698,7 +4707,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return NOT_ASSIGNABLE | assignable;
       }
       else if (curc === $$SQUARE_L_5B) {
-        let wasDestruct = parseArrayLiteralPattern(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        let wasDestruct = parseArrayLiteralPattern(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, allowAssignment ? PARSE_INIT : SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
 
         if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) {
           // TODO: what cases pass through here? can probably construct one using spread/rest
