@@ -2859,123 +2859,20 @@ export default (describe, test) => describe('parens', _ => {
       });
 
       describe('with block', _ => {
-        test('division', {
+
+        test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (div)', {
           code: '_ => {}\n/foo',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'BinaryExpression',
-                  left: {
-                    type: 'ArrowFunctionExpression',
-                    params: [{type: 'Identifier', name: '_'}],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {type: 'BlockStatement', body: []},
-                  },
-                  operator: '/',
-                  right: {type: 'Identifier', name: 'foo'},
-                },
-              },
-            ],
-          },
-          desc: `
-        this is a prelude to the regex test
-
-          MultiplicativeExpression(
-            ExponentiationExpression(
-              UnaryExpression(
-                UpdateExpression(
-                  LeftHandSideExpression(
-                    NewExpression(
-                      MemberExpression(
-                        MemberExpression(
-                          CoverParenthesizedExpressionAndArrowParameterList
-          )))))))))
-          /
-          foo
-        `,
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+          HAS_AST: true,
         });
 
-        test('sans flag', {
+        test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (regex no flag)', {
           code: '_ => {}\n/foo/',
-          throws: 'Expected to parse a value',
-          desc: `
-        The "arrow/foo" bit would parse as follows:
-
-          MultiplicativeExpression(
-            ExponentiationExpression(
-              UnaryExpression(
-                UpdateExpression(
-                  LeftHandSideExpression(
-                    NewExpression(
-                      MemberExpression(
-                        MemberExpression(
-                          CoverParenthesizedExpressionAndArrowParameterList
-          )))))))))
-          /
-          foo
-          /
-          {error} because missing rhs of second divison
-
-          And ASI explicitly fails because next line starts with forward slash (and the block can not parse as division)
-        `,
-          tokens: [],
+          HAS_AST: true,
         });
 
-        test('sans flag', {
+        test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (regex + flag)', {
           code: '_ => {}\n/foo/g',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'BinaryExpression',
-                  left: {
-                    type: 'BinaryExpression',
-                    left: {
-                      type: 'ArrowFunctionExpression',
-                      params: [{type: 'Identifier', name: '_'}],
-                      id: null,
-                      generator: false,
-                      async: false,
-                      expression: false,
-                      body: {type: 'BlockStatement', body: []},
-                    },
-                    operator: '/',
-                    right: {type: 'Identifier', name: 'foo'},
-                  },
-                  operator: '/',
-                  right: {type: 'Identifier', name: 'g'},
-                },
-              },
-            ],
-          },
-          desc: `
-        ASI explicitly fails because next line starts with forward slash, in effect the whole arrow is the lhs for the division (((_=>{})/foo)/g)
-
-          MultiplicativeExpression(
-            ExponentiationExpression(
-              UnaryExpression(
-                UpdateExpression(
-                  LeftHandSideExpression(
-                    NewExpression(
-                      MemberExpression(
-                        MemberExpression(
-                          CoverParenthesizedExpressionAndArrowParameterList
-          )))))))))
-          /
-          foo
-          /
-          g
-        `,
-          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+          HAS_AST: true,
         });
       });
     });
@@ -4289,17 +4186,79 @@ export default (describe, test) => describe('parens', _ => {
       });
     });
 
-    // TODO
-    // test.fail('arrow with block cannot be lhs of binary expression', {
-    //   code: 'a => {} + x',
-    // });
+    describe('arrows is not a normal expression value', _ => {
 
-    test.fail('async arrow with param named true sans init', {
-      code: 'async (a, ...true) => a;',
-    });
+      test.pass('expr; lhs of addition', {
+        code: 'a => a + x',
+      });
 
-    test.fail('async arrow with param named true with init', {
-      code: 'async (a, ...true=fail) => a;',
+      test.fail('body; lhs of addition', {
+        code: 'a => {} + x',
+        HAS_AST: true,
+      });
+
+      test.fail('expr; rhs of addition', {
+        code: 'x + a => a',
+      });
+
+      test.fail('body; rhs of addition', {
+        code: 'x + a => {}',
+      });
+
+      test.pass('expr; division', {
+        code: 'a => a / x',
+      });
+
+      test.fail('body; division', {
+        code: 'a => {} / x',
+        HAS_AST: true,
+      });
+
+      test.fail('arrow regex requires semi', {
+        code: 'a => {} /x/',
+        HAS_AST: true,
+      });
+
+      test.fail('arrow regex with newline', {
+        code: 'a => {}\n/x/',
+        HAS_AST: true,
+      });
+
+      test.pass('expr; arrow dot', {
+        code: 'a => x.foo',
+      });
+
+      test.fail('body; arrow dot', {
+        code: 'a => {}.foo',
+        HAS_AST: true,
+      });
+
+      test.pass('expr; dynamic prop', {
+        code: 'a => x[foo]',
+      });
+
+      test.fail('body; dynamic prop', {
+        code: 'a => {}[foo]',
+        HAS_AST: true,
+      });
+
+      test.pass('expr; call', {
+        code: 'a => x()',
+      });
+
+      test.fail('body; call', {
+        code: 'a => {}()',
+        HAS_AST: true,
+      });
+
+      test.pass('asi and the + is a unary operator', {
+        code: '() => {}\n+function(){}',
+      });
+
+      test.fail('newest victim of asi', {
+        code: '() => {}\n/function(){}',
+        HAS_AST: true,
+      });
     });
   });
 });

@@ -4291,6 +4291,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseExpressionAfterLiteral(lexerFlags, astProp) {
     // assume we just parsed and skipped a literal (string/number/regex/array/object)
+    // TODO: `new "foo".__proto__.constructor`
     let assignable = parseValueTail(lexerFlags, NOT_ASSIGNABLE, NOT_NEW_ARG, astProp);
     return parseExpressionFromOp(lexerFlags, assignable, astProp);
   }
@@ -4375,6 +4376,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseExpressionFromOp(lexerFlags, assignable, astProp) {
     ASSERT(parseExpressionFromOp.length === arguments.length, 'arg count');
     ASSERT(typeof assignable === 'number', 'assignable num');
+
+    // <SCRUB AST>
+    if (_path[_path.length - 1] && _path[_path.length - 1][astProp] && (_path[_path.length - 1][astProp].type === 'ArrowFunctionExpression' && _path[_path.length - 1][astProp].expression === false)) {
+      if (curc === $$FWDSLASH_2F && curtok.str === '/' && curtok.nl) {
+        THROW('Can not divide an arrow and ASI does not apply at start of line with forward slash');
+      }
+      return NOT_ASSIGNABLE;
+    }
+    // </SCRUB AST>
 
     if (isAssignBinOp()) {
       if (!isAssignable(assignable)) {
@@ -4655,7 +4665,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === parseValueHeadBody.length, 'argcount');
     // - ident (a var, true, false, null, super, new <value>, new.target, this, class, function, async func, generator func)
     // - literal (number, string, regex, object, array, template)
-    // - arrow or group
+    // - arrow or group (special return flag)
     // - await expression
 
     // do not include the suffix (property, call, etc)
@@ -5399,6 +5409,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof assignable === 'number', 'assignablenum', assignable);
     ASSERT(typeof astProp === 'string', 'should be string');
 
+
+
+    // <SCRUB AST>
+    // Unfortunately there's no trivial way of doing this check without a lot
+    // more unmaintainable spaghetti return code. Maybe later. For now the arrow
+    // tail checks can only be done with AST enabled.
+    if (
+      _path[_path.length - 1] && (
+        (_path[_path.length - 1].type === 'ArrowFunctionExpression' && _path[_path.length - 1].expression === false) ||
+        (_path[_path.length - 1][astProp] && _path[_path.length - 1][astProp].type === 'ArrowFunctionExpression' && _path[_path.length - 1][astProp].expression === false)
+      )
+    ) {
+      return NOT_ASSIGNABLE;
+    }
+    // </SCRUB AST>
+
     if (curc === $$DOT_2E && curtok.str === '.') {
       ASSERT_skipAny('.', lexerFlags); // TODO: optimize; next must be identifier
       if (curtype !== $IDENT) THROW('Dot property must be an identifier');
@@ -5983,7 +6009,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseArrowAfterGroup(lexerFlags, scoop, simpleArgs, toplevelComma, asyncToken, rootAstProp);
       // we just parsed an arrow. Whatever the state of await/yield was we can ignore that here.
       if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
-      return NOT_ASSIGNABLE; // reset after the arrow
+      return NOT_ASSIGNABLE; // assignability resets after the arrow
     }
     else if (hasAllFlags(destructible, MUST_DESTRUCT)) {
       THROW('The group had to be destructed but was not followed by an arrow (this is an invalid assignment target)');
@@ -6038,7 +6064,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // We need to propagate the await/yield state as well so prepare that first
       let extraFlags = 0;
-      // - ``async function a(){     async ([y] = delete ((foo[await x]))) => {};     }`
+      // - `async function a(){     async ([y] = delete ((foo[await x]))) => {};     }`
       // - `delete (((((foo(await)))))).bar`
       // - `delete (((((foo(yield)))))).bar`
       // - `function *f(){ delete (((((foo(yield)))))).bar }`

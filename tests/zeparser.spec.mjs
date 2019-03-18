@@ -8,14 +8,9 @@ if (!(process.version.slice(1, 3) >= 10)) throw new Error('Requires node 10+, di
 
 Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
-const INPUT_OVERRIDE = process.argv.includes('-i')
-  ? (
-    [
-      process.argv.slice(process.argv.indexOf('-i')+1).join(' '),
-      process.argv = process.argv.slice(0, process.argv.indexOf('-i')),
-    ][0]
-  )
-  : '';
+console.log('Start of ZeParser3 test suite');
+
+const INPUT_OVERRIDE = process.argv.includes('-i') ? process.argv[process.argv.indexOf('-i') + 1] : '';
 const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
 const SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
 const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
@@ -70,7 +65,11 @@ function read(path, file) {
     fs.readdirSync(combo + '/').forEach(s => read(combo + '/', s));
   }
 }
-read(dir, '');
+if (INPUT_OVERRIDE) {
+  console.log('Using override input and only testing that...');
+} else {
+  read(dir, '');
+}
 
 files = files.filter(f => f.indexOf('test262') >= 0 === TEST262);
 
@@ -173,9 +172,13 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     WEB,
     ES,
     OPTIONS,
+    HAS_AST,
   } = testDetails;
 
   ++testj;
+
+  // Skip if it requires an AST or no AST and the parser currently has no ast
+  if (typeof HAS_AST === 'boolean' && HAS_AST !== checkAST) return;
 
   //if (testj !== 3319) return;
   testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
@@ -589,7 +592,15 @@ const start = async () => {
       let tok = await import(path.join(dirname, '../src/zetokenizer.mjs'));
       let par = await import(path.join(dirname, '../src/zeparser.mjs'));
       // Make sure the dev version of the parser is tested first
-      parsers.unshift({parser: {tok, par, parse(...args){ return par.default(...args); }}, hasAst: true, desc: 'dev build'});
+      parsers.unshift({
+        parser: {
+          tok,
+          par,
+          parse(...args){ return par.default(...args); }
+        },
+        hasAst: true,
+        desc: 'dev build',
+      });
     })(),
     (async () => {
       // node --experimental-modules cli/build.mjs
@@ -624,6 +635,8 @@ const start = async () => {
     (async () => process.argv.includes('-b') ? ({parse: babelParse} = (await import('@babel/parser')).default) : {})(),
 
     ...files.map(async path => {
+      if (INPUT_OVERRIDE) return;
+
       let moduleExports = (await import(path)).default;
 
       let before = cases.length;

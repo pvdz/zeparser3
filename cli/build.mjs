@@ -72,6 +72,8 @@ module.exports = {
         ;
       }
       if (!keepAst) {
+        // Known issues with the AST-less build:
+        // - Expression "tails" will be incorrectly parsed; as part of an arrow (`()=>{}.foo`, `()=>{}+foo` etc)
         s = s
           .replace(/\/\/ <SCRUB AST>([\s\S]*?)\/\/ <\/SCRUB AST>/g, '"004 ast scrubbed"')
           // .replace(/^\s*AST_.*/mg, '0x002')
