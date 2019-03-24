@@ -1229,5 +1229,21 @@ export default (describe, test) =>
           });
         });
       });
+      
+      test.fail_strict('func param default has octal, sans directive', {
+        code: 'function foo(package) { }',
+      });
+
+      test.fail('func param default has octal but directive happens inside', {
+        code: 'function foo(package) { "use strict"; }',
+      });
+
+      test.fail_strict('arrow param default has octal, sans directive', {
+        code: 'x = (y = "foo\\003bar") => { }',
+      });
+
+      test.fail('arrow param default has octal but directive happens inside', {
+        code: 'x = (y = "foo\\003bar") => { "use strict"; }',
+      });
     });
   });
