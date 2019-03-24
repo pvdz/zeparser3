@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// For as long as node does not support it out of the box you can only execute this through:
+//
+//     node --experimental-modules tests/zeparser.spec.mjs
+//
 
 // [input:str|str[], output:num|num[], [mode:flag|flags[]=0], [desc:str], [skipVersion:string|string[]='']
 // (mode is a constant defined below, like script-type, regexDiv, strict mode, etc)
@@ -7,7 +11,9 @@
 // if input is an array, all inputs should match the same output
 // if output is an array, input should yield multiple (those) tokens
 
-const fs = require('fs');
+Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
+
+import fs from 'fs';
 
 import {
   PASS,
