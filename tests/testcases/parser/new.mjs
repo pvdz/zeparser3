@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $NUMBER_DEC, $NUMBER_HEX, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $STRING_SINGLE, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer';
 
 export default (describe, test) =>
   describe('new', _ => {
@@ -2111,6 +2111,60 @@ export default (describe, test) =>
           tokens: [$IDENT, $IDENT, $IDENT, $ASI],
         });
 
+        test('new on the result of new can be made valid (1)', {
+          code: 'new new A().foo',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'NewExpression',
+                      arguments: [],
+                      callee: {type: 'Identifier', name: 'A'},
+                    },
+                    property: {type: 'Identifier', name: 'foo'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('new on the result of new can be made valid (2)', {
+          code: 'new new A.foo()',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'A'},
+                      property: {type: 'Identifier', name: 'foo'},
+                      computed: false,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
         test('null', {
           code: 'new null',
           ast: {
@@ -2304,26 +2358,179 @@ export default (describe, test) =>
           throws: true,
         });
 
-        // TODO
-        // test('invalid yield ident', {
-        //   code: 'new yield',
-        // });
-        //
-        // test('yield call', {
-        //   code: 'new yield()',
-        // });
-        //
-        // test('valid yield', {
-        //   code: 'function *f(){ new yield }',
-        // });
-        //
-        // test('valid arg yield', {
-        //   code: 'function *f(){ new yield x }',
-        // });
-        //
-        // test('valid called arg yield', {
-        //   code: 'function *f(){ new yield x(); }',
-        // });
+        test('dstring arg', {
+          code: 'new "foo".__proto__.constructor',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'MemberExpression',
+                      object: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      property: {type: 'Identifier', name: '__proto__'},
+                      computed: false,
+                    },
+                    property: {type: 'Identifier', name: 'constructor'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('sstring arg', {
+          code: "new 'foo'.__proto__.constructor",
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'MemberExpression',
+                      object: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
+                      property: {type: 'Identifier', name: '__proto__'},
+                      computed: false,
+                    },
+                    property: {type: 'Identifier', name: 'constructor'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $STRING_SINGLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('number arg', {
+          code: 'new 1..__proto__.constructor',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'MemberExpression',
+                      object: {type: 'Literal', value: '<TODO>', raw: '1.'},
+                      property: {type: 'Identifier', name: '__proto__'},
+                      computed: false,
+                    },
+                    property: {type: 'Identifier', name: 'constructor'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('hex arg', {
+          code: 'new 0x2.__proto__.constructor',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'MemberExpression',
+                      object: {type: 'Literal', value: '<TODO>', raw: '0x2'},
+                      property: {type: 'Identifier', name: '__proto__'},
+                      computed: false,
+                    },
+                    property: {type: 'Identifier', name: 'constructor'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $NUMBER_HEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test('bool arg', {
+          code: 'new true.__proto__.constructor',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'MemberExpression',
+                      object: {type: 'Literal', value: true, raw: 'true'},
+                      property: {type: 'Identifier', name: '__proto__'},
+                      computed: false,
+                    },
+                    property: {type: 'Identifier', name: 'constructor'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+        });
+
+        test.fail_strict('invalid yield ident', {
+          code: 'new yield',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Identifier', name: 'yield'},
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $ASI],
+        });
+
+        test.fail_strict('yield call', {
+          code: 'new yield()',
+        });
+
+        test.fail('yield inside generator', {
+          code: 'function *f(){ new yield }',
+        });
+
+        test.fail('yield+arg inside generator', {
+          code: 'function *f(){ new yield x }',
+        });
+
+        test.fail('yield+arg called inside generator', {
+          code: 'function *f(){ new yield x(); }',
+        });
       });
 
       test.fail('can not do arrow', {
@@ -3297,7 +3504,3 @@ export default (describe, test) =>
       });
     });
   });
-
-// new new foo().foo    (new on the result of new can be made valid)
-// new new foo.foo()    (new on the result of new can be made valid)
-// new without parens is weaker than new with parens,
