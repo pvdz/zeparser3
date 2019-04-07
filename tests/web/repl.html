@@ -24,6 +24,12 @@
 
     .box { align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto; }
     .header, .box.header { background-color: #eee; border: 1px solid black; box-sizing: border-box; padding: 5px; height: 30px; }
+
+    .box.top-left .header { border: 0; border-top: 1px solid #aaa; border-right: 1px solid #aaa; }
+    .box.top-right .header { border: 0; border-top: 1px solid #aaa; border-left: 1px solid #aaa; }
+    .box.bottom-left .header { border: 0; border-right: 1px solid #aaa; }
+    .box.bottom-right .header { border: 0; border-left: 1px solid #aaa; }
+
   </style>
 </head>
 <body>
