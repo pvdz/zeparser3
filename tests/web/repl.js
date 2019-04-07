@@ -5,15 +5,15 @@ const elog = console.error;
 let logs = [];
 console.log = (...args) => {
   clog(...args);
-  logs.push(args.join('LOG '));
+  logs.push('LOG '+args.join(' '));
 };
 console.warn= (...args) => {
   wlog(...args);
-  logs.push(args.join('WRN '));
+  logs.push('WRN '+args.join(' '));
 };
 console.error= (...args) => {
   elog(...args);
-  logs.push(args.join('ERR '));
+  logs.push('ERR ' + args.join('ERR '));
 };
 
 import * as $ from '../../src/utils.mjs';
@@ -49,7 +49,7 @@ window.ta_input.onchange = window.ta_input.onkeyup = e => {
     logs.unshift(e.stack+'\n\n-------------\n\n');
     throw new Error(e);
   } finally {
-    stderr.value = logs.map(s => 'LOG ' + s + '\n').join('');
+    stderr.value = logs.map(s => s + '\n').join('');
     ta_input.style.backgroundColor = color;
   }
 
