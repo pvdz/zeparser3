@@ -375,8 +375,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let curc = 0;
 
   let catchforofhack = false;
-  let asyncExceptionStack = undefined; // TODO: delete this hack (it's unused?)
-  let asyncExceptionSimple = false; // unused
 
   let traceast = false;
 
@@ -1366,12 +1364,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(hasNoFlag(curtype, $ERROR | $EOF), 'should not have error or eof at this point');
 
-    // async edge case :'(
-    if (asyncExceptionStack !== undefined) {
-      parsePlainArrowAfterAsyncNewline(lexerFlags, scoop, astProp);
-      return;
-    }
-
     switch (getGenericTokenType(curtype)) { // TODO: convert to flag index to have perfect hash in the switch
       case $IDENT:
         parseIdentStatement(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, includeDeclarations, astProp);
@@ -1399,29 +1391,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           , curtok
         );
     }
-  }
-  function parsePlainArrowAfterAsyncNewline(lexerFlags, scoop, astProp) {
-    ASSERT(curtok.str === '=>', 'if the hack is used the next token must be an arrow');
-    ASSERT(!!asyncExceptionStack, 'this should have been asserted at callsite');
-    // the stack contains args to be used in an arrow so just construct it now...
-    // - `let f = async \n (g) => g`
-    // - `let f = async \n (g = await ofo) => g`
-
-    // restore curtok.nl
-    curtok.nl = false; // the arrow .nl was checked so we can reset to false here
-
-    // TODO: verify the args
-
-    AST_open(astProp, 'ExpressionStatement');
-    astProp = 'expression';
-
-    AST_open(astProp, 'ArrowFunctionExpression');
-    AST_set('params', asyncExceptionStack instanceof Array ? asyncExceptionStack : [asyncExceptionStack]);
-    asyncExceptionStack = undefined; // prevent recursion on this
-    parseArrowFromPunc(lexerFlags, scoop, NOT_ASYNC, asyncExceptionSimple);
-    AST_close('ArrowFunctionExpression');
-
-    AST_close('ExpressionStatement');
   }
 
   // ### functions
