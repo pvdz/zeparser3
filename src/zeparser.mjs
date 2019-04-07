@@ -1046,6 +1046,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function SCOPE_addBindingAndDedupe(lexerFlags, scoop, name, bindingType, originIsVarDecl) {
     ASSERT(SCOPE_addBindingAndDedupe.length === arguments.length, 'arg count');
     SCOPE_addBinding(lexerFlags, scoop, name, bindingType, CHECK_DUPE_BINDS, originIsVarDecl);
+    if (scoop === DO_NOT_BIND) return; // example: class expr. TODO: should this be checked at call sites instead?
     if (options_webCompat === WEB_COMPAT_ON) {
       scoop.lex.funcs['#' + name] = false; // mark var name as "not only func decls"
     }
@@ -1053,6 +1054,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function SCOPE_addFuncDeclName(lexerFlags, scoop, name, bindingType, originIsVarDecl) {
     ASSERT(SCOPE_addBindingAndDedupe.length === arguments.length, 'arg count');
     SCOPE_addBinding(lexerFlags, scoop, name, bindingType, CHECK_DUPE_BINDS, originIsVarDecl);
+    ASSERT(scoop !== DO_NOT_BIND, 'find me a case first');
     if (options_webCompat === WEB_COMPAT_ON) {
       if (!scoop.lex.funcs['#' + name]) scoop.lex.funcs['#' + name] = true;
     }

@@ -168,6 +168,32 @@ export default (describe, test) =>
       test.fail('can not extend arrows because it is not a valid lhs', {
         code: 'class x extends () => x {}',
       });
+
+      test.pass('regression: should not try to record class in scope at all', {
+        // #11
+        code: '(class A extends B { constructor() { super() } })',
+        WEB: false,
+      });
+
+      test.pass('regression: should not try to record class in scope in web compat', {
+        // #11
+        code: '(class A extends B { constructor() { super() } })',
+        WEB: true,
+      });
+
+      test.fail('regression: crashed (unexpectedly), web=false', {
+        // #11
+        // This should throw an error because super can only be called in a constructor
+        code: '(class A extends B { method() { super() } })',
+        WEB: false,
+      });
+
+      test.fail('regression: crashed (unexpectedly), web=true', {
+        // #11
+        // This should throw an error because super can only be called in a constructor
+        code: '(class A extends B { method() { super() } })',
+        web: true,
+      });
     });
 
     describe('ident methods', _ => {
