@@ -1294,11 +1294,11 @@ export default (describe, test) =>
           code: 'for ([x + y] in obj);',
         });
 
-        test.fail('array+init that would be valid to destructure', {
+        test.pass('array+init that would be valid to destructure', {
           code: 'for ([x] = z in obj);',
         });
 
-        test.fail('array+init that would be valid to assign-destructure', {
+        test.pass('array+init that would be valid to assign-destructure', {
           code: 'for ([x.y] = z in obj);',
         });
 
@@ -1318,11 +1318,11 @@ export default (describe, test) =>
           code: 'for ({a: x + y} in obj);',
         });
 
-        test.fail('object+init that would be valid to destructure', {
+        test.pass('object+init that would be valid to destructure', {
           code: 'for ({x} = z in obj);',
         });
 
-        test.fail('object+init that would be valid to assign-destructure', {
+        test.pass('object+init that would be valid to assign-destructure', {
           code: 'for ({a: x.y} = z in obj);',
         });
 
@@ -1360,6 +1360,58 @@ export default (describe, test) =>
 
         test.fail('silly bad case with arr property and assignment', {
           code: 'for ([].bar = x in obj);',
+        });
+      });
+
+      describe('regressions #8', _ => {
+        // As reported by https://github.com/pvdz/zeparser3/issues/8
+
+        test.fail('lhs rest with trailing comma', {
+          code: 'for ([...x,] in [[]]);',
+        });
+
+        test.pass('lhs empty arr with number init', {
+          code: 'for ([] = 0 in {});',
+        });
+
+        test.pass('lhs arr with rest with number init', {
+          code: 'for ([...[a]] = 0 in {});',
+        });
+
+        test.pass('lhs obj with init', {
+          code: 'for ({x} = 0 in {});',
+        });
+
+        test.pass('lhs obj with prop init', {
+          code: 'for ({p: x = 0} = 0 in {});',
+        });
+
+        test.fail('lhs assignment', {
+          code: 'for (x = 0 in {});',
+        });
+
+        test.fail('lhs dynamic property assignment', {
+          code: 'for(o[0] = 0 in {});',
+        });
+
+        test.fail('lhs paren wrapped unary increment', {
+          code: 'for ((a++) in c);',
+        });
+
+        test.fail('lhs plus-prefixed expr', {
+          code: 'for (+a().b in c);',
+        })
+
+        test.fail('lhs is void', {
+          code: 'for (void a.b in c);',
+        });
+
+        test.fail('lhs is regex', {
+          code: 'for (/foo/ in {});',
+        });
+
+        test.pass('sneaky lhs contains `in`', {
+          code: 'for ((a in b).x in {});',
         });
       });
     });
@@ -1607,6 +1659,58 @@ export default (describe, test) =>
 
       test.fail('rhs must be AssignmentExpression', {
         code: 'for (let x of a,b) c',
+      });
+
+      describe('regressions #8', _ => {
+        // As reported by https://github.com/pvdz/zeparser3/issues/8
+
+        test.fail('lhs rest with trailing comma', {
+          code: 'for ([...x,] of [[]]);',
+        });
+
+        test.pass('lhs empty arr with number init', {
+          code: 'for ([] = 0 of {});',
+        });
+
+        test.pass('lhs arr with rest with number init', {
+          code: 'for ([...[a]] = 0 of {});',
+        });
+
+        test.pass('lhs obj with init', {
+          code: 'for ({x} = 0 of {});',
+        });
+
+        test.pass('lhs obj with prop init', {
+          code: 'for ({p: x = 0} = 0 of {});',
+        });
+
+        test.fail('lhs assignment', {
+          code: 'for (x = 0 of {});',
+        });
+
+        test.fail('lhs dynamic property assignment', {
+          code: 'for(o[0] = 0 of {});',
+        });
+
+        test.fail('lhs paren wrapped unary increment', {
+          code: 'for ((a++) of c);',
+        });
+
+        test.fail('lhs plus-prefixed expr', {
+          code: 'for (+a().b of c);',
+        })
+
+        test.fail('lhs is void', {
+          code: 'for (void a.b of c);',
+        });
+
+        test.fail('lhs is regex', {
+          code: 'for (/foo/ of {});',
+        });
+
+        test.pass('sneaky lhs contains `in`', {
+          code: 'for ((a in b).x of {});',
+        });
       });
 
       // TODO: cases for yield and await as rhs

@@ -2779,9 +2779,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // first parse a simple expression and check whether it's assignable (var or prop)
     let assignable = 0;
+    let destructible = MIGHT_DESTRUCT;
     let wasNotDecl = false;
     let emptyInit = false;
-    let startedWithArrObj = false; // `for ([x] in y)` or `for ({x} of y)` etc. need this to turn lhs into Pattern.
     let hadAssign = false;
     catchforofhack = false;
     if (curtype === $IDENT) {
@@ -2845,17 +2845,117 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       emptyInit = true;
       ASSERT(assignable = initAssignable(assignable)); // prevent assertion error, otherwise irrelevant
     }
+    else if (curc === $$CURLY_L_7B) {
+      // for-in, for-of, for-await
+      // - `for ({}.x in y);`
+      // - `for ({}.x);`                 // bad
+      // - `for ({} in y);`
+      // - `for ({} = y in y);`
+      // - `for ({x} = y in z);`
+      // - `for ({x} = y of z);`
+      // - `for ({x} = y);`              // bad
+      // - `for ({x} = y;;);`
+      // - `for ({x};;);`
+      // - `for ({x}.y in z);`
+
+      wasNotDecl = true;
+
+      destructible = parseObjectLiteralPatternAndAssign(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
+
+      if (curc !== $$SEMI_3B) {
+        // - `for ({}.x in y);`
+        // - `for ({}.x);`                 // bad
+        // - `for ({} in y);`
+        // - `for ({} = y in y);`
+        // - `for ({x} = y in z);`
+        // - `for ({x} = y of z);`
+        // - `for ({x} = y);`              // bad
+        // - `for ({x}.y in z);`
+
+        if (curtok.str === 'in' || curtok.str === 'of') {
+          // - `for ({} in y);`
+          // - `for ({} = y in y);`
+          // - `for ({x} = y in z);`
+          // - `for ({x} = y of z);`
+
+          // TODO: are yield/await relevant here?
+          if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+          AST_destruct(astProp);
+        } else {
+          // - `for ({}.x in y);`
+          // - `for ({}.x);`                 // bad
+          // - `for ({x} = y);`              // bad
+          // - `for ({x}.y in z);`
+          assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
+        }
+      }
+    }
+    else if (curc === $$SQUARE_L_5B) {
+      // for-in, for-of, for-await
+      // - `for ([].x in y);`
+      // - `for ([].x);`                 // bad
+      // - `for ([] in y);`
+      // - `for ([] = y in y);`
+      // - `for ([x] = y in z);`
+      // - `for ([x] = y of z);`
+      // - `for ([x] = y);`              // bad
+      // - `for ([x] = y;;);`
+      // - `for ([x];;);`
+      // - `for ([x].y in z);`
+
+      wasNotDecl = true;
+
+      destructible = parseArrayLiteralPattern(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
+
+      if (curc !== $$SEMI_3B) {
+        // - `for ([].x in y);`
+        // - `for ([].x);`                 // bad
+        // - `for ([] in y);`
+        // - `for ([] = y in y);`
+        // - `for ([x] = y in z);`
+        // - `for ([x] = y of z);`
+        // - `for ([x] = y);`              // bad
+        // - `for ([x].y in z);`
+
+        if (curtok.str === 'in' || curtok.str === 'of') {
+          // - `for ([] in y);`
+          // - `for ([] = y in y);`
+          // - `for ([x] = y in z);`
+          // - `for ([x] = y of z);`
+
+          // TODO: are yield/await relevant here?
+          if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+          AST_destruct(astProp);
+        } else {
+          // - `for ([].x in y);`
+          // - `for ([].x);`                 // bad
+          // - `for ([x] = y);`              // bad
+          // - `for ([x].y in z);`
+          assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
+        }
+      }
+    }
     else {
-      // - `for ("foo" `
-      // - `for ("foo";;); `
-      // - `for ("foo".x in y `
-      // - `for ("foo".x = y in y `
-      // - `for ({}.x in y `
-      // - `for ({}.x = y in y `
-      // - `for ([].x in y `
-      // - `for ([].x = y in y `
-      startedWithArrObj = curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B;
+      // If the LHS is an object or array then it must cover an AssignmentPattern. In this case it may have an
+      // initializer for any of its part or the lhs as a while (so `for ([]=1 in x);` is valid). There are tests.
+      // The lhs of a `for-in` or `for-of` must be an obj/array assignment pattern, or otherwise a simple assignment
+      // target (meaning it must end with a property, which may be a dynamic prop). For regular `for-loop` anything ok.
+
+      // for-in, for-of, for-await
+      // - `for (1`
+      // - `for ("foo"`
+      // - `for (/foo/`
+      // - `for ("foo";;);`
+      // - `for ("foo" in y);`            // bad
+      // - `for ("foo".x in y);`
+      // - `for ("foo".x = z in y);`      // bad
+
       assignable = parseValue(lexerFlags | LF_IN_FOR_LHS, NO_ASSIGNMENT, NOT_NEW_ARG, astProp);
+      // assignable = parseValueHeadBodyIdent(lexerFlags | LF_IN_FOR_LHS, NOT_NEW_ARG, BINDING_TYPE_NONE, NO_ASSIGNMENT, astProp);
+      hadAssign = curc === $$IS_3D && curtok.str === '=';
+      assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
       wasNotDecl = true;
     }
 
@@ -2869,7 +2969,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.str === 'of') {
         if (catchforofhack) THROW('Encountered `var` declaration for a name used in catch binding which in web compat mode is still not allowed in a `for-of`');
         if (hadAssign) THROW('The lhs of a `for-of` cannot have an assignment');
-        if (startedWithArrObj) AST_destruct(astProp);
         AST_wrapClosed(astProp, 'ForOfStatement', 'left');
         if (notAssignable(assignable)) THROW('Left part of for-of must be assignable');
         ASSERT_skipRex('of', lexerFlags);
@@ -2882,7 +2981,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (awaitable) THROW('`for await` only accepts the `for-of` type');
       if (curtok.str === 'in') {
         if (hadAssign) THROW('The lhs of a `for-in` cannot have an assignment');
-        if (startedWithArrObj) AST_destruct(astProp);
         AST_wrapClosed(astProp, 'ForInStatement', 'left');
         if (notAssignable(assignable)) {
           // certain cases were possible in legacy mode
@@ -2922,6 +3020,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex(';', lexerFlags);
 
     if (curc === $$SEMI_3B) {
+      if (hasAllFlags(destructible, MUST_DESTRUCT)) THROW('Cannot use lhs as regular for-loop because it must destruct');
       AST_set('test', null);
     } else {
       parseExpressions(lexerFlags, ALLOW_ASSIGNMENT, 'test');
@@ -5640,7 +5739,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // this function assumes you've just skipped the paren and are now in the first token of a group/arrow/async-call
     // this is either the arg of a delete, or any other group opener that may or may not have been prefixed with async
-    let lexerFlags = lexerFlagsBeforeParen | LF_NO_ASI;
+    let lexerFlags = sansFlag(lexerFlagsBeforeParen | LF_NO_ASI, LF_IN_FOR_LHS);
 
     // parse the group as if it were a group (also for the sake of AST)
     // while doing so keep track of the next three states. At the end
