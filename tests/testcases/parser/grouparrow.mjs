@@ -4260,6 +4260,17 @@ export default (describe, test) => describe('parens', _ => {
         HAS_AST: true,
       });
     });
+
+    describe('regressions #12', _ => {
+
+      test.pass('object pattern alias can be pattern too', {
+        code: '({a,b=b,a:c,[a]:[d]})=>0;',
+      });
+
+      test.pass('object pattern alias can be property too', {
+        code: '({a, a:a, a:a=a, [a]:{a}, a:some_call()[a], a:this.a} = 0);',
+      });
+    });
   });
 });
 

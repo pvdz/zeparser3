@@ -4796,8 +4796,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             THROW('Found a struct that must be destructured but was not');
           }
         }
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO)) {
-          if (options_webCompat === WEB_COMPAT_ON) {
+        if (options_webCompat === WEB_COMPAT_ON) {
+          if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO)) {
             THROW('Found an object with double `__proto__` which is not allowed');
           }
         }
@@ -4811,15 +4811,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // Note: immediate tail assignments are parsed at this point and `({x})=y` is illegal
         // Note: however, this may still be the lhs inside a `for` header so we still need to propagate it...
         // To make sure we don't accidentally over accept we can check the next token to clamp down abuse
-        if (hasNoFlag(wasDestruct, CANT_DESTRUCT) && hasAllFlags(lexerFlags, LF_IN_FOR_LHS)) {
+        if (hasNoFlag(wasDestruct, CANT_DESTRUCT)) {
           // Only when `in` or `of` to prevent cases like `({x})=y`, though they could be handled differently as well...
-          return IS_ASSIGNABLE | assignable;
+          return setAssignable(assignable);
         }
-        return NOT_ASSIGNABLE | assignable;
+        return setNotAssignable(assignable);
       }
       else if (curc === $$SQUARE_L_5B) {
         let wasDestruct = parseArrayLiteralPattern(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, allowAssignment ? PARSE_INIT : SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-
         if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) {
           // TODO: what cases pass through here? can probably construct one using spread/rest
           // fail: `([???]);`
@@ -4843,13 +4842,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME)) assignable |= ASSIGNABLE_HAD_YIELD_VARNAME;
 
         // Note: immediate tail assignments are parsed at this point and `([x])=y` is illegal
-        // Note: however, this may still be the lhs inside a `for` header so we still need to propagate it...
-        // To make sure we don't accidentally over accept we can check the next token to clamp down abuse
-        if (hasNoFlag(wasDestruct, CANT_DESTRUCT) && hasAllFlags(lexerFlags, LF_IN_FOR_LHS)) {
-          // Only when `in` or `of` to prevent cases like `([x])=y`, though they could be handled differently as well...
-          return IS_ASSIGNABLE | assignable;
+        // However, this may still be the lhs inside a `for` header or some kind of binding declaration so we still
+        // need to propagate it... To make sure we don't accidentally over-accept we could check the next token
+
+        if (hasNoFlag(wasDestruct, CANT_DESTRUCT)) {
+          // Prevent cases like `for (([x])=y in z);`, though they could be handled differently as well...
+          // - `var {[a]: [b]} = c`  // fail
+          // - `var {[a]: b} = c`    // pass
+          // - `var {a: [b]} = c`    // pass
+          return setAssignable(assignable);
         }
-        return NOT_ASSIGNABLE | assignable;
+        return setNotAssignable(assignable);
       }
       else if (curc === $$PAREN_L_28) {
         // do not parse arrow/group tail, regardless
@@ -6873,7 +6876,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseObjectLikePart.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astprop string');
     ASSERT(staticToken === undefined || staticToken.str === 'static', 'token or undefined');
-    let destructible = MIGHT_DESTRUCT;
+    let destructible = bindingType === BINDING_TYPE_NONE ? MIGHT_DESTRUCT : MUST_DESTRUCT;
     let assignable = 0; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
 
     // an objlit property has quite a few (though limited) valid goals
@@ -6900,6 +6903,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `({*20(){}`          (could also be .5)
     // - `({*[expr](){}`
     // - `({[expr]:expr`      (destructible!)
+    // - `({[expr]:[x]`       (destructible!)
     // - `({[expr](){}`
 
     if (curtype === $IDENT) {
@@ -7082,6 +7086,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // skip computed key part first because we need to figure out whether we're parsing a method
       ASSERT_skipRex('[', lexerFlags); // next is expression
       let nowAssignable = parseExpression(lexerFlags, ALLOW_ASSIGNMENT, astProp);
+      // pass yield/await flags here (note that the assignability itself is irrelevant for this expr)
+      // TODO: find a testcase where the setNotAssignable state fails...
       assignable = setNotAssignable(nowAssignable | assignable);
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
 
@@ -7095,6 +7101,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `let {[foo]: bar} = baz`
         // - `let {[foo]: bar()} = baz`
         // - `let {[foo]: a + b} = baz`
+        // - `let {[foo]: [bar]} = baz`
         // if (curc !== $$COLON_3A) THROW('A computed property name must be followed by a colon or paren');
         ASSERT_skipRex(':', lexerFlags);
         if (isClassMethod === IS_CLASS_METHOD) THROW('fail')
@@ -7103,7 +7110,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('kind', 'init'); // only getters/setters get special value here
         AST_set('method', curc === $$PAREN_L_28);
         AST_set('computed', true);
-
         let lhsAssignable = parseValue(lexerFlags, ALLOW_ASSIGNMENT, NOT_NEW_ARG, 'value');
         if (notAssignable(lhsAssignable) || (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=')) {
           destructible |= CANT_DESTRUCT;

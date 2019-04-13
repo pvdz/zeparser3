@@ -12431,6 +12431,29 @@ export default (describe, test) =>
     test.pass('destructuring case', {
       code: 'var {[2]: y = 1} = {2:3}',
     });
+
+    describe('regressions #12', _ => {
+
+      test.pass('', {
+        code: 'var {[a]: [b]} = c',
+      });
+
+      test.pass('', {
+        code: 'var {[a]: b} = c',
+      });
+
+      test.pass('', {
+        code: 'var {a: [b]} = c',
+      });
+
+      test.pass('', {
+        code: 'var {a,b=0,c:d,e:f=0,[g]:[h]}=0',
+      });
+
+      test.pass('', {
+        code: 'var m = \'foo\'; var {[m]:[z]} = {foo:[1]}',
+      });
+    });
   });
 
 // forbid "let" and "static" only in strict mode
