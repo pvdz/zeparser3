@@ -476,7 +476,11 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (stack) {
       console.log(
         'Stack:',
-        stack
+        (
+          stack.length > 10
+          ? [...stack.split('\n').slice(0,7), '...trunced by ze tester', ...stack.split('\n').slice(-3)].join('\n')
+          : stack
+        )
         .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
         .replace(/\n.* at (THROW|ASSERT\().*?\n/s, '\nExplicit '+BOLD+'$1'+RESET+' at:\n')
         .replace(/(zeparser.spec.js.*?)\n.*/s, '$1 (trunced remainder of trace)')
