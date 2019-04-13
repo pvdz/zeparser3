@@ -1879,6 +1879,33 @@ export default (describe, test) =>
       test.fail('for await in non-async func', {
         code: 'function f() { for await (x of y) {} }',
       });
+
+      describe('regressions as reported in #10', _ => {
+
+        test.pass('1', {
+          code: 'async function f() { for await ([a] = 1 of []); }',
+        });
+
+        test.pass('2', {
+          code: 'async function f() { for await ([a = 1] = 1 of []); }',
+        });
+
+        test.pass('3', {
+          code: 'async function f() { \'use strict\'; for await ({a} = 1 of []); }',
+        });
+
+        test.pass('4', {
+          code: 'async function * f() { for await ({a: a} = 1 of []); }',
+        });
+
+        test.pass('5', {
+          code: 'async function * f() { for await ({0: a} = 1 of []); }',
+        });
+
+        test.pass('6', {
+          code: 'async function * f() { for await ({0: a = 1} = 1 of []); }',
+        });
+      });
     });
   });
 
