@@ -873,7 +873,7 @@ export default (describe, test) =>
       });
 
       test.pass('break to label in for-await', {
-        code: 'foo: for await (x of y) break foo;',
+        code: 'async function f(){ foo: for await (x of y) break foo; }',
       });
 
       test.pass('break to label in nested if', {

@@ -2760,6 +2760,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let awaitable = curtype === $IDENT && curtok.str === 'await';
     if (awaitable) {
       if (!allowAsyncGenerators) THROW('The `for await` syntax is not supported by the currently targeted language version');
+      if (hasNoFlag(lexerFlags, LF_IN_ASYNC)) THROW('Can only use `for-await` inside an async function');
       ASSERT_skipAny('await', lexerFlags); // TODO: optimize; next must be `(`
     }
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
@@ -2838,8 +2839,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     else if (curc === $$SEMI_3B) {
+      // - `for (;;);`
       if (awaitable) {
-        // this is the semi in `for await (;`
+        // - `for await (;;);`
         THROW('for await only accepts the `for-of` type');
       }
       emptyInit = true;
@@ -2863,32 +2865,44 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible = parseObjectLiteralPatternAndAssign(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
       assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
 
-      if (curc !== $$SEMI_3B) {
-        // - `for ({}.x in y);`
-        // - `for ({}.x);`                 // bad
+      if (curc === $$SEMI_3B) {
+        // - `for ({a};;);`
+        // - `for ({a}.x;;);`
+        if (awaitable) {
+          // - `for await ({a};;);`
+          // - `for await ({a}.x;;);`
+          THROW('Can not use `for-await` with a regular `for` loop, only `for-of`');
+        }
+      } else if (curtok.str === 'in') {
         // - `for ({} in y);`
         // - `for ({} = y in y);`
         // - `for ({x} = y in z);`
         // - `for ({x} = y of z);`
+
+        if (awaitable) THROW('Can not use `for-await` with a `for-in`, only `for-of`');
+
+        // TODO: are yield/await relevant here?
+        if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+        AST_destruct(astProp);
+      } else if (curtok.str === 'of') {
+        // - `for ({} on y);`
+        // - `for ({} = y on y);`
+        // - `for ({x} = y on z);`
+        // - `for ({x} = y of z);`
+        // - `for await ({} on y);`
+        // - `for await ({} = y on y);`
+        // - `for await ({x} = y on z);`
+        // - `for await ({x} = y of z);`
+
+        // TODO: are yield/await relevant here?
+        if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+        AST_destruct(astProp);
+      } else {
+        // - `for ({}.x in y);`
+        // - `for ({}.x);`                 // bad
         // - `for ({x} = y);`              // bad
         // - `for ({x}.y in z);`
-
-        if (curtok.str === 'in' || curtok.str === 'of') {
-          // - `for ({} in y);`
-          // - `for ({} = y in y);`
-          // - `for ({x} = y in z);`
-          // - `for ({x} = y of z);`
-
-          // TODO: are yield/await relevant here?
-          if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
-          AST_destruct(astProp);
-        } else {
-          // - `for ({}.x in y);`
-          // - `for ({}.x);`                 // bad
-          // - `for ({x} = y);`              // bad
-          // - `for ({x}.y in z);`
-          assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
-        }
+        assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
       }
     }
     else if (curc === $$SQUARE_L_5B) {
@@ -2909,32 +2923,40 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible = parseArrayLiteralPattern(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
       assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
 
-      if (curc !== $$SEMI_3B) {
-        // - `for ([].x in y);`
-        // - `for ([].x);`                 // bad
+      if (curc === $$SEMI_3B) {
+        // - `for ([a];;);`
+        // - `for ([a].x;;);`
+        if (awaitable) {
+          // - `for await ([a];;);`
+          // - `for await ([a].x;;);`
+          THROW('Can not use `for-await` with a regular `for` loop, only `for-of`');
+        }
+      } else if (curtok.str === 'in') {
         // - `for ([] in y);`
         // - `for ([] = y in y);`
         // - `for ([x] = y in z);`
         // - `for ([x] = y of z);`
+
+        if (awaitable) THROW('Can not use `for-await` with a `for-in`, only `for-of`');
+
+        // TODO: are yield/await relevant here?
+        if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+        AST_destruct(astProp);
+      } else if (curtok.str === 'of') {
+        // - `for ([] in y);`
+        // - `for ([] = y in y);`
+        // - `for ([x] = y in z);`
+        // - `for ([x] = y of z);`
+
+        // TODO: are yield/await relevant here?
+        if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+        AST_destruct(astProp);
+      } else {
+        // - `for ([].x in y);`
+        // - `for ([].x);`                 // bad
         // - `for ([x] = y);`              // bad
         // - `for ([x].y in z);`
-
-        if (curtok.str === 'in' || curtok.str === 'of') {
-          // - `for ([] in y);`
-          // - `for ([] = y in y);`
-          // - `for ([x] = y in z);`
-          // - `for ([x] = y of z);`
-
-          // TODO: are yield/await relevant here?
-          if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
-          AST_destruct(astProp);
-        } else {
-          // - `for ([].x in y);`
-          // - `for ([].x);`                 // bad
-          // - `for ([x] = y);`              // bad
-          // - `for ([x].y in z);`
-          assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
-        }
+        assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
       }
     }
     else {

@@ -1386,6 +1386,34 @@ export default (describe, test) =>
           code: 'for ({p: x = 0} = 0 in {});',
         });
 
+        test.fail('for await with arr destruct lhs', {
+          code: 'async function f() { for await ([x] in y) {} }',
+        });
+
+        test.fail('for await with obj destruct lhs', {
+          code: 'async function f() { for await ({x} in y) {} }',
+        });
+
+        test.fail('for await with valid strange lhs', {
+          code: 'async function f() { for await ("foo".x in y) {} }',
+        });
+
+        test.fail('for await with valid grouped lhs', {
+          code: 'async function f() { for await ((x) in y) {} }',
+        });
+
+        test.fail('for await with var', {
+          code: 'async function f() { for await (var x in y) {} }',
+        });
+
+        test.fail('for await with let', {
+          code: 'async function f() { for await (let x in y) {} }',
+        });
+
+        test.fail('for await with const', {
+          code: 'async function f() { for await (const x in y) {} }',
+        });
+
         test.fail('lhs assignment', {
           code: 'for (x = 0 in {});',
         });
@@ -1400,7 +1428,7 @@ export default (describe, test) =>
 
         test.fail('lhs plus-prefixed expr', {
           code: 'for (+a().b in c);',
-        })
+        });
 
         test.fail('lhs is void', {
           code: 'for (void a.b in c);',
@@ -1733,37 +1761,124 @@ export default (describe, test) =>
       code: 'for (x in y of z) ;',
     });
 
-    test('for await of', {
-      code: 'for await (x of y) {}',
-      callback(ast, tokens, astJson) { return astJson.includes('"await":true'); },
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ForOfStatement',
-            left: {type: 'Identifier', name: 'x'},
-            right: {type: 'Identifier', name: 'y'},
-            await: true,
-            body: {type: 'BlockStatement', body: []},
-          },
-        ],
-      },
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
+    describe('for-await', _ => {
 
-    test('for await in', {
-      code: 'for await (x in y) {}',
-      throws: 'for await',
-    });
+      test('for await of inside async func', {
+        code: 'async function f(){ for await (x of y) {} }',
+        callback(ast, tokens, astJson) { return astJson.includes('"await":true'); },
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'FunctionDeclaration',
+              generator: false,
+              async: true,
+              id: {type: 'Identifier', name: 'f'},
+              params: [],
+              body: {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ForOfStatement',
+                    left: {type: 'Identifier', name: 'x'},
+                    right: {type: 'Identifier', name: 'y'},
+                    await: true,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
 
-    test('for await loop', {
-      code: 'for await (x;y;z) {}',
-      throws: 'for await',
-    });
+      test.pass('for await of inside async arrow', {
+        code: 'async () => { for await (x of y) {} }',
+      });
 
-    test('for await empty loop', {
-      code: 'for await (;;) {}',
-      throws: 'for await',
+      test.fail('for await cant appear outside of async', {
+        code: 'for await (x of y) {}',
+      });
+
+      test.fail('for await in non-async func', {
+        code: 'function f() { for await (x of y) {} }',
+      });
+
+      test.fail('for await in generator func', {
+        code: 'function *f() { for await (x of y) {} }',
+      });
+
+      test.fail('for await in a non-async func nested in an async function', {
+        code: 'async function f() { function g(){ { for await (x of y) {} } }',
+      });
+
+      test.fail('for await does not support `in` (not async)', {
+        code: 'for await (x in y) {}',
+      });
+
+      test('for await does not support `in` (in async)', {
+        code: 'async function f(){ for await (x in y) {} }',
+        throws: 'for await',
+      });
+
+      test.fail('for await does not support regular loop (no async)', {
+        code: 'for await (x;y;z) {}',
+      });
+
+      test('for await does not support regular loop (in async)', {
+        code: 'async function f(){ for await (x;y;z) {} }',
+        throws: 'for await',
+      });
+
+      test.fail('for await empty loop (not async)', {
+        code: 'for await (;;) {}',
+      });
+
+      test('for await empty loop (in async)', {
+        code: 'async function f(){ for await (;;) {} }',
+        throws: 'for await',
+      });
+
+      test.pass('for await with arr destruct lhs', {
+        code: 'async function f() { for await ([x] of y) {} }',
+      });
+
+      test.pass('for await with obj destruct lhs', {
+        code: 'async function f() { for await ({x} of y) {} }',
+      });
+
+      test.pass('for await with valid strange lhs', {
+        code: 'async function f() { for await ("foo".x of y) {} }',
+      });
+
+      test.pass('for await with var', {
+        code: 'async function f() { for await (var x of y) {} }',
+      });
+
+      test.pass('for await with let', {
+        code: 'async function f() { for await (let x of y) {} }',
+      });
+
+      test.pass('for await with const', {
+        code: 'async function f() { for await (const x of y) {} }',
+      });
+
+      test.pass('for await with valid grouped lhs', {
+        code: 'async function f() { for await ((x) of y) {} }',
+      });
+
+      test.fail('for await in non-async func', {
+        code: 'function f() { for await (x of y) {} }',
+      });
+
+      test.fail('for await in non-async func', {
+        code: 'function f() { for await (x of y) {} }',
+      });
+
+      test.fail('for await in non-async func', {
+        code: 'function f() { for await (x of y) {} }',
+      });
     });
   });
 

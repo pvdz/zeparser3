@@ -653,7 +653,7 @@ export default (describe, test) =>
       });
 
       test.pass('continue to label in for-await', {
-        code: 'foo: for await (x of y) continue foo;',
+        code: 'async function f(){ foo: for await (x of y) continue foo; }',
       });
 
       test.pass('continue to label in nested if', {
