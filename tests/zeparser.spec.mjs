@@ -67,6 +67,7 @@ function read(path, file) {
 }
 if (INPUT_OVERRIDE) {
   console.log('Using override input and only testing that...');
+  console.log('=============================================\n');
 } else {
   read(dir, '');
 }

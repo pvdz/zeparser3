@@ -996,6 +996,9 @@ export default (describe, test) =>
     [
       '({...(obj)} = foo)', // rest arg must be "simple" assignment. parenthesized expr is simple if its arg is. so ok.
       '({...obj} = foo)',
+      '({...obj.x} = foo)',
+      '({...{}.x} = foo)',
+      '({...[].x} = foo)',
     ].forEach((tcase,i) => {
       test.pass('good destruct assign of obj case ' + i, {
         code: tcase,

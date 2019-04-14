@@ -2433,9 +2433,88 @@ export default (describe, test) => describe('parens', _ => {
         });
       });
     });
+
+    describe('destructuring obj rest property for assignments', _ => {
+
+      test.fail('obj rest pattern must be simple', {
+        code: '({...[]} = x);',
+      });
+
+      test.pass('arr rest pattern is more freeform', {
+        code: '([...[]] = x);',
+      });
+
+      test.pass('rest in obj pattern on arr pattern with prop', {
+        code: '({...[].x} = x);',
+      });
+
+      test.pass('rest in obj pattern on ident with prop', {
+        code: '({...a.x} = x);',
+      });
+
+      test.pass('rest in obj pattern on string with prop', {
+        code: '({..."x".x} = x);',
+      });
+
+      test.pass('rest in obj pattern on obj pattern with prop', {
+        code: '({...{}.x} = x);',
+      });
+
+      test.pass('rest in arr pattern on arr pattern with prop', {
+        code: '([...[].x] = x);',
+      });
+
+      test.pass('rest in arr pattern on obj pattern with prop', {
+        code: '([...{}.x] = x);',
+      });
+
+      test.pass('rest in obj pattern on ident with dynamic prop', {
+        code: '({...a[x]} = x);',
+      });
+
+      test.pass('rest in obj pattern on string with dynamic prop', {
+        code: '({..."x"[x]} = x);',
+      });
+
+      test.pass('rest in obj pattern on arr pattern with dynamic prop', {
+        code: '({...[][x]} = x);',
+      });
+
+      test.pass('rest in obj pattern on obj pattern with dynamic prop', {
+        code: '({...{}[x]} = x);',
+      });
+
+      test.pass('rest in arr pattern on arr pattern with dynamic prop', {
+        code: '([...[][x]] = x);',
+      });
+
+      test.pass('rest in arr pattern on obj pattern with dynamic prop', {
+        code: '([...{}[x]] = x);',
+      });
+
+      describe('regression #13, destructuring with arr/obj literal with property', _ => {
+
+        test.pass('obj pattern with property', {
+          code: '({...{b: 0}.x} = {});',
+        });
+
+        test.pass('arr pattern with property', {
+          code: '({...[0].x} = {});',
+        });
+
+        test.pass('obj pattern with dynamic property', {
+          code: '({...{b: 0}[x]} = {});',
+        });
+
+        test.pass('arr pattern with dynamic property', {
+          code: '({...[0][x]} = {});',
+        });
+      });
+    });
   });
 
   describe('arrow', _ => {
+
     test('arrow, one arg without parens, expr', {
       code: 'x=>x;',
       ast: {
@@ -4261,7 +4340,7 @@ export default (describe, test) => describe('parens', _ => {
       });
     });
 
-    describe('regressions #12', _ => {
+    describe('regressions #12, obj pattern with computed props', _ => {
 
       test.pass('object pattern alias can be pattern too', {
         code: '({a,b=b,a:c,[a]:[d]})=>0;',

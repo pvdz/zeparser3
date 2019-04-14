@@ -6744,6 +6744,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - {...x}
     // - {...x, y}
     // - {...x = y, y}
+    // - {...x.x, y}
+    // - {...x.x = y, y}
 
     AST_open(_astProp, 'ObjectExpression');
     AST_set('properties', []);
@@ -7763,18 +7765,30 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         destructible |= CANT_DESTRUCT;
       }
     } else {
-      // The destructibility of the whole expression solely depends on the tail
-      // For example, `foo`, `foo.bar`, `foo().bar`, `{...x}[y]`, are all assignable and therefor assign-destructible
-      destructible = resetDestructibility(destructible);
-
       assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
-
-      let notAssign = curtok.str !== '=';
+      // (If there is no tail the input assignable is returned...)
+      if (isAssignable(assignable)) {
+        // The destructibility of the whole expression solely depends on the tail
+        // For example, `foo`, `foo.bar`, `foo().bar`, `{...x}[y]`, are all assignable and therefor assign-destructible
+        destructible = resetDestructibility(destructible);
+      } else {
+        // This couldn't cause a valid pattern like `[a]` to become invalid just because it had no tail because
+        // if there is no tail the input assignable is returned. So `[a+b]` remains non-assignable.
+        destructible |= CANT_DESTRUCT;
+      }
+      let firstOpNotAssign = curtok.str !== '=';
       if (curc !== $$COMMA_2C && curc !== closingCharOrd) {
-        if (notAssign) destructible |= CANT_DESTRUCT;
+        if (firstOpNotAssign && notAssignable(assignable)) destructible |= CANT_DESTRUCT;
         // From here on out `assignable` is only used to track yield/await state for fringe cases
         assignable |= parseExpressionFromOp(lexerFlags, assignable, astProp);
-      } else if (notAssign) {
+        if (firstOpNotAssign) {
+          // If there was an op it won't be a (regular) assignment and it can't be destructible in any of those cases
+          // - `x, [foo + y, bar] = doo;`
+          destructible |= CANT_DESTRUCT;
+        } else {
+          // - `[x.y = a] = z`
+        }
+      } else if (firstOpNotAssign) {
         if (bindingType !== BINDING_TYPE_NONE || notAssignable(assignable)) {
           // this is a binding with binary operator that is not just `=`
           // - if destructuring a binding, current path is not destructible
@@ -7882,6 +7896,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `[...x = x];`      // (valid but never destructible)
       // - `{...x = x};`      // (valid but never destructible)
 
+      // rest can be a property with assignment destructuring (invalid for arrows/bindings)
+      // - `({...a.x} = x);`
+      // - `([...a.x] = x);`
+      // - `({...a[x]} = x);`
+      // - `([...a[x]] = x);`
+
       // don't update destructible here. assignment is handled at the end of this function (!)
 
       let identToken = curtok;
@@ -7951,23 +7971,36 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // Note: rest param can be on arr/obj
       // - `(...[x,y]) => {}`
       // - `([...[x,y]]) => {}`
+      // rest can be a property with assignment destructuring (invalid for arrows/bindings)
+      // - `({...[]} = x);`        // bad (rest arg must be simple)
+      // - `({...[].x} = x);`
+      // - `([...[].x] = x);`
+      // - `({...[][x]} = x);`
+      // - `([...[][x]] = x);`
       let nowDestruct = parseArrayLiteralPattern(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
       ASSERT(curtok.str !== '=' || (nowDestruct|CANT_DESTRUCT), 'rest can never have default so if there was an assignment dont let it be destructible');
       if (curtok.str !== '=' && curc !== closingCharOrd && curc !== $$COMMA_2C) {
-        nowDestruct = parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, assignable, nowDestruct, closingCharOrd, astProp);
+        // - `({...[].x} = x);`
+        destructible = parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, assignable, nowDestruct, closingCharOrd, astProp);
+      } else {
+        // The rest arg of an _object_ pattern can only be a simple assignment target. The rest of an array pattern
+        // has more freedom. If there is no tail for obj rest then this not destructible.
+        // - `({ ...[x] }) => {}`
+        // - `{...[] = c}`
+        // - `[...[] = c]`
+        if (closingCharOrd === $$CURLY_R_7D && curtok.str !== '=') {
+          destructible |= nowDestruct | CANT_DESTRUCT;
+        } else {
+          destructible |= nowDestruct;
+        }
       }
-      assignable = hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...[x]=y];`
-      destructible |= nowDestruct;
+      assignable = hasAllFlags(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...[x]=y];`
 
       // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
       // (The object rest in any binding pattern can only be a simple ident)
-      if (closingCharOrd === $$CURLY_R_7D) {
-        if (bindingType !== BINDING_TYPE_NONE) {
-          // - `function f({...[a, b]}){}`
-          THROW('The rest argument of an object binding pattern must always be a simple ident and not an object pattern');
-        }
-        // - `({...[x] }) => {}`
-        destructible |= CANT_DESTRUCT;
+      if (closingCharOrd === $$CURLY_R_7D && bindingType !== BINDING_TYPE_NONE) {
+        // - `function f({...[a, b]}){}`
+        THROW('The rest argument of an object binding pattern must always be a simple ident and not an object pattern');
       }
     }
     else if (curc === $$CURLY_L_7B) {
@@ -7981,22 +8014,35 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `(...{x:y}) => {}`
       // - `([...{x:y}]) => {}`
       // (and object)
+      // rest can be a property with assignment destructuring (invalid for arrows/bindings)
+      // - `({...{}} = x);`       // bad (rest arg must be simple)
+      // - `({...{}.x} = x);`
+      // - `([...{}.x] = x);`
+      // - `({...{}[x]} = x);`
+      // - `([...{}[x]] = x);`
       let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, SKIP_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, astProp);
       ASSERT(curtok.str !== '=' || (nowDestruct|CANT_DESTRUCT), 'rest can never have default so if there was an assignment dont let it be destructible');
       if (curtok.str !== '=' && curc !== closingCharOrd && curc !== $$COMMA_2C) {
-        destructible = parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, assignable, destructible, closingCharOrd, astProp);
+        // - `({ ...{}.x } = x);`
+        destructible = parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, assignable, nowDestruct, closingCharOrd, astProp);
+      } else {
+        // The rest arg of an _object_ pattern can only be a simple assignment target. The rest of an array pattern
+        // has more freedom. If there is no tail for obj rest then this not destructible.
+        // - `({ ...{x} }) => {}`
+        // - `{...{} = c}`
+        // - `[...{} = c]`
+        if (closingCharOrd === $$CURLY_R_7D && curtok.str !== '=') {
+          destructible |= nowDestruct | CANT_DESTRUCT;
+        } else {
+          destructible |= nowDestruct;
+        }
       }
       assignable = hasAllFlags(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE; // this is valid: `[...{x}=y];`
-      destructible |= nowDestruct;
       // A param object pattern can only have a rest with ident, this was not just an ident, so assignment pattern only
       // (The object rest in any binding pattern can only be a simple ident)
-      if (closingCharOrd === $$CURLY_R_7D) {
-        if (bindingType !== BINDING_TYPE_NONE) {
-          // - `let {...{a,b}} = foo`
-          THROW('The rest argument of an object binding pattern must always be a simple ident and not an array pattern');
-        }
-        // - `({...{x} }) => {}`
-        destructible |= CANT_DESTRUCT;
+      if (closingCharOrd === $$CURLY_R_7D && bindingType !== BINDING_TYPE_NONE) {
+        // - `let {...{a,b}} = foo`
+        THROW('The rest argument of an object binding pattern must always be a simple ident and not an array pattern');
       }
     }
     else if (curc === closingCharOrd) {
