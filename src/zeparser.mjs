@@ -3006,11 +3006,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_wrapClosed(astProp, 'ForInStatement', 'left');
         if (notAssignable(assignable)) {
           // certain cases were possible in legacy mode
-          if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
-            // TODO: do we need to verify these patterns first...? or is any assignment okay here
-          } else {
+          // if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
+          //   // TODO: do we need to verify these patterns first...? or is any assignment okay here
+          // } else {
             THROW('Left part of for-in must be assignable');
-          }
+          // }
         }
         ASSERT_skipRex('in', lexerFlags);
         // `for (a in b=c) ..`
@@ -3860,18 +3860,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Setters require exactly one parameter');
     }
     if (bindingOrigin === FROM_FOR_HEADER && (curtok.str === 'in' || curtok.str === 'of')) {
+      if (many !== 1) {
+        THROW('For-in and for-of can only have one binding, found ' + many);
+      }
+
+      // https://tc39.github.io/ecma262/#sec-initializers-in-forin-statement-heads
       // binding inits are ONLY okay when;
       // - sloppy mode
       // - web-compat mode
       // - regular var names
       // - for-in statements
       // - `var` binding
-      if (startWasObjectOrArray || curtok.str === 'of' || bindingType !== BINDING_TYPE_VAR || options_webCompat === WEB_COMPAT_OFF || hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-        if (many > 1) {
-          THROW('For-in and for-of can only have one binding, found ' + many);
-        } else if (inited) {
-          THROW('For-in and for-of binding can not have an init');
-        }
+      if (inited && (
+        startWasObjectOrArray ||
+        options_webCompat === WEB_COMPAT_OFF ||
+        bindingType !== BINDING_TYPE_VAR ||
+        curtok.str === 'of' ||
+        hasAllFlags(lexerFlags, LF_STRICT_MODE))
+      ) {
+        THROW('For-in and for-of binding can not have an init');
       }
     }
     return wasSimple;

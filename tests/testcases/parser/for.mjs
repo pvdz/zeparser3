@@ -1363,85 +1363,109 @@ export default (describe, test) =>
         });
       });
 
-      describe('regressions #8', _ => {
-        // As reported by https://github.com/pvdz/zeparser3/issues/8
+      // In web compat assignments are allowed in the lhs of a `for-in` with `var` decl (but that's it)
+      // https://tc39.github.io/ecma262/#sec-initializers-in-forin-statement-heads
+      [true, false].forEach(WEB => describe('webcompat='+WEB, _ => {
 
-        test.fail('lhs rest with trailing comma', {
-          code: 'for ([...x,] in [[]]);',
-        });
+        describe('regressions #8', _ => {
+          // As reported by https://github.com/pvdz/zeparser3/issues/8
 
-        test.pass('lhs empty arr with number init', {
-          code: 'for ([] = 0 in {});',
-        });
+          test.fail('lhs rest with trailing comma', {
+            code: 'for ([...x,] in [[]]);',
+            WEB,
+          });
 
-        test.pass('lhs arr with rest with number init', {
-          code: 'for ([...[a]] = 0 in {});',
-        });
+          test.pass('lhs empty arr with number init', {
+            code: 'for ([] = 0 in {});',
+            WEB,
+          });
 
-        test.pass('lhs obj with init', {
-          code: 'for ({x} = 0 in {});',
-        });
+          test.pass('lhs arr with rest with number init', {
+            code: 'for ([...[a]] = 0 in {});',
+            WEB,
+          });
 
-        test.pass('lhs obj with prop init', {
-          code: 'for ({p: x = 0} = 0 in {});',
-        });
+          test.pass('lhs obj with init', {
+            code: 'for ({x} = 0 in {});',
+            WEB,
+          });
 
-        test.fail('for await with arr destruct lhs', {
-          code: 'async function f() { for await ([x] in y) {} }',
-        });
+          test.pass('lhs obj with prop init', {
+            code: 'for ({p: x = 0} = 0 in {});',
+            WEB,
+          });
 
-        test.fail('for await with obj destruct lhs', {
-          code: 'async function f() { for await ({x} in y) {} }',
-        });
+          test.fail('for await with arr destruct lhs', {
+            code: 'async function f() { for await ([x] in y) {} }',
+            WEB,
+          });
 
-        test.fail('for await with valid strange lhs', {
-          code: 'async function f() { for await ("foo".x in y) {} }',
-        });
+          test.fail('for await with obj destruct lhs', {
+            code: 'async function f() { for await ({x} in y) {} }',
+            WEB,
+          });
 
-        test.fail('for await with valid grouped lhs', {
-          code: 'async function f() { for await ((x) in y) {} }',
-        });
+          test.fail('for await with valid strange lhs', {
+            code: 'async function f() { for await ("foo".x in y) {} }',
+            WEB,
+          });
 
-        test.fail('for await with var', {
-          code: 'async function f() { for await (var x in y) {} }',
-        });
+          test.fail('for await with valid grouped lhs', {
+            code: 'async function f() { for await ((x) in y) {} }',
+            WEB,
+          });
 
-        test.fail('for await with let', {
-          code: 'async function f() { for await (let x in y) {} }',
-        });
+          test.fail('for await with var', {
+            code: 'async function f() { for await (var x in y) {} }',
+            WEB,
+          });
 
-        test.fail('for await with const', {
-          code: 'async function f() { for await (const x in y) {} }',
-        });
+          test.fail('for await with let', {
+            code: 'async function f() { for await (let x in y) {} }',
+            WEB,
+          });
 
-        test.fail('lhs assignment', {
-          code: 'for (x = 0 in {});',
-        });
+          test.fail('for await with const', {
+            code: 'async function f() { for await (const x in y) {} }',
+            WEB,
+          });
 
-        test.fail('lhs dynamic property assignment', {
-          code: 'for(o[0] = 0 in {});',
-        });
+          test.fail('lhs assignment', {
+            code: 'for (x = 0 in {});',
+            WEB,
+          });
 
-        test.fail('lhs paren wrapped unary increment', {
-          code: 'for ((a++) in c);',
-        });
+          test.fail('lhs dynamic property assignment', {
+            code: 'for(o[0] = 0 in {});',
+            WEB,
+          });
 
-        test.fail('lhs plus-prefixed expr', {
-          code: 'for (+a().b in c);',
-        });
+          test.fail('lhs paren wrapped unary increment', {
+            code: 'for ((a++) in c);',
+            WEB,
+          });
 
-        test.fail('lhs is void', {
-          code: 'for (void a.b in c);',
-        });
+          test.fail('lhs plus-prefixed expr', {
+            code: 'for (+a().b in c);',
+            WEB,
+          });
 
-        test.fail('lhs is regex', {
-          code: 'for (/foo/ in {});',
-        });
+          test.fail('lhs is void', {
+            code: 'for (void a.b in c);',
+            WEB,
+          });
 
-        test.pass('sneaky lhs contains `in`', {
-          code: 'for ((a in b).x in {});',
+          test.fail('lhs is regex', {
+            code: 'for (/foo/ in {});',
+            WEB,
+          });
+
+          test.pass('sneaky lhs contains `in`', {
+            code: 'for ((a in b).x in {});',
+            WEB,
+          });
         });
-      });
+      }));
     });
 
     describe('for-of', _ => {
