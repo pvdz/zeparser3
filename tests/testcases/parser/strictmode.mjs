@@ -1246,4 +1246,23 @@ export default (describe, test) =>
         code: 'x = (y = "foo\\003bar") => { "use strict"; }',
       });
     });
+
+    describe('octal cases, regressions from #15', _ => {
+
+      test.fail_strict('octal in sloppy mode function', {
+        code: 'function foo() { 00004; }',
+      });
+
+      test.fail('octal in strict mode function with directive', {
+        code: 'function foo() { "use strict"; 00004; }',
+      });
+
+      test.fail('function with octal as name', {
+        code: 'function 00004() { "use strict"; 00004; }',
+      });
+
+      test.fail('function with octals as parameter names', {
+        code: 'function foo(001, 003) { "use strict"; }',
+      });
+    });
   });
