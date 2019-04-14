@@ -2,6 +2,7 @@ import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR} from '../../../src/zetokenizer';
 
 export default (describe, test) =>
   describe('call expression', _ => {
+
     test('function call, no args', {
       code: 'foo()',
       ast: {
@@ -277,6 +278,67 @@ export default (describe, test) =>
             code: 'foo(...a,);',
             ES,
           });
+        });
+      });
+    });
+
+    describe('calling with a pattern, reported in #14', _ => {
+      // The object must be a pattern because of the assignment
+
+      describe('with plain func name', _ => {
+
+        test.pass('when the object is an expression', {
+          code: 'foo({a})',
+        });
+
+        test.fail('when the object must be a pattern (shorthand+assignment)', {
+          code: 'foo({a=1})',
+        });
+
+        test.fail('patterns AND assignment patterns', {
+          code: 'foo({a=1}. {b=2}, {c=3} = {}))',
+        });
+
+        test.pass('as an assignment pattern the whole thing is a valid parameter again', {
+          code: 'foo({c=3} = {})',
+        });
+      });
+
+      describe('when the func name is `async`', _ => {
+
+        test.pass('when the object is an expression', {
+          code: 'async({a})',
+        });
+
+        test.fail('when the object must be a pattern (shorthand+assignment)', {
+          code: 'async({a=1})',
+        });
+
+        test.fail('patterns AND assignment patterns', {
+          code: 'async({a=1}. {b=2}, {c=3} = {}))',
+        });
+
+        test.pass('as an assignment pattern the whole thing is a valid parameter again', {
+          code: 'async({c=3} = {})',
+        });
+      });
+
+      describe('when the func name is `yield`', _ => {
+
+        test.fail_strict('when the object is an expression', {
+          code: 'yield({a})',
+        });
+
+        test.fail('when the object must be a pattern (shorthand+assignment)', {
+          code: 'yield({a=1})',
+        });
+
+        test.fail('patterns AND assignment patterns', {
+          code: 'yield({a=1}. {b=2}, {c=3} = {}))',
+        });
+
+        test.fail_strict('as an assignment pattern the whole thing is a valid parameter again', {
+          code: 'yield({c=3} = {})',
         });
       });
     });

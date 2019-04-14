@@ -1569,9 +1569,8 @@ export default (describe, test) => describe('parens', _ => {
       throws: 'missing an argument',
     });
 
-    test('invalid spread/rest', {
+    test.fail('invalid spread/rest', {
       code: '(...x);',
-      throws: 'followed by an arrow',
     });
 
     test('empty group at eof', {

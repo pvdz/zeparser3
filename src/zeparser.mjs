@@ -6080,17 +6080,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     lexerFlags = lexerFlagsBeforeParen; // ASI can happen again
     verifyDestructible(destructible);
 
-    if (asyncToken !== UNDEF_ASYNC) {
-      // `async(a);`
-      // `async(a = await x);`
-      // `async(a) => x`
-      // `async(a = await x) => x`
-      return parseAfterAsyncGroup(lexerFlags, paramScoop, asyncStmtOrExpr, allowAssignment, simpleArgs, toplevelComma, newlineAfterAsync, destructible, false, asyncToken, assignable, rootAstProp);
-    }
+    let isArrow = curtok.str === '=>';
 
-    if (curtok.str === '=>') {
-      // arrow function
-      // `(a) => {}`
+    // First deal with arrow-error cases. But don't parse as async just yet (this is to dedupe the error checks)
+    if (isArrow) {
+      // These are soe errors for async and plain arrows
 
       if (curtok.nl) {
         // we can safely throw here because there's no way that the `=>` token is valid without an arrow header
@@ -6119,6 +6113,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // The param name/default containing await/yield checks are done elsewhere...
       ASSERT(!(hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME) && (hasAllFlags(lexerFlags, LF_IN_ASYNC) || goalMode === GOAL_MODULE)), 'async arrows dont reach this place and nested in an async arrow triggers somewhere else so I dont think this case can occur');
       ASSERT(!(hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME) && hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE)), 'these checks occur elsewhere and I cant come up with a covering test case');
+    } else if (hasAllFlags(destructible, MUST_DESTRUCT)) {
+      THROW('Group contained a value that must destruct but this was not an arrow so it is invalid');
+    }
+
+    if (asyncToken !== UNDEF_ASYNC) {
+      // `async(a);`
+      // `async(a = await x);`
+      // `async(a) => x`
+      // `async(a = await x) => x`
+      return parseAfterAsyncGroup(lexerFlags, paramScoop, asyncStmtOrExpr, allowAssignment, simpleArgs, toplevelComma, newlineAfterAsync, destructible, false, asyncToken, assignable, rootAstProp);
+    }
+
+    if (isArrow) {
+      // arrow function
+      // `(a) => {}`
 
       parseArrowAfterGroup(lexerFlags, paramScoop, simpleArgs, toplevelComma, asyncToken, rootAstProp);
       // we just parsed an arrow. Whatever the state of await/yield was we can ignore that here.

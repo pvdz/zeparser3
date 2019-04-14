@@ -1585,14 +1585,26 @@ export default (describe, test) =>
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
           });
 
-          test('asi check async newline arrow', {
+          test.fail('asi check async newline arrow', {
             code: 'let x = typeof async \n (x) => x',
-            throws: 'async',
           });
 
           test('asi check async paren newline arrow', {
             code: 'let x = typeof async (x) \n => x',
             throws: 'arrow',
+          });
+
+          test.fail('asi check typeof async arrow no newline', {
+            code: 'let x = typeof async (x) => x',
+            desc: 'arrow is assignment expression which is not valid as unary arg',
+          });
+
+          test.fail('asi check async boxed newline arrow', {
+            code: 'let x = [typeof async \n (x) => x]',
+          });
+
+          test.fail('asi check async boxed paren newline arrow', {
+            code: 'let x = [typeof async (x) \n => x]',
           });
         });
 
@@ -1735,14 +1747,20 @@ export default (describe, test) =>
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
           });
 
-          test('asi check async newline arrow', {
+          test.fail('asi check async newline arrow', {
             code: 'let x = delete async \n (x) => x',
-            throws: 'async',
           });
 
-          test('asi check async paren newline arrow', {
+          test.fail('asi check async paren newline arrow', {
             code: 'let x = delete async (x) \n => x',
-            throws: 'arrow',
+          });
+
+          test.fail('boxed asi check async newline arrow', {
+            code: 'let x = [delete async \n (x) => x]',
+          });
+
+          test.fail('boxed asi check async paren newline arrow', {
+            code: 'let x = [delete async (x) \n => x]',
           });
         });
 

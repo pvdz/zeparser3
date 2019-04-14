@@ -1,7 +1,9 @@
 import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer';
 
 export default (describe, test) =>
+
   describe('unary ops', _ => {
+
     describe('positive prefix +x', _ => {
       test('statement', {
         code: '+a',
@@ -1235,6 +1237,48 @@ export default (describe, test) =>
       });
     });
 
+    describe('typeof', _ => {
+
+      test('base', {
+        code: 'typeof x',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'UnaryExpression',
+                operator: 'typeof',
+                prefix: true,
+                argument: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $ASI],
+      });
+
+      describe('reported in #14', _ => {
+        // for the sake of completeness (the actual problem is about using a pattern with a func call)
+
+        test.pass('counter-example where the object is not (necessarily) a pattern', {
+          code: 'typeof async({a});',
+        });
+
+        test.fail('1', {
+          code: 'typeof async({a = 1});',
+        });
+
+        test.fail('2', {
+          code: 'typeof async({a = 1}, {b = 2}, {c = 3} = {});',
+        });
+
+        test.fail('3', {
+          code: 'typeof async({a = 1}, {b = 2} = {}, {c = 3} = {});',
+        });
+      })
+    });
+
     describe('ambiguity', _ => {
       describe('as statement', _ => {
         test('asi before', {
@@ -1488,6 +1532,30 @@ export default (describe, test) =>
     describe('precedent', _ => {
 
       test('operator should not consume binaries', {
+        code: 'typeof x + y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'UnaryExpression',
+                  operator: 'typeof',
+                  prefix: true,
+                  argument: {type: 'Identifier', name: 'x'},
+                },
+                operator: '+',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('cannot unary an async ', {
         code: 'typeof x + y',
         ast: {
           type: 'Program',
