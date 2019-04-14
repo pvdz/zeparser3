@@ -307,6 +307,18 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       console.log('Expected error message to contain: "' + expectedThrows + '"');
       ++fail;
     }
+  } else if (INPUT_OVERRIDE) {
+    console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
+    ++pass;
+    console.log('ast:', formatAst(obj.ast) + ',');
+    console.log(
+      'tokens: [$' +
+      obj.tokens
+      .slice(0, -1)
+      .map(o => debug_toktype(o.type))
+      .join(', $') +
+      '],',
+    );
   } else if (expectedThrows) {
     ++fail;
     LOG_THROW('_failed_ to throw ANY error', code, '', desc, true);
@@ -346,6 +358,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     let mustVerify = checkAST && expectedAst !== true;
     let expectedJson = mustVerify && JSON.stringify(expectedAst); // note: do not ignore prop order because there are perf implications if the order is not fixed
     let actualJson = (mustVerify || expectedCallback !== undefined) && JSON.stringify(obj.ast);
+
     if (mustVerify && expectedJson !== actualJson) {
       let missingAst = expectedJson === '{"<not given>":true}';
 
@@ -354,10 +367,10 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       console.log('Actual ast:', formatAst(obj.ast) + ',');
       console.log(
         'tokens: [$' +
-        obj.tokens
-        .slice(0, -1)
-        .map(o => debug_toktype(o.type))
-        .join(', $') +
+          obj.tokens
+            .slice(0, -1)
+            .map(o => debug_toktype(o.type))
+            .join(', $') +
         '],',
       );
 

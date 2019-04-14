@@ -5031,8 +5031,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(assignable !== 0, 'every branch that breaks should update this');
 
-    parseAfterVarName(lexerFlags, identToken, assignable, allowAssignment, astProp);
-    return assignable;
+    return parseAfterVarName(lexerFlags, identToken, assignable, allowAssignment, astProp);
   }
   function parseValueHeadBodyAfterIdent(lexerFlags, identToken, bindingType, allowAssignment, astProp) {
     ASSERT(parseValueHeadBodyAfterIdent.length === arguments.length, 'expecting args');
@@ -5115,8 +5114,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     ASSERT(assignable !== 0, 'everything that breaks should update this');
 
-    parseAfterVarName(lexerFlags, identToken, assignable, allowAssignment, astProp);
-    return assignable;
+    return parseAfterVarName(lexerFlags, identToken, assignable, allowAssignment, astProp);
   }
 
   function verifyEvalArgumentsVar(lexerFlags) {
@@ -5412,7 +5410,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC) && identToken.str === 'yield') THROW('Yield in generator is keyword');
       // TODO: same for await?
       ASSERT(isAssignable(assignable), 'not sure whether an arrow can be valid if the arg is marked as non-assignable');
-      return parseArrowParenlessFromPunc(lexerFlags, identToken, astProp);
+      parseArrowParenlessFromPunc(lexerFlags, identToken, astProp);
+      return NOT_ASSIGNABLE;
     } else {
       AST_setIdent(astProp, identToken);
       return assignable;
@@ -5441,7 +5440,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_setIdent('params', identToken);
     parseArrowFromPunc(lexerFlags, paramScoop, NOT_ASYNC, ARGS_SIMPLE);
     AST_close('ArrowFunctionExpression');
-    return NOT_ASSIGNABLE;
   }
 
   function parseTickExpression(lexerFlags, astProp) {
@@ -6902,6 +6900,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `({ident,`
     // - `({ident:ident`
     // - `({ident:expr`
+    // - `({ident:()=>x)`
     // - `({ident(){}`
     // - `({get ident(){}`    (or set/async)
     // - `({get *ident(){}`   (or set, and I think by now async too?)

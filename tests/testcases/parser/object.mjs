@@ -8556,4 +8556,23 @@ export default (describe, test) =>
         });
       });
     });
+
+    describe('invalid destructuring assignments (#16)', _ => {
+
+      test.fail('obj pattern with value being an arrow', {
+        code:'({a: b => []} = [2])',
+      });
+
+      test.fail('obj pattern with "shorthand" being an arrow', {
+        code:'({b => []} = [2])',
+      });
+
+      test.fail('obj pattern with value being an addition', {
+        code:'({a: b + c} = [2])',
+      });
+
+      test.fail('obj pattern with value of a computed property being an arrow', {
+        code:'({[a]: b => []} = [2])',
+      });
+    });
   });
