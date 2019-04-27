@@ -2566,6 +2566,34 @@ export default (describe, test) =>
       test.pass('can do async call', {
         code: 'delete async(x);',
       });
+
+      describe('assignment expressions as arg', _ => {
+
+        test.fail('new argless arrow', {
+          code: 'new ()=>{}',
+        });
+
+        test.fail('new parenless arrow', {
+          code: 'new x=>{}',
+        });
+
+        test.fail('new arrow', {
+          code: 'new (x)=>{}',
+        });
+
+        test.fail_strict('new yield var', {
+          code: 'new yield',
+        });
+
+        test.fail('new yield keyword', {
+          code: 'function *f(){ new yield }',
+        });
+
+        test.pass('new ternary', {
+          code: 'new a ? b : c  ',
+          desc: 'fine because `new` is stronger than `?`'
+        });
+      });
     });
 
     describe('new.target', _ => {

@@ -732,9 +732,8 @@ export default (describe, test) =>
           code: 'function *g() { yield = {}; }',
         });
 
-        test('in assigned group', {
+        test.fail('in assigned group', {
           code: 'function *g() { (x = yield) = {}; }',
-          throws: 'invalid assignment',
         });
 
         test.fail('as parenless arg name', {
@@ -794,6 +793,10 @@ export default (describe, test) =>
           code: 'function *g() { (x = x + yield); }',
           desc: 'yield inside generator is never a var',
           throws: true,
+        });
+
+        test.fail_strict('yield as varname rhs should work', {
+          code: '(x = x + yield);',
         });
 
         test('group yield as rhs with arg', {

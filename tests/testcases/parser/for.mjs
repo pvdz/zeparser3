@@ -275,6 +275,86 @@ export default (describe, test) =>
           code: 'for ([].bar = x ;;);',
         });
       });
+
+      describe('lhs assign expr edge cases', _ => {
+
+        test.pass('parenless arrow lhs', {
+          code: 'for (x=>{};;);',
+        });
+
+        test.pass('arrow lhs', {
+          code: 'for ((x)=>{};;);',
+        });
+
+        test.pass('grouped arrow lhs', {
+          code: 'for (((x)=>{}) ;;);',
+        });
+
+        test.pass('grouped arrow.prop lhs', {
+          code: 'for (((x)=>{}).x ;;);',
+        });
+
+        test.fail_strict('yield var lhs', {
+          code: 'for (yield;;);',
+        });
+
+        test.pass('yield keyword lhs', {
+          code: 'function *f(){ for (yield;;); }',
+        });
+
+        test.fail('arrow expr with `in` should fail', {
+          code: 'for (x=>x in y;;);',
+          desc: 'because the parser should be greedy (otoh the arrow can only be valid in regular loop so theres no ambiguity once the arrow is seen...)',
+          /*
+          https://tc39.github.io/ecma262/#sec-statements
+          Note: +In means "is allowed", ~In means "not allowed", without prefix means "same as input"
+
+          IterationStatement[Yield, Await, Return]:
+            for([lookahead ≠ let []Expression[~In, ?Yield, ?Await]opt ; ; ) ;
+          Expression[In, Yield, Await]:
+            AssignmentExpression[?In, ?Yield, ?Await]
+          AssignmentExpression[In, Yield, Await]:
+            ArrowFunction[?In, ?Yield, ?Await]
+          ArrowFunction[In, Yield, Await]:
+            ArrowParameters[?Yield, ?Await][no LineTerminator here]=>ConciseBody[?In]
+          ConciseBody[In]:
+            [lookahead ≠ {]AssignmentExpression[?In, ~Yield, ~Await]
+            {FunctionBody[~Yield, ~Await]}
+
+          So a block-arrow doesn't care but an expression arrow propagates the `in` flag and disallows it in the
+          expression, just like a regular lhs would. So it's not allowed.
+           */
+        });
+
+        test.pass('arrow body with `in` should pass', {
+          code: 'for (x=>{x in y};;);',
+          desc: 'counter test to previous one',
+        });
+
+        test.pass('yield no-arg lhs', {
+          code: 'function *f(){   for (yield;;);   }',
+        });
+
+        test.pass('yield arg lhs', {
+          code: 'function *f(){   for (yield x;;);   }',
+        });
+
+        test.fail('yield arg with `in` lhs', {
+          code: 'function *f(){   for (yield x in y;;);   }',
+        });
+
+        test.pass('ternary in lhs', {
+          code: 'for (a ? b : c;;);',
+        });
+
+        test.pass('assignment in lhs', {
+          code: 'for (a = b;;);',
+        });
+
+        test.pass('compound assignment in lhs', {
+          code: 'for (a += b;;);',
+        });
+      });
     });
 
     describe('var decls', _ => {
@@ -1466,6 +1546,63 @@ export default (describe, test) =>
           });
         });
       }));
+
+      describe('lhs edge cases', _ => {
+
+        test.fail('parenless arrow lhs', {
+          code: 'for (x=>{} in y);',
+        });
+
+        test.fail('parenless arrow crap lhs', {
+          code: 'for (x=>{}.x in y);',
+        });
+
+        test.fail('arrow lhs', {
+          code: 'for ((x)=>{} in y);',
+        });
+
+        test.fail('grouped arrow lhs', {
+          code: 'for (((x)=>{}) in y);',
+        });
+
+        test.pass('grouped arrow.prop lhs', {
+          code: 'for (((x)=>{}).x in y);',
+        });
+
+        test.fail('arrow crap lhs', {
+          code: 'for ((x)=>{}.x in y);',
+        });
+
+        test.fail_strict('yield no-arg lhs', {
+          code: 'for (yield in x);',
+        });
+
+        test.fail('yield no-arg lhs', {
+          code: 'function *f(){   for (yield in y);   }',
+        });
+
+        test.fail('yield arg lhs', {
+          code: 'function *f(){   for (yield x in y);   }',
+        });
+
+        test.fail('yield arg with `in` lhs', {
+          code: 'function *f(){   for (yield x in y in z);   }',
+        });
+
+        test.fail('ternary in lhs', {
+          code: 'for (a ? b : c in x);',
+        });
+
+        test.fail('assignment in lhs', {
+          code: 'for (a = b in x);',
+        });
+
+        test.fail('compound assignment in lhs', {
+          code: 'for (a += b in x);',
+        });
+
+        // what about `for ([x]=y in z);`, is that an exception? would it break if we can assignment exprs in lhs?
+      });
     });
 
     describe('for-of', _ => {
@@ -1763,6 +1900,71 @@ export default (describe, test) =>
         test.pass('sneaky lhs contains `in`', {
           code: 'for ((a in b).x of {});',
         });
+      });
+
+      describe('lhs edge cases', _ => {
+
+        test.fail('parenless arrow lhs', {
+          code: 'for (x=>{} of y);',
+        });
+
+        test.fail('parenless arrow crap lhs', {
+          code: 'for (x=>{}.x of y);',
+        });
+
+        test.fail('arrow lhs', {
+          code: 'for ((x)=>{} of y);',
+        });
+
+        test.fail('grouped arrow lhs', {
+          code: 'for (((x)=>{}) of y);',
+        });
+
+        test.pass('grouped arrow.prop lhs', {
+          code: 'for (((x)=>{}).x of y);',
+        });
+
+        test.fail('arrow crap lhs', {
+          code: 'for ((x)=>{}.x of y);',
+        });
+
+        test.fail_strict('yield no-arg lhs', {
+          code: 'for (yield of x);',
+        });
+
+        test.fail('yield keyword lhs', {
+          code: 'function *f(){ for (yield of obj); }',
+        });
+
+        test.fail('yield no-arg lhs', {
+          code: 'function *f(){   for (yield of y);   }',
+        });
+
+        test.fail('yield arg lhs', {
+          code: 'function *f(){   for (yield x of y);   }',
+        });
+
+        test.fail('yield arg with `in` lhs', {
+          code: 'function *f(){   for (yield x in y of z);   }',
+        });
+
+        test.fail('ternary in lhs', {
+          code: 'for (a ? b : c of x);',
+        });
+
+        test.fail('ternary in lhs', {
+          code: 'for (a ? b : c of x);',
+        });
+
+        test.fail('assignment in lhs', {
+          code: 'for (a = b of x);',
+        });
+
+        test.fail('compound assignment in lhs', {
+          code: 'for (a += b of x);',
+        });
+
+        // what about `for ([x]=y of z);`, is that an exception? would it break if we can assignment exprs in lhs?
       });
 
       // TODO: cases for yield and await as rhs

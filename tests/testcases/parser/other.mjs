@@ -10,7 +10,27 @@ export default (describe, test) =>
     });
 
     test.pass('reading from eval', {
-      code: 'eval; log(eval); eval.foo; eval[foo]; eval.foo = bar; eval[foo] = bar;',
+      code: 'eval',
+    });
+
+    test.pass('reading from eval', {
+      code: 'log(eval)',
+    });
+
+    test.pass('reading from eval', {
+      code: 'eval.foo',
+    });
+
+    test.pass('reading from eval', {
+      code: 'eval[foo]',
+    });
+
+    test.pass('reading from eval', {
+      code: 'eval.foo = bar',
+    });
+
+    test.pass('reading from eval', {
+      code: 'eval[foo] = bar',
     });
 
     test.pass('reading from arguments', {

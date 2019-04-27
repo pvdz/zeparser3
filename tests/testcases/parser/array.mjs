@@ -785,9 +785,8 @@ export default (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('only destructuring inside an expr with assignmentpattern', {
+      test.fail('can not wrap the whole lhs pattern in parens when assignment destructuring', {
         code: '([foo]) = arr;',
-        throws: 'Invalid assignment',
       });
 
       test('spread with ident with tail is ok', {

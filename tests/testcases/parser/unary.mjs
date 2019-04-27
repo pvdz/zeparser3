@@ -68,6 +68,7 @@ export default (describe, test) =>
     });
 
     describe('incremental prefix', _ => {
+
       describe('sans newline', _ => {
         test('base', {
           code: '++a',
@@ -440,6 +441,22 @@ export default (describe, test) =>
 
       test.pass('property of keyword as expr', {
         code: '(++this.x)',
+      });
+
+      test.pass('left of ternary', {
+        code: '++x ? b : c',
+      });
+
+      test.fail('left of assignment', {
+        code: '++x = y',
+      });
+
+      test.fail('left of parenless arrow', {
+        code: '++x => b',
+      });
+
+      test.fail('left of paren arrow', {
+        code: '++(x) => b',
       });
     });
 

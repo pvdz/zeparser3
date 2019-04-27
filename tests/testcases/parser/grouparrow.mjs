@@ -429,10 +429,9 @@ export default (describe, test) => describe('parens', _ => {
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
 
-      test('assignment to grouped array is not okay', {
+      test.fail('assignment to grouped array is not okay', {
         code: '([x, y]) = z;',
         desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
-        throws: 'Invalid assignment',
       });
 
       test('assignment to array grouped is destructuring', {
@@ -676,10 +675,9 @@ export default (describe, test) => describe('parens', _ => {
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('assignment to grouped array is not okay', {
+      test.fail('assignment to grouped array is not okay', {
         code: '({x, y}) = z;',
         desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
-        throws: 'Invalid assignment',
       });
     });
 
@@ -1583,10 +1581,9 @@ export default (describe, test) => describe('parens', _ => {
       throws: 'Empty group',
     });
 
-    test('grouped assignment is _not_ a valid assignment target', {
+    test.fail('grouped assignment is _not_ a valid assignment target', {
       code: '(a=1)=2',
       desc: 'https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
-      throws: 'Invalid assignment',
     });
 
     test('grouped compound assignment is _not_ a valid assignment target', {
@@ -3858,9 +3855,8 @@ export default (describe, test) => describe('parens', _ => {
       tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    test('cannot assign to group with assignment', {
+    test.fail('cannot assign to group with assignment', {
       code: '(a=/i/) = /i/',
-      throws: 'Invalid assignment',
     });
 
     describe('invalid arrow header things', _ => {

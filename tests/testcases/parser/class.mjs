@@ -4099,6 +4099,13 @@ export default (describe, test) =>
       code: 'f = ([cls = class {}, xCls = class X {}, xCls2 = class { static name() {} }]) => {}',
     });
 
+    // test.fail('class extending an arrow', {
+    //   code: [
+    //     'class x extends ()=>{} {}',
+    //     'class x extends ()=>1 {}',
+    //   ],
+    // });
+
     // export default class extends F {}
     // class extends {} {}
     // async constructor ?

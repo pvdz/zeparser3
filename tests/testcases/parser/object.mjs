@@ -8559,6 +8559,22 @@ export default (describe, test) =>
 
     describe('invalid destructuring assignments (#16)', _ => {
 
+      test.pass('make sure init isnt clobbered', {
+        code:'({a: b = c} = [2])',
+      });
+
+      test.pass('init to group on simple assignment', {
+        code:'({a: (b) = c} = [2])',
+      });
+
+      test.pass('group that ends with property is simple too', {
+        code:'({a: (b).c} = [2])',
+      });
+
+      test.pass('group with prop with default', {
+        code:'({a: (b).c = d} = [2])',
+      });
+
       test.fail('obj pattern with value being an arrow', {
         code:'({a: b => []} = [2])',
       });

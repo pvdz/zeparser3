@@ -991,7 +991,7 @@ export default (describe, test) =>
 
       test('cannot assign to grouped eval', {
         code: '(eval) = x;',
-        throws: 'Invalid assignment', // because `eval` is not assignable
+        throws: true, // Invalid assignment because `eval` is not assignable
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',
@@ -1013,7 +1013,7 @@ export default (describe, test) =>
 
       test('should not pass because of newline / asi', {
         code: '(eval)\n = x;',
-        throws: 'Invalid assignment', // applies ASI but then hits a wall
+        throws: true, // Invalid assignment, applies ASI but then hits a wall because `eval` is not assignable
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',
