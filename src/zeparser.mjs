@@ -4486,15 +4486,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(curtok.str !== 'function');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
+    if (fromStmtOrExpr === IS_STATEMENT) {
+      AST_open(astProp, 'ExpressionStatement');
+      astProp = 'expression'
+    }
+
     if (curtok.str === 'await') {
       // - `async await => {}`
       THROW('Cannot use `await` as an arg name with async arrows');
     }
 
-    if (fromStmtOrExpr === IS_STATEMENT) {
-      AST_open(astProp, 'ExpressionStatement');
-      astProp = 'expression'
-    }
     AST_open(astProp, 'ArrowFunctionExpression');
     AST_set('params', []);
 
@@ -5479,9 +5480,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // assume an identifier has just been parsed and that it should be considered a regular var name
     // (in the case of `await`, consider it a regular var)
     if (curc === $$IS_3D && curtok.str === '=>') {
-      if (curtok.nl) THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
-      if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC) && identToken.str === 'yield') THROW('Yield in generator is keyword');
-      // TODO: same for await?
       ASSERT(isAssignable(assignable), 'not sure whether an arrow can be valid if the arg is marked as non-assignable');
       parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, astProp);
       return NOT_ASSIGNABLE;
@@ -5496,6 +5494,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(curtok.str === '=>', 'punc is arrow');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
+    if (curtok.nl) THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
+    if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC) && identToken.str === 'yield') THROW('Yield in generator is keyword');
+
+    // arrow with single param
+    AST_open(astProp, 'ArrowFunctionExpression');
+    AST_set('params', []);
+
     // - `x => x`
     let arrowScoop = SCOPE_create('parseArrowParenlessFromPunc');
     let paramScoop = SCOPE_addLexTo(arrowScoop, ARG_SCOPE, 'parseArrowParenlessFromPunc(arg)');
@@ -5508,10 +5513,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Cannot use `await` as an arrow parameter name inside another async function');
     }
 
-    // arrow with single param
-    AST_open(astProp, 'ArrowFunctionExpression');
-    AST_set('params', []);
     AST_setIdent('params', identToken);
+
     parseArrowFromPunc(lexerFlags, paramScoop, NOT_ASYNC, allowAssignment, ARGS_SIMPLE);
     AST_close('ArrowFunctionExpression');
   }
@@ -5929,10 +5932,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags); // next must be `=>`
 
-      lexerFlags = lexerFlagsBeforeParen; // reset no_asi state to before the group
       if (curtok.str !== '=>') {
-        THROW('Empty group must indicate an arrow, async(), or await()');
-      } else if (curtok.nl) {
+        THROW('Empty group must indicate an arrow, async(), or call()');
+      }
+
+      lexerFlags = lexerFlagsBeforeParen; // reset no_asi state to before the group
+
+      if (curtok.nl) {
         // arrows with newlines are always an error
         // - `() \n => x`
         THROW('The arrow token `=>` is a restricted production and cannot have a newline preceding it');
