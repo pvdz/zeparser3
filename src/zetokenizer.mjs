@@ -512,6 +512,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   }
   // </SCRUB ASSERTS>
 
+  let startForError = 0;
   function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=RETURN_SOLID_TOKENS) {
     ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
     ASSERT(!finished, 'should not next() after eof token');
@@ -522,7 +523,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       ++anyTokenCount;
       if (neof()) {
         let cstart = cache;
-        let start = pointer;
+        let start = startForError = pointer; // TODO: see if startForError makes a dent at all
         wasWhite = false;
         let consumedTokenType = next(lexerFlags);
         token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite, cstart);
@@ -3302,22 +3303,43 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     }
   }
 
-  function THROW(str) {
+  function THROW(str, token = null) {
     console.error('Throwing this error:', str);
-    _THROW('Tokenizer error! ' + str);
+    _THROW('Tokenizer error! ' + str, token);
   }
-  function _THROW(str) {
+  function _THROW(str, token = null) {
     console.log('\n');
-    console.log('Error at #|#\n' + GETPOS('#|#'));
+    console.log('Error at #|#\n' + GETPOS('#|#', token));
     if (gracefulErrors === FAIL_HARD) throw new Error(str);
     else console.error(str);
   }
   function DEBUG() {
     return 'Tokenizer at #|#\n' + GETPOS('#|#');
   }
-  function GETPOS(sep) {
-    if (input.length < 100) return '```\n' + slice(0, pointer) + sep + slice(pointer, input.length) + '\n```';
-    return '```\n' + slice(Math.max(0, pointer - 20), pointer) + sep + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
+  function GETPOS(sep, token) {
+    let offset = token ? token.start : startForError;
+    let inputOffset = offset > 100 ? offset - 100 : 0;
+    if (inputOffset) offset -= inputOffset;
+    let usedInput = input.slice(inputOffset, inputOffset + 200);
+
+    let nl1 = offset && (usedInput.lastIndexOf('\n', offset) + 1);
+    let nl2 = usedInput.indexOf('\n', nl1);
+    if (nl2 < 0) nl2 = usedInput.length;
+    let arrows = Math.max(1, token ? token.str.length : 1);
+
+    let indent = offset - (nl1);
+
+    return (
+      usedInput.slice(0, nl2) + '\n' +
+      ' '.repeat(Math.max(0, indent)) +
+      '^'.repeat(Math.max(0, arrows)) +
+      '------- error'+(offset>=usedInput.length?' at EOF':'') + '\n' +
+      usedInput.slice(nl2) +
+      ''
+    );
+
+    // if (input.length < 100) return '```\n' + slice(0, pointer) + sep + slice(pointer, input.length) + '\n```';
+    // return '```\n' + slice(Math.max(0, pointer - 20), pointer) + sep + slice(pointer, Math.min(len, pointer + 20)) + '\n```';
   }
 
   nextToken.asi = addAsi;

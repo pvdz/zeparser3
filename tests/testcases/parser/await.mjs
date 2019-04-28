@@ -1124,6 +1124,14 @@ export default (describe, test) =>
             test.fail('async generator class method', {
               code: 'class x {async *f(foo = await bar){}}',
             });
+
+            test.fail('await can be unary arg 1', {
+              code: 'function f(foo = +await bar){}',
+            });
+
+            test.fail('await can be unary arg 2', {
+              code: 'async function f(foo = +await bar){}',
+            });
           });
 
           describe('non-arrow, complex nested await', _ => {
@@ -1191,6 +1199,14 @@ export default (describe, test) =>
             test.fail('async generator class method', {
               code: 'class x {async *f(foo = [{m: t(await bar)}]){}}',
             });
+
+            test.fail('await can be unary arg 1', {
+              code: 'function f(foo = [{m: t(+await bar)}]){}',
+            });
+
+            test.fail('await can be unary arg 2', {
+              code: 'async function f(foo = [{m: t(+await bar)}]){}',
+            });
           });
 
           describe('arrow, just an await', _ => {
@@ -1230,6 +1246,14 @@ export default (describe, test) =>
             test.fail('async destructuring arr args call', {
               code: 'async ([x] = await bar);',
             });
+
+            test.fail('await can be unary arg 1', {
+              code: '(foo = +await bar) => {}',
+            });
+
+            test.fail('await can be unary arg 1', {
+              code: 'async (foo = +await bar) => {}',
+            });
           });
 
           describe('arrow, complex await', _ => {
@@ -1268,6 +1292,14 @@ export default (describe, test) =>
 
             test.fail('async destruct arr call', {
               code: 'async ([p] = [{m: 5 + t(await bar)}]);',
+            });
+
+            test.fail('await can be unary arg 1', {
+              code: '(foo = [{m: 5 + t(+await bar)}]) => {}',
+            });
+
+            test.fail('await can be unary arg 2', {
+              code: 'async (foo = [{m: 5 + t(+await bar)}]) => {}',
             });
           });
         });
@@ -1339,6 +1371,14 @@ export default (describe, test) =>
             test.fail('async generator class method', {
               code: 'async function g(){class x {async *f(foo = await bar){}}    }',
             });
+
+            test.fail('await is valid unary arg 1', {
+              code: 'async function g(){    function f(foo = +await bar){}    }',
+            });
+
+            test.fail('await is valid unary arg 2', {
+              code: 'async function g(){async function f(foo = +await bar){}    }',
+            });
           });
 
           describe('non-arrow, complex nested await', _ => {
@@ -1406,6 +1446,14 @@ export default (describe, test) =>
             test.fail('async generator class method', {
               code: 'async function g(){class x {async *f(foo = [h, {m: t(await bar)}]){}}    }',
             });
+
+            test.fail('await is valid unary arg 1', {
+              code: 'async function g(){    function f(foo = [h, {m: t(+await bar)}]){}    }',
+            });
+
+            test.fail('await is valid unary arg 2', {
+              code: 'async function g(){async function f(foo = [h, {m: t(+await bar)}]){}    }',
+            });
           });
 
           describe('arrow, just an await', _ => {
@@ -1445,6 +1493,14 @@ export default (describe, test) =>
 
             test.pass('async destruct arr call', {
               code: 'async function a(){     async ([v] = await bar);     }',
+            });
+
+            test.fail('await is valid unary arg 1', {
+              code: 'async function a(){     (foo = +await bar) => {}     }',
+            });
+
+            test.fail('await is valid unary arg 2', {
+              code: 'async function a(){     async (foo = +await bar) => {}     }',
             });
           });
 
@@ -1529,6 +1585,14 @@ export default (describe, test) =>
               desc: 'there was a bug where a regular method would plainly clobber the state flags',
               throws: 'await',
             });
+
+            test.fail('await is valid unary arg 1', {
+              code: 'async function a(){     (foo = [{m: 5 + t(+await bar)}]) => {}     }',
+            });
+
+            test.fail('await is valid unary arg 2', {
+              code: 'async function a(){     async (foo = [{m: 5 + t(+await bar)}]) => {}     }',
+            });
           });
         });
       });
@@ -1541,4 +1605,7 @@ export default (describe, test) =>
         code: 'async r => result = [...{ x = await x }] = y;',
       });
     });
+
+    // async function f(){ await; }   (make sure the arg is mandatory)
+
   });

@@ -385,8 +385,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function THROW(desc, ...args) {
     console.log('\n');
     console.log('Error in parser:', desc, 'remaining throw args;', args);
-    console.log('Error token:', curtok, '\n'+curtok);
-    tok.throw('Parser error! ' + desc);
+    console.log('Error token: ' + curtok);
+    tok.throw('Parser error! ' + desc, curtok);
   }
 
   function sansFlag(flags, flag) {
@@ -3550,10 +3550,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       case 'typeof':
       case 'void':
-        ASSERT_skipRex($IDENT, lexerFlags); // not very likely
+        ASSERT_skipRex($IDENT, lexerFlags);
+        // - `typeof x`
+        // [v]: `typeof x`
+        // [v]: `typeof x + y`
+        // [v]: `typeof x + typeof y`
+        // [v]: `typeof a.b↵/foo`
+        // [v]: `typeof a.b↵/foo/g`
+        // [x]: `typeof 3 ** 2;`
+        // [v]: `typeof new x()`
+        // [x]: `typeof async () => x`
+        // [v]: `void x`
+        // [x]: `void a↵/foo/`
+        // [v]: `void a↵/foo/g`
+        // Note: this version goes through here:
+        // HIT [v]: `async function f(){   typeof await x;   }`
+        // But the one with await in func args does not because this is parseIdentLabelOrExpressionStatement
+
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
+        // This is the start of a _statement_ so we don't care about the assignability
         assignable = parseUnary(lexerFlags, identName, astProp);
         break;
 
@@ -4923,8 +4940,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (isNewArg === IS_NEW_ARG) THROW('Cannot `new` on +/- prefixed value');
         let name = curtok.str;
         ASSERT_skipRex($PUNCTUATOR, lexerFlags);
-        parseUnary(lexerFlags, name, astProp);
-        return NOT_ASSIGNABLE;
+        let assignable = parseUnary(lexerFlags, name, astProp);
+        return setNotAssignable(assignable);
       }
       else if (curc === $$DOT_2E) {
         // basically an expression that starts with a leading (single) dot, only legal case is `new`
@@ -5045,6 +5062,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseThisKeyword(astProp);
       case 'typeof':
       case 'void':
+        // HIT [v]: `x + typeof y.x`
+        // HIT [v]: `async function f(){   function g(x = typeof await x) {}  }`
+        // HIT [x]: `async function f(){   function g(x = typeof await x) { "use strict"; }  }`
         if (isNewArg === IS_NEW_ARG) THROW('Cannot '+identName+' inside `new`');
         ASSERT_skipRex($IDENT, lexerFlags); // not very likely
         return parseUnary(lexerFlags, identName, astProp);
@@ -5148,6 +5168,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseThisKeyword(astProp);
       case 'typeof':
       case 'void':
+        // [v]: `delete typeof true`
+        // [x]: `(typeof 3 ** 2)`
+        // [x]: `async function f(){   function fh({x: typeof await x}) {}   }`
+        // [x]: `async function f(){   function fh({x: typeof await x}) { "use strict"; }   }`
+        // [x]: `[typeof x] = x;`
+        // [v]: `[typeof x]`
+        // [x]: `([typeof x]) => x;`
+        // [x]: `[void x] = x;`
+        // [v]: `[void x]`
         return parseUnary(lexerFlags, identName, astProp);
       case 'yield':
         // Note: as quoted from the spec: "The syntactic context immediately following yield requires use of the InputElementRegExpOrTemplateTail lexical goal"
@@ -5364,17 +5393,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // - `~yield`                        // ok outside strict & generator
     // - `function *f(){ ~yield }`       // error
+    // - `+await x`                      // ok, await state needs to propagate back down for strict mode arg check case
 
     AST_open(astProp, 'UnaryExpression');
     AST_set('operator', identName);
     AST_set('prefix', true);
     // dont parse just any standard expression. instead stop when you find any infix operator
-    parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'argument');
+    let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'argument');
     AST_close('UnaryExpression');
     if (curtok.str === '**') {
       THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
     }
-    return NOT_ASSIGNABLE;
+    return setNotAssignable(assignable);
   }
 
   function parseYield(lexerFlags, identToken, allowAssignment, astProp) {
@@ -6759,9 +6789,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
           assignable = setNotAssignable(assignable);
           destructible |= CANT_DESTRUCT;
-        } else if (wasParen) {
-          destructible |= isAssignable(assignable) ? DESTRUCT_ASSIGN_ONLY : CANT_DESTRUCT;
+        } else if (wasParen && isAssignable(assignable)) {
+          // - `[(x)] = obj`
+          destructible |=  DESTRUCT_ASSIGN_ONLY;
         } else if (notAssignable(assignable)) {
+          // - `[x()] = obj`
+          // - `[(x())] = obj`
           destructible |= CANT_DESTRUCT;
         } else {
         }
@@ -6871,7 +6904,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `({a:(b) = c} = 1)`
           THROW('Unable to assignment destructure the lhs because it is not destructible');
         }
-        verifyDestructible(destructible | MUST_DESTRUCT); // this is to assert the above _can_ be destructed
 
         // if the object MUST destructure, it now MIGHT again
         // for example, `({a = b})` has to be destructured because of the init, which
@@ -8513,14 +8545,7 @@ function D_DEBUG(d) {
     arr.push('DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME');
     d ^= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
   }
-  if (d & NOT_ASSIGNABLE) {
-    arr.push('NOT_ASSIGNABLE');
-    d ^= NOT_ASSIGNABLE;
-  }
-  if (d & IS_ASSIGNABLE) {
-    arr.push('IS_ASSIGNABLE');
-    d ^= IS_ASSIGNABLE;
-  }
+
   if (d !== 0) {
     console.log('Gathered flags so far:', arr.join(', '))
     _THROW('D_DEBUG: unknown flags left:', d.toString(2));
@@ -8558,6 +8583,7 @@ function A_DEBUG(a) {
     arr.push('ASSIGNABLE_HAD_YIELD_KEYWORD');
     a ^= ASSIGNABLE_HAD_YIELD_KEYWORD;
   }
+
   if (a !== 0) {
     console.log('Gathered flags so far:', arr.join(', '))
     _THROW('A_DEBUG: unknown flags left:', a.toString(2));
