@@ -12,10 +12,32 @@ let WEB_COMPAT_NEVER = 32;
 
 import util from 'util';
 
+const BOLD = '\x1b[;1;1m';
+const BLINK = '\x1b[;5;1m';
+const RED = '\x1b[31m';
+const GREEN = '\x1b[32m';
+const RESET = '\x1b[0m';
+
+let prefixLogOrigin = false; // this slows things down considerably so just used for debugging
+const _LOG = console.log; // global hijack :(
+console.log = (...args) => {
+  if (prefixLogOrigin && (args.length > 1 || (args.length === 1 && (typeof args[0] !== 'string' || args[0].trim() !== '')))) {
+    // This is probably v8 specific but allows me to more easily locate console.logs :)
+    // Assumes this console.log is always one step away from the actual call site
+    let origin = new Error().stack.split(' at ')[2].split('/').slice(-1)[0].trim()
+    let parts = origin.split(':').slice(0, 2);
+    parts[1] = parseInt(parts[1], 10).toString().padStart(4, '_');
+    origin = parts.join(':');
+    origin = '\x1b[;2m' + origin + ':' + RESET;
+    args.unshift(origin);
+  }
+  _LOG(...args);
+};
+
 function LOG(...args) {
   let pre = args[0].slice(0, 4);
   if (pre !== 'PASS' && pre !== 'SKIP') {
-    console.log.apply(console, args);
+    _LOG.apply(console, args);
   }
 }
 
@@ -66,6 +88,7 @@ export {
   WEB_COMPAT_ALWAYS,
   WEB_COMPAT_NEVER,
 
+  _LOG,
   LOG,
   toPrint,
   THROW,

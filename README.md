@@ -2,11 +2,11 @@
 
 A 100% spec compliant JavaScript parser written in JavaScript, parsing ES6-ES9.
 
-The parser itself is currently feature complete but not ready for production. 
+The parser itself is currently feature complete but not ready for production (still need to fuzz).
 
 Test262 is passing and there are thousands of additional unit tests to improve coverage.
 
-Anything stage 4 is supported by this parser, opted in by default (but you can request to parse in a specific version).
+Anything <= ES9 (ES2018) stage 4 is supported by this parser, opted in by default (but you can request to parse in a specific version).
 
 ## ES modules
 
@@ -25,13 +25,31 @@ It's a burden in some ways and nice in others. A prod build would not have any m
 # Tokenizer fuzz testing (broken atm)
 ./tests/fuzz_tokens.mjs
 
-# Parser tests
+# Parser tests (this is the main test runner)
 ./tests/zeparser.spec.js
 node --experimental-modules tests/zeparser.spec.mjs
 
-# Run all tests and ignore failures
+# Show help
+./tests/zeparser.spec.js -?
+node --experimental-modules tests/zeparser.spec.mjs --help
+
+# Run all tests and do NOT stop on failures
 ./tests/zeparser.spec.js -F
 node --experimental-modules tests/zeparser.spec.mjs -F
+
+# Test a particular input
+./tests/zeparser.spec.js -i "some.input()"
+node --experimental-modules tests/zeparser.spec.mjs -i "some.input()"
+
+# Find out which tests execute a particular code branch in the parser
+# Add `HIT()` to any branch you want to know about and this option
+# will print all the test cases that called it. 
+./tests/zeparser.spec.js -s
+node --experimental-modules tests/zeparser.spec.mjs -s
+
+# Do not run tests on builds (cuts down runtime to 1/3rd)
+./tests/zeparser.spec.js -q
+node --experimental-modules tests/zeparser.spec.mjs -q
 
 # Run test262 tests (needs setup)
 ./tests/zeparser.spec.js -t
@@ -52,6 +70,8 @@ mkdir build
 ./cli/build.js
 ```
 
+(For now you'll need `node --experimental-modules cli/build.mjs`)
+
 The [build script](cli/build.js):
 
 - will remove non-assert dev artifacts
@@ -67,7 +87,7 @@ build/build_w_ast.js
 biuld/build_no_ast.js
 ```
 
-When available these are picked up automatically by the test runner.
+When available these are picked up automatically by the test runner unless you use `-q`.
 
 # Perf testing
 
@@ -87,6 +107,7 @@ See above for configuring the build script. In the perf script you can adjust th
 
 The parser itself supports ES5-ES9 but is not production ready;
 
+- Harden the parser and find and fix more edge cases that currently pester the parser
 - Add location to AST nodes
 - Setup a test running that confirms AST nodes against other engines (Babel/Flow/etc)
 - Setup tests on a "prod" build, sans assertions

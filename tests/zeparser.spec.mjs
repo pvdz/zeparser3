@@ -11,9 +11,32 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 console.log('Start of ZeParser3 test suite');
 
 const INPUT_OVERRIDE = process.argv.includes('-i') ? process.argv[process.argv.indexOf('-i') + 1] : '';
-const TEST262 = process.argv.includes('-t') || (process.argv.includes('-T') ? false : false);
+const SEARCH = process.argv.includes('-s');
+const SKIP_BUILDS = process.argv.includes('-q') || SEARCH;
+const TEST262 = process.argv.includes('-t');
 const SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
-const STOP_AFTER_FAIL = process.argv.includes('-f') || (process.argv.includes('-F') ? false : true);
+const STOP_AFTER_FAIL = !process.argv.includes('-f');
+
+if (process.argv.includes('-?') || process.argv.includes('--help')) {
+  console.log(`
+  ZeParser Test Runner
+
+  Usage:
+    \`tests/zeparser.spec.mjs\` [options]
+  But for the time being:
+    \`node --experimental-modules tests/zeparser.spec.mjs\`
+  And suggested if also testing builds:
+    \`node --experimental-modules cli/build.mjs; node --experimental-modules tests/zeparser.spec.mjs\` [options]
+
+  Options:
+    -i "input"    Test input only (sloppy, strict, module)
+    -q            Quick: don't run builds as well
+    -t            Run test262 suite
+    -F            Do not stop after first fail
+    -s            Use HIT() in code and only print tests that execute at least one HIT(), implies -q
+`);
+  process.exit();
+}
 
 import fs from 'fs';
 import path from 'path';
@@ -24,7 +47,9 @@ let babelParse = undefined; // if available, loaded through import() below
 
 import {
   toPrint,
+  _LOG,
 } from './utils.mjs';
+let LOG = _LOG; // I want to be able to override this and imports are constants
 
 import ZeParser, {
   COLLECT_TOKENS_NONE,
@@ -54,11 +79,28 @@ const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
 const RESET = '\x1b[0m';
 
+// use -s and call HIT in some part of the code to log all test cases that visit that particular branch(es)
+let found = false;
+let foundCache = new Set; // dont print multiples
+let foundTest = (x) => found = x || true;
+let PRINT_HIT = console.log;
+if (SEARCH) {
+  global.HIT = foundTest; // faster to quickly search than exporting and having to uncomment the import...
+  console.log = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+  console.dir = () => {};
+  LOG = () => {};
+  PRINT_HIT(BLINK + 'Suppressing __all__ further output, only printing hits...' + RESET);
+} else {
+  global.HIT = ()=>{};
+}
+
 let dir = path.join(dirname, 'testcases/parser');
 let files = [];
 function read(path, file) {
   let combo = path + file;
-  console.log('read:', path + file);
+  LOG('read:', path + file);
   if (fs.statSync(combo).isFile()) {
     files.push(combo);
   } else {
@@ -66,8 +108,8 @@ function read(path, file) {
   }
 }
 if (INPUT_OVERRIDE) {
-  console.log('Using override input and only testing that...');
-  console.log('=============================================\n');
+  LOG('Using override input and only testing that...');
+  LOG('=============================================\n');
 } else {
   read(dir, '');
 }
@@ -181,6 +223,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   // Skip if it requires an AST or no AST and the parser currently has no ast
   if (typeof HAS_AST === 'boolean' && HAS_AST !== checkAST) return;
 
+  found = false; // reset -s search state
+
   //if (testj !== 3319) return;
   testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
   testSuffix += '[' + testj + ']';
@@ -231,7 +275,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   }
 
   if (SKIP) {
-    console.log(`${prefix} SKIP: \`${toPrint(code)}\`${suffix}`);
+    if (!SEARCH) LOG(`${prefix} SKIP: \`${toPrint(code)}\`${suffix}`);
     ++skips;
     if (brake) throw BOLD + RED + 'stopped for test';
     return;
@@ -264,6 +308,19 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     stack = f.stack;
   }
 
+  if (SEARCH) {
+    // If you use -q -i then you just want to know whether or not some codepath hits some code
+    if (INPUT_OVERRIDE) {
+      PRINT_HIT(`[${(wasError.indexOf('TODO') >= 0 ?'T':wasError?RED+'x':GREEN+'v')+RESET}] Input ${found ? 'WAS' : 'was NOT'} hit` + (found === true ? '' : '    (' + found + ')'));
+    } else if (found) {
+      if (!foundCache.has(code)) {
+        PRINT_HIT(`// [${(wasError.indexOf('TODO') >= 0 ?'T':wasError?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(code)}\`` + (found === true ? '' : '    (' + found + ')'));
+        foundCache.add(code);
+      }
+    }
+    return; // dont care about further result
+  }
+
   astPath = ast.pathNames;
   delete ast.path; // meh
   delete ast.pathNames;
@@ -278,15 +335,15 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   if (wasError) {
     let wasTodo = wasError.indexOf('TODO') >= 0;
     if (wasError.indexOf('Parser error!') < 0 && wasError.indexOf('Tokenizer error!') < 0 && !wasTodo) {
-      console.log(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
+      LOG(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
       LOG_THROW('unexpected CRASH', code, stack, desc);
-      console.log(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
-      console.log('Thrown error:', wasError);
+      LOG(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
+      LOG('Thrown error:', wasError);
       ++fail;
       ++crash;
     } else if (!expectedThrows) {
       LOG_THROW(`${BOLD}unexpected ${RED}${wasTodo?'TODO':'ERROR'}${RESET}`, code, stack, desc);
-      console.log('Thrown error:', wasError);
+      LOG('Thrown error:', wasError);
       ++fail;
       ++crash;
     } else if (wasError.indexOf('Parser error') !== 0 && wasError.indexOf('Tokenizer error') !== 0) {
@@ -294,24 +351,24 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         LOG_THROW('TODO', code, stack, desc);
       } else {
         LOG_THROW('Unhandled exception path', code, stack, desc);
-        console.log('Thrown error:', wasError);
+        LOG('Thrown error:', wasError);
       }
       ++fail;
       ++crash;
     } else if (!wasTodo && (expectedThrows === true || wasError.toUpperCase().indexOf(expectedThrows.toUpperCase()) >= 0)) {
-      console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
+      LOG(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
       ++pass;
     } else {
       LOG_THROW('thrown message mismatch', code, stack, desc);
-      console.log('Thrown error:', wasError);
-      console.log('Expected error message to contain: "' + expectedThrows + '"');
+      LOG('Thrown error:', wasError);
+      LOG('Expected error message to contain: "' + expectedThrows + '"');
       ++fail;
     }
   } else if (INPUT_OVERRIDE) {
-    console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
+    LOG(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
     ++pass;
-    console.log('ast:', formatAst(obj.ast) + ',');
-    console.log(
+    LOG('ast:', formatAst(obj.ast) + ',');
+    LOG(
       'tokens: [$' +
       obj.tokens
       .slice(0, -1)
@@ -323,10 +380,10 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     ++fail;
     LOG_THROW('_failed_ to throw ANY error', code, '', desc, true);
     if (expectedThrows !== true) {
-      console.log('Expected an error message containing: "' + expectedThrows + '"');
+      LOG('Expected an error message containing: "' + expectedThrows + '"');
     }
-    console.log('Actual ast:', formatAst(obj.ast) + ',');
-    console.log(
+    LOG('Actual ast:', formatAst(obj.ast) + ',');
+    LOG(
       'tokens: [$' +
       obj.tokens
       .slice(0, -1)
@@ -338,10 +395,10 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
       LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true);
 
-      console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
-      console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
+      LOG('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
+      LOG('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
       // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
-      console.log(
+      LOG(
         'tokens: [$' +
         obj.tokens
         .slice(0, -1)
@@ -351,7 +408,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       );
       ++fail;
     } else {
-      console.log(`${prefix} ${GREEN}PASS${RESET} (skipped ast check): \`${toPrint(code)}\`${suffix}`);
+      LOG(`${prefix} ${GREEN}PASS${RESET} (skipped ast check): \`${toPrint(code)}\`${suffix}`);
       ++pass;
     }
   } else {
@@ -364,8 +421,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
       LOG_THROW(missingAst ? 'AST missing' : 'AST mismatch', code, '', desc, true);
 
-      console.log('Actual ast:', formatAst(obj.ast) + ',');
-      console.log(
+      LOG('Actual ast:', formatAst(obj.ast) + ',');
+      LOG(
         'tokens: [$' +
           obj.tokens
             .slice(0, -1)
@@ -375,7 +432,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       );
 
       if (missingAst) {
-        console.log('(No expected AST given...)');
+        LOG('(No expected AST given...)');
       } else {
         printComparedAstStrings(expectedJson, actualJson);
       }
@@ -384,10 +441,10 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
       LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true);
 
-      console.log('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
-      console.log('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
+      LOG('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
+      LOG('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
       // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
-      console.log(
+      LOG(
         'tokens: [$' +
         obj.tokens
         .slice(0, -1)
@@ -416,7 +473,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         }).program;
       } catch (e) {
         // Ignore babel exceptions for now. We should confirm and could then report them upstream later.
-        console.log('Babel crashed on this input:' + e.message);
+        LOG('Babel crashed on this input:' + e.message);
       }
       if (
         babelAst
@@ -462,9 +519,9 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
           printComparedAstStrings(actualJson, babelJson, 'zePar', 'babel');
 
-          console.log('ZeParser   AST:');
+          LOG('ZeParser   AST:');
           console.dir(obj.ast, {depth: null});
-          console.log('BabelParsr AST:');
+          LOG('BabelParsr AST:');
           console.dir(orderAst(babelAst, banned), {depth: null});
 
           ++fail; // I guess...
@@ -473,7 +530,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         }
       }
       if (!babelAst) {
-        console.log(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
+        LOG(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
         ++pass;
       }
     }
@@ -483,16 +540,16 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   if (brake) throw BOLD + RED + 'stopped for test';
 
   function LOG_THROW(errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false) {
-    console.log('\n');
-    console.log(tokenizer && tokenizer.GETPOS(BOLD + '#|#' + RESET));
-    if (TEST262) console.log('\n============== input ==============' + code + '\n============== /input =============\n');
-    console.log(`${prefix} ${RED}ERROR${RESET}: \`${toPrint(code)}\` :: ` + errmsg + suffix);
+    LOG('\n');
+    LOG(tokenizer && tokenizer.GETPOS(BOLD + '#|#' + RESET));
+    if (TEST262) LOG('\n============== input ==============' + code + '\n============== /input =============\n');
+    LOG(`${prefix} ${RED}ERROR${RESET}: \`${toPrint(code)}\` :: ` + errmsg + suffix);
     if (stack) {
-      console.log(
+      LOG(
         'Stack:',
         (
           stack.length > 10
-          ? [...stack.split('\n').slice(0,7), '...trunced by ze tester', ...stack.split('\n').slice(-3)].join('\n')
+          ? [...stack.split('\n').slice(0,8), '...trunced by ze tester', ...stack.split('\n').slice(-3)].join('\n')
           : stack
         )
         .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
@@ -500,16 +557,16 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
         .replace(/(zeparser.spec.js.*?)\n.*/s, '$1 (trunced remainder of trace)')
       );
     }
-    //console.log('Final test options:\n', finalTestOptions);
-    console.log('Description:', desc);
-    console.log('From:', from);
+    //LOG('Final test options:\n', finalTestOptions);
+    LOG('Description:', desc);
+    LOG('From:', from);
 
     if (!noPartial) {
-      console.log('Ast so far (path=['+astPath+']):', formatAst(ast));
-      console.log('Tokens so far:[', tokens.map(o => debug_toktype(o.type)).join(', '), ' ...]');
+      LOG('Ast so far (path=['+astPath+']):', formatAst(ast));
+      LOG('Tokens so far:[', tokens.map(o => debug_toktype(o.type)).join(', '), ' ...]');
     }
 
-    if (_debug) console.log('Debug:', _debug);
+    if (_debug) LOG('Debug:', _debug);
   }
 }
 
@@ -522,8 +579,8 @@ function printComparedAstStrings(want, real, n1 = 'want', n2 = 'real') {
     let x1 = want.slice(Math.min(n, want.length), Math.min(n + step, want.length));
     let x2 = real.slice(Math.min(n, real.length), Math.min(n + step, real.length));
     if (x1 === x2) {
-      console.log(n1 + '[' + steps + ']: SAME', x1);
-      console.log(n2 + '[' + steps + ']: SAME', x2);
+      LOG(n1 + '[' + steps + ']: SAME', x1);
+      LOG(n2 + '[' + steps + ']: SAME', x2);
     } else {
       // try to highlight the difference area
 
@@ -546,8 +603,8 @@ function printComparedAstStrings(want, real, n1 = 'want', n2 = 'real') {
         do ++stop; while (stop < x1.length && /[\w\d]/.test(x1[stop]));
       }
 
-      console.log(n1 + '[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
-      console.log(BOLD+n2+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
+      LOG(n1 + '[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
+      LOG(BOLD+n2+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
     }
 
     n += step;
@@ -592,8 +649,8 @@ function formatAst(ast) {
   }).replace(/(?:^;?\(?)|(?:\)[\s\n]*$)/g, '');
 }
 
-if (TEST262) console.log('Running test262 provided tests instead');
-if (SKIP_TO) console.log('Warning: Skipping the first', SKIP_TO, 'tests');
+if (TEST262) LOG('Running test262 provided tests instead');
+if (SKIP_TO) LOG('Warning: Skipping the first', SKIP_TO, 'tests');
 
 let pass = 0;
 let fail = 0;
@@ -605,8 +662,8 @@ let completed = false;
 
 let parsers = [];
 const start = async () => {
-  await Promise.all([
-    (async () => {
+  let parserPromises = [
+    async () => {
       let tok = await import(path.join(dirname, '../src/zetokenizer.mjs'));
       let par = await import(path.join(dirname, '../src/zeparser.mjs'));
       // Make sure the dev version of the parser is tested first
@@ -619,8 +676,8 @@ const start = async () => {
         hasAst: true,
         desc: 'dev build',
       });
-    })(),
-    (async () => {
+    },
+    async () => {
       // node --experimental-modules cli/build.mjs
       // TODO: should I just run that by default first?
       try {
@@ -631,10 +688,10 @@ const start = async () => {
           desc: 'prod build [ast:yes]'
         });
       } catch(e) {
-        console.log('Ignoring prod build test; file could not be loaded');
+        LOG('Ignoring prod build test; file could not be loaded');
       }
-    })(),
-    (async () => {
+    },
+    async () => {
       // node --experimental-modules cli/build.mjs
       // TODO: should I just run that by default first?
       try {
@@ -645,9 +702,13 @@ const start = async () => {
           desc: 'prod build [ast:no]'
         });
       } catch(e) {
-        console.log('Ignoring prod build test; file could not be loaded');
+        LOG('Ignoring prod build test; file could not be loaded');
       }
-    })(),
+    },
+  ].slice(0, SKIP_BUILDS ? 1 : 3).map(f => f());
+
+  await Promise.all([
+    ...parserPromises,
 
     (async () => { try { ({format: prettierFormat} = (await import('prettier')).default); } catch(e) {} })(),
     (async () => process.argv.includes('-b') ? ({parse: babelParse} = (await import('@babel/parser')).default) : {})(),
@@ -673,24 +734,24 @@ const start = async () => {
         describe,
         test,
       );
-      console.log('Added', cases.length-before,' tests from', path);
+      LOG('Added', cases.length-before,' tests from', path);
     }),
   ]);
 
   try {
     parsers.forEach(({parser, hasAst, desc}, i) => {
-      // console.log('----->', parser, hasAst, desc);
+      // LOG('----->', parser, hasAst, desc);
       checkAST = hasAst;
       parserDesc = (parsers.length ? '##' + desc : '') + '## ' + desc;
       all(parser, cases);
     });
     completed = true;
   } finally {
-    console.log(`
+    LOG(`
     #####
     ${completed?'':RED + 'INCOMPLETE! ' + RESET}passed: ${pass}, ${crash?(STOP_AFTER_FAIL?'':BLINK)+RED:''}crashed: ${crash}${crash?RESET:''}, ${(fail - crash)?RED:''}failed: ${fail - crash}${(fail - crash)?RESET:''}, skipped: ${skips}
     `);
   }
 };
 
-start().then(() => console.log('done')).catch(e => console.log('crash:', e));
+start().then(() => LOG('done')).catch(e => LOG('crash:', e));
