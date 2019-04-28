@@ -585,6 +585,10 @@ export default (describe, test) =>
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
     });
 
+    test.fail('an async arrow in an illegal position', {
+      code: 'let y = typeof async x => await x',
+    });
+
     test('await in a body of an async arrow', {
       code: 'let y = async x => { await x; }',
       ast: {

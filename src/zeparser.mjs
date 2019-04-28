@@ -1997,7 +1997,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // note that the function above is okay... just the arrow is not.
       if (allowAssignment === ASSIGN_EXPR_IS_ERROR) {
         // Since we will parse an arrow next, check the allowAssignment flag first
-        TODO
         ASSERT(curtype === $IDENT, 'already confirmed that the next token is an ident');
         ASSERT(!curtok.nl, 'already confirmed that the next token is on the sae line as `async`');
         // `async foo` would only be valid with an arrow (`async foo => foo`) arrow is not allowed here
