@@ -262,22 +262,22 @@ const NOT_NEW_ARG = 4;
 const PARSE_DIRECTIVES = true;
 const IGNORE_DIRECTIVES = false;
 const MIGHT_DESTRUCT = 0; // any kind of destructuring or lack thereof is okay
-const CANT_DESTRUCT = 1; // it is impossible to destructure this
-const DESTRUCT_ASSIGN_ONLY = 2; // the only way this can destruct is by assignment
-const MUST_DESTRUCT = 4;
-const DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR = 8; // signal having found a constructor (special case)
-const DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO = 16; // signal that a `__proto__: x` was parsed (do detect double occurrence)
-const DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD = 32;
-const DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME = 64;
-const DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD = 128;
-const DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME = 256;
-const ASSIGNABLE_UNDETERMINED = 0;
-const NOT_ASSIGNABLE = 1;
-const IS_ASSIGNABLE = 2;
-const ASSIGNABLE_HAD_AWAIT_VARNAME = 4; // parsed an expression containing `await` as a regular var name
-const ASSIGNABLE_HAD_AWAIT_KEYWORD = 8; // parsed an expression containing an AwaitExpression
-const ASSIGNABLE_HAD_YIELD_VARNAME = 16; // parsed an expression containing `yield` as a regular var name
-const ASSIGNABLE_HAD_YIELD_KEYWORD = 32; // parsed an expression containing a YieldExpression
+const CANT_DESTRUCT = 1 << 0; // it is impossible to destructure this
+const DESTRUCT_ASSIGN_ONLY = 1 << 1; // the only way this can destruct is by assignment
+const MUST_DESTRUCT = 1 << 2;
+const ASSIGNABLE_UNDETERMINED = 1 << 3;
+const NOT_ASSIGNABLE = 1 << 4;
+const IS_ASSIGNABLE = 1 << 5;
+const IS_SINGLE_IDENT_WRAP_A = 1 << 6;   // "assignable"
+const IS_SINGLE_IDENT_WRAP_NA = 1 << 7;  // "not assignable"
+const NOT_SINGLE_IDENT_WRAP_A = 1 << 8;  // "assignable"
+const NOT_SINGLE_IDENT_WRAP_NA = 1 << 9; // "not assignable"
+const PIGGY_BACK_SAW_AWAIT_VARNAME = 1 << 10; // parsed an expression containing `await` as a regular var name
+const PIGGY_BACK_SAW_AWAIT_KEYWORD = 1 << 11; // parsed an expression containing an AwaitExpression
+const PIGGY_BACK_SAW_YIELD_VARNAME = 1 << 12; // parsed an expression containing `yield` as a regular var name
+const PIGGY_BACK_SAW_YIELD_KEYWORD = 1 << 13  ; // parsed an expression containing a YieldExpression
+const PIGGY_BACK_WAS_CONSTRUCTOR = 1 << 14; // signal having found a constructor (special case)
+const PIGGY_BACK_WAS_PROTO = 1 << 15; // signal that a `__proto__: x` was parsed (do detect double occurrence)
 const NO_SPREAD = 0;
 const LAST_SPREAD = 1;
 const MID_SPREAD = 2;
@@ -310,14 +310,6 @@ const IS_SETTER = 2;
 const NOT_EVAL_OR_ARGS = undefined;
 const IS_DELETE_ARG = true;
 const NOT_DELETE_ARG = false;
-const IS_SINGLE_IDENT_WRAP_A = 1;   // "assignable"
-const IS_SINGLE_IDENT_WRAP_NA = 2;  // "not assignable"
-const NOT_SINGLE_IDENT_WRAP_A = 4;  // "assignable"
-const NOT_SINGLE_IDENT_WRAP_NA = 8; // "not assignable"
-const DELETE_PIGGY_AWAIT_KEYWORD = 16;
-const DELETE_PIGGY_AWAIT_VARNAME = 32;
-const DELETE_PIGGY_YIELD_KEYWORD = 64;
-const DELETE_PIGGY_YIELD_VARNAME = 128;
 const INC_DECL = true;
 const EXC_DECL = false;
 const FROM_CONTINUE = true;
@@ -339,6 +331,18 @@ const CHECK_TO_BIND = false;
 
 function ASSERT_ASSIGN_EXPR(allowAssignment) {
   ASSERT(allowAssignment === ASSIGN_EXPR_IS_OK || allowAssignment === ASSIGN_EXPR_IS_ERROR, 'allowAssignment is enum', allowAssignment);
+}
+
+const PIGGIES = (
+  PIGGY_BACK_SAW_AWAIT_VARNAME |
+  PIGGY_BACK_SAW_AWAIT_KEYWORD |
+  PIGGY_BACK_SAW_YIELD_VARNAME |
+  PIGGY_BACK_SAW_YIELD_KEYWORD |
+  PIGGY_BACK_WAS_CONSTRUCTOR |
+  PIGGY_BACK_WAS_PROTO
+);
+function copyPiggies(output, input) {
+  return output | (input & PIGGIES);
 }
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
@@ -2138,7 +2142,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - async function/method parameters
     // - async arrow parameters
 
-    return NOT_ASSIGNABLE | ASSIGNABLE_HAD_AWAIT_KEYWORD;
+    return NOT_ASSIGNABLE | PIGGY_BACK_SAW_AWAIT_KEYWORD;
   }
   function parseAwaitVar(lexerFlags, awaitIdentToken, isNewArg, allowAssignment, astProp) {
     ASSERT(parseAwaitVar.length === arguments.length, 'arg count');
@@ -2164,7 +2168,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //   - goal module and canon is await: error
 
     // However, something like `function f(x = 5 + await){}` should probably not be a syntax error in script goal..?
-    return assignable | ASSIGNABLE_HAD_AWAIT_VARNAME;
+    return assignable | PIGGY_BACK_SAW_AWAIT_VARNAME;
   }
 
   function parseBlockStatement(lexerFlags, scoop, labelSet, blockType, parseDirectives, wasSimple, includeDeclarations, astProp) {
@@ -3682,14 +3686,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       NOT_ASYNC_PREFIXED,
       astProp
     );
-    ASSERT((assignableOrJustIdent&0b1111) === NOT_SINGLE_IDENT_WRAP_A || (assignableOrJustIdent&0b1111) === NOT_SINGLE_IDENT_WRAP_NA || (assignableOrJustIdent&0b1111) === IS_SINGLE_IDENT_WRAP_A || (assignableOrJustIdent&0b1111) === IS_SINGLE_IDENT_WRAP_NA, 'exception enum');
 
     // "decode" the return value back into an assignable
     let assignable = hasAnyFlag(assignableOrJustIdent, IS_SINGLE_IDENT_WRAP_A | NOT_SINGLE_IDENT_WRAP_A) ? initAssignable(): initNotAssignable();
-    if (hasAnyFlag(assignableOrJustIdent, DELETE_PIGGY_AWAIT_KEYWORD)) assignable |= ASSIGNABLE_HAD_AWAIT_KEYWORD;
-    if (hasAnyFlag(assignableOrJustIdent, DELETE_PIGGY_AWAIT_VARNAME)) assignable |= ASSIGNABLE_HAD_AWAIT_VARNAME;
-    if (hasAnyFlag(assignableOrJustIdent, DELETE_PIGGY_YIELD_KEYWORD)) assignable |= ASSIGNABLE_HAD_YIELD_KEYWORD;
-    if (hasAnyFlag(assignableOrJustIdent, DELETE_PIGGY_YIELD_VARNAME)) assignable |= ASSIGNABLE_HAD_YIELD_VARNAME;
+    assignable = copyPiggies(assignable, assignableOrJustIdent);
 
     // the group parser parses one rhs paren so there may not be any parens left to consume here
     let canBeErrorCase = hasAnyFlag(assignableOrJustIdent, IS_SINGLE_IDENT_WRAP_A | IS_SINGLE_IDENT_WRAP_NA);
@@ -4280,7 +4280,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             if (hasAnyFlag(lexerFlags, LF_IN_ASYNC)) return 'Await not allowed as ident here';
           }
         }
-        return IS_ASSIGNABLE | ASSIGNABLE_HAD_AWAIT_VARNAME;
+        return IS_ASSIGNABLE | PIGGY_BACK_SAW_AWAIT_VARNAME;
       case 'yield':
         // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
         // > It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is: ... "yield".
@@ -4291,7 +4291,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         } else if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC)) {
           return 'Cannot use this reserved word as a variable name inside a generator';
         }
-        return IS_ASSIGNABLE | ASSIGNABLE_HAD_YIELD_VARNAME;
+        return IS_ASSIGNABLE | PIGGY_BACK_SAW_YIELD_VARNAME;
     }
 
     // valid binding name
@@ -4854,20 +4854,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           }
         }
         if (options_webCompat === WEB_COMPAT_ON) {
-          if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO)) {
+          if (hasAllFlags(wasDestruct, PIGGY_BACK_WAS_PROTO)) {
             THROW('Found an object with double `__proto__` which is not allowed');
           }
         }
 
-        let assignable = 0;
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD)) assignable |= ASSIGNABLE_HAD_AWAIT_KEYWORD;
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME)) assignable |= ASSIGNABLE_HAD_AWAIT_VARNAME;
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD)) assignable |= ASSIGNABLE_HAD_YIELD_KEYWORD;
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME)) assignable |= ASSIGNABLE_HAD_YIELD_VARNAME;
-
         // Note: immediate tail assignments are parsed at this point and `({x})=y` is illegal
         // Note: however, this may still be the lhs inside a `for` header so we still need to propagate it...
         // To make sure we don't accidentally over accept we can check the next token to clamp down abuse
+        let assignable = copyPiggies(0, wasDestruct);
         if (hasNoFlag(wasDestruct, CANT_DESTRUCT)) {
           // Only when `in` or `of` to prevent cases like `({x})=y`, though they could be handled differently as well...
           return setAssignable(assignable);
@@ -4886,22 +4881,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             THROW('Found a struct that must be destructured but was not');
           }
         }
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO)) {
+        if (hasAllFlags(wasDestruct, PIGGY_BACK_WAS_PROTO)) {
           if (options_webCompat === WEB_COMPAT_ON) {
             THROW('Found an object with double `__proto__` which is not allowed');
           }
         }
 
-        let assignable = 0;
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD)) assignable |= ASSIGNABLE_HAD_AWAIT_KEYWORD;
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME)) assignable |= ASSIGNABLE_HAD_AWAIT_VARNAME;
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD)) assignable |= ASSIGNABLE_HAD_YIELD_KEYWORD;
-        if (hasAllFlags(wasDestruct, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME)) assignable |= ASSIGNABLE_HAD_YIELD_VARNAME;
-
         // Note: immediate tail assignments are parsed at this point and `([x])=y` is illegal
         // However, this may still be the lhs inside a `for` header or some kind of binding declaration so we still
         // need to propagate it... To make sure we don't accidentally over-accept we could check the next token
 
+        let assignable = copyPiggies(0, wasDestruct);
         if (hasNoFlag(wasDestruct, CANT_DESTRUCT)) {
           // Prevent cases like `for (([x])=y in z);`, though they could be handled differently as well...
           // - `var {[a]: [b]} = c`  // fail
@@ -5445,7 +5435,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curtok.str === '?', 'just in case more tokens can start with `?`');
       THROW('Can not have a `yield` expression on the left side of a ternary');
     }
-    return NOT_ASSIGNABLE | ASSIGNABLE_HAD_YIELD_KEYWORD;
+    return NOT_ASSIGNABLE | PIGGY_BACK_SAW_YIELD_KEYWORD;
   }
   function parseYieldVarname(lexerFlags, identToken, allowAssignment, astProp) {
     ASSERT(parseYieldVarname.length === arguments.length, 'arg count');
@@ -5459,7 +5449,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // `yield` is a var name in sloppy mode:
     parseAfterVarName(lexerFlags, identToken, IS_ASSIGNABLE, allowAssignment, astProp);
-    return IS_ASSIGNABLE | ASSIGNABLE_HAD_YIELD_VARNAME;
+    return IS_ASSIGNABLE | PIGGY_BACK_SAW_YIELD_VARNAME;
   }
   function parseYieldArgument(lexerFlags, astProp) {
     // there can be no newline between keyword `yield` and its argument (restricted production)
@@ -6138,16 +6128,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         if (isDeleteArg === IS_DELETE_ARG) {
           // We need to propagate the await/yield state as well so prepare that first
-          let extraFlags = 0;
           // - `delete ("x"[(yield)])`
           // - `delete ("x"[(await)])`
           // - `async x => delete ("x"[(await x)])`
           // - `function *f(){ delete ("x"[(yield)]) }`
-          if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) extraFlags |= DELETE_PIGGY_AWAIT_KEYWORD;
-          if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) extraFlags |= DELETE_PIGGY_AWAIT_VARNAME;
-          if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) extraFlags |= DELETE_PIGGY_YIELD_KEYWORD;
-          if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) extraFlags |= DELETE_PIGGY_YIELD_VARNAME;
-          return (isAssignable(assignable) ? NOT_SINGLE_IDENT_WRAP_A : NOT_SINGLE_IDENT_WRAP_NA) | extraFlags;
+          return copyPiggies(isAssignable(assignable) ? NOT_SINGLE_IDENT_WRAP_A : NOT_SINGLE_IDENT_WRAP_NA, assignable);
         }
         // - `((a)) = b;`
         return assignable;
@@ -6185,10 +6170,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async(await);`
     // - `async function f(){ async(await x); }`
     // - `{ (x = yield) = {}; }`
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
+
+    destructible = copyPiggies(destructible, assignable);
 
     skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
 
@@ -6213,17 +6196,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `([[].length]) => x;`
         THROW('The left hand side of the arrow can only be destructed through assignment so arrow is illegal');
       }
-      if (hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD)) {
+      if (hasAllFlags(destructible, PIGGY_BACK_SAW_AWAIT_KEYWORD)) {
         // - `async function a(){     (foo = await bar) => {}     }`
         THROW('The arguments of an arrow cannot contain an await expression in their defaults');
       }
-      if (hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD)) {
+      if (hasAllFlags(destructible, PIGGY_BACK_SAW_YIELD_KEYWORD)) {
         // = `async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }`
         THROW('The arguments of an arrow cannot contain a yield expression in their defaults');
       }
       // The param name/default containing await/yield checks are done elsewhere...
-      ASSERT(!(hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME) && (hasAllFlags(lexerFlags, LF_IN_ASYNC) || goalMode === GOAL_MODULE)), 'async arrows dont reach this place and nested in an async arrow triggers somewhere else so I dont think this case can occur');
-      ASSERT(!(hasAllFlags(destructible, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME) && hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE)), 'these checks occur elsewhere and I cant come up with a covering test case');
+      ASSERT(!(hasAllFlags(destructible, PIGGY_BACK_SAW_AWAIT_VARNAME) && (hasAllFlags(lexerFlags, LF_IN_ASYNC) || goalMode === GOAL_MODULE)), 'async arrows dont reach this place and nested in an async arrow triggers somewhere else so I dont think this case can occur');
+      ASSERT(!(hasAllFlags(destructible, PIGGY_BACK_SAW_YIELD_VARNAME) && hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE)), 'these checks occur elsewhere and I cant come up with a covering test case');
     } else if (hasAllFlags(destructible, MUST_DESTRUCT)) {
       THROW('Group contained a value that must destruct but this was not an arrow so it is invalid');
     }
@@ -6273,15 +6256,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       //       world where perf matters, though. So it's mostly compiler inference that crap out
 
       // We need to propagate the await/yield state as well so prepare that first
-      let extraFlags = 0;
       // - `async function a(){     async ([y] = delete ((foo[await x]))) => {};     }`
       // - `delete (((((foo(await)))))).bar`
       // - `delete (((((foo(yield)))))).bar`
       // - `function *f(){ delete (((((foo(yield)))))).bar }`
-      if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) extraFlags |= DELETE_PIGGY_AWAIT_KEYWORD;
-      if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) extraFlags |= DELETE_PIGGY_AWAIT_VARNAME;
-      if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) extraFlags |= DELETE_PIGGY_YIELD_KEYWORD;
-      if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) extraFlags |= DELETE_PIGGY_YIELD_VARNAME;
+      let extraFlags = copyPiggies(0, assignable);
 
       if (foundSingleIdentWrap) {
         ASSERT(!toplevelComma, 'sanity check; the main loop should break after this state was found');
@@ -6335,10 +6314,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else if (
         // - `async (foo = await x) => foo`            (fail)
         // have to check both assignable and destructible for the state flags
-        hasAnyFlag(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME | ASSIGNABLE_HAD_AWAIT_KEYWORD) ||
-        hasAnyFlag(groupDestructible, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME | DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD)
+        hasAnyFlag(assignable, PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_AWAIT_KEYWORD) ||
+        hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_AWAIT_KEYWORD)
       ) {
-        if (hasAnyFlag(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD) || hasAnyFlag(groupDestructible, DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD)) {
+        if (hasAnyFlag(assignable, PIGGY_BACK_SAW_AWAIT_KEYWORD) || hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_AWAIT_KEYWORD)) {
           THROW('Async arrow arg defaults can not contain `await` expressions');
         }
         // - `async await => foo`            (fail)
@@ -6358,15 +6337,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         (
           hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE) &&
           (
-            hasAnyFlag(assignable, ASSIGNABLE_HAD_YIELD_VARNAME) ||
-            hasAnyFlag(groupDestructible, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME)
+            hasAnyFlag(assignable, PIGGY_BACK_SAW_YIELD_VARNAME) ||
+            hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_YIELD_VARNAME)
           )
         ) ||
-        hasAnyFlag(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD) ||
-        hasAnyFlag(groupDestructible, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD)
+        hasAnyFlag(assignable, PIGGY_BACK_SAW_YIELD_KEYWORD) ||
+        hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD)
       ) {
         TODO
-        if (hasAnyFlag(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD) || hasAnyFlag(groupDestructible, DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD)) {
+        if (hasAnyFlag(assignable, PIGGY_BACK_SAW_YIELD_KEYWORD) || hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD)) {
           // - `async (foo = await x) => foo`                             (fail)
           THROW('Async arrow arg defaults can not contain `yield` expressions');
         }
@@ -6838,7 +6817,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // also remove the piggy because the proto rule does not apply for destructuring assignments
 
-        destructible = sansFlag(destructible, MUST_DESTRUCT | DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO);
+        destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO);
 
         // the array MUST now be a pattern. Does not need to be an arrow.
         // the outer-most assignment is an expression, the inner assignments become patterns too.
@@ -6859,11 +6838,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async function a(){     ([v] = await bar) => {}     }`
     // - `function *g(){ (x = [yield]) }`
     // - `{ (x = [yield]) }`
-    if (hasAllFlags(assignableYieldAwaitState, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-    if (hasAllFlags(assignableYieldAwaitState, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-    if (hasAllFlags(assignableYieldAwaitState, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-    if (hasAllFlags(assignableYieldAwaitState, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
-    return destructible;
+    return copyPiggies(destructible, assignableYieldAwaitState);
   }
   function parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, isClassMethod, exportedNames, exportedBindings, _astProp) {
     // returns whether this object is destructible
@@ -6909,7 +6884,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         // also remove the piggy, the rule does not apply for destructuring assignments
 
-        destructible = sansFlag(destructible, MUST_DESTRUCT | DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO);
+        destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO);
 
         // the object MUST now be a pattern. Does not need to be an arrow.
         // the outer-most assignment is an expression, the inner assignments become patterns too.
@@ -6923,10 +6898,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `async function a(){     ({r} = await bar) => {}     }`
         // - `({x} = yield) => {}`
         // - `function *f(){ ({x} = yield) => {} }`
-        if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-        if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-        if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-        if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
+        destructible = copyPiggies(destructible, assignable);
         AST_close('AssignmentExpression');
       } else if (isCompoundAssignment(curtok.str)) {
         // - `{x} += y`
@@ -6975,7 +6947,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       let currentDestruct = parseObjectLikePart(lexerFlags, scoop, bindingType, isClassMethod, undefined, exportedNames, exportedBindings, astProp);
-      if (hasAnyFlag(currentDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO)) {
+      if (hasAnyFlag(currentDestruct, PIGGY_BACK_WAS_PROTO)) {
         // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
         // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
         // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
@@ -6985,7 +6957,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible |= currentDestruct;
 
       if (isClassMethod === IS_CLASS_METHOD) {
-        if (hasAnyFlag(currentDestruct, DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR)) {
+        if (hasAnyFlag(currentDestruct, PIGGY_BACK_WAS_CONSTRUCTOR)) {
           ++constructors;
         }
 
@@ -6999,7 +6971,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (constructors > 1) {
       THROW('Classes may only have one constructor');
     } else if (constructors > 0) {
-      destructible = sansFlag(destructible, DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR);
+      destructible = sansFlag(destructible, PIGGY_BACK_WAS_CONSTRUCTOR);
     }
 
     // restore in/template flags (`x${+{}}` would fail if you didn't do this before parsing the closing curly)
@@ -7011,8 +6983,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags); // class x{} /foo/
     }
 
-    if (doubleDunderProto === 1) return sansFlag(destructible, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO);
-    ASSERT(hasAnyFlag(destructible, DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO) === doubleDunderProto > 1, 'either dunder was not found and the piggy is not there or proto was found multiple times and the piggy is still in the destructible field');
+    if (doubleDunderProto === 1) return sansFlag(destructible, PIGGY_BACK_WAS_PROTO);
+    ASSERT(hasAnyFlag(destructible, PIGGY_BACK_WAS_PROTO) === doubleDunderProto > 1, 'either dunder was not found and the piggy is not there or proto was found multiple times and the piggy is still in the destructible field');
     return destructible;
   }
   function parseObjectLikePart(lexerFlags, scoop, bindingType, isClassMethod, staticToken, exportedNames, exportedBindings, astProp) {
@@ -7131,7 +7103,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (wasConstructor) {
           // this is a constructor method. we need to signal the caller that we parsed one to dedupe them
           // to signal the caller we piggy back on the destructible which is already a bit-field
-          destructible |= DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR;
+          destructible |= PIGGY_BACK_WAS_CONSTRUCTOR;
         }
       }
     }
@@ -7161,7 +7133,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         ASSERT_skipRex(':', lexerFlags); // next is expression
 
         // `{"__proto__": 1, __proto__: 2}` is still an error
-        if (litToken.str.slice(1, -1) === '__proto__') destructible |= DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO;
+        if (litToken.str.slice(1, -1) === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
 
         destructible |= parseObjectPropertyValueAfterColon(lexerFlags, litToken, isClassMethod, bindingType, assignable, destructible, scoop,exportedNames, exportedBindings, astProp);
         ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
@@ -7185,7 +7157,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (wasConstructor) {
           // this is a constructor method. we need to signal the caller that we parsed one to dedupe them
           // to signal the caller we piggy back on the destructible which is already a bit-field
-          destructible |= DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR;
+          destructible |= PIGGY_BACK_WAS_CONSTRUCTOR;
         }
       } else {
         THROW('Object literal keys that are strings or numbers must be a method or have a colon: ' + curtok);
@@ -7374,12 +7346,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `function *g(){ (x = {[yield]: 1}) }`
     // - `{ (x = {[yield]: 1}) }`
     // - `s = {"foo": await = x} = x`
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
-
-    return destructible;
+    return copyPiggies(destructible, assignable);
   }
 
   function parseObjectPropertyValueAfterColon(lexerFlags, keyToken, isClassMethod, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp) {
@@ -7538,12 +7505,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `function *f({x: x}) { function f({x: yield}) {} }`
     // - `({ *g1() {   return {x: yield}  }})`
     // - `({xxxx:await}) => null`
-    if (hasAllFlags(assignableOnlyForYieldAwaitFlags, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-    if (hasAllFlags(assignableOnlyForYieldAwaitFlags, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-    if (hasAllFlags(assignableOnlyForYieldAwaitFlags, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-    if (hasAllFlags(assignableOnlyForYieldAwaitFlags, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
-
-    return destructible;
+    return copyPiggies(destructible, assignableOnlyForYieldAwaitFlags);
   }
 
   function parseObjectLikePartFromIdent(lexerFlags, scoop, bindingType, isClassMethod, isConstructor, isStatic, identToken, exportedNames, exportedBindings, astProp) {
@@ -7669,7 +7631,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - ({ident: <object destruct> = expr,}
       // anything else as value is non-destructible
       ASSERT_skipRex(':', lexerFlags); // next is expression
-      if (identToken.str === '__proto__') destructible |= DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO;
+      if (identToken.str === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
 
       destructible |= parseObjectPropertyValueAfterColon(lexerFlags, identToken, isClassMethod, bindingType, assignable, destructible, scoop,exportedNames, exportedBindings, astProp);
       ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
@@ -7832,12 +7794,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `function* g() {   [...{ x = yield }] = y   }`
     // - `result = [...{ x = await }] = y;`
     // - `async r => result = [...{ x = await x }] = y;`
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
-
-    return destructible;
+    return copyPiggies(destructible, assignable);
   }
   function parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp) {
     ASSERT(parseComputedModifierMethod.length === arguments.length, 'arg count');
@@ -7902,7 +7859,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function verifyDestructible(destructible) {
-    ASSERT(destructible >= 0 && destructible < 512, 'bit-wise field range check');
+    ASSERT(destructible >= 0 && destructible < (1<<16), 'bit-wise field range check');
 
     if (hasAllFlags(destructible, CANT_DESTRUCT) && hasAllFlags(destructible, MUST_DESTRUCT)) {
       THROW('Found a part that cant destruct and a part that must destruct so it is not destructible');
@@ -7966,12 +7923,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async g => (x = [await y])`
     // - `function *g(){ (x = [yield y]) }`
     // - `{ (x = [yield y]) }`
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
-
-    return destructible;
+    return copyPiggies(destructible, assignable);
   }
   function parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncIdent, exportedNames, exportedBindings, astProp) {
     // parseArrowableRest
@@ -8296,12 +8248,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (closingCharOrd === $$CURLY_R_7D && !isAssignable(assignable)) destructible |= CANT_DESTRUCT;
 
       // TODO: come up with test cases that cover these checks
-      if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-      if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-      if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-      if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
+      if (hasAllFlags(assignable, PIGGY_BACK_SAW_AWAIT_KEYWORD)) TODO;
+      if (hasAllFlags(assignable, PIGGY_BACK_SAW_AWAIT_VARNAME)) TODO;
+      if (hasAllFlags(assignable, PIGGY_BACK_SAW_YIELD_KEYWORD)) TODO;
+      if (hasAllFlags(assignable, PIGGY_BACK_SAW_YIELD_VARNAME)) TODO;
 
-      return destructible;
+      return copyPiggies(destructible, assignable);
     }
 
     if (curc !== closingCharOrd) {
@@ -8353,13 +8305,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `function *g() { [...yield]; }`
     // - `[...await]`
     // - `[...yield]`
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_AWAIT_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_KEYWORD)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
-    if (hasAllFlags(assignable, ASSIGNABLE_HAD_YIELD_VARNAME)) destructible |= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
-
     // destructible because the `...` is at the end of the structure and its arg is an ident/array/object and has no tail
-    return destructible;
+    return copyPiggies(destructible, assignable);
   }
   function parseObjectLikeMethodAfterKey(lexerFlags, isStatic, isGenerator, asyncgetsetToken, keyToken, isClassMethod, isConstructor, isDynamic, isGetSet, astProp) {
     ASSERT(arguments.length === parseObjectLikeMethodAfterKey.length, 'want args');
@@ -8517,29 +8464,29 @@ function D_DEBUG(d) {
     arr.push('DESTRUCT_ASSIGN_ONLY');
     d ^= DESTRUCT_ASSIGN_ONLY;
   }
-  if (d & DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR) {
-    arr.push('DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR');
-    d ^= DESTRUCTIBLE_PIGGY_BACK_WAS_CONSTRUCTOR;
+  if (d & PIGGY_BACK_WAS_CONSTRUCTOR) {
+    arr.push('PIGGY_BACK_WAS_CONSTRUCTOR');
+    d ^= PIGGY_BACK_WAS_CONSTRUCTOR;
   }
-  if (d & DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO) {
-    arr.push('DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO');
-    d ^= DESTRUCTIBLE_PIGGY_BACK_WAS_PROTO;
+  if (d & PIGGY_BACK_WAS_PROTO) {
+    arr.push('PIGGY_BACK_WAS_PROTO');
+    d ^= PIGGY_BACK_WAS_PROTO;
   }
-  if (d & DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD) {
-    arr.push('DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD');
-    d ^= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_KEYWORD;
+  if (d & PIGGY_BACK_SAW_AWAIT_KEYWORD) {
+    arr.push('PIGGY_BACK_SAW_AWAIT_KEYWORD');
+    d ^= PIGGY_BACK_SAW_AWAIT_KEYWORD;
   }
-  if (d & DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME) {
-    arr.push('DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME');
-    d ^= DESTRUCTIBLE_PIGGY_BACK_SAW_AWAIT_VARNAME;
+  if (d & PIGGY_BACK_SAW_AWAIT_VARNAME) {
+    arr.push('PIGGY_BACK_SAW_AWAIT_VARNAME');
+    d ^= PIGGY_BACK_SAW_AWAIT_VARNAME;
   }
-  if (d & DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD) {
-    arr.push('DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD');
-    d ^= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_KEYWORD;
+  if (d & PIGGY_BACK_SAW_YIELD_KEYWORD) {
+    arr.push('PIGGY_BACK_SAW_YIELD_KEYWORD');
+    d ^= PIGGY_BACK_SAW_YIELD_KEYWORD;
   }
-  if (d & DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME) {
-    arr.push('DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME');
-    d ^= DESTRUCTIBLE_PIGGY_BACK_SAW_YIELD_VARNAME;
+  if (d & PIGGY_BACK_SAW_YIELD_VARNAME) {
+    arr.push('PIGGY_BACK_SAW_YIELD_VARNAME');
+    d ^= PIGGY_BACK_SAW_YIELD_VARNAME;
   }
 
   if (d !== 0) {
@@ -8563,21 +8510,21 @@ function A_DEBUG(a) {
     arr.push('IS_ASSIGNABLE');
     a ^= IS_ASSIGNABLE;
   }
-  if (a & ASSIGNABLE_HAD_AWAIT_VARNAME) {
-    arr.push('ASSIGNABLE_HAD_AWAIT_VARNAME');
-    a ^= ASSIGNABLE_HAD_AWAIT_VARNAME;
+  if (a & PIGGY_BACK_SAW_AWAIT_VARNAME) {
+    arr.push('PIGGY_BACK_SAW_AWAIT_VARNAME');
+    a ^= PIGGY_BACK_SAW_AWAIT_VARNAME;
   }
-  if (a & ASSIGNABLE_HAD_AWAIT_KEYWORD) {
-    arr.push('ASSIGNABLE_HAD_AWAIT_KEYWORD');
-    a ^= ASSIGNABLE_HAD_AWAIT_KEYWORD;
+  if (a & PIGGY_BACK_SAW_AWAIT_KEYWORD) {
+    arr.push('PIGGY_BACK_SAW_AWAIT_KEYWORD');
+    a ^= PIGGY_BACK_SAW_AWAIT_KEYWORD;
   }
-  if (a & ASSIGNABLE_HAD_YIELD_VARNAME) {
-    arr.push('ASSIGNABLE_HAD_YIELD_VARNAME');
-    a ^= ASSIGNABLE_HAD_YIELD_VARNAME;
+  if (a & PIGGY_BACK_SAW_YIELD_VARNAME) {
+    arr.push('PIGGY_BACK_SAW_YIELD_VARNAME');
+    a ^= PIGGY_BACK_SAW_YIELD_VARNAME;
   }
-  if (a & ASSIGNABLE_HAD_YIELD_KEYWORD) {
-    arr.push('ASSIGNABLE_HAD_YIELD_KEYWORD');
-    a ^= ASSIGNABLE_HAD_YIELD_KEYWORD;
+  if (a & PIGGY_BACK_SAW_YIELD_KEYWORD) {
+    arr.push('PIGGY_BACK_SAW_YIELD_KEYWORD');
+    a ^= PIGGY_BACK_SAW_YIELD_KEYWORD;
   }
 
   if (a !== 0) {
