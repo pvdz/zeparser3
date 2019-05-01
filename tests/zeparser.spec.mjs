@@ -378,7 +378,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     );
   } else if (expectedThrows) {
     ++fail;
-    LOG_THROW('_failed_ to throw ANY error', code, '', desc, true);
+    LOG_THROW('_failed_ to throw ANY error', code, '', desc, true, false);
     if (expectedThrows !== true) {
       LOG('Expected an error message containing: "' + expectedThrows + '"');
     }
@@ -393,7 +393,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     );
   } else if (!checkAST) {
     if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-      LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true);
+      LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true, false);
 
       LOG('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
       LOG('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
@@ -419,7 +419,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     if (mustVerify && expectedJson !== actualJson) {
       let missingAst = expectedJson === '{"<not given>":true}';
 
-      LOG_THROW(missingAst ? 'AST missing' : 'AST mismatch', code, '', desc, true);
+      LOG_THROW(missingAst ? 'AST missing' : 'AST mismatch', code, '', desc, true, false);
 
       LOG('Actual ast:', formatAst(obj.ast) + ',');
       LOG(
@@ -439,7 +439,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
 
       ++fail;
     } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-      LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true);
+      LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true, false);
 
       LOG('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
       LOG('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
@@ -454,7 +454,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       );
       ++fail;
     } else if (expectedCallback && expectedCallback(obj.ast, obj.tokens, actualJson) === false) {
-      LOG_THROW('input parsed properly but ' + BOLD + 'CALLBACK' + RESET + ' rejected', code, undefined, desc);
+      LOG_THROW('input parsed properly but ' + BOLD + 'CALLBACK' + RESET + ' rejected', code, undefined, desc, false, false);
       ++fail;
     } else {
 
@@ -515,7 +515,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
           'typeof class{}\n/foo/g', // regex asi case (TODO: report to babel)
           'typeof async function f(){}\n/foo/g', // typeof async func regex edge case (TODO: report to babel)
         ].includes(code)) {
-          LOG_THROW('BABEL AST mismatch', code, '', desc, true);
+          LOG_THROW('BABEL AST mismatch', code, '', desc, true, false);
 
           printComparedAstStrings(actualJson, babelJson, 'zePar', 'babel');
 
@@ -539,9 +539,11 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   if (STOP_AFTER_FAIL && fail) throw BOLD + RED + 'stopped';
   if (brake) throw BOLD + RED + 'stopped for test';
 
-  function LOG_THROW(errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false) {
-    LOG('\n');
-    LOG(tokenizer && tokenizer.GETPOS(BOLD + '#|#' + RESET));
+  function LOG_THROW(errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false, printCode = true) {
+    if (printCode) {
+      LOG('\n');
+      LOG(tokenizer && tokenizer.GETPOS(BOLD + '#|#' + RESET, undefined, errmsg));
+    }
     if (TEST262) LOG('\n============== input ==============' + code + '\n============== /input =============\n');
     LOG(`${prefix} ${RED}ERROR${RESET}: \`${toPrint(code)}\` :: ` + errmsg + suffix);
     if (stack) {

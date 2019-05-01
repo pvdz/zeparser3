@@ -3305,18 +3305,18 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
 
   function THROW(str, token = null) {
     console.error('Throwing this error:', str);
-    _THROW('Tokenizer error! ' + str, token);
+    _THROW('Tokenizer error! ' + str, token, str);
   }
-  function _THROW(str, token = null) {
+  function _THROW(str, token = null, msg = '') {
     console.log('\n');
-    console.log('Error at #|#\n' + GETPOS('#|#', token));
+    console.log('Error at #|#\n' + GETPOS('#|#', token, msg));
     if (gracefulErrors === FAIL_HARD) throw new Error(str);
     else console.error(str);
   }
-  function DEBUG() {
-    return 'Tokenizer at #|#\n' + GETPOS('#|#');
+  function DEBUG(msg) {
+    return 'Tokenizer at #|#\n' + GETPOS('#|#', undefined, 'DEBUG('+msg+')');
   }
-  function GETPOS(sep, token) {
+  function GETPOS(sep, token, msg) {
     let offset = token ? token.start : startForError;
     let inputOffset = offset > 100 ? offset - 100 : 0;
     if (inputOffset) offset -= inputOffset;
@@ -3333,7 +3333,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       usedInput.slice(0, nl2) + '\n' +
       ' '.repeat(Math.max(0, indent)) +
       '^'.repeat(Math.max(0, arrows)) +
-      '------- error'+(offset>=usedInput.length?' at EOF':'') + '\n' +
+      '------- error'+(msg?': '+msg:offset>=usedInput.length?' at EOF':'') + '\n' +
       usedInput.slice(nl2) +
       ''
     );
