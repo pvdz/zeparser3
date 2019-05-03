@@ -2305,6 +2305,66 @@ export default (describe, test) =>
     test.fail('new arg without yield ag', {
       code: 'function *g() { new yield }',
     });
+
+    describe('yield in group in param default', _ => {
+
+      // https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
+      // > It is a Syntax Error if ArrowParameters Contains YieldExpression is true.
+      // The arrow parens inherit the generator state from the parent scope (unlike regular funcs, who reset it)
+
+      test.fail_strict('group yield piggy test in arrow param default', {
+        code: '(x=(yield)=y)=>z',
+      });
+
+      test.fail_strict('group yield piggy test in func param default', {
+        code: 'function f(x=(yield)=y){}',
+      });
+
+      test.fail('group yield+arg piggy test in func param default', {
+        code: 'function f(x=(yield z)=y){}',
+      });
+
+      test.fail('group yield piggy test in gen func param default', {
+        code: 'function *f(x=(yield)=y){}',
+      });
+
+      test.fail('group yield+arg piggy test in gen func param default', {
+        code: 'function *f(x=(yield z)=y){}',
+      });
+
+      test.fail('group yield piggy test in arrow param default', {
+        code: 'function *f(){    (x=(yield)=y)=>z   }',
+      });
+
+      test.fail('group yield+arg piggy test in arrow param default', {
+        code: 'function *f(){    (x=(yield z)=y)=>z   }',
+      });
+
+      test.fail_strict('group yield piggy test in func param default', {
+        code: 'function *f(){    function g(x=(yield)=y){}   }',
+        desc: 'a function does reset the yield/await state for params',
+      });
+
+      test.fail('group yield+arg piggy test in func param default', {
+        code: 'function *f(){    function g(x=(yield z)=y){}   }',
+      });
+
+      test.fail('group yield piggy test in gen func param default', {
+        code: 'function *f(){    function *g(x=(yield)=y){}   }',
+      });
+
+      test.fail('group yield+arg piggy test in gen func param default', {
+        code: 'function *f(){    function *g(x=(yield z)=y){}   }',
+      });
+
+      test.fail_strict('group yield assign', {
+        code: '(x=(yield)=y)',
+      });
+
+      test.fail('group yield+arg assign', {
+        code: '(x=(yield z)=y)',
+      });
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

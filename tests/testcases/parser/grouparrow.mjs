@@ -3858,6 +3858,172 @@ export default (describe, test) => describe('parens', _ => {
     test.fail('cannot assign to group with assignment', {
       code: '(a=/i/) = /i/',
     });
+// TODO: (,)=>x
+
+    test.fail('a group that only has a comma is not arrowable', {
+      code: '(,)=>x',
+    });
+
+    describe('MUST_DESTRUCT cases', _ => {
+
+      // I believe the fail cases fail because https://tc39.github.io/ecma262/#prod-DestructuringAssignmentTarget
+      // (The object is treated as an expression, not a pattern, and so the {a=b} is an error as per CoverInitializedName
+      // in https://tc39.github.io/ecma262/#sec-object-initializer-static-semantics-early-errors )
+
+      describe('group toplevel', _ => {
+
+        test.fail('something that MUST be a pattern can not be an object', {
+          code: '({x = y})',
+        });
+
+        test.pass('assignment to something that MUST be a pattern', {
+          code: '({x = y} = z)',
+        });
+
+        test.pass('something that MUST be a pattern as arrow head', {
+          code: '({x = y}) => z',
+        });
+
+        test.fail('property on something that MUST be a pattern', {
+          code: '({x = y}.z)',
+        });
+
+        test.fail('assignment to a property on something that MUST be a pattern', {
+          code: '({x = y}.z = obj)',
+        });
+
+        test.fail('arrow on property on something that MUST be a pattern', {
+          code: '({x = y}.z) => obj',
+        });
+
+        test.fail('property on group on something that MUST be a pattern', {
+          code: '({x = y}).z',
+        });
+      });
+
+      describe('nested in array', _ => {
+
+        test.fail('something that MUST be a pattern can not be an object', {
+          code: '([{x = y}])',
+        });
+
+        test.pass('assignment to something that MUST be a pattern', {
+          code: '([{x = y}] = z)',
+        });
+
+        test.pass('something that MUST be a pattern as arrow head', {
+          code: '([{x = y}]) => z',
+        });
+
+        test.fail('property on something that MUST be a pattern', {
+          code: '([{x = y}].z)',
+        });
+
+        test.fail('assignment to a property on something that MUST be a pattern', {
+          code: '([{x = y}].z = obj)',
+        });
+
+        test.fail('property even without assign', {
+          code: '([{x = y}.z])',
+        });
+
+        test.fail('property inside', {
+          code: '([{x = y}.z] = obj)',
+        });
+
+        test.fail('arrow on property on something that MUST be a pattern', {
+          code: '([{x = y}].z) => obj',
+        });
+
+        test.fail('property on group on something that MUST be a pattern', {
+          code: '([{x = y}]).z',
+        });
+      });
+
+      describe('array without nesting', _ => {
+        // I mean, it belongs in this set of tests
+
+        test.fail('something that MUST be a pattern can not be an object', {
+          code: '[{x = y}]',
+        });
+
+        test.pass('assignment to something that MUST be a pattern', {
+          code: '[{x = y}] = z',
+        });
+
+        test.fail('just messing with a heuristic', {
+          code: '[{x = y}] in z',
+          desc: 'note that {x=y} must always destruct and this exmple would only be valid inside a for-in/of header',
+        });
+
+        test.pass('in a for-in', {
+          code: 'for ([{x = y}] in y);',
+        });
+
+        test.pass('in a for-of', {
+          code: 'for ([{x = y}] of y);',
+        });
+
+        test.fail('in a for-loop', {
+          code: 'for ([{x = y}] ;;);',
+        });
+
+        test.fail('something that MUST be a pattern as arrow head without parens', {
+          code: '[{x = y}] => z',
+        });
+
+        test.fail('property on something that MUST be a pattern', {
+          code: '[{x = y}].z',
+        });
+
+        test.fail('assignment to a property on something that MUST be a pattern', {
+          code: '[{x = y}].z = obj',
+        });
+
+        test.fail('property inside', {
+          code: '[{x = y}.z] = obj',
+        });
+
+        test.fail('arrow on property on something that MUST be a pattern', {
+          code: '[{x = y}].z => obj',
+        });
+      });
+
+      describe('nested in object', _ => {
+
+        test.fail('something that MUST be a pattern can not be an object', {
+          code: '({a: {x = y}})',
+        });
+
+        test.pass('assignment to something that MUST be a pattern', {
+          code: '({a: {x = y}} = z)',
+        });
+
+        test.pass('something that MUST be a pattern as arrow head', {
+          code: '({a: {x = y}}) => z',
+        });
+
+        test.fail('property on something that MUST be a pattern', {
+          code: '({a: {x = y}}.z)',
+        });
+
+        test.fail('property inside', {
+          code: '({a: {x = y}.z})',
+        });
+
+        test.fail('assignment to a property on something that MUST be a pattern', {
+          code: '({a: {x = y}}.z = obj)',
+        });
+
+        test.fail('arrow on property on something that MUST be a pattern', {
+          code: '({a: {x = y}}.z) => obj',
+        });
+
+        test.fail('property on group on something that MUST be a pattern', {
+          code: '({a: {x = y}}).z',
+        });
+      });
+    });
 
     describe('invalid arrow header things', _ => {
 
@@ -4346,6 +4512,35 @@ export default (describe, test) => describe('parens', _ => {
       });
     });
   });
+
+  test('propagating the lhs-paren state', {
+    code: '(foo + (bar + boo) + ding)',
+    ast: {
+      type: 'Program',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'foo'},
+              operator: '+',
+              right: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'bar'},
+                operator: '+',
+                right: {type: 'Identifier', name: 'boo'},
+              },
+            },
+            operator: '+',
+            right: {type: 'Identifier', name: 'ding'},
+          },
+        },
+      ],
+    },
+    tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+  });
 });
 
 // arrow params and arrow can not have newline (asi breaks an arrow into group and syntax error)
@@ -4353,4 +4548,3 @@ export default (describe, test) => describe('parens', _ => {
 // cannot destructure when body contains "use strict"
 // cant redeclare existing vars
 // TODO: let not allowed in `let`, `const`, `for`-binding of any kind, and class name. But others are fine in sloppy
-// `(foo + (bar + boo) + ding)` propagating the lhs-paren state

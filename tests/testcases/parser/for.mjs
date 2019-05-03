@@ -1729,7 +1729,7 @@ export default (describe, test) =>
         tokens: true,
       });
 
-      test('no destructuring with property', {
+      test('destructuring with property', {
         code: 'for ([a.b].foo of c) d',
         ast: {
           type: 'Program',
@@ -1762,6 +1762,22 @@ export default (describe, test) =>
           ],
         },
         tokens: true,
+      });
+
+      test.pass('destructuring with dynamic property', {
+        code: 'for ([a.b][foo] of c) d',
+      });
+
+      test.fail('destructuring with call', {
+        code: 'for ([a.b](foo) of c) d',
+      });
+
+      test.fail('destructuring with tag', {
+        code: 'for ([a.b]`foo` of c) d',
+      });
+
+      test.fail('destructuring with update', {
+        code: 'for ([a.b]++ of c) d',
       });
 
       test('obj destructuring without binding', {
@@ -1803,7 +1819,7 @@ export default (describe, test) =>
         tokens: true,
       });
 
-      test('no destructuring with property', {
+      test('destructuring with property', {
         code: 'for ({a: b.c}.foo of d) e',
         ast: {
           type: 'Program',
@@ -1844,6 +1860,22 @@ export default (describe, test) =>
           ],
         },
         tokens: true,
+      });
+
+      test.pass('destructuring with dynamic property', {
+        code: 'for ({a: b.c}[x] of d) e',
+      });
+
+      test.fail('destructuring with call', {
+        code: 'for ({a: b.c}() of d) e',
+      });
+
+      test.fail('destructuring that gets tagged', {
+        code: 'for ({a: b.c}`z` of d) e',
+      });
+
+      test.fail('destructuring that gets update', {
+        code: 'for ({a: b.c}-- of d) e',
       });
 
       test.fail('rhs must be AssignmentExpression', {

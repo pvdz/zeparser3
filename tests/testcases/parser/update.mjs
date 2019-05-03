@@ -397,6 +397,10 @@ export default (describe, test) =>
       test.fail('left of paren arrow', {
         code: '++(x) => b',
       });
+
+      test.pass('regex arg case', {
+        code: '++/b/.c',
+      });
     });
 
     describe('decremental prefix', _ => {
@@ -744,6 +748,10 @@ export default (describe, test) =>
 
       test.pass('property of keyword as expr', {
         code: '(--this.x)',
+      });
+
+      test.pass('regex arg case', {
+        code: '--/b/.c',
       });
     });
 

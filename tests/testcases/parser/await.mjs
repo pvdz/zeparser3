@@ -1235,6 +1235,10 @@ export default (describe, test) =>
               code: 'async ({x} = await bar) => {}',
             });
 
+            test.fail('async destructuring obj args expr arrow', {
+              code: 'let z = async ({x} = await bar) => {}',
+            });
+
             test.fail('async destructuring obj args call', {
               code: 'async ({x} = await bar);',
             });
@@ -1607,6 +1611,77 @@ export default (describe, test) =>
 
       test.pass('keyword inside rest', {
         code: 'async r => result = [...{ x = await x }] = y;',
+      });
+    });
+
+    describe('await in group in param default', _ => {
+
+      // https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
+      // > It is a Syntax Error if ArrowParameters Contains AwaitExpression is true.
+      // The arrow parens inherit the async state from the parent scope (unlike regular funcs, who reset it)
+
+      test.pass('group await piggy test in arrow param default', {
+        code: '(x=(await)=y)=>z',
+        desc: 'this is only an await expression in Module goal',
+        MODULE: {throws: true},
+      });
+
+      test.fail('group await piggy test in async arrow param default', {
+        code: 'async (x=(await)=y)=>z',
+        desc: 'await in arrow param is always an error',
+      });
+
+      test.pass('group await piggy test in func param default', {
+        code: 'function f(x=(await)=y){}',
+        desc: 'this is only an await expression in Module goal',
+        MODULE: {throws: true},
+      });
+
+      test.fail('group bad await piggy test in async func param default', {
+        code: 'async function f(x=(await)=y){}',
+        desc: 'await in arrow param is always an error',
+      });
+
+      test.fail('group await piggy test in async func param default', {
+        code: 'async function f(x=(await z)=y){}',
+        desc: 'await in arrow param is always an error',
+      });
+
+      test.fail('group bad await piggy test in arrow param default', {
+        code: 'async function f(){    (x=(await)=y)=>z   }',
+        MODULE: {throws: true},
+      });
+
+      test.fail('group await piggy test in arrow param default', {
+        code: 'async function f(){    (x=(await y)=y)=>z   }',
+        MODULE: {throws: true},
+      });
+
+      test.pass('group bad await piggy test in func param default', {
+        code: 'async function f(){    function g(x=(await)=y){}   }',
+        MODULE: {throws: true},
+      });
+
+      test.fail('group await piggy test in func param default', {
+        code: 'async function f(){    function g(x=(await z)=y){}   }',
+        desc: 'the await is a var name so does not expect the `z`',
+      });
+
+      test.fail('group bad await piggy test in async func param default', {
+        code: 'async function f(){    async function g(x=(await)=y){}   }',
+      });
+
+      test.fail('group await piggy test in async func param default', {
+        code: 'async function f(){    async function g(x=(await z)=y){}   }',
+      });
+
+      test.pass('group bad await assign', {
+        code: '(x=(await)=y)',
+        MODULE: {throws: true},
+      });
+
+      test.fail('group await assign', {
+        code: '(x=(await z)=y)',
       });
     });
 

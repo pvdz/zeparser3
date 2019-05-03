@@ -2412,6 +2412,59 @@ export default (describe, test) =>
           desc: 'fine because `new` is stronger than `?`'
         });
       });
+
+      test('calling a new result should get call and new exprs', {
+        code: 'new c(x)(y)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {
+                  type: 'NewExpression',
+                  arguments: [{type: 'Identifier', name: 'x'}],
+                  callee: {type: 'Identifier', name: 'c'},
+                },
+                arguments: [{type: 'Identifier', name: 'y'}],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('calling a `new async` result should get call and new exprs', {
+        code: 'new async(x)(y)',
+        desc: 'fun fact: this at some point parsed the x and y args as part of the new call, oops',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {
+                  type: 'NewExpression',
+                  arguments: [{type: 'Identifier', name: 'x'}],
+                  callee: {type: 'Identifier', name: 'async'},
+                },
+                arguments: [{type: 'Identifier', name: 'y'}],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test.fail('new on parenless async arrow', {
+        code: 'new async x => x',
+      });
+
+      test.fail('new on parenless arrow with param called async', {
+        code: 'new async => x',
+      });
     });
 
     describe('new.target', _ => {

@@ -8161,6 +8161,10 @@ export default (describe, test) =>
             code: 'x = {\'__proto__\': 1, __proto__: 2}',
           });
 
+          test.pass('bad case with wrapped in array', {
+            code: 'x = [{__proto__: 1, __proto__: 2}]',
+          });
+
           test.pass('okay with shorthand right', {
             code: 'x = {__proto__: 1, __proto__}',
           });
@@ -8269,6 +8273,12 @@ export default (describe, test) =>
 
           test('bad case with string and ident', {
             code: 'x = {\'__proto__\': 1, __proto__: 2}',
+            throws: '__proto__',
+            WEB: true,
+          });
+
+          test('bad case wrapped in array', {
+            code: 'x = [{__proto__: 1, __proto__: 2}]',
             throws: '__proto__',
             WEB: true,
           });
