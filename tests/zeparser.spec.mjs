@@ -15,7 +15,8 @@ const SEARCH = process.argv.includes('-s');
 const SKIP_BUILDS = process.argv.includes('-q') || SEARCH;
 const TEST262 = process.argv.includes('-t');
 const SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
-const STOP_AFTER_FAIL = !process.argv.includes('-f');
+const STOP_AFTER_FAIL = !process.argv.includes('-F');
+const TRUNC_STACK_TRACE = !process.argv.includes('-S');
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -550,8 +551,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       LOG(
         'Stack:',
         (
-          stack.length > 10
-          ? [...stack.split('\n').slice(0,8), '...trunced by ze tester', ...stack.split('\n').slice(-3)].join('\n')
+          stack.length > 10 && TRUNC_STACK_TRACE
+          ? [...stack.split('\n').slice(0,8), '...trunced by ze tester (use `-S` to prevent)', ...stack.split('\n').slice(-3)].join('\n')
           : stack
         )
         .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
