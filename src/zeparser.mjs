@@ -2883,54 +2883,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
 
       destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-      assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
-
-      if (curc === $$SEMI_3B) {
-        // - `for ({a};;);`
-        // - `for ({a}.x;;);`
-        if (awaitable) {
-          // - `for await ({a};;);`
-          // - `for await ({a}.x;;);`
-          THROW('Can not use `for-await` with a regular `for` loop, only `for-of`');
-        }
-      } else if (curtok.str === 'in') {
-        // - `for ({} in y);`
-        // - `for ({} = y in y);`
-        // - `for ({x} = y in z);`
-        // - `for ({x} = y of z);`
-
-        if (awaitable) THROW('Can not use `for-await` with a `for-in`, only `for-of`');
-
-        // TODO: are yield/await relevant here?
-        if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
-        AST_destruct(astProp);
-      } else if (curtok.str === 'of') {
-        // - `for ({} on y);`
-        // - `for ({} = y on y);`
-        // - `for ({x} = y on z);`
-        // - `for ({x} = y of z);`
-        // - `for await ({} on y);`
-        // - `for await ({} = y on y);`
-        // - `for await ({x} = y on z);`
-        // - `for await ({x} = y of z);`
-
-        // TODO: are yield/await relevant here?
-        if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
-        AST_destruct(astProp);
-      } else {
-        // [v]: `for ({}.bar ;;);`
-        // [v]: `for ({}.bar = x ;;);`
-        // [v]: `for ({a: b.c}.foo in d) e`
-        // [v]: `for ({}.bar in obj);`
-        // [x]: `for ({}.bar = x in obj);`
-        // [v]: `for ({a: b.c}.foo of d) e`
-
-        // - `for ({}.x in y);`
-        // - `for ({}.x);`                 // bad
-        // - `for ({x} = y);`              // bad
-        // - `for ({x}.y in z);`
-        assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
-      }
+      assignable = parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp);
     }
     else if (curc === $$SQUARE_L_5B) {
       // for-in, for-of, for-await
@@ -2948,43 +2901,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
 
       destructible = parseArrayOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-      assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
-
-      if (curc === $$SEMI_3B) {
-        // - `for ([a];;);`
-        // - `for ([a].x;;);`
-        if (awaitable) {
-          // - `for await ([a];;);`
-          // - `for await ([a].x;;);`
-          THROW('Can not use `for-await` with a regular `for` loop, only `for-of`');
-        }
-      } else if (curtok.str === 'in') {
-        // - `for ([] in y);`
-        // - `for ([] = y in y);`
-        // - `for ([x] = y in z);`
-        // - `for ([x] = y of z);`
-
-        if (awaitable) THROW('Can not use `for-await` with a `for-in`, only `for-of`');
-
-        // TODO: are yield/await relevant here?
-        if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
-        AST_destruct(astProp);
-      } else if (curtok.str === 'of') {
-        // - `for ([] in y);`
-        // - `for ([] = y in y);`
-        // - `for ([x] = y in z);`
-        // - `for ([x] = y of z);`
-
-        // TODO: are yield/await relevant here?
-        if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
-        AST_destruct(astProp);
-      } else {
-        // - `for ([].x in y);`
-        // - `for ([].x);`                 // bad
-        // - `for ([x] = y);`              // bad
-        // - `for ([x].y in z);`
-        assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
-      }
+      assignable = parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp);
     }
     else {
       // If the LHS is an object or array then it must cover an AssignmentPattern. In this case it may have an
@@ -3081,6 +2998,77 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'update');
     }
+  }
+  function parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp) {
+    assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
+
+    if (curc === $$SEMI_3B) {
+      // - `for ({a};;);`
+      // - `for ({a}.x;;);`
+      // - `for ([a];;);`
+      // - `for ([a].x;;);`
+      if (awaitable) {
+        // - `for await ({a};;);`
+        // - `for await ({a}.x;;);`
+        // - `for await ([a];;);`
+        // - `for await ([a].x;;);`
+        THROW('Can not use `for-await` with a regular `for` loop, only `for-of`');
+      }
+    }
+    else if (curtok.str === 'in') {
+      // - `for ({} in y);`
+      // - `for ({} = y in y);`
+      // - `for ({x} = y in z);`
+      // - `for ({x} = y of z);`
+      // - `for ([] in y);`
+      // - `for ([] = y in y);`
+      // - `for ([x] = y in z);`
+      // - `for ([x] = y of z);`
+
+      if (awaitable) THROW('Can not use `for-await` with a `for-in`, only `for-of`');
+
+      // TODO: are yield/await relevant here?
+      if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+      AST_destruct(astProp);
+    }
+    else if (curtok.str === 'of') {
+      // - `for ({} on y);`
+      // - `for ({} = y on y);`
+      // - `for ({x} = y on z);`
+      // - `for ({x} = y of z);`
+      // - `for await ({} on y);`
+      // - `for await ({} = y on y);`
+      // - `for await ({x} = y on z);`
+      // - `for await ({x} = y of z);`
+      // - `for ([] in y);`
+      // - `for ([] = y in y);`
+      // - `for ([x] = y in z);`
+      // - `for ([x] = y of z);`
+
+      // TODO: are yield/await relevant here?
+      if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+      AST_destruct(astProp);
+    }
+    else {
+      // [v]: `for ({}.bar ;;);`
+      // [v]: `for ({}.bar = x ;;);`
+      // [v]: `for ({a: b.c}.foo in d) e`
+      // [v]: `for ({}.bar in obj);`
+      // [x]: `for ({}.bar = x in obj);`
+      // [v]: `for ({a: b.c}.foo of d) e`
+
+      // - `for ({}.x in y);`
+      // - `for ({}.x);`                 // bad
+      // - `for ({x} = y);`              // bad
+      // - `for ({x}.y in z);`
+      // - `for ([].x in y);`
+      // - `for ([].x);`                 // bad
+      // - `for ([x] = y);`              // bad
+      // - `for ([x].y in z);`
+      assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
+    }
+
+    return assignable;
   }
 
   function parseIfStatement(lexerFlags, scoop, labelSet, astProp) {
@@ -5767,6 +5755,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let assignable = 0; // true iif first expr is assignable, always false if the group has a comma
     let toplevelComma = false;
     let simpleArgs = ARGS_SIMPLE; // true if only idents and without assignment (so es5 valid)
+    let mustBeArrow = false; // special case; a `...` must mean arrow, and a trailing comma must mean arrow as well
 
     while (curc !== $$PAREN_R_29) { // top-level group loop, list of ident, array, object, rest, and other expressions
       if (curtype === $IDENT) {
@@ -5891,16 +5880,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         destructible |= parseArrowableTopRest(lexerFlags, paramScoop, asyncToken !== UNDEF_ASYNC, astProp);
         if (asyncToken !== UNDEF_ASYNC) {
           // - `async(...x);`
-          // - `async (...x) => x`
+          // - `async(...x,)`
+          // - `async(...x,b)`
+          // - `async(...x) => x`
           if (curc !== $$PAREN_R_29) {
-            destructible |= CANT_DESTRUCT; // now the dots in async toplevel must mean spread/call
+            // These cases are not valid as arrows so the header cannot destruct.
+            // - `async (...x,)`
+            // - `async (...x,b)`
+            destructible |= CANT_DESTRUCT; // Now the dots in async toplevel must mean spread/call
+          } else {
+            // These cases are valid both as a call to `async` as well as an async arrow, so do nothing
+            // - `async(...x);`
+            // - `async(...x) => x`
           }
         } else {
+          // Note: `...` in toplevel of group can only mean rest, meaning an arrow must follow the group
+          // This must also be the last element of the arrow header (can not have trailing comma)
           // - `(...x);`
           // - `(...x) => x`
-          // TODO: change this to use a local state var rather than pollute destructible...
-          destructible |= MUST_DESTRUCT; // dots in async-less toplevel group must mean arrow
-          // must be last element in arrow header
+          // - `(...x,) => x`
+
+          mustBeArrow = true;
           break;
         }
       }
@@ -5981,8 +5981,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // [x]: `(a,) = x;`
           // [x]: `(,) => x;`
           // This may only be valid in ES8+ and as an arrow. Any other case fails here.
-          // TODO: use a local var rather than polluting destructible for this case
-          destructible |= MUST_DESTRUCT;
+          mustBeArrow = true;
           // trailing function commas do not affect the AST (so don't wrap in sequence)
           break;
         } else {
@@ -6045,11 +6044,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // The param name/default containing await/yield checks are done elsewhere...
       ASSERT(!(hasAllFlags(destructible, PIGGY_BACK_SAW_AWAIT_VARNAME) && (hasAllFlags(lexerFlags, LF_IN_ASYNC) || goalMode === GOAL_MODULE)), 'async arrows dont reach this place and nested in an async arrow triggers somewhere else so I dont think this case can occur');
       ASSERT(!(hasAllFlags(destructible, PIGGY_BACK_SAW_YIELD_VARNAME) && hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE)), 'these checks occur elsewhere and I cant come up with a covering test case');
-    } else if (hasAllFlags(destructible, MUST_DESTRUCT)) {
+    } else if (hasAllFlags(destructible, MUST_DESTRUCT) || mustBeArrow) {
       // [x]: `(...x);`
       // [x]: `(a,)`
       // [x]: `(a,b,)`
       // [x]: `(a = b,)`
+      // [x]: `({a = b})`
       THROW('Group contained a value that must destruct but this was not an arrow so it is invalid');
     }
 
@@ -6448,7 +6448,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // This function serves to throw in case the object was found to must be a Pattern but used as a value anyways
     // For example: `({a = b} = x)` vs `({a = b}.c)`
 
-    return parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, isClassMethod, exportedNames, exportedBindings, _astProp);
+    let destructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, isClassMethod, exportedNames, exportedBindings, _astProp);
+
+    return destructible;
   }
 
   function parseArrayLiteralPattern(lexerFlagsBeforeParen, scoop, bindingType, skipInit, exportedNames, exportedBindings, _astProp) {
