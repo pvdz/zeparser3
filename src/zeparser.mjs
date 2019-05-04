@@ -905,7 +905,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === 2, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     if (curc !== ord || curtok.str.length !== 1) {
-      THROW('Next ord should be ' + ord + ' (' + String.fromCharCode(ord) + ') but was ' + curc + ' (curc: `' + String.fromCharCode(curc) + '`, token: `'+curtok.str+'`)');
+      THROW('Next ord should be ' + ord + ' (`' + String.fromCharCode(ord) + '`) but was ' + curc + ' (curc: `' + String.fromCharCode(curc) + '`, token: `'+curtok.str+'`)');
     } else {
       ASSERT(curtok.str.length === 1, 'should be len=1');
       skipRex(lexerFlags);
@@ -916,7 +916,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === 2, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     if (curc !== ord) {
-      THROW('Next ord should be ' + ord + ' (' + String.fromCharCode(ord) + ') but was ' + curc + ' (curc: `' + String.fromCharCode(curc) + '`, token: `'+curtok.str+'`)');
+      THROW('Next ord should be ' + ord + ' (`' + String.fromCharCode(ord) + '`) but was ' + curc + ' (curc: `' + String.fromCharCode(curc) + '`, token: `'+curtok.str+'`)');
     } else if (curtok.str.length !== 1) {
       THROW('Next token should be the single char `' + String.fromCharCode(ord) + '` but was `' + curtok.str + '`');
     } else {
@@ -2932,6 +2932,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // there can be multiple vars and inits
     // for-in and for-of can only have one var without inits (invalidate after)
 
+
+    // - `for (x of y);`
+    //           ^
+    // - `for (x in y);`
+    //           ^
+    // - `for (x;;);`
+    //          ^
     if (curtype === $IDENT) {
       if (curtok.str === 'of') {
         if (catchforofhack) THROW('Encountered `var` declaration for a name used in catch binding which in web compat mode is still not allowed in a `for-of`');

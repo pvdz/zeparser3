@@ -2215,7 +2215,7 @@ export default (describe, test) =>
 
             test('const, two vars with both init, semi', {
               code: 'for (const foo = bar, zoo = boo);',
-              throws: '(;)',
+              throws: '(`;`)',
             });
 
             test.fail('var on next line does not trigger asi', {
@@ -2305,7 +2305,7 @@ export default (describe, test) =>
 
             test('asi can not trigger if next token is ident', {
               code: 'for (const\nfoo() in x);',
-              throws: '(;)', // expecting for-header semi
+              throws: '(`;`)', // expecting for-header semi
             });
           });
 
@@ -2386,7 +2386,7 @@ export default (describe, test) =>
 
             test('asi can not trigger if next token is ident', {
               code: 'for (const\nfoo() of x);',
-              throws: '(;)', // expecting for-header semi
+              throws: '(`;`)', // expecting for-header semi
             });
           });
         });
@@ -4921,22 +4921,22 @@ export default (describe, test) =>
             describe('array', _ => {
               test('empty "array" should work', {
                 code: 'for (const [] = x);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('empty array with one comma', {
                 code: 'for (const [,] = x);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('empty array with double comma', {
                 code: 'for (const [,,] = x);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('with one var, no init, semi', {
                 code: 'for (const [foo] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test.fail('trailing comma is insignificant', {
@@ -4945,32 +4945,32 @@ export default (describe, test) =>
 
               test('double trailing comma is significant', {
                 code: 'for (const [foo,,] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('leading comma', {
                 code: 'for (const [,foo] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double leading comma', {
                 code: 'for (const [,,foo] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('two vars', {
                 code: 'for (const [foo,bar] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('two vars with eliding comma', {
                 code: 'for (const [foo,,bar] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double destruct', {
                 code: 'for (const [foo] = arr, [bar] = arr2);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test.fail('destruct and non-destruct without init', {
@@ -4979,7 +4979,7 @@ export default (describe, test) =>
 
               test('destruct and non-destruct with init', {
                 code: 'for (const [foo] = arr, bar = arr2);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('non-destruct without init and destruct', {
@@ -4989,12 +4989,12 @@ export default (describe, test) =>
 
               test('non-destruct with init and destruct', {
                 code: 'for (const foo = arr, [bar] = arr2);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('one var with initializer', {
                 code: 'for (const [foo=a] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5015,12 +5015,12 @@ export default (describe, test) =>
 
               test('two vars, with and without initializer', {
                 code: 'for (const [foo=a, bar] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('two vars, without and with initializer', {
                 code: 'for (const [foo, bar=b] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5043,7 +5043,7 @@ export default (describe, test) =>
 
               test('two vars, with and with initializer', {
                 code: 'for (const [foo=a, bar=b] = arr);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5089,12 +5089,12 @@ export default (describe, test) =>
               describe('rest operator', _ => {
                 test('rest as the only destruct', {
                   code: 'for (const [...foo] = obj);',
-                  throws: '(;)',
+                  throws: '(`;`)',
                 });
 
                 test('rest preceded by an ident', {
                   code: 'for (const [foo, ...bar] = obj);',
-                  throws: '(;)',
+                  throws: '(`;`)',
                 });
 
                 test('rest followed by an ident', {
@@ -5114,7 +5114,7 @@ export default (describe, test) =>
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] = obj);',
-                  throws: '(;)',
+                  throws: '(`;`)',
                 });
 
                 test('trailing comma after rest on a nested destruct', {
@@ -5130,7 +5130,7 @@ export default (describe, test) =>
 
                 test('second param rest on a nested destruct', {
                   code: 'for (const [x, ...[foo, bar]] = obj);',
-                  throws: '(;)',
+                  throws: '(`;`)',
                   tokens: [
                     $IDENT,
                     $PUNCTUATOR,
@@ -5182,7 +5182,7 @@ export default (describe, test) =>
 
                 test('spread and rest', {
                   code: 'for (const [a=[...b], ...c] = obj);',
-                  throws: '(;)',
+                  throws: '(`;`)',
                 });
               });
             });
@@ -5190,7 +5190,7 @@ export default (describe, test) =>
             describe('object', _ => {
               test('empty obj', {
                 code: 'for (const {} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
@@ -5208,13 +5208,13 @@ export default (describe, test) =>
 
               test('single var base case', {
                 code: 'for (const {x} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single var with trailing comma', {
                 code: 'for (const {x,} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
@@ -5241,7 +5241,7 @@ export default (describe, test) =>
 
               test('double var simple', {
                 code: 'for (const {x, y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double var with double comma', {
@@ -5253,12 +5253,12 @@ export default (describe, test) =>
 
               test('double var simple', {
                 code: 'for (const {x} = a, {y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('destruct and non-destruct with init', {
                 code: 'for (const {x} = a, y = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test.fail('destruct and non-destruct without init', {
@@ -5267,7 +5267,7 @@ export default (describe, test) =>
 
               test('non-destruct with ini and destruct', {
                 code: 'for (const x = a, {y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('non-destruct without ini and destruct', {
@@ -5277,52 +5277,52 @@ export default (describe, test) =>
 
               test('single destruct with init', {
                 code: 'for (const {x = y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double destruct with and without init', {
                 code: 'for (const {x = y, z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double destruct without and with init', {
                 code: 'for (const {x, y = z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double destruct both with init', {
                 code: 'for (const {x = y, z = a} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('single destruct with rename', {
                 code: 'for (const {x : y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double destruct with and without rename', {
                 code: 'for (const {x : y, z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double destruct without and with rename', {
                 code: 'for (const {x, y : z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double destruct both with rename', {
                 code: 'for (const {x : y, z : a} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('single destruct with rename and init', {
                 code: 'for (const {x : y = z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('double destruct with rename and init', {
                 code: 'for (const {x : y, z, a : b = c} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('single destruct no assignment', {
@@ -5387,7 +5387,7 @@ export default (describe, test) =>
 
               test('correct dynamic property destructuring', {
                 code: 'for (const {[x]: y} = z);',
-                throws: '(;)',
+                throws: '(`;`)',
               });
 
               test('dynamic property destructuring missing alias', {
@@ -5417,7 +5417,7 @@ export default (describe, test) =>
 
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (const {[x]: y = z} = a);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5442,7 +5442,7 @@ export default (describe, test) =>
 
               test('dynamic prop as second prop', {
                 code: 'for (const {a, [x]: y} = a);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,

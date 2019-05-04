@@ -2240,7 +2240,7 @@ export default (describe, test) =>
 
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo();;);',
-              throws: '(;)', // expecting for-header semi
+              throws: '(`;`)', // expecting for-header semi
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -2248,37 +2248,37 @@ export default (describe, test) =>
           describe('invalid colorless for statement', _ => {
             test('let, one var, no init, semi', {
               code: 'for (let foo);',
-              throws: '(;)',
+              throws: '(`;`)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('let, two vars, no init, semi', {
               code: 'for (let foo, bar);',
-              throws: '(;)',
+              throws: '(`;`)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('let, var with init, semi', {
               code: 'for (let foo = bar);',
-              throws: '(;)',
+              throws: '(`;`)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('let, two vars with both init, semi', {
               code: 'for (let foo = bar, zoo = boo);',
-              throws: '(;)',
+              throws: '(`;`)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('var on next line does not trigger asi', {
               code: 'for (let\nfoo);',
-              throws: '(;)',
+              throws: '(`;`)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo());',
-              throws: '(;)', // expecting for-header semi
+              throws: '(`;`)', // expecting for-header semi
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -2356,7 +2356,7 @@ export default (describe, test) =>
 
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo() in x);',
-              throws: '(;)', // expecting for-header semi
+              throws: '(`;`)', // expecting for-header semi
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -2436,7 +2436,7 @@ export default (describe, test) =>
 
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo() of x);',
-              throws: '(;)', // expecting for-header semi
+              throws: '(`;`)', // expecting for-header semi
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -5341,7 +5341,7 @@ export default (describe, test) =>
             describe('object', _ => {
               test('empty obj', {
                 code: 'for (let {} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
@@ -5361,13 +5361,13 @@ export default (describe, test) =>
 
               test('single var base case', {
                 code: 'for (let {x} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single var with trailing comma', {
                 code: 'for (let {x,} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
@@ -5394,7 +5394,7 @@ export default (describe, test) =>
 
               test('double var simple', {
                 code: 'for (let {x, y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5422,7 +5422,7 @@ export default (describe, test) =>
 
               test('double var simple', {
                 code: 'for (let {x} = a, {y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5447,7 +5447,7 @@ export default (describe, test) =>
 
               test('destruct and non-destruct with init', {
                 code: 'for (let {x} = a, y = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5470,7 +5470,7 @@ export default (describe, test) =>
 
               test('destruct and non-destruct without init', {
                 code: 'for (let {x} = a, obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5491,7 +5491,7 @@ export default (describe, test) =>
 
               test('non-destruct with ini and destruct', {
                 code: 'for (let x = a, {y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5514,7 +5514,7 @@ export default (describe, test) =>
 
               test('non-destruct without ini and destruct', {
                 code: 'for (let x, {y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5535,7 +5535,7 @@ export default (describe, test) =>
 
               test('single destruct with init', {
                 code: 'for (let {x = y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5556,7 +5556,7 @@ export default (describe, test) =>
 
               test('double destruct with and without init', {
                 code: 'for (let {x = y, z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5579,7 +5579,7 @@ export default (describe, test) =>
 
               test('double destruct without and with init', {
                 code: 'for (let {x, y = z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5602,7 +5602,7 @@ export default (describe, test) =>
 
               test('double destruct both with init', {
                 code: 'for (let {x = y, z = a} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5627,7 +5627,7 @@ export default (describe, test) =>
 
               test('single destruct with rename', {
                 code: 'for (let {x : y} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5648,7 +5648,7 @@ export default (describe, test) =>
 
               test('double destruct with and without rename', {
                 code: 'for (let {x : y, z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5671,7 +5671,7 @@ export default (describe, test) =>
 
               test('double destruct without and with rename', {
                 code: 'for (let {x, y : z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5694,7 +5694,7 @@ export default (describe, test) =>
 
               test('double destruct both with rename', {
                 code: 'for (let {x : y, z : a} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5719,7 +5719,7 @@ export default (describe, test) =>
 
               test('single destruct with rename and init', {
                 code: 'for (let {x : y = z} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5742,7 +5742,7 @@ export default (describe, test) =>
 
               test('double destruct with rename and init', {
                 code: 'for (let {x : y, z, a : b = c} = obj);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5842,7 +5842,7 @@ export default (describe, test) =>
 
               test('correct dynamic property destructuring', {
                 code: 'for (let {[x]: y} = z);',
-                throws: '(;)',
+                throws: '(`;`)',
                 desc: 'TODO: the message is actually wrong here (since the init is present). not a big deal right now as long as something throws.',
               });
 
@@ -5873,7 +5873,7 @@ export default (describe, test) =>
 
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (let {[x]: y = z} = a);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,
@@ -5898,7 +5898,7 @@ export default (describe, test) =>
 
               test('dynamic prop as second prop', {
                 code: 'for (let {a, [x]: y} = a);',
-                throws: '(;)',
+                throws: '(`;`)',
                 tokens: [
                   $IDENT,
                   $PUNCTUATOR,

@@ -112,7 +112,7 @@ export default (describe, test) =>
           throws: 'yield',
           SLOPPY_SCRIPT: {
             desc: 'cannot be yield outside a generator so it must ASI or bail',
-            throws: '())',
+            throws: '(`)`)',
           },
         });
 
@@ -121,7 +121,7 @@ export default (describe, test) =>
           throws: 'yield',
           SLOPPY_SCRIPT: {
             desc: 'cannot be yield outside a generator so it must ASI or bail',
-            throws: '())',
+            throws: '(`)`)',
           },
         });
       });
@@ -522,7 +522,7 @@ export default (describe, test) =>
           code: 'function f(){ call(yield x); }',
           throws: 'yield',
           SLOPPY_SCRIPT: {
-            throws: '())',
+            throws: '(`)`)',
           },
         });
 
@@ -530,7 +530,7 @@ export default (describe, test) =>
           code: 'function f(){ call(yield x + y); }',
           throws: 'yield',
           SLOPPY_SCRIPT: {
-            throws: '())',
+            throws: '(`)`)',
           },
         });
       });
