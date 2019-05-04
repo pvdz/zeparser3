@@ -151,10 +151,8 @@ export default (describe, test) =>
         tokens: [],
       });
 
-      test('object with default', {
+      test.pass('object with initializer is ok', {
         code: 'try {} catch({e}=x){}',
-        throws: 'The catch clause cannot have a default',
-        tokens: [],
       });
 
       test('object with inside default', {
@@ -197,25 +195,11 @@ export default (describe, test) =>
       test('array with trailing comma', {
         code: 'try {} catch([e],){}',
         throws: 'exactly one parameter',
-        tokens: [],
       });
 
-      test('ident with default', {
-        code: 'try {} catch(e=x){}',
-        throws: 'The catch clause cannot have a default',
-        tokens: [],
-      });
-
-      test('object with default', {
-        code: 'try {} catch({e}=x){}',
-        throws: 'The catch clause cannot have a default',
-        tokens: [],
-      });
-
-      test('array with default', {
+      test.pass('array with default', {
         code: 'try {} catch([e]=x){}',
-        throws: 'The catch clause cannot have a default',
-        tokens: [],
+        desc: 'catch clauses cant have a default but patterns can still have initializers',
       });
 
       test('array with inside default', {

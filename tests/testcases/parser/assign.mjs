@@ -1033,4 +1033,8 @@ export default (describe, test) =>
         code: '({a: (1) = x })',
       });
     });
+
+    test.fail('assignment of a pattern', {
+      code: 'x = {x=y};',
+    });
   });
