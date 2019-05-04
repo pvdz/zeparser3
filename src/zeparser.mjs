@@ -2852,6 +2852,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `for (a=>b;;);`
           // - `for (a=>b in c);`    // error
           // - `for (a=>b in c);`    // error
+          // TODO: we can do parseValue here. the hadAssign is never true because these funcs dont parse ops. (not even for patterns?)
           assignable = parseValueHeadBodyIdent(lexerFlags | LF_IN_FOR_LHS, NOT_NEW_ARG, BINDING_TYPE_NONE, ASSIGN_EXPR_IS_OK, astProp);
           hadAssign = curc === $$IS_3D && curtok.str === '=';
           assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
@@ -2882,7 +2883,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       wasNotDecl = true;
 
-      destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, SKIP_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
       assignable = parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp);
     }
     else if (curc === $$SQUARE_L_5B) {
@@ -2900,7 +2901,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       wasNotDecl = true;
 
-      destructible = parseArrayOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      destructible = parseArrayOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
       assignable = parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp);
     }
     else {
@@ -3007,18 +3008,36 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp) {
+    ASSERT(parsePatternTailInForHeader.length == arguments.length, 'arg count');
+
     assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
+
+    // - `for ({}`
+    //           ^
+    // - `for ([]`
+    //           ^
+    // - `for ([].foo in`
+    //           ^
+    // - `for ([] in x`
+    //            ^
+    // Unnecessary overhead most of the time but it makes certain edge cases just easier to deal with
+    assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
+
+    // - `for ([].foo in x);`
+    //                ^
+    // - `for ([] in x);`
+    //            ^
+    // - `for ([] = x in x);`
+    //            ^
+    // - `for ([] of x);`
+    // - `for ([] ;;);`
 
     if (curc === $$SEMI_3B) {
       // - `for ({a};;);`
-      // - `for ({a}.x;;);`
       // - `for ([a];;);`
-      // - `for ([a].x;;);`
       if (awaitable) {
         // - `for await ({a};;);`
-        // - `for await ({a}.x;;);`
         // - `for await ([a];;);`
-        // - `for await ([a].x;;);`
         THROW('Can not use `for-await` with a regular `for` loop, only `for-of`');
       }
     }
@@ -3035,7 +3054,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (awaitable) THROW('Can not use `for-await` with a `for-in`, only `for-of`');
 
       // TODO: are yield/await relevant here?
-      if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+      if (notAssignable(assignable)) THROW('The for-header lhs binding pattern is not destructible');
       AST_destruct(astProp);
     }
     else if (curtok.str === 'of') {
@@ -3053,26 +3072,35 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `for ([x] = y of z);`
 
       // TODO: are yield/await relevant here?
-      if (assignable === NOT_ASSIGNABLE) THROW('The for-header lhs binding declaration is not destructible');
+      if (notAssignable(assignable)) THROW('The for-header lhs binding pattern is not destructible');
       AST_destruct(astProp);
+    } else if (curtok.str === '=') {
+      // This can be fine if inside a regular `for-loop`. Only if we see `in` or `of` before the `;` are we in trouble.
+      parseExpressionFromOp(lexerFlags| LF_IN_FOR_LHS, assignable, astProp);
+      if (curc === $$SEMI_3B) {
+        // This is fiiiine
+        // - `for ([] = x ;;);`
+        // - `for ({} = x ;;);`
+      } else if (curtok.str === 'in' || curtok.str === 'of') {
+        // - `for ([] = x in y);`
+        // - `for ({} = x of y);`
+        // https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors
+        // > It is a Syntax Error if LeftHandSideExpression is either an ObjectLiteral or an ArrayLiteral and if LeftHandSideExpression is not covering an AssignmentPattern.
+        // This means, IF the lhs is an object, THEN it must also cover a Pattern. It does not say the lhs can be any
+        // Pattern. The important distinction is that if it could be any Pattern, then it could have a "top level"
+        // initialiser. But as the wording stands, it may be a Pattern if and only if it would match an object or array
+        // literal as a whole. And `[] = x` would be an assignment, not an obj/arr literal. So it is an error.
+        THROW('The left side of a `for-of` and `for-in` can not be an assignment, even if it is a BindingPattern');
+      } else {
+        // End of the expression before finding `in`, `of`, or a semi colon.
+        // - `for ([] = x);`
+        THROW('Unknown input followed the left side of a for loop header after assignment: ' + curtok);
+      }
     }
     else {
-      // [v]: `for ({}.bar ;;);`
-      // [v]: `for ({}.bar = x ;;);`
-      // [v]: `for ({a: b.c}.foo in d) e`
-      // [v]: `for ({}.bar in obj);`
-      // [x]: `for ({}.bar = x in obj);`
-      // [v]: `for ({a: b.c}.foo of d) e`
-
-      // - `for ({}.x in y);`
-      // - `for ({}.x);`                 // bad
-      // - `for ({x} = y);`              // bad
-      // - `for ({x}.y in z);`
-      // - `for ([].x in y);`
-      // - `for ([].x);`                 // bad
-      // - `for ([x] = y);`              // bad
-      // - `for ([x].y in z);`
-      assignable = parseValueTail(lexerFlags | LF_IN_FOR_LHS, assignable, NOT_NEW_ARG, astProp);
+      // - `for ({});`
+      // - `for ([]);`
+      THROW('Unknown input followed the left side of a for loop header: ' + curtok);
     }
 
     return assignable;
@@ -7013,7 +7041,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `({15: bar});`
       // - `({15(){}});`
       // - `({15: bar}) => x`
-
       let litToken = curtok;
       ASSERT_skipRex(litToken.str, lexerFlags); // next is expression
 
@@ -7096,6 +7123,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `({[foo]() {}} = y)`            fail
       // - `const {[x]: y} = z;`
       // - `({[x]: y}) => z;`
+      // - `function f({[x]: {y = z}}) {}`
 
       // skip computed key part first because we need to figure out whether we're parsing a method
       ASSERT_skipRex('[', lexerFlags); // next is expression
@@ -7116,22 +7144,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `let {[foo]: a + b} = baz`
         // - `let {[foo]: [bar]} = baz`
         // - `[a, {[b]:d}, c] = obj`
+        // - `function f({[x]: {y = z}}) {}`
         ASSERT_skipRex(':', lexerFlags);
+
         if (isClassMethod === IS_CLASS_METHOD) TODO,THROW('fail');
 
         AST_wrapClosed(astProp, 'Property', 'key');
         AST_set('kind', 'init'); // only getters/setters get special value here
         AST_set('method', curc === $$PAREN_L_28);
         AST_set('computed', true);
-        let lhsAssignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_OK, NOT_NEW_ARG, 'value');
-        if (notAssignable(lhsAssignable) || (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D && curtok.str !== '=')) {
-          destructible |= CANT_DESTRUCT;
-        }
-
-        // Note: we don't care about the assignability of the initializer value, but we do care about await/yield here
-        let rhsAssignable = parseExpressionFromOp(lexerFlags, lhsAssignable, 'value');
-        assignable = assignable | lhsAssignable | rhsAssignable; // assignable itself is not used beyond this point but the await/yield flags are
-
+        destructible = _parseObjectPropertyValueAfterColon(lexerFlags, null, isClassMethod, bindingType, IS_ASSIGNABLE, destructible, scoop, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         AST_set('shorthand', false);
         AST_close('Property');
       } else if (curc !== $$PAREN_L_28) {
@@ -7312,7 +7334,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseObjectPropertyValueAfterColon(lexerFlags, keyToken, isClassMethod, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp) {
     ASSERT(parseObjectPropertyValueAfterColon.length === arguments.length, 'arg count');
-    if (isClassMethod) THROW('Class members have to be methods, for now');
     // property value or label, some are destructible:
     // - ({ident: ident,}
     // - ({35: ident,}
@@ -7336,6 +7357,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
     AST_set('computed', false);
 
+    destructible = _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, isClassMethod, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp);
+
+    AST_set('shorthand', false);
+    AST_close('Property');
+
+    return destructible;
+  }
+
+  function _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, isClassMethod, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop, exportedNames, exportedBindings, astProp) {
+    ASSERT(_parseObjectPropertyValueAfterColon.length === arguments.length, 'arg count');
+    if (isClassMethod) THROW('Class members have to be methods, for now');
     if (curtype === $IDENT) {
       // - `{ident: ident}`
       //            ^
@@ -7361,6 +7393,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // if (typeof identAssignableOrErrMsg === 'string') TODO
 
       // - `{key: bar}`
+      //          ^
       // - `{key: bar/x`
       // - `{key: delete a.b`
       // - `{key: await /foo}`
@@ -7375,34 +7408,79 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let wasAssign = curtok.str === '=';
       // - `{key: bar}`
       // - `{key: bar, koo: baa}`
-      let validExportSyntax = keyToken.type === $IDENT && (curc === $$CURLY_R_7D || curc === $$COMMA_2C);
+      // - `{[key]: bar}`
+      let commaOrEnd = curc === $$COMMA_2C || curc === $$CURLY_R_7D;
       let valueAssignable = parseValueAfterIdent(lexerFlags, identToken, bindingType, ASSIGN_EXPR_IS_OK, 'value');
       assignableOnlyForYieldAwaitFlags |= valueAssignable;
-      if (curc !== $$COMMA_2C && curc !== $$CURLY_R_7D) {
-        // - `({x:y;a:b})`
+
+      if (curc === $$COMMA_2C || curc === $$CURLY_R_7D) {
+        if (wasAssign || commaOrEnd) { // "did this have no tail?"
+          // - `({a: b} = d)`
+          //          ^
+          // - `({[a]: b} = d)`
+          //            ^
+          // - `({a: b = d})`
+          // - `({a: b, c: d})`
+          if (notAssignable(valueAssignable)) {
+            // - `({[a]: true} = d)`
+            //               ^
+            // - `[...{a: true} = c]`
+            // - `({ *g1() {   return {x: yield}  }})`
+            // - `({x:function(){"use strict";}})`
+            destructible |= CANT_DESTRUCT;
+          } else if (keyToken && keyToken.type === $IDENT) {
+            // "valid exports"
+            // - `[a, {b:d}, c] = obj`
+            // If this isn't an export of some kind then the exportedNames and bindings are null so don't worry :)
+            SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+            addNameToExports(exportedNames, identToken.str);
+            addBindingToExports(exportedBindings, identToken.str);
+          } else {
+            // non-ident prop with a single ident as value, assignable, destructible. but cant be part of an export decl
+            // - `({"a": b})`
+            //            ^
+            // - `({[a]: b})`
+            //            ^
+            // - `({15: b})`
+          }
+        }
+        else {
+          // - `({a: b.c} = d)`
+          //            ^
+          // - `({[a]: b()} = d)`
+          //              ^
+          // So something that had a tail but no ops. Assign destructible if it is assignable.
+          if (isAssignable(valueAssignable)) {
+            // - `({[a]: a.b} = d)`
+            //              ^
+            // - `[a, {15: d}, c] = obj`
+            //              ^
+            // - `[...{a: b.b} = c]`
+            //               ^
+            destructible |= DESTRUCT_ASSIGN_ONLY;
+          } else {
+            // - `({[a]: a()} = d)`
+            //              ^
+            destructible |= CANT_DESTRUCT;
+          }
+        }
+      } else if (curtok.str === '=') {
+        // - `({[a]: b = c} = d)`
+        //             ^
         let rhsAssignable = parseExpressionFromOp(lexerFlags, valueAssignable, 'value');
         assignableOnlyForYieldAwaitFlags |= rhsAssignable;
-        if (!wasAssign && !isAssignable(rhsAssignable)) {
-          // - `({foo: true / false});`
-          destructible |= CANT_DESTRUCT;
-        }
-      }
-      else if (notAssignable(valueAssignable))  {
-        // - `[...{a: true} = c]`
-        // - `({ *g1() {   return {x: yield}  }})`
-        // - `({x:function(){"use strict";}})`
-        destructible |= CANT_DESTRUCT;
-      }
-      else if (validExportSyntax) {
-        // - `[a, {b:d}, c] = obj`
-        // If this isn't an export of some kind then the exportedNames and bindings are null so don't worry :)
-        SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
-        addNameToExports(exportedNames, identToken.str);
-        addBindingToExports(exportedBindings, identToken.str);
       } else {
-        // The ... arg is not a simple ident, but all pieces are simple or patterns so it is destruct assignable
-        // - `[...{a: b.b} = c]`
-        destructible |= DESTRUCT_ASSIGN_ONLY;
+        // - `({[a]: b + c} = d)`
+        //             ^
+        // - `({a: b * c} = d)`
+        //           ^
+        // - `({a: x.y / c} = d)`
+        //             ^
+        // - `({x: y; a: b})`
+        //          ^
+        destructible |= CANT_DESTRUCT;
+        let rhsAssignable = parseExpressionFromOp(lexerFlags, valueAssignable, 'value');
+        assignableOnlyForYieldAwaitFlags |= rhsAssignable;
       }
     }
     else if (curc === $$SQUARE_L_5B) {
@@ -7459,8 +7537,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, nowAssignable, nowDestruct, $$CURLY_R_7D, 'value');
     }
-    AST_set('shorthand', false);
-    AST_close('Property');
 
     ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
 
@@ -7831,7 +7907,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function verifyDestructibleForBinding(destructible, bindingType) {
     if (hasAnyFlag(destructible, CANT_DESTRUCT)) {
-      THROW('The binding declaration is not destructible');
+      THROW('The binding pattern is not destructible');
     }
     if (bindingType === BINDING_TYPE_ARG && hasAnyFlag(destructible, DESTRUCT_ASSIGN_ONLY)) {
       THROW('This binding can not be used in function parameters because it is not destructible');
@@ -8426,7 +8502,7 @@ function isTemplateStart(curtype) {
   return (curtype & $TICK_PURE) === $TICK_PURE || (curtype & $TICK_HEAD) === $TICK_HEAD;
 }
 
-function D_DEBUG(d) {
+function D(d) {
   if (d === 0) {
     return 'D=MIGHT_DESTRUCT';
   }
@@ -8471,12 +8547,12 @@ function D_DEBUG(d) {
 
   if (d !== 0) {
     console.log('Gathered flags so far:', arr.join(', '))
-    _THROW('D_DEBUG: unknown flags left:', d.toString(2));
+    _THROW('D: unknown flags left:', d.toString(2));
   }
 
   return 'D='+arr.join(', ');
 }
-function A_DEBUG(a) {
+function A(a) {
   if (a === 0) {
     return 'A=ASSIGNABLE_UNDETERMINED';
   }
@@ -8509,7 +8585,7 @@ function A_DEBUG(a) {
 
   if (a !== 0) {
     console.log('Gathered flags so far:', arr.join(', '))
-    _THROW('A_DEBUG: unknown flags left:', a.toString(2));
+    _THROW('A: unknown flags left:', a.toString(2));
   }
 
   return 'A='+arr.join(', ');

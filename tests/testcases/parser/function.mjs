@@ -5397,6 +5397,11 @@ export default (describe, test) =>
         code: 'while (true) function f(){}',
       });
     });
+
+    test.pass('pattern with shorthand and init nested in dynamic property', {
+      // #21
+      code: 'function f({[x]: {y = z}}) {}',
+    });
   });
 
 // TODO: mirror tests for all functions (regular, expr, arrow, objlit method, class method)

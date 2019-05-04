@@ -1374,11 +1374,11 @@ export default (describe, test) =>
           code: 'for ([x + y] in obj);',
         });
 
-        test.pass('array+init that would be valid to destructure', {
+        test.fail('array+init are invalid to destructure in for-in lhs', {
           code: 'for ([x] = z in obj);',
         });
 
-        test.pass('array+init that would be valid to assign-destructure', {
+        test.fail('array+init are invalid to assign-destructure in for-in lhs', {
           code: 'for ([x.y] = z in obj);',
         });
 
@@ -1398,11 +1398,11 @@ export default (describe, test) =>
           code: 'for ({a: x + y} in obj);',
         });
 
-        test.pass('object+init that would be valid to destructure', {
+        test.fail('object+init are invalid to for-in lhs', {
           code: 'for ({x} = z in obj);',
         });
 
-        test.pass('object+init that would be valid to assign-destructure', {
+        test.fail('object+init are invalid to assign-destructure to for-in lhs', {
           code: 'for ({a: x.y} = z in obj);',
         });
 
@@ -1455,22 +1455,22 @@ export default (describe, test) =>
             WEB,
           });
 
-          test.pass('lhs empty arr with number init', {
+          test.fail('lhs empty arr with number init', {
             code: 'for ([] = 0 in {});',
             WEB,
           });
 
-          test.pass('lhs arr with rest with number init', {
+          test.fail('lhs arr with rest with number init', {
             code: 'for ([...[a]] = 0 in {});',
             WEB,
           });
 
-          test.pass('lhs obj with init', {
+          test.fail('lhs obj with init', {
             code: 'for ({x} = 0 in {});',
             WEB,
           });
 
-          test.pass('lhs obj with prop init', {
+          test.fail('lhs obj with prop init', {
             code: 'for ({p: x = 0} = 0 in {});',
             WEB,
           });
@@ -1889,19 +1889,19 @@ export default (describe, test) =>
           code: 'for ([...x,] of [[]]);',
         });
 
-        test.pass('lhs empty arr with number init', {
+        test.fail('lhs empty arr with number init', {
           code: 'for ([] = 0 of {});',
         });
 
-        test.pass('lhs arr with rest with number init', {
+        test.fail('lhs arr with rest with number init', {
           code: 'for ([...[a]] = 0 of {});',
         });
 
-        test.pass('lhs obj with init', {
+        test.fail('lhs obj with init', {
           code: 'for ({x} = 0 of {});',
         });
 
-        test.pass('lhs obj with prop init', {
+        test.fail('lhs obj with prop init', {
           code: 'for ({p: x = 0} = 0 of {});',
         });
 
@@ -2140,28 +2140,57 @@ export default (describe, test) =>
 
       describe('regressions as reported in #10', _ => {
 
-        test.pass('1', {
+        // These all fail because they have an assignment left of the `of` or `in` keyword
+
+        test.fail('1', {
           code: 'async function f() { for await ([a] = 1 of []); }',
         });
 
-        test.pass('2', {
+        test.fail('2', {
           code: 'async function f() { for await ([a = 1] = 1 of []); }',
         });
 
-        test.pass('3', {
+        test.fail('3', {
           code: 'async function f() { \'use strict\'; for await ({a} = 1 of []); }',
         });
 
-        test.pass('4', {
+        test.fail('4', {
           code: 'async function * f() { for await ({a: a} = 1 of []); }',
         });
 
-        test.pass('5', {
+        test.fail('5', {
           code: 'async function * f() { for await ({0: a} = 1 of []); }',
         });
 
-        test.pass('6', {
+        test.fail('6', {
           code: 'async function * f() { for await ({0: a = 1} = 1 of []); }',
+        });
+      });
+
+      describe('regressions (fixed) as reported in #10', _ => {
+
+        test.pass('1', {
+          code: 'async function f() { for await ([a] of []); }',
+        });
+
+        test.pass('2', {
+          code: 'async function f() { for await ([a = 1] of []); }',
+        });
+
+        test.pass('3', {
+          code: 'async function f() { \'use strict\'; for await ({a} of []); }',
+        });
+
+        test.pass('4', {
+          code: 'async function * f() { for await ({a: a} of []); }',
+        });
+
+        test.pass('5', {
+          code: 'async function * f() { for await ({0: a} of []); }',
+        });
+
+        test.pass('6', {
+          code: 'async function * f() { for await ({0: a = 1} of []); }',
         });
       });
     });
