@@ -3786,7 +3786,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: legacy `let` as a var name support
 
     let mustHaveInit = false;
-    let wasSimple = ARG_NEITHER_SIMPLE_NOR_INIT; // simple if valid in es5 (list of idents, no inits)
+    let wasSimple = ARG_NEITHER_SIMPLE_NOR_INIT; // simple if "valid in es5" (list of idents, no inits)
 
     if (curtype === $IDENT) {
       // normal
@@ -3860,7 +3860,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex('=', lexerFlags); // x(foo=/bar/){}
       wasSimple = ARG_HAD_INIT; // if this is an arg the arg is not "simple"
       if (defaultsOption === ASSIGNMENT_IS_DEFAULT) {
-        if (bindingOrigin === FROM_CATCH) THROW('The catch clause cannot have a default');
+        if (wasSimple === ARG_WAS_SIMPLE && bindingOrigin === FROM_CATCH) THROW('The catch clause cannot have a default');
+        // - `try {} catch (a) {}`
+        // - `try {} catch ([a]) {}`
+        // - `try {} catch ([a] = b) {}`
         AST_wrapClosed(astProp, 'AssignmentPattern', 'left');
         parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
         AST_close('AssignmentPattern');
@@ -6744,48 +6747,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // a forward slash after ] has to be a division
     AST_close('ArrayExpression');
     if (skipInit === PARSE_INIT) {
-      if (curc === $$IS_3D && curtok.str === '=') {
-        // Note: this might be something like `([x]=await y)=>z` which is illegal so we must propagate await/yield flags
-        // - `[x]=y`
-        // - `[x=y]=z`
-        // - `[x=await y]=z`
-        // - `[x=y]=await z`
-        // - `[...{a = b} = c] = x`
-
-        verifyDestructible(destructible);
-        if (hasAllFlags(destructible, CANT_DESTRUCT)) THROW('Tried to destructure something that is not destructible');
-        // this assignment resets the destructible state
-        // for example; `({a = b})` must destruct because of the shorthand. `[...a=b]` can't destruct because rest is only
-        // legal on a simple identifier. So combining them you get `[...{a = b} = c]` where the inside must destruct and the outside cannot. (there's a test)
-
-        // if the array MUST destructure, it now MIGHT again
-        // for example, `({a = b})` has to be destructured because of the init, which
-        // is not allowed for objlits (`let x = {y=z}` and `let x = {y=z} => d` are errors while
-        // `let x = {y=z} = d` and `let x = ({y=z}) => d` and `let x = ({y=z}=e) => d` are valid)
-        // but make sure the assign flag is retained (`([x.y]=z) => z` is an error!)
-
-        // This is an assignment, so if the lhs was a MUST_DESTRUCT pattern then we can drop that flag now
-        // Also remove the piggy because the proto rule does not apply for destructuring assignments
-        // [v]: `result = [...{ x = await }] = y;`
-        // [v]: `async r => result = [...{ x = await x }] = y;`
-        // [v]: `result = [...{ x = yield }] = y;`
-        // [v]: `function* g() {   [...{ x = yield }] = y   }`
-        // [v]: `([{x = y}] = z)`
-        // [v]: `[{x = y}] = z`
-        destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO);
-
-        // the array MUST now be a pattern. Does not need to be an arrow.
-        // the outer-most assignment is an expression, the inner assignments become patterns too.
-        AST_destruct(_astProp);
-        AST_wrapClosed(_astProp, 'AssignmentExpression', 'left');
-        AST_set('operator', '=');
-        ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a division
-        assignableYieldAwaitState |= parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
-        AST_close('AssignmentExpression');
-      } else if (isCompoundAssignment(curtok.str)) {
-        // - `[x] += y`
-        THROW('Cannot compound-assign to an array literal');
-      }
+      destructible = parsePatternAssign(lexerFlags, destructible, _astProp);
     }
 
     // pick up the flags from assignable and put them in destructible
@@ -6796,7 +6758,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return copyPiggies(destructible, assignableYieldAwaitState);
   }
 
-  function parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, isClassMethod, exportedNames, exportedBindings, _astProp) {
+  function parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, isClassMethod, exportedNames, exportedBindings, astProp) {
     // returns whether this object is destructible
     ASSERT(parseObjectLiteralPatternAndAssign.length === arguments.length, 'expecting all args');
     ASSERT(skipInit === SKIP_INIT || skipInit === PARSE_INIT, 'skipInit is enum', skipInit);
@@ -6819,54 +6781,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - {...x.x, y}
     // - {...x.x = y, y}
 
-    AST_open(_astProp, 'ObjectExpression');
+    AST_open(astProp, 'ObjectExpression');
     AST_set('properties', []);
     let destructible = parseObjectLikePatternSansAssign(lexerFlags | LF_NO_ASI, scoop, bindingType, isClassMethod, IS_EXPRESSION, exportedNames, exportedBindings, 'properties');
     AST_close('ObjectExpression');
     // this is immediately after the top-level object literal closed that we started parsing
     if (skipInit === PARSE_INIT) {
-      if (curc === $$IS_3D && curtok.str === '=') {
-        // - `{x} = y`
-        if (hasAnyFlag(destructible, CANT_DESTRUCT)) {
-          // - `({a:(b) = c} = 1)`
-          THROW('Unable to assignment destructure the lhs because it is not destructible');
-        }
-
-        // if the object MUST destructure, it now MIGHT again
-        // for example, `({a = b})` has to be destructured because of the init, which
-        // is not allowed for objlits (`let x = {y=z}` and `let x = {y=z} => d` are errors while
-        // `let x = {y=z} = d` and `let x = ({y=z}) => d` and `let x = ({y=z}=e) => d` are valid)
-        // but make sure the assign flag is retained (`([x.y]=z) => z` is an error!)
-
-        // This is an assignment, so if the lhs was a MUST_DESTRUCT pattern then we can drop that flag now
-        // Also remove the piggy because the proto rule does not apply for destructuring assignments
-        // [v]: `foo({c=3} = {})`
-        // [v]: `async({c=3} = {})`
-        // [v]: `yield({c=3} = {})`
-        // [v]: `log({foo: [bar]} = obj);`
-        // [v]: `({a:(b) = c} = 1)`
-        // [v]: `for ({x} = z;;);`
-        // [v]: `({...[].x} = x);`
-        destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO);
-
-        // the object MUST now be a pattern. Does not need to be an arrow.
-        // the outer-most assignment is an expression, the inner assignments become patterns too.
-        AST_destruct(_astProp);
-        AST_wrapClosed(_astProp, 'AssignmentExpression', 'left');
-        AST_set('operator', '=');
-        ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a regex
-        let assignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
-        // pick up the flags from assignable and put them in destructible
-        // - `({x} = await bar) => {}`
-        // - `async function a(){     ({r} = await bar) => {}     }`
-        // - `({x} = yield) => {}`
-        // - `function *f(){ ({x} = yield) => {} }`
-        destructible = copyPiggies(destructible, assignable);
-        AST_close('AssignmentExpression');
-      } else if (isCompoundAssignment(curtok.str)) {
-        // - `{x} += y`
-        THROW('Cannot compound-assign to an object literal');
-      }
+      destructible = parsePatternAssign(lexerFlags, destructible, astProp);
     }
 
     return destructible;
@@ -7310,6 +7231,70 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `{ (x = {[yield]: 1}) }`
     // - `s = {"foo": await = x} = x`
     return copyPiggies(destructible, assignable);
+  }
+
+  function parsePatternAssign(lexerFlags, destructible, astProp) {
+    if (curc === $$IS_3D && curtok.str === '=') {
+      // Note: this might be something like `([x]=await y)=>z` which is illegal so we must propagate await/yield flags
+      // - `[x]=y`
+      // - `[x=y]=z`
+      // - `[x=await y]=z`
+      // - `[x=y]=await z`
+      // - `[...{a = b} = c] = x`
+      // - `{x} = y`
+
+      verifyDestructible(destructible);
+      if (hasAllFlags(destructible, CANT_DESTRUCT)) {
+        // - `({a:(b) = c} = 1)`
+        THROW('Tried to destructure something that is not destructible');
+      }
+
+      // for example; `({a = b})` must destruct because of the shorthand. `[...a=b]` can't destruct because rest is only
+      // legal on a simple identifier. So combining them you get `[...{a = b} = c]` where the inside must destruct and
+      // the outside cannot. (there's a test)
+
+      // If the object or array had MUST_DESTRUCT set, we have to reset this to MIGHT_DESTRUCT
+      // For example, `({a = b})` and `[{a = b}]` have to be destructured because of the init, which
+      // is not allowed for objlits (`let x = {y=z}` and `let x = {y=z} => d` are errors while
+      // `let x = {y=z} = d` and `let x = ({y=z}) => d` and `let x = ({y=z}=e) => d` are valid)
+      // but make sure the assign flag is retained (`([x.y]=z) => z` is an error!)
+
+      // This is an assignment, so if the lhs was a MUST_DESTRUCT pattern then we can drop that flag now
+      // Also remove the piggy because the proto rule does not apply for destructuring assignments
+      // [v]: `result = [...{ x = await }] = y;`
+      // [v]: `async r => result = [...{ x = await x }] = y;`
+      // [v]: `result = [...{ x = yield }] = y;`
+      // [v]: `function* g() {   [...{ x = yield }] = y   }`
+      // [v]: `([{x = y}] = z)`
+      // [v]: `[{x = y}] = z`
+      // [v]: `foo({c=3} = {})`
+      // [v]: `async({c=3} = {})`
+      // [v]: `yield({c=3} = {})`
+      // [v]: `log({foo: [bar]} = obj);`
+      // [v]: `({a:(b) = c} = 1)`
+      // [v]: `for ({x} = z;;);`
+      // [v]: `({...[].x} = x);`
+      destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO);
+
+      // the array MUST now be a pattern. Does not need to be an arrow.
+      // the outer-most assignment is an expression, the inner assignments become patterns too.
+      AST_destruct(astProp);
+      AST_wrapClosed(astProp, 'AssignmentExpression', 'left');
+      AST_set('operator', '=');
+      ASSERT_skipRex('=', lexerFlags); // a forward slash after = has to be a division
+      // pick up the flags from assignable and put them in destructible
+      // - `({x} = await bar) => {}`
+      // - `async function a(){     ({r} = await bar) => {}     }`
+      // - `({x} = yield) => {}`
+      // - `function *f(){ ({x} = yield) => {} }`
+      destructible |= parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
+      AST_close('AssignmentExpression');
+    } else if (isCompoundAssignment(curtok.str)) {
+      // - `[x] += y`
+      // - `{x} += y`
+      THROW('Cannot compound-assign to an array literal');
+    }
+    return destructible;
   }
 
   function parseObjectPropertyValueAfterColon(lexerFlags, keyToken, isClassMethod, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp) {
