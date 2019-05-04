@@ -413,9 +413,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof flags === 'number', 'hasNoFlag flag 2 should be number', flag, flags);
     return (flags & flag) === 0;
   }
-  function resetDestructibility(flags) {
-    return sansFlag(flags, CANT_DESTRUCT | DESTRUCT_ASSIGN_ONLY | MUST_DESTRUCT);
-  }
 
   let uid_counter = 0;
 
@@ -4880,15 +4877,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (curtok.str === '++' || curtok.str === '--') {
         // note: this is ++/-- PREFIX. This version does NOT have newline restrictions!
-        if (isNewArg === IS_NEW_ARG) THROW('Cannot `new` on an inc/dec expr');
+        if (isNewArg === IS_NEW_ARG) {
+          // [x]: `new ++x`
+          // [x]: `new ++x.y`
+          // [x]: `new ++x().y`
+          THROW('Cannot `new` on an inc/dec expr');
+        }
+
         AST_open(astProp, 'UpdateExpression');
         AST_set('operator', curtok.str);
         ASSERT_skipRex($PUNCTUATOR, lexerFlags); // next can be regex (++/x/.y), though it's very unlikely
         AST_set('prefix', true);
-
         let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'argument');
-        if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as prefix');
         AST_close('UpdateExpression');
+
+        if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as prefix');
         return setNotAssignable(assignable);
       }
       else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
@@ -5375,11 +5378,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return NOT_ASSIGNABLE;
   }
   function parseUnary(lexerFlags, identName, astProp) {
-    ASSERT(identName !== 'delete', 'delete has a special parser');
-    ASSERT(identName !== 'new', 'new has a special parser');
-    ASSERT(identName !== 'yield', 'yield has a special parser');
-    ASSERT(identName !== 'await', 'await has a special parser');
+    ASSERT(parseUnary.length === arguments.length, 'arg count');
+    ASSERT(['+', '-', '++', '--', '~', '!', 'void', 'typeof'].includes(identName), 'delete, new, yield, and await have special parsers', identName);
 
+    // - `!x`
     // - `~yield`                        // ok outside strict & generator
     // - `function *f(){ ~yield }`       // error
     // - `+await x`                      // ok, await state needs to propagate back down for strict mode arg check case
@@ -5390,7 +5392,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // dont parse just any standard expression. instead stop when you find any infix operator
     let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'argument');
     AST_close('UnaryExpression');
+
     if (curtok.str === '**') {
+      // [x]: `~3 ** 2;`
+      // [x]: `typeof 3 ** 2;`
       THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
     }
     return setNotAssignable(assignable);
@@ -6288,7 +6293,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // First deal with arrow-error cases. But don't parse as async just yet (this is to dedupe the error checks)
     if (isArrow) {
-      // These are soe errors for async and plain arrows
+      // These are some errors for async and plain arrows
 
       if (curtok.nl) {
         // we can safely throw here because there's no way that the `=>` token is valid without an arrow header
@@ -8032,7 +8037,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (isAssignable(assignable)) {
         // The destructibility of the whole expression solely depends on the tail
         // For example, `foo`, `foo.bar`, `foo().bar`, `{...x}[y]`, are all assignable and therefor assign-destructible
-        destructible = resetDestructibility(destructible);
+        destructible = sansFlag(destructible, CANT_DESTRUCT | DESTRUCT_ASSIGN_ONLY | MUST_DESTRUCT);
       } else {
         // This couldn't cause a valid pattern like `[a]` to become invalid just because it had no tail because
         // if there is no tail the input assignable is returned. So `[a+b]` remains non-assignable.
