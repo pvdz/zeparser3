@@ -5977,18 +5977,24 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [v]: `({a},) => {}`
         // [v]: `([x] = y,) => {}`
         // [v]: `({a} = b,) => {}`
+        // [v]: `async(x,)`
+        // [v]: `async(x,) => x`
 
-        if (allowTrailingFunctionComma) {
-          // [v]: `(a,) => a`
-          // [x]: `(a,);`
-          // [x]: `(a,) = x;`
-          // [x]: `(,) => x;`
-          // This may only be valid in ES8+ and as an arrow. Any other case fails here.
-          mustBeArrow = true;
-          // trailing function commas do not affect the AST (so don't wrap in sequence)
-          break;
+        if (asyncToken === UNDEF_ASYNC) {
+          if (allowTrailingFunctionComma) {
+            // [v]: `(a,) => a`
+            // This may only be valid in ES8+ and as an arrow. Any other case fails here.
+            mustBeArrow = true;
+            // trailing function commas do not affect the AST (so don't wrap in sequence)
+            break;
+          } else {
+            // [x]: `(a,);`
+            // [x]: `(a,) = x;`
+            THROW('Encountered trailing comma in the toplevel of a group, this could be valid in arrows but not with the currently targeted language version');
+          }
         } else {
-          THROW('Encountered trailing comma in the toplevel of a group, this could be valid in arrows but not with the currently targeted language version');
+          // [v]: `async(x,)`
+          // [v]: `async(x,) => x`
         }
       }
       if (!toplevelComma) {

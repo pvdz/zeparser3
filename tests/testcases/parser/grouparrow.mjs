@@ -4541,6 +4541,16 @@ export default (describe, test) => describe('parens', _ => {
     },
     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
   });
+
+  test.pass('async call with trailing comma in arg list', {
+    code: 'async(x,)',
+    desc: 'the only case when parsing groups where the trailing comma does NOT mean an arrow must be parsed',
+  });
+
+  test.pass('async arrow with trailing comma in arg list', {
+    code: 'async(x,) => x',
+    desc: 'the only case when parsing groups where the trailing comma does NOT mean an arrow must be parsed',
+  });
 });
 
 // arrow params and arrow can not have newline (asi breaks an arrow into group and syntax error)
