@@ -2508,7 +2508,6 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
       if (c === $$SQUARE_R_5D) {
         return parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState);
       } else if (c === $$BACKSLASH_5C) {
-        console.log('b=',c)
         ASSERT_skip($$BACKSLASH_5C);
         c = parseRegexClassCharEscape(); // note: this may lead to c being >0xffff !! can also be 0 for certain escapes
         if (c === INVALID_IDENT_CHAR || c === CHARCLASS_BAD) {
