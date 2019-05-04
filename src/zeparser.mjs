@@ -7834,7 +7834,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('The binding declaration is not destructible');
     }
     if (bindingType === BINDING_TYPE_ARG && hasAnyFlag(destructible, DESTRUCT_ASSIGN_ONLY)) {
-      THROW('This binding an not be used in function parameters because it is not destructible');
+      THROW('This binding can not be used in function parameters because it is not destructible');
     }
   }
   function parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, assignable, destructible, closingCharOrd, astProp) {
