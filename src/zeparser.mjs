@@ -3585,7 +3585,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_open(astProp, 'ExpressionStatement');
         astProp = 'expression';
         // This is the start of a _statement_ so we don't care about the assignability
-        assignable = parseUnary(lexerFlags, identName, astProp);
+        _parseUnary(lexerFlags, identName, astProp);
+        ASSERT(assignable = setNotAssignable(0)); // theres an assert at the end
         break;
 
       case 'yield':
@@ -4876,30 +4877,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseGroupToplevels(lexerFlags, IS_STATEMENT, allowAssignment, UNDEF_ASYNC, NOT_ASYNC_PREFIXED, astProp);
       }
       else if (curtok.str === '++' || curtok.str === '--') {
-        // note: this is ++/-- PREFIX. This version does NOT have newline restrictions!
-        if (isNewArg === IS_NEW_ARG) {
-          // [x]: `new ++x`
-          // [x]: `new ++x.y`
-          // [x]: `new ++x().y`
-          THROW('Cannot `new` on an inc/dec expr');
-        }
-
-        AST_open(astProp, 'UpdateExpression');
-        AST_set('operator', curtok.str);
-        ASSERT_skipRex($PUNCTUATOR, lexerFlags); // next can be regex (++/x/.y), though it's very unlikely
-        AST_set('prefix', true);
-        let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'argument');
-        AST_close('UpdateExpression');
-
-        if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as prefix');
-        return setNotAssignable(assignable);
+        return parseUnaryUpdate(lexerFlags, isNewArg, astProp);
       }
       else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
-        if (isNewArg === IS_NEW_ARG) THROW('Cannot `new` on +/- prefixed value');
-        let name = curtok.str;
-        ASSERT_skipRex($PUNCTUATOR, lexerFlags);
-        let assignable = parseUnary(lexerFlags, name, astProp);
-        return setNotAssignable(assignable);
+        return parseUnary(lexerFlags, isNewArg, astProp);
       }
       else if (curc === $$DOT_2E) {
         // basically an expression that starts with a leading (single) dot, only legal case is `new`
@@ -5058,9 +5039,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // HIT [v]: `x + typeof y.x`
         // HIT [v]: `async function f(){   function g(x = typeof await x) {}  }`
         // HIT [x]: `async function f(){   function g(x = typeof await x) { "use strict"; }  }`
-        if (isNewArg === IS_NEW_ARG) THROW('Cannot '+identName+' inside `new`');
-        ASSERT_skipRex($IDENT, lexerFlags); // not very likely
-        return parseUnary(lexerFlags, identName, astProp);
+        return parseUnary(lexerFlags, isNewArg, astProp);
       case 'yield':
         // - `function *f{ (x = x + yield); }`
         // - `x = x + yield`
@@ -5170,7 +5149,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [x]: `([typeof x]) => x;`
         // [x]: `[void x] = x;`
         // [v]: `[void x]`
-        return parseUnary(lexerFlags, identName, astProp);
+        return _parseUnary(lexerFlags, identName, astProp);
       case 'yield':
         // Note: as quoted from the spec: "The syntactic context immediately following yield requires use of the InputElementRegExpOrTemplateTail lexical goal"
         return parseYield(lexerFlags, identToken, allowAssignment, astProp);
@@ -5377,9 +5356,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('ThisExpression');
     return NOT_ASSIGNABLE;
   }
-  function parseUnary(lexerFlags, identName, astProp) {
+  function parseUnary(lexerFlags, isNewArg, astProp) {
     ASSERT(parseUnary.length === arguments.length, 'arg count');
-    ASSERT(['+', '-', '++', '--', '~', '!', 'void', 'typeof'].includes(identName), 'delete, new, yield, and await have special parsers', identName);
+
+    let identName = curtok.str;
+    skipRex(lexerFlags); // next can be regex (+/x/.y), though it's very unlikely
+
+    if (isNewArg === IS_NEW_ARG) THROW('Cannot '+identName+' inside `new`');
+
+    return _parseUnary(lexerFlags, identName, astProp);
+  }
+  function _parseUnary(lexerFlags, identName, astProp) {
+    ASSERT(_parseUnary.length === arguments.length, 'arg count');
+    ASSERT(['+', '-', '~', '!', 'void', 'typeof'].includes(identName), '++, --, delete, new, yield, and await have special parsers', identName);
 
     // - `!x`
     // - `~yield`                        // ok outside strict & generator
@@ -5398,6 +5387,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // [x]: `typeof 3 ** 2;`
       THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
     }
+    return setNotAssignable(assignable);
+  }
+  function parseUnaryUpdate(lexerFlags, isNewArg, astProp) {
+    ASSERT(parseUnaryUpdate.length === arguments.length, 'arg count');
+    // note: this is ++/-- PREFIX. This version does NOT have newline restrictions!
+    if (isNewArg === IS_NEW_ARG) {
+      // [x]: `new ++x`
+      // [x]: `new ++x.y`
+      // [x]: `new ++x().y`
+      THROW('Cannot `new` on an inc/dec expr');
+    }
+
+    AST_open(astProp, 'UpdateExpression');
+    AST_set('operator', curtok.str);
+    AST_set('prefix', true);
+    ASSERT_skipRex($PUNCTUATOR, lexerFlags); // next can be regex (++/x/.y), though it's very unlikely
+    let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'argument');
+    AST_close('UpdateExpression');
+
+    if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as prefix');
     return setNotAssignable(assignable);
   }
 
