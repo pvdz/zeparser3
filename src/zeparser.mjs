@@ -3484,160 +3484,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // TODO: in most of the cases below where it leads to a label an error "keyword label" should be thrown immediately
 
-    let assignable = 0;
-    // note: curtok token has been skipped prior to this call.
-    let identName = curtok.str;
-    switch (identName) {
-      case 'await': {
-        ASSERT_skipRex('await', lexerFlags);
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        assignable = parseAwait(lexerFlags, identToken, NOT_NEW_ARG, ASSIGN_EXPR_IS_OK, 'expression');
-        parseExpressionFromOp(lexerFlags, assignable, 'expression');
-        AST_close('ExpressionStatement');
-        parseSemiOrAsi(lexerFlags);
-        return;
-      }
+    ASSERT(curtok.str !== 'function', 'function ident is already checked before this func');
 
-      case 'delete':
-        ASSERT_skipRex('delete', lexerFlags); // not very likely
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        // - `async function f(g=delete foo[await x]){}`
-        // - `async function a(){ async ([y] = delete foo[await x]) => {}; }`
-        assignable = parseDeleteExpression(lexerFlags, assignable, 'expression');
-        astProp = 'expression';
-        break;
+    // For the sake of simplicity, and because this function should not hit very frequently, we'll take the slow path
+    skipIdentSafeSlowAndExpensive(lexerFlags);
 
-      case 'false':
-        ASSERT_skipDiv('false', lexerFlags); // not very likely but certainly not regex
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        assignable = parseFalseKeyword(astProp);
-        break;
-
-      case 'function':
-        ASSERT(false, 'function ident is already checked before this func');
-        throw new Error('fail');
-
-      case 'new':
-        ASSERT_skipRex('new', lexerFlags); // not very likely
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        parseNewKeyword(lexerFlags, astProp);
-        assignable = initNotAssignable(assignable); // `new (await foo)()`
-        break;
-
-      case 'null':
-        ASSERT_skipDiv('null', lexerFlags); // not very likely but certainly not regex
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        assignable = parseNullKeyword(astProp);
-        break;
-
-      case 'super':
-        ASSERT_skipDiv('super', lexerFlags); // not very likely but certainly not regex
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        assignable = parseSuperKeyword(lexerFlags, astProp);
-        break;
-
-      case 'this':
-        ASSERT_skipDiv('this', lexerFlags); // not very likely but certainly not regex
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        assignable = parseThisKeyword(astProp);
-        break;
-
-      case 'true':
-        ASSERT_skipDiv('true', lexerFlags); // not very likely but certainly not regex
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        assignable = parseTrueKeyword(astProp);
-        break;
-
-      case 'typeof':
-      case 'void':
-        ASSERT_skipRex($IDENT, lexerFlags);
-        // - `typeof x`
-        // [v]: `typeof x`
-        // [v]: `typeof x + y`
-        // [v]: `typeof x + typeof y`
-        // [v]: `typeof a.b↵/foo`
-        // [v]: `typeof a.b↵/foo/g`
-        // [x]: `typeof 3 ** 2;`
-        // [v]: `typeof new x()`
-        // [x]: `typeof async () => x`
-        // [v]: `void x`
-        // [x]: `void a↵/foo/`
-        // [v]: `void a↵/foo/g`
-        // Note: this version goes through here:
-        // HIT [v]: `async function f(){   typeof await x;   }`
-        // But the one with await in func args does not because this is parseIdentLabelOrExpressionStatement
-
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        // This is the start of a _statement_ so we don't care about the assignability
-        _parseUnary(lexerFlags, identName, astProp);
-        ASSERT(assignable = setNotAssignable(0)); // theres an assert at the end
-        break;
-
-      case 'yield':
-        // we catch yield here because it can be a valid label, a varname, and a keyword
-        // Note: as quoted from the spec: "The syntactic context immediately following yield requires use of the InputElementRegExpOrTemplateTail lexical goal"
-        ASSERT_skipRex('yield', lexerFlags); // not very likely (but there's probably a use case for this)
-        if (curc === $$COLON_3A) {
-          // this func will do strict mode checks
-          return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        }
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-        // note: `yield` as a var name in sloppy mode _is_ assignable. any other appearance of `yield` is not.
-        assignable = parseYield(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, astProp);
-        // TODO: probably also         parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, astProp);
-        break;
-
-      default:
-        ASSERT_skipDiv($IDENT, lexerFlags); // regular division
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
-        AST_open(astProp, 'ExpressionStatement');
-        astProp = 'expression';
-
-        if (!checkIdentReadable(lexerFlags, BINDING_TYPE_NONE, identToken)) THROW('Illegal keyword encountered; is not a value [' + identToken.str + ']');
-        assignable = fatalBindingAssignableIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
-        if (notAssignable(assignable)) {
-          // just a nice error. can/will probably clean this up later. probably.
-          if (identName === 'arguments' || identName === 'eval') {
-            assignable = verifyEvalArgumentsVar(lexerFlags);
-          }
-        }
-
-        assignable = parseIdentOrParenlessArrow(lexerFlags, identToken, assignable, ASSIGN_EXPR_IS_OK, astProp);
+    if (curc === $$COLON_3A) {
+      // Ident to be verified not to be reserved in the label parser
+      return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
     }
 
-    ASSERT(assignable !== 0, 'every branch should update assignable');
-
-    ASSERT(_path[_path.length-1].type === 'ExpressionStatement', 'at this point the AST has ExpressionStatement open');
-    ASSERT(astProp === 'expression', 'each case in the switch should only break if it is an ExpressionStatement and it should leave astProp to expression');
-
-    ASSERT(isAssignable(assignable) || notAssignable(assignable), 'asssignable should be updated properly [' + assignable + ']');
-
-    assignable = parseValueTail(lexerFlags, assignable, NOT_NEW_ARG, astProp);
-    // TODO: check for ++/-- here? because that is probably invalid?
-    assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
-
-    if (curc === $$COMMA_2C) {
-      // sequence expression as statement...
-      // Don't care about assignable await/yield flags
-      _parseExpressions(lexerFlags, initNotAssignable(), 'expression');
-    }
+    AST_open(astProp, 'ExpressionStatement');
+    parseExpressionsAfterIdent(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, 'expression');
     AST_close('ExpressionStatement');
     parseSemiOrAsi(lexerFlags);
   }
@@ -4659,6 +4517,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('ConditionalExpression');
 
     return setNotAssignable(midAssignable | rhsAssignable);
+  }
+
+  function parseExpressionsAfterIdent(lexerFlags, identToken, allowAssignment, astProp) {
+    ASSERT(parseExpressionsAfterIdent.length === arguments.length, 'arg count');
+    ASSERT_ASSIGN_EXPR(allowAssignment);
+    let assignable = parseExpressionAfterIdent(lexerFlags, identToken, BINDING_TYPE_NONE, allowAssignment, astProp)
+    if (curc === $$COMMA_2C) assignable = _parseExpressions(lexerFlags, assignable, astProp);
+    return assignable;
   }
   function parseExpressions(lexerFlags, allowAssignment, astProp) {
     ASSERT(arguments.length === parseExpressions.length, 'arg count');

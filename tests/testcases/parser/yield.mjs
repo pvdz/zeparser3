@@ -699,26 +699,56 @@ export default (describe, test) =>
           code: 'yield\n/foo',
           throws: 'yield',
           SLOPPY_SCRIPT: {
-            throws: 'ASI',
+            // If `yield` is not considered a keyword then it follows regular var name rules so division is fine
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'BinaryExpression',
+                    left: {type: 'Identifier', name: 'yield'},
+                    operator: '/',
+                    right: {type: 'Identifier', name: 'foo'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
           },
-          desc: 'even in sloppy mode, this should not lead to a division (backwards compat breaking I guess)',
         });
 
-        test('sans flag', {
+        test.fail('sans flag', {
           code: 'yield\n/foo/',
-          throws: 'yield',
           SLOPPY_SCRIPT: {
-            throws: 'ASI',
-            desc: 'in all fairness nothing would have saved this',
+            desc: 'in sloppy the asi fails because the line starts with a regex',
           },
         });
 
-        test('with flag', {
+        test.fail('with flag', {
           code: 'yield\n/foo/g',
-          throws: 'yield',
           SLOPPY_SCRIPT: {
-            throws: 'ASI',
-            desc: 'even in sloppy mode, this should not lead to a division (backwards compat breaking I guess)',
+            desc: 'this is a division, no ASI',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'BinaryExpression',
+                    left: {
+                      type: 'BinaryExpression',
+                      left: {type: 'Identifier', name: 'yield'},
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'foo'},
+                    },
+                    operator: '/',
+                    right: {type: 'Identifier', name: 'g'},
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
           },
         });
       });
