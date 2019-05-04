@@ -662,21 +662,15 @@ export default (describe, test) =>
         // this should turn `switch` into `\u0073witch`
         let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
 
-        test('leading escape [' + keyword + ' => ' + prefixed + ']', {
+        test.fail_strict('leading escape [' + keyword + ' => ' + prefixed + ']', {
           code: '(' + prefixed + ' = "sentinal 3435")',
-          STRICT: {throws: keyword === 'let' ? 'variable name' : 'escape'},
-          ast: true,
-          tokens: true,
         });
 
         // this should turn `switch` into `s\u0077itch`
         let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
 
-        test('second char escaped [' + keyword + ' => ' + middled + ']', {
+        test.fail_strict('second char escaped [' + keyword + ' => ' + middled + ']', {
           code: '(' + middled + ' = "sentinal 6543322")',
-          STRICT: {throws: keyword === 'let' ? 'variable name' : 'escape'},
-          ast: true,
-          tokens: true,
         });
       });
 
