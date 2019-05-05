@@ -401,9 +401,28 @@ export default (describe, test) =>
       test.pass('regex arg case', {
         code: '++/b/.c',
       });
+
+      test.fail('an array pattern', {
+        code: '++[]',
+        HAS_AST: true,
+      });
+
+      test.fail('an object pattern', {
+        code: '++{}',
+        HAS_AST: true,
+      });
+
+      test.pass('prop on an array', {
+        code: '++[].foo',
+      });
+
+      test.pass('prop on an object', {
+        code: '++{}.foo',
+      });
     });
 
     describe('decremental prefix', _ => {
+
       describe('sans newline', _ => {
         test('base', {
           code: '--a',
@@ -753,9 +772,28 @@ export default (describe, test) =>
       test.pass('regex arg case', {
         code: '--/b/.c',
       });
+
+      test.fail('an array pattern', {
+        code: '--[]',
+        HAS_AST: true,
+      });
+
+      test.fail('an object pattern', {
+        code: '--{}',
+        HAS_AST: true,
+      });
+
+      test.pass('a prop on an array pattern', {
+        code: '--[].x',
+      });
+
+      test.pass('a prop on an object pattern', {
+        code: '--{}.x',
+      });
     });
 
     describe('incremental suffix', _ => {
+
       describe('sans newline', _ => {
         test('base', {
           code: 'a++',
@@ -976,9 +1014,32 @@ export default (describe, test) =>
       test.pass('property of keyword as expr', {
         code: '(this.x++)',
       });
+
+      test.fail('an array pattern', {
+        code: '[]++',
+        HAS_AST: true,
+      });
+
+      test.fail('a block', {
+        code: '{}++',
+      });
+
+      test.fail('an object pattern', {
+        code: '({}++)',
+        HAS_AST: true,
+      });
+
+      test.pass('a prop on an array pattern', {
+        code: '[].x++',
+      });
+
+      test.pass('a prop on an object pattern', {
+        code: '({}.x++)',
+      });
     });
 
     describe('decremental suffix', _ => {
+
       describe('sans newline', _ => {
         test('base', {
           code: 'a--',
@@ -1198,6 +1259,20 @@ export default (describe, test) =>
 
       test.pass('property of keyword as expr', {
         code: '(this.x--)',
+      });
+
+      test.fail('an array pattern', {
+        code: '[]--',
+        HAS_AST: true,
+      });
+
+      test.fail('a block', {
+        code: '{}--',
+      });
+
+      test.fail('an object pattern', {
+        code: '({}--)',
+        HAS_AST: true,
       });
     });
 

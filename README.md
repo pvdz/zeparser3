@@ -2,11 +2,13 @@
 
 A 100% spec compliant JavaScript parser written in JavaScript, parsing ES6-ES9.
 
-The parser itself is currently feature complete but not ready for production (still need to fuzz).
+REPL: https://pvdz.github.io/zeparser3/tests/web/repl.html
+
+The parser itself is currently feature complete but not ready for production (_some unhandled edge cases left, it seems, and I still need to run a fuzzer_).
 
 Test262 is passing and there are thousands of additional unit tests to improve coverage.
 
-Anything <= ES9 (ES2018) stage 4 is supported by this parser, opted in by default (but you can request to parse in a specific version).
+Anything <= ES9 (ES2018) stage 4 should be supported by this parser, opted in by default (but you can request to parse in a specific version >=ES6). You can also opt-in to "annex B web compat" support.
 
 ## ES modules
 
@@ -88,6 +90,12 @@ biuld/build_no_ast.js
 ```
 
 When available these are picked up automatically by the test runner unless you use `-q`.
+
+The no-AST build is almost as perfect as the regular build except for certain validation cases where it requires the AST:
+
+- Binary op after arrow with block body (`()=>{}*x` is illegal)
+- Regular expression on new line after arrow with block body (`()=>{} \n /foo/g`, prohibited by ASI rules and can't be a division)
+- Update operator anything that's writable but not a valid var or member expression (`++[]`)
 
 # Perf testing
 

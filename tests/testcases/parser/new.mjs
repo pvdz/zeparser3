@@ -2721,15 +2721,12 @@ export default (describe, test) =>
           code: 'function f(){ new.target = foo }',
         });
 
-        test('not incremental', {
+        test.fail('not incremental', {
           code: 'function f(){ ++new.target }',
-          throws: 'non-assignable value',
-          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR],
         });
 
-        test('not decremental', {
+        test.fail('not decremental', {
          code: 'function f(){ new.target-- }',
-         throws: 'non-assignable value',
         });
 
         test('operable left', {

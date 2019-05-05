@@ -2798,6 +2798,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let wasNotDecl = false;
     let emptyInit = false;
     let hadAssign = false;
+    let mustBePlainLoop = false;
     catchforofhack = false;
 
     if (curtype === $IDENT) {
@@ -2826,14 +2827,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
             THROW('Let binding missing binding names');
           } else {
+            mustBePlainLoop = true;
             // backwards compat; treat let as an identifier
-            // TODO: `for (let().x in y);`
-            // TODO: `for (let + x in y);`
-            assignable = parseExpressionAfterPlainVarName(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, astProp);
-            if (curc === $$COMMA_2C) {
+            assignable = parseExpressionAfterPlainVarName(lexerFlags | LF_IN_FOR_LHS, identToken, ASSIGN_EXPR_IS_OK, astProp);
+            if (curtok.str === 'in' ){
+              // - `for (let().x in y);`
+              // - `for (let.foo.x in y);`
+              // - `for (let + x in y);`
+            } else if (curtok.str === 'of') {
+              // - `for (let().x of y);`
+              // - `for (let.foo.x of y);`
+              // - `for (let + x of y);`
+              THROW('If the left side of a `for-of` is not a binding then it can not start with `let` as a var name');
+            } else if (curc === $$COMMA_2C) {
+              mustBePlainLoop = true;
               // Note: we are inside a for-header so we don't care about await/yield flags of assignable here
               _parseExpressions(lexerFlags, initNotAssignable(), astProp);
               // the `assignable` state is irrelevant to the `for (;;)` case so don't bother updating it here
+            } else if (curc !== $$SEMI_3B) {
+              // - `for (let().x);`
+              // - `for (let.foo.x);`
+              // - `for (let + x);`
+              THROW('Did not find `in`, `of`, or a semi colon after the left side in the `for` header');
             }
           }
 
@@ -2944,6 +2959,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curtok.str === 'of') {
         if (catchforofhack) THROW('Encountered `var` declaration for a name used in catch binding which in web compat mode is still not allowed in a `for-of`');
         if (hadAssign) THROW('The lhs of a `for-of` cannot have an assignment');
+        if (mustBePlainLoop) THROW('The lhs contained something that is not allowed with `for-of` loops');
         AST_wrapClosed(astProp, 'ForOfStatement', 'left');
         if (notAssignable(assignable)) THROW('Left part of for-of must be assignable');
         ASSERT_skipRex('of', lexerFlags);
@@ -2956,6 +2972,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (awaitable) THROW('`for await` only accepts the `for-of` type');
       if (curtok.str === 'in') {
         if (hadAssign) THROW('The lhs of a `for-in` cannot have an assignment');
+        if (mustBePlainLoop) THROW('The lhs contained something that is not allowed with `for-in` loops');
         AST_wrapClosed(astProp, 'ForInStatement', 'left');
         if (notAssignable(assignable)) {
           // certain cases were possible in legacy mode
@@ -4432,8 +4449,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof assignable === 'number', 'assignable num');
 
     // <SCRUB AST>
+    // Using the AST to assert whether the previous node was an arrow. There's currently no easy way to figure this
+    // out. And the `()=>{}\n/x/` case looks valid but wouldn't (and shouldn't) be accepted as valid js due to ASI.
     if (_path[_path.length - 1] && _path[_path.length - 1][astProp] && (_path[_path.length - 1][astProp].type === 'ArrowFunctionExpression' && _path[_path.length - 1][astProp].expression === false)) {
       if (curc === $$FWDSLASH_2F && curtok.str === '/' && curtok.nl) {
+        // This is an explicit error for dividing an arrow with division on the next line, problem due to ASI rules.
+        // - `()=>{}\n/x`
         THROW('Can not divide an arrow and ASI does not apply at start of line with forward slash');
       }
       return NOT_ASSIGNABLE;
@@ -4773,7 +4794,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseGroupToplevels(lexerFlags, IS_STATEMENT, allowAssignment, UNDEF_ASYNC, NOT_ASYNC_PREFIXED, astProp);
       }
       else if (curtok.str === '++' || curtok.str === '--') {
-        return parseUnaryUpdate(lexerFlags, isNewArg, astProp);
+        return parseUpdatePrefix(lexerFlags, isNewArg, astProp);
       }
       else if (curtok.str === '+' || curtok.str === '-' || curtok.str === '!' || curtok.str === '~') {
         return parseUnary(lexerFlags, isNewArg, astProp);
@@ -5205,8 +5226,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return setNotAssignable(assignable);
   }
-  function parseUnaryUpdate(lexerFlags, isNewArg, astProp) {
-    ASSERT(parseUnaryUpdate.length === arguments.length, 'arg count');
+  function parseUpdatePrefix(lexerFlags, isNewArg, astProp) {
+    ASSERT(parseUpdatePrefix.length === arguments.length, 'arg count');
     // note: this is ++/-- PREFIX. This version does NOT have newline restrictions!
     if (isNewArg === IS_NEW_ARG) {
       // [x]: `new ++x`
@@ -5220,6 +5241,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('prefix', true);
     ASSERT_skipRex($PUNCTUATOR, lexerFlags); // next can be regex (++/x/.y), though it's very unlikely
     let assignable = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'argument');
+
+    // <SCRUB AST>
+    // Using the AST for this because in the current propagation system we can only tell whether the parsed part
+    // is assignable or not, and in this reading something that can be destructured can be assigned to.
+    let argNode = _path[_path.length - 1] && _path[_path.length - 1].argument;
+    if (!argNode || (argNode.type !== 'Identifier' && argNode.type !== 'MemberExpression')) {
+      // - `++[]`
+      // - `--f()`
+      // - `++this`
+      THROW('Can only pre-increment or pre-decrement an identifier or member expression');
+    }
+    // </SCRUB AST>
+
     AST_close('UpdateExpression');
 
     if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as prefix');
@@ -5575,6 +5609,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // check for this _after_ the newline check, for cases like `"foo"\n++bar`
     if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as postfix');
+
+    // <SCRUB AST>
+    // Using the AST for this because in the current propagation system we can only tell whether the parsed part
+    // is assignable or not, and in this reading something that can be destructured can be assigned to.
+    let prev = _path[_path.length - 1] && _path[_path.length - 1][astProp];
+    if (!prev || (prev.type !== 'Identifier' && prev.type !== 'MemberExpression')) {
+      // - `[]++`
+      // - `f()--`
+      // - `this++`
+      THROW('Can only post-increment or post-decrement an identifier or member expression');
+    }
+    // </SCRUB AST>
 
     AST_wrapClosed(astProp, 'UpdateExpression', 'argument');
     AST_set('operator', curtok.str);

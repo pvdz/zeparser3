@@ -1999,6 +1999,31 @@ export default (describe, test) =>
         // what about `for ([x]=y of z);`, is that an exception? would it break if we can assignment exprs in lhs?
       });
 
+      describe('let as a var', _ => {
+        // for-of forbids any lhs that starts with `let`
+
+        test.fail('let is not allowed as the lhs to for-of', {
+          code: 'for (let of x);',
+        });
+
+        test.fail('a property on let is not allowed in for-of', {
+          code: 'for (let.foo of x);',
+        });
+
+        test.fail('a call on let is not allowed in for-of', {
+          code: 'for (let() of x);',
+        });
+
+        test.fail('a property on a call on let is not allowed in for-of', {
+          code: 'for (let().foo of x);',
+        });
+
+        test.fail('let with an array that cannot be a pattern is not allowed in for-of', {
+          code: 'for (let[a+b] of x);',
+          desc: 'fails in strict because let is a keyword there, fails in sloppy because the array cant be a pattern',
+        });
+      });
+
       // TODO: cases for yield and await as rhs
     });
 
