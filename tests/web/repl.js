@@ -31,6 +31,20 @@ window.onerror = (msg, url, lineNo, columnNo, error) => {
 
 ta_input.value = localStorage.getItem('ZeParser3.repl.input') || ta_input.value;
 
+if (localStorage.getItem('ZeParser3.repl.options')) {
+  try {
+    localStorage.getItem('ZeParser3.repl.options')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+      .map(s => s.split(' '))
+      .map(([q, checked]) => console.log(q, checked) || (checked === 'true') && (document.querySelector(q).checked = true));
+  } catch (e) {
+    localStorage.removeItem('ZeParser3.repl.options');
+  }
+}
+
+
 function pret(s, isjson) {
   // Note: this is prettier 0.4 or something... it's good enough for our purpose
   try {
@@ -63,7 +77,7 @@ function reflectResult(inpBgColor, inpColor, otherBgColor, otherColor) {
   ta_output.style.color = otherColor;
 }
 
-window.ta_input.onchange = window.ta_input.onkeyup = e => {
+const update = e => {
   console.clear();
   stderr.value = '';
   reflectFail(); // should not be visible (?)
@@ -77,19 +91,30 @@ window.ta_input.onchange = window.ta_input.onkeyup = e => {
   if (input) localStorage.setItem('ZeParser3.repl.input', input);
   else localStorage.removeItem('ZeParser3.repl.input');
 
+  // Store the settings in an easy to thaw way
+  localStorage.setItem(
+    'ZeParser3.repl.options',
+    [
+      ...document.querySelectorAll('.box.top-left input')
+    ]
+      .map(e => `[name="${e.name}"][value="${e.value}" ${!!e.checked}`)
+      .join(',')
+  );
+
   let out;
   let threw = 'unknown';
   try {
     console.log('crunching:', '\n```\n' + pret(input) + '\n```');
 
-    out = ZeParser(window.ta_input.value, Tok.GOAL_MODULE, Tok.COLLECT_TOKENS_ALL, {
-      // strictMode: startInStrictMode,
-      // webCompat: !!WEB,
-      // trailingArgComma: testDetails.options && testDetails.options.trailingArgComma,
+    let mode = document.querySelector('input[name=mode]:checked').value === 'module' ? Tok.GOAL_MODULE : Tok.GOAL_SCRIPT;
+
+    out = ZeParser(window.ta_input.value, mode, Tok.COLLECT_TOKENS_ALL, {
+      strictMode: document.querySelector('input[name=mode]:checked').value === 'strict',
+      webCompat: !!document.querySelector('input[name=webcompat]:checked'),
       astRoot: ast,
       tokenStorage: tokens,
       // getTokenizer: tok => tokenizer = tok,
-      // targetEsVersion: ES || Infinity,
+      targetEsVersion: +document.querySelector('input[name=version]:checked').value,
     });
     threw = false;
   } finally {
@@ -103,5 +128,15 @@ window.ta_input.onchange = window.ta_input.onkeyup = e => {
   window.ta_ast.value = pret(JSON.stringify(ast.root), true);
   window.ta_output.value = tokens.map(JSON.stringify).join('\n')
   console.log(['out:', out, 'ast:', ast]);
+
+
+
 };
-window.ta_input.onchange();
+
+[
+  window.ta_input,
+  ...document.querySelectorAll('.box.top-left input')
+].forEach(e => e.onchange = e.onkeyup = update);
+
+
+update();

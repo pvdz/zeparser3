@@ -41,9 +41,21 @@
 </div>
 <div style="flex-grow: 1">
   <div class="box main" style="align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
-    <div class="box left" style="flex-direction: column; align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
+    <div class="box left" style="flex-direction: column; align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto; max-width:50%;">
       <div class="box top-left" style="flex-direction: column; align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
-        <div class="header">Input</div>
+        <div class="header">
+          <b>Input</b>&nbsp;&mdash;
+          <label><input type="checkbox" name="webcompat" value="on"> Web compat</label>&nbsp;&mdash;
+          Parsing mode:
+            <label><input type="radio" name="mode" value="sloppy"/> Sloppy</label>
+            <label><input checked type="radio" name="mode" value="strict"/> Strict</label>
+            <label><input type="radio" name="mode" value="module"/> Module</label>&nbsp;&mdash;
+          Spec:
+            <label><input type="radio" name="version" value="6"/> ES6</label>
+            <label><input type="radio" name="version" value="7"/> ES7</label>
+            <label><input type="radio" name="version" value="8"/> ES8</label>
+            <label><input type="radio" name="version" value="9" checked/> ES9</label>
+        </div>
         <textarea id="ta_input" placeholder="enter code here" class="box tl" style="align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
 // Note: Firefox (&lt;=63) crashes as long as it does not support `import()`.
 // Same for any browser not supporting es modules (`import`/`export`).
