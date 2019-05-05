@@ -6715,6 +6715,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - [{a}] = x
         // - [{a:b}] = x
         // - [{a:1}.foo] = x
+        // - `[{}.foo] = x`
         let objDestructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, astProp);
         destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, hasAllFlags(objDestructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, objDestructible, $$SQUARE_R_5D, astProp);
       }
@@ -6767,7 +6768,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else {
         // only destructible as assignment destructuring if "simple assignment"
-        // - `[{}.foo] = x`
+        //     ^
         // - `[5[foo]] = x`
         // - `["x".foo] = x`
         // - `[`x`.foo] = x`
@@ -6800,16 +6801,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = setNotAssignable(assignable);
           destructible |= CANT_DESTRUCT;
         }
-        else if (wasParen && isAssignable(assignable)) {
+        else if (wasParen && isAssignable(assignable) && bindingType === BINDING_TYPE_NONE) {
           // - `[(x)] = obj`
           destructible |=  DESTRUCT_ASSIGN_ONLY;
         }
-        else if (notAssignable(assignable)) {
+        else if (wasParen || notAssignable(assignable)) {
+          // - `let [(x)] = obj`
+          //            ^
           // - `[x()] = obj`
+          //        ^
           // - `[(x())] = obj`
+          //          ^
           destructible |= CANT_DESTRUCT;
         }
         else {
+          // [v]: `[5..length] = x`
+          // [v]: `["X".length] = x`
+          // [v]: `[`x`.length] = x`
+          // [v]: `[`a${5}b`.length] = x`
+          // [v]: `[/foo/.length] = x`
+          // [v]: `[/x/g.length] = x`
+          // [v]: `[50..foo] = x`
+          // [v]: `["foo".foo] = x`
         }
       }
 

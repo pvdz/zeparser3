@@ -11983,6 +11983,31 @@ export default (describe, test) =>
       })
     });
 
+    describe('binding pattern', _ => {
+
+      ['var', 'let', 'const'].forEach(bindingType => {
+
+        describe('bindingType=`'+bindingType+'`', _ => {
+
+          test.pass('base case array', {
+            code: bindingType + ' [x] = v;',
+          });
+
+          test.pass('base case obj', {
+            code: bindingType + ' {x} = v;',
+          });
+
+          test.fail('arr with parens', {
+            code: bindingType + ' [(x)] = v;',
+          });
+
+          test.fail('obj with parens', {
+            code: bindingType + ' {(x)} = v;',
+          });
+        });
+      });
+    });
+
     describe('let as identifier in sloppy mode', _ => {
       /*
     See section E: https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
