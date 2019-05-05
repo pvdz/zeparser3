@@ -3597,7 +3597,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Now parse a group and pass it a special flag that changes the semantics of the return value
     // It's an ugly hack :( all caused by `delete ((((a, b) => c).d))` being hard to custom parse
 
-    HIT('parens='+parens)
     let assignableOrJustIdent = _parseGroupToplevels(
       lexerFlags,
       IS_EXPRESSION,
