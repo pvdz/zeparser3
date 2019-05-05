@@ -57,7 +57,7 @@
             <label><input type="radio" name="version" value="9" checked/> ES9</label>
         </div>
         <textarea id="ta_input" placeholder="enter code here" class="box tl" style="align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
-// Note: Firefox (&lt;=63) crashes as long as it does not support `import()`.
+// Note: Firefox (&lt;=63) crashes because of import(), >=66 seems to work fine
 // Same for any browser not supporting es modules (`import`/`export`).
 hello.world;
 how('are').you().doing ? oh: right;
