@@ -12004,6 +12004,34 @@ export default (describe, test) =>
           test.fail('obj with parens', {
             code: bindingType + ' {(x)} = v;',
           });
+
+          test.fail('value that is a member expression', {
+            code: bindingType + ' {a: b.c} = v;',
+          });
+
+          test.fail('shorthand that is a member expression', {
+            code: bindingType + ' {a.b} = v;',
+          });
+
+          test.fail('key that is a member expression', {
+            code: bindingType + ' {a.b: c} = v;',
+          });
+
+          test.pass('key that is computed', {
+            code: bindingType + ' {[a]: c} = v;',
+          });
+
+          test.pass('member key that is computed', {
+            code: bindingType + ' {[a.b]: c} = v;',
+          });
+
+          test.fail('shorthand that is computed', {
+            code: bindingType + ' {[a]} = v;',
+          });
+
+          test.fail('member value on key that is computed', {
+            code: bindingType + ' {[a]: b.c} = v;',
+          });
         });
       });
     });

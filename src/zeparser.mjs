@@ -7065,6 +7065,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `({get [expr](){}`   (or set/async)
         // - `({get *[expr](){}`  (or set, and I think by now async too?)
         // - `({static static(){}`
+        // - `let {x:o.f=1}=a`
         // - since this is an object curly, it _must_ be a syntax error when not a valid property starter
 
         let identToken = curtok;
@@ -7511,7 +7512,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (isAssignable(valueAssignable)) {
             // - `({[a]: a.b} = d)`
             //              ^
-            // - `[a, {15: d}, c] = obj`
+            // - `[a, {15: d[x]}, c] = obj`
             //              ^
             // - `[...{a: b.b} = c]`
             //               ^
@@ -7522,12 +7523,33 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             destructible |= CANT_DESTRUCT;
           }
         }
-      } else if (curtok.str === '=') {
-        // - `({[a]: b = c} = d)`
-        //             ^
+      }
+      else if (curtok.str === '=') {
+        if (notAssignable(valueAssignable)) {
+          // A value that is not assignable cannot be destructed
+          // - `let {x: true = 1} = z`
+          //                 ^
+          // - `let {x: f() = 1} = z`
+          //                ^
+          destructible |= CANT_DESTRUCT;
+        } else if (!wasAssign) {
+          // There was a tail between the ident and the assign, this is not bindable destructible, but assignable
+          // - `let {x: a.b = 1} = z`
+          //                ^
+          destructible |= DESTRUCT_ASSIGN_ONLY;
+        } else {
+          // This is fine. There was no tail between ident and `=`. This is still perhaps binding destructible
+          // - `let {x: o = 1} = z`
+          //              ^
+          // - `({[a]: b = c} = d)`
+          //             ^
+        }
+
+        // The assignment itself cannot affect destructibility so just parse the rest
         let rhsAssignable = parseExpressionFromOp(lexerFlags, valueAssignable, 'value');
         assignableOnlyForYieldAwaitFlags |= rhsAssignable;
-      } else {
+      }
+      else {
         // - `({[a]: b + c} = d)`
         //             ^
         // - `({a: b * c} = d)`
@@ -7967,7 +7989,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAnyFlag(destructible, CANT_DESTRUCT)) {
       THROW('The binding pattern is not destructible');
     }
-    if (bindingType === BINDING_TYPE_ARG && hasAnyFlag(destructible, DESTRUCT_ASSIGN_ONLY)) {
+    if (bindingType !== BINDING_TYPE_NONE && hasAnyFlag(destructible, DESTRUCT_ASSIGN_ONLY)) {
       THROW('This binding can not be used in function parameters because it is not destructible');
     }
   }
