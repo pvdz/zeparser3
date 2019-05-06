@@ -550,7 +550,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   function LOG_THROW(errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false, printCode = true) {
     if (printCode) {
       LOG('\n');
-      LOG(tokenizer && tokenizer.GETPOS(BOLD + '#|#' + RESET, undefined, errmsg));
+      LOG(tokenizer && tokenizer.getErrorContext(undefined, errmsg));
     }
     if (TEST262) LOG('\n============== input ==============' + code + '\n============== /input =============\n');
     LOG(`${prefix} ${RED}ERROR${RESET}: \`${toPrint(code)}\` :: ` + errmsg + suffix);

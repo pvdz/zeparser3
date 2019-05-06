@@ -356,6 +356,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, Infinity
     exposeScopes = false, // put scopes in the AST under `$scope` property?
     astUids = false, // add an incremental uid to all ast nodes for debugging
+    fullErrorContext = false, // do not trunc the input when throwing an error?
 
     // ast compatibility stuff?
 
@@ -390,7 +391,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     console.log('\n');
     console.log('Error in parser:', desc, 'remaining throw args;', args);
     console.log('Error token: ' + curtok);
-    tok.throw('Parser error! ' + desc, curtok);
+    tok.throw('Parser error! ' + desc, curtok, undefined, fullErrorContext);
   }
 
   function sansFlag(flags, flag) {

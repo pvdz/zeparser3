@@ -386,7 +386,7 @@ let ID_CONTINUE_REGEX = /|/;
     ID_START_REGEX = new RegExp('^\\p{ID_Start}$','u');
     ID_CONTINUE_REGEX = new RegExp('^\\p{ID_Continue}$','u');
   } catch(e) {
-    console.warn('Unable to create regexes with unicode property escapes; unicode support disabled');
+    console.warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
   }
 })();
 
@@ -3307,20 +3307,21 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
     console.error('Throwing this error:', str);
     _THROW('Tokenizer error! ' + str, token, str);
   }
-  function _THROW(str, token = null, msg = '') {
+  function _THROW(str, token = null, msg = '', fullErrorContext = false) {
     console.log('\n');
-    console.log('Error at #|#\n' + GETPOS('#|#', token, msg));
+    let ectxt = getErrorContext(token, msg, fullErrorContext);
+    console.log('Error at:\n```\n' + ectxt + (ectxt[ectxt.length-1] === '\n' ? '' : '\n') + '```\n');
     if (gracefulErrors === FAIL_HARD) throw new Error(str);
     else console.error(str);
   }
   function DEBUG(msg) {
-    return 'Tokenizer at #|#\n' + GETPOS('#|#', undefined, 'DEBUG('+msg+')');
+    return 'Tokenizer at:\n' + getErrorContext(undefined, 'DEBUG('+msg+')');
   }
-  function GETPOS(sep, token, msg) {
+  function getErrorContext(token, msg, fullErrorContext = false) {
     let offset = token ? token.start : startForError;
-    let inputOffset = offset > 100 ? offset - 100 : 0;
+    let inputOffset = fullErrorContext || offset <= 100 ? 0 : offset - 100;
     if (inputOffset) offset -= inputOffset;
-    let usedInput = input.slice(inputOffset, inputOffset + 200);
+    let usedInput = input.slice(inputOffset, fullErrorContext ? input.length : inputOffset + 200);
 
     let nl1 = offset && (usedInput.lastIndexOf('\n', offset) + 1);
     let nl2 = usedInput.indexOf('\n', nl1);
@@ -3348,7 +3349,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   nextToken.getTokenCountAny = () => anyTokenCount;
   nextToken.getTokenCountSolid = () => solidTokenCount;
   nextToken.DEBUG = DEBUG;
-  nextToken.GETPOS = GETPOS;
+  nextToken.getErrorContext = getErrorContext;
 
   return nextToken;
 }
