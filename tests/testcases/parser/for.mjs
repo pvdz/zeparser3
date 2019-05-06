@@ -1618,6 +1618,34 @@ export default (describe, test) =>
 
         // what about `for ([x]=y in z);`, is that an exception? would it break if we can assignment exprs in lhs?
       });
+
+      describe('let as a var', _ => {
+        // for-in allows certain lhs that starts with `let`. In strict mode all bets are off.
+
+        test.fail_strict('let is allowed as the lhs to for-in', {
+          code: 'for (let in x);',
+        });
+
+        test.fail_strict('a property on let is allowed in for-in', {
+          code: 'for (let.foo in x);',
+        });
+
+        test.fail('a call on let is not allowed in for-in', {
+          code: 'for (let() in x);',
+        });
+
+        test.fail_strict('a property on a call on let is allowed in for-in', {
+          code: 'for (let().foo in x);',
+        });
+
+        test.fail('let with an array that cannot be a pattern is not allowed in for-in', {
+          code: 'for (let[a+b] in x);',
+        });
+
+        test.fail('let with an object and property cannot work because it is always parsed as a pattern', {
+          code: 'for (let {x}.y in x);',
+        });
+      });
     });
 
     describe('for-of', _ => {
@@ -2036,6 +2064,10 @@ export default (describe, test) =>
         test.fail('let with an array that cannot be a pattern is not allowed in for-of', {
           code: 'for (let[a+b] of x);',
           desc: 'fails in strict because let is a keyword there, fails in sloppy because the array cant be a pattern',
+        });
+
+        test.fail('let with an object and property cannot work because it is always parsed as a pattern', {
+          code: 'for (let {x}.y of x);',
         });
       });
 

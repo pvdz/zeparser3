@@ -673,24 +673,19 @@ export default (describe, test) =>
 
     describe('regex edge case', _ => {
       describe('keyword', _ => {
-        test('division', {
+        test.fail('division', {
           code: 'function* f(){ yield\n/foo }',
-          throws: 'ASI',
           desc: 'note: spec requires a regex after the yield identifier so a division can never happen here',
         });
 
-        test('sans flag', {
+        test.fail('sans flag', {
           code: 'function* f(){ yield\n/foo/ }',
-          throws: 'ASI',
           desc: 'note: yield keyword is not allowed to have a newline and is expected to be a keyword here, the forward slash on the next line prevents ASI, boom',
-          tokens: [],
         });
 
-        test('with flag', {
+        test.fail('with flag', {
           code: 'function* f(){ yield\n/foo/g }',
-          throws: 'ASI',
           desc: 'note: spec requires a regex after the yield identifier so a (double) division can never happen here, ASI cant be applied because of the regex, so boom',
-          tokens: [],
         });
       });
 

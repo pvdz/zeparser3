@@ -342,6 +342,13 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       LOG('Thrown error:', wasError);
       ++fail;
       ++crash;
+    } else if (wasError.indexOf('Assertion fail') >= 0) {
+      LOG(`${RED}####  ${BLINK}ASSERTION BROKEN${RESET}${RED}  ####${RESET}`);
+      LOG_THROW('Invariant violated', code, stack, desc);
+      LOG(`${RED}####  ${BLINK}ASSERTION BROKEN${RESET}${RED}  ####${RESET}`);
+      LOG('Assertion expected:', wasError);
+      ++fail;
+      ++crash;
     } else if (!expectedThrows) {
       LOG_THROW(`${BOLD}unexpected ${RED}${wasTodo?'TODO':'ERROR'}${RESET}`, code, stack, desc);
       LOG('Thrown error:', wasError);

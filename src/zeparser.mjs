@@ -2213,7 +2213,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'BlockStatement');
     if (exposeScopes) AST_set('$scope', scoop);
     AST_set('body', []);
-    ASSERT_skipRex('{', lexerFlagsNoTemplate);
+    skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // [v]: `(x)=>{/x/}`
     if (parseDirectives === PARSE_DIRECTIVES) {
       _parseBodyPartsWithDirectives(lexerFlagsNoTemplate, scoop, labelSet, UNDEF_EXPORTS, UNDEF_EXPORTS, wasSimple, functionNameTokenToVerify, 'body');
     } else {
@@ -2817,59 +2817,145 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     catchforofhack = false;
 
     if (curtype === $IDENT) {
+      // - `for (;;);`
+      //         ^
+      // - `for (x in y);`
+      //         ^
+      // - `for (x of y);`
+      //         ^
       switch (curtok.str) {
         case 'var':
-          ASSERT_skipAny('var' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{ (even when keyword=let)
+          // - `for (var x of y);`
+          //         ^
+          // - `for (var x;;);`
+          ASSERT_skipAny('var' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{
           parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_VAR, FROM_FOR_HEADER, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
           // No need to dupe-check scope here
           assignable = initAssignable(assignable); // var decls are assignable
           break;
+
         case 'let':
-          let identToken = curtok;
+          // - `for (let x of y);`
+          //         ^
+          // - `for (let x;;);`
+          let letIdentToken = curtok;
           ASSERT_skipDiv('let', lexerFlags); // div; if let is varname then next token can be next line statement start and if that starts with forward slash it's a div
+
+          // [v]: `for (let x of y);`
+          //                ^
           if (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
+            // [v]: `for (let x of y);`
+            //                ^
+            // [v]: `for (let [x] in y);`
+            //                ^
+            // [v]: `for (let {x} of y);`
+            //                ^
+            // [x]: `for (let x of y);`
+            // [x]: `for (let [x] in y);`
+            // [x]: `for (let {x} of y);`
+            // [v]: `for (let x;;);`
+            // [v]: `for (let [x] = x;;);`
+            // [v]: `for (let {x} = x;;);`
             if (curtok.str === 'in') {
-              // edge case `for (let in x)` makes `let` to be parsed as a var name in sloppy mode
+              // Edge case makes `let` to be parsed as a var name in sloppy mode
+              // [v]: `for (let in x)`
               if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+                // Except in strict mode...
+                // [x]: `for (let in x)`
                 THROW('Let binding missing binding names as `let` cannot be a var name in strict mode');
               }
               AST_setIdent(astProp, curtok);
+              wasNotDecl = true;
             } else {
+              // [v]: `for (let x of y);`
+              //                ^
               parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_LET, FROM_FOR_HEADER, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-              if (SCOPE_verifyLexical(lexerFlags, scoop)) THROW('Let for-binding attempted to get at least one name bound more than once');
+              if (SCOPE_verifyLexical(lexerFlags, scoop)) {
+                // [x]: `for (let [x, x] of y);`
+                THROW('Let for-binding attempted to get at least one name bound more than once');
+              }
             }
             assignable = initAssignable(assignable); // decls are assignable (`let` as a var name should be as well)
           } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+            // In strict mode, `let` must be a keyword, and since we did not see a valid binding token, this is an error
+            // [x]: `for (let.x in y);`
+            //               ^
+            // [x]: `for (let() of y);`
+            //               ^
+            // [x]: `for (let + of y);`
             THROW('Let binding missing binding names');
           } else {
-            mustBePlainLoop = true;
-            // backwards compat; treat let as an identifier
-            assignable = parseExpressionAfterPlainVarName(lexerFlags | LF_IN_FOR_LHS, identToken, ASSIGN_EXPR_IS_OK, astProp);
-            if (curtok.str === 'in' ){
-              // - `for (let().x in y);`
-              // - `for (let.foo.x in y);`
-              // - `for (let + x in y);`
-            } else if (curtok.str === 'of') {
-              // - `for (let().x of y);`
-              // - `for (let.foo.x of y);`
-              // - `for (let + x of y);`
-              THROW('If the left side of a `for-of` is not a binding then it can not start with `let` as a var name');
+            // In sloppy mode, `let` must now be a regular var name.
+            wasNotDecl = true;
+            // - The next token cannot be `[`, as that case has been taken care of above
+            // - If is an error if this is a `for-of` as that case completely forbids `let` as var name
+            // [v]: `for (let.x in y);`
+            //               ^
+            // [x]: `for (let() of y);`
+            //               ^
+            // [x]: `for (let[x] in y);`
+            // [x]: `for (let[x] of y);`
+            // [x]: `for (let[x];;);`
+            // [x]: `for (let of y);`
+            // [v]: `for (let;;);`
+            // [x]: `for (let.x in y);`
+            // [x]: `for (let.x of y);`
+            // [v]: `for (let.x;;);`
+            // [x]: `for (let + in y);`
+            // [x]: `for (let + of y);`
+            // [v]: `for (let + x;;);`
+            // [x]: `for (let() in y);`
+            // [x]: `for (let() of y);`
+            // [v]: `for (let();;);`
+
+            ASSERT(curtok.str !== '[', 'case handled above');
+            ASSERT(curtok.str !== 'in', 'case handled above');
+
+            if (curtok.str === 'of') {
+              // [x]: `for (let of y);`
+              THROW('A `for (let of ...)` is always illegal');
             } else if (curc === $$COMMA_2C) {
+              // [x]: `for (let , x;;);`
+              //                ^
               mustBePlainLoop = true;
-              // Note: we are inside a for-header so we don't care about await/yield flags of assignable here
+              // Note: we are inside a for-header so we don't care about assignable or the await/yield flags here
+              AST_setIdent(astProp, letIdentToken);
               _parseExpressions(lexerFlags, initNotAssignable(), astProp);
-              // the `assignable` state is irrelevant to the `for (;;)` case so don't bother updating it here
+              assignable = NOT_ASSIGNABLE;
             } else if (curc !== $$SEMI_3B) {
-              // - `for (let().x);`
-              // - `for (let.foo.x);`
-              // - `for (let + x);`
-              THROW('Did not find `in`, `of`, or a semi colon after the left side in the `for` header');
+              // [x]: `for(let.a of 0);`
+              // [v]: `for (let.foo in x);`
+              // [x]: `for (let() in x);`
+              // [v]: `for (let().foo in x);`
+              // [x]: `for (let.foo of x);`
+              // [x]: `for (let() of x);`
+              // [x]: `for (let().foo of x);`
+              // [x]: `for (let=10;;);`
+              // [v]: `for (let.foo;;);`
+              // [v]: `for (let();;);`
+              assignable = parseValueAfterIdent(lexerFlags, letIdentToken, BINDING_TYPE_NONE, ASSIGN_EXPR_IS_OK, astProp);
+              if (curtok.str === 'of') {
+                // [x]: `for (let.a of x);`
+                THROW('Cannot use `let` as a var name on the left side in a `for-of` header');
+              }
+              if (notAssignable(assignable)) {
+                // [v]: `for (let();;);`
+                mustBePlainLoop = true;
+              }
+            } else {
+              // [v]: `for (let;;);`
+              //               ^
+              AST_setIdent(astProp, letIdentToken);
+              assignable = NOT_ASSIGNABLE;
             }
           }
-
           break;
+
         case 'const':
-          ASSERT_skipAny('const' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{ (even when keyword=let)
+          // - `for (const x of y);`
+          //         ^
+          // - `for (const x;;);`
+          ASSERT_skipAny('const' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{
           parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_CONST, FROM_FOR_HEADER, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
           if (SCOPE_verifyLexical(lexerFlags, scoop)) THROW('Const for-binding attempted to get at least one name bound more than once');
           assignable = initAssignable(assignable); // const decl is assignable
@@ -2896,6 +2982,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('for await only accepts the `for-of` type');
       }
       emptyInit = true;
+      wasNotDecl = true;
       ASSERT(assignable = initAssignable(assignable)); // prevent assertion error, otherwise irrelevant
     }
     else if (curc === $$CURLY_L_7B) {
@@ -2969,6 +3056,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //           ^
     // - `for (x;;);`
     //          ^
+
     if (curtype === $IDENT) {
       if (curtok.str === 'of') {
         if (catchforofhack) THROW('Encountered `var` declaration for a name used in catch binding which in web compat mode is still not allowed in a `for-of`');
@@ -3001,7 +3089,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'right');
         return;
       }
-      ASSERT(curtok.str === 'instanceof', 'the only other valid identifier here is the instanceof op'); // very unlikely case tho
+
+      // [x]: `for (let of x) y`
+      //                   ^
+      // [x]: `function *f(){ for (yield of obj); }`
+      //                                    ^
+      THROW('Unexpected input while parsing the left side of a for-header');
     } else if (awaitable) {
       THROW('for await only accepts the `for-of` type');
     } else {
@@ -5311,10 +5404,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return setNotAssignable(assignable);
   }
 
-  function parseYield(lexerFlags, identToken, allowAssignment, astProp) {
+  function parseYield(lexerFlags, yieldIdentToken, allowAssignment, astProp) {
     ASSERT(arguments.length === parseYield.length, 'arg count');
-    ASSERT(identToken !== curtok, 'should have consumed the ident already');
-    ASSERT(identToken.str === 'yield', 'should receive the yield keyword token that was already consumed');
+    ASSERT(yieldIdentToken !== curtok, 'should have consumed the ident already');
+    ASSERT(yieldIdentToken.str === 'yield', 'should receive the yield keyword token that was already consumed');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     // Parse an async arrow as a plain call to `async` first, inheriting the async/generator state. Then when you
@@ -5326,7 +5419,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR)) {
       return parseYieldKeyword(lexerFlags, allowAssignment, astProp);
     }
-    return parseYieldVarname(lexerFlags, identToken, allowAssignment, astProp);
+    return parseYieldVarname(lexerFlags, yieldIdentToken, allowAssignment, astProp);
   }
   function parseYieldKeyword(lexerFlags, allowAssignment, astProp) {
     ASSERT(parseYieldKeyword.length === arguments.length, 'arg count');
@@ -5336,6 +5429,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // Could still be arrow header, but we won't know that until much later. However, this causes destructible=false.
       // - `function *f(){ return function(x = yield y){}; }`
       THROW('The `yield` keyword in arg default must be a var name but that is not allowed inside a generator');
+    }
+
+    if (curc === $$FWDSLASH_2F && curtok.nl) {
+      // [x]: `function* f(){ yield↵/foo }`
+      // [x]: `function* f(){ yield↵/foo/ }`
+      // [x]: `function* f(){ yield↵/foo/g }`
+      THROW('Yield keyword can not be followed by a regular expression on the next line');
     }
 
     if (allowAssignment === ASSIGN_EXPR_IS_ERROR) {
@@ -5403,8 +5503,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, wasSimple, isAsync, astProp) {
     ASSERT(parseArrowParenlessFromPunc.length === arguments.length, 'arg count');
-    ASSERT(curtok.str === '=>', 'punc is arrow');
     ASSERT_ASSIGN_EXPR(allowAssignment);
+
+    if (curtok.str !== '=>') {
+      // [x]: `function *g() { async yield = {}; }`
+      THROW('An `async` followed by an identifier should lead to an arrow function, found something unexpected');
+    }
+    if (hasAllFlags(lexerFlags, LF_IN_GENERATOR) && identToken.str === 'yield') {
+      // [x]: `function *g() { async yield => {}; }`
+      THROW('Arrows cannot be generators and parenless `yield` param in a generator would be parsing a yield expression and fail at the arrow');
+    }
 
     // - `x => x`
     //      ^
@@ -5417,7 +5525,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `async x \n => x`
       THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
     }
-    ASSERT(hasNoFlag(lexerFlags, LF_IN_GENERATOR) || identToken.str !== 'yield', 'arrows cannot be generators and parenless `yield` param in a generator would be parsing a yield expression and fail at the arrow');
     ASSERT((identToken.str === 'eval' || identToken.str === 'argument') ? wasSimple === ARGS_COMPLEX : true, 'eval and arguments must pass on complex so they throw if the body contains use strict');
     ASSERT(!((identToken.str === 'eval' || identToken.str === 'argument') && hasAllFlags(lexerFlags, LF_STRICT_MODE)), 'caller should throw for eval/argument already in strict mode');
     if (hasAnyFlag(lexerFlags, LF_STRICT_MODE) && identToken.str === 'yield') {
@@ -5799,6 +5906,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     if (curc === $$TICK_60) {
       THROW('Block body arrows can not be immediately tagged without a group');
+    }
+    if ((isAssignBinOp() || isNonAssignBinOp(lexerFlags)) && (!curtok.nl || curc === $$FWDSLASH_2F)) {
+      THROW('An arrow function can not be part of an operator to the right');
     }
   }
   function parseGroupToplevels(lexerFlags, asyncStmtOrExpr, allowAssignment, asyncToken, newlineAfterAsync, astProp) {
@@ -6979,7 +7089,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(lexerFlags, LF_IN_FOR_LHS)) lexerFlags = lexerFlags ^ LF_IN_FOR_LHS;
     if (hasAllFlags(lexerFlags, LF_IN_TEMPLATE)) lexerFlags = lexerFlags ^ LF_IN_TEMPLATE;
 
-    ASSERT_skipAny('{', lexerFlags); // TODO: next must be propname (ident, string, number, square bracket) or } or *
+    skipAnyOrDieSingleChar($$CURLY_L_7B, lexerFlags); // TODO: next must be propname (ident, string, number, square bracket) or } or *
 
     let destructible = MIGHT_DESTRUCT; // innocent until proven guilty? may or may not destruct
 
@@ -8600,7 +8710,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('method', isGetSet === NOT_GETSET); // getters and setters are not considered methods here
       AST_set('computed', !!isDynamic);
 
-      ASSERT(curc === $$PAREN_L_28, 'should have parsed everything before the method args now');
+      if (curc !== $$PAREN_L_28) {
+        // [x]: `wrap({get 123: x});`
+        THROW('Expected to parse a paren of the method now but found something else');
+      }
       parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, isGetSet, NOT_FUNCTION_STATEMENT, 'value');
 
       AST_set('shorthand', false);
