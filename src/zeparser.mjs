@@ -2963,7 +2963,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // there can be multiple vars and inits
     // for-in and for-of can only have one var without inits (invalidate after)
 
-
     // - `for (x of y);`
     //           ^
     // - `for (x in y);`
@@ -3005,6 +3004,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curtok.str === 'instanceof', 'the only other valid identifier here is the instanceof op'); // very unlikely case tho
     } else if (awaitable) {
       THROW('for await only accepts the `for-of` type');
+    } else {
+      // [v]: `for (;;);`
     }
 
     if (emptyInit) {
@@ -3013,26 +3014,45 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else {
       AST_wrapClosed(astProp, 'ForStatement', 'init');
       // we are still in the `init` part of a classic for. keep parsing _with_ LF_IN_FOR_LHS from the current expression value.
-      if (wasNotDecl) assignable = parseExpressionFromOp(lexerFlags | LF_IN_FOR_LHS, assignable, 'init');
+      if (wasNotDecl) {
+        // [v]: `for (a+b;;) c;`
+        //             ^
+        // [x]: `for (a+b in c) d;`
+        // [x]: `for (a+b of c) d;`
+        parseExpressionFromOp(lexerFlags | LF_IN_FOR_LHS, assignable, 'init');
+      }
     }
 
     let hadComma = curc === $$COMMA_2C;
-    if (hadComma) _parseExpressions(lexerFlags, initNotAssignable(), 'init');
-    if (curc !== $$SEMI_3B) {
-      // note: `x in y` is valid so `for(a,x in y)` will parse up to the `)`. since `of` is not an op it stops at `of`.
-      if (hadComma && (curtok.str === 'of' || ')')) THROW('Comma not allowed in left side of `for-in`/`for-of` header');
-      // not a comma error; this will throw as we asserted
-      skipRexOrDieSingleChar($$SEMI_3B, lexerFlags);
+    if (hadComma) {
+      // - `for (a, b;;);`
+      //          ^
+      // - `for (a, b in c);`
+      // - `for (a, b of c);`
+      _parseExpressions(lexerFlags | LF_IN_FOR_LHS, initNotAssignable(), 'init');
     }
-    ASSERT_skipRex(';', lexerFlags);
+
+    if (curc !== $$SEMI_3B && hadComma && (curtok.str === 'of' || curtok.str === 'in')) {
+      // note: `x in y` is valid so `for(a,x in y)` will parse up to the `)`. since `of` is not an op it stops at `of`.
+      // [x]: `for (a,b of c) d;`
+      THROW('Comma not allowed in left side of `for-in`/`for-of` header');
+    }
+
+    if (hasAllFlags(destructible, MUST_DESTRUCT)) {
+      // - `for ({a=b};;);`
+      THROW('Cannot use lhs as regular for-loop because it must destruct');
+    }
+
+    skipRexOrDieSingleChar($$SEMI_3B, lexerFlags);
 
     if (curc === $$SEMI_3B) {
-      if (hasAllFlags(destructible, MUST_DESTRUCT)) THROW('Cannot use lhs as regular for-loop because it must destruct');
       AST_set('test', null);
     } else {
       parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'test');
     }
+
     skipRexOrDieSingleChar($$SEMI_3B, lexerFlags);
+
     if (curc === $$PAREN_R_29) {
       AST_set('update', null);
     } else {

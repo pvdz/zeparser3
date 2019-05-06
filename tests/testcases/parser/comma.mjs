@@ -200,10 +200,9 @@ export default (describe, test) =>
     test('in a for-of header part 1', {
       code: 'for (a,b of c) d;',
       throws: 'Comma not allowed',
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
 
-    test.fail('in a for-of header part 1', {
+    test.fail('in a for-of header part 2', {
       code: 'for (a of b,c) d;',
     });
 

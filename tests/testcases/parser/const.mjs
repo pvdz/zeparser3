@@ -2213,9 +2213,8 @@ export default (describe, test) =>
               code: 'for (const foo = bar);',
             });
 
-            test('const, two vars with both init, semi', {
+            test.fail('const, two vars with both init, semi', {
               code: 'for (const foo = bar, zoo = boo);',
-              throws: '(`;`)',
             });
 
             test.fail('var on next line does not trigger asi', {

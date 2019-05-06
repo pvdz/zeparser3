@@ -354,6 +354,21 @@ export default (describe, test) =>
         test.pass('compound assignment in lhs', {
           code: 'for (a += b;;);',
         });
+
+        test.fail('init part cannot be a pattern 1', {
+          code: 'for ({x = y} ;;) {}',
+          desc: '{x=y} cannot be expression because shorthand props cannot have an assignment/default',
+        });
+
+        test.fail('init part cannot be a pattern 2', {
+          code: 'for ({x = y} ;1 ;) {}',
+          desc: '{x=y} cannot be expression because shorthand props cannot have an assignment/default',
+        });
+
+        test.fail('init part cannot be a pattern 3', {
+          code: 'for ({x = y} ;1 ;1) {}',
+          desc: '{x=y} cannot be expression because shorthand props cannot have an assignment/default',
+        });
       });
     });
 
