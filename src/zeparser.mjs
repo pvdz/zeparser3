@@ -1963,31 +1963,45 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //   - else: `async(..)`
     // - else: `async` as a var name
 
-    if (curtok.str === 'in' || curtok.str === 'instanceof' || curtype === $EOF || !allowAsyncFunctions) {
+    if (curtype === $EOF || !allowAsyncFunctions) {
       return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
     }
 
     let newlineAfterAsync = curtok.nl;
 
     if (curtype === $IDENT) {
-      //   - `async foo ...`
-      //            ^
-      //   - `async function f(){}`
-      //   - `async \n function f(){}`
+      // - `async foo ...`
+      //          ^
+      // - `async eval => {}`
+      // - `async eval => { "use strict"; }`
+      // - `async function f(){}`
+      // - `async in x`
+      // - `async in obj`
+      // - `async \n function f(){}`
+      //             ^
 
       if (newlineAfterAsync) {
-        // This _must_ mean async is a regular var name so just parse an expression now.
-        // - `async \n ident...` ->
-        //   - `async; foo;`
-        //   - `async in obj`
-        //   - `async instanceof obj`
-        //   - `async; function f(){}`
+        // This _MUST_ mean async is a regular var name so just parse an expression now.
+        // - `async \n ident`
+        //             ^
+        // - `async \n foo;`
+        // - `async \n in x`
+        // - `async \n in obj`
+        // - `async \n instanceof obj`
+        // - `async \n function f(){}`
         return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
       }
 
       if (curtok.str === 'function') {
         // - `async function f(){}`
         return parseAsyncFunctionDecl(lexerFlags, fromStmtOrExpr, includeDeclarations, scoop, isExport, exportedBindings, astProp);
+      }
+
+      if (curtok.str === 'in' || curtok.str === 'instanceof') {
+        // - `async in x`
+        // - `async instanceof x`
+
+        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
       }
 
       // - `async foo => ..`                        ok
@@ -2002,7 +2016,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         //              ^
         THROW('Cannot apply `new` to an (async) arrow');
       }
-      return parseParenlessArrowAfterAsync(lexerFlags, fromStmtOrExpr, allowAssignment, astProp);
+      parseParenlessArrowAfterAsync(lexerFlags, fromStmtOrExpr, allowAssignment, astProp);
+      return NOT_ASSIGNABLE;
     }
 
     if (curc === $$PAREN_L_28) {
@@ -4044,9 +4059,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (identToken.str !== identToken.canon) {
             return 'Keywords may not have escapes in their name';
           }
-          if (identToken.canon === 'eval' || identToken.canon === 'arguments') {
-            return 'Cannot create a binding named `'+ identToken.canon +'` in strict mode';
-          }
           return 'Cannot use this reserved word as a variable name in strict mode';
         }
         break;
@@ -4402,14 +4414,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return assignable;
   }
   function parseParenlessArrowAfterAsync(lexerFlags, fromStmtOrExpr, allowAssignment, astProp) {
+    ASSERT(parseParenlessArrowAfterAsync.length === arguments.length, 'arg count');
+    ASSERT(curtok.str !== 'function', '(Function and newline have already been asserted)');
+    ASSERT(!curtok.nl, '(Function and newline have already been asserted)');
+    ASSERT(curtype === $IDENT, 'dont have to skip the ident to assert it having to be an arrow');
+    ASSERT_ASSIGN_EXPR(allowAssignment);
+
     // We must parse an async arrow without parens now. We still have to validate the arg name too.
     // - `async foo => foo`
+    //          ^
     // - `async foo => { }`
     // - `async foo \n => foo`
     // - `async foo \n => { }`
-    ASSERT(curtype === $IDENT);
-    ASSERT(curtok.str !== 'function');
-    ASSERT_ASSIGN_EXPR(allowAssignment);
+    // - `async eval => {}`
+    // - `async eval => { "use strict"; }`
 
     if (fromStmtOrExpr === IS_STATEMENT) {
       AST_open(astProp, 'ExpressionStatement');
@@ -4421,27 +4439,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Cannot use `await` as an arg name with async arrows');
     }
 
-    AST_open(astProp, 'ArrowFunctionExpression');
-    AST_set('params', []);
+    let identToken = curtok;
+    let isSimple = ARGS_SIMPLE;
+    if (identToken.str === 'eval' || identToken.str === 'arguments') {
+      if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+        // - `"use strict"; eval => {}`
+        // - `"use strict"; async eval => {}`
+        THROW('Cannot use `eval` or `arguments` as param of an arrow in strict mode');
+      }
+      // - `eval => {}`
+      // - `async eval => {}`
+      isSimple = ARGS_COMPLEX;
+    }
+    skipAny(lexerFlags); // this was `async <curtok>` and curtok is not a keyword; next must be `=>`
+    parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, isSimple, WAS_ASYNC, astProp);
 
-    let arrowScoop = SCOPE_create('parseParenlessArrowAfterAsync');
-    let paramScoop = SCOPE_addLexTo(arrowScoop, ARG_SCOPE, 'parseParenlessArrowAfterAsync(arg)');
-    if (exposeScopes) AST_set('$scope', paramScoop);
-    ASSERT(paramScoop._ = 'arrow scope');
-
-    parseBinding(lexerFlags, paramScoop, BINDING_TYPE_ARG, FROM_ASYNC_ARG, ASSIGNMENT_IS_DEFAULT, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'params');
-
-    if (curtok.str !== '=>') THROW('Missing rest of async arrow');
-    if (curtok.nl) THROW('Can not have newline between arrow arg and actual arrow');
-
-    parseArrowFromPunc(lexerFlags, paramScoop, WAS_ASYNC, allowAssignment, ARGS_SIMPLE);
-    AST_close('ArrowFunctionExpression');
     if (fromStmtOrExpr === IS_STATEMENT) {
       AST_close('ExpressionStatement');
       parseSemiOrAsi(lexerFlags); // this is not a func decl!
     }
-
-    return NOT_ASSIGNABLE;
   }
   function parseExpressionFromOp(lexerFlags, assignable, astProp) {
     ASSERT(parseExpressionFromOp.length === arguments.length, 'arg count');
@@ -4901,7 +4917,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     switch (identName) {
       case 'arguments':
         assignable = verifyEvalArgumentsVar(lexerFlags);
-        break;
+        if (curtok.str === '=>') {
+          if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+            THROW('Can not use `arguments` as arg name in strict mode');
+          }
+          parseArrowParenlessFromPunc(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, ARGS_COMPLEX, NOT_ASYNC, astProp);
+          return NOT_ASSIGNABLE;
+        }
+        AST_setIdent(astProp, identToken);
+        return assignable;
       case 'async':
         return parseAsyncExpression(lexerFlags, identToken, isNewArg, NOT_EXPORT, allowAssignment, astProp);
       case 'await':
@@ -4918,7 +4942,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseDeleteExpression(lexerFlags, assignable, astProp);
       case 'eval':
         assignable = verifyEvalArgumentsVar(lexerFlags);
-        break;
+        if (curtok.str === '=>') {
+          if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+            THROW('Can not use `eval` as arg name in strict mode');
+          }
+          parseArrowParenlessFromPunc(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, ARGS_COMPLEX, NOT_ASYNC, astProp);
+          return NOT_ASSIGNABLE;
+        }
+        AST_setIdent(astProp, identToken);
+        return assignable;
       case 'false':
         return parseFalseKeyword(astProp);
       case 'function':
@@ -5003,13 +5035,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasNoFlag(lexerFlags, LF_STRICT_MODE)) return IS_ASSIGNABLE;
 
     if (isAssignBinOp()) {
-      THROW('Cannot assign to `eval`');
+      THROW('Cannot assign to `eval` and `arguments` in strict mode');
     }
 
     switch (curtok.str) {
       case '++':
       case '--':
-        THROW('Cannot assign to `eval`');
+        THROW('Cannot assign to `eval` and `arguments` in strict mode');
     }
 
     return NOT_ASSIGNABLE;
@@ -5341,7 +5373,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // (in the case of `await`, consider it a regular var)
     if (curc === $$IS_3D && curtok.str === '=>') {
       ASSERT(isAssignable(assignable), 'not sure whether an arrow can be valid if the arg is marked as non-assignable');
-      parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, astProp);
+      parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, ARGS_SIMPLE, NOT_ASYNC, astProp);
       return NOT_ASSIGNABLE;
     } else {
       AST_setIdent(astProp, identToken);
@@ -5349,19 +5381,34 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
-  function parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, astProp) {
+  function parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, wasSimple, isAsync, astProp) {
     ASSERT(parseArrowParenlessFromPunc.length === arguments.length, 'arg count');
     ASSERT(curtok.str === '=>', 'punc is arrow');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
-    if (curtok.nl) THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
-    if (hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC) && identToken.str === 'yield') THROW('Yield in generator is keyword');
+    // - `x => x`
+    //      ^
+    // - `async x => x`
+    //            ^
+    // - `eval => x`
+    // - `async eval => x`
+
+    if (curtok.nl) {
+      // - `async x \n => x`
+      THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
+    }
+    ASSERT(hasNoFlag(lexerFlags, LF_IN_GENERATOR) || identToken.str !== 'yield', 'arrows cannot be generators and parenless `yield` param in a generator would be parsing a yield expression and fail at the arrow');
+    ASSERT((identToken.str === 'eval' || identToken.str === 'argument') ? wasSimple === ARGS_COMPLEX : true, 'eval and arguments must pass on complex so they throw if the body contains use strict');
+    ASSERT(!((identToken.str === 'eval' || identToken.str === 'argument') && hasAllFlags(lexerFlags, LF_STRICT_MODE)), 'caller should throw for eval/argument already in strict mode');
+    if (hasAnyFlag(lexerFlags, LF_STRICT_MODE) && identToken.str === 'yield') {
+      TODO//: can it hit here at all? `yield => {}` doesn't seem to reach here
+      THROW('Yield in generator or strict mode is keyword');
+    }
 
     // arrow with single param
     AST_open(astProp, 'ArrowFunctionExpression');
     AST_set('params', []);
 
-    // - `x => x`
     let arrowScoop = SCOPE_create('parseArrowParenlessFromPunc');
     let paramScoop = SCOPE_addLexTo(arrowScoop, ARG_SCOPE, 'parseArrowParenlessFromPunc(arg)');
     if (exposeScopes) AST_set('$scope', paramScoop);
@@ -5375,7 +5422,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_setIdent('params', identToken);
 
-    parseArrowFromPunc(lexerFlags, paramScoop, NOT_ASYNC, allowAssignment, ARGS_SIMPLE);
+    parseArrowFromPunc(lexerFlags, paramScoop, isAsync, allowAssignment, wasSimple);
     AST_close('ArrowFunctionExpression');
   }
 
@@ -5661,7 +5708,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseArrowFromPunc(lexerFlags, paramScoop, isAsync, allowAssignment, wasSimple) {
     ASSERT(arguments.length === parseArrowFromPunc.length, 'arg count');
-    ASSERT(typeof isAsync === 'boolean', 'isasync bool');
+    ASSERT(isAsync === NOT_ASYNC || isAsync === WAS_ASYNC, 'isasync bool');
     ASSERT_skipRex('=>', lexerFlags); // `{` or any expression
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
@@ -5685,7 +5732,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (exposeScopes) AST_set('$scope', paramScoop);
     AST_set('id', null);
     AST_set('generator', false);
-    AST_set('async', isAsync);
+    AST_set('async', isAsync === WAS_ASYNC);
 
     lexerFlags = resetLexerFlagsForFuncAndArrow(lexerFlags, NOT_GENERATOR, isAsync, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
@@ -6036,7 +6083,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       if (curc === $$PAREN_R_29) {
         // [x]: `(a,)`
-        //          ^--------- we are here
+        //          ^
+        // [v]: `async (a,);`
+        //                ^
+        // [v]: `async (a,) => x`
         // [x]: `(a,b,)`
         // [x]: `(a = b,)`
         // [x]: `([x],)`

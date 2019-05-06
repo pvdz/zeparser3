@@ -3858,7 +3858,6 @@ export default (describe, test) => describe('parens', _ => {
     test.fail('cannot assign to group with assignment', {
       code: '(a=/i/) = /i/',
     });
-// TODO: (,)=>x
 
     test.fail('a group that only has a comma is not arrowable', {
       code: '(,)=>x',
@@ -4509,6 +4508,95 @@ export default (describe, test) => describe('parens', _ => {
 
       test.pass('object pattern alias can be property too', {
         code: '({a, a:a, a:a=a, [a]:{a}, a:some_call()[a], a:this.a} = 0);',
+      });
+    });
+
+    describe('directives for arrows', _ => {
+
+      describe('eval', _ => {
+
+        test.fail_strict('eval as parenless arrow arg name without directive', {
+          code: 'eval => {}',
+        });
+
+        test.fail_strict('eval as arrow arg name without directive', {
+          code: '(eval) => {}',
+        });
+
+        test.fail_strict('eval as second arrow arg name without directive', {
+          code: '(a, eval) => {}',
+        });
+
+        test.fail('eval in parenless arrow arg name with directive', {
+          code: 'eval => {"use strict";}',
+        });
+
+        test.fail('eval in arrow arg name with directive', {
+          code: '(eval) => {"use strict";}',
+        });
+
+        test.fail_strict('eval as parenless async arrow arg name without directive', {
+          code: 'async eval => {}',
+        });
+
+        test.fail_strict('eval as async arrow arg name without directive', {
+          code: 'async (eval) => {}',
+        });
+
+        test.fail_strict('eval as second async arrow arg name without directive', {
+          code: 'async (a, eval) => {}',
+        });
+
+        test.fail('eval in parenless async arrow arg name with directive', {
+          code: 'async eval => {"use strict";}',
+        });
+
+        test.fail('eval in async arrow arg name with directive', {
+          code: 'async (eval) => {"use strict";}',
+        });
+      });
+
+      describe('arguments', _ => {
+
+        test.fail_strict('arguments as parenless arrow arg name without directive', {
+          code: 'arguments => {}',
+        });
+
+        test.fail_strict('arguments as arrow arg name without directive', {
+          code: '(arguments) => {}',
+        });
+
+        test.fail_strict('arguments as second arrow arg name without directive', {
+          code: '(a, arguments) => {}',
+        });
+
+        test.fail('arguments in parenless arrow arg name with directive', {
+          code: 'arguments => {"use strict";}',
+        });
+
+        test.fail('arguments in arrow arg name with directive', {
+          code: '(arguments) => {"use strict";}',
+        });
+
+        test.fail_strict('arguments as parenless async arrow arg name without directive', {
+          code: 'async arguments => {}',
+        });
+
+        test.fail_strict('arguments as async arrow arg name without directive', {
+          code: 'async (arguments) => {}',
+        });
+
+        test.fail_strict('arguments as second async arrow arg name without directive', {
+          code: 'async (a, arguments) => {}',
+        });
+
+        test.fail('arguments in parenless async arrow arg name with directive', {
+          code: 'async arguments => {"use strict";}',
+        });
+
+        test.fail('arguments in async arrow arg name with directive', {
+          code: 'async (arguments) => {"use strict";}',
+        });
       });
     });
   });

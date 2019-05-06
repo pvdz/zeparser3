@@ -2414,4 +2414,12 @@ export default (describe, test) => describe('async keyword', function() {
   test.fail_strict('async call in generator with nested yield', {
     code: 'function *f(){ async(await); }',
   });
+
+  test.fail('Cannot use await as param name in async func', {
+    code: 'async function f(await) {}',
+  });
+
+  test.fail('Cannot use await as param name in async arrow', {
+    code: 'async await => {}',
+  });
 });
