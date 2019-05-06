@@ -36,4 +36,12 @@ export default (describe, test) =>
     test.pass('reading from arguments', {
       code: 'arguments; log(arguments); arguments.foo; arguments[foo]; arguments.foo = bar; arguments[foo] = bar;',
     });
+
+    test.pass('asi with CR', {
+      code: 'a\rb',
+    });
+
+    test.pass('asi with LF', {
+      code: 'a\nb',
+    });
   });

@@ -739,6 +739,7 @@ function ZeTokenizer(input, targetEsVersion = 6, moduleGoal = GOAL_MODULE, colle
   }
 
   function parseCR() {
+    consumedNewline = true;
     wasWhite = true;
     if (neof() && peeky($$LF_0A)) {
       ASSERT_skip($$LF_0A);
