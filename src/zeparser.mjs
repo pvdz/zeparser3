@@ -198,7 +198,7 @@ import ZeTokenizer, {
   LF_SUPER_CALL,
   LF_SUPER_PROP,
   INITIAL_LEXER_FLAGS,
-  LF_DEBUG,
+  LF_DEBUG as L,
 
   RETURN_ANY_TOKENS,
   RETURN_SOLID_TOKENS,
@@ -1289,6 +1289,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let wasStrict = hasAllFlags(lexerFlags, LF_STRICT_MODE); // unique param check
 
     let addedLexerFlags = parseDirectivePrologues(LF_NO_FLAGS, 'body');
+
     if (hasAnyFlag(addedLexerFlags, LF_STRICT_MODE)) {
       if (wasSimple === ARGS_COMPLEX) {
         // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
@@ -6015,7 +6016,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let destructible = MIGHT_DESTRUCT; // this function checks so many things :(
     let assignable = 0; // true iif first expr is assignable, always false if the group has a comma
     let toplevelComma = false;
-    let simpleArgs = ARGS_SIMPLE; // true if only idents and without assignment (so es5 valid)
+    let wasSimple = ARGS_SIMPLE; // true if only idents and without assignment (so es5 valid)
     let mustBeArrow = false; // special case; a `...` must mean arrow, and a trailing comma must mean arrow as well
 
     while (curc !== $$PAREN_R_29) { // top-level group loop, list of ident, array, object, rest, and other expressions
@@ -6049,7 +6050,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // [x]: `(true = x) => {}`
           // [x]: `([dupe, a], dupe=x) => {}`
           // [v]: `delete (x=await)`
-          simpleArgs = ARGS_COMPLEX;
+          wasSimple = ARGS_COMPLEX;
         }
         else if (wasCommaOrEnd) {
           // [v]: `(foo) => {}`
@@ -6069,7 +6070,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (!toplevelComma && curc === $$PAREN_R_29) {
             ASSERT(destructible === MIGHT_DESTRUCT, 'should not have parsed anything yet so destructible is still default');
             // ASSERT(assignable === 0, 'should still be the default');
-            ASSERT(simpleArgs === ARGS_SIMPLE, 'should still be the default');
+            ASSERT(wasSimple === ARGS_SIMPLE, 'should still be the default');
             // this must be the case where the group consists entirely of one ident, `(foo)`
             // there may still be an arrow trailing, which this function should deal with too
             foundSingleIdentWrap = true; // move on to the arrow
@@ -6078,13 +6079,42 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // if curc is a comma then the group is not assignable but that will fail through the toplevelComma flag
           // if the group is just an identifier then it can be assigned to: `(a) = b`. There's a test. Or two.
           // If the group is not assignable then it can't become an arrow and we can skip a few related cases
+          // If the arg name is eval or arguments and sloppy mode, then its assignable but not "simple"
           // SCOPE_addBinding(lexerFlags, paramScoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
           if (notAssignable(assignable)) {
+            // [x]: `(true) => {}`
             // [x]: `(eval) => {}`
+            // [x]: `(arguments) => {}`
             destructible |= CANT_DESTRUCT;
+            wasSimple = ARGS_COMPLEX; // if we can't assign to it then the name is a keyword of sorts
+          } else if (
+            // TODO: make this part more efficient :( Should check for keywords that are only keywords in strict mode
+            identToken.str === 'eval' ||
+            identToken.str === 'arguments' ||
+            identToken.str === 'implements' ||
+            identToken.str === 'package' ||
+            identToken.str === 'protected' ||
+            identToken.str === 'interface' ||
+            identToken.str === 'private' ||
+            identToken.str === 'public' ||
+            identToken.str === 'yield' ||
+            identToken.str === 'let'
+          ) {
+            // Mark the args as non-simple such that if the body contains a "use strict" directive, it will still throw
+            // If already in strict mode then make an arrow illegal immediately.
+            wasSimple = ARGS_COMPLEX;
+            if (hasAllFlags(lexerFlags, LF_STRICT_MODE) ) {
+              // [x]: `"use strict"; (eval) => { }`
+              // [x]: `"use strict"; (arguments) => { }`
+              destructible |= CANT_DESTRUCT;
+            } else {
+              // [x]: `(eval) => { "use strict"; }`
+              // [x]: `(arguments) => { "use strict"; }`
+            }
           } else {
-            // [x]: `f = (eval) => { "use strict"; }`
-            simpleArgs = ARGS_COMPLEX; // if we can't assign to it then the name is a keyword of sorts
+            // The arg was not special under strict mode
+            // [x]: `f = (foo) => { "use strict"; }`
+            // [x]: `f = (async) => { "use strict"; }`
           }
         }
         else {
@@ -6092,7 +6122,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // parse a regular ident expression here
           // - `(typeof x)`
           destructible |= CANT_DESTRUCT;
-          simpleArgs = ARGS_COMPLEX;
+          wasSimple = ARGS_COMPLEX;
         }
       }
       else if (curc === $$CURLY_L_7B) {
@@ -6113,7 +6143,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           destructible |= CANT_DESTRUCT;
         }
         assignable = parseAfterPatternInGroup(lexerFlags, assignable, destructible, astProp);
-        simpleArgs = ARGS_COMPLEX;
+        wasSimple = ARGS_COMPLEX;
       }
       else if (curc === $$SQUARE_L_5B) {
         // note: grouped object/array literals are _never_ assignable
@@ -6133,11 +6163,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           destructible |= CANT_DESTRUCT;
         }
         assignable = parseAfterPatternInGroup(lexerFlags, assignable, destructible, astProp);
-        simpleArgs = ARGS_COMPLEX;
+        wasSimple = ARGS_COMPLEX;
       }
       else if (curc === $$DOT_2E && curtok.str === '...') {
         // top level group dots kinda have to be rest but there is an `async` edge case where it could be spread
-        simpleArgs = ARGS_COMPLEX;
+        wasSimple = ARGS_COMPLEX;
         destructible |= parseArrowableTopRest(lexerFlags, paramScoop, asyncToken !== UNDEF_ASYNC, astProp);
         if (asyncToken !== UNDEF_ASYNC) {
           // - `async(...x);`
@@ -6193,7 +6223,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `async("foo".bar) => x`
           //                     ^
           // TODO: move this out because worst case you'll still have to do this down below so we shouldnt add repetitive complexity for this edge case
-          return parseAfterAsyncGroup(lexerFlagsBeforeParen, paramScoop, asyncStmtOrExpr, allowAssignmentForGroupToBeArrow, simpleArgs, toplevelComma, newlineAfterAsync, CANT_DESTRUCT, false, asyncToken, assignable, rootAstProp);
+          return parseAfterAsyncGroup(lexerFlagsBeforeParen, paramScoop, asyncStmtOrExpr, allowAssignmentForGroupToBeArrow, wasSimple, toplevelComma, newlineAfterAsync, CANT_DESTRUCT, false, asyncToken, assignable, rootAstProp);
         }
 
         if (isDeleteArg === IS_DELETE_ARG) {
@@ -6328,14 +6358,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // `async(a = await x);`
       // `async(a) => x`
       // `async(a = await x) => x`
-      return parseAfterAsyncGroup(lexerFlags, paramScoop, asyncStmtOrExpr, allowAssignmentForGroupToBeArrow, simpleArgs, toplevelComma, newlineAfterAsync, destructible, false, asyncToken, assignable, rootAstProp);
+      return parseAfterAsyncGroup(lexerFlags, paramScoop, asyncStmtOrExpr, allowAssignmentForGroupToBeArrow, wasSimple, toplevelComma, newlineAfterAsync, destructible, false, asyncToken, assignable, rootAstProp);
     }
 
     if (isArrow) {
       // arrow function
       // `(a) => {}`
 
-      parseArrowAfterGroup(lexerFlags, paramScoop, simpleArgs, toplevelComma, asyncToken, allowAssignmentForGroupToBeArrow, rootAstProp);
+      parseArrowAfterGroup(lexerFlags, paramScoop, wasSimple, toplevelComma, asyncToken, allowAssignmentForGroupToBeArrow, rootAstProp);
       // we just parsed an arrow. Whatever the state of await/yield was we can ignore that here.
       if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
       return NOT_ASSIGNABLE; // assignability resets after the arrow
@@ -6460,7 +6490,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return assignable;
   }
-  function parseAfterAsyncGroup(lexerFlags, paramScoop, fromStmtOrExpr, allowAssignment, simpleArgs, toplevelComma, newlineAfterAsync, groupDestructible, zeroArgs, asyncToken, assignable, astProp) {
+  function parseAfterAsyncGroup(lexerFlags, paramScoop, fromStmtOrExpr, allowAssignment, wasSimple, toplevelComma, newlineAfterAsync, groupDestructible, zeroArgs, asyncToken, assignable, astProp) {
     ASSERT(parseAfterAsyncGroup.length === arguments.length, 'arg count');
     ASSERT(typeof groupDestructible === 'number', 'destructible num')
     ASSERT_ASSIGN_EXPR(allowAssignment);
@@ -6493,7 +6523,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (zeroArgs) {
         // - `async () => foo`
-        parseArrowAfterAsyncNoArgGroup(lexerFlags, paramScoop, simpleArgs, toplevelComma, asyncToken, allowAssignment, astProp);
+        parseArrowAfterAsyncNoArgGroup(lexerFlags, paramScoop, toplevelComma, asyncToken, allowAssignment, astProp);
       }
       else if (
         // - `async (foo = await x) => foo`            (fail)
@@ -6541,7 +6571,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else {
         // - `async (foo) => foo`
-        parseArrowAfterGroup(lexerFlags, paramScoop, simpleArgs, toplevelComma, asyncToken, allowAssignment, astProp);
+        parseArrowAfterGroup(lexerFlags, paramScoop, wasSimple, toplevelComma, asyncToken, allowAssignment, astProp);
       }
     }
     else {
@@ -6608,7 +6638,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async () => {}, await foo
     return NOT_ASSIGNABLE; // dont care about await/yield flags here
   }
-  function parseArrowAfterAsyncNoArgGroup(lexerFlags, paramScoop, simpleArgs, toplevelComma, asyncToken, allowAssignment, astProp) {
+  function parseArrowAfterAsyncNoArgGroup(lexerFlags, paramScoop, toplevelComma, asyncToken, allowAssignment, astProp) {
     ASSERT(parseArrowAfterAsyncNoArgGroup.length === arguments.length, 'arg count');
 
     // The ast should look something like this now:
@@ -6624,7 +6654,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseArrowFromPunc(lexerFlags, paramScoop, WAS_ASYNC, allowAssignment, ARG_WAS_SIMPLE);
     AST_close('ArrowFunctionExpression');
   }
-  function parseArrowAfterGroup(lexerFlags, paramScoop, simpleArgs, toplevelComma, asyncToken, allowAssignment, astProp) {
+  function parseArrowAfterGroup(lexerFlags, paramScoop, wasSimple, toplevelComma, asyncToken, allowAssignment, astProp) {
     ASSERT(parseArrowAfterGroup.length === arguments.length, 'arg count');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
@@ -6649,7 +6679,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // must assert unique parameters now
     if (SCOPE_verifyLexical(lexerFlags, paramScoop, true)) THROW('Arrow had at least one duplicate parameter name bound');
 
-    parseArrowFromPunc(lexerFlags, paramScoop, !!asyncToken, allowAssignment, simpleArgs);
+    parseArrowFromPunc(lexerFlags, paramScoop, !!asyncToken, allowAssignment, wasSimple);
 
     AST_close('ArrowFunctionExpression');
   }

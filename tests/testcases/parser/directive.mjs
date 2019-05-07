@@ -1480,4 +1480,140 @@ export default (describe, test) =>
         });
       });
     });
+
+    describe('eval/arguments in arg and strict mode in body', _ => {
+
+      test.fail_strict('eval in parenless arrow sans directive', {
+        code: 'eval => { }',
+      });
+
+      test.fail_strict('eval in parened arrow sans directive', {
+        code: '(eval) => { }',
+      });
+
+      test.fail('eval in parenless arrow', {
+        code: 'eval => { "use strict"; }',
+      });
+
+      test.fail('eval in parened arrow', {
+        code: '(eval) => { "use strict"; }',
+      });
+
+      test.fail('eval as second arg in parened arrow', {
+        code: '(a, eval) => { "use strict"; }',
+      });
+
+      test.fail_strict('eval in func sans directive', {
+        code: 'function f(eval) { }',
+      });
+
+      test.fail('eval in func', {
+        code: 'function f(eval) { "use strict"; }',
+      });
+
+      test.fail('eval as second arg in parened arrow', {
+        code: 'function f(a, eval) { "use strict"; }',
+      });
+
+      test.fail_strict('arguments in parenless arrow sans directive', {
+        code: 'arguments => { }',
+      });
+
+      test.fail_strict('arguments in parened arrow sans directive', {
+        code: '(arguments) => { }',
+      });
+
+      test.fail('arguments in parenless arrow', {
+        code: 'arguments => { "use strict"; }',
+      });
+
+      test.fail('arguments in parened arrow', {
+        code: '(arguments) => { "use strict"; }',
+      });
+
+      test.fail('arguments as second arg in parened arrow', {
+        code: '(a, arguments) => { "use strict"; }',
+      });
+
+      test.fail_strict('arguments in func sans directive', {
+        code: 'function f(arguments) { }',
+      });
+
+      test.fail('arguments in func', {
+        code: 'function f(arguments) { "use strict"; }',
+      });
+
+      test.fail('arguments as second arg in parened arrow', {
+        code: 'function f(a, arguments) { "use strict"; }',
+      });
+
+    });
+
+    test("regression: single use strict in arrow", {
+      code: '(w, o, e, m) => { "use strict" }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ArrowFunctionExpression',
+              params: [{type: 'Identifier', name: 'w'}, {type: 'Identifier', name: 'o'}, {type: 'Identifier', name: 'e'}, {type: 'Identifier', name: 'm'}],
+              id: null,
+              generator: false,
+              async: false,
+              expression: false,
+              body: {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                    directive: 'use strict',
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $ASI, $PUNCTUATOR, $ASI],
+    });
+
+    test("regression: double use strict in arrow", {
+      desc: 'this was throwing at some point, complaining about non-simple args',
+      code: '(w, o, e, m) => { "use strict"; "use strict" }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ArrowFunctionExpression',
+              params: [{type: 'Identifier', name: 'w'}, {type: 'Identifier', name: 'o'}, {type: 'Identifier', name: 'e'}, {type: 'Identifier', name: 'm'}],
+              id: null,
+              generator: false,
+              async: false,
+              expression: false,
+              body: {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                    directive: 'use strict',
+                  },
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                    directive: 'use strict',
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $STRING_DOUBLE, $ASI, $PUNCTUATOR, $ASI],
+    });
   });
