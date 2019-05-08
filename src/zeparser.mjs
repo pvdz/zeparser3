@@ -4591,19 +4591,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseExpressionFromOp.length === arguments.length, 'arg count');
     ASSERT(typeof assignable === 'number', 'assignable num');
 
-    // <SCRUB AST>
-    // Using the AST to assert whether the previous node was an arrow. There's currently no easy way to figure this
-    // out. And the `()=>{}\n/x/` case looks valid but wouldn't (and shouldn't) be accepted as valid js due to ASI.
-    if (_path[_path.length - 1] && _path[_path.length - 1][astProp] && (_path[_path.length - 1][astProp].type === 'ArrowFunctionExpression' && _path[_path.length - 1][astProp].expression === false)) {
-      if (curc === $$FWDSLASH_2F && curtok.str === '/' && curtok.nl) {
-        // This is an explicit error for dividing an arrow with division on the next line, problem due to ASI rules.
-        // - `()=>{}\n/x`
-        THROW('Can not divide an arrow and ASI does not apply at start of line with forward slash');
-      }
-      return NOT_ASSIGNABLE;
-    }
-    // </SCRUB AST>
-
     if (isAssignBinOp()) {
       if (notAssignable(assignable)) {
         THROW('Cannot assign to lhs because it is not a valid assignment target');
@@ -5918,7 +5905,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'body');
     }
 
-
     // TODO: this may be superseded by assign-expr checks
     if (hasAllFlags(lexerFlags, LF_IN_FOR_LHS) && curtok.str === 'in') {
       THROW('Arrows cannot be lhs to for-in');
@@ -5937,7 +5923,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Block body arrows can not be immediately tagged without a group');
     }
     if ((isAssignBinOp() || isNonAssignBinOp(lexerFlags)) && (!curtok.nl || curc === $$FWDSLASH_2F)) {
+      // - `()=>{}+a'
       THROW('An arrow function can not be part of an operator to the right');
+    }
+    if ((curtok.str === '++' || curtok.str === '--') && !curtok.nl) {
+      // - `()=>{}++'
+      // - `()=>{}--'
+      // - `()=>{}\n++x'
+      // - `()=>{}\n--x'
+      THROW('An arrow function can not have a postfix update operator');
     }
   }
   function parseGroupToplevels(lexerFlags, asyncStmtOrExpr, allowAssignment, asyncToken, newlineAfterAsync, astProp) {

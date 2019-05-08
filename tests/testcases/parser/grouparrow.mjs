@@ -2507,6 +2507,33 @@ export default (describe, test) => describe('parens', _ => {
         });
       });
     });
+
+    test("paren wrapped arrow can have binary op", {
+      code: `(() => {}) << x`,
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'ArrowFunctionExpression',
+                params: [],
+                id: null,
+                generator: false,
+                async: false,
+                expression: false,
+                body: {type: 'BlockStatement', body: []},
+              },
+              operator: '<<',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+    });
   });
 
   describe('arrow', _ => {
