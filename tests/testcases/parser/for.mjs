@@ -370,6 +370,56 @@ export default (describe, test) =>
           desc: '{x=y} cannot be expression because shorthand props cannot have an assignment/default',
         });
       });
+
+      test("postfix update in for-header", {
+        code: 'for (x--;;);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForStatement',
+              init: {
+                type: 'UpdateExpression',
+                argument: {type: 'Identifier', name: 'x'},
+                operator: '--',
+                prefix: false,
+              },
+              test: null,
+              update: null,
+              body: {type: 'EmptyStatement'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test("postfix on yield in for-header", {
+        code: 'for (yield[g]--;;);',
+        STRICT: { throws: true },
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForStatement',
+              init: {
+                type: 'UpdateExpression',
+                argument: {
+                  type: 'MemberExpression',
+                  object: {type: 'Identifier', name: 'yield'},
+                  property: {type: 'Identifier', name: 'g'},
+                  computed: true,
+                },
+                operator: '--',
+                prefix: false,
+              },
+              test: null,
+              update: null,
+              body: {type: 'EmptyStatement'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
     });
 
     describe('var decls', _ => {

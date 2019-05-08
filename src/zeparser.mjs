@@ -5795,14 +5795,28 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return assignable;
     }
 
-    // check for this _after_ the newline check, for cases like `"foo"\n++bar`
-    if (notAssignable(assignable)) THROW('Cannot inc/dec a non-assignable value as postfix');
+    // check for this _after_ the newline check, for cases like
+    if (notAssignable(assignable)) {
+      // - `"foo"\n++bar`
+      THROW('Cannot inc/dec a non-assignable value as postfix');
+    }
 
     // <SCRUB AST>
     // Using the AST for this because in the current propagation system we can only tell whether the parsed part
     // is assignable or not, and in this reading something that can be destructured can be assigned to.
     let prev = _path[_path.length - 1] && _path[_path.length - 1][astProp];
-    if (!prev || (prev.type !== 'Identifier' && prev.type !== 'MemberExpression')) {
+    // Note: the for-case is nasty because when parsing the lhs the AST is not yet populated with a `for` statement
+    // because that particular node type depends on `in`, `of`, or a semi. So the AST could be an array (block body)
+    if (
+      !prev ||
+      (
+        prev instanceof Array ?
+          // - `for (x--;;);`
+          !prev.length || (prev[prev.length - 1].type !== 'Identifier' && prev[prev.length - 1].type !== 'MemberExpression') :
+          // - `[]++`
+          (prev.type !== 'Identifier' && prev.type !== 'MemberExpression')
+      )
+    ) {
       // - `[]++`
       // - `f()--`
       // - `this++`
