@@ -358,6 +358,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     astUids = false, // add an incremental uid to all ast nodes for debugging
     fullErrorContext = false, // do not trunc the input when throwing an error?
 
+    // You can override the logging functions
+    $log = console.log,
+    $warn = console.warn,
+    $error = console.error,
+
     // ast compatibility stuff?
 
     // Should we parse directives as their own AST nodes? (Other parsers do not, they just use ExpressionStatement)
@@ -367,7 +372,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     /* (This comment prevents the buildscript from detecting the ast prefix) */AST_directiveNodes = false,
   } = options;
 
-  let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage);
+  let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage, $log, $warn, $error);
 
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 or infin');
 
@@ -388,10 +393,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let traceast = false;
 
   function THROW(desc, ...args) {
-    console.log('\n');
-    console.log('Error in parser:', desc, 'remaining throw args;', args);
-    console.log('Error token: ' + curtok);
-    tok.throw('Parser error! ' + desc, curtok, undefined, fullErrorContext);
+    THROW_TOKEN(desc, curtok, ...args)
+  }
+  function THROW_TOKEN(desc, token, ...args) {
+    if (desc.indexOf('Unexpected token') >= 0) console.log(new Error().stack)
+    $log('\n');
+    $log('Error in parser:', desc, 'remaining throw args;', args);
+    $log('Error token: ' + token);
+    tok.throw('Parser error! ' + desc, token, undefined, fullErrorContext);
   }
 
   function sansFlag(flags, flag) {
@@ -433,9 +442,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_open(prop, type, explictlyOverwrite = false) {
     if (traceast) {
-      console.log('AST_open; write type='+type+' to prop=' + prop, explictlyOverwrite);
-      console.log('- path (before):', _path.map(o => o.type).join(' - '));
-      console.log('- AST:', inspect(_tree, false, null))
+      $log('AST_open; write type='+type+' to prop=' + prop, explictlyOverwrite);
+      $log('- path (before):', _path.map(o => o.type).join(' - '));
+      $log('- AST:', inspect(_tree, false, null))
     }
     ASSERT(arguments.length === 2 || arguments.length === 3, '2 args');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
@@ -463,9 +472,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_close(names) {
     if (traceast) {
-      console.log('AST_close(' + names +'), closing', _path[_path.length-1].type);
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- AST:', inspect(_tree, false, null))
+      $log('AST_close(' + names +'), closing', _path[_path.length-1].type);
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- AST:', inspect(_tree, false, null))
     }
     ASSERT(arguments.length === 1, 'expecting one arg');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
@@ -477,9 +486,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_set(prop, value, clobber = false) {
     if (traceast) {
-      console.log('AST_set', prop, value);
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- AST:', inspect(_tree, false, null))
+      $log('AST_set', prop, value);
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- AST:', inspect(_tree, false, null))
     }
     ASSERT(typeof prop === 'string', 'prop should be string');
     ASSERT(arguments.length === 2 || arguments.length === 3, 'expecting two args');
@@ -514,9 +523,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_add(prop, value) {
     if (traceast) {
-      console.log('ADD', prop, value);
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- AST:', inspect(_tree, false, null))
+      $log('ADD', prop, value);
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- AST:', inspect(_tree, false, null))
     }
     ASSERT(typeof prop === 'string', 'prop should be string');
     ASSERT(arguments.length === 2, 'expecting two args');
@@ -528,9 +537,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function AST_wrapOpened(prop, newNodeType, newProp) {
     if (traceast) {
-      console.log('AST_wrapOpened', prop, newNodeType, newProp);
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before:', inspect(_tree, false, null))
+      $log('AST_wrapOpened', prop, newNodeType, newProp);
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- tree before:', inspect(_tree, false, null))
     }
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -544,7 +553,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _pnames.pop();
     let parent = _path[_path.length-1];
 
-    if (traceast) console.log(' - node to wrap:', node, ', prop:', prop, ', parent:', parent);
+    if (traceast) $log(' - node to wrap:', node, ', prop:', prop, ', parent:', parent);
 
     if (Array.isArray(parent[prop])) {
       ASSERT(node === parent[prop][parent[prop].length - 1], 'top should be last element of parent[prop]');
@@ -559,14 +568,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _path.push(node);
     _pnames.push(newProp);
     if (traceast) {
-      console.log('- tree after:', inspect(_tree, false, null))
+      $log('- tree after:', inspect(_tree, false, null))
     }
   }
   function AST_wrapClosed(prop, newNodeType, newProp) {
     if (traceast) {
-      console.log('AST_wrapClosed', prop, newNodeType, newProp);
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before:', inspect(_tree, false, null))
+      $log('AST_wrapClosed', prop, newNodeType, newProp);
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- tree before:', inspect(_tree, false, null))
     }
     ASSERT(AST_wrapClosed.length === arguments.length, 'arg count');
     ASSERT(typeof prop === 'string', 'should be string');
@@ -580,14 +589,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let parent = _path[_path.length-1];
     let child = null;
-    if (traceast) console.log(' - prop:', prop, ', parent:', parent);
+    if (traceast) $log(' - prop:', prop, ', parent:', parent);
 
     if (Array.isArray(parent[prop])) {
       child = parent[prop].pop();
     } else {
       child = parent[prop];
     }
-    if (traceast) console.log(' - child:', child);
+    if (traceast) $log(' - child:', child);
     ASSERT(child, 'AST_wrapClosed('+prop+', '+newNodeType+','+newProp+'); node prop `'+prop+'` should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
     AST_open(prop, newNodeType, CALLED_FROM_WRAPPER);
@@ -595,15 +604,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // TODO: what if array?
     AST_set(newProp, child);
     if (traceast) {
-      console.log('- tree after:', inspect(_tree, false, null))
+      $log('- tree after:', inspect(_tree, false, null))
     }
   }
   function AST_replaceOpened(newNodeType, oldNodeType) {
     if (traceast) {
-      console.log('AST_replaceOpened', oldNodeType, '->', newNodeType);
-      console.log('- path:', _pnames.join(' - '));
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before:', inspect(_tree, false, null))
+      $log('AST_replaceOpened', oldNodeType, '->', newNodeType);
+      $log('- path:', _pnames.join(' - '));
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- tree before:', inspect(_tree, false, null))
     }
     ASSERT(arguments.length === 2, 'expecting 2 args');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
@@ -623,17 +632,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(prevProp, newNodeType, CALLED_FROM_WRAPPER);
 
     if (traceast) {
-      console.log('- tree after:', inspect(_tree, false, null))
+      $log('- tree after:', inspect(_tree, false, null))
     }
 
     return oldNode;
   }
   function AST_replaceClosed(prop, newNodeType, oldNodeType) {
     if (traceast) {
-      console.log('AST_replaceClosed;', prop, ':', oldNodeType, '->', newNodeType);
-      console.log('- path:', _pnames.join(' - '));
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before:', inspect(_tree, false, null))
+      $log('AST_replaceClosed;', prop, ':', oldNodeType, '->', newNodeType);
+      $log('- path:', _pnames.join(' - '));
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- tree before:', inspect(_tree, false, null))
     }
     ASSERT(arguments.length === 3, 'expecting 3 args');
     ASSERT(typeof prop === 'string', 'prop=string');
@@ -657,17 +666,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(prop, newNodeType, CALLED_FROM_WRAPPER);
 
     if (traceast) {
-      console.log('- tree after:', inspect(_tree, false, null))
+      $log('- tree after:', inspect(_tree, false, null))
     }
 
     return oldNode;
   }
   function AST_replaceParent(newNodeType, oldNodeType) {
     if (traceast) {
-      console.log('AST_replaceParent', prop, newNodeType, newNodeType);
-      console.log('- path:', _pnames.join(' - '));
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before:', inspect(_tree, false, null))
+      $log('AST_replaceParent', prop, newNodeType, newNodeType);
+      $log('- path:', _pnames.join(' - '));
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- tree before:', inspect(_tree, false, null))
     }
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -686,16 +695,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(prevProp, newNodeType, CALLED_FROM_WRAPPER);
 
     if (traceast) {
-      console.log('- tree after:', inspect(_tree, false, null))
+      $log('- tree after:', inspect(_tree, false, null))
     }
 
     return oldNode;
   }
   function AST_wrapClosedIntoArray(prop, value, newProp, skipArrCheck) {
     if (traceast) {
-      console.log('AST_wrapClosedIntoArray', prop, value, newProp);
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before:', inspect(_tree, false, null))
+      $log('AST_wrapClosedIntoArray', prop, value, newProp);
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- tree before:', inspect(_tree, false, null))
     }
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -704,21 +713,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let parent = _path[_path.length-1];
     let child = null;
-    if (traceast) console.log(' - prop:', prop, ', parent:', parent);
+    if (traceast) $log(' - prop:', prop, ', parent:', parent);
 
     if (!skipArrCheck && Array.isArray(parent[prop])) {
       child = parent[prop].pop();
     } else {
       child = parent[prop];
     }
-    if (traceast) console.log(' - child:', child);
+    if (traceast) $log(' - child:', child);
     ASSERT(child, 'should exist, bad tree?', 'child=', child, 'prop=', prop, 'newProp=', newProp, 'parent[prop]=', parent[prop]);
 
     AST_open(prop, value, CALLED_FROM_WRAPPER);
     // set the node as the first child of the property as an array
     AST_set(newProp, [child]);
     if (traceast) {
-      console.log('- tree after:', inspect(_tree, false, null))
+      $log('- tree after:', inspect(_tree, false, null))
     }
   }
   function AST_destruct(prop) {
@@ -734,9 +743,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // note: this function is usually called after a few nodes have closed (the literal struct).
 
     if (traceast) {
-      console.log('AST_destruct', prop);
-      console.log('- path:', _path.map(o => o.type).join(' - '));
-      console.log('- tree before destruct:', inspect(_tree, false, null))
+      $log('AST_destruct', prop);
+      $log('- path:', _path.map(o => o.type).join(' - '));
+      $log('- tree before destruct:', inspect(_tree, false, null))
     }
     ASSERT(arguments.length === 1, 'arg count');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
@@ -748,12 +757,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST__destruct(node);
     if (traceast) {
-      console.log('- tree after destruct:', inspect(_tree, false, null))
+      $log('- tree after destruct:', inspect(_tree, false, null))
     }
   }
   function AST__destruct(node) {
     if (traceast) {
-      console.log('AST__destruct', node);
+      $log('AST__destruct', node);
     }
 
     ASSERT(arguments.length === 1, 'arg count');
@@ -810,7 +819,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function softError() {
-    THROW('Tokenizer error: ' + inspect(curtok, false, null))
+    THROW_TOKEN('Tokenizer soft error: ' + (tok.regexerror() ? 'Regex: ' +tok.regexerror() : '(but not regex)'), curtok);
   }
 
   function skipRex(lexerFlags) {
@@ -1353,8 +1362,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (curc === $$CURLY_R_7D || curtok.nl || curtype === $EOF) {
         tok.asi();
       } else {
-        console.log('parse error at curc', curc, String.fromCharCode(curc), curtok.str);
-        console.log('current token:', curtok);
+        $log('parse error at curc', curc, String.fromCharCode(curc), curtok.str);
+        $log('current token:', curtok);
         THROW('Unable to ASI, token: ' + curtok);
       }
     }
@@ -1390,12 +1399,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case $REGEX:
         parseFromLiteralStatement(lexerFlags, astProp);
         break;
+      case $ERROR:
+        THROW_TOKEN('Tokenizer error: ' + (tok.regexerror() ? 'Regex: ' + tok.regexerror() : '(not regex?)'), curtok );
+
       default:
-        THROW('Unexpected token'
+        THROW_TOKEN('Unexpected token'
           // <SCRUB DEV>
           + ': ' + debug_toktype(curtype), debug_toktype(getGenericTokenType(curtype))
           // </SCRUB DEV>
           , curtok
+          , tok.regexerror()
         );
     }
   }
@@ -2737,7 +2750,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('ExportSpecifier');
     }
     if (curtok.str !== '}') {
-      console.log('Error: Invalid export token: ' + curtok);
+      $log('Error: Invalid export token: ' + curtok);
       if (curtok.str === '...') THROW('Export object cannot have spread');
       if (curtok.str === ':') THROW('Export object uses `as` to alias (`{a as y}`), not colon (`{a: y}`)');
       THROW('Export object can only have "shorthand" `{x}` or "as" `{x as y}');
@@ -4081,7 +4094,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(fatalBindingIdentCheck.length === arguments.length, 'arg count');
     ASSERT(identToken.type === $IDENT, 'ident check on ident tokens ok', identToken);
     let str = nonFatalBindingIdentCheck(identToken, bindingType, lexerFlags);
-    if (str !== '') THROW(`Cannot use this name (${identToken.str}) as a variable name because: ${str}`);
+    if (str !== '') THROW_TOKEN(`Cannot use this name (${identToken.str}) as a variable name because: ${str}`, identToken);
   }
   function nonFatalBindingIdentCheck(identToken, bindingType, lexerFlags) {
     ASSERT(nonFatalBindingIdentCheck.length === arguments.length, 'expecting all args');
@@ -8608,7 +8621,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (asyncIdent) {
           destructible |= CANT_DESTRUCT;
         } else {
-          console.log('rest crashed, closingCharOrd='+String.fromCharCode(closingCharOrd)+', token: ' + curtok);
+          $log('rest crashed, closingCharOrd='+String.fromCharCode(closingCharOrd)+', token: ' + curtok);
           if (curtok.str === '=') THROW('The rest argument can not have an initializer');
           else if (curtok.str === ',') THROW('The rest argument was not destructible as it must be last and can not have a trailing comma');
           else THROW('The rest argument must the be last parameter');
@@ -8754,10 +8767,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   // <SCRUB AST>
   function logPath() {
-    console.log('logPath: ' + _path.map(o=>o.type).join(' '))
+    $log('logPath: ' + _path.map(o=>o.type).join(' '))
   }
   function logTree() {
-    console.log('logTree: ' + inspect(_tree, false, null))
+    $log('logTree: ' + inspect(_tree, false, null))
   }
   // </SCRUB AST>
 
@@ -8840,7 +8853,7 @@ function D(d) {
   }
 
   if (d !== 0) {
-    console.log('Gathered flags so far:', arr.join(', '))
+    $log('Gathered flags so far:', arr.join(', '))
     _THROW('D: unknown flags left:', d.toString(2));
   }
 
@@ -8878,7 +8891,7 @@ function A(a) {
   }
 
   if (a !== 0) {
-    console.log('Gathered flags so far:', arr.join(', '))
+    $log('Gathered flags so far:', arr.join(', '))
     _THROW('A: unknown flags left:', a.toString(2));
   }
 
