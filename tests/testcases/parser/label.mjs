@@ -45,6 +45,17 @@ export default (describe, test) =>
       });
     });
 
+    [
+      'implements', 'package', 'protected', 'interface', 'private', 'public',
+      // > In strict mode code, let and static are treated as reserved words through static semantic restrictions
+      'let', 'static',
+    ].forEach(keyword => {
+      test.fail_strict('can not use certain reserved keywords as label name in strict mode: keyword=`' + keyword + '`', {
+        code: keyword + ': x;',
+        throws: true,
+      });
+    });
+
     describe('await', _ => {
 
       test.pass('in sloppy', {
@@ -68,6 +79,22 @@ export default (describe, test) =>
       test.fail('defined outside of async as break label inside async', {
         code: 'await: { async function f(){ break await; } }',
         desc: 'red herring; label sets do not cross function boundaries ;) so label is undefined and the break crashes',
+      });
+    });
+
+    describe('await', _ => {
+
+      test.fail_strict('in sloppy', {
+        code: 'yield: x',
+      });
+
+      test.fail('in a generator', {
+        code: 'function *f(){ yield: x; }',
+      });
+
+      test.fail('defined outside of generator as break label inside generator', {
+        code: 'yield: { function *f(){ break await; } }',
+        desc: 'red herring; await is special for async, not generaotrs ;) but since the label does not exist it still fails',
       });
     });
 
@@ -97,8 +124,16 @@ export default (describe, test) =>
       throws: 'same label',
     });
 
+    test.fail_strict('eval', {
+      code: 'eval: x;',
+    });
+
+    test.fail_strict('c', {
+      code: 'arguments: x;',
+    });
+
 
     // TODO: label:functiondecl is explicitly considered a syntax error
     // TODO: labels must be "identifiers", which may not be reserved
-    // await, yield, async, let, etc special keywords that once were valid labels (because sloppy mode)
+    // async, let, etc special keywords that once were valid labels (because sloppy mode)
   });
