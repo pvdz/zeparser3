@@ -2534,6 +2534,16 @@ export default (describe, test) => describe('parens', _ => {
       },
       tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
     });
+
+    test.pass('paren wrapped argless arrow with dot property is ok', {
+      desc: 'regression',
+      code: '(() => {}).x',
+    });
+
+    test.pass('paren wrapped parenless arrow with dot property is ok', {
+      desc: 'regression',
+      code: '(x => {}).x',
+    });
   });
 
   describe('arrow', _ => {

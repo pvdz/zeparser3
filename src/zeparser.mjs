@@ -5634,26 +5634,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof assignable === 'number', 'assignablenum', assignable);
     ASSERT(typeof astProp === 'string', 'should be string');
 
-    // <SCRUB AST>
-    // Unfortunately there's no trivial way of doing this check without a lot
-    // more unmaintainable spaghetti return code. Maybe later. For now the arrow
-    // tail checks can only be done with AST enabled.
-    if (
-      _path[_path.length - 1] && (
-        (_path[_path.length - 1].type === 'ArrowFunctionExpression' && _path[_path.length - 1].expression === false) ||
-        (_path[_path.length - 1][astProp] && _path[_path.length - 1][astProp].type === 'ArrowFunctionExpression' && _path[_path.length - 1][astProp].expression === false)
-      )
-    ) {
-      // - `()=>{}.foo`
-      // - `()=>{}[foo]`
-      // - `()=>{}(foo)`
-      // - `()=>{}`foo``
-      // - `()=>{}++`
-      // - `()=>{}--`
-      return NOT_ASSIGNABLE;
-    }
-    // </SCRUB AST>
-
     if (curc === $$DOT_2E && curtok.str === '.') {
       ASSERT_skipAny('.', lexerFlags); // TODO: optimize; next must be identifier
       if (curtype !== $IDENT) THROW('Dot property must be an identifier');

@@ -995,9 +995,8 @@ export default (describe, test) =>
           throws: 'Expected to parse a value',
         });
 
-        test('multi groups', {
+        test.fail('multi groups', {
           code: '(((x)))\n++;',
-          throws: 'Expected to parse a value',
         });
       });
 
@@ -1241,9 +1240,8 @@ export default (describe, test) =>
           throws: 'Expected to parse a value',
         });
 
-        test('multi groups', {
+        test.fail('multi groups', {
           code: '(((x)))\n--;',
-          throws: 'Expected to parse a value',
         });
       });
 
