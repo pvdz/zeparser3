@@ -124,11 +124,11 @@ export default (describe, test) =>
       throws: 'same label',
     });
 
-    test.fail_strict('eval', {
+    test.pass('eval is NOT a reserved word at all so ok to use as label', {
       code: 'eval: x;',
     });
 
-    test.fail_strict('c', {
+    test.pass('arguments is NOT a reserved word at all so ok to use as label', {
       code: 'arguments: x;',
     });
 

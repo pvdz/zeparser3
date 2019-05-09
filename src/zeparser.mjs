@@ -3839,7 +3839,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp) {
     ASSERT(arguments.length === parseLabeledStatementInstead.length, 'arg count');
 
-    fatalBindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
+    // This is an exception to the general case where eval and arguments are okay to use as label name. Thanks, spec.
+    if (identToken.str !== 'eval' && identToken.str !== 'arguments') {
+      fatalBindingIdentCheck(identToken, BINDING_TYPE_NONE, lexerFlags);
+    }
 
     AST_open(astProp, 'LabeledStatement');
     AST_setIdent('label', identToken);
