@@ -8135,7 +8135,7 @@ export default (describe, test) =>
         code: '({a: 1, a})',
       });
 
-      describe('dunderproto', _ => {
+      describe('dunderproto __proto__', _ => {
 
         // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
         // > It is a Syntax Error if PropertyNameList of PropertyDefinitionList contains any duplicate entries for
@@ -8159,6 +8159,11 @@ export default (describe, test) =>
 
           test.pass('bad case with string and ident', {
             code: 'x = {\'__proto__\': 1, __proto__: 2}',
+          });
+
+          test.pass('paren wrapped', {
+            desc: 'regression',
+            code: '({ __proto__: null, other: null, "__proto__": null });',
           });
 
           test.pass('bad case with wrapped in array', {
@@ -8268,6 +8273,30 @@ export default (describe, test) =>
           test('bad case with ident and string', {
             code: 'x = {__proto__: 1, "__proto__": 2}',
             throws: '__proto__',
+            WEB: true,
+          });
+
+          test.pass('paren wrapped is explicitly exempted', {
+            desc: 'rule does not applying when parsing potential arrow',
+            code: '({ __proto__: x, __proto__: y});',
+            WEB: true,
+          });
+
+          test.pass('arrow is explicitly exempted', {
+            desc: 'rule does not applying when parsing arrow',
+            code: '({ __proto__: x, __proto__: y}) => x;',
+            WEB: true,
+          });
+
+          test.pass('async call wrapped is explicitly exempted', {
+            desc: 'rule does not applying when parsing potential async arrow',
+            code: 'async({ __proto__: x, __proto__: y});',
+            WEB: true,
+          });
+
+          test.pass('async arrow is explicitly exempted', {
+            desc: 'rule does not applying when parsing potential async arrow',
+            code: 'async ({ __proto__: x, __proto__: y}) => x;',
             WEB: true,
           });
 

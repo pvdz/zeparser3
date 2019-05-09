@@ -7154,7 +7154,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // > 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object
     // Initializers. So we don't have to track all properties of object literals to check for dupes, however, we still
-    // need to confirm this for the constructor of a class.
+    // need to confirm this for the constructor of a class and for annex B web-compat also __proto__.
 
     let constructors = 0; // must throw if more than one plain constructor was found
     let doubleDunderProto = 0;
