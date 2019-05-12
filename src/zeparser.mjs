@@ -492,9 +492,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     ASSERT(typeof prop === 'string', 'prop should be string');
     ASSERT(arguments.length === 2 || arguments.length === 3, 'expecting two args');
-    ASSERT(_path.length > 0, 'path shouldnt be empty');
+    ASSERT(clobber || _path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
-    ASSERT(clobber !== (_path[_path.length - 1][prop] === undefined), 'dont clobber, prop=' + prop + ', val=' + value);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
+    ASSERT(clobber ? (_path[_path.length - 1][prop] !== undefined) : true, 'expected to clobber a value but it was undefined');
+    ASSERT(clobber !== (_path[_path.length - 1][prop] === undefined), 'dont clobber, prop=' + prop + ', val=' + value + ', clobber=' + clobber);// + ',was=' + JSON.stringify(_path[_path.length - 1]));
 
     _path[_path.length - 1][prop] = value;
   }
@@ -1232,63 +1233,57 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // scan here is not so bad... And let's face it; trivial cases are quickly found.
 
       let stringToken = curtok;
+      AST_setLiteral(astProp, stringToken);
       ASSERT_skipDiv($STRING, lexerFlags); // statement start means div
 
-      // Remember; this is always the case of a statement that starts with a string and
-      // we are checking the next token after that
+      // Remember the next token. Do a regular parse. If the next token is still the same token then there was no tail
+      // and we can assume ASI will happen.
+      let nextToken = curtok;
+      // Since this must be the start of a block, we only have to care about a semi in this case
+      if (curc !== $$SEMI_3B) {
+        // [v]: `"use strict" + x`   (valid, but it's not strict mode)
+        // [v]: `"use strict", x`  (valid, but it's not strict mode)
+        // [v]: `"use strict" \n x`  (valid and strict mode)
+        parseExpressionAfterLiteral(lexerFlags, astProp);
+        if (curc !== $$SEMI_3B) {
+          // [v]: `"use strict" + x`   (valid, but it's not strict mode)
+          parseExpressionFromOp(lexerFlags, NOT_ASSIGNABLE, astProp);
+          if (curc === $$COMMA_2C) {
+            // [v]: `"use strict", x`  (valid, but it's not strict mode)
+            _parseExpressions(lexerFlags, NOT_ASSIGNABLE, astProp);
+          }
+        }
+      }
 
-      if (isDirective()) {
-        lexerFlags = parseDirectivePrologue(lexerFlags, stringToken, astProp);
+      if (curtok === nextToken) {
+        // There was no tail, no op, no comma, so this was ASI, I hope. Or an error.
+        // This is a directive. It may be nonsense, but it's a string in the head so it's a directive.
+
+        let dir = stringToken.str.slice(1, -1);
+        if (AST_directiveNodes) {
+          AST_wrapClosed(astProp, 'Directive', 'directive');
+          AST_set("directive", dir, true); // replace the string token with just the string value, then wrap it
+          AST_close('Directive');
+        } else {
+          AST_wrapClosed(astProp, 'ExpressionStatement', 'expression');
+          AST_set("directive", dir); // This is what other parsers seem to do...
+          // The whole expression has already been parsed so we can just close it.
+          AST_close('ExpressionStatement');
+        }
+
+        if (dir === 'use strict') {
+          lexerFlags = lexerFlags | LF_STRICT_MODE;
+        }
       } else {
-        // not ideal but this almost never happens
-        _parseFromLiteralStatement(lexerFlags, stringToken, astProp)
+        AST_wrapClosed(astProp, 'ExpressionStatement', 'expression');
+        // The whole expression has already been parsed so we can just close it.
+        AST_close('ExpressionStatement');
       }
+
+      parseSemiOrAsi(lexerFlags);
     }
-    return lexerFlags;
-  }
-  function parseDirectivePrologue(lexerFlags, stringToken, astProp) {
-    ASSERT(arguments.length === parseDirectivePrologue.length, 'arg count');
-
-    let dir = stringToken.str.slice(1, -1);
-    if (dir === 'use strict') lexerFlags = lexerFlags | LF_STRICT_MODE;
-
-    if (AST_directiveNodes) {
-      AST_open(astProp, 'Directive');
-      AST_set('directive', dir);
-      AST_close('Directive');
-    } else {
-      AST_open(astProp, 'ExpressionStatement');
-      AST_setLiteral('expression', stringToken);
-      AST_set('directive', dir);
-      AST_close('ExpressionStatement');
-    }
-
-    parseSemiOrAsi(lexerFlags);
 
     return lexerFlags;
-  }
-
-  function isDirective() {
-    // scan for simple cases first
-    if (curc === $$SEMI_3B || curc === $$CURLY_R_7D) return true;
-    if (!curtok.nl) {
-      if (curtype === $EOF) return true; // meh. useless in global, leads to an error in any other case. but okay!
-      return false; // no chance to ASI
-    }
-    if (curtok.str === '++' || curtok.str === '--') return true; // "foo" \n ++bar
-    if (curtype !== $PUNCTUATOR) {
-      if (curtok.str === 'in' || curtok.str === 'instanceof') {
-        return false;
-      }
-      // considering the current token is a string;
-      // only certain punctuators and in/instanceof would be valid
-      // tokens next and we checked those so the newline causes ASI
-      return true;
-    }
-    // so there is a newline and the next token is a punctuation.
-    // we confirmed the edge cases so just consider ASI not allowed here.
-    // TODO: puncs that are invalid here should lead to ASI (and then fail later). How valuable is that level of correctness?
-    return false;
   }
 
   function _parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, wasSimple, functionNameTokenToVerify, astProp) {
@@ -4039,8 +4034,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === parseBinding.length, 'expecting args');
     // note: a "binding pattern" means a var/let/const var declaration with name or destructuring pattern
 
-    // TODO: legacy `let` as a var name support
-
     let mustHaveInit = false;
     let wasSimple = ARG_NEITHER_SIMPLE_NOR_INIT; // simple if "valid in es5" (list of idents, no inits)
 
@@ -4781,34 +4774,38 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseExpressionsAfterIdent(lexerFlags, identToken, allowAssignment, astProp) {
     ASSERT(parseExpressionsAfterIdent.length === arguments.length, 'arg count');
     ASSERT_ASSIGN_EXPR(allowAssignment);
-    let assignable = parseExpressionAfterIdent(lexerFlags, identToken, BINDING_TYPE_NONE, allowAssignment, astProp)
-    if (curc === $$COMMA_2C) assignable = _parseExpressions(lexerFlags, assignable, astProp);
-    return assignable;
+    let assignableForPiggies = parseExpressionAfterIdent(lexerFlags, identToken, BINDING_TYPE_NONE, allowAssignment, astProp)
+    if (curc === $$COMMA_2C) {
+      assignableForPiggies = _parseExpressions(lexerFlags, assignableForPiggies, astProp);
+    }
+    return assignableForPiggies;
   }
   function parseExpressions(lexerFlags, allowAssignment, astProp) {
     ASSERT(arguments.length === parseExpressions.length, 'arg count');
     ASSERT_ASSIGN_EXPR(allowAssignment);
-    let assignable = parseExpression(lexerFlags, allowAssignment, astProp);
-    if (curc === $$COMMA_2C) assignable = _parseExpressions(lexerFlags, assignable, astProp);
-    return assignable;
+    let assignableForPiggies = parseExpression(lexerFlags, allowAssignment, astProp);
+    if (curc === $$COMMA_2C) {
+      assignableForPiggies = _parseExpressions(lexerFlags, assignableForPiggies, astProp);
+    }
+    return assignableForPiggies;
   }
-  function _parseExpressions(lexerFlags, assignable, astProp) {
+  function _parseExpressions(lexerFlags, assignableForPiggies, astProp) {
     ASSERT(arguments.length === _parseExpressions.length, 'arg count');
     ASSERT(curc === $$COMMA_2C, 'confirm at callsite');
     AST_wrapClosedIntoArray(astProp, 'SequenceExpression', 'expressions');
-    assignable = __parseExpressions(lexerFlags, assignable, 'expressions');
+    assignableForPiggies = __parseExpressions(lexerFlags, assignableForPiggies, 'expressions');
     AST_close('SequenceExpression');
-    return assignable; // since we asserted a comma, we can be certain about this
+    return assignableForPiggies; // since we asserted a comma, we can be certain about this
   }
-  function __parseExpressions(lexerFlags, assignable, astProp) {
+  function __parseExpressions(lexerFlags, assignableForPiggies, astProp) {
     ASSERT(__parseExpressions.length === arguments.length, 'arg count');
     // current node should already be a SequenceExpression here. it wont be closed here either
     do {
       ASSERT_skipRex(',', lexerFlags);
       let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
-      assignable |= nowAssignable; // make sure to propagate the await/yield flags
+      assignableForPiggies |= nowAssignable; // make sure to propagate the await/yield flags
     } while (curc === $$COMMA_2C);
-    return setNotAssignable(assignable);
+    return setNotAssignable(assignableForPiggies);
   }
 
   function isAssignBinOp() {

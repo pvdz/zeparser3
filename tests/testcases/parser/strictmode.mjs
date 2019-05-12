@@ -1365,4 +1365,38 @@ export default (describe, test) =>
         code: 'function foo(001, 003) { "use strict"; }',
       });
     });
+
+    describe('asi', _ => {
+
+      [
+        '.foo',
+        '[foo]',
+        '()',
+        '`x`',
+        ' + x',
+        '/f',
+        '/f/g',
+      ].forEach(suffix => {
+
+        test.fail_strict('tails that prevent ASI so it is not a directive', {
+          code: 'function f(){ "use strict" \n /* suffix = */ ' + suffix + '; eval = 1; }',
+        });
+      });
+
+      [
+        'foo',
+        '++x',
+        '--x',
+        'function f(){}',
+        '{x}',
+        ';',
+        '25',
+        'true',
+      ].forEach(suffix => {
+
+        test.fail('tails that cause ASI so it is a directive', {
+          code: 'function f(){ "use strict" \n ' + suffix + '; eval = 1; }',
+        });
+      });
+    });
   });
