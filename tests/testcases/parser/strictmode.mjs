@@ -1077,41 +1077,48 @@ export default (describe, test) =>
     describe('header requirements for directive in body', _ => {
 
       // these tests should cover cases where the header is fine in sloppy mode and throw when finding a use strict in the body
+      // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+      // > It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName
+      // > is: "implements", "interface", "let", "package",  "private", "protected", "public", "static", or "yield".
 
       [
         // Explicitly forbidden binding names in strict mode
+        // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
         'eval', 'arguments',
-        // Idents that are only keywords in strict mode
-        'package',
-        // Yield is always the YieldExpression in strict mode
+        // Yield is always the YieldExpression in strict mode or in a generator context
         'yield',
+        // Let is disallowed through a static semantic rather than cfg
+        'let',
+        // Other idents that are only keywords in strict mode
+        'implements', 'interface', 'package', 'private', 'protected', 'public', 'static',
       ].forEach(ident => {
+
         describe('ident = [' + ident + ']', _ => {
 
           describe('function decl', _ => {
 
             test.fail_strict('as func name w/o directive', {
-              code: 'function '+ident+'(){ }',
+              code: 'function '+ident+'(a){ }',
             });
 
             test.fail('as func name w directive', {
-              code: 'function '+ident+'(){ "use strict"; }',
+              code: 'function '+ident+'(b){ "use strict"; }',
             });
 
             test.fail_strict('as param name w/o directive', {
-              code: 'function f('+ident+'){ }',
+              code: 'function c('+ident+'){ }',
             });
 
             test.fail('as param name w directive', {
-              code: 'function f('+ident+'){ "use strict"; }',
+              code: 'function d('+ident+'){ "use strict"; }',
             });
 
             test.fail_strict('assigned to in param default w/o directive', {
-              code: 'function f(x='+ident+'=10){ }',
+              code: 'function e(x='+ident+'=10){ }',
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
-            test.fail('assigned to in param default w/o directive', {
+            test.fail('assigned to in param default w directive', {
               code: 'function f(x='+ident+'=10){ "use strict"; }',
               desc: 'the default causes the error, not the usage, but whatever',
             });
@@ -1140,7 +1147,7 @@ export default (describe, test) =>
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
-            test.fail('assigned to in param default w/o directive', {
+            test.fail('assigned to in param default w directive', {
               code: 'f = function f(x='+ident+'=10){ "use strict"; }',
               desc: 'the default (always) causes the error, not the usage, but whatever',
             });
@@ -1161,7 +1168,7 @@ export default (describe, test) =>
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
-            test.fail('assigned to in param default w/o directive', {
+            test.fail('assigned to in param default w directive', {
               code: 'f(x='+ident+'=10) => { "use strict"; }',
               desc: 'the default (always) causes the error, not the usage, but whatever',
             });
@@ -1191,7 +1198,7 @@ export default (describe, test) =>
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
-            test.fail('assigned to in param default w/o directive', {
+            test.fail('assigned to in param default w directive', {
               code: 'o = {foo(x='+ident+'=y){ "use strict"; }}',
               desc: 'the default (always) causes the error, not the usage, but whatever',
             });
@@ -1222,28 +1229,121 @@ export default (describe, test) =>
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
-            test.fail('assigned to in param default w/o directive', {
+            test.fail('assigned to in param default w directive', {
               code: 'class c {foo(x='+ident+'=y){ "use strict"; }}',
               desc: 'the default (always) causes the error, not the usage, but whatever',
             });
           });
         });
       });
-      
-      test.fail_strict('func param default has octal, sans directive', {
-        code: 'function foo(package) { }',
-      });
 
-      test.fail('func param default has octal but directive happens inside', {
-        code: 'function foo(package) { "use strict"; }',
-      });
+      describe('octal escape in func header and the use strict directive rules', _ => {
+        // octal escapes are okay in sloppy mode. package is a keyword only in strict mode. lets combine that into tests
 
-      test.fail_strict('arrow param default has octal, sans directive', {
-        code: 'x = (y = "foo\\003bar") => { }',
-      });
+        describe('arrow param name', _ => {
 
-      test.fail('arrow param default has octal but directive happens inside', {
-        code: 'x = (y = "foo\\003bar") => { "use strict"; }',
+          test.fail_strict('package as func param, no escape, no directive', {
+            code: 'function foo(package) { }',
+          });
+
+          test.fail('package as func param, no escape, with directive', {
+            code: 'function foo(package) { "use strict"; }',
+          });
+
+          test.fail_strict('package as func param, unicode escape, no directive', {
+            code: 'function foo(p\\u0061ckage) { }',
+          });
+
+          test.fail('package as func param, unicode escape, with directive', {
+            code: 'function foo(p\\u0061ckage) { "use strict"; }',
+          });
+
+          test.fail('package as func param, hex escape, no directive', {
+            code: 'function foo(p\\x61ckage) { }',
+          });
+
+          test.fail('package as func param, hex escape, with directive', {
+            code: 'function foo(p\\x61ckage) { "use strict"; }',
+          });
+
+          test.fail('package as func param, octal escape, no directive', {
+            code: 'function foo(p\\141ckage) { }',
+          });
+
+          test.fail('package as func param, octal escape, with directive', {
+            code: 'function foo(p\\141ckage) { "use strict"; }',
+          });
+        });
+
+        describe('arrow param name', _ => {
+
+          test.fail_strict('package as func param, no escape, no directive', {
+            code: '(package) => { }',
+          });
+
+          test.fail('package as func param, no escape, with directive', {
+            code: '(package) => { "use strict"; }',
+          });
+
+          test.fail_strict('package as func param, unicode escape, no directive', {
+            code: '(p\\u0061ckage) => { }',
+          });
+
+          test.fail('package as func param, unicode escape, with directive', {
+            code: '(p\\u0061ckage) => { "use strict"; }',
+          });
+
+          test.fail('package as func param, hex escape, no directive', {
+            code: '(p\\x61ckage) => { }',
+          });
+
+          test.fail('package as func param, hex escape, with directive', {
+            code: '(p\\x61ckage) => { "use strict"; }',
+          });
+
+          test.fail('package as func param, octal escape, no directive', {
+            code: '(p\\141ckage) => { }',
+          });
+
+          test.fail('package as func param, octal escape, with directive', {
+            code: '(p\\141ckage) => { "use strict"; }',
+          });
+        });
+
+        describe('parenless arrow param name', _ => {
+
+          test.fail_strict('package as func param, no escape, no directive', {
+            code: 'package => { }',
+          });
+
+          test.fail('package as func param, no escape, with directive', {
+            code: 'package => { "use strict"; }',
+          });
+
+          test.fail_strict('package as func param, unicode escape, no directive', {
+            code: 'p\\u0061ckage => { }',
+          });
+
+          test.fail('package as func param, unicode escape, with directive', {
+            code: 'p\\u0061ckage => { "use strict"; }',
+          });
+
+          test.fail('package as func param, hex escape, no directive', {
+            code: 'p\\x61ckage => { }',
+          });
+
+          test.fail('package as func param, hex escape, with directive', {
+            code: 'p\\x61ckage => { "use strict"; }',
+          });
+
+          test.fail('package as func param, octal escape, no directive', {
+            code: 'p\\141ckage => { }',
+          });
+
+          test.fail('package as func param, octal escape, with directive', {
+            code: 'p\\141ckage => { "use strict"; }',
+          });
+        });
       });
     });
 

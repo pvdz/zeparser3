@@ -10,4 +10,13 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
+
+    test.pass('func expr can be followed by `=` sign as long as it is not an assignment', {
+      code: 'while (function* () {} === x);',
+      desc: 'regression, was just checking for the next char to be = instead of whole token',
+    });
+
+    test.fail('make sure compound assignments are caught', {
+      code: 'while (function* () {} += x);',
+    });
   });

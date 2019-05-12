@@ -420,6 +420,90 @@ export default (describe, test) =>
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
+
+      test('for header lhs can contain ident instanceof', {
+        code: 'for (a instanceof b;;);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ForStatement',
+              init: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'a'},
+                operator: 'instanceof',
+                right: {type: 'Identifier', name: 'b'},
+              },
+              test: null,
+              update: null,
+              body: {type: 'EmptyStatement'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test.fail('for must have child statement', {
+        code: 'for (eval instanceof this; new 2e308;)',
+      });
+
+      test.pass('for header lhs can contain number instanceof', {
+        code: 'for (12 instanceof obj;;);',
+      });
+
+      test.pass('for header lhs can contain arr instanceof', {
+        code: 'for ([] instanceof obj;;);',
+      });
+
+      describe('binary ops in lhs', _ => {
+
+        test('for header !==', {
+          code: 'for ([] !== x;;);',
+          desc: 'regression',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForStatement',
+                init: {
+                  type: 'BinaryExpression',
+                  left: {type: 'ArrayExpression', elements: []},
+                  operator: '!==',
+                  right: {type: 'Identifier', name: 'x'},
+                },
+                test: null,
+                update: null,
+                body: {type: 'EmptyStatement'},
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test.pass('init part can be any expression', {
+          code: 'for (a + b;;);',
+        });
+
+        test.pass('init part starting with array can be any expression', {
+          code: 'for ([] + b;;);',
+        });
+
+        test.pass('init part starting with object can be any expression', {
+          code: 'for ({} + b;;);',
+        });
+
+        test.pass('init part starting with number can be any expression', {
+          code: 'for (2 + b;;);',
+        });
+
+        test.pass('init part starting with string can be any expression', {
+          code: 'for ("abc" + b;;);',
+        });
+
+        test.pass('init part starting with regex can be any expression', {
+          code: 'for (/x/g + b;;);',
+        });
+      });
     });
 
     describe('var decls', _ => {
@@ -1696,6 +1780,33 @@ export default (describe, test) =>
           code: 'for (let {x}.y in x);',
         });
       });
+
+      describe('binary ops in lhs', _ => {
+
+        test.fail('init part can be any expression', {
+          code: 'for (a + b in obj);',
+        });
+
+        test.fail('init part starting with array can be any expression', {
+          code: 'for ([] + b in obj);',
+        });
+
+        test.fail('init part starting with object can be any expression', {
+          code: 'for ({} + b in obj);',
+        });
+
+        test.fail('init part starting with number can be any expression', {
+          code: 'for (2 + b in obj);',
+        });
+
+        test.fail('init part starting with string can be any expression', {
+          code: 'for ("abc" + b in obj);',
+        });
+
+        test.fail('init part starting with regex can be any expression', {
+          code: 'for (/x/g + b in obj);',
+        });
+      });
     });
 
     describe('for-of', _ => {
@@ -2118,6 +2229,33 @@ export default (describe, test) =>
 
         test.fail('let with an object and property cannot work because it is always parsed as a pattern', {
           code: 'for (let {x}.y of x);',
+        });
+      });
+
+      describe('binary ops in lhs', _ => {
+
+        test.fail('init part can be any expression', {
+          code: 'for (a + b of obj);',
+        });
+
+        test.fail('init part starting with array can be any expression', {
+          code: 'for ([] + b of obj);',
+        });
+
+        test.fail('init part starting with object can be any expression', {
+          code: 'for ({} + b of obj);',
+        });
+
+        test.fail('init part starting with number can be any expression', {
+          code: 'for (2 + b of obj);',
+        });
+
+        test.fail('init part starting with string can be any expression', {
+          code: 'for ("abc" + b of obj);',
+        });
+
+        test.fail('init part starting with regex can be any expression', {
+          code: 'for (/x/g + b of obj);',
         });
       });
 

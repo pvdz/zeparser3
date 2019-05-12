@@ -8104,316 +8104,866 @@ export default (describe, test) =>
 
     describe('duplicate keys', _ => {
 
-      // https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
-      // 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object Initializers.
+      describe('obj expr', _ => {
 
-      test.pass('base case of duplicate key', {
-        code: '({a: 1, a: 2})',
-      });
+        // https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
+        // 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object Initializers.
 
-      test.pass('first and last', {
-        code: '({a: 1, b: 3, a: 2})',
-      });
+        test.pass('base case of duplicate key', {
+          code: '({a: 1, a: 2})',
+        });
 
-      test.pass('last two', {
-        code: '({b: x, a: 1, a: 2})',
-      });
+        test.pass('first and last', {
+          code: '({a: 1, b: 3, a: 2})',
+        });
 
-      test.pass('first two', {
-        code: '({a: 1, a: 2, b: 3})',
-      });
+        test.pass('last two', {
+          code: '({b: x, a: 1, a: 2})',
+        });
 
-      test.pass('shorthand', {
-        code: '({a, a})',
-      });
+        test.pass('first two', {
+          code: '({a: 1, a: 2, b: 3})',
+        });
 
-      test.pass('shorthand and not-shorthand', {
-        code: '({a, a: 1})',
-      });
+        test.pass('shorthand', {
+          code: '({a, a})',
+        });
 
-      test.pass('not-shorthand and shorthand', {
-        code: '({a: 1, a})',
-      });
+        test.pass('shorthand and not-shorthand', {
+          code: '({a, a: 1})',
+        });
 
-      describe('dunderproto __proto__', _ => {
+        test.pass('not-shorthand and shorthand', {
+          code: '({a: 1, a})',
+        });
 
-        // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
-        // > It is a Syntax Error if PropertyNameList of PropertyDefinitionList contains any duplicate entries for
-        //   "__proto__" and at least two of those entries were obtained from productions of the form PropertyDefinition:PropertyName:AssignmentExpression .
+        test.pass('string with ident value, ident with ident', {
+          code: '({"x": a, y: a});',
+        });
 
-        // This restriction only applies to webcompat mode (annex B)
+        test.pass('ident with ident value, string with ident value', {
+          code: '({x: a, "y": a});',
+        });
 
-        describe('without webcompat', _ => {
+        test.pass('string with ident value, ident shorthand', {
+          code: '({"x": a, a});',
+        });
 
-          test.pass('bad case with two idents', {
-            code: 'x = {__proto__: 1, __proto__: 2}',
-          });
+        test.pass('computed prop with ident value, ident shorthand', {
+          code: '({[foo()]: a, a});',
+        });
 
-          test.pass('bad case with strings', {
-            code: 'x = {\'__proto__\': 1, "__proto__": 2}',
-          });
+        describe('dunderproto __proto__', _ => {
 
-          test.pass('bad case with ident and string', {
-            code: 'x = {__proto__: 1, "__proto__": 2}',
-          });
+          // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+          // > It is a Syntax Error if PropertyNameList of PropertyDefinitionList contains any duplicate entries for
+          //   "__proto__" and at least two of those entries were obtained from productions of the form PropertyDefinition:PropertyName:AssignmentExpression .
 
-          test.pass('bad case with string and ident', {
-            code: 'x = {\'__proto__\': 1, __proto__: 2}',
-          });
+          // This restriction only applies to webcompat mode (annex B)
 
-          test.pass('paren wrapped', {
-            desc: 'regression',
-            code: '({ __proto__: null, other: null, "__proto__": null });',
-          });
+          describe('without webcompat', _ => {
 
-          test.pass('bad case with wrapped in array', {
-            code: 'x = [{__proto__: 1, __proto__: 2}]',
-          });
-
-          test.pass('okay with shorthand right', {
-            code: 'x = {__proto__: 1, __proto__}',
-          });
-
-          test.pass('okay with shorthand left', {
-            code: 'x = {__proto__, __proto__: 2}',
-          });
-
-          test.pass('computed', {
-            code: 'x = {[__proto__]: 1, __proto__: 2}',
-          });
-
-          test.pass('string computed', {
-            code: 'x = {["__proto__"]: 1, __proto__: 2}',
-          });
-
-          test.pass('method prop', {
-            code: 'x = {__proto__(){}, __proto__: 2}',
-          });
-
-          test.pass('method method', {
-            code: 'x = {__proto__(){}, __proto__(){}}',
-          });
-
-          test.pass('async generator', {
-            code: 'x = {async __proto__(){}, *__proto__(){}}',
-          });
-
-          test.pass('static getter', {
-            code: 'class x {static __proto__(){}; get __proto__(){}}',
-          });
-
-          describe('exceptions', _ => {
-
-            // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
-            // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
-            // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
-
-            describe('not async', _ => {
-
-              test.pass('plain group', {
-                code: '({__proto__: a, __proto__: b});',
-              });
-
-              test.pass('destructuring assignment', {
-                code: 'x = {__proto__: a, __proto__: b} = y',
-              });
-
-              test.pass('grouped destructuring assignment', {
-                code: '({__proto__: a, __proto__: b} = x)',
-              });
-
-              test.pass('as an arrow', {
-                code: '({__proto__: a, __proto__: b}) => x;',
-              });
-
-              test.pass('inside a complex destruct in an arrow', {
-                code: '(a, [b, [c, {__proto__: d, __proto__: e}]], f) => x;',
-              });
-
-              test.pass('as a function with obvious pattern', {
-                code: 'function f({__proto__: a, __proto__: b}) {}',
-              });
-
-              test.pass('inside a complex destruct in an arrow', {
-                code: 'function f(a, [b, [c, {__proto__: d, __proto__: e}]], f) {}',
-              });
+            test.pass('bad case with two idents', {
+              code: 'x = {__proto__: 1, __proto__: 2}',
             });
 
-            describe('with async', _ => {
+            test.pass('bad case with strings', {
+              code: 'x = {\'__proto__\': 1, "__proto__": 2}',
+            });
 
-              test.pass('plain group', {
-                code: 'async ({__proto__: a, __proto__: b});',
+            test.pass('bad case with ident and string', {
+              code: 'x = {__proto__: 1, "__proto__": 2}',
+            });
+
+            test.pass('bad case with string and ident', {
+              code: 'x = {\'__proto__\': 1, __proto__: 2}',
+            });
+
+            test.pass('paren wrapped', {
+              desc: 'regression',
+              code: '({ __proto__: null, other: null, "__proto__": null });',
+            });
+
+            test.pass('bad case with wrapped in array', {
+              code: 'x = [{__proto__: 1, __proto__: 2}]',
+            });
+
+            test.pass('okay with shorthand right', {
+              code: 'x = {__proto__: 1, __proto__}',
+            });
+
+            test.pass('okay with shorthand left', {
+              code: 'x = {__proto__, __proto__: 2}',
+            });
+
+            test.pass('computed', {
+              code: 'x = {[__proto__]: 1, __proto__: 2}',
+            });
+
+            test.pass('string computed', {
+              code: 'x = {["__proto__"]: 1, __proto__: 2}',
+            });
+
+            test.pass('method prop', {
+              code: 'x = {__proto__(){}, __proto__: 2}',
+            });
+
+            test.pass('method method', {
+              code: 'x = {__proto__(){}, __proto__(){}}',
+            });
+
+            test.pass('async generator', {
+              code: 'x = {async __proto__(){}, *__proto__(){}}',
+            });
+
+            test.pass('static getter', {
+              code: 'class x {static __proto__(){}; get __proto__(){}}',
+            });
+
+            describe('exceptions', _ => {
+
+              // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+              // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
+              // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
+
+              describe('not async', _ => {
+
+                test.pass('plain group', {
+                  code: '({__proto__: a, __proto__: b});',
+                });
+
+                test.pass('destructuring assignment', {
+                  code: 'x = {__proto__: a, __proto__: b} = y',
+                });
+
+                test.pass('grouped destructuring assignment', {
+                  code: '({__proto__: a, __proto__: b} = x)',
+                });
+
+                test.pass('as an arrow', {
+                  code: '({__proto__: a, __proto__: b}) => x;',
+                });
+
+                test.pass('inside a complex destruct in an arrow', {
+                  code: '(a, [b, [c, {__proto__: d, __proto__: e}]], f) => x;',
+                });
+
+                test.pass('as a function with obvious pattern', {
+                  code: 'function f({__proto__: a, __proto__: b}) {}',
+                });
+
+                test.pass('inside a complex destruct in an arrow', {
+                  code: 'function f(a, [b, [c, {__proto__: d, __proto__: e}]], f) {}',
+                });
               });
 
-              test.pass('grouped destructuring assignment', {
-                code: 'async ({__proto__: a, __proto__: b} = x)',
+              describe('with async', _ => {
+
+                test.pass('plain group', {
+                  code: 'async ({__proto__: a, __proto__: b});',
+                });
+
+                test.pass('grouped destructuring assignment', {
+                  code: 'async ({__proto__: a, __proto__: b} = x)',
+                });
+
+                test.pass('as an arrow', {
+                  code: 'async ({__proto__: a, __proto__: b}) => x;',
+                });
+              });
+            });
+          });
+
+          describe('with webcompat', _ => {
+
+            test('bad case with two idents', {
+              code: 'x = {__proto__: 1, __proto__: 2}',
+              throws: '__proto__',
+              WEB: true,
+            });
+
+            test('bad case with strings', {
+              code: 'x = {\'__proto__\': 1, "__proto__": 2}',
+              throws: '__proto__',
+              WEB: true,
+            });
+
+            test('bad case with ident and string', {
+              code: 'x = {__proto__: 1, "__proto__": 2}',
+              throws: '__proto__',
+              WEB: true,
+            });
+
+            test.pass('paren wrapped is explicitly exempted', {
+              desc: 'rule does not applying when parsing potential arrow',
+              code: '({ __proto__: x, __proto__: y});',
+              WEB: true,
+            });
+
+            test.pass('arrow is explicitly exempted', {
+              desc: 'rule does not applying when parsing arrow',
+              code: '({ __proto__: x, __proto__: y}) => x;',
+              WEB: true,
+            });
+
+            test.pass('async call wrapped is explicitly exempted', {
+              desc: 'rule does not applying when parsing potential async arrow',
+              code: 'async({ __proto__: x, __proto__: y});',
+              WEB: true,
+            });
+
+            test.pass('async arrow is explicitly exempted', {
+              desc: 'rule does not applying when parsing potential async arrow',
+              code: 'async ({ __proto__: x, __proto__: y}) => x;',
+              WEB: true,
+            });
+
+            test('bad case with string and ident', {
+              code: 'x = {\'__proto__\': 1, __proto__: 2}',
+              throws: '__proto__',
+              WEB: true,
+            });
+
+            test('bad case wrapped in array', {
+              code: 'x = [{__proto__: 1, __proto__: 2}]',
+              throws: '__proto__',
+              WEB: true,
+            });
+
+            test.pass('okay with shorthand right', {
+              code: 'x = {__proto__: 1, __proto__}',
+              WEB: true,
+            });
+
+            test.pass('okay with shorthand left', {
+              code: 'x = {__proto__, __proto__: 2}',
+              WEB: true,
+            });
+
+            test.pass('computed', {
+              code: 'x = {[__proto__]: 1, __proto__: 2}',
+              WEB: true,
+            });
+
+            test.pass('string computed', {
+              code: 'x = {["__proto__"]: 1, __proto__: 2}',
+              WEB: true,
+            });
+
+            test.pass('method prop', {
+              code: 'x = {__proto__(){}, __proto__: 2}',
+              WEB: true,
+            });
+
+            test.pass('method method', {
+              code: 'x = {__proto__(){}, __proto__(){}}',
+              WEB: true,
+            });
+
+            test.pass('async generator', {
+              code: 'x = {async __proto__(){}, *__proto__(){}}',
+              WEB: true,
+            });
+
+            test.pass('static getter', {
+              code: 'class x {static __proto__(){}; get __proto__(){}}',
+              WEB: true,
+            });
+
+            describe('exceptions', _ => {
+
+              // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+              // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
+              // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
+
+              describe('not async', _ => {
+
+                test.pass('plain group', {
+                  code: '({__proto__: a, __proto__: b});',
+                  WEB: true,
+                });
+
+                test.pass('destructuring assignment', {
+                  code: 'x = {__proto__: a, __proto__: b} = y',
+                  WEB: true,
+                });
+
+                test.pass('grouped destructuring assignment', {
+                  code: '({__proto__: a, __proto__: b} = x)',
+                  WEB: true,
+                });
+
+                test.pass('as an arrow', {
+                  code: '({__proto__: a, __proto__: b}) => x;',
+                  WEB: true,
+                });
+
+                test.pass('inside a complex destruct in an arrow', {
+                  code: '(a, [b, [c, {__proto__: d, __proto__: e}]], f) => x;',
+                  WEB: true,
+                });
+
+                test.pass('as a function with obvious pattern', {
+                  code: 'function f({__proto__: a, __proto__: b}) {}',
+                  WEB: true,
+                });
+
+                test.pass('inside a complex destruct in an arrow', {
+                  code: 'function f(a, [b, [c, {__proto__: d, __proto__: e}]], f) {}',
+                  WEB: true,
+                });
               });
 
-              test.pass('as an arrow', {
-                code: 'async ({__proto__: a, __proto__: b}) => x;',
+              describe('with async', _ => {
+
+                test.pass('plain group', {
+                  code: 'async ({__proto__: a, __proto__: b});',
+                  WEB: true,
+                });
+
+                test.pass('grouped destructuring assignment', {
+                  code: 'async ({__proto__: a, __proto__: b} = x)',
+                  WEB: true,
+                });
+
+                test.pass('as an arrow', {
+                  code: 'async ({__proto__: a, __proto__: b}) => x;',
+                  WEB: true,
+                });
               });
             });
           });
         });
+      });
 
-        describe('with webcompat', _ => {
+      describe('let binding pattern', _ => {
 
-          test('bad case with two idents', {
-            code: 'x = {__proto__: 1, __proto__: 2}',
-            throws: '__proto__',
-            WEB: true,
-          });
+        test.fail('simple pattern', {
+          code: 'let x, {a: x} = obj',
+        });
 
-          test('bad case with strings', {
-            code: 'x = {\'__proto__\': 1, "__proto__": 2}',
-            throws: '__proto__',
-            WEB: true,
-          });
+        test.fail('shorthand pattern', {
+          code: 'let x, {x} = obj',
+        });
 
-          test('bad case with ident and string', {
-            code: 'x = {__proto__: 1, "__proto__": 2}',
-            throws: '__proto__',
-            WEB: true,
-          });
+        test.fail('string ident value', {
+          code: 'let x, {"foo": x} = obj',
+        });
 
-          test.pass('paren wrapped is explicitly exempted', {
-            desc: 'rule does not applying when parsing potential arrow',
-            code: '({ __proto__: x, __proto__: y});',
-            WEB: true,
-          });
+        test.fail('nub ident value', {
+          code: 'let x, {15: x} = obj',
+        });
 
-          test.pass('arrow is explicitly exempted', {
-            desc: 'rule does not applying when parsing arrow',
-            code: '({ __proto__: x, __proto__: y}) => x;',
-            WEB: true,
-          });
+        test.fail('nested shorthand dupe', {
+          code: 'let x, {a: {x}} = obj',
+        });
 
-          test.pass('async call wrapped is explicitly exempted', {
-            desc: 'rule does not applying when parsing potential async arrow',
-            code: 'async({ __proto__: x, __proto__: y});',
-            WEB: true,
-          });
+        test.fail('nested labeled dupe', {
+          code: 'let x, {a: {b: x}} = obj',
+        });
 
-          test.pass('async arrow is explicitly exempted', {
-            desc: 'rule does not applying when parsing potential async arrow',
-            code: 'async ({ __proto__: x, __proto__: y}) => x;',
-            WEB: true,
-          });
+        test.fail('dupe shorthand key', {
+          code: 'let {x, x} = obj',
+        });
 
-          test('bad case with string and ident', {
-            code: 'x = {\'__proto__\': 1, __proto__: 2}',
-            throws: '__proto__',
-            WEB: true,
-          });
+        test.fail('dupe key', {
+          code: 'let {a: x, b: x} = obj',
+        });
 
-          test('bad case wrapped in array', {
-            code: 'x = [{__proto__: 1, __proto__: 2}]',
-            throws: '__proto__',
-            WEB: true,
-          });
+        test.fail('computed dupe key', {
+          code: 'let {[a]: x, b: x} = obj',
+        });
 
-          test.pass('okay with shorthand right', {
-            code: 'x = {__proto__: 1, __proto__}',
-            WEB: true,
-          });
+        test.fail('double computed dupe key', {
+          code: 'let {[a]: x, [b]: x} = obj',
+        });
 
-          test.pass('okay with shorthand left', {
-            code: 'x = {__proto__, __proto__: 2}',
-            WEB: true,
-          });
+        test.fail('dupe key', {
+          code: 'let {a: x, b: x} = obj',
+        });
 
-          test.pass('computed', {
-            code: 'x = {[__proto__]: 1, __proto__: 2}',
-            WEB: true,
-          });
+        test.fail('bad nested dupe key', {
+          code: 'let {a: x, {b: x}} = obj',
+        });
 
-          test.pass('string computed', {
-            code: 'x = {["__proto__"]: 1, __proto__: 2}',
-            WEB: true,
-          });
+        test.fail('nested dupe key', {
+          code: 'let {a: x, c: {b: x}} = obj',
+        });
 
-          test.pass('method prop', {
-            code: 'x = {__proto__(){}, __proto__: 2}',
-            WEB: true,
-          });
+        test.fail('rest simple', {
+          code: 'let {a: x, ...x} = obj',
+        });
 
-          test.pass('method method', {
-            code: 'x = {__proto__(){}, __proto__(){}}',
-            WEB: true,
-          });
+        test.fail('rest init', {
+          code: 'let {a: x, ...x = y} = obj',
+        });
 
-          test.pass('async generator', {
-            code: 'x = {async __proto__(){}, *__proto__(){}}',
-            WEB: true,
-          });
+        test.fail('rest nested', {
+          code: 'let {a: x, ...{x}} = obj',
+        });
+      });
 
-          test.pass('static getter', {
-            code: 'class x {static __proto__(){}; get __proto__(){}}',
-            WEB: true,
-          });
+      describe('function binding pattern', _ => {
 
-          describe('exceptions', _ => {
+        test.fail('simple pattern', {
+          code: 'function f(x, {a: x}) {}',
+        });
 
-            // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
-            // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
-            // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
+        test.fail('shorthand pattern', {
+          code: 'function f(x, {x}) {}',
+        });
 
-            describe('not async', _ => {
+        test.fail('string ident value', {
+          code: 'function f(x, {"foo": x}) {}',
+        });
 
-              test.pass('plain group', {
-                code: '({__proto__: a, __proto__: b});',
-                WEB: true,
-              });
+        test.fail('nub ident value', {
+          code: 'function f(x, {15: x}) {}',
+        });
 
-              test.pass('destructuring assignment', {
-                code: 'x = {__proto__: a, __proto__: b} = y',
-                WEB: true,
-              });
+        test.fail('nested shorthand dupe', {
+          code: 'function f(x, {a: {x}}) {}',
+        });
 
-              test.pass('grouped destructuring assignment', {
-                code: '({__proto__: a, __proto__: b} = x)',
-                WEB: true,
-              });
+        test.fail('nested labeled dupe', {
+          code: 'function f(x, {a: {b: x}}) {}',
+        });
 
-              test.pass('as an arrow', {
-                code: '({__proto__: a, __proto__: b}) => x;',
-                WEB: true,
-              });
+        test.fail('dupe shorthand key', {
+          code: 'function f({x, x}) {}',
+        });
 
-              test.pass('inside a complex destruct in an arrow', {
-                code: '(a, [b, [c, {__proto__: d, __proto__: e}]], f) => x;',
-                WEB: true,
-              });
+        test.fail('dupe key', {
+          code: 'function f({a: x, b: x}) {}',
+        });
 
-              test.pass('as a function with obvious pattern', {
-                code: 'function f({__proto__: a, __proto__: b}) {}',
-                WEB: true,
-              });
+        test.fail('computed dupe key', {
+          code: 'function f({[a]: x, b: x}) {}',
+        });
 
-              test.pass('inside a complex destruct in an arrow', {
-                code: 'function f(a, [b, [c, {__proto__: d, __proto__: e}]], f) {}',
-                WEB: true,
-              });
-            });
+        test.fail('double computed dupe key', {
+          code: 'function f({[a]: x, [b]: x}) {}',
+        });
 
-            describe('with async', _ => {
+        test.fail('dupe key', {
+          code: 'function f({a: x, b: x}) {}',
+        });
 
-              test.pass('plain group', {
-                code: 'async ({__proto__: a, __proto__: b});',
-                WEB: true,
-              });
+        test.fail('nested dupe key', {
+          code: 'function f({a: x, c: {b: x}}) {}',
+        });
 
-              test.pass('grouped destructuring assignment', {
-                code: 'async ({__proto__: a, __proto__: b} = x)',
-                WEB: true,
-              });
+        test.fail('bad nested dupe key', {
+          code: 'function f({a: x, {b: x}}) {}',
+        });
 
-              test.pass('as an arrow', {
-                code: 'async ({__proto__: a, __proto__: b}) => x;',
-                WEB: true,
-              });
-            });
-          });
+        test.fail('rest simple', {
+          code: 'function f({a: x, ...x}) {}',
+        });
+
+        test.fail('rest init', {
+          code: 'function f({a: x, ...x = y}) {}',
+        });
+
+        test.fail('rest nested', {
+          code: 'function f({a: x, ...{x}}) {}',
+        });
+      });
+
+      describe('arrow binding pattern', _ => {
+
+        test.fail('simple pattern', {
+          code: '(x, {a: x}) => {}',
+        });
+
+        test.fail('shorthand pattern', {
+          code: '(x, {x}) => {}',
+        });
+
+        test.fail('string ident value', {
+          code: '(x, {"foo": x}) => {}',
+        });
+
+        test.fail('nub ident value', {
+          code: '(x, {15: x}) => {}',
+        });
+
+        test.fail('nested shorthand dupe', {
+          code: '(x, {a: {x}}) => {}',
+        });
+
+        test.fail('nested labeled dupe', {
+          code: '(x, {a: {b: x}}) => {}',
+        });
+
+        test.fail('dupe shorthand key', {
+          code: '({x, x}) => {}',
+        });
+
+        test.fail('dupe key', {
+          code: '({a: x, b: x}) => {}',
+        });
+
+        test.fail('computed dupe key', {
+          code: '({[a]: x, b: x}) => {}',
+        });
+
+        test.fail('double computed dupe key', {
+          code: '({[a]: x, [b]: x}) => {}',
+        });
+
+        test.fail('dupe key', {
+          code: '({a: x, b: x}) => {}',
+        });
+
+        test.fail('nested dupe key', {
+          code: '({a: x, c: {b: x}}) => {}',
+        });
+
+        test.fail('bad nested dupe key', {
+          code: '({a: x, {b: x}}) => {}',
+        });
+
+        test.fail('rest simple', {
+          code: '({a: x, ...x}) => {}',
+        });
+
+        test.fail('rest init', {
+          code: '({a: x, ...x = y}) => {}',
+        });
+
+        test.fail('rest nested', {
+          code: '({a: x, ...{x}}) => {}',
+        });
+      });
+
+      describe('async arrow binding pattern', _ => {
+
+        test.fail('simple pattern', {
+          code: 'async (x, {a: x}) => {}',
+        });
+
+        test.fail('shorthand pattern', {
+          code: 'async (x, {x}) => {}',
+        });
+
+        test.fail('string ident value', {
+          code: 'async (x, {"foo": x}) => {}',
+        });
+
+        test.fail('nub ident value', {
+          code: 'async (x, {15: x}) => {}',
+        });
+
+        test.fail('nested shorthand dupe', {
+          code: 'async (x, {a: {x}}) => {}',
+        });
+
+        test.fail('nested labeled dupe', {
+          code: 'async (x, {a: {b: x}}) => {}',
+        });
+
+        test.fail('dupe shorthand key', {
+          code: 'async ({x, x}) => {}',
+        });
+
+        test.fail('dupe key', {
+          code: 'async ({a: x, b: x}) => {}',
+        });
+
+        test.fail('computed dupe key', {
+          code: 'async ({[a]: x, b: x}) => {}',
+        });
+
+        test.fail('double computed dupe key', {
+          code: 'async ({[a]: x, [b]: x}) => {}',
+        });
+
+        test.fail('dupe key', {
+          code: 'async ({a: x, b: x}) => {}',
+        });
+
+        test.fail('nested dupe key', {
+          code: 'async ({a: x, c: {b: x}}) => {}',
+        });
+
+        test.fail('bad nested dupe key', {
+          code: 'async ({a: x, {b: x}}) => {}',
+        });
+
+        test.fail('rest simple', {
+          code: 'async ({a: x, ...x}) => {}',
+        });
+
+        test.fail('rest init', {
+          code: 'async ({a: x, ...x = y}) => {}',
+        });
+
+        test.fail('rest nested', {
+          code: 'async ({a: x, ...{x}}) => {}',
+        });
+      });
+
+      describe('objlit inside async call', _ => {
+        // Note: duplicate keys are NOT a syntax error for assignment patterns (pfew)
+
+        test.pass('simple pattern', {
+          code: 'async (x, {a: x})',
+        });
+
+        test.pass('shorthand pattern', {
+          code: 'async (x, {x})',
+        });
+
+        test.pass('string ident value', {
+          code: 'async (x, {"foo": x})',
+        });
+
+        test.pass('nub ident value', {
+          code: 'async (x, {15: x})',
+        });
+
+        test.pass('nested shorthand dupe', {
+          code: 'async (x, {a: {x}})',
+        });
+
+        test.pass('nested labeled dupe', {
+          code: 'async (x, {a: {b: x}})',
+        });
+
+        test.pass('dupe shorthand key', {
+          code: 'async ({x, x})',
+        });
+
+        test.pass('dupe key', {
+          code: 'async ({a: x, b: x})',
+        });
+
+        test.pass('computed dupe key', {
+          code: 'async ({[a]: x, b: x})',
+        });
+
+        test.pass('double computed dupe key', {
+          code: 'async ({[a]: x, [b]: x})',
+        });
+
+        test.pass('dupe key', {
+          code: 'async ({a: x, b: x})',
+        });
+
+        test.fail('bad nested dupe key', {
+          code: 'async ({a: x, {b: x}})',
+        });
+
+        test.pass('nested dupe key', {
+          code: 'async ({a: x, c: {b: x}})',
+        });
+
+        test.pass('rest simple', {
+          code: 'async ({a: x, ...x})',
+        });
+
+        test.pass('rest init', {
+          code: 'async ({a: x, ...x = y})',
+        });
+
+        test.pass('rest nested', {
+          code: 'async ({a: x, ...{x}})',
+        });
+      });
+
+      describe('assigment pattern', _ => {
+        // Note: duplicate keys are NOT a syntax error for assignment patterns (pfew)
+
+        test.pass('simple pattern', {
+          code: '({x, a: x} = obj)',
+        });
+
+        test.pass('shorthand pattern', {
+          code: '({x, x} = obj)',
+        });
+
+        test.pass('string ident value', {
+          code: '({x, "foo": x} = obj)',
+        });
+
+        test.pass('nub ident value', {
+          code: '({x, 15: x} = obj)',
+        });
+
+        test.pass('nested shorthand dupe', {
+          code: '({x, a: {x}} = obj)',
+        });
+
+        test.pass('nested labeled dupe', {
+          code: '({x, a: {b: x}} = obj)',
+        });
+
+        test.fail('bad nested labeled dupe', {
+          code: '({x, a: c: {b: x}} = obj)',
+        });
+
+        test.pass('dupe key', {
+          code: '({a: x, b: x} = obj)',
+        });
+
+        test.pass('computed dupe key', {
+          code: '({[a]: x, b: x} = obj)',
+        });
+
+        test.pass('double computed dupe key', {
+          code: '({[a]: x, [b]: x} = obj)',
+        });
+
+        test.pass('nested dupe key', {
+          code: '({a: x, c: {b: x}} = obj)',
+        });
+
+        test.fail('bad nested dupe key', {
+          code: '({a: x, {b: x}} = obj)',
+        });
+
+        test.pass('rest simple', {
+          code: '({a: x, ...x} = obj)',
+        });
+
+        test.fail('rest init', {
+          code: '({a: x, ...x = y} = obj)',
+          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          desc: 'rest on anything but an ident is not destructible'
+        });
+
+        test.fail('rest nested', {
+          code: '({a: x, ...{x}} = obj)',
+          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          desc: 'rest on anything but an ident is not destructible'
+        });
+      });
+
+      describe('async call wrapping an assigment pattern', _ => {
+        // Note: duplicate keys are NOT a syntax error for assignment patterns (pfew)
+
+        test.pass('simple pattern', {
+          code: 'async({x, a: x} = obj)',
+        });
+
+        test.pass('shorthand pattern', {
+          code: 'async({x, x} = obj)',
+        });
+
+        test.pass('string ident value', {
+          code: 'async({x, "foo": x} = obj)',
+        });
+
+        test.pass('nub ident value', {
+          code: 'async({x, 15: x} = obj)',
+        });
+
+        test.pass('nested shorthand dupe', {
+          code: 'async({x, a: {x}} = obj)',
+        });
+
+        test.pass('nested labeled dupe', {
+          code: 'async({x, a: {b: x}} = obj)',
+        });
+
+        test.pass('dupe key', {
+          code: 'async({a: x, b: x} = obj)',
+        });
+
+        test.pass('computed dupe key', {
+          code: 'async({[a]: x, b: x} = obj)',
+        });
+
+        test.pass('double computed dupe key', {
+          code: 'async({[a]: x, [b]: x} = obj)',
+        });
+
+        test.pass('nested dupe key', {
+          code: 'async({a: x, c: {b: x}} = obj)',
+        });
+
+        test.fail('bad nested dupe key', {
+          code: 'async({a: x, {b: x}} = obj)',
+        });
+
+        test.pass('rest simple', {
+          code: 'async({a: x, ...x} = obj)',
+        });
+
+        test.fail('rest init', {
+          code: 'async({a: x, ...x = y} = obj)',
+          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          desc: 'rest on anything but an ident is not destructible'
+        });
+
+        test.fail('rest nested', {
+          code: 'async({a: x, ...{x}} = obj)',
+          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          desc: 'rest on anything but an ident is not destructible'
+        });
+      });
+
+      describe('for-header assigment pattern', _ => {
+
+        test.pass('simple pattern', {
+          code: 'for ({x, a: x} in obj);',
+        });
+
+        test.pass('shorthand pattern', {
+          code: 'for ({x, x} in obj);',
+        });
+
+        test.pass('string ident value', {
+          code: 'for ({x, "foo": x} in obj);',
+        });
+
+        test.pass('nub ident value', {
+          code: 'for ({x, 15: x} in obj);',
+        });
+
+        test.pass('nested shorthand dupe', {
+          code: 'for ({x, a: {x}} in obj);',
+        });
+
+        test.pass('nested labeled dupe', {
+          code: 'for ({x, a: {b: x}} in obj);',
+        });
+
+        test.pass('dupe key', {
+          code: 'for ({a: x, b: x} in obj);',
+        });
+
+        test.pass('computed dupe key', {
+          code: 'for ({[a]: x, b: x} in obj);',
+        });
+
+        test.pass('double computed dupe key', {
+          code: 'for ({[a]: x, [b]: x} in obj);',
+        });
+
+        test.pass('nested dupe key', {
+          code: 'for ({a: x, c: {b: x}} in obj);',
+        });
+
+        test.fail('bad nested dupe key', {
+          code: 'for ({a: x, {b: x}} in obj);',
+        });
+
+        test.pass('rest simple', {
+          code: 'for ({a: x, ...x} in obj);',
+        });
+
+        test.fail('rest init', {
+          code: 'for ({a: x, ...x = y} in obj);',
+          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          desc: 'rest on anything but an ident is not destructible'
+        });
+
+        test.fail('rest nested', {
+          code: 'for ({a: x, ...{x}} in obj);',
+          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          desc: 'rest on anything but an ident is not destructible'
         });
       });
     });

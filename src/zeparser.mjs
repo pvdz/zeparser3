@@ -307,7 +307,7 @@ const ASSIGN_EXPR_IS_ERROR = {_:'ASSIGN_EXPR_IS_ERROR'}; // throw on actual assi
 const NOT_GETSET = 0;
 const IS_GETTER = 1;
 const IS_SETTER = 2;
-const NOT_EVAL_OR_ARGS = undefined;
+const NO_ID_TO_VERIFY = undefined;
 const IS_DELETE_ARG = true;
 const NOT_DELETE_ARG = false;
 const INC_DECL = true;
@@ -1002,7 +1002,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // </SCRUB AST>
     AST_set('body', []);
     let labelSet = {_: 'labelSet'};
-    _parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, ARGS_SIMPLE, NOT_EVAL_OR_ARGS, 'body');
+    _parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, ARGS_SIMPLE, NO_ID_TO_VERIFY, 'body');
     // <SCRUB AST>
     ASSERT(_path.length === len, 'should close all that was opened. Open before: ' + JSON.stringify(bak.map(o=>o.type).join(' > ')) + ', open after: ' + JSON.stringify(_path.map(o=>o.type).join(' > ')));
     // </SCRUB AST>
@@ -1298,7 +1298,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let wasStrict = hasAllFlags(lexerFlags, LF_STRICT_MODE); // unique param check
 
     let addedLexerFlags = parseDirectivePrologues(LF_NO_FLAGS, 'body');
-
     if (hasAnyFlag(addedLexerFlags, LF_STRICT_MODE)) {
       if (wasSimple === ARGS_COMPLEX) {
         // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
@@ -1306,9 +1305,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // and IsSimpleParameterList is only true the params are "es5" (no destructuring, no defaults, just idents)
         THROW('Can only declare use strict if func params are "simple"');
       }
-      if (functionNameTokenToVerify) {
-        // the binding type is not used in conjunction with strict mode
-        fatalBindingIdentCheck(functionNameTokenToVerify, BINDING_TYPE_VAR, lexerFlags | LF_STRICT_MODE);
+      if (functionNameTokenToVerify !== NO_ID_TO_VERIFY && (
+        // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+        // TODO: optimize this to heck :'( Probably some redundant checks, too.
+        // Note: check canon because in strict these are keywords and they are not allowed to have escapes; so treat same
+        functionNameTokenToVerify.canon === 'eval' ||
+        functionNameTokenToVerify.canon === 'arguments' ||
+        functionNameTokenToVerify.canon === 'implements' ||
+        functionNameTokenToVerify.canon === 'interface' ||
+        functionNameTokenToVerify.canon === 'let' ||
+        functionNameTokenToVerify.canon === 'package' ||
+        functionNameTokenToVerify.canon === 'private' ||
+        functionNameTokenToVerify.canon === 'protected' ||
+        functionNameTokenToVerify.canon === 'public' ||
+        functionNameTokenToVerify.canon === 'static' ||
+        functionNameTokenToVerify.canon === 'yield'
+      )) {
+        THROW('Can not use reserved keyword `' + functionNameTokenToVerify.canon + '` in strict mode as id for function that has a use strict directive');
       }
     }
 
@@ -1317,6 +1330,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     lexerFlags |= addedLexerFlags;
+
     while (curtype !== $EOF && curc !== $$CURLY_R_7D) parseBodyPart(lexerFlags, scoop, {'#': labelSet}, exportedNames, exportedBindings, INC_DECL, astProp);
   }
 
@@ -1378,7 +1392,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseBodyPart(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, includeDeclarations, astProp) {
     ASSERT(arguments.length === parseBodyPart.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-    ASSERT(hasNoFlag(curtype, $ERROR | $EOF), 'should not have error or eof at this point');
+    ASSERT(hasNoFlag(curtype, $ERROR | $EOF), 'token type should not have $error or $eof at this point');
 
     switch (getGenericTokenType(curtype)) { // TODO: convert to flag index to have perfect hash in the switch
       case $IDENT:
@@ -1528,7 +1542,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // need to track whether the name was eval/args because if the func body is strict mode then it should still throw
     // retroactively for having that name. a bit annoying.
-    let functionNameTokenToVerify = NOT_EVAL_OR_ARGS;
+    let functionNameTokenToVerify = NO_ID_TO_VERIFY;
 
     let name = '';
     if (curtype === $IDENT) {
@@ -1553,10 +1567,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // The above comes down to the following; a func decl is a `var` if it's directly in a scope and if that is
       // either a function scope or the goal is script. Otherwise it is to be considered a lexical (let) binding.
       let nameBindingType = (isFuncDecl === IS_FUNC_DECL && ((hasNoFlag(lexerFlags, LF_IN_GLOBAL) || goalMode === GOAL_SCRIPT) && hasAllFlags(lexerFlags, LF_IN_SCOPE_ROOT))) ? BINDING_TYPE_VAR : BINDING_TYPE_LET;
+      functionNameTokenToVerify = curtok; // if not strict mode yet but this func has a directive, check it again
 
-      // TODO: this func could return another state: "valid in sloppy mode, invalid in strict mode"
-      //       that would be better because currently the checks have to run twice in infrequent the worst case
-      fatalBindingIdentCheck(curtok, nameBindingType, bindingFlags);
+      // Note: must verify id here and not after asserting the existence of the directive because by then the lexer flag
+      // for async will have been merged and `async function await(){}` would be illegal.
+      // The binding of a function could be considered lexical, but is probably the only lexical case that can be `let`
+      // The id is passed forward and validated on a subset, if it turns out the func has a use strict directive.
+      fatalBindingIdentCheck(curtok, curtok.str === 'let' ? BINDING_TYPE_VAR : nameBindingType, bindingFlags);
+
       name = curtok.str;
       if (isFunctionStatement) {
         outerScoop = SCOPE_addLexTo(outerScoop, BLOCK_SCOPE, 'special function statement');
@@ -1573,7 +1591,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       innerScoop = SCOPE_addLexTo(innerScoop, BLOCK_SCOPE, 'parseFunctionAfterKeyword_hide_func_name');
       ASSERT(innerScoop._ = 'func scope');
 
-      functionNameTokenToVerify = curtok; // if not strict mode yet but this func has a directive, check it again
       AST_setIdent('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     } else if (isFuncDecl === IS_FUNC_DECL && !isIdentOptional) {
@@ -2215,7 +2232,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseBlockStatement(lexerFlags, scoop, labelSet, blockType, parseDirectives, wasSimple, includeDeclarations, astProp) {
-    return _parseBlockStatement(lexerFlags, scoop, labelSet, blockType, parseDirectives, wasSimple, NOT_EVAL_OR_ARGS, includeDeclarations, astProp);
+    return _parseBlockStatement(lexerFlags, scoop, labelSet, blockType, parseDirectives, wasSimple, NO_ID_TO_VERIFY, includeDeclarations, astProp);
   }
   function _parseBlockStatement(lexerFlags, scoop, labelSet, blockType, parseDirectives, wasSimple, functionNameTokenToVerify, includeDeclarations, astProp) {
     ASSERT(_parseBlockStatement.length === arguments.length, 'arg count');
@@ -2243,7 +2260,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     AST_close('BlockStatement');
 
-    if (curc === $$IS_3D) THROW('A statement can not start with object destructuring assignment (because block)');
+    if (curtok.str === '=') {
+      THROW('A statement can not start with object destructuring assignment (because block)');
+    }
   }
 
   function parseBreakStatement(lexerFlags, scoop, labelSet, astProp) {
@@ -2810,6 +2829,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
     parseForHeader(lexerFlags | LF_NO_ASI, scoop, awaitable, astProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
+    if (curtype === $EOF) THROW('Missing `for` child statement');
     parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, scoop, {'##': 'for', '#': labelSet}, EXC_DECL, 'body');
     AST_close(['ForStatement', 'ForInStatement', 'ForOfStatement']);
   }
@@ -3105,11 +3125,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
       }
 
-      // [x]: `for (let of x) y`
-      //                   ^
-      // [x]: `function *f(){ for (yield of obj); }`
-      //                                    ^
-      THROW('Unexpected input while parsing the left side of a for-header');
+      // [x]: `for (a + b;;);`
+      //              ^
+      // [x]: `for (a);`
+      //             ^
+      parseExpressionFromBinaryOp(lexerFlags, astProp);
+      // [x]: `for (a + b;;);`
+      //                 ^
+      // [x]: `for (a, b;;);`
+      //             ^
+      if (curc === $$COMMA_2C) {
+        // Don't care about assignable await/yield flags
+        // [x]: `for (a,b;;);`
+        //             ^
+        _parseExpressions(lexerFlags, initNotAssignable(), astProp);
+      }
+
+      if (curc !== $$SEMI_3B) {
+        // [x]: `for (a);`
+        //             ^
+        // [x]: `for (a + b);`
+        //                 ^
+        // [x]: `for (a, b);`
+        //                ^
+        THROW('Unexpected input while parsing the left side of a for-header');
+      }
+
     } else if (awaitable) {
       THROW('for await only accepts the `for-of` type');
     } else {
@@ -3234,7 +3275,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // TODO: are yield/await relevant here?
       if (notAssignable(assignable)) THROW('The for-header lhs binding pattern is not destructible');
       AST_destruct(astProp);
-    } else if (curtok.str === '=') {
+    }
+    else if (curtok.str === '=') {
       // This can be fine if inside a regular `for-loop`. Only if we see `in` or `of` before the `;` are we in trouble.
       parseExpressionFromOp(lexerFlags| LF_IN_FOR_LHS, assignable, astProp);
       if (curc === $$SEMI_3B) {
@@ -3258,9 +3300,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     else {
-      // - `for ({});`
-      // - `for ([]);`
-      THROW('Unknown input followed the left side of a for loop header: ' + curtok);
+      // [v]: `for ([] + x;;);`
+      //            ^
+      // [x]: `for ({});`
+      //           ^
+      parseExpressionFromBinaryOp(lexerFlags, astProp);
+      // [v]: `for ([] + x;;);`
+      //                  ^
+      if (curc === $$COMMA_2C) {
+        // Don't care about assignable await/yield flags
+        // [v]: `for ([], x;;);`
+        //              ^
+        _parseExpressions(lexerFlags, initNotAssignable(), astProp);
+      }
+
+      if (curc !== $$SEMI_3B) {
+        // [x]: `for ([]);`
+        // [x]: `for ({});`
+        //              ^
+        THROW('Unknown input followed the left side of a for loop header: ' + curtok);
+      }
     }
 
     return assignable;
@@ -4325,7 +4384,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'private':
       case 'public':
         if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-          if (identToken.str !== identToken.canon) THROW('Keywords may not have escapes in their name');
+          if (identToken.str !== identToken.canon) return 'Keywords may not have escapes in their name';
           return 'Unexpected keyword: `' + identToken.canon + '`';
         }
         break;
@@ -4572,11 +4631,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let identToken = curtok;
     let isSimple = ARGS_SIMPLE;
-    if (identToken.str === 'eval' || identToken.str === 'arguments') {
+    if (
+      // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+      // TODO: optimize this to heck :'( Probably some redundant checks, too.
+      // Note: check canon because in strict these are keywords and they are not allowed to have escapes; so treat same
+      identToken.canon === 'eval' ||
+      identToken.canon === 'arguments' ||
+      identToken.canon === 'implements' ||
+      identToken.canon === 'interface' ||
+      identToken.canon === 'let' ||
+      identToken.canon === 'package' ||
+      identToken.canon === 'private' ||
+      identToken.canon === 'protected' ||
+      identToken.canon === 'public' ||
+      identToken.canon === 'static' ||
+      identToken.canon === 'yield'
+    ) {
       if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
         // - `"use strict"; eval => {}`
         // - `"use strict"; async eval => {}`
-        THROW('Cannot use `eval` or `arguments` as param of an arrow in strict mode');
+        THROW('Cannot use future reserved keyword `' + identToken.canon + '` as param of an arrow in strict mode');
       }
       // - `eval => {}`
       // - `async eval => {}`
@@ -4651,6 +4725,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return setNotAssignable(mergeAssignable(rhsAssignable, lhsAssignable));
   }
   function parseExpressionFromBinaryOp(lexerFlags, astProp) {
+    ASSERT(parseExpressionFromBinaryOp.length === arguments.length, 'arg count');
     // parseBinary
     // Now parsing the rhs (b) after an operator
     // - `a + b`
@@ -5454,7 +5529,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     AST_open(astProp, 'YieldExpression');
-    AST_set('delegate', false); // TODO ??
+    if (curc === $$STAR_2A) {
+      // This is a "delegate"
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/yield*
+      // [v] `yield * x`
+      AST_set('delegate', true);
+      ASSERT_skipRex('*', lexerFlags); // next is any value
+    } else {
+      AST_set('delegate', false);
+    }
     parseYieldArgument(lexerFlags, 'argument'); // takes care of newline check
     AST_close('YieldExpression');
 
@@ -5517,6 +5600,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (hasAllFlags(lexerFlags, LF_IN_GENERATOR) && identToken.str === 'yield') {
       // [x]: `function *g() { async yield => {}; }`
       THROW('Arrows cannot be generators and parenless `yield` param in a generator would be parsing a yield expression and fail at the arrow');
+    }
+
+    fatalBindingIdentCheck(identToken, BINDING_TYPE_ARG, lexerFlags); // TODO: confirm this isn't a duplicate check
+    if (
+      // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+      // TODO: optimize this to heck :'( Probably some redundant checks, too.
+      // Note: check canon because in strict these are keywords and they are not allowed to have escapes; so treat same
+      identToken.canon === 'eval' ||
+      identToken.canon === 'arguments' ||
+      identToken.canon === 'implements' ||
+      identToken.canon === 'interface' ||
+      identToken.canon === 'let' ||
+      identToken.canon === 'package' ||
+      identToken.canon === 'private' ||
+      identToken.canon === 'protected' ||
+      identToken.canon === 'public' ||
+      identToken.canon === 'static' ||
+      identToken.canon === 'yield'
+    ) {
+      // Throw error if body is or contains strict mode
+      wasSimple = ARGS_COMPLEX;
     }
 
     // - `x => x`
@@ -6093,16 +6197,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             wasSimple = ARGS_COMPLEX; // if we can't assign to it then the name is a keyword of sorts
           } else if (
             // TODO: make this part more efficient :( Should check for keywords that are only keywords in strict mode
-            identToken.str === 'eval' ||
-            identToken.str === 'arguments' ||
-            identToken.str === 'implements' ||
-            identToken.str === 'package' ||
-            identToken.str === 'protected' ||
-            identToken.str === 'interface' ||
-            identToken.str === 'private' ||
-            identToken.str === 'public' ||
-            identToken.str === 'yield' ||
-            identToken.str === 'let'
+            // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
+            // Also note to check canon because we must disallow unicode escapes in keywords (but that's only in strict)
+            identToken.canon === 'eval' ||
+            identToken.canon === 'arguments' ||
+            identToken.canon === 'implements' ||
+            identToken.canon === 'interface' ||
+            identToken.canon === 'let' ||
+            identToken.canon === 'package' ||
+            identToken.canon === 'private' ||
+            identToken.canon === 'protected' ||
+            identToken.canon === 'public' ||
+            identToken.canon === 'static' ||
+            identToken.canon === 'yield'
           ) {
             // Mark the args as non-simple such that if the body contains a "use strict" directive, it will still throw
             // If already in strict mode then make an arrow illegal immediately.
@@ -6112,8 +6219,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               // [x]: `"use strict"; (arguments) => { }`
               destructible |= CANT_DESTRUCT;
             } else {
+              // [x]: `(eval) => { }`
+              // [x]: `(arguments) => { }`
               // [x]: `(eval) => { "use strict"; }`
               // [x]: `(arguments) => { "use strict"; }`
+              wasSimple = ARGS_COMPLEX; // Throw if use strict directve is found
             }
           } else {
             // The arg was not special under strict mode
@@ -6959,25 +7069,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // if it isn't the last in the array then the array is not destructible
         // if binding, if spread arg is not array/object/ident then it is not destructible
         // if not binding, it is also destructible if arg is member expression
-        // - ([...x]);       (this is valid)
-        // - ([...x=y]);     (spread wraps the assignment (!))
-        // - ([...x+=y]);    (spread wraps the assignment (!))
-        // - ([...x+y]);     (spread wraps any expression)
-        // - ([...x, y]);    (spread does not need to be last)
-        // - ([...x, ...y]); (spread can appear more than once)
-        // - ([...x]) => x
-        // - ([x, ...y]) => x
-        // - ([...x.y] = z)             (ok)
-        // - ([...x.y]) => z            (bad)
-        // - ([...x.y] = z) => z        (bad)
-        // - (z = [...x.y]) => z        (ok)
-        // - (z = [...x.y] = z) => z    (ok)
-
+        // - `([...x]);`                  (this is valid)
+        // - `([...x=y]);`                (spread wraps the assignment (!))
+        // - `([...x+=y]);`               (spread wraps the assignment (!))
+        // - `([...x+y]);`                (spread wraps any expression)
+        // - `([...x, y]);`               (spread does not need to be last)
+        // - `([...x, ...y]);`            (spread can appear more than once)
+        // - `([...x]) => x`
+        // - `([x, ...y]) => x`
+        // - `([...x.y] = z)`             (ok)
+        // - `([...x.y]) => z`            (bad)
+        // - `([...x.y] = z) => z`        (bad)
+        // - `(z = [...x.y]) => z`        (ok)
+        // - `(z = [...x.y] = z) => z`    (ok)
+        // - `[...(x), y]`                (ok)
+        // - `[...(x), y] = z`            (bad)
 
         let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$SQUARE_R_5D, bindingType, NOT_GROUP_TOPLEVEL, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
         destructible |= subDestruct;
-        if (curc !== $$COMMA_2C && curc !== $$SQUARE_R_5D) THROW('Encountered unexpected token after parsing spread/rest argument ');
-        ASSERT(curc !== $$COMMA_2C || hasAllFlags(subDestruct, CANT_DESTRUCT), 'if comma then cannot destruct, should be dealt with in function');
+        if (curc !== $$COMMA_2C && curc !== $$SQUARE_R_5D) {
+          THROW('Encountered unexpected token after parsing spread/rest argument ');
+        }
+        console.log('wtf', ''+curtok)
+        ASSERT(curc !== $$COMMA_2C || hasAllFlags(subDestruct, CANT_DESTRUCT), 'if comma then cannot destruct, should be dealt with in spread-parsing function');
         // if there are any other elements after this then this cannot be a destructible since that demands rest as last
         if (spreadStage === NO_SPREAD) spreadStage = LAST_SPREAD;
       }
@@ -7333,7 +7447,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // `{"__proto__": 1, __proto__: 2}` is still an error
         if (litToken.str.slice(1, -1) === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
 
-        destructible |= parseObjectPropertyValueAfterColon(lexerFlags, litToken, isClassMethod, bindingType, assignable, destructible, scoop,exportedNames, exportedBindings, astProp);
+        destructible |= parseObjectPropertyValueAfterColon(lexerFlags, litToken, isClassMethod, bindingType, assignable, destructible, scoop, exportedNames, exportedBindings, astProp);
         ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
       }
       else if (curc === $$PAREN_L_28) {
@@ -7688,6 +7802,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       assignableOnlyForYieldAwaitFlags |= valueAssignable;
 
       if (curc === $$COMMA_2C || curc === $$CURLY_R_7D) {
+        // - `({a: b} = d)`
+        //          ^
+        // - `({a: b = x} = d)`
+        //           ^
         if (wasAssign || commaOrEnd) { // "did this have no tail?"
           // - `({a: b} = d)`
           //          ^
@@ -7716,6 +7834,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             // - `({[a]: b})`
             //            ^
             // - `({15: b})`
+            SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
           }
         }
         else {
@@ -7740,6 +7859,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
       else if (curtok.str === '=') {
+        // - `({a: b = x} = d)`
+        //           ^
         if (notAssignable(valueAssignable)) {
           // A value that is not assignable cannot be destructed
           // - `let {x: true = 1} = z`
@@ -7758,6 +7879,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           //              ^
           // - `({[a]: b = c} = d)`
           //             ^
+          SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
         }
 
         // The assignment itself cannot affect destructibility so just parse the rest
@@ -8284,6 +8406,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'SpreadElement');
     let destructible = _parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncIdent, exportedNames, exportedBindings, 'argument');
     AST_close('SpreadElement');
+
     return destructible;
   }
   function _parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncIdent, exportedNames, exportedBindings, astProp) {
@@ -8568,7 +8691,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `[...(x,y)]`
         // - `[.../x/+y]`
 
-        if (curc !== $$COMMA_2C && curc !== closingCharOrd) {
+        if (curc === $$COMMA_2C) {
+          // Note: rest in array must be the last element and trailing comma is NOT allowed after array-rest
+          // [v]: `[...a, b]`
+          // [v]: `[...(x), y]`
+          destructible |= CANT_DESTRUCT;
+        }
+        else if (curc !== closingCharOrd) {
           // - `[.../x//y]`
           // - `[.../x/g/y]`
           // - `[..."foo".bar]`

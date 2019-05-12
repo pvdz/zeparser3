@@ -2390,6 +2390,123 @@ export default (describe, test) =>
         code: '(x=(yield z)=y)',
       });
     });
+
+    describe('yield *', _ => {
+
+      test('yield can be followed by star', {
+        code: 'function* f() { yield* x; }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'FunctionDeclaration',
+              generator: true,
+              async: false,
+              id: {type: 'Identifier', name: 'f'},
+              params: [],
+              body: {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'YieldExpression',
+                      delegate: true,
+                      argument: {type: 'Identifier', name: 'x'},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('yield star can be followed by another argless yield', {
+        code: 'function* f() { yield* yield; }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'FunctionDeclaration',
+              generator: true,
+              async: false,
+              id: {type: 'Identifier', name: 'f'},
+              params: [],
+              body: {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'YieldExpression',
+                      delegate: true,
+                      argument: {type: 'YieldExpression', delegate: false, argument: null},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('yield star can be followed by another yield with arg', {
+        code: 'function* f() { yield* yield y; }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'FunctionDeclaration',
+              generator: true,
+              async: false,
+              id: {type: 'Identifier', name: 'f'},
+              params: [],
+              body: {
+                type: 'BlockStatement',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'YieldExpression',
+                      delegate: true,
+                      argument: {
+                        type: 'YieldExpression',
+                        delegate: false,
+                        argument: {type: 'Identifier', name: 'y'},
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('yield multiplied with yield in sloppy mode', {
+        code: 'yield * yield',
+        STRICT: {throws: true},
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'yield'},
+                operator: '*',
+                right: {type: 'Identifier', name: 'yield'},
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+      });
+    });
   });
 
 // I don't think a yield expression can ... yield a valid assignment

@@ -426,6 +426,29 @@ export default (describe, test) =>
         test.pass('spread on string property assignment', {
           code: '[..."foo".foo=x]',
         });
+
+        test('array spread with comma', {
+          code: '[...(x), y]',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'SpreadElement',
+                      argument: {type: 'Identifier', name: 'x'},
+                    },
+                    {type: 'Identifier', name: 'y'},
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        });
       });
     });
 
