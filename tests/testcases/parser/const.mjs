@@ -11158,6 +11158,103 @@ export default (describe, test) =>
     test.fail('let in destructed prop name', {
       code: 'const {let} = 1;',
     });
+
+    test.pass('const a var inside for-statement that was var bound in for-header', {
+      code: 'for (var x = 3;;) { const x = 1 }',
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in
+      // > the VarDeclaredNames of Statement.
+      // But none the other way around?
+    });
+
+    test.fail('const a var inside for-header that was var bound in for-statement', {
+      code: 'for (const x = 1;;) { var x = 2 }',
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in
+      // > the VarDeclaredNames of Statement.
+    });
+
+    test.pass('const a var inside for-statement that was var bound in for-in-header', {
+      code: 'for (var x in obj) { const x = 1 }',
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in
+      // > the VarDeclaredNames of Statement.
+      // Not the other way around
+    });
+
+    test.fail('const a var inside for-header that was var bound in for-in-statement', {
+      code: 'for (const x in obj) { var x = 13 }',
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in
+      // > the VarDeclaredNames of Statement.
+    });
+
+    test.pass('const a var inside for-statement that was var bound in for-of-header', {
+      code: 'for (var x of obj) { const x = 1 }',
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in
+      // > the VarDeclaredNames of Statement.
+      // Not the other way around
+    });
+
+    test.fail('const a var inside for-header that was var bound in for-of-statement', {
+      code: 'for (const x of obj) { var x = 14 }',
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in
+      // > the VarDeclaredNames of Statement.
+    });
+
+    test.fail('in global, lex rebind a var declared in for-header in sibling statement', {
+      code: 'for (var x;;); const x = 1',
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-early-errors
+      // IterationStatement: for(LexicalDeclarationExpression;Expression)Statement
+      // > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in the
+      //   VarDeclaredNames of Statement.
+      // Note that the for-var ends up in global, and so is the const. So the statement is global and the lexical names
+      // contains an element that also appears in its variable list. So it fails.
+    });
+
+    test.fail('lexically rebind a var that was bound inside for-header in a block in global', {
+      code: '{ for (var x;;); const x = 1 }',
+      desc: 'it is definitely an error in a block',
+
+      // https://tc39.github.io/ecma262/#sec-block-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the LexicallyDeclaredNames of StatementList also occurs in the VarDeclaredNames of StatementList.
+      // https://tc39.github.io/ecma262/#sec-try-statement-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the BoundNames of CatchParameter also occurs in the VarDeclaredNames of Block.
+      // But I don't see this rule for the toplevel...
+
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-vardeclarednames
+      // propagates the list of var decl
+      // https://tc39.github.io/ecma262/#sec-block-static-semantics-toplevelvardeclarednames
+      // collects it on the toplevel
+      // So the toplevel VarDeclaredNames contains `x` now
+
+      // The `const x` definitely adds `x` to the LexicallyDeclaredNames
+
+      // So this is an error?
+    });
+
+    test.fail('lexically rebind a var that was bound inside for-header in a function body', {
+      code: 'function f(){  for (var x;;); const x = 1  }',
+      desc: 'it is definitely an error in a function body',
+
+      // https://tc39.github.io/ecma262/#sec-block-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the LexicallyDeclaredNames of StatementList also occurs in the VarDeclaredNames of StatementList.
+      // https://tc39.github.io/ecma262/#sec-try-statement-static-semantics-early-errors
+      // > It is a Syntax Error if any element of the BoundNames of CatchParameter also occurs in the VarDeclaredNames of Block.
+      // But I don't see this rule for the toplevel...
+
+      // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-vardeclarednames
+      // propagates the list of var decl
+      // https://tc39.github.io/ecma262/#sec-block-static-semantics-toplevelvardeclarednames
+      // collects it on the toplevel
+      // So the toplevel VarDeclaredNames contains `x` now
+
+      // The `const x` definitely adds `x` to the LexicallyDeclaredNames
+
+      // So this is an error
+    });
   });
 
 // TODO: const probably has some constant-specific rules to test from the parser's perspective?

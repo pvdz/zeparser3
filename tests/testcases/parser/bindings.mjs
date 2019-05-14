@@ -1833,6 +1833,60 @@ export default (describe, test) =>
         });
       });
     });
+
+    describe('var/lex dupe checks', _ => {
+
+      // In general, you can not declare a lex binding if a var binding exists on the same statement level or below
+      // but this check stops at function boundaries. There are no further restriction for var bindings beyond that.
+
+      test.pass('var outside, let inside, is okay', {
+        code: 'var x; { let x }',
+      });
+
+      test.pass('let inside, var outside, is okay', {
+        code: '{ let x } var x;',
+      });
+
+      test.fail('let then var on same level', {
+        code: 'let x; var x;',
+      });
+
+      test.fail('var then let on same level', {
+        code: 'var x; let x;',
+      });
+
+      test.fail('outer let, inner var', {
+        code: 'let x; { var x }',
+      });
+
+      test.fail('inner var, outer let', {
+        code: '{ var x } let x;',
+      });
+
+      test.pass('for-header var, for-statement let', {
+        code: 'for (var x;;) { let x; }',
+      });
+
+      test.fail('for-header let, for-statement var', {
+        code: 'for (let x;;) { var x; }',
+      });
+
+      test.fail('outer let, for-statement var', {
+        code: 'let x; for (;;) { var x; }',
+      });
+
+      test.fail('for-statement var, outer var', {
+        code: 'for (;;) { var x; } let x;',
+      });
+
+      test.pass('outer var, for-statement let', {
+        code: 'var x; for (;;) { let x; }',
+      });
+
+      test.pass('for-statement let, outer var', {
+        code: 'for (;;) { let x; } var x;',
+      });
+    });
   });
 
 
