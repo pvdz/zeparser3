@@ -107,13 +107,6 @@ export default (describe, test) =>
       });
     });
 
-//
-//     test('for header instancoef', {
-//       code: 'for ((2935) instanceof ((2e308));;) debugger',
-//     });
-//
-//     test('interface declared twice', {
-
     test.pass('should pass', {
       code: 'for ({[a]: ""[b] = c} of d) {}',
       // This one is actually valid
@@ -146,42 +139,9 @@ export default (describe, test) =>
       code: 'for ({x = y} = (z);;) {}',
     });
 
-
-//       code: `
-// throw new 'zx\r"';
-// function* interface(d = /[--]|>?|(?:q\xab)/my, s = (package), [], {}, n = (false), ...{}) {
-//   "WEx";
-//   "xxxV";
-//   ;
-// }
-// do if ("dx") break; while (({}));
-// const interface = m;
-//
-// `,
-//     });
-//
-//     test('dupe const binding', {
-//       code: `
-// "";
-// "xx"
-// "use strict";
-// while (((this))) switch (2785116224220380) {
-//   default:
-// }
-// for (;; 2e308) if ((null)) debugger
-// try {} finally {}
-// function* csyearfw(turvyki, vanysjsavoonlwss, jmmyvr, eh) {
-//   "use strict"
-//   "x&xi0"
-//   return;
-//   for (let c in "xxx2") continue
-//   throw yield
-//   const n = 2e3088)
-// }
-// ^------- error
-//
-// `,
-//     })
-
+    test.pass('for header instancoef', {
+      code: 'for ((2935) instanceof ((2e308));;) debugger',
+      desc: 'fuzzed',
+    });
   });
 
