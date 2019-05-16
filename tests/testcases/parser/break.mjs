@@ -638,69 +638,69 @@ export default (describe, test) =>
         describe('global', _ => {
 
           test.pass('plain', {
-            code: 'for (;;)    break   }',
+            code: 'for (;;)    break',
           });
 
           test.pass('block', {
-            code: 'for (;;)    { break }   }',
+            code: 'for (;;)    { break }',
           });
 
           test.pass('nested', {
-            code: 'for (;;)    if (x) break   }',
+            code: 'for (;;)    if (x) break',
           });
 
           test.fail('labeled', {
-            code: 'for (;;)    break y   }',
+            code: 'for (;;)    break y',
           });
 
           test.fail('labeled nested', {
-            code: 'for (;;)    if (x) break y   }',
+            code: 'for (;;)    if (x) break y',
           });
         });
 
         describe('function', _ => {
 
           test.pass('plain', {
-            code: 'function f(){ for (;;)       break    }}',
+            code: 'function f(){ for (;;)       break    }',
           });
 
           test.pass('block', {
-            code: 'function f(){ for (;;)       { break }    }}',
+            code: 'function f(){ for (;;)       { break }    }',
           });
 
           test.pass('nested', {
-            code: 'function f(){ for (;;)       if (x) break   }}',
+            code: 'function f(){ for (;;)       if (x) break   }',
           });
 
           test.fail('labeled', {
-            code: 'function f(){ for (;;)       break y   }}',
+            code: 'function f(){ for (;;)       break y   }',
           });
 
           test.fail('labeled nested', {
-            code: 'function f(){ for (;;)       if (x) break y   }}',
+            code: 'function f(){ for (;;)       if (x) break y   }',
           });
         });
 
         describe('arrow', _ => {
 
           test.pass('plain', {
-            code: '() => { for (;;)       break    }}',
+            code: '() => { for (;;)       break    }',
           });
 
           test.pass('block', {
-            code: '() => { for (;;)       { break }    }}',
+            code: '() => { for (;;)       { break }    }',
           });
 
           test.pass('nested', {
-            code: '() => { for (;;)       if (x) break   }}',
+            code: '() => { for (;;)       if (x) break   }',
           });
 
           test.fail('labeled', {
-            code: '() => { for (;;)       break y   }}',
+            code: '() => { for (;;)       break y   }',
           });
 
           test.fail('labeled nested', {
-            code: '() => { for (;;)       if (x) break y   }}',
+            code: '() => { for (;;)       if (x) break y   }',
           });
         });
       });
@@ -710,69 +710,69 @@ export default (describe, test) =>
         describe('global', _ => {
 
           test.pass('plain', {
-            code: 'while (true)    break   }',
+            code: 'while (true)    break',
           });
 
           test.pass('block', {
-            code: 'while (true)    { break }   }',
+            code: 'while (true)    { break }',
           });
 
           test.pass('nested', {
-            code: 'while (true)    if (x) break   }',
+            code: 'while (true)    if (x) break',
           });
 
           test.fail('labeled', {
-            code: 'while (true)    break y   }',
+            code: 'while (true)    break y',
           });
 
           test.fail('labeled nested', {
-            code: 'while (true)    if (x) break y   }',
+            code: 'while (true)    if (x) break y',
           });
         });
 
         describe('function', _ => {
 
           test.pass('plain', {
-            code: 'function f(){ while (true)       break    }}',
+            code: 'function f(){ while (true)       break    }',
           });
 
           test.pass('block', {
-            code: 'function f(){ while (true)       { break }    }}',
+            code: 'function f(){ while (true)       { break }    }',
           });
 
           test.pass('nested', {
-            code: 'function f(){ while (true)       if (x) break   }}',
+            code: 'function f(){ while (true)       if (x) break   }',
           });
 
           test.fail('labeled', {
-            code: 'function f(){ while (true)       break y   }}',
+            code: 'function f(){ while (true)       break y   }',
           });
 
           test.fail('labeled nested', {
-            code: 'function f(){ while (true)       if (x) break y   }}',
+            code: 'function f(){ while (true)       if (x) break y   }',
           });
         });
 
         describe('arrow', _ => {
 
           test.pass('plain', {
-            code: '() => { while (true)       break    }}',
+            code: '() => { while (true)       break    }',
           });
 
           test.pass('block', {
-            code: '() => { while (true)       { break }    }}',
+            code: '() => { while (true)       { break }    }',
           });
 
           test.pass('nested', {
-            code: '() => { while (true)       if (x) break   }}',
+            code: '() => { while (true)       if (x) break   }',
           });
 
           test.fail('labeled', {
-            code: '() => { while (true)       break y   }}',
+            code: '() => { while (true)       break y   }',
           });
 
           test.fail('labeled nested', {
-            code: '() => { while (true)       if (x) break y   }}',
+            code: '() => { while (true)       if (x) break y   }',
           });
         });
       });

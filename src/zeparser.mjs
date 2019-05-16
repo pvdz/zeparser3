@@ -8895,6 +8895,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   init(initialLexerFlags);
   parseTopLevels(initialLexerFlags);
 
+  if (curtype !== $EOF) THROW('Unexpected further input');
+
   return {
     ast:
     // <SCRUB AST>

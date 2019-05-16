@@ -113,6 +113,32 @@ export default (describe, test) =>
 //     });
 //
 //     test('interface declared twice', {
+
+    test.pass('should pass', {
+      code: 'for ({[a]: ""[b] = c} of d) {}',
+      // This one is actually valid
+      desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
+    });
+
+    test.fail('crappy end not properly rejected', {
+      code: 'if (x) {}}dsadsa',
+    });
+
+    test.fail('crappy end not properly rejected', {
+      code: 'for (;;) {}}dsadsa',
+    });
+
+    test.fail('more regression', {
+      code: 'for ({[a]: ""[b] = c} of d) {}}',
+      desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
+    });
+
+    test.fail('original report', {
+      code: 'for ({[a]: ""[b] = c} of d) {}})',
+      desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
+    });
+
+
 //       code: `
 // throw new 'zx\r"';
 // function* interface(d = /[--]|>?|(?:q\xab)/my, s = (package), [], {}, n = (false), ...{}) {
