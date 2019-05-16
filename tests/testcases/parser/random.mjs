@@ -138,6 +138,14 @@ export default (describe, test) =>
       desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
     });
 
+    test.pass('regression reporting must destruct cannot be lhs of for loop', {
+      code: 'for ({x = y} = z;;) {}',
+    });
+
+    test.pass('regression with parens', {
+      code: 'for ({x = y} = (z);;) {}',
+    });
+
 
 //       code: `
 // throw new 'zx\r"';

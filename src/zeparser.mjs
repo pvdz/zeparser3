@@ -3031,6 +3031,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
 
       destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, SKIP_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      if (hasAllFlags(destructible, MUST_DESTRUCT) && curtok.str === '=') {
+        if (hasAllFlags(destructible, CANT_DESTRUCT)) TODO, THROW('Found something that must and cant destruct');
+        destructible = sansFlag(destructible, MUST_DESTRUCT);
+      }
       assignable = parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp);
     }
     else if (curc === $$SQUARE_L_5B) {
@@ -3049,7 +3053,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
 
       destructible = parseArrayOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-      assignable = parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp);
+      if (hasAllFlags(destructible, MUST_DESTRUCT) && curtok.str === '=') {
+        if (hasAllFlags(destructible, CANT_DESTRUCT)) TODO, THROW('Found something that must and cant destruct');
+        destructible = sansFlag(destructible, MUST_DESTRUCT);
+      }
+      assignable = parsePatternTailInForHeader(lexerFlags, assignable, destructible, awaitable, astProp);0
     }
     else {
       // If the LHS is an object or array then it must cover an AssignmentPattern. In this case it may have an
@@ -3278,6 +3286,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // This is fiiiine
         // - `for ([] = x ;;);`
         // - `for ({} = x ;;);`
+        assignable = NOT_ASSIGNABLE;
       } else if (curtok.str === 'in' || curtok.str === 'of') {
         // - `for ([] = x in y);`
         // - `for ({} = x of y);`
