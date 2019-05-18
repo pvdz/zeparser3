@@ -4099,6 +4099,47 @@ export default (describe, test) =>
       code: 'f = ([cls = class {}, xCls = class X {}, xCls2 = class { static name() {} }]) => {}',
     });
 
+    test.fail('class extends.ident', {
+      code: 'class v extends.foo {}',
+    });
+
+    test('class extends number literal', {
+      code: 'class v extends.9 {}',
+      desc: 'this is a class that extends the number .9 (not a syntactically invalid attempt to read property 9)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'v'},
+            superClass: {type: 'Literal', value: '<TODO>', raw: '.9'},
+            body: {type: 'ClassBody', body: []},
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('class extends array literal', {
+      code: 'class v extends[x] {}',
+      desc: 'note: this is not a dynamic property access but an array instance with one element (`[x]`)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'v'},
+            superClass: {
+              type: 'ArrayExpression',
+              elements: [{type: 'Identifier', name: 'x'}],
+            },
+            body: {type: 'ClassBody', body: []},
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
     // test.fail('class extending an arrow', {
     //   code: [
     //     'class x extends ()=>{} {}',
