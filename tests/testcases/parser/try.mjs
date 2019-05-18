@@ -51,184 +51,283 @@ export default (describe, test) =>
     });
 
     describe('catch arg', _ => {
-      test('no arg', {
-        code: 'try {} catch(){}',
-        throws: 'Missing catch clause',
-        tokens: [],
-      });
 
-      test('plain ident', {
-        code: 'try {} catch(e){}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'TryStatement',
-              block: {type: 'BlockStatement', body: []},
-              handler: {
-                type: 'CatchClause',
-                param: {type: 'Identifier', name: 'e'},
-                body: {type: 'BlockStatement', body: []},
-              },
-              finalizer: null,
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
+      describe('present', _ => {
 
-      test('dobule arg', {
-        code: 'try {} catch(e, f){}',
-        throws: 'exactly one parameter',
-        tokens: [],
-      });
+        test('no arg', {
+          code: 'try {} catch(){}',
+          throws: 'Missing catch clause',
+          tokens: [],
+        });
 
-      test('simple object destruct', {
-        code: 'try {} catch({e}){}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'TryStatement',
-              block: {type: 'BlockStatement', body: []},
-              handler: {
-                type: 'CatchClause',
-                param: {
-                  type: 'ObjectPattern',
-                  properties: [
-                    {
-                      type: 'Property',
-                      key: {type: 'Identifier', name: 'e'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {type: 'Identifier', name: 'e'},
-                      shorthand: true,
-                    },
-                  ],
+        test('plain ident', {
+          code: 'try {} catch(e){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'TryStatement',
+                block: {type: 'BlockStatement', body: []},
+                handler: {
+                  type: 'CatchClause',
+                  param: {type: 'Identifier', name: 'e'},
+                  body: {type: 'BlockStatement', body: []},
                 },
-                body: {type: 'BlockStatement', body: []},
+                finalizer: null,
               },
-              finalizer: null,
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
 
-      test('simple array destruct', {
-        code: 'try {} catch([e]){}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'TryStatement',
-              block: {type: 'BlockStatement', body: []},
-              handler: {
-                type: 'CatchClause',
-                param: {
-                  type: 'ArrayPattern',
-                  elements: [{type: 'Identifier', name: 'e'}],
+        test('dobule arg', {
+          code: 'try {} catch(e, f){}',
+          throws: 'exactly one parameter',
+          tokens: [],
+        });
+
+        test('simple object destruct', {
+          code: 'try {} catch({e}){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'TryStatement',
+                block: {type: 'BlockStatement', body: []},
+                handler: {
+                  type: 'CatchClause',
+                  param: {
+                    type: 'ObjectPattern',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'e'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'e'},
+                        shorthand: true,
+                      },
+                    ],
+                  },
+                  body: {type: 'BlockStatement', body: []},
                 },
-                body: {type: 'BlockStatement', body: []},
+                finalizer: null,
               },
-              finalizer: null,
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
 
-      test('ident with trailing comma', {
-        code: 'try {} catch(e,){}',
-        throws: 'exactly one parameter',
-        tokens: [],
-      });
+        test('simple array destruct', {
+          code: 'try {} catch([e]){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'TryStatement',
+                block: {type: 'BlockStatement', body: []},
+                handler: {
+                  type: 'CatchClause',
+                  param: {
+                    type: 'ArrayPattern',
+                    elements: [{type: 'Identifier', name: 'e'}],
+                  },
+                  body: {type: 'BlockStatement', body: []},
+                },
+                finalizer: null,
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
 
-      test('object with trailing comma', {
-        code: 'try {} catch({e},){}',
-        throws: 'no trailing comma',
-        tokens: [],
-      });
+        test('ident with trailing comma', {
+          code: 'try {} catch(e,){}',
+          throws: 'exactly one parameter',
+          tokens: [],
+        });
 
-      test.pass('object with initializer is ok', {
-        code: 'try {} catch({e}=x){}',
-      });
+        test('object with trailing comma', {
+          code: 'try {} catch({e},){}',
+          throws: 'no trailing comma',
+          tokens: [],
+        });
 
-      test('object with inside default', {
-        code: 'try {} catch({e=x}){}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'TryStatement',
-              block: {type: 'BlockStatement', body: []},
-              handler: {
-                type: 'CatchClause',
-                param: {
-                  type: 'ObjectPattern',
-                  properties: [
-                    {
-                      type: 'Property',
-                      key: {type: 'Identifier', name: 'e'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {
+        test.pass('object with initializer is ok', {
+          code: 'try {} catch({e}=x){}',
+        });
+
+        test('object with inside default', {
+          code: 'try {} catch({e=x}){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'TryStatement',
+                block: {type: 'BlockStatement', body: []},
+                handler: {
+                  type: 'CatchClause',
+                  param: {
+                    type: 'ObjectPattern',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'e'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {
+                          type: 'AssignmentPattern',
+                          left: {type: 'Identifier', name: 'e'},
+                          right: {type: 'Identifier', name: 'x'},
+                        },
+                        shorthand: true,
+                      },
+                    ],
+                  },
+                  body: {type: 'BlockStatement', body: []},
+                },
+                finalizer: null,
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('array with trailing comma', {
+          code: 'try {} catch([e],){}',
+          throws: 'exactly one parameter',
+        });
+
+        test.pass('array with default', {
+          code: 'try {} catch([e]=x){}',
+          desc: 'catch clauses cant have a default but patterns can still have initializers',
+        });
+
+        test('array with inside default', {
+          code: 'try {} catch([e=x]){}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'TryStatement',
+                block: {type: 'BlockStatement', body: []},
+                handler: {
+                  type: 'CatchClause',
+                  param: {
+                    type: 'ArrayPattern',
+                    elements: [
+                      {
                         type: 'AssignmentPattern',
                         left: {type: 'Identifier', name: 'e'},
                         right: {type: 'Identifier', name: 'x'},
                       },
-                      shorthand: true,
-                    },
-                  ],
+                    ],
+                  },
+                  body: {type: 'BlockStatement', body: []},
                 },
-                body: {type: 'BlockStatement', body: []},
+                finalizer: null,
               },
-              finalizer: null,
-            },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
       });
 
-      test('array with trailing comma', {
-        code: 'try {} catch([e],){}',
-        throws: 'exactly one parameter',
-      });
+      [undefined, 9, Infinity].forEach(VER => {
 
-      test.pass('array with default', {
-        code: 'try {} catch([e]=x){}',
-        desc: 'catch clauses cant have a default but patterns can still have initializers',
-      });
+        describe('optional catch binding supported from ES9 upward (version=`'+VER+'`)', _ => {
 
-      test('array with inside default', {
-        code: 'try {} catch([e=x]){}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'TryStatement',
-              block: {type: 'BlockStatement', body: []},
-              handler: {
-                type: 'CatchClause',
-                param: {
-                  type: 'ArrayPattern',
-                  elements: [
-                    {
-                      type: 'AssignmentPattern',
-                      left: {type: 'Identifier', name: 'e'},
-                      right: {type: 'Identifier', name: 'x'},
-                    },
-                  ],
+          test('try/catch no finally', {
+            code: 'try {} catch {}',
+            ES: VER,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'TryStatement',
+                  block: {type: 'BlockStatement', body: []},
+                  handler: {
+                    type: 'CatchClause',
+                    param: null,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                  finalizer: null,
                 },
-                body: {type: 'BlockStatement', body: []},
-              },
-              finalizer: null,
+              ],
             },
-          ],
-        },
-        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test('try/catch/finally', {
+            code: 'try {} catch {} finally {}',
+            ES: VER,
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'TryStatement',
+                  block: {type: 'BlockStatement', body: []},
+                  handler: {
+                    type: 'CatchClause',
+                    param: null,
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                  finalizer: {type: 'BlockStatement', body: []},
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+          });
+
+          test.fail('try/catch parenless ident', {
+            code: 'try {} catch foo {}',
+            ES: VER,
+          });
+
+          test.fail('try/catch parenless array', {
+            code: 'try {} catch [] {}',
+            ES: VER,
+          });
+
+          test.pass('try/catch asi ', {
+            code: 'try {} catch \n {}',
+            ES: VER,
+          });
+        });
+      });
+
+      [6, 7, 8, 9].forEach(VER => {
+
+        describe('optional catch binding not supported in ES8 downward (version=`'+VER+'`)', _ => {
+
+          test.pass('try/catch no finally', {
+            code: 'try {} catch {}',
+            ES: VER,
+          });
+
+          test.pass('try/catch/finally', {
+            code: 'try {} catch {} finally {}',
+            ES: VER,
+          });
+
+          test.fail('try/catch parenless ident', {
+            code: 'try {} catch foo {}',
+            ES: VER,
+          });
+
+          test.fail('try/catch parenless array', {
+            code: 'try {} catch [] {}',
+            ES: VER,
+          });
+
+          test.pass('try/catch asi ', {
+            code: 'try {} catch \n {}',
+            ES: VER,
+          });
+        });
       });
     });
 

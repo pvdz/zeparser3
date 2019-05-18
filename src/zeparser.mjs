@@ -217,6 +217,7 @@ const VERSION_TRAILING_FUNC_COMMAS = 8;
 const VERSION_ASYNC_GEN = 9;
 const VERSION_OBJECTSPREAD = 9;
 const VERSION_TAGGED_TEMPLATE_BAD_ESCAPES = 9;
+const VERSION_OPTIONAL_CATCH = 9;
 const VERSION_WHATEVER = Infinity;
 
 const WAS_ASYNC = true;
@@ -380,6 +381,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let allowAsyncFunctions = targetEsVersion >= VERSION_ASYNC || targetEsVersion === VERSION_WHATEVER;
   let allowAsyncGenerators = targetEsVersion >= VERSION_ASYNC_GEN || targetEsVersion === VERSION_WHATEVER;
   let allowBadEscapesInTaggedTemplates = targetEsVersion >= VERSION_TAGGED_TEMPLATE_BAD_ESCAPES || targetEsVersion === VERSION_WHATEVER;
+  let allowOptionalCatchBinding = targetEsVersion >= VERSION_OPTIONAL_CATCH || targetEsVersion === VERSION_WHATEVER;
 
   if (getTokenizer) getTokenizer(tok);
 
@@ -3651,27 +3653,38 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // parseCatch
       hasEither = true;
       AST_open('handler', 'CatchClause');
-      ASSERT_skipAny('catch', lexerFlags); // TODO: optimize; next must be (
-      skipAnyOrDieSingleChar($$PAREN_L_28, lexerFlags); // TODO: optimize; next MUST be one arg (ident/destructuring)
+      ASSERT_skipAny('catch', lexerFlags); // TODO: optimize; next must be ( or {
+
+      // TODO: can we safely move these extra scoop layers inside the conditional? (very uncommon path so not very important)
 
       // record the catch var in its own scope record, we'll then move the args record to be a lexical scope level (hackish)
       let catchHeadScoop = SCOPE_addLexTo(scoop, CATCH_SCOPE, 'parseTryStatement(catch-var)');
 
-      if (curc === $$PAREN_R_29) THROW('Missing catch clause parameter');
-      // catch clause cannot have a default
-      // catch clause can be written to, cannot already be declared, so it's like a `let` binding
-      // there's an explicit rule disallowing lexical bindings with same name as catch var so just record it as lex
-      parseBinding(lexerFlags | LF_NO_ASI, catchHeadScoop, BINDING_TYPE_ARG, FROM_CATCH, ASSIGNMENT_IS_DEFAULT, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'param');
-
-      // destructuring requires manual checks so do this now for the catch var
-      if (SCOPE_verifyLexical(lexerFlags, catchHeadScoop, true)) THROW('Catch binding had at least one duplicate name bound');
-
       // create a scope for the catch body. this way var decls can search for the catch scope to assert new vars
       let catchBodyScoop = SCOPE_addLexTo(catchHeadScoop, BLOCK_SCOPE, 'parseTryStatement(catch-body)');
 
-      if (curc === $$COMMA_2C) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
-      if (curc === $$IS_3D && curtok.str === '=') THROW('Catch clause parameter does not support default values');
-      skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags); // TODO: optimize; next must be {
+      // Catch clause is optional since es9
+      if (allowOptionalCatchBinding && curc === $$PAREN_L_28) {
+        skipAnyOrDieSingleChar($$PAREN_L_28, lexerFlags); // TODO: optimize; next MUST be one arg (ident/destructuring)
+
+        if (curc === $$PAREN_R_29) THROW('Missing catch clause parameter');
+        // catch clause cannot have a default
+        // catch clause can be written to, cannot already be declared, so it's like a `let` binding
+        // there's an explicit rule disallowing lexical bindings with same name as catch var so just record it as lex
+        parseBinding(lexerFlags | LF_NO_ASI, catchHeadScoop, BINDING_TYPE_ARG, FROM_CATCH, ASSIGNMENT_IS_DEFAULT, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'param');
+
+        // destructuring requires manual checks so do this now for the catch var
+        if (SCOPE_verifyLexical(lexerFlags, catchHeadScoop, true)) THROW('Catch binding had at least one duplicate name bound');
+
+        if (curc === $$COMMA_2C) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
+        if (curc === $$IS_3D && curtok.str === '=') THROW('Catch clause parameter does not support default values');
+        skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags); // TODO: optimize; next must be {
+      } else {
+        // https://github.com/estree/estree/pull/167/files
+        // [v]: `try {} catch {}`
+        AST_set('param', null);
+      }
+
       parseBlockStatement(lexerFlags, catchBodyScoop, {'#':labelSet}, IS_STATEMENT, IGNORE_DIRECTIVES, IGNORE_DIRECTIVES, INC_DECL, 'body');
       AST_close('CatchClause');
     } else {
