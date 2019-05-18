@@ -102,6 +102,49 @@ export default (describe, test) =>
       code: 'do async () \n => x; while(y)',
       desc: 'restricted production and after ASI the `while` keyword is expected',
     });
+
+    describe('asi problem case that almost all parsers seem to accept', _ => {
+
+      // This case is (currently) accepted by all parsers except traceur.
+      // And only for sub-statements that don't require ASI (like block, switch, try). It's almost as if that's
+      // universally stopping ASI in its tracks..? Even v8 suffers from this at the time of writing.
+      // I found it with a fuzzer.
+
+      test.fail('block', {
+        code: 'do {} while(x) x',
+        desc: '<3 fuzzing; this case should fail because do-while absolutely requires a semi-colon',
+      });
+
+      test.fail('switch', {
+        code: 'do switch(x){} while(x) x',
+        desc: '<3 fuzzing',
+      });
+
+      test.fail('try catch', {
+        code: 'do try {} catch {} while(x) x',
+        desc: '<3 fuzzing',
+      });
+
+      test.fail('try catch finally', {
+        code: 'do try {} catch {} while(x) x',
+        desc: '<3 fuzzing',
+      });
+
+      test.fail('if', {
+        code: 'do if (x) {} while(x) x',
+        desc: '<3 fuzzing',
+      });
+
+      test.fail('debugger with semi', {
+        code: 'do debugger; while(x) x',
+        desc: '<3 fuzzing',
+      });
+
+      test.fail('debugger without semi', {
+        code: 'do debugger while(x) x',
+        desc: '<3 fuzzing',
+      });
+    });
   });
 
 // TODO: <es6 there was no asi after do/while. es6+ does apply asi (to confirm that it really was es6...)
