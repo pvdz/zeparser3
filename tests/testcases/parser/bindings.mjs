@@ -1886,6 +1886,10 @@ export default (describe, test) =>
       test.pass('for-statement let, outer var', {
         code: 'for (;;) { let x; } var x;',
       });
+
+      test.fail('rebinding a let binding with a class id inside a function', {
+        code: 'function f(){let i; class i{}}',
+      });
     });
   });
 
