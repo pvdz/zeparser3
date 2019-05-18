@@ -1172,6 +1172,91 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function SCOPE_lexParentDupeCheck(lexerFlags, scoop, hashed) {
     ASSERT(SCOPE_lexParentDupeCheck.length === arguments.length, 'arg count');
 
+    // In general, a lexical binding is considered a dupe for a var binding when the var binding happens on the
+    // same _statement_ level or lower, without crossing function boundaries.
+    // The clash is only for `lex` decls
+    // However, we don't check after the fact but rather when encountering a binding. That makes certain cases tricky.
+
+    // [v]: `var x`
+    // [v]: `let x`
+    // [v]: `var x; { let x }`
+    // [v]: `{ let x } var x;`
+    // [x]: `let x; var x`
+    // [x]: `var x; let x`
+    // [x]: `let x; { var x }`
+    // [x]: `{ var x } let x;`
+
+    // We create a pseudo scoop for every block level which inherits from the parent scoop
+    // When a var or lex binding is found, that name is marked as taken in the lexvar for every scoop up to the nearest
+    // function root. If processing a lexical binding and the name is already taken in the current lexvar then consider
+    // it an error. If processing a var binding walk the scoop to nearest function and if the name is lex bound anywhere
+    // then consider it an error, too.
+
+    // Note that this function explicitly checks a lexical binding so we just check the lex and lexvar
+
+    // Here are the spec rules for the set of var and lex declared names
+
+    //TopLevelVarDeclaredNames / VarDeclaredNames
+    // - block (TopLevelVarDeclaredNames)
+    // - label (TopLevelVarDeclaredNames)
+    //   - TopLevelVarDeclaredNames of statement list
+    //   - BoundNames of HoistableDeclaration, or [] for any other decls    (-> vars / function ids in global are vars)
+    //   - TopLevelVarDeclaredNames of a labelled statement,
+    //   - or VarDeclaredNames of other statements
+    // - var (= statement!)
+    //   - BoundNames of statement
+    // - for-loop / for-in / for-of / for-await-of
+    //   - if var decl in left side
+    //     - then BoundNames of that decl + VarDeclaredNames of statement
+    //   - all other cases
+    //     - VarDeclaredNames of statement
+    // - block (VarDeclaredNames)
+    // - with
+    // - if/else
+    // - do-while
+    // - while
+    // - switch
+    // - switch block
+    // - case clause / default clause
+    // - try / catch / finally
+    //   - VarDeclaredNames of sub-statement (any if multiple), but not decl or expr parts
+    // - label (VarDeclaredNames)
+    //   - BoundNames of function declaration
+    //   - else, VarDeclaredNames of statement
+    //   - combined VarDeclaredNames of the two or three blocks
+    // - function statement list
+    // - script global
+    // - module global
+    //   - script/function: TopLevelVarDeclaredNames of statement list
+    //   - module: VarDeclaredNames of statement list
+    //   - BoundNames for "export VariableStatement"
+
+    // So the VarDeclaredNames of an arbitrary statement goes up to the next function, declaration, or statement without substatement
+    // Notable exceptions:
+    // - for-loop propagates the for header too if it is a var decl
+    // - functions directly in script/function toplevel, or direct sub-statement of a toplevel label
+
+    //LexicallyDeclaredNames
+    // - fewer idiosyncracies
+    // - blocks/toplevel only reflects declarations on the same level, no inheritance except for labels
+    // - label propagates only functions, except nothing in module global
+    // - module global includes imports
+
+    // As rule of thumb, a lexical declaration may not appear in a var decl list of a sub-statement or sibling-statement
+
+    // With this logic;
+    // [x]: `{ let x; if (foo) { var y; } }`
+    // [x]: `{ if (foo) { var y; }; let x; }`
+    // [v]: `{ var x; if (foo) { let y; } }`
+    // [v]: `{ if (foo) { let y; }; var x; }`
+
+    // Because the inheritance basically goes outward, not inward
+
+    // When recording a new var binding we need to assert there hasn't been a lex binding (lex[id] = false up to scope root)
+    // - record true on every lexvar[id] up to scope root
+    // When recording a new lex binding we need to assert there hasn't been a var binding (lexvar[id] = false, only one)
+    // - record true on every lex up to scope root
+
     // confirm that given hashed name is not already defined in parent pseudo-lexical scopes of certain kinds (like args)
 
     let lex = scoop.lex;
@@ -1328,7 +1413,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     lexerFlags |= addedLexerFlags;
 
-    while (curtype !== $EOF && curc !== $$CURLY_R_7D) parseBodyPart(lexerFlags, scoop, {'#': labelSet}, exportedNames, exportedBindings, INC_DECL, astProp);
+    while (curtype !== $EOF && curc !== $$CURLY_R_7D) {
+      parseBodyPart(lexerFlags, scoop, {'#': labelSet}, exportedNames, exportedBindings, INC_DECL, astProp);
+    }
   }
 
   function _parseBodyPartsSansDirectives(lexerFlags, scoop, labelSet, includeDeclarations, astProp) {
@@ -1578,10 +1665,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       // declarations bind in outer scope, expressions bind in inner scope, methods bind ...  ehh?
       if (isFuncDecl === IS_FUNC_DECL) {
-        SCOPE_addFuncDeclName(lexerFlags, outerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL);
+        SCOPE_addFuncDeclName(lexerFlags, outerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL); // TODO: fix origin
       } else if (isFuncDecl === IS_FUNC_EXPR && isRealFuncExpr) {
         // FIXME: this approach may work but means the exposed scope cannot be used to find func expr names (probably same for other similar cases like class exprs)
-        SCOPE_addBindingAndDedupe(lexerFlags, innerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL);
+        TODO
+        // ik probeerde uit te zoeken of en waarom deze branch niet gehit werd/
+        SCOPE_addBindingAndDedupe(lexerFlags, innerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL); // TODO: fix origin
       }
       // create new lexical binding to "hide" the function name.
       // this way it wont cause problems when doing `x=function f(){ let f; }`
