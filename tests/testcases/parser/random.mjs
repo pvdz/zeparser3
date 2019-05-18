@@ -107,41 +107,44 @@ export default (describe, test) =>
       });
     });
 
-    test.pass('should pass', {
-      code: 'for ({[a]: ""[b] = c} of d) {}',
-      // This one is actually valid
-      desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
-    });
+    describe('verified', _ => {
 
-    test.fail('crappy end not properly rejected', {
-      code: 'if (x) {}}dsadsa',
-    });
+      test.pass('should pass', {
+        code: 'for ({[a]: ""[b] = c} of d) {}',
+        // This one is actually valid
+        desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
+      });
 
-    test.fail('crappy end not properly rejected', {
-      code: 'for (;;) {}}dsadsa',
-    });
+      test.fail('crappy end not properly rejected', {
+        code: 'if (x) {}}dsadsa',
+      });
 
-    test.fail('more regression', {
-      code: 'for ({[a]: ""[b] = c} of d) {}}',
-      desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
-    });
+      test.fail('crappy end not properly rejected', {
+        code: 'for (;;) {}}dsadsa',
+      });
 
-    test.fail('original report', {
-      code: 'for ({[a]: ""[b] = c} of d) {}})',
-      desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
-    });
+      test.fail('more regression', {
+        code: 'for ({[a]: ""[b] = c} of d) {}}',
+        desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
+      });
 
-    test.pass('regression reporting must destruct cannot be lhs of for loop', {
-      code: 'for ({x = y} = z;;) {}',
-    });
+      test.fail('original report', {
+        code: 'for ({[a]: ""[b] = c} of d) {}})',
+        desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
+      });
 
-    test.pass('regression with parens', {
-      code: 'for ({x = y} = (z);;) {}',
-    });
+      test.pass('regression reporting must destruct cannot be lhs of for loop', {
+        code: 'for ({x = y} = z;;) {}',
+      });
 
-    test.pass('for header instancoef', {
-      code: 'for ((2935) instanceof ((2e308));;) debugger',
-      desc: 'fuzzed',
+      test.pass('regression with parens', {
+        code: 'for ({x = y} = (z);;) {}',
+      });
+
+      test.pass('for header instancoef', {
+        code: 'for ((2935) instanceof ((2e308));;) debugger',
+        desc: 'fuzzed',
+      });
     });
   });
 

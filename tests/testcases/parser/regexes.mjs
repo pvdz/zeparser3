@@ -1218,6 +1218,10 @@ export default (describe, test) => describe('regexes', _ => {
     code: '/}/',
   });
 
+  test.fail('invalid back reference', {
+    code: '/\\9/u',
+  });
+
   test.fail('v8 passes this due to lazy parse but it is illegal', {
     code: 'function l(){((/)/))(/]/)};',
     desc: 'fuzzed',
