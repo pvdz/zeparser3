@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_TAIL} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) => describe('async keyword', function() {
   test('async is callable as long as it isnt the statement expression itself (group)', {
@@ -2422,4 +2422,19 @@ export default (describe, test) => describe('async keyword', function() {
   test.fail('Cannot use await as param name in async arrow', {
     code: 'async await => {}',
   });
+
+  // test.fail('new (await) inside default of async arrow param', {
+  //   code: 'async function f(){ (x = new x(await x)) => {} }',
+  //   // https://twitter.com/Ghost1240145716/status/1127918881727606786
+  // });
+
+  // test.fail('await in default of async arrow param', {
+  //   code: 'async (a = b => await (0)) => {}'
+  //   // https://twitter.com/Ghost1240145716/status/1127918881727606786
+  // });
+
+  // test.fail('await as param name of an arrow that is a param default of an async func', {
+  //   code: 'async(a = (await) => {}) => {};',
+  //   // https://twitter.com/Ghost1240145716/status/1127918881727606786
+  // });
 });

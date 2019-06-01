@@ -4,7 +4,7 @@ let {PARSE_MODE_DIV} = require('../../utils');
 
 //import ZeTokenizer, {
 let {$ERROR, $PUNCTUATOR} = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
+//} from '../../../src/zetokenizer.mjs';
 
 let punctuators = [
   [`{`, $PUNCTUATOR],

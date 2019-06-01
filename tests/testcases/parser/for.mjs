@@ -1,4 +1,4 @@
-import {$IDENT, $NUMBER_DEC, $PUNCTUATOR} from '../../../src/zetokenizer';
+import {$IDENT, $NUMBER_DEC, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('for statement', _ => {
@@ -502,6 +502,62 @@ export default (describe, test) =>
 
         test.pass('init part starting with regex can be any expression', {
           code: 'for (/x/g + b;;);',
+        });
+      });
+
+      describe('double proto', _ => {
+
+        test('double proto of lhs obj no web compat', {
+          code: 'for ({__proto__: 1, __proto__: 2};;);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ForStatement',
+                init: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: '__proto__'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Literal', value: '<TODO>', raw: '1'},
+                      shorthand: false,
+                    },
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: '__proto__'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {type: 'Literal', value: '<TODO>', raw: '2'},
+                      shorthand: false,
+                    },
+                  ],
+                },
+                test: null,
+                update: null,
+                body: {type: 'EmptyStatement'},
+              },
+            ],
+          },
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test.fail('double proto of lhs obj in web compat', {
+          code: 'for ({__proto__: 1, __proto__: 2};;);',
+          WEB: true,
+        });
+
+        test.pass('double proto of lhs arr no web compat', {
+          code: 'for ([{__proto__: 1, __proto__: 2}];;);',
+        });
+
+        test.fail('double proto of lhs arr in web compat', {
+          code: 'for ([{__proto__: 1, __proto__: 2}];;);',
+          WEB: true,
         });
       });
     });

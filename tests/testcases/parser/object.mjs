@@ -1,4 +1,4 @@
-import {$IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $STRING_SINGLE, $ASI} from '../../../src/zetokenizer';
+import {$IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $STRING_SINGLE, $ASI} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('objects', _ => {
@@ -4812,19 +4812,16 @@ export default (describe, test) =>
         throws: 'must be followed by a colon or paren',
       });
 
-      test('can not use async/generators on getters/setters', {
+      test.fail('can not use async/generators on getters/setters', {
         code: '({async get foo(){}});',
-        throws: 'Must have left paren',
       });
 
-      test('can not use async/generators on getters/setters', {
+      test.fail('can not use async/generators on getters/setters', {
         code: '({get set foo(){}});',
-        throws: 'Must have left paren',
       });
 
-      test('can not use async/generators on getters/setters', {
+      test.fail('can not use async/generators on getters/setters', {
         code: '({async set foo(){}});',
-        throws: 'Must have left paren',
       });
 
       test.fail('getters with non-zero param count', {
@@ -4841,24 +4838,20 @@ export default (describe, test) =>
 
       describe('dont allow semi because it shares code with class', _ => {
 
-        test('instead of comma', {
+        test.fail('instead of comma', {
           code: '({x:y;a:b})',
-          throws: true,
         });
 
-        test('trailing semi', {
+        test.fail('trailing semi', {
           code: '({x:y;})',
-          throws: true,
         });
 
-        test('leading semi', {
+        test.fail('leading semi', {
           code: '({;x:y,a:b})',
-          throws: true,
         });
 
-        test('only a semi', {
+        test.fail('only a semi', {
           code: '({;})',
-          throws: true,
         });
       });
 
@@ -8228,8 +8221,12 @@ export default (describe, test) =>
 
               describe('not async', _ => {
 
-                test.pass('plain group', {
-                  code: '({__proto__: a, __proto__: b});',
+                test.pass('obj plain group', {
+                  code: '({web: false, __proto__: a, __proto__: b});',
+                });
+
+                test.pass('arr plain group', {
+                  code: '([{web: false, __proto__: a, __proto__: b}]);',
                 });
 
                 test.pass('destructuring assignment', {
@@ -8294,9 +8291,15 @@ export default (describe, test) =>
               WEB: true,
             });
 
-            test.pass('paren wrapped is explicitly exempted', {
+            test.pass('obj paren wrapped is explicitly exempted', {
               desc: 'rule does not applying when parsing potential arrow',
-              code: '({ __proto__: x, __proto__: y});',
+              code: '({web: true,  __proto__: x, __proto__: y});',
+              WEB: true,
+            });
+
+            test.pass('arr paren wrapped is explicitly exempted', {
+              desc: 'rule does not applying when parsing potential arrow',
+              code: '([{web: true,  __proto__: x, __proto__: y}]);',
               WEB: true,
             });
 
@@ -9178,6 +9181,68 @@ export default (describe, test) =>
 
       test.fail('obj pattern with value of a computed property being an arrow', {
         code:'({[a]: b => []} = [2])',
+      });
+    });
+
+    describe('method names can be `prototype`', _ => {
+
+      test('plain', {
+        code: 'x= { prototype(){} }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {type: 'Identifier', name: 'x'},
+                operator: '=',
+                right: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'prototype'},
+                      kind: 'init',
+                      method: true,
+                      computed: false,
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {type: 'BlockStatement', body: []},
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+      });
+
+      test.pass('getter', {
+        code: 'x= { get prototype(){} }',
+      });
+
+      test.pass('setter', {
+        code: 'x= { set prototype(x){} }',
+      });
+
+      test.pass('generator', {
+        code: 'x= { *prototype(){} }',
+      });
+
+      test.pass('async', {
+        code: 'x= { async prototype(){} }',
+      });
+
+      test.pass('gen async', {
+        code: 'x= { async *prototype(){} }',
       });
     });
   });

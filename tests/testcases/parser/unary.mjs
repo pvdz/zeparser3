@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 // await, (yield), delete, and new have their own file
 

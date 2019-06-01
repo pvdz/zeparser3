@@ -4,7 +4,7 @@ let {PARSE_MODE_TICK} = require('../../utils');
 
 //import ZeTokenizer, {
 let {$STRING_SINGLE, $TICK_HEAD} = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
+//} from '../../../src/zetokenizer.mjs';
 
 //import string_body from './string_body';
 let string_body = require('./string_body'); // Λλ

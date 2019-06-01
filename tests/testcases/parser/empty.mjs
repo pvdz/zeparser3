@@ -1,4 +1,4 @@
-import {$PUNCTUATOR} from '../../../src/zetokenizer';
+import {$PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('empty statement', _ => {

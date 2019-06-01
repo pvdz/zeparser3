@@ -122,7 +122,7 @@ function ASSERT(bool, desc, ...rest) {
 }
 
 function THROW(str, ...rest) {
-  console.log('error args:', rest.length ? rest : '<none>');
+  // console.log('error args:', rest.length ? rest : '<none>');
   throw new Error(`Parser error! ${str} ${rest.length ? rest : ''}`);
 }
 

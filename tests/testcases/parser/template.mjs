@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('templates', _ => {

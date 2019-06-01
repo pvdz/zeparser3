@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $PUNCTUATOR, $REGEX} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $PUNCTUATOR, $REGEX} from '../../../src/zetokenizer.mjs';
 
 // Tests in this file should concern themselves with parser ambiguity, not lexer test cases. Those can
 // be found in the lexer tests and regressions that concern one token should be added there (in duplicate).

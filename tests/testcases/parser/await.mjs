@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 // https://tc39.github.io/ecma262/#prod-AwaitExpression
 // await is parsed as an AwaitExpression when the [Await] parameter is present. The [Await] parameter is present in the following contexts:
@@ -1562,8 +1562,13 @@ export default (describe, test) =>
               code: 'async function a(){     async ([y] = delete ((((foo))[await x]))) => {};     }',
             });
 
-            test.fail('class with computed method containing await followed by a simple ident method that should not clobber the state', {
+            test.fail('class with computed method containing await keyword followed by a simple ident method that should not clobber the state', {
               code: 'async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }',
+              desc: 'there was a bug where a regular method would plainly clobber the state flags',
+            });
+
+            test.fail_strict('class with computed method containing await expr followed by a simple ident method that should not clobber the state', {
+              code: '(fail = class A {[await](){}; "x"(){}}) => {}',
               desc: 'there was a bug where a regular method would plainly clobber the state flags',
             });
 

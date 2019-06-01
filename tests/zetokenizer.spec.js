@@ -55,7 +55,7 @@ import ZeTokenizer, {
 
   debug_toktype,
   LF_DEBUG,
-} from '../src/zetokenizer';
+} from '../src/zetokenizer.mjs';
 
 const FAIL_FAST = true;
 

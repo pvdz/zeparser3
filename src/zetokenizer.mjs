@@ -386,7 +386,7 @@ let ID_CONTINUE_REGEX = /|/;
     ID_START_REGEX = new RegExp('^\\p{ID_Start}$','u');
     ID_CONTINUE_REGEX = new RegExp('^\\p{ID_Continue}$','u');
   } catch(e) {
-    $warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
+    console.warn('ZeParser: Unable to create regexes with unicode property escapes; unicode support disabled (' + e.message + ')');
   }
 })();
 
@@ -418,7 +418,7 @@ function ZeTokenizer(
   let consumedNewline = false; // whitespace newline token or string token that contained newline or multiline comment
   let consumedComment = false; // needed to confirm requirement to parse --> closing html comment
   let finished = false; // generated an $EOF?
-  let lastParsedIdent = ''; // updated after parsing an ident. used to canonalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
+  let lastParsedIdent = ''; // updated after parsing an ident. used to canonicalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
   let lastRegexUnicodeEscapeOrd = 0; // need this to validate unicode escapes in named group identifiers :/
 
   let cache = input.charCodeAt(0);

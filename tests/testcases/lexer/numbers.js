@@ -4,7 +4,7 @@ let {USE_SLOPPY_MODE, USE_STRICT_MODE} = require('../../utils');
 
 //import ZeTokenizer, {
 let {$ERROR, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $NUMBER_OLD} = require('../../../src/zetokenizer');
-//} from '../../../src/zetokenizer';
+//} from '../../../src/zetokenizer.mjs';
 
 let numbers = [
   // "The SourceCharacter immediately following a NumericLiteral must not be an IdentifierStart or DecimalDigit."

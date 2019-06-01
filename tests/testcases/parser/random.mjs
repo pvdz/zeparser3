@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
 
@@ -146,5 +146,16 @@ export default (describe, test) =>
         desc: 'fuzzed',
       });
     });
+
+    test.fail('yield double declared according to v8 but not zeparser (in web/sloppy)', {
+      code: 'function yield(){switch(e){default:}}switch(x){default:case x:}const yield=x',
+    });
+
+    test.fail('protected double declraed according to v8', {
+      code: 'function protected(){for(;;)switch(x){default:}}const protected=x',
+      // function arguments(){}v:switch(x){default:}let arguments=l
+      // function package(){}let package=a
+      // function v(){}const v=x
+    })
   });
 

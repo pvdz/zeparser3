@@ -220,14 +220,18 @@ const VERSION_TAGGED_TEMPLATE_BAD_ESCAPES = 9;
 const VERSION_OPTIONAL_CATCH = 9;
 const VERSION_WHATEVER = Infinity;
 
-const WAS_ASYNC = true;
-const NOT_ASYNC = false;
 const IS_ASYNC_PREFIXED = {};
-const NOT_ASYNC_PREFIXED = {};
-const UNDEF_ASYNC = undefined;
-const WAS_GENERATOR = true;
-const IS_GENERATOR = true;
-const NOT_GENERATOR = false;
+let NOT_ASYNC_PREFIXED = {};
+let UNDEF_STATIC = undefined;
+ASSERT(!void (UNDEF_STATIC = {UNDEF_STATIC: 1, get str(){ASSERT(false)}}));
+let UNDEF_ASYNC = undefined;
+ASSERT(!void (UNDEF_ASYNC = {UNDEF_ASYNC: 1, get str(){ASSERT(false)}}));
+let UNDEF_STAR = undefined;
+ASSERT(!void (UNDEF_STAR = {UNDEF_STAR: 1, get str(){ASSERT(false)}}));
+let UNDEF_GET = undefined;
+ASSERT(!void (UNDEF_GET = {UNDEF_GET: 1, get str(){ASSERT(false)}}));
+let UNDEF_SET = undefined;
+ASSERT(!void (UNDEF_SET = {UNDEF_SET: 1, get str(){ASSERT(false)}}));
 const CALLED_FROM_WRAPPER = true;
 const IS_FUNC_DECL = true;
 const NOT_FUNC_DECL = false;
@@ -279,6 +283,7 @@ const PIGGY_BACK_SAW_YIELD_VARNAME = 1 << 12; // parsed an expression containing
 const PIGGY_BACK_SAW_YIELD_KEYWORD = 1 << 13  ; // parsed an expression containing a YieldExpression
 const PIGGY_BACK_WAS_CONSTRUCTOR = 1 << 14; // signal having found a constructor (special case)
 const PIGGY_BACK_WAS_PROTO = 1 << 15; // signal that a `__proto__: x` was parsed (do detect double occurrence)
+const PIGGY_BACK_WAS_DOUBLE_PROTO = 1 << 16; // signal that double proto was found on object; error in web compat outside of arrow headers
 const NO_SPREAD = 0;
 const LAST_SPREAD = 1;
 const MID_SPREAD = 2;
@@ -286,8 +291,6 @@ const PARSE_INIT = {_:'PARSE_INIT'};
 const SKIP_INIT = {_:'SKIP_INIT'};
 const IS_GROUP_TOPLEVEL = true;
 const NOT_GROUP_TOPLEVEL = false;
-const IS_CLASS_METHOD = true;
-const NOT_CLASS_METHOD = false;
 const IS_EXPORT = true;
 const NOT_EXPORT = false;
 const IS_DyNAMIC_PROPERTY = true;
@@ -305,9 +308,6 @@ const IS_METHOD = true;
 const NOT_METHOD = false;
 const ASSIGN_EXPR_IS_OK = {_:'ASSIGN_EXPR_IS_OK'}; // fine to parse assignments, arrows, yield, ternary
 const ASSIGN_EXPR_IS_ERROR = {_:'ASSIGN_EXPR_IS_ERROR'}; // throw on actual assignments, but also arrows, yield, ternary
-const NOT_GETSET = 0;
-const IS_GETTER = 1;
-const IS_SETTER = 2;
 const NO_ID_TO_VERIFY = undefined;
 const IS_DELETE_ARG = true;
 const NOT_DELETE_ARG = false;
@@ -341,9 +341,31 @@ const PIGGIES = (0
   | PIGGY_BACK_SAW_YIELD_KEYWORD
   | PIGGY_BACK_WAS_CONSTRUCTOR
   | PIGGY_BACK_WAS_PROTO
+  | PIGGY_BACK_WAS_DOUBLE_PROTO
 );
 function copyPiggies(output, input) {
   return output | (input & PIGGIES);
+}
+
+function sansFlag(flags, flag) {
+  ASSERT(typeof flag === 'number', 'sansFlag flag 1 should be number;', typeof flags1, typeof flags2, flag, flags);
+  ASSERT(typeof flags === 'number', 'sansFlag flag 2 should be number;', typeof flags1, typeof flags2, flag, flags);
+  return (flags | flag) ^ flag;
+}
+function hasAllFlags(flags1, flags2) {
+  ASSERT(typeof flags1 === 'number', 'hasAllFlags flag 1 should be number;', typeof flags1, typeof flags2, flags1, flags2);
+  ASSERT(typeof flags2 === 'number', 'hasAllFlags flag 2 should be number;', typeof flags1, typeof flags2, flags1, flags2);
+  return (flags1 & flags2) === flags2;
+}
+function hasAnyFlag(flags1, flags2) {
+  ASSERT(typeof flags1 === 'number', 'hasAnyFlag flag 1 should be a number;', typeof flags1, typeof flags2, flags1, flags2);
+  ASSERT(typeof flags2 === 'number', 'hasAnyFlag flag 2 should be a number;', typeof flags1, typeof flags2, flags1, flags2);
+  return (flags1 & flags2) !== 0;
+}
+function hasNoFlag(flags, flag) {
+  ASSERT(typeof flag === 'number', 'hasNoFlag flag 1 should be number;', typeof flags1, typeof flags2, flag, flags);
+  ASSERT(typeof flags === 'number', 'hasNoFlag flag 2 should be number;', typeof flags1, typeof flags2, flag, flags);
+  return (flags & flag) === 0;
 }
 
 function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_NONE, options = {}) {
@@ -373,6 +395,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     /* (This comment prevents the buildscript from detecting the ast prefix) */AST_directiveNodes = false,
   } = options;
 
+  let failForRegexAssertIfPass = undefined;
+  let regexAssertTrace = undefined;
+
   let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage, $log, $warn, $error);
 
   ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 or infin');
@@ -398,32 +423,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     THROW_TOKEN(desc, curtok, ...args)
   }
   function THROW_TOKEN(desc, token, ...args) {
-    if (desc.indexOf('Unexpected token') >= 0) console.log(new Error().stack)
     $log('\n');
     $log('Error in parser:', desc, 'remaining throw args;', args);
     $log('Error token: ' + token);
     tok.throw('Parser error! ' + desc, token, undefined, fullErrorContext);
-  }
-
-  function sansFlag(flags, flag) {
-    ASSERT(typeof flag === 'number', 'sansFlag flag 1 should be number', flag, flags);
-    ASSERT(typeof flags === 'number', 'sansFlag flag 2 should be number', flag, flags);
-    return (flags | flag) ^ flag;
-  }
-  function hasAllFlags(flags1, flags2) {
-    ASSERT(typeof flags1 === 'number', 'hasAllFlags flag 1 should be number', flags1, flags2);
-    ASSERT(typeof flags2 === 'number', 'hasAllFlags flag 2 should be number', flags1, flags2);
-    return (flags1 & flags2) === flags2;
-  }
-  function hasAnyFlag(flags1, flags2) {
-    ASSERT(typeof flags1 === 'number', 'hasAnyFlag flag 1 should be number', flags1, flags2);
-    ASSERT(typeof flags2 === 'number', 'hasAnyFlag flag 2 should be number', flags1, flags2);
-    return (flags1 & flags2) !== 0;
-  }
-  function hasNoFlag(flags, flag) {
-    ASSERT(typeof flag === 'number', 'hasNoFlag flag 1 should be number', flag, flags);
-    ASSERT(typeof flags === 'number', 'hasNoFlag flag 2 should be number', flag, flags);
-    return (flags & flag) === 0;
   }
 
   let uid_counter = 0;
@@ -855,7 +858,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function skipAny(lexerFlags) {
     skipRex(lexerFlags); // TODO: optimize; in this case the next token is very restricted but at least no slash
-    ASSERT(curc !== $$FWDSLASH_2F, 'skip any should not be called when the next char can be fwd slash');
+    ASSERT(curc !== $$FWDSLASH_2F || (failForRegexAssertIfPass = curtok, regexAssertTrace = new Error().stack));
   }
 
   // <SCRUB ASSERTS>
@@ -894,7 +897,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function ASSERT_skipAny(what, lexerFlags) {
     // next token cannot validly start with a forward slash (may be optimizable)
     ASSERT_skipDiv(what, lexerFlags);
-    ASSERT(curc !== $$FWDSLASH_2F, 'skip any should not be called when the next char can be fwd slash');
+    // If the next token started with a forward slash anyways, raise an assertion error if the test still passed anyways.
+    ASSERT(curc !== $$FWDSLASH_2F || (failForRegexAssertIfPass = curtok, regexAssertTrace = new Error().stack));
   }
   // </SCRUB ASSERTS>
 
@@ -911,7 +915,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function skipAnyOrDie(ord, str, lexerFlags) {
     // next token cannot start with forward slash (may be optimizable)
     skipRexOrDie(ord, str, lexerFlags);
-    ASSERT(curc !== $$FWDSLASH_2F, 'skip any should not be called when the next char can be fwd slash');
+    ASSERT(curc !== $$FWDSLASH_2F || (failForRegexAssertIfPass = curtok, regexAssertTrace = new Error().stack));
   }
   function skipRexOrDieSingleChar(ord, lexerFlags) {
     // skip a token and if the next token starts with a forward slash, search for a regular expression literal
@@ -940,7 +944,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function skipAnyOrDieSingleChar(ord, lexerFlags) {
     // next token cant start with forward slash (may be optimizable)
     skipRexOrDieSingleChar(ord, lexerFlags);
-    ASSERT(curc !== $$FWDSLASH_2F, 'skip any should not be called when the next char can be fwd slash');
+    ASSERT(curc !== $$FWDSLASH_2F || (failForRegexAssertIfPass = curtok, regexAssertTrace = new Error().stack));
   }
   function skipRexIf(str, lexerFlags) {
     // if current token matches str, skip to next token
@@ -956,7 +960,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function skipAnyIf(str, lexerFlags) {
     let x = skipRexIf(str, lexerFlags);
-    ASSERT(!x  || curc !== $$FWDSLASH_2F, 'skip any should not be called when the next char can be fwd slash');
+    ASSERT(!x || curc !== $$FWDSLASH_2F || (failForRegexAssertIfPass = curtok, regexAssertTrace = new Error().stack));
     return x;
   }
   function skipIdentSafeSlowAndExpensive(lexerFlags) {
@@ -1513,9 +1517,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   // ### functions
 
-  function parseFunction(lexerFlags, scoop, isFuncDecl, isRealFuncExpr, isAsync, optionalIdent, isFunctionStatement, astProp) {
+  function parseFunction(lexerFlags, scoop, isFuncDecl, isRealFuncExpr, asyncToken, optionalIdent, isFunctionStatement, astProp) {
     ASSERT(parseFunction.length === arguments.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerflags number');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
 
     /*
      function f() {}
@@ -1532,31 +1537,66 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
      x=async function g(){}
      x=async function(){}
      o={async foo(){}}
-     */
+    */
     ASSERT_skipAny('function', lexerFlags);
-    let isGenerator = false;
-    if (skipAnyIf('*', lexerFlags)) {
-      if (isAsync && !allowAsyncGenerators) {
+    let starToken = UNDEF_STAR;
+    if (curtok.str === '*') {
+      starToken = curtok;
+      ASSERT_skipAny('*', lexerFlags);
+      if (asyncToken !== UNDEF_ASYNC && !allowAsyncGenerators) {
         THROW('Async generators are not supported by the current targeted language version, they were introduced in ES9/ES2018');
       }
-      isGenerator = true;
     }
-    return parseFunctionAfterKeyword(lexerFlags, scoop, isFuncDecl, isRealFuncExpr, isGenerator, isAsync, optionalIdent, NOT_CONSTRUCTOR, NOT_METHOD, NOT_GETSET, isFunctionStatement, astProp);
+
+    return parseFunctionAfterKeyword(
+      lexerFlags,
+      scoop,
+      isFuncDecl,
+      isRealFuncExpr,
+      optionalIdent,
+      NOT_CONSTRUCTOR,
+      isFunctionStatement,
+      NOT_METHOD,
+      asyncToken,
+      starToken,
+      UNDEF_GET,
+      UNDEF_SET,
+      astProp
+    );
   }
-  function parseFunctionExpression(lexerFlags, isAsync, astProp) {
-    ASSERT(typeof isAsync === 'boolean', 'enum');
-    let isGenerator = NOT_GENERATOR;
-    if (skipAnyIf('*', lexerFlags)) {
-      if (isAsync && !allowAsyncGenerators) {
+  function parseFunctionExpression(lexerFlags, asyncToken, astProp) {
+    ASSERT(parseFunctionExpression.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token', asyncToken);
+
+    let starToken = UNDEF_STAR;
+    if (curtok.str === '*') {
+      starToken = curtok;
+      ASSERT_skipAny('*', lexerFlags);
+      if (asyncToken !== UNDEF_ASYNC && !allowAsyncGenerators) {
         THROW('Async generators are not supported by the current targeted language version, they were introduced in ES9/ES2018');
       }
-      isGenerator = IS_GENERATOR;
     }
-    parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, IS_FUNC_EXPR, isGenerator, isAsync, IDENT_REQUIRED, NOT_CONSTRUCTOR, NOT_METHOD, NOT_GETSET, NOT_FUNCTION_STATEMENT, astProp);
+
+    parseFunctionAfterKeyword(
+      lexerFlags,
+      DO_NOT_BIND,
+      NOT_FUNC_DECL,
+      IS_FUNC_EXPR,
+      IDENT_REQUIRED,
+      NOT_CONSTRUCTOR,
+      NOT_FUNCTION_STATEMENT,
+      NOT_METHOD,
+      asyncToken,
+      starToken,
+      UNDEF_GET,
+      UNDEF_SET,
+      astProp
+    );
   }
-  function parseAsyncFunctionDecl(lexerFlags, fromStmtOrExpr, includeDeclarations, scoop, isExport, exportedBindings, astProp) {
+  function parseAsyncFunctionDecl(lexerFlags, asyncToken, fromStmtOrExpr, includeDeclarations, scoop, isExport, exportedBindings, astProp) {
     ASSERT(parseAsyncFunctionDecl.length === arguments.length, 'arg count');
     ASSERT(curtok.str === 'function', 'already checked, not yet consumed');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
 
     // `async function ...`
     if (fromStmtOrExpr === IS_STATEMENT && includeDeclarations === EXC_DECL) {
@@ -1568,7 +1608,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       scoop,
       fromStmtOrExpr === IS_EXPRESSION ? NOT_FUNC_DECL : IS_FUNC_DECL,
       fromStmtOrExpr === IS_EXPRESSION ? IS_FUNC_EXPR : NOT_FUNC_EXPR,
-      WAS_ASYNC,
+      asyncToken,
       (isExport === IS_EXPORT || fromStmtOrExpr === IS_EXPRESSION) ? IDENT_OPTIONAL : IDENT_REQUIRED,
       NOT_FUNCTION_STATEMENT,
       astProp
@@ -1585,10 +1625,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return NOT_ASSIGNABLE;
   }
-  function parseFunctionAfterKeyword(lexerFlags, outerScoop, isFuncDecl, isRealFuncExpr, isGenerator, isAsync, isIdentOptional, isClassConstructor, isMethod, isGetSet, isFunctionStatement, astProp) {
+  function parseFunctionAfterKeyword(
+    lexerFlags,
+    outerScoop,
+    isFuncDecl,
+    isRealFuncExpr,
+    isIdentOptional,
+    isClassConstructor,
+    isFunctionStatement,
+    isMethod,
+    asyncToken,
+    starToken,
+    getToken,
+    setToken,
+    astProp
+  ) {
     ASSERT(arguments.length === parseFunctionAfterKeyword.length, 'arg count must match');
-    ASSERT(isGenerator === IS_GENERATOR || isGenerator === NOT_GENERATOR, 'gen enum');
-    ASSERT(typeof isAsync === 'boolean', 'enum');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(!!isFuncDecl === (outerScoop !== DO_NOT_BIND), 'outerScoop is only used for func decl ids and required there', !!isFuncDecl, outerScoop !== DO_NOT_BIND);
 
     /*
@@ -1615,11 +1671,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression');
 
-    ASSERT(!isAsync || allowAsyncFunctions, 'async = es8');
-    ASSERT(!isAsync || !isGenerator || allowAsyncGenerators, 'async generators = es9');
+    if (asyncToken !== UNDEF_ASYNC) {
+      if (!allowAsyncFunctions) {
+        THROW('Async functions are not supported in the currently targeted version, they are >= ES8 / ES2017');
+      }
+      if (starToken !== UNDEF_STAR && !allowAsyncGenerators) {
+        THROW('Async generator functions are not supported in the currently targeted version, they are >= ES9 / ES2018');
+      }
+    }
 
-    AST_set('generator', isGenerator);
-    AST_set('async', isAsync);
+    AST_set('generator', starToken !== UNDEF_STAR);
+    AST_set('async', asyncToken !== UNDEF_ASYNC);
 
     let innerScoop = SCOPE_create('parseFunctionAfterKeyword_main_func_scope');
     ASSERT(innerScoop._ = 'func scope');
@@ -1634,7 +1696,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let bindingFlags = (
         sansFlag(lexerFlags, LF_IN_GENERATOR | LF_IN_ASYNC)
         |
-        getFuncIdentAsyncGenState(isRealFuncExpr, lexerFlags, isGenerator, isAsync)
+        getFuncIdentAsyncGenState(isRealFuncExpr, lexerFlags, starToken, asyncToken)
       );
 
       // functions decls are lexical bound, except in script-goal (!) global root and in any function scope root;
@@ -1690,13 +1752,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // note: we dont reset the template lexer flag here. instead we do it at any place where we parse curly pairs
     //       this fixes the problem of parsing arrow functions where we can't tell whether the next token is part
     //       of the arrow expression until after parsing and processing that token. that needs curly pair checks.
-    lexerFlags = resetLexerFlagsForFuncAndArrow(lexerFlags, isGenerator, isAsync, NOT_ARROW);
+    lexerFlags = resetLexerFlagsForFuncAndArrow(lexerFlags, starToken, asyncToken, NOT_ARROW);
 
     // super() is allowed in constructor param defaults so deal with the flag now...
     // these flags dont reset in arrows so only do it here
     if (isClassConstructor === IS_CONSTRUCTOR) {
-      ASSERT(isAsync === NOT_ASYNC, 'class constructors are not async');
-      ASSERT(isGenerator === NOT_GENERATOR, 'class constructors are not generators');
+      ASSERT(asyncToken === UNDEF_ASYNC, 'class constructors are not async');
+      ASSERT(starToken === UNDEF_STAR, 'class constructors are not generators');
       ASSERT(isMethod === IS_METHOD, 'class constructors are methods');
       // you can use `super()` in arg defaults so set it up now
       lexerFlags |= LF_IN_CONSTRUCTOR;
@@ -1718,38 +1780,52 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseFunctionFromParams(
       lexerFlags,
       innerScoop,
-      isAsync ? FROM_ASYNC_ARG : FROM_OTHER_FUNC_ARG,
+      asyncToken === UNDEF_ASYNC ? FROM_OTHER_FUNC_ARG : FROM_ASYNC_ARG,
       isFuncDecl === IS_FUNC_DECL ? IS_STATEMENT : IS_EXPRESSION,
-      isGenerator,
       isClassConstructor,
-      isGetSet,
       functionNameTokenToVerify,
-      isMethod
+      isMethod,
+      asyncToken,
+      starToken,
+      getToken,
+      setToken
     );
     AST_close(isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression');
 
     return name;
   }
-  function getFuncIdentGeneratorState(isFuncExpr, enclosingScopeFlags, currentScopeIsGenerator) {
+  function getFuncIdentGeneratorState(isFuncExpr, enclosingScopeFlags, starToken) {
+    ASSERT(getFuncIdentGeneratorState.length === arguments.length, 'arg count');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+
     // function idents can never be `yield` with the module goal
     if (hasAllFlags(enclosingScopeFlags, LF_STRICT_MODE)) return LF_IN_GENERATOR;
 
-    if (isFuncExpr) return currentScopeIsGenerator ? LF_IN_GENERATOR : 0;
+    if (isFuncExpr) return starToken !== UNDEF_STAR ? LF_IN_GENERATOR : 0;
     return hasAnyFlag(enclosingScopeFlags, LF_IN_GENERATOR) ? LF_IN_GENERATOR : 0;
   }
-  function getFuncIdentAsyncState(isFuncExpr, enclosingScopeFlags, currentScopeIsGenerator) {
+  function getFuncIdentAsyncState(isFuncExpr, enclosingScopeFlags, asyncToken) {
+    ASSERT(getFuncIdentAsyncState.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+
     // function idents can never be `await` with the module goal
     if (goalMode === GOAL_MODULE) return LF_IN_ASYNC;
 
-    if (isFuncExpr) return currentScopeIsGenerator ? LF_IN_ASYNC : 0;
+    if (isFuncExpr) return asyncToken !== UNDEF_ASYNC ? LF_IN_ASYNC : 0;
     return hasAnyFlag(enclosingScopeFlags, LF_IN_ASYNC) ? LF_IN_ASYNC : 0;
   }
-  function getFuncIdentAsyncGenState(isFuncExpr, enclosingScopeFlags, currentScopeGenerator, currentScopeAsync) {
-    return getFuncIdentGeneratorState(isFuncExpr, enclosingScopeFlags, currentScopeGenerator) |
-      getFuncIdentAsyncState(isFuncExpr, enclosingScopeFlags, currentScopeAsync)
+  function getFuncIdentAsyncGenState(isFuncExpr, enclosingScopeFlags, starToken, asyncToken) {
+    ASSERT(getFuncIdentAsyncGenState.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+
+    return getFuncIdentGeneratorState(isFuncExpr, enclosingScopeFlags, starToken) |
+      getFuncIdentAsyncState(isFuncExpr, enclosingScopeFlags, asyncToken)
   }
-  function resetLexerFlagsForFuncAndArrow(lexerFlags, isGenerator, isAsync, funcType) {
-    ASSERT(arguments.length === resetLexerFlagsForFuncAndArrow.length, 'arg count');
+  function resetLexerFlagsForFuncAndArrow(lexerFlags, starToken, asyncToken, funcType) {
+    ASSERT(resetLexerFlagsForFuncAndArrow.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
 
     // this resets lexerflags for parsing a function from the arguments onwards or for the body of an arrow
     lexerFlags = sansFlag(lexerFlags,
@@ -1760,10 +1836,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // the function name can inherit this state from the enclosing scope but all other parts of a function will
     // be parsed according to the state of hte currently defined function
-    if (isAsync) {
+    if (asyncToken !== UNDEF_ASYNC) {
       lexerFlags |= LF_IN_ASYNC;
     }
-    if (isGenerator) {
+    if (starToken !== UNDEF_STAR) {
       lexerFlags |= LF_IN_GENERATOR;
     }
 
@@ -1772,11 +1848,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return lexerFlags;
   }
-  function parseFunctionFromParams(lexerFlags, scoop, bindingFrom, expressionState, isGenerator, isClassConstructor, isGetSet, functionNameTokenToVerify, isMethod) {
+  function parseFunctionFromParams(lexerFlags, scoop, bindingFrom, expressionState, isClassConstructor, functionNameTokenToVerify, isMethod, asyncToken, starToken, getToken, setToken) {
     ASSERT(parseFunctionFromParams.length === arguments.length, 'arg count should match');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+
     let paramScoop = SCOPE_addLexTo(scoop, ARG_SCOPE, 'parseFunctionFromParams(arg)');
     // `yield` can certainly NOT be a var name if either parent or current function was a generator, so track it
-    let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, paramScoop, bindingFrom, isGetSet, isGenerator, isMethod);
+    let wasSimple = parseFuncArguments(lexerFlags | LF_NO_ASI, paramScoop, bindingFrom, isMethod, asyncToken, starToken, getToken, setToken);
     ASSERT(typeof lexerFlags === 'number');
 
     let finalFuncScope = SCOPE_addLexTo(paramScoop, BLOCK_SCOPE, 'parseFunctionFromParams(body)');
@@ -1793,10 +1874,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       'body'
     );
   }
-  function parseFuncArguments(lexerFlags, scoop, bindingFrom, isGetSet, isGenerator, isMethod) {
+  function parseFuncArguments(lexerFlags, scoop, bindingFrom, isMethod, asyncToken, starToken, getToken, setToken) {
     // parseArguments
     ASSERT(arguments.length === parseFuncArguments.length, 'arg count');
-    ASSERT(isGetSet === IS_GETTER || isGetSet === IS_SETTER || isGetSet === NOT_GETSET, 'enum');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+
     // TODO: await expression inside the params (like default param) of an async function are illegal
     lexerFlags = lexerFlags | LF_IN_FUNC_ARGS; // prevents await expression as default arg
     AST_set('params', []);
@@ -1806,16 +1891,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc !== $$PAREN_L_28) THROW('Must have func arguments next but did not find `(`');
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
     if (curc === $$PAREN_R_29) {
-      if (isGetSet === IS_SETTER) {
+      if (setToken !== UNDEF_SET) {
         THROW('Setters must have exactly one parameter');
       }
       ASSERT_skipRex(')', lexerFlags);
     }
-    else if (isGetSet === IS_GETTER) {
+    else if (getToken !== UNDEF_GET) {
       THROW('Getters can not have any parameters');
     }
     else {
-      wasSimple = parseBindings(lexerFlags, scoop, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, isGetSet, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'params');
+      wasSimple = parseBindings(lexerFlags, scoop, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, setToken, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'params');
       AST_destruct('params');
       ASSERT(curc !== $$COMMA_2C, 'the trailing func comma case should already be caught by now');
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
@@ -1891,7 +1976,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           }
         }
         ASSERT(scoop, 'should have a scoop at this point');
-        parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_REQUIRED, isFunctionStatement, astProp);
+        parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, IDENT_REQUIRED, isFunctionStatement, astProp);
         return;
 
       case 'if':
@@ -1984,26 +2069,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseSemiOrAsi(lexerFlags);
   }
 
-  function parseAsyncStatement(lexerFlags, scoop, asyncIdentToken, isExport, includeDeclarations, exportedBindings, astProp) {
+  function parseAsyncStatement(lexerFlags, scoop, asyncToken, isExport, includeDeclarations, exportedBindings, astProp) {
     ASSERT(parseAsyncStatement.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+
     // an async statement is almost the same as an expression but it needs to know whether it was in fact
     // an expression or not so it knows how to apply the statement semi/asi.
     // at this point already verified not to be a label.
     // only the `async function ...` form does NOT require a semi as a statement. all other forms do.
     // A statement needs to pass on the scoop because the async func decl needs to record its id in that outer scope
-    _parseAsync(lexerFlags, scoop, IS_STATEMENT, asyncIdentToken, NOT_NEW_ARG, isExport, ASSIGN_EXPR_IS_OK, includeDeclarations, exportedBindings, astProp);
+    _parseAsync(lexerFlags, scoop, IS_STATEMENT, asyncToken, NOT_NEW_ARG, isExport, ASSIGN_EXPR_IS_OK, includeDeclarations, exportedBindings, astProp);
   }
-  function parseAsyncExpression(lexerFlags, asyncIdentToken, isNewArg, isExport, allowAssignment, astProp) {
+  function parseAsyncExpression(lexerFlags, asyncToken, isNewArg, isExport, allowAssignment, astProp) {
     ASSERT(parseAsyncExpression.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
     // parsed the `async` keyword (-> identToasyncIdentTokenken)
-    return _parseAsync(lexerFlags, DO_NOT_BIND, IS_EXPRESSION, asyncIdentToken, isNewArg, isExport, allowAssignment, EXC_DECL, UNDEF_EXPORTS, astProp);
+    return _parseAsync(lexerFlags, DO_NOT_BIND, IS_EXPRESSION, asyncToken, isNewArg, isExport, allowAssignment, EXC_DECL, UNDEF_EXPORTS, astProp);
   }
-  function _parseAsync(lexerFlags, scoop, fromStmtOrExpr, asyncIdentToken, isNewArg, isExport, allowAssignment, includeDeclarations, exportedBindings, astProp) {
+  function _parseAsync(lexerFlags, scoop, fromStmtOrExpr, asyncToken, isNewArg, isExport, allowAssignment, includeDeclarations, exportedBindings, astProp) {
     ASSERT(_parseAsync.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astprop = string', astProp);
-    ASSERT(asyncIdentToken.str === 'async', 'pass on the async keyword');
-    ASSERT(curtok !== asyncIdentToken, 'should have consumed the async keyword');
+    ASSERT(asyncToken !== UNDEF_ASYNC && asyncToken.str === 'async', 'async token should be passed on');
+    ASSERT(curtok !== asyncToken, 'should have consumed the async keyword');
     ASSERT(scoop === DO_NOT_BIND || scoop, 'potentially need scoop, for async func decls (only)');
     ASSERT_ASSIGN_EXPR(allowAssignment);
     // this function will parse tail but NOT parse op and rhs.
@@ -2082,7 +2170,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - else: `async` as a var name
 
     if (curtype === $EOF || !allowAsyncFunctions) {
-      return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
+      return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp);
     }
 
     let newlineAfterAsync = curtok.nl;
@@ -2107,19 +2195,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `async \n in obj`
         // - `async \n instanceof obj`
         // - `async \n function f(){}`
-        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
+        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp);
       }
 
       if (curtok.str === 'function') {
         // - `async function f(){}`
-        return parseAsyncFunctionDecl(lexerFlags, fromStmtOrExpr, includeDeclarations, scoop, isExport, exportedBindings, astProp);
+        return parseAsyncFunctionDecl(lexerFlags, asyncToken, fromStmtOrExpr, includeDeclarations, scoop, isExport, exportedBindings, astProp);
       }
 
       if (curtok.str === 'in' || curtok.str === 'instanceof') {
         // - `async in x`
         // - `async instanceof x`
 
-        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
+        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp);
       }
 
       // - `async foo => ..`                        ok
@@ -2134,7 +2222,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         //              ^
         THROW('Cannot apply `new` to an (async) arrow');
       }
-      parseParenlessArrowAfterAsync(lexerFlags, fromStmtOrExpr, allowAssignment, astProp);
+      parseParenlessArrowAfterAsync(lexerFlags, fromStmtOrExpr, allowAssignment, asyncToken, astProp);
       return NOT_ASSIGNABLE;
     }
 
@@ -2156,7 +2244,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `new async();`
         // - `new async() =>x`                   --> error, arrow not allowed as new arg
         // Do not parse the paren because it belongs to the `new` op
-        AST_setIdent('callee', asyncIdentToken);
+        AST_setIdent('callee', asyncToken);
         return IS_ASSIGNABLE; // I mean ...
       }
 
@@ -2169,10 +2257,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `new async();`
         // - `new async() => x`     (error because arrow is an AssignmentExpression and new does not accept that)
         // Note that if it turns out to be an arrow, the parser will throw when seeing `=>` unexpectedly
-        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
+        return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp);
       }
 
-      let r = parseGroupToplevels(lexerFlags, fromStmtOrExpr, allowAssignment, asyncIdentToken, newlineAfterAsync ? IS_ASYNC_PREFIXED : NOT_ASYNC_PREFIXED, astProp);
+      let r = parseGroupToplevels(lexerFlags, fromStmtOrExpr, allowAssignment, asyncToken, newlineAfterAsync ? IS_ASYNC_PREFIXED : NOT_ASYNC_PREFIXED, astProp);
 
       if (fromStmtOrExpr === IS_STATEMENT) {
         AST_close('ExpressionStatement');
@@ -2189,7 +2277,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async \n [x]`
     // - `(async \n [x])`
     // - `new async;`
-    return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncIdentToken, isNewArg, allowAssignment, astProp);
+    return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp);
   }
 
   function isAssignable(state) {
@@ -2401,116 +2489,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return false;
   }
 
-  function parseClassDeclaration(lexerFlags, scoop, optionalIdent, astProp) {
-    ASSERT(arguments.length === parseClassDeclaration.length, 'expecting all args');
-    // class x {}
-    // class x extends <lhs expr> {}
-    // class x {;}
-    // class x {[static] <method>[]}
-    // export class x {}
-    // export class {}
-
-    lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_CONSTRUCTOR);
-
-    ASSERT_skipAny('class', lexerFlags); // TODO: valid varname, `extends`, or `{`
-    AST_open(astProp, 'ClassDeclaration');
-
-    let name = parseClassId(lexerFlags, optionalIdent, scoop);
-
-    // TODO: I'm prety sure scoop should be DO_NOT_BIND here (and can be folded inward)
-    _parseClass(lexerFlags, scoop, IS_STATEMENT);
-
-    AST_close('ClassDeclaration');
-
-    return name; // used if export
-  }
-  function parseClassExpression(lexerFlags, astProp) {
-    ASSERT(arguments.length === parseClassExpression.length, 'expecting all args');
-    // x = class x {}
-    // x = class x extends <lhs expr> {}
-    // x = class x {;}
-    // x = class x {[static] <method>[]}
-
-    lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_CONSTRUCTOR);
-
-    AST_open(astProp, 'ClassExpression');
-
-    parseClassId(lexerFlags, IDENT_OPTIONAL, DO_NOT_BIND);
-
-    let assignable = _parseClass(lexerFlags, DO_NOT_BIND, IS_EXPRESSION);
-    AST_close('ClassExpression');
-
-    // The `await/yield` flags only describe the `extends` part. Additionally the class as a whole is not assignable.
-    return setNotAssignable(assignable);
-  }
-  function parseClassId(lexerFlags, optionalIdent, scoop) {
-    ASSERT(parseClassId.length === arguments.length, 'arg count');
-    ASSERT(hasAllFlags(lexerFlags, LF_STRICT_MODE) && hasNoFlag(lexerFlags, LF_IN_CONSTRUCTOR), 'should be set by caller');
-
-    let bindingName = '';
-    // note: default exports has optional ident but should still not skip `extends` here
-    // but it is not a valid class name anyways (which is superseded by a generic keyword check)
-    if (curtype === $IDENT && curtok.str !== 'extends') {
-      // The class name is to be considered a `const` inside the class, but a `let` outside of the class
-      // https://tc39.github.io/ecma262/#sec-runtime-semantics-classdefinitionevaluation
-      // > If hasNameProperty is false, perform SetFunctionName(value, className).
-      // https://tc39.github.io/ecma262/#sec-initializeboundname
-      // > Perform ? InitializeBoundName(className, value, env).
-      // > Perform env.InitializeBinding(name, value).
-      // https://tc39.github.io/ecma262/#table-15
-      // > InitializeBinding(N, V) : Set the value of an already existing but uninitialized binding in an Environment
-      //   Record. The String value N is the text of the bound name. V is the value for the binding and is a value of
-      //   any ECMAScript language type.
-      // eg: it is a `let` binding in outer scope and a `const` binding in inner scope...
-      fatalBindingIdentCheck(curtok, BINDING_TYPE_CLASS, lexerFlags);
-      bindingName = curtok.str;
-      SCOPE_addBindingAndDedupe(lexerFlags, scoop, bindingName, BINDING_TYPE_LET, ORIGIN_NOT_VAR_DECL);
-      AST_setIdent('id', curtok);
-      ASSERT_skipAny($IDENT, lexerFlags);
-    } else if (!optionalIdent) {
-      //  '`export class extends x {}` is the only valid class decl without name');
-      THROW('Class decl missing required ident, `extends` is not a valid variable name');
-    } else {
-      // expression           (`x = class {}`)
-      // default exports      (`export default class {}`)
-      AST_set('id', null);
-    }
-    return bindingName;
-  }
-  function _parseClass(lexerFlags, scoop, isExpression) {
-    ASSERT(arguments.length === _parseClass.length, 'expecting all args');
-    ASSERT(hasAllFlags(lexerFlags, LF_STRICT_MODE) && hasNoFlag(lexerFlags, LF_IN_CONSTRUCTOR), 'should be set by caller');
-    // Note: all class code is always strict mode implicitly
-    // Note: methods inside classes can access super properties
-    // Note: `super()` is only valid in the constructor a class that uses `extends` (resets when nesting but after `extends`)
-
-    let assignable = 0; // only relevant to propagate the `extends` expression
-
-    if (curtype === $IDENT && curtok.str === 'extends') {
-      ASSERT_skipRex('extends', lexerFlags);
-      // - `class x extends {} {}`             is valid so we can't just scan for `{` and throw a nice error
-      // - `async function f(fail = class y extends (await f) {}){}`  (should be an error...?)
-      // - `class x extends ()=>{} {}`         error because the extends cannot be an arrow
-      // - `class x extends ()=>{} 1`          error because the extends cannot be an arrow
-      assignable = parseValue(lexerFlags | LF_NO_ASI, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'superClass');
-      // don't set LF_SUPER_CALL before parsing the extending value
-      lexerFlags |= LF_SUPER_CALL; // can do `super()` because this class extends another class
-    } else {
-      AST_set('superClass', null);
-      lexerFlags = sansFlag(lexerFlags, LF_SUPER_CALL);
-    }
-
-    // TODO: div/regex for class decl/expr, and asi.
-
-    // _now_ enable super props, super call is already set up correctly
-    lexerFlags |= LF_SUPER_PROP;
-    // note: generator and async state is not reset because computed method names still use the outer state
-    // Note: this `assignable` is relevant for passing back await/yield flags
-    assignable |= parseClassbody(lexerFlags, scoop, BINDING_TYPE_NONE, isExpression, 'body');
-
-    return assignable;
-  }
-
   function parseConstStatement(lexerFlags, scoop, astProp) {
     ASSERT_skipAny('const', lexerFlags); // next is ident, [, or {
     parseAnyVarDecls(lexerFlags, scoop, BINDING_TYPE_CONST, FROM_STATEMENT_START, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
@@ -2636,7 +2614,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // `export default function(){}`
         // `export default function* (){}`
 
-        let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_OPTIONAL, NOT_FUNCTION_STATEMENT, 'declaration');
+        let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, IDENT_OPTIONAL, NOT_FUNCTION_STATEMENT, 'declaration');
 
         // bound names: func name and "*default*"
         // exported binding: func name and "*default*"
@@ -2772,7 +2750,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // export function f(){}
         // export function* f(){}
         // (anonymous should not be allowed but parsers seem to do it anyways)
-        let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, NOT_ASYNC, IDENT_REQUIRED, NOT_FUNCTION_STATEMENT, 'declaration');
+        let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, IDENT_REQUIRED, NOT_FUNCTION_STATEMENT, 'declaration');
         addNameToExports(exportedNames, exportedName);
         addBindingToExports(exportedBindings, exportedName);
         AST_set('source', null);
@@ -2781,6 +2759,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else if (curc === $$A_61 && curtok.str === 'async') {
         // export async function f(){}
         // (note: no arrows here because we require a name)
+        let asyncToken = curtok;
         ASSERT_skipAny('async', lexerFlags);
 
         if (curtok.str !== 'function') {
@@ -2792,7 +2771,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('Async can not be followed by a newline as it results in `export async;`, which is not valid (and probably not what you wanted)');
         }
 
-        let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, WAS_ASYNC, IDENT_REQUIRED, NOT_FUNCTION_STATEMENT, 'declaration');
+        let exportedName = parseFunction(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, asyncToken, IDENT_REQUIRED, NOT_FUNCTION_STATEMENT, 'declaration');
         addNameToExports(exportedNames, exportedName);
         addBindingToExports(exportedBindings, exportedName);
         AST_set('source', null);
@@ -3121,7 +3100,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       wasNotDecl = true;
 
-      destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, SKIP_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      if (options_webCompat === WEB_COMPAT_ON) {
+        if (hasAllFlags(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
+          ASSERT(curtok.str !== '=' && curtok.str !== 'in' && curtok.str !== 'of', 'an init should be parsed already and have reset the flag');
+          // - `for ({__proto__: 1, __proto__: 2};;);`
+          THROW('Found an object with double `__proto__` which is not allowed here in webcompat');
+        }
+      }
       if (hasAllFlags(destructible, MUST_DESTRUCT) && curtok.str === '=') {
         if (hasAllFlags(destructible, CANT_DESTRUCT)) TODO, THROW('Found something that must and cant destruct');
         destructible = sansFlag(destructible, MUST_DESTRUCT);
@@ -3144,6 +3130,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
 
       destructible = parseArrayOuter(lexerFlags | LF_IN_FOR_LHS, scoop, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      if (options_webCompat === WEB_COMPAT_ON) {
+        if (hasAllFlags(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
+          ASSERT(curtok.str !== '=', 'an init should be parsed already and have reset the flag');
+          // - `for ([{__proto__: 1, __proto__: 2}];;);`
+          THROW('Found an object with double `__proto__` which is not allowed here in webcompat');
+        }
+      }
       if (hasAllFlags(destructible, MUST_DESTRUCT) && curtok.str === '=') {
         if (hasAllFlags(destructible, CANT_DESTRUCT)) TODO, THROW('Found something that must and cant destruct');
         destructible = sansFlag(destructible, MUST_DESTRUCT);
@@ -4068,15 +4061,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('kind', keyword);
     AST_set('declarations', []);
 
-    parseBindings(lexerFlags, scoop, bindingType, bindingOrigin, ASSIGNMENT_IS_INIT, NOT_GETSET, doDupeBindingCheck, exportedNames, exportedBindings, 'declarations');
+    parseBindings(lexerFlags, scoop, bindingType, bindingOrigin, ASSIGNMENT_IS_INIT, UNDEF_SET, doDupeBindingCheck, exportedNames, exportedBindings, 'declarations');
     AST_close(['VariableDeclaration', 'ExpressionStatement']); //  expr in case of `let` in sloppy
   }
 
-  function parseBindings(lexerFlags, scoop, bindingType, bindingOrigin, defaultOptions, isGetSet, skipDoubleBindCheck, exportedNames, exportedBindings, astProp) {
+  function parseBindings(lexerFlags, scoop, bindingType, bindingOrigin, defaultOptions, setToken, skipDoubleBindCheck, exportedNames, exportedBindings, astProp) {
     ASSERT(parseBindings.length === arguments.length, 'expecting all args');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(typeof bindingType === 'number', 'bindingType should be enum');
     ASSERT(typeof bindingOrigin === 'number', 'bindingOrigin should be enum');
-    ASSERT(isGetSet !== IS_GETTER, 'getters should not call this');
     // TODO: if bindingType=let then also consider it could be a var name
     let many = 0;
     let inited = false;
@@ -4113,7 +4106,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
     } while (true);
-    if (many !== 1 && isGetSet === IS_SETTER) {
+    if (many !== 1 && setToken !== UNDEF_SET) {
       THROW('Setters require exactly one parameter');
     }
     if (bindingOrigin === FROM_FOR_HEADER && (curtok.str === 'in' || curtok.str === 'of')) {
@@ -4182,7 +4175,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curc === $$CURLY_L_7B) {
       ASSERT(bindingType !== BINDING_TYPE_NONE, 'must bind as something');
-      let destructible = parseObjectOuter(lexerFlags, scoop, bindingType, SKIP_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, astProp);
+      let destructible = parseObjectOuter(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
+      destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error when pattern is required
       verifyDestructibleForBinding(destructible, bindingType);
       AST_destruct(astProp);
       // note: throw for `const {};` and `for (const {};;);` but not `for (const {} in obj);`
@@ -4196,6 +4190,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curc === $$SQUARE_L_5B) {
       let destructible = parseArrayOuter(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
+      destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error when pattern is required
       verifyDestructibleForBinding(destructible, bindingType);
       AST_destruct(astProp);
       // note: throw for `const {};` and `for (const {};;);` but not `for (const {} in obj);`
@@ -4686,7 +4681,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp) {
     ASSERT(arguments.length === parseExpressionAfterAsyncAsVarName.length, 'arg count');
-    ASSERT(asyncToken.str === 'async');
+    ASSERT(asyncToken !== UNDEF_ASYNC && asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     if (stmtOrExpr === IS_STATEMENT) {
@@ -4707,12 +4702,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return assignable;
   }
-  function parseParenlessArrowAfterAsync(lexerFlags, fromStmtOrExpr, allowAssignment, astProp) {
+  function parseParenlessArrowAfterAsync(lexerFlags, fromStmtOrExpr, allowAssignment, asyncToken, astProp) {
     ASSERT(parseParenlessArrowAfterAsync.length === arguments.length, 'arg count');
     ASSERT(curtok.str !== 'function', '(Function and newline have already been asserted)');
     ASSERT(!curtok.nl, '(Function and newline have already been asserted)');
     ASSERT(curtype === $IDENT, 'dont have to skip the ident to assert it having to be an arrow');
     ASSERT_ASSIGN_EXPR(allowAssignment);
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
 
     // We must parse an async arrow without parens now. We still have to validate the arg name too.
     // - `async foo => foo`
@@ -4761,7 +4757,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       isSimple = ARGS_COMPLEX;
     }
     skipAny(lexerFlags); // this was `async <curtok>` and curtok is not a keyword; next must be `=>`
-    parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, isSimple, WAS_ASYNC, astProp);
+    parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, isSimple, asyncToken, astProp);
 
     if (fromStmtOrExpr === IS_STATEMENT) {
       AST_close('ExpressionStatement');
@@ -5098,7 +5094,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
-        let wasDestruct = parseObjectOuter(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, allowAssignment ? PARSE_INIT : SKIP_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        let wasDestruct = parseObjectOuter(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, allowAssignment ? PARSE_INIT : SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         return _parseValueHeadBodyAfterObjArr(wasDestruct);
       }
       else if (curc === $$SQUARE_L_5B) {
@@ -5145,22 +5141,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function _parseValueHeadBodyAfterObjArr(wasDestruct) {
     ASSERT(_parseValueHeadBodyAfterObjArr.length === arguments.length, 'argcount');
 
+    if (options_webCompat === WEB_COMPAT_ON) {
+      if (hasAllFlags(wasDestruct, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
+        // [x]: `x = {__proto__: 1, __proto__: 2}`
+        // [x]: `x = {'__proto__': 1, "__proto__": 2}`
+        // [x]: `x = [{__proto__: 1, __proto__: 2}]`
+        // [x]: `x = [{'__proto__': 1, "__proto__": 2}]`
+        THROW('Found an object with double `__proto__` which is not allowed here in webcompat');
+      }
+    }
+
     if (hasAllFlags(wasDestruct, MUST_DESTRUCT)) {
       // [x]: `x = {x=y};`
       // [x]: `for ({x=y} ;;) b;`
       // [x]: `[{a = b}];`
       // [x]: `[{x = y}] in z`
       THROW('Found a struct that must be destructured but was not');
-    }
-
-    if (options_webCompat === WEB_COMPAT_ON) {
-      if (hasAllFlags(wasDestruct, PIGGY_BACK_WAS_PROTO)) {
-        // [x]: `x = {__proto__: 1, __proto__: 2}`
-        // [x]: `x = {'__proto__': 1, "__proto__": 2}`
-        // [x]: `x = [{__proto__: 1, __proto__: 2}]`
-        // [x]: `x = [{'__proto__': 1, "__proto__": 2}]`
-        THROW('Found an object with double `__proto__` which is not allowed');
-      }
     }
 
     // Note: immediate tail assignments are parsed at this point and `({x})=y` is illegal
@@ -5222,7 +5218,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
             THROW('Can not use `arguments` as arg name in strict mode');
           }
-          parseArrowParenlessFromPunc(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, ARGS_COMPLEX, NOT_ASYNC, astProp);
+          parseArrowParenlessFromPunc(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, ARGS_COMPLEX, UNDEF_ASYNC, astProp);
           return NOT_ASSIGNABLE;
         }
         AST_setIdent(astProp, identToken);
@@ -5247,7 +5243,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
             THROW('Can not use `eval` as arg name in strict mode');
           }
-          parseArrowParenlessFromPunc(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, ARGS_COMPLEX, NOT_ASYNC, astProp);
+          parseArrowParenlessFromPunc(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, ARGS_COMPLEX, UNDEF_ASYNC, astProp);
           return NOT_ASSIGNABLE;
         }
         AST_setIdent(astProp, identToken);
@@ -5255,7 +5251,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'false':
         return parseFalseKeyword(astProp);
       case 'function':
-        parseFunctionExpression(lexerFlags, NOT_ASYNC, astProp);
+        parseFunctionExpression(lexerFlags, UNDEF_ASYNC, astProp);
         return NOT_ASSIGNABLE;
       case 'let':
         if (bindingType === BINDING_TYPE_CLASS) {
@@ -5689,7 +5685,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // (in the case of `await`, consider it a regular var)
     if (curc === $$IS_3D && curtok.str === '=>') {
       ASSERT(isAssignable(assignable), 'not sure whether an arrow can be valid if the arg is marked as non-assignable');
-      parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, ARGS_SIMPLE, NOT_ASYNC, astProp);
+      parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, ARGS_SIMPLE, UNDEF_ASYNC, astProp);
       return NOT_ASSIGNABLE;
     } else {
       AST_setIdent(astProp, identToken);
@@ -5697,8 +5693,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
-  function parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, wasSimple, isAsync, astProp) {
+  function parseArrowParenlessFromPunc(lexerFlags, identToken, allowAssignment, wasSimple, asyncToken, astProp) {
     ASSERT(parseArrowParenlessFromPunc.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     if (curtok.str !== '=>') {
@@ -5766,7 +5763,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_setIdent('params', identToken);
 
-    parseArrowFromPunc(lexerFlags, paramScoop, isAsync, allowAssignment, wasSimple);
+    parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, wasSimple);
     AST_close('ArrowFunctionExpression');
   }
 
@@ -5847,6 +5844,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof astProp === 'string', 'should be string');
 
     if (curc === $$DOT_2E && curtok.str === '.') {
+      // parseMemberExpression dot
       ASSERT_skipAny('.', lexerFlags); // TODO: optimize; next must be identifier
       if (curtype !== $IDENT) THROW('Dot property must be an identifier');
       AST_wrapClosed(astProp, 'MemberExpression', 'object');
@@ -5857,15 +5855,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       assignable = parseValueTail(lexerFlags, setAssignable(assignable), isNewArg, astProp);
     }
     else if (curc === $$SQUARE_L_5B) {
+      // parseMemberExpression dynamic
       AST_wrapClosed(astProp, 'MemberExpression', 'object');
       ASSERT_skipRex('[', lexerFlags);
-      let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'property'); // no comma (!)
+      let nowAssignable = parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'property');
       // - `foo[await bar]`
-      assignable = mergeAssignable(nowAssignable, assignable);
+      assignable = mergeAssignable(nowAssignable, assignable); // pass on piggies (yield, await, etc)
       skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
       AST_set('computed', true); // x[y] vs x.y
       AST_close('MemberExpression');
-      assignable = parseValueTail(lexerFlags, setAssignable(assignable), isNewArg, astProp);
+      assignable = parseValueTail(lexerFlags, setAssignable(assignable), isNewArg, astProp); // member expressions are assignable
     }
     else if (curc === $$PAREN_L_28) {
       ASSERT(curtype === $PUNCTUATOR && curtok.str === '(');
@@ -6044,14 +6043,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return assignable;
   }
 
-  function parseArrowFromPunc(lexerFlags, paramScoop, isAsync, allowAssignment, wasSimple) {
+  function parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, wasSimple) {
     ASSERT(arguments.length === parseArrowFromPunc.length, 'arg count');
-    ASSERT(isAsync === NOT_ASYNC || isAsync === WAS_ASYNC, 'isasync bool');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_skipRex('=>', lexerFlags); // `{` or any expression
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     ASSERT(_path[_path.length - 1] && _path[_path.length - 1].params, 'params should be wrapped in arrow node now');
-    ASSERT(!isAsync || allowAsyncFunctions, 'async = es8');
+    ASSERT(asyncToken === UNDEF_ASYNC || allowAsyncFunctions, 'async = es8 and this should be confirmed elsewhere');
 
     ASSERT(paramScoop && paramScoop.lex && paramScoop.lex.type === ARG_SCOPE, 'this func should receive a param scoop', paramScoop);
 
@@ -6070,9 +6069,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (exposeScopes) AST_set('$scope', paramScoop);
     AST_set('id', null);
     AST_set('generator', false);
-    AST_set('async', isAsync === WAS_ASYNC);
+    AST_set('async', asyncToken !== UNDEF_ASYNC);
 
-    lexerFlags = resetLexerFlagsForFuncAndArrow(lexerFlags, NOT_GENERATOR, isAsync, IS_ARROW);
+    lexerFlags = resetLexerFlagsForFuncAndArrow(lexerFlags, UNDEF_STAR, asyncToken, IS_ARROW);
     if (curc === $$CURLY_L_7B) {
       lexerFlags = sansFlag(lexerFlags, LF_IN_FOR_LHS); // this state _is_ reset for block-body arrows, albeit futile
       AST_set('expression', false); // "body of arrow is block"
@@ -6131,6 +6130,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseGroupToplevels(lexerFlags, asyncStmtOrExpr, allowAssignment, asyncToken, newlineAfterAsync, astProp) {
     ASSERT(parseGroupToplevels.length === arguments.length, 'expecting args');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags); // `(/x/);`
     return _parseGroupToplevels(lexerFlags, asyncStmtOrExpr, allowAssignment, NOT_DELETE_ARG, asyncToken, newlineAfterAsync, astProp);
@@ -6139,6 +6139,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(arguments.length === _parseGroupToplevels.length, 'arg count');
     ASSERT(newlineAfterAsync === NOT_ASYNC_PREFIXED || newlineAfterAsync === IS_ASYNC_PREFIXED);
     ASSERT(typeof astProp === 'string');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignmentForGroupToBeArrow);
     // = parseGroup(), = parseArrow()
     // will parse `=>` tail if it exists (except in async edge cases)
@@ -6220,7 +6221,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       AST_open(astProp, 'ArrowFunctionExpression');
       AST_set('params', []);
-      parseArrowFromPunc(lexerFlags, paramScoop, NOT_ASYNC, allowAssignmentForGroupToBeArrow, ARGS_SIMPLE);
+      parseArrowFromPunc(lexerFlags, paramScoop, UNDEF_ASYNC, allowAssignmentForGroupToBeArrow, ARGS_SIMPLE);
       AST_close('ArrowFunctionExpression');
 
       if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
@@ -6356,7 +6357,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - ({..}.foo)
         // - ({..}.foo = x)
         // - ({..} + foo)
-        destructible |= parseObjectOuter(lexerFlags, paramScoop, BINDING_TYPE_NONE, PARSE_INIT, NOT_CLASS_METHOD, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        destructible |= parseObjectOuter(lexerFlags, paramScoop, BINDING_TYPE_NONE, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        // - `({web: true,  __proto__: x, __proto__: y});`
+        destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error in potential arrow header
         if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
           // Note: this is NOT destructible because we're in a group toplevel so an assignment would just be an
           // assignment, not a destructuring. And any tail would not lead to any kind of pattern. And destructuring
@@ -6377,6 +6380,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - ([..].foo = x)
         // - ([..] + foo)
         destructible |= parseArrayOuter(lexerFlags, paramScoop, BINDING_TYPE_NONE, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        // - `([{web: true,  __proto__: x, __proto__: y}]);`
+        destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error in potential arrow header
         if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
           // Note: this is NOT destructible because we're in a group toplevel so an assignment would just be an
           // assignment, not a destructuring. And any tail would not lead to any kind of pattern. And destructuring
@@ -6390,7 +6395,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else if (curc === $$DOT_2E && curtok.str === '...') {
         // top level group dots kinda have to be rest but there is an `async` edge case where it could be spread
         wasSimple = ARGS_COMPLEX;
-        destructible |= parseArrowableTopRest(lexerFlags, paramScoop, asyncToken !== UNDEF_ASYNC, astProp);
+        destructible |= parseArrowableTopRest(lexerFlags, paramScoop, asyncToken, astProp);
         if (asyncToken !== UNDEF_ASYNC) {
           // - `async(...x);`
           // - `async(...x,)`
@@ -6715,6 +6720,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseAfterAsyncGroup(lexerFlags, paramScoop, fromStmtOrExpr, allowAssignment, wasSimple, toplevelComma, newlineAfterAsync, groupDestructible, zeroArgs, asyncToken, assignable, astProp) {
     ASSERT(parseAfterAsyncGroup.length === arguments.length, 'arg count');
     ASSERT(typeof groupDestructible === 'number', 'destructible num')
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     // this is called after parsing a group that followed an `async` when it might be an async arrow
@@ -6862,6 +6868,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseArrowAfterAsyncNoArgGroup(lexerFlags, paramScoop, toplevelComma, asyncToken, allowAssignment, astProp) {
     ASSERT(parseArrowAfterAsyncNoArgGroup.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
 
     // The ast should look something like this now:
     // {
@@ -6873,11 +6880,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'ArrowFunctionExpression');
     AST_set('params', []);
-    parseArrowFromPunc(lexerFlags, paramScoop, WAS_ASYNC, allowAssignment, ARG_WAS_SIMPLE);
+    parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, ARG_WAS_SIMPLE);
     AST_close('ArrowFunctionExpression');
   }
   function parseArrowAfterGroup(lexerFlags, paramScoop, wasSimple, toplevelComma, asyncToken, allowAssignment, astProp) {
     ASSERT(parseArrowAfterGroup.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     // <SCRUB AST>
@@ -6901,7 +6909,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // must assert unique parameters now
     if (SCOPE_verifyLexical(lexerFlags, paramScoop, true)) THROW('Arrow had at least one duplicate parameter name bound');
 
-    parseArrowFromPunc(lexerFlags, paramScoop, !!asyncToken, allowAssignment, wasSimple);
+    parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, wasSimple);
 
     AST_close('ArrowFunctionExpression');
   }
@@ -6930,7 +6938,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // an assignment is NOT assignable (it's right associative which makes `x=x=x` work but not `(x=x)=x`)
     return setNotAssignable(mergeAssignable(assignable, rhsAssignable));
   }
-  function parseArrowableTopRest(lexerFlags, scoop, asyncKeywordPrefixed, astProp) {
+  function parseArrowableTopRest(lexerFlags, scoop, asyncToken, astProp) {
     // rest (can not be spread)
     // a `...` at the top-level of a group means this has to be an arrow header unless async'ed
     // a `...[x+y]` at the toplevel is an error
@@ -6943,8 +6951,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - async(...{destruct}) => x
     // - async(...<expr>);            // :(
 
-    let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, BINDING_TYPE_ARG, IS_GROUP_TOPLEVEL, asyncKeywordPrefixed, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-    if (!asyncKeywordPrefixed) {
+    let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, BINDING_TYPE_ARG, IS_GROUP_TOPLEVEL, asyncToken, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+    if (asyncToken === UNDEF_ASYNC) {
       if (hasAllFlags(subDestruct, CANT_DESTRUCT) || curc === $$COMMA_2C) {
         THROW('The ... argument must be destructible in an arrow header, found something that was not destructible');
       }
@@ -6962,19 +6970,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // This function serves to throw in case the array was found to must be a Pattern but used as a value anyways
     // For example: `[{a = b} = x]` vs `[{a = b}.c]`
 
-    return parseArrayLiteralPattern(lexerFlagsBeforeParen, scoop, bindingType, skipInit, exportedNames, exportedBindings, _astProp);
-  }
-  function parseObjectOuter(lexerFlags, scoop, bindingType, skipInit, isClassMethod, exportedNames, exportedBindings, _astProp) {
-    ASSERT(parseObjectOuter.length === arguments.length, 'arg count');
-
-    // This function serves to throw in case the object was found to must be a Pattern but used as a value anyways
-    // For example: `({a = b} = x)` vs `({a = b}.c)`
-
-    let destructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, isClassMethod, exportedNames, exportedBindings, _astProp);
-
+    let destructible = parseArrayLiteralPattern(lexerFlagsBeforeParen, scoop, bindingType, skipInit, exportedNames, exportedBindings, _astProp);
     return destructible;
   }
-
   function parseArrayLiteralPattern(lexerFlagsBeforeParen, scoop, bindingType, skipInit, exportedNames, exportedBindings, _astProp) {
     // token offsetS:
     // - ( [
@@ -7149,7 +7147,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - [{a:b}] = x
         // - [{a:1}.foo] = x
         // - `[{}.foo] = x`
-        let objDestructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, astProp);
+        let objDestructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, astProp);
         destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, hasAllFlags(objDestructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, objDestructible, $$SQUARE_R_5D, astProp);
       }
       else if (curc === $$SQUARE_L_5B) {
@@ -7198,7 +7196,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc !== $$COMMA_2C && curc !== $$SQUARE_R_5D) {
           THROW('Encountered unexpected token after parsing spread/rest argument ');
         }
-        console.log('wtf', ''+curtok)
+
         ASSERT(curc !== $$COMMA_2C || hasAllFlags(subDestruct, CANT_DESTRUCT), 'if comma then cannot destruct, should be dealt with in spread-parsing function');
         // if there are any other elements after this then this cannot be a destructible since that demands rest as last
         if (spreadStage === NO_SPREAD) spreadStage = LAST_SPREAD;
@@ -7294,7 +7292,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return copyPiggies(destructible, assignableYieldAwaitState);
   }
 
-  function parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, isClassMethod, exportedNames, exportedBindings, astProp) {
+  function parseObjectOuter(lexerFlags, scoop, bindingType, skipInit, exportedNames, exportedBindings, astProp) {
+    ASSERT(parseObjectOuter.length === arguments.length, 'arg count');
+
+    // This function makes it easier to search for places that parse an object literal/pattern, without recursive bits
+
+    let destructible = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, exportedNames, exportedBindings, astProp);
+    return destructible;
+  }
+  function parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, skipInit, exportedNames, exportedBindings, astProp) {
     // returns whether this object is destructible
     ASSERT(parseObjectLiteralPatternAndAssign.length === arguments.length, 'expecting all args');
     ASSERT(skipInit === SKIP_INIT || skipInit === PARSE_INIT, 'skipInit is enum', skipInit);
@@ -7319,7 +7325,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'ObjectExpression');
     AST_set('properties', []);
-    let destructible = parseObjectLikePatternSansAssign(lexerFlags | LF_NO_ASI, scoop, bindingType, isClassMethod, IS_EXPRESSION, exportedNames, exportedBindings, 'properties');
+    let destructible = parseObjectLikePatternSansAssign(lexerFlags | LF_NO_ASI, scoop, bindingType, IS_EXPRESSION, exportedNames, exportedBindings, 'properties');
     AST_close('ObjectExpression');
     // this is immediately after the top-level object literal closed that we started parsing
     if (skipInit === PARSE_INIT) {
@@ -7328,74 +7334,54 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return destructible;
   }
-  function parseClassbody(lexerFlags, scoop, bindingType, isExpression, astProp) {
-    ASSERT(parseClassbody.length === arguments.length, 'expecting all args');
-
-    AST_open(astProp, 'ClassBody');
-    AST_set('body', []);
-    let assignable = parseObjectLikePatternSansAssign(lexerFlags, scoop, bindingType, IS_CLASS_METHOD, isExpression, UNDEF_EXPORTS, UNDEF_EXPORTS, 'body');
-    AST_close('ClassBody');
-    // Note: returning `assignable` is relevant for passing back await/yield flags
-    return assignable;
-  }
-  function parseObjectLikePatternSansAssign(_lexerFlags, scoop, bindingType, isClassMethod, isExpression, exportedNames, exportedBindings, astProp) {
+  function parseObjectLikePatternSansAssign(outerLexerFlags, scoop, bindingType, isExpression, exportedNames, exportedBindings, astProp) {
     ASSERT(parseObjectLikePatternSansAssign.length === arguments.length, 'arg count');
     // parse the body of something that looks like an object literal (obj lit, class body)
 
-    let lexerFlags = _lexerFlags;
-    if (hasAllFlags(lexerFlags, LF_IN_FOR_LHS)) lexerFlags = lexerFlags ^ LF_IN_FOR_LHS;
-    if (hasAllFlags(lexerFlags, LF_IN_TEMPLATE)) lexerFlags = lexerFlags ^ LF_IN_TEMPLATE;
+    let lexerFlags = sansFlag(outerLexerFlags, LF_IN_FOR_LHS | LF_IN_TEMPLATE);
 
     skipAnyOrDieSingleChar($$CURLY_L_7B, lexerFlags); // TODO: next must be propname (ident, string, number, square bracket) or } or *
 
     let destructible = MIGHT_DESTRUCT; // innocent until proven guilty? may or may not destruct
 
-    if (isClassMethod === IS_CLASS_METHOD) {
-      while (curc === $$SEMI_3B) ASSERT_skipAny(';', lexerFlags);
-    }
-
     // > 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object
     // Initializers. So we don't have to track all properties of object literals to check for dupes, however, we still
-    // need to confirm this for the constructor of a class and for annex B web-compat also __proto__.
+    // need to confirm this for annex B web-compat __proto__.
 
-    let constructors = 0; // must throw if more than one plain constructor was found
-    let doubleDunderProto = 0;
+    let hasThunderProto = false;
     while (curc !== $$CURLY_R_7D) {
       if (curc === $$COMMA_2C) {
-        // ({,
+        // - `{,}`
+        //     ^
         THROW('Objects cant have comma without something preceding it');
       }
 
-      let currentDestruct = parseObjectLikePart(lexerFlags, scoop, bindingType, isClassMethod, undefined, exportedNames, exportedBindings, astProp);
-      if (hasAnyFlag(currentDestruct, PIGGY_BACK_WAS_PROTO)) {
-        // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
-        // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
-        // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
-        // so; the __proto__ dupe check does not apply when inside a group or when the object is a destructuring assignment
-        ++doubleDunderProto;
+      let currentDestruct = parseObjectLikePart(lexerFlags, scoop, bindingType, exportedNames, exportedBindings, astProp);
+      if (options_webCompat === WEB_COMPAT_ON) {
+        if (hasAnyFlag(currentDestruct, PIGGY_BACK_WAS_PROTO)) {
+          // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+          // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
+          // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
+          // so; the __proto__ dupe check does not apply when inside a group or when the object is a destructuring assignment
+          if (hasThunderProto) {
+            // [x]: `x = {__proto__: 1, __proto__: 2}`
+            // [x]: `x = {'__proto__': 1, "__proto__": 2}`
+            // [x]: `x = [{__proto__: 1, __proto__: 2}]`
+            // [x]: `x = [{'__proto__': 1, "__proto__": 2}]`
+            // Note: This is NOT an error if this object is toplevel of a group or async call (both potential arrow pattern)
+            destructible |= PIGGY_BACK_WAS_DOUBLE_PROTO;
+          }
+          hasThunderProto = true;
+        }
       }
       destructible |= currentDestruct;
 
-      if (isClassMethod === IS_CLASS_METHOD) {
-        if (hasAnyFlag(currentDestruct, PIGGY_BACK_WAS_CONSTRUCTOR)) {
-          ++constructors;
-        }
-
-        while (curc === $$SEMI_3B) ASSERT_skipAny(';', lexerFlags);
-      } else {
-        if (curc !== $$COMMA_2C) break;
-        ASSERT_skipAny(',', lexerFlags); // TODO: ident, }, [, number, string
-      }
-    }
-
-    if (constructors > 1) {
-      THROW('Classes may only have one constructor');
-    } else if (constructors > 0) {
-      destructible = sansFlag(destructible, PIGGY_BACK_WAS_CONSTRUCTOR);
+      if (curc !== $$COMMA_2C) break;
+      ASSERT_skipAny(',', lexerFlags); // TODO: ident, `[`, number, string, `}`
     }
 
     // restore in/template flags (`x${+{}}` would fail if you didn't do this before parsing the closing curly)
-    lexerFlags = _lexerFlags;
+    lexerFlags = outerLexerFlags;
 
     if (isExpression === IS_EXPRESSION) {
       skipDivOrDieSingleChar($$CURLY_R_7D, lexerFlags); // ({...} / foo)
@@ -7403,183 +7389,107 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags); // class x{} /foo/
     }
 
-    if (doubleDunderProto === 1) return sansFlag(destructible, PIGGY_BACK_WAS_PROTO);
-    ASSERT(hasAnyFlag(destructible, PIGGY_BACK_WAS_PROTO) === doubleDunderProto > 1, 'either dunder was not found and the piggy is not there or proto was found multiple times and the piggy is still in the destructible field');
-    return destructible;
+    return sansFlag(destructible, PIGGY_BACK_WAS_PROTO);
   }
-  function parseObjectLikePart(lexerFlags, scoop, bindingType, isClassMethod, staticToken, exportedNames, exportedBindings, astProp) {
+  function parseObjectLikePart(lexerFlags, scoop, bindingType, exportedNames, exportedBindings, astProp) {
     // parseProperty parseMethod
+    // This function is recursively called for static members
     ASSERT(parseObjectLikePart.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astprop string');
-    ASSERT(staticToken === undefined || staticToken.str === 'static', 'token or undefined');
-    let destructible = bindingType === BINDING_TYPE_NONE ? MIGHT_DESTRUCT : MUST_DESTRUCT;
-    let assignable = 0; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
 
-    // an objlit property has quite a few (though limited) valid goals
-    // - `({},`
-    // - `({ident,`
-    // - `({ident:ident`
-    // - `({ident:expr`
-    // - `({ident:()=>x)`
-    // - `({ident(){}`
-    // - `({get ident(){}`    (or set/async)
-    // - `({get *ident(){}`   (or set, and I think by now async too?)
-    // - `({get 'x'(){}`      (or double quotes)
-    // - `({get *'x'(){}`     (or double quotes)
-    // - `({get 10(){}`       (could also be .5)
-    // - `({get *10(){}`      (could also be .5)
-    // - `({get [expr](){}`   (or set/async)
-    // - `({get *[expr](){}`  (or set, and I think by now async too?)
-    // - `({'foo':expr`       (or double quotes)
-    // - `({'foo'(){}`        (or double quotes)
-    // - `({200:expr`         (could also be .5)
-    // - `({200(){}`          (could also be .5)
-    // - `({...ident`
-    // - `({*ident(){}`
-    // - `({*'x'(){}`         (or double quotes)
-    // - `({*20(){}`          (could also be .5)
-    // - `({*[expr](){}`
-    // - `({[expr]:expr`      (destructible!)
-    // - `({[expr]:[x]`       (destructible!)
-    // - `({[expr](){}`
+    let destructible = bindingType === BINDING_TYPE_NONE ? MIGHT_DESTRUCT : MUST_DESTRUCT;
+    let assignableForPiggies = 0; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
+
+    // An objlit property has quite a few (though limited) valid goals
+
+    // Note that "key" is one of ident, string, number, or computed property;
+    // - `{key: x}`
+    // - `{ident: x}`
+    // - `{"foo": x}`
+    // - `{300: x}`
+    // - `{[expr]: x}`
+
+    // Valid syntaxes (all can have trailing comma except for rest)
+    // - `{}`
+    // - `{ident}`         (shorthand ident is susceptible to keyword restrictions)
+    // - `{ident=expr}`    (valid pattern, invalid object literal)
+    // - `{key:ident}`     (assign/bind pattern-able for all keys)
+    // - `{key:expr}`      (assign pattern-able if member expression for all keys)
+    // - `{key(){}}`       (method shorthand)
+    // - `{get key(){}}`
+    // - `{set key(x){}}`
+    // - `{async key(){}}`
+    // - `{*key(){}}`
+    // - `{async *key(){}}`
+    // - `{...value}`      (this seems to be able to allow any value token including regexes, literals, idents)
 
     if (curtype === $IDENT) {
-      if (curtok.str === 'static' && staticToken === undefined) {
-        // - `{static x(){}`
-        // - `{static *x(){}`
-        // - `{static async x(){}`
-        // - `{static get x(){}`
-        // - `{static set x(y){}`
-        // - `{static [x](){}`
-        // - `{static async [x](){}`
-        // - `{static get [x](){}`
-        // - `{static set [x](y){}`
-        // - `{static *[x](){}`
-        // - `{static *async [x](){}`
-        // - `{static *get [x](){}`
-        // - `{static *set [x](y){}`
-        // - `{static 8(){}`
-        // - `{static async 8(){}`
-        // - `{static get 8(){}`
-        // - `{static set 8(y){}`
-        // - `{static *8(){}`
-        // - `{static *async 8(){}`
-        // - `{static *get 8(){}`
-        // - `{static *set 8(y){}`
-        // - `{static "x"(){}`
-        // - `{static async "x"(){}`
-        // - `{static get "x"(){}`
-        // - `{static set "x"(y){}`
-        // - `{static *"x"(){}`
-        // - `{static *async "x"(){}`
-        // - `{static *get "x"(){}`
-        // - `{static *set "x"(y){}`
+      // (This branch is the only case that can lead to objlit prop shorthand iif the next char is `}` or `,` or `=`)
+      // All forms can have trailing comma but it will lead to an error in a rest pattern
 
-        let currentStaticToken = curtok;
-        ASSERT_skipAny('static', lexerFlags); // this is `{static` and the next cannot validly be slash...
+      // - `{key:expr}`
+      // - `{ident,}`
+      // - `{ident,}`
+      // - `{key(){}`
+      // - `{get key(){}`
+      // - `{set key(){}`
+      // - `{async key(){}`
+      // - `{*key(){}`
+      // - `{async *key(){}`
+      // - `{async *ident(){}`
+      // - `{static static(){}`   (static is not a legal modifier in objlits)
+      // - `let {x:o.f=1}=a`      (member expressions are not legal in binding patterns, only assign patterns)
 
-        if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curc === $$COLON_3A || curc === $$PAREN_L_28) {
-          // - `({static: x})`
-          // - `({static: x}) => x`
-          // - `({static}=x)`     // valid in sloppy mode since static is not a proper reserved word
-          // - `({static, y}=x)`
-          // - `({static(){}})`
-          destructible = parseObjectLikePartFromIdent(lexerFlags, scoop, bindingType, isClassMethod, NOT_CONSTRUCTOR, undefined, currentStaticToken, exportedNames, exportedBindings, astProp);
-        }
-        else {
-          destructible = parseObjectLikePart(lexerFlags, scoop, bindingType, isClassMethod, currentStaticToken, exportedNames, exportedBindings, astProp);
-        }
-      }
-      else {
-        // (if prefixed by static then that's already consumed above)
-        // this is the only case that can be a shorthand. only valid syntaxes:
-        // - `({ident,`
-        // - `({ident:ident`
-        // - `({ident:expr`
-        // - `({ident(){}`
-        // - `({get ident(){}`    (or set/async)
-        // - `({get *ident(){}`   (or set, and I think by now async too?)
-        // - `({get [expr](){}`   (or set/async)
-        // - `({get *[expr](){}`  (or set, and I think by now async too?)
-        // - `({static static(){}`
-        // - `let {x:o.f=1}=a`
-        // - since this is an object curly, it _must_ be a syntax error when not a valid property starter
-
-        let identToken = curtok;
-        ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
-
-        if (allowAsyncFunctions) {
-          if (curc !== $$PAREN_L_28 && curtok.nl && identToken.str === 'async') {
-            // this is `{async \n ..(){}}` which is always an error due to async being a restricted production
-            THROW('Async methods are a restricted production and cannot have a newline following it');
-          }
-        }
-
-        let wasConstructor = isClassMethod === IS_CLASS_METHOD && staticToken === undefined && curc === $$PAREN_L_28 && identToken.canon === 'constructor';
-
-        ASSERT(typeof wasConstructor === 'boolean', 'enum');
-
-        destructible = parseObjectLikePartFromIdent(lexerFlags, scoop, bindingType, isClassMethod, wasConstructor, staticToken, identToken, exportedNames, exportedBindings, astProp);
-
-        if (wasConstructor) {
-          // this is a constructor method. we need to signal the caller that we parsed one to dedupe them
-          // to signal the caller we piggy back on the destructible which is already a bit-field
-          destructible |= PIGGY_BACK_WAS_CONSTRUCTOR;
-        }
-      }
+      destructible = parseObjectLikePartFromIdent(lexerFlags, scoop, bindingType, exportedNames, exportedBindings, astProp);
     }
     else if (hasAllFlags(curtype, $NUMBER) || hasAllFlags(curtype, $STRING)) {
-      // property names can also be strings and numbers but these cannot be shorthanded
-      // number/string keys can still destructure just fine (`({"foo": x} = y)`)
-      // - `({"a b c": bar});`
-      // - `({"a b c"(){}});`
-      // - `({"a b c": bar}) => x`
-      // - `({15: bar});`
-      // - `({15(){}});`
+      // Property names can also be strings and numbers but these cannot be shorthanded
+      // Number/string keys can still destructure just fine (`({"foo": x} = y)`)
+      // - `{"foo": bar}`
+      //     ^
+      // - `{"foo"(){}}`
+      // - `({"foo": bar}) => x`
+      // - `{15: bar}`
+      // - `{15(){}}`
+      //     ^
       // - `({15: bar}) => x`
       let litToken = curtok;
-      ASSERT_skipRex(litToken.str, lexerFlags); // next is expression
+      ASSERT_skipAny(litToken.str, lexerFlags); // next is `:` or `(`
 
       if (curc === $$COLON_3A) {
-        if (isClassMethod) THROW('Class members have to be methods, for now');
-        // property value or label, some are destructible:
-        // - ({ident: ident,}
-        // - ({ident: <array destruct>,}
-        // - ({ident: <object destruct>,}
-        // - ({ident: ident = expr}
-        // - ({ident: <array destruct> = expr,}
-        // - ({ident: <object destruct> = expr,}
-        // anything else as value is non-destructible
+        // Any key-colon combo is destructible, the "value" determines assign/binding/both destructibility:
+        // - `{key: ident}`
+        //        ^
+        // - `{300: x}`
+        // - `{"foo": x}`
+        // - `{key: expr.ident}`
+        // - `{key: member[expr]}`
+        // - `{key: <array destruct>}`
+        // - `{key: <object destruct>}`
+        // - `{key: expr = init}`          // destructibility depends on expr
         ASSERT_skipRex(':', lexerFlags); // next is expression
 
-        // `{"__proto__": 1, __proto__: 2}` is still an error
-        if (litToken.str.slice(1, -1) === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
+        // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
+        // `{"__proto__": 1, __proto__: 2}` is still an error, only for key:value (not shorthand or methods)
+        if (options_webCompat === WEB_COMPAT_ON) {
+          if (litToken.str.slice(1, -1) === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
+        }
 
-        destructible |= parseObjectPropertyValueAfterColon(lexerFlags, litToken, isClassMethod, bindingType, assignable, destructible, scoop, exportedNames, exportedBindings, astProp);
+        destructible |= parseObjectPropertyValueAfterColon(lexerFlags, litToken, bindingType, assignableForPiggies, destructible, scoop, exportedNames, exportedBindings, astProp);
         ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
       }
       else if (curc === $$PAREN_L_28) {
-        // method shorthand
-        // - ({5(){}})
-        // - ({'foo'(){}})
+        // Method shorthand
+        // - `{5(){}}`
+        // - `{'foo'(){}}`
         AST_setLiteral(astProp, litToken);
 
-        let wasConstructor =
-          isClassMethod === IS_CLASS_METHOD &&
-          staticToken === undefined &&
-          hasAllFlags(litToken.type, $STRING) && // technically not really necessary as numbers would never be able to contain "constructor" :)
-          litToken.str.slice(1, -1) === 'constructor';
-
-        ASSERT(typeof wasConstructor === 'boolean', 'enum');
-
-        let nowDestructible = parseObjectLikeMethodAfterKey(lexerFlags, staticToken, undefined, undefined, litToken, isClassMethod, wasConstructor, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
-        destructible = nowDestructible | CANT_DESTRUCT;
-        if (wasConstructor) {
-          // this is a constructor method. we need to signal the caller that we parsed one to dedupe them
-          // to signal the caller we piggy back on the destructible which is already a bit-field
-          destructible |= PIGGY_BACK_WAS_CONSTRUCTOR;
-        }
-      } else {
+        let destructPiggies = parseObjectLikeMethodAfterKey(lexerFlags, UNDEF_ASYNC, UNDEF_STAR, UNDEF_GET, UNDEF_SET, litToken, astProp);
+        ASSERT(!hasAnyFlag(destructPiggies, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_VARNAME), 'yield/await cases are caught before this point (yield/await keyword always illegal in func arg, yield/await as param considered "non-simple"');
+        ASSERT(destructPiggies === CANT_DESTRUCT, 'no piggies');
+        destructible |= CANT_DESTRUCT;
+      }
+      else {
         THROW('Object literal keys that are strings or numbers must be a method or have a colon: ' + curtok);
       }
 
@@ -7607,14 +7517,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - ({...x.y} = z) => z        (bad)
       // - (z = {...x.y}) => z        (ok)
       // - (z = {...x.y} = z) => z    (ok)
-      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$CURLY_R_7D, bindingType, NOT_GROUP_TOPLEVEL, undefined, exportedNames, exportedBindings, astProp);
+      let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$CURLY_R_7D, bindingType, NOT_GROUP_TOPLEVEL, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
       ASSERT(typeof subDestruct === 'number', 'should be number');
       destructible |= subDestruct;
       ASSERT(curc !== $$COMMA_2C || hasAllFlags(subDestruct, CANT_DESTRUCT), 'if comma then cannot destruct, should be dealt with in function');
       ASSERT(curc === $$COMMA_2C || curc === $$CURLY_R_7D, 'abstraction should parse whole rest/spread goal; ' + curtok);
     }
     else if (curc === $$SQUARE_L_5B) {
-      // computed property (is valid in destructuring assignment!
+      // computed property (is valid in destructuring assignment!)
       // - `({[foo]: x} = y)`
       // - `({[foo]() {}} = y)`            fail
       // - `const {[x]: y} = z;`
@@ -7626,9 +7536,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
       // pass yield/await flags here (note that the assignability itself is irrelevant for this expr)
       // TODO: find a testcase where the setNotAssignable state fails...
-      assignable = setNotAssignable(nowAssignable | assignable);
+      assignableForPiggies = setNotAssignable(nowAssignable | assignableForPiggies);
       skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is : or (
+
       if (curc === $$COLON_3A) {
+        // Computed keys do not affect destructibility
         // - `({[foo]: bar} = baz)`
         // - `({[foo]: bar()} = baz)`
         // - `({[foo]: a + b} = baz)`
@@ -7643,34 +7555,31 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `function f({[x]: {y = z}}) {}`
         ASSERT_skipRex(':', lexerFlags);
 
-        if (isClassMethod === IS_CLASS_METHOD) TODO,THROW('fail');
-
         AST_wrapClosed(astProp, 'Property', 'key');
         AST_set('kind', 'init'); // only getters/setters get special value here
-        AST_set('method', curc === $$PAREN_L_28);
+        AST_set('method', false);
         AST_set('computed', true);
-        destructible = _parseObjectPropertyValueAfterColon(lexerFlags, null, isClassMethod, bindingType, IS_ASSIGNABLE, destructible, scoop, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        destructible = _parseObjectPropertyValueAfterColon(lexerFlags, undefined, bindingType, IS_ASSIGNABLE, destructible, scoop, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         AST_set('shorthand', false);
         AST_close('Property');
-      } else if (curc !== $$PAREN_L_28) {
+      }
+      else if (curc === $$PAREN_L_28) {
+        // [x]: `async function f(){    async function f(){   (a= {[await foo](){}, "x"(){}} ) => a    }    }`
+        // [v]: `({[x](){}});`
+        // [x]: `({[x](){}} = z);`
+        // [v]: `wrap({get [foo](){}, [bar](){}});`
+        // [v]: `wrap({[foo](){}, get [bar](){}});`
+        // [v]: `wrap({set [foo](c){}, [bar](){}});`
+        // [v]: `wrap({[foo](){}, set [bar](e){}});`
+        // [x]: `({[foo]() {}} = y)`
+        let destructPiggies = parseObjectLikeMethodAfterKey(lexerFlags, UNDEF_ASYNC, UNDEF_STAR, UNDEF_GET, UNDEF_SET, undefined, astProp);
+        ASSERT(!hasAnyFlag(destructPiggies, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_VARNAME), 'yield/await cases are caught before this point (yield/await keyword always illegal in func arg, yield/await as param considered "non-simple"');
+        ASSERT(destructPiggies === CANT_DESTRUCT, 'no piggies');
+        destructible |= CANT_DESTRUCT;
+      }
+      else {
         // - `{[foo] * 5}`
         THROW('A computed property name must be followed by a colon or paren');
-      } else {
-        // - `{[foo](){}}`
-        // - `class {[foo](){}}`
-        parseObjectLikeMethodAfterKey(
-          lexerFlags,
-          staticToken,
-          UNDEF_ASYNC,
-          UNDEF_ASYNC,
-          undefined,
-          isClassMethod,
-          NOT_CONSTRUCTOR,
-          IS_DyNAMIC_PROPERTY,
-          NOT_GETSET,
-          astProp
-        );
-        destructible |= CANT_DESTRUCT;
       }
     }
     else if (curc === $$STAR_2A) {
@@ -7690,66 +7599,44 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let identToken = curtok;
         ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
 
-        if (curc === $$PAREN_L_28) {
-          // - `({*ident(){}})`
-          // - `({*get(){}})`
-          // - `({*set(){}})`
-          // - `({*async(){}})`     // NOT an async generator! it's a generatr
-          if (identToken.str === 'prototype') THROW('Class methods can not be called `prototype`');
-          AST_setIdent(astProp, identToken);
-          parseObjectLikeMethodAfterKey(lexerFlags, staticToken, starToken, undefined, identToken, isClassMethod, NOT_CONSTRUCTOR, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
-        } else {
-          if (allowAsyncFunctions) {
-            if (curtok.str === 'async') {
-              // - `({*async x(){}})`     // NOT an async generator! just an error
-              THROW('Found `* async x(){}` but this should be `async * x(){}`'); // provided it's supported at all...
-            }
-          }
-          if (curtok.str === 'get' || curtok.str === 'set') {
-            // - `({*get x(){}})`
-            // - `({*set x(){}})`
-            THROW('Getters and setters can not be generators'); // (and you would put the get/set before the *, anyways)
-          }
-          if (curc === $$COLON_3A) {
-            // - `({*ident: x})`
-            THROW('Generators must be method shorthands');
-          }
-          // - `({*ident x(){}})`
-          THROW('Unexpected token can not be generator method');
-        }
+        // - `({*ident(){}})`
+        // - `({*get(){}})`       // ok (not a getter!)
+        // - `({*set(){}})`       // ok (not a setter!)
+        // - `({*async(){}})`     // NOT an async generator! it's a generator
+        AST_setIdent(astProp, identToken);
+        let destructPiggies = parseObjectLikeMethodAfterKey(lexerFlags, UNDEF_ASYNC, starToken, UNDEF_GET, UNDEF_SET, identToken, astProp);
+        ASSERT(!hasAnyFlag(destructPiggies, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_VARNAME), 'yield/await cases are caught before this point (yield/await keyword always illegal in func arg, yield/await as param considered "non-simple"');
+        ASSERT(destructPiggies === CANT_DESTRUCT, 'no piggies');
       }
       else if (hasAnyFlag(curtype, $NUMBER | $STRING)) {
         // - `({*"str"(){}})`
         // - `({*15(){}})`
         let litToken = curtok;
-        ASSERT_skipAny(litToken.str, lexerFlags); // TODO: next must be `(`
-
-        destructible |= CANT_DESTRUCT;
 
         AST_setLiteral(astProp, litToken);
-        parseObjectLikeMethodAfterKey(lexerFlags, staticToken, starToken, undefined, litToken, isClassMethod, NOT_CONSTRUCTOR, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
+        ASSERT_skipAny(litToken.str, lexerFlags); // TODO: next must be `(`
+
+        let destructPiggies = parseObjectLikeMethodAfterKey(lexerFlags, UNDEF_ASYNC, starToken, UNDEF_GET, UNDEF_SET, litToken, astProp);
+        ASSERT(!hasAnyFlag(destructPiggies, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_VARNAME), 'yield/await cases are caught before this point (yield/await keyword always illegal in func arg, yield/await as param considered "non-simple"');
+        ASSERT(destructPiggies === CANT_DESTRUCT, 'no piggies');
       }
       else if (curc === $$SQUARE_L_5B) {
         // - `{*[expr](){}} = x`
 
-        destructible |= CANT_DESTRUCT;
+        // skip dynamic part first because we need to assert that we're parsing a method
+        ASSERT_skipRex('[', lexerFlags); // next is expression
+        let assignablePiggies1 = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
+        skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is ( or :
 
-        let nowAssignable = parseComputedModifierMethod(lexerFlags, isClassMethod, staticToken, starToken, undefined, astProp);
-        assignable = mergeAssignable(nowAssignable, assignable);
+        let assignablePiggies2 = parseObjectMethod(lexerFlags, UNDEF_ASYNC, starToken, UNDEF_GET, UNDEF_SET, undefined, astProp);
+
+        assignableForPiggies = mergeAssignable(assignablePiggies1, assignableForPiggies);
+        assignableForPiggies = mergeAssignable(assignablePiggies2, assignableForPiggies);
       }
       else {
         THROW('Invalid objlit key character after generator star');
       }
       ASSERT(curc !== $$IS_3D, 'this struct can not have an init');
-    }
-    else if (curc === $$SEMI_3B) {
-      if (isClassMethod === NOT_CLASS_METHOD) {
-        // - `({;})`
-        THROW('Semi is not a valid character in object literals');
-      }
-      // - `class x {;}`
-      // these semi's dont contribute anything to the AST (lossy)
-      ASSERT_skipAny(';', lexerFlags); // any property start or }
     }
     else {
       // ({<?>
@@ -7761,9 +7648,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `function *g(){ (x = {[yield]: 1}) }`
     // - `{ (x = {[yield]: 1}) }`
     // - `s = {"foo": await = x} = x`
-    return copyPiggies(destructible, assignable);
+    return copyPiggies(destructible, assignableForPiggies);
   }
-
   function parsePatternAssign(lexerFlags, destructible, astProp) {
     if (curc === $$IS_3D && curtok.str === '=') {
       // Note: this might be something like `([x]=await y)=>z` which is illegal so we must propagate await/yield flags
@@ -7805,7 +7691,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // [v]: `({a:(b) = c} = 1)`
       // [v]: `for ({x} = z;;);`
       // [v]: `({...[].x} = x);`
-      destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO);
+      // [x]: `x = {__proto__: a, __proto__: b} = y`
+      // TODO: not sure about PIGGY_BACK_WAS_PROTO (but "free" so not wasting time for a test case right now)
+      destructible = sansFlag(destructible, MUST_DESTRUCT | PIGGY_BACK_WAS_PROTO | PIGGY_BACK_WAS_DOUBLE_PROTO);
 
       // the array MUST now be a pattern. Does not need to be an arrow.
       // the outer-most assignment is an expression, the inner assignments become patterns too.
@@ -7827,8 +7715,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return destructible;
   }
-
-  function parseObjectPropertyValueAfterColon(lexerFlags, keyToken, isClassMethod, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp) {
+  function parseObjectPropertyValueAfterColon(lexerFlags, keyToken, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp) {
     ASSERT(parseObjectPropertyValueAfterColon.length === arguments.length, 'arg count');
     // property value or label, some are destructible:
     // - ({ident: ident,}
@@ -7853,17 +7740,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
     AST_set('computed', false);
 
-    destructible = _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, isClassMethod, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp);
+    destructible = _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop,exportedNames, exportedBindings, astProp);
 
     AST_set('shorthand', false);
     AST_close('Property');
 
     return destructible;
   }
-
-  function _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, isClassMethod, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop, exportedNames, exportedBindings, astProp) {
+  function _parseObjectPropertyValueAfterColon(lexerFlags, keyToken, bindingType, assignableOnlyForYieldAwaitFlags, destructible, scoop, exportedNames, exportedBindings, astProp) {
     ASSERT(_parseObjectPropertyValueAfterColon.length === arguments.length, 'arg count');
-    if (isClassMethod) THROW('Class members have to be methods, for now');
     if (curtype === $IDENT) {
       // - `{ident: ident}`
       //            ^
@@ -8036,7 +7921,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `({key: {}.length = x} = x)`       -- ok
       // - `({key: {x}.foo})`
       // - `({key: {x}.foo})`
-      let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, 'value');
+      let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, PARSE_INIT, exportedNames, exportedBindings, 'value');
       destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, bindingType, hasAllFlags(nowDestruct, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE, nowDestruct, $$CURLY_R_7D, 'value');
     }
     else {
@@ -8072,13 +7957,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `({xxxx:await}) => null`
     return copyPiggies(destructible, assignableOnlyForYieldAwaitFlags);
   }
-
-  function parseObjectLikePartFromIdent(lexerFlags, scoop, bindingType, isClassMethod, isConstructor, isStatic, identToken, exportedNames, exportedBindings, astProp) {
+  function parseObjectLikePartFromIdent(lexerFlags, scoop, bindingType, exportedNames, exportedBindings, astProp) {
     ASSERT(parseObjectLikePartFromIdent.length === arguments.length, 'arg count');
-    ASSERT(identToken.type === $IDENT, 'should get ident token: ' + identToken);
+    ASSERT(curtok.type === $IDENT, 'should be at ident');
     ASSERT(typeof astProp === 'string', 'astprop string');
-    ASSERT(isStatic === undefined || isStatic.str === 'static', 'keyword or undefined');
-    ASSERT(typeof isConstructor === 'boolean', 'enum');
+
+    let propLeadingIdentToken = curtok;
+    ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
+
+    if (allowAsyncFunctions) {
+      // Note: `{async\n(){}}` is legal in sloppy so we do have to check the paren
+      if (curc !== $$PAREN_L_28 && curtok.nl && propLeadingIdentToken.str === 'async') {
+        // - `{async \n key(){}}`
+        //              ^
+        // Always an error due to async being a restricted production
+        // Note that `{async(){}}` is legal so we must check the curc
+        THROW('Async methods are a restricted production and cannot have a newline following it');
+      }
+    }
+
+    let asyncToken = UNDEF_ASYNC;
+    let starToken = UNDEF_STAR;
+    let getToken = UNDEF_GET;
+    let setToken = UNDEF_SET;
 
     // note: if this part started with `static` then identToken will always be the NEXT token and isstatic=true
     // - `{ident,`
@@ -8123,18 +8024,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `{eval}`           ok as it is not a "reserved word"
       // - `{await}`          "depends"
 
-      if (isClassMethod) {
-        if (curc === $$COMMA_2C) THROW('Classes do not use commas');
-        THROW('Class members have to be methods, for now');
-      }
-
       // https://tc39.github.io/ecma262/#prod-ObjectLiteral
       // https://tc39.github.io/ecma262/#prod-PropertyDefinitionList
       // https://tc39.github.io/ecma262/#prod-PropertyDefinition
       // https://tc39.github.io/ecma262/#prod-IdentifierReference
       // https://tc39.github.io/ecma262/#prod-Identifier
       // Identifier : IdentifierName but not ReservedWord
-      if (identToken.str === 'eval' || identToken.str === 'arguments') {
+      if (propLeadingIdentToken.str === 'eval' || propLeadingIdentToken.str === 'arguments') {
         // ({eval});         // ok
         // ({eval} = x);     // bad in strict mode
         // {{eval}) => x;    // bad in strict mode
@@ -8145,18 +8041,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // must throw for reserved words but binding check also checks for `eval`
         // and `arguments` which are not reserved and which would be allowed here
         // Since this is an assignment the `yield` and `await` checks are implicitly done when doing binding name checks
-        fatalBindingIdentCheck(identToken, bindingType, lexerFlags);
+        fatalBindingIdentCheck(propLeadingIdentToken, bindingType, lexerFlags);
       }
-      SCOPE_addBinding(lexerFlags, scoop, identToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
-      addNameToExports(exportedNames, identToken.str);
-      addBindingToExports(exportedBindings, identToken.str);
+
+      SCOPE_addBinding(lexerFlags, scoop, propLeadingIdentToken.str, bindingType, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
+      addNameToExports(exportedNames, propLeadingIdentToken.str);
+      addBindingToExports(exportedBindings, propLeadingIdentToken.str);
 
       AST_open(astProp, 'Property');
-      AST_setIdent('key', identToken);
+      AST_setIdent('key', propLeadingIdentToken);
       AST_set('kind', 'init'); // only getters/setters get special value here
       AST_set('method', false); // only the {x(){}} shorthand gets true here, this is {x}
       AST_set('computed', false);
-      AST_setIdent('value', identToken);
+      AST_setIdent('value', propLeadingIdentToken);
       if (curc === $$IS_3D && curtok.str === '=') {
         // - `({foo = 10})`
         // the shorthand only forces MUST_DESTRUCT when an initializer follows it immediately
@@ -8176,7 +8073,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(curc !== $$IS_3D, 'further assignments should be parsed as part of the rhs expression');
     }
     else if (curc === $$COLON_3A) {
-      if (isClassMethod) THROW('Class members have to be methods, for now');
       // property value or label, some are destructible:
       // - ({ident: ident,}
       // - ({ident: (ident)}
@@ -8196,36 +8092,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - ({ident: <object destruct> = expr,}
       // anything else as value is non-destructible
       ASSERT_skipRex(':', lexerFlags); // next is expression
-      if (identToken.str === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
+      if (options_webCompat === WEB_COMPAT_ON) {
+        if (propLeadingIdentToken.str === '__proto__') destructible |= PIGGY_BACK_WAS_PROTO;
+      }
 
-      destructible |= parseObjectPropertyValueAfterColon(lexerFlags, identToken, isClassMethod, bindingType, assignable, destructible, scoop,exportedNames, exportedBindings, astProp);
+      destructible |= parseObjectPropertyValueAfterColon(lexerFlags, propLeadingIdentToken, bindingType, assignable, destructible, scoop,exportedNames, exportedBindings, astProp);
       ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
     }
-    else if (curc === $$SQUARE_L_5B) {
-      // (this is the part after the first ident of the part (or two if there is a "static" prefix)
-      // - ({static [expr](){}
-      // - ({get [expr](){}
-      // - ({set [expr](ident){}
-      // - ({async [expr](){}
-      // - ({static get [expr](){}
-      // - ({static set [expr](ident){}
-      // - ({static async [expr](){}
-
-      destructible |= CANT_DESTRUCT;
-
-      let nowAssignable = parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, undefined, identToken, astProp);
-      assignable = mergeAssignable(nowAssignable, assignable);
-    }
     else if (curc === $$PAREN_L_28) {
-      // method shorthand
+      // Method shorthand, no modifier
       // - ({ident(){}})
 
       destructible |= CANT_DESTRUCT;
 
-      AST_setIdent(astProp, identToken);
-      if (identToken.str === 'prototype') THROW('Class methods can not be called `prototype`');
-      ASSERT(!!(identToken.canon === 'constructor' && !isStatic && isClassMethod) == isConstructor, 'if the ident is constructor then isconstructor should be set');
-      parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, undefined, identToken, isClassMethod, isConstructor, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
+      AST_setIdent(astProp, propLeadingIdentToken);
+
+      parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, propLeadingIdentToken, astProp);
 
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
     }
@@ -8236,87 +8118,73 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - ({set ident(ident){}})
       destructible |= CANT_DESTRUCT;
 
-      let kind = NOT_GETSET;
-      if (identToken.str === 'get') {
-        kind = IS_GETTER;
-      } else if (identToken.str === 'set') {
-        kind = IS_SETTER;
-      } else if (!allowAsyncFunctions || identToken.str !== 'async') {
-        if (!isClassMethod || identToken.str !== 'static') {
-          THROW('Did not expect another identifier while parsing an object literal property');
-        }
+      switch (propLeadingIdentToken.str) {
+        case 'get':
+          getToken = propLeadingIdentToken;
+          break;
+        case 'set':
+          setToken = propLeadingIdentToken;
+          break;
+        case 'async':
+          asyncToken = propLeadingIdentToken;
+          break;
+        default:
+          THROW('Expected to parse the start of a property but found an unknown modifier', propLeadingIdentToken);
       }
-      let identToken2 = curtok;
-      if (identToken2.str === 'prototype') THROW('Class methods can not be called `prototype`');
-      ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
 
-      if (curc !== $$PAREN_L_28) THROW('Must have left paren now, got: ' + curtok);
+      let identToken2 = curtok;
       AST_setIdent(astProp, identToken2);
-      parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, identToken, identToken2, isClassMethod, NOT_CONSTRUCTOR, NOT_DyNAMIC_PROPERTY, kind, astProp);
+      ASSERT_skipAny($IDENT, lexerFlags); // TODO: next is `(`
+      parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, identToken2, astProp);
 
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
     }
     else if (curc === $$STAR_2A) {
-      // getter/setter/async with generator
+      // async with generator
       // note that only async can actually be a generator, getters/setters cannot
-      // if the `static` modifier was used then it is passed on as the`isStatic` arg
-      // - ({get *ident(){}})
-      // - ({set *ident(ident){}})
       // - ({async *ident(){}})
-      // - ({get *5(){}})
-      // - ({set *5(ident){}})
       // - ({async *5(){}})
-      // - ({get *'x'(){}})
-      // - ({set *'x'(ident){}})
       // - ({async *'x'(){}})
-      // - ({get *[x](){}})
-      // - ({set *[x](ident){}})
       // - ({async *[x](){}})
-      // - ({static get *ident(){}})
-      // - ({static set *ident(ident){}})
-      // - ({static async *ident(){}})
-      // - ({static get *5(){}})
-      // - ({static set *5(ident){}})
-      // - ({static async *5(){}})
-      // - ({static get *'x'(){}})
-      // - ({static set *'x'(ident){}})
-      // - ({static async *'x'(){}})
-      // - ({static get *[x](){}})
-      // - ({static set *[x](ident){}})
-      // - ({static async *[x](){}})
 
       destructible |= CANT_DESTRUCT;
 
-      let starToken = curtok;
-      ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident or [
+      asyncToken = propLeadingIdentToken;
+      if (asyncToken.str !== 'async') {
+        // - `{get *foo(){}}`
+        THROW('Expected to parse the start of a generator method but found an ident that was not `async`', propLeadingIdentToken);
+      }
 
-      if (identToken.str === 'get') THROW('A getter cannot be a generator');
-      if (identToken.str === 'set') THROW('A setter cannot be a generator');
-      ASSERT(identToken.str !== 'static', 'this case is caught elsewhere');
-      if (identToken.str !== 'async') THROW('the only method modifier allowed to have a generator is `async` (since es9)');
       if (!allowAsyncFunctions) THROW('Async functions are not supported by the current targeted language version');
       if (!allowAsyncGenerators) THROW('Async generators are not supported by the current targeted language version');
 
+      // Skip the star
+      starToken = curtok;
+      ASSERT_skipAny('*', lexerFlags); // TODO: ident, number, string, `[`
+
       if (curtype === $IDENT) {
-        // `class x{   async *foo(a){}   }`
-        // `class x{   async *prototype(a){}   }`
-        if (curtok.str === 'prototype') THROW('Class async generator methods can not be called `prototype`');
-        let nameToken = curtok;
-        AST_setIdent(astProp, curtok);
-        ASSERT_skipAny($IDENT, lexerFlags);
-        parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, identToken, nameToken, isClassMethod, NOT_CONSTRUCTOR, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
-      } else if ((curtype & $STRING) === $STRING || (curtype & $NUMBER) === $NUMBER) {
+        // `{   async *foo(){}   }`
+        // `{   async *prototype(){}   }`
+        let identToken2 = curtok;
+        AST_setIdent(astProp, identToken2);
+        ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
+        parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, identToken2, astProp);
+      } else if (hasAnyFlag(curtype, $NUMBER | $STRING)) {
+        // `{   async *300(){}   }`
+        // `{   async *"foo"(){}   }`
         let litToken = curtok;
         AST_setLiteral(astProp, litToken);
-        ASSERT_skipAny(litToken.str, lexerFlags); // TODO: next must be `(`
-        parseObjectLikeMethodAfterKey(lexerFlags, isStatic, starToken, identToken, litToken, isClassMethod, NOT_CONSTRUCTOR, NOT_DyNAMIC_PROPERTY, NOT_GETSET, astProp);
+        ASSERT_skipAny(litToken.str, lexerFlags); // next is `(`
+        parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, litToken, astProp);
       } else if (curc === $$SQUARE_L_5B) {
-        // - `class x {    async *[y](){}    }`
-        // - `x = { async *[y](){} }`
-        let nowAssignable = parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, starToken, identToken, astProp);
-        assignable = mergeAssignable(nowAssignable, assignable);
+        // `{   async *[foo](){}   }`
+        ASSERT_skipRex('[', lexerFlags); // next is expression
+        let assignablePiggies = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
+        assignable = mergeAssignable(assignablePiggies, assignable);
+        skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is (
+        parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, undefined, astProp);
       } else {
-        THROW('Invalid key token');
+        THROW('Expected to parse the key of a generator method but found something unexpected', curtok);
       }
 
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
@@ -8333,22 +8201,64 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       destructible |= CANT_DESTRUCT;
 
-      let kind = NOT_GETSET;
-      if (identToken.str === 'get') {
-        kind = IS_GETTER;
-      } else if (identToken.str === 'set') {
-        kind = IS_SETTER;
+      switch (propLeadingIdentToken.str) {
+        case 'get':
+          getToken = propLeadingIdentToken;
+          break;
+        case 'set':
+          setToken = propLeadingIdentToken;
+          break;
+        case 'async':
+          asyncToken = propLeadingIdentToken;
+          break;
+        default:
+          THROW('Expected to parse the start of a property but found an unknown modifier', propLeadingIdentToken);
       }
 
       let litToken = curtok;
-      ASSERT_skipRex(litToken.str, lexerFlags); // next is `(`
-
+      ASSERT_skipAny(litToken.str, lexerFlags); // next is `(`
       AST_setLiteral(astProp, litToken);
-      parseObjectLikeMethodAfterKey(lexerFlags, isStatic, undefined, identToken, litToken, isClassMethod, NOT_CONSTRUCTOR, NOT_DyNAMIC_PROPERTY, kind, astProp);
+
+      parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, litToken, astProp);
       ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
     }
+    else if (curc === $$SQUARE_L_5B) {
+      // (this is the part after the first ident of the part (or two if there is a "static" prefix)
+      // - ({static [expr](){}
+      //            ^
+      // - ({get [expr](){}
+      // - ({set [expr](ident){}
+      // - ({async [expr](){}
+      // - ({static get [expr](){}
+      //                ^
+      // - ({static set [expr](ident){}
+      // - ({static async [expr](){}
+
+      destructible |= CANT_DESTRUCT;
+
+      switch (propLeadingIdentToken.str) {
+        case 'get':
+          getToken = propLeadingIdentToken;
+          break;
+        case 'set':
+          setToken = propLeadingIdentToken;
+          break;
+        case 'async':
+          asyncToken = propLeadingIdentToken;
+          break;
+        default:
+          THROW('Expected to parse the start of a property but found an unknown modifier', propLeadingIdentToken);
+      }
+
+      // skip dynamic part first because we need to assert that we're parsing a method
+      ASSERT_skipRex('[', lexerFlags); // next is expression
+      let assignablePiggies = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
+      assignable = mergeAssignable(assignablePiggies, assignable);
+      skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is ( or :
+
+      parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, undefined, astProp);
+    }
     else {
-      if (isClassMethod) THROW('Class members have to be methods, for now');
       // this is most likely an error
       // - `({x+=y})`
       THROW('Unexpected character after object literal property name ' + curtok);
@@ -8361,68 +8271,752 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async r => result = [...{ x = await x }] = y;`
     return copyPiggies(destructible, assignable);
   }
-  function parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp) {
-    ASSERT(parseComputedModifierMethod.length === arguments.length, 'arg count');
+  function parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, keyToken, astProp) {
+    ASSERT(parseObjectMethod.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
 
-    // skip dynamic part first because we need to assert that we're parsing a method
-    ASSERT_skipRex('[', lexerFlags); // next is expression
-    let assignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
-    skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is ( or :
+    AST_wrapClosed(astProp, 'Property', 'key');
+    AST_set('kind', getToken !== UNDEF_GET ? 'get' : setToken !== UNDEF_SET ? 'set' : 'init'); // only getters/setters get special value here
+    AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET); // getters and setters are not methods but properties
+    AST_set('computed', keyToken === undefined);
 
-    _parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp);
+    verifyGeneralMethodState(asyncToken, starToken, getToken, setToken, keyToken, false);
 
-    // note: we only care about the dynamic part as the rest being parsed here is part of the method itself. So in
-    // the next example, the outer function only cares about the expression for the dynamic name:
-    // - `async (fail = ({static *[await oops](){}})) => {}`
+    // - `foo = { get x(){  "use strict"; (break = "sentinal 79845134");   }}`
+    // - `let o = {async await(){}}`
+    // - `let o = {async *await(){}}`
+    // - `({set break(x){}});`
+    parseFunctionAfterKeyword(
+      lexerFlags,
+      DO_NOT_BIND,
+      NOT_FUNC_DECL,
+      NOT_FUNC_EXPR,
+      IDENT_OPTIONAL,
+      NOT_CONSTRUCTOR,
+      NOT_FUNCTION_STATEMENT,
+      IS_METHOD,
+      asyncToken,
+      starToken,
+      getToken,
+      setToken,
+      'value'
+    );
+    AST_set('shorthand', false);
+    AST_close('Property');
+    ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+  }
+
+
+  function parseClassDeclaration(lexerFlags, scoop, optionalIdent, astProp) {
+    ASSERT(arguments.length === parseClassDeclaration.length, 'expecting all args');
+    // class x {}
+    // class x extends <lhs expr> {}
+    // class x {;}
+    // class x {[static] <method>[]}
+    // export class x {}
+    // export class {}
+
+    // _all_ bits of a class decl/expr are strict
+    let insideTemplate = hasAnyFlag(lexerFlags, LF_IN_TEMPLATE); // need this to properly consume closing curly
+    lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_FOR_LHS | LF_IN_TEMPLATE | LF_NO_ASI);
+
+    ASSERT_skipAny('class', lexerFlags); // TODO: valid varname, `extends`, or `{`
+    AST_open(astProp, 'ClassDeclaration');
+
+    let name = parseClassId(lexerFlags, optionalIdent, scoop);
+
+    // TODO: I'm prety sure scoop should be DO_NOT_BIND here (and can be folded inward)
+    _parseClass(lexerFlags, insideTemplate, scoop, IS_STATEMENT);
+
+    AST_close('ClassDeclaration');
+
+    return name; // used if export
+  }
+  function parseClassExpression(lexerFlags, astProp) {
+    ASSERT(arguments.length === parseClassExpression.length, 'expecting all args');
+    // x = class x {}
+    // x = class x extends <lhs expr> {}
+    // x = class x {;}
+    // x = class x {[static] <method>[]}
+
+    // _all_ bits of a class decl/expr are strict
+    let insideTemplate = hasAnyFlag(lexerFlags, LF_IN_TEMPLATE); // need this to properly consume closing curly
+    lexerFlags = sansFlag(lexerFlags | LF_STRICT_MODE, LF_IN_FOR_LHS | LF_IN_TEMPLATE | LF_NO_ASI);
+
+    AST_open(astProp, 'ClassExpression');
+
+    // TODO: can extends and computed prop keys access the class id? is there any way that is relevant for parsers?
+    parseClassId(lexerFlags, IDENT_OPTIONAL, DO_NOT_BIND);
+
+    let assignable = _parseClass(lexerFlags, insideTemplate, DO_NOT_BIND, IS_EXPRESSION);
+    AST_close('ClassExpression');
+
+    // The `await/yield` flags only describe the `extends` part. Additionally the class as a whole is not assignable.
+    return setNotAssignable(assignable);
+  }
+  function parseClassId(lexerFlags, optionalIdent, scoop) {
+    ASSERT(parseClassId.length === arguments.length, 'arg count');
+    ASSERT(hasAllFlags(lexerFlags, LF_STRICT_MODE), 'should be set by caller');
+
+    let bindingName = '';
+
+    // note: default exports has optional ident but should still not skip `extends` here
+    // but it is not a valid class name anyways (which is superseded by a generic keyword check)
+    if (curtype === $IDENT && curtok.str !== 'extends') {
+      // The class name is to be considered a `const` inside the class, but a `let` outside of the class
+      // https://tc39.github.io/ecma262/#sec-runtime-semantics-classdefinitionevaluation
+      // > If hasNameProperty is false, perform SetFunctionName(value, className).
+      // https://tc39.github.io/ecma262/#sec-initializeboundname
+      // > Perform ? InitializeBoundName(className, value, env).
+      // > Perform env.InitializeBinding(name, value).
+      // https://tc39.github.io/ecma262/#table-15
+      // > InitializeBinding(N, V) : Set the value of an already existing but uninitialized binding in an Environment
+      //   Record. The String value N is the text of the bound name. V is the value for the binding and is a value of
+      //   any ECMAScript language type.
+      // eg: it is a `let` binding in outer scope and a `const` binding in inner scope...
+      fatalBindingIdentCheck(curtok, BINDING_TYPE_CLASS, lexerFlags);
+      bindingName = curtok.str;
+      SCOPE_addBindingAndDedupe(lexerFlags, scoop, bindingName, BINDING_TYPE_LET, ORIGIN_NOT_VAR_DECL);
+      AST_setIdent('id', curtok);
+      ASSERT_skipAny($IDENT, lexerFlags);
+    }
+    else if (!optionalIdent) {
+      //  '`export class extends x {}` is the only valid class decl without name');
+      THROW('Class decl missing required ident, `extends` is not a valid variable name');
+    }
+    else {
+      // - `x = class {}`                // expression
+      // - `export default class {}`     // default exports
+      AST_set('id', null);
+    }
+
+    return bindingName;
+  }
+  function _parseClass(outerLexerFlags, insideTemplate, scoop, isExpression) {
+    ASSERT(arguments.length === _parseClass.length, 'expecting all args');
+    ASSERT(hasAllFlags(outerLexerFlags, LF_STRICT_MODE), 'should be set by caller');
+
+    // Note: all class code is always strict mode implicitly (explicitly mentioned by 10.2.1, this includes extends)
+    // Note: methods inside classes can access super properties
+    // Note: `super()` is only valid in the constructor a class that uses `extends` (resets when nesting but after `extends`)
+
+    let assignable = 0; // only relevant to propagate the `extends` expression
+
+    // Separate inner from outer because the error is different if encountering yield/await without an async/gen context
+    // Computed method key names can also not access super, unless the outer context is a method, too
+    // The constructor flag is kept for outer because it still applies to computed key expressions
+    let innerLexerFlags = sansFlag(outerLexerFlags, LF_IN_CONSTRUCTOR);
+
+    if (curtype === $IDENT && curtok.str === 'extends') {
+      // Note: the extends arg uses the outer lexer flags (yield/await state is propagated in the grammar), still strict
+      ASSERT_skipRex('extends', outerLexerFlags);
+      // - `class x extends {} {}`             is valid so we can't just scan for `{` and throw a nice error
+      // - `async function f(fail = class y extends (await f) {}){}`  (should be an error...?)
+      // - `class x extends ()=>{} {}`         error because the extends cannot be an arrow
+      // - `class x extends ()=>{} 1`          error because the extends cannot be an arrow
+      assignable = parseValue(outerLexerFlags, ASSIGN_EXPR_IS_ERROR, NOT_NEW_ARG, 'superClass');
+      // don't set LF_SUPER_CALL before parsing the extending value
+      // Note that computed props will not get this state from the current class (but potentially from an outer class)
+      innerLexerFlags |= LF_SUPER_CALL; // can do `super()` because this class extends another class
+    }
+    else {
+      AST_set('superClass', null);
+      innerLexerFlags = sansFlag(innerLexerFlags, LF_SUPER_CALL);
+    }
+
+    // _now_ enable super props, super call is already set up correctly
+    // Note that computed props will not get this state from the current class (but potentially from an outer class)
+    innerLexerFlags |= LF_SUPER_PROP;
+
+    // note: generator and async state is not reset because computed method names still use the outer state
+    // Note: this `assignable` is relevant for passing back await/yield flags
+    assignable |= parseClassBody(innerLexerFlags, outerLexerFlags, insideTemplate, scoop, BINDING_TYPE_NONE, isExpression, 'body');
+
     return assignable;
   }
-  function _parseComputedModifierMethod(lexerFlags, isClassMethod, isStatic, isGenerator, modifierIdentToken, astProp) {
-    ASSERT(_parseComputedModifierMethod.length === arguments.length, 'arg count');
-    let modifier = modifierIdentToken ? modifierIdentToken.str : '';
+  function parseClassBody(lexerFlags, outerLexerFlags, insideTemplate, scoop, bindingType, isExpression, astProp) {
+    ASSERT(parseClassBody.length === arguments.length, 'expecting all args');
+    ASSERT(hasAllFlags(lexerFlags, LF_STRICT_MODE), 'should be set by caller');
+    ASSERT(hasNoFlag(lexerFlags, LF_IN_CONSTRUCTOR), 'should be unset by caller');
 
-    let generatorState = (isGenerator && isGenerator.str === '*') ? WAS_GENERATOR : NOT_GENERATOR;
-    let asyncState = NOT_ASYNC;
+    AST_open(astProp, 'ClassBody');
+    AST_set('body', []);
+    let assignable = _parseClassBody(lexerFlags, outerLexerFlags, insideTemplate, scoop, bindingType, isExpression, UNDEF_EXPORTS, UNDEF_EXPORTS, 'body');
+    AST_close('ClassBody');
+    // Note: returning `assignable` is relevant for passing back await/yield flags that could occur in computed key exprs
+    return assignable;
+  }
+  function _parseClassBody(lexerFlags, outerLexerFlags, insideTemplate, scoop, bindingType, isExpression, exportedNames, exportedBindings, astProp) {
+    ASSERT(_parseClassBody.length === arguments.length, 'arg count');
+    ASSERT(hasAllFlags(lexerFlags, LF_STRICT_MODE), 'should be set by caller');
+    ASSERT(hasNoFlag(lexerFlags, LF_IN_CONSTRUCTOR), 'should be unset by caller');
+    ASSERT(typeof insideTemplate === 'boolean');
+    // parse one method of a class body
 
-    let kind = NOT_GETSET;
-    let kindValue = '';
-    if (modifier === 'get') {
-      kind = IS_GETTER;
-      kindValue = 'get';
-    } else if (modifier === 'set') {
-      kind = IS_SETTER;
-      kindValue = 'set';
-    } else if (modifier === 'async') {
+    let destructibleForPiggies = CANT_DESTRUCT; // relevant for computed key exprs
+
+    // - `(class {})`
+    //           ^
+    // - `(class = x)`
+    //           ^
+    skipAnyOrDieSingleChar($$CURLY_L_7B, lexerFlags); // TODO: next must be method key, modifier, or end (ident, string, number, `[`, `}`, `;`, or `*`)
+
+    while (curc === $$SEMI_3B) {
+      ASSERT_skipAny(';', lexerFlags); // TODO: next must be method key, modifier, or end (ident, string, number, `[`, `}`, `;`, or `*`)
+    }
+
+    // We must throw an error if a constructor was declared more than once, canonical, string keys included
+    // We must throw an error if any static method is called "prototype", canonical, string keys included
+    // Other keys can occur more than once without error
+
+    let hasConstructor = false; // must throw if more than one plain constructor was found
+    while (curc !== $$CURLY_R_7D) {
+      // note: generator and async state is not reset because computed method names still use the outer class state
+      destructibleForPiggies |= parseClassMethod(lexerFlags, outerLexerFlags, scoop, bindingType, exportedNames, exportedBindings, astProp);
+      if (hasAnyFlag(destructibleForPiggies, PIGGY_BACK_WAS_CONSTRUCTOR)) {
+        if (hasConstructor) THROW('Classes may only have one constructor');
+        hasConstructor = true;
+      }
+
+      while (curc === $$SEMI_3B) {
+        ASSERT_skipAny(';', lexerFlags); // TODO: next must be method key, modifier, or end (ident, string, number, `[`, `}`, `;`, or `*`)
+      }
+    }
+
+    // TODO: not sure whether this is really relevant... Suppose it can't hurt..?
+    lexerFlags = outerLexerFlags;
+    // Restore in/template flags (`x${+{}}` would fail if you didn't do this before parsing the closing curly)
+    if (insideTemplate) lexerFlags |= LF_IN_TEMPLATE;
+
+    if (isExpression === IS_EXPRESSION) {
+      // - `(class x {} / foo)`
+      skipDivOrDieSingleChar($$CURLY_R_7D, lexerFlags);
+    } else {
+      // - `class x {} /foo/`
+      skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
+    }
+
+    // note: generator and async state is not reset because computed method names still use the outer state
+    // Note: this `destructible` is only relevant for passing back piggies
+
+    // - `async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }`
+    // - `(fail = class A {[await](){}; "x"(){}}) => {}`
+    // - `function *f(){  class x{[yield foo](a){}}  }`
+    if (hasAnyFlag(destructibleForPiggies, PIGGY_BACK_SAW_YIELD_VARNAME)) TODO // add tests
+
+    return destructibleForPiggies;
+  }
+  function parseClassMethod(lexerFlags, outerLexerFlags, scoop, bindingType, exportedNames, exportedBindings, astProp) {
+    // parseProperty parseMethod
+    ASSERT(parseClassMethod.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string', 'astprop string');
+
+    let destructible = bindingType === BINDING_TYPE_NONE ? MIGHT_DESTRUCT : MUST_DESTRUCT;
+    let assignable = 0; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
+
+    // - `class x {ident(){}}`
+    // - `class x {'foo'(){}}`        (or double quotes)
+    // - `class x {200(){}}`          (could also be .5)
+    // - `class x {[expr](){}}`       (expr is parsed with lexer state from before class body (!))
+    // In the following, "key" can be substituted with any of the four cases above
+    // - `class x {get key(){}}`
+    // - `class x {set key(y){}}`
+    // - `class x {*key(){}}`
+    // - `class x {async key(){}}`
+    // - `class x {async *key(){}}`
+    // - `class x {static get key(){}}`
+    // - `class x {static set key(y){}}`
+    // - `class x {static *key(){}}`
+    // - `class x {static async key(){}}`
+    // - `class x {static async *key(){}}`
+    // Special cases
+    // - `class x {constructor(){}}`        (proper constructor, can only occur once)
+    // - `class x {static constructor(){}}` (NOT a constructor, but valid)
+    // - `class x {[constructor](){}}`      (NOT a constructor, but valid)
+    // - `class x {get constructor(){}}`    (illegal, constructors can not have any of the get/set/async/* modifiers)
+    // - `class x {static(){}}`             (method names are not susceptible to keyword restrictions)
+    // - `class x {static static(){}}`      (method names are not susceptible to keyword restrictions)
+    // - `class x {static get constructor(){}}`    (ok because static members are not real constructors)
+
+    let staticToken = UNDEF_STATIC;
+    let getToken = UNDEF_GET;
+    let setToken = UNDEF_SET;
+    let asyncToken = UNDEF_ASYNC;
+    let starToken = UNDEF_STAR;
+
+    if (curtype === $IDENT && curtok.str === 'static') {
+      // In the following cases, "key" can be substituted with any of the four keys (ident, string, number, computed)
+      // - `class x {static get key(){}}`
+      //             ^
+      // - `class x {static set key(y){}}`
+      // - `class x {static *key(){}}`
+      // - `class x {static async key(){}}`
+      // - `class x {static async *key(){}}`
+      // - `class x {static constructor(){}}`
+      // - `class x {static(){}}`
+      // - `class x {static static(){}}`
+      //             ^
+      // - `class x {static get constructor(){}}`
+
+      staticToken = curtok;
+      // = `class x { static / foo(){} }`
+      ASSERT_skipRex('static', lexerFlags); // this is `class x {static` and if the next char is a slash it will be an error (there's a test)
+
+      if (curc === $$PAREN_L_28) {
+        // The `static` ident here is the name of a method, not a modifier
+        // - `class x {static(){}}`
+        //                   ^
+        destructible |= _parseClassMethodIdentKey(lexerFlags, UNDEF_STATIC, asyncToken, starToken, getToken, setToken, staticToken, astProp);
+        return destructible;
+      }
+    }
+
+    if (curtype === $IDENT) {
+      ASSERT(curtok.str !== 'static' || staticToken.str === 'static');
+      destructible = parseClassMethodFromIdent(lexerFlags, outerLexerFlags, scoop, bindingType, staticToken, exportedNames, exportedBindings, astProp);
+    }
+    else if (hasAllFlags(curtype, $NUMBER) || hasAllFlags(curtype, $STRING)) {
+      // property names can also be strings and numbers but these cannot be shorthanded
+      // number/string keys can still destructure just fine (`({"foo": x} = y)`)
+      // - `class x {"abc"(){}};`
+      // - `class x {15(){}};`
+
+      destructible |= parseClassMethodLiteralKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
+    }
+    else if (curc === $$SQUARE_L_5B) {
+      // Computed method key
+      // - `class x {[foo](){}}`
+      destructible |= parseClassMethodComputedKey(lexerFlags, outerLexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
+    }
+    else if (curc === $$STAR_2A) {
+      // - `class x {*ident(){}}`
+      //             ^
+      // - `class x {*"str"(){}}`
+      // - `class x {*15(){}}`
+      // - `class x {*[expr](){}}`
+
+      starToken = curtok;
+      ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident, number, string, `[`
+
+      if (curtype === $IDENT) {
+        // - `class x {*ident(){}}`
+        //              ^
+        // - `class x {*ident(){}}`
+        // - `class x {*get(){}}`       // ok (not a getter!)
+        // - `class x {*set(){}}`       // ok (not a setter!)
+        // - `class x {*async(){}}`     // NOT an async generator! it's a generatr
+        destructible |= parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
+      }
+      else if (hasAnyFlag(curtype, $NUMBER | $STRING)) {
+        // - `({*"str"(){}})`
+        // - `({*15(){}})`
+        destructible |= parseClassMethodLiteralKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
+      }
+      else if (curc === $$SQUARE_L_5B) {
+        // - `{*[expr](){}} = x`
+        destructible |= parseClassMethodComputedKey(lexerFlags, outerLexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
+      }
+      else {
+        THROW('Invalid objlit key character after generator star');
+      }
+      ASSERT(curc !== $$IS_3D, 'this struct can not have an init');
+    }
+    else if (curc === $$SEMI_3B) {
+      // - `class x {;}`
+      // these semi's dont contribute anything to the AST (lossy)
+      ASSERT_skipAny(';', lexerFlags); // any property start or }
+    }
+    else {
+      // - `class x {<?>`
+      THROW('Unexpected token, wanted to parse a start of a property in an object literal/pattern');
+    }
+
+    // pick up the flags from assignable and put them in destructible
+    // - `async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }`
+    // - `function *g(){ (x = {[yield]: 1}) }`
+    // - `{ (x = {[yield]: 1}) }`
+    // - `s = {"foo": await = x} = x`
+    return copyPiggies(destructible, assignable);
+  }
+  function parseClassMethodFromIdent(lexerFlags, outerLexerFlags, scoop, bindingType, staticToken, exportedNames, exportedBindings, astProp) {
+    ASSERT(parseClassMethodFromIdent.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string', 'astprop string');
+    ASSERT(staticToken === UNDEF_STATIC || staticToken.str === 'static', 'static token');
+
+    let identToken = curtok;
+    ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
+
+    if (allowAsyncFunctions) {
+      if (curc !== $$PAREN_L_28 && curtok.nl && identToken.str === 'async') {
+        // - `{async \n key(){}}`
+        //              ^
+        // Always an error due to async being a restricted production
+        // Note that `{async(){}}` is legal so we must check the curc
+        THROW('Async methods are a restricted production and cannot have a newline following it');
+      }
+    }
+
+    // The "key" in the next is one of ident, string, number, or computed property
+    // - `class x {key(){}}`
+    //                  ^
+    // - `class x {get key(){}}`
+    //                 ^
+    // - `class x {set key(){}}`
+    // - `class x {async key(){}}`
+    // - `class x {async *key(){}}`
+    //                   ^
+    // - `class x {static ident(){}}`
+    //                         ^
+    // - `class x {static get key(){}}`
+    //                        ^
+    // - `class x {static set key(){}}`
+    // - `class x {static async key(){}}`
+    // - `class x {static async *key(){}}`
+
+    let destructible = MIGHT_DESTRUCT;
+    let assignable = 0; // Propagate await/yield state flags to caller
+
+    // The syntactic order of modifiers is
+    // { [[async [*]]|get|set] key(){} }
+    let getToken = UNDEF_GET;
+    let setToken = UNDEF_SET;
+    let asyncToken = UNDEF_ASYNC;
+    let starToken = UNDEF_STAR;
+
+    if (curc === $$PAREN_L_28) {
+      // Simple method shorthand
+      // - `class x {ident(){}}`
+      //                  ^
+      destructible |= _parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, identToken, astProp);
+    }
+    else {
+      switch (identToken.str) {
+        case 'get':
+          // The next token may now only be the key
+          // - `class x {get key(){}}`
+          //                 ^
+          getToken = identToken;
+          break;
+        case 'set':
+          // The next token may now only be the key
+          // - `class x {get key(){}}`
+          //                 ^
+          setToken = identToken;
+          break;
+        case 'async':
+          // - `class x {async key(){}})
+          //                   ^
+          // - `class x {async *key(){}})
+          //                   ^
+
+          // the next token may now only be the key
+          asyncToken = identToken;
+          // Might be followed by star
+          if (curtok.str === '*') {
+            // - `class x {async *key(){}})
+            //                   ^
+            starToken = curtok;
+            ASSERT_skipAny('*', lexerFlags); // TODO: next is key; ident or `[` or `*` or number or string
+          }
+          break;
+        default:
+          // There aren't any other ident modifiers so this must be an error
+          THROW('Either the current modifier is unknown or the input that followed was unexpected', identToken, curtok);
+      }
+
+      // The curtok must be key and is unknown. There are four types of key; ident, number, string, and computed
+      // - `class x {get ident(){}}`
+      //                 ^
+      // - `class x {get "foo"(){}}`
+      //                 ^
+      // - `class x {get 300(){}}`
+      //                 ^
+      // - `class x {get [expr](){}}`
+      //                 ^
+
+      // - `class x {static get key(){}}`
+      //                        ^
+      // - `class x {set key(ident){}}`
+      // - `class x {static set key(ident){}}`
+      // - `class x {async key(){}}`
+      // - `class x {static async key(){}}`
+
+      if (curc === $$SQUARE_L_5B) {
+        destructible |= parseClassMethodComputedKey(lexerFlags, outerLexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
+      } else if (hasAnyFlag(curtype, $STRING | $NUMBER)) {
+        destructible |= parseClassMethodLiteralKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
+      } else if (hasAnyFlag(curtype, $IDENT)) {
+        destructible |= parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp);
+      } else {
+        // Stuff like incompatible modifiers, obj lit syntax, invalid tokens, etc
+        THROW('Expected to parse the modified key of a class method but could not parse one');
+      }
+    }
+
+    // Pick up the flags from assignable and put them in destructible
+    // - `result = [...{ x = yield }] = y;`
+    // - `function* g() {   [...{ x = yield }] = y   }`
+    // - `result = [...{ x = await }] = y;`
+    // - `async r => result = [...{ x = await x }] = y;`
+    return copyPiggies(destructible, assignable);
+  }
+  function parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp) {
+    ASSERT(parseClassMethodIdentKey.length === arguments.length, 'arg count');
+    ASSERT(hasAllFlags(curtype, $IDENT), 'curtype is ident', curtok);
+    ASSERT(staticToken === UNDEF_STATIC || staticToken.str === 'static', 'static token');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+
+    let keyToken = curtok; // Note: constructor is tested elsewhere
+    ASSERT_skipAny($IDENT, lexerFlags); // TODO: next must be `(`
+    return _parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, keyToken, astProp);
+  }
+  function _parseClassMethodIdentKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, keyToken, astProp) {
+    ASSERT(_parseClassMethodIdentKey.length === arguments.length, 'arg count');
+    ASSERT(staticToken === UNDEF_STATIC || staticToken.str === 'static', 'static token');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+    ASSERT(keyToken !== undefined, 'key is token');
+    ASSERT(keyToken.type === $IDENT, 'key is ident');
+
+    AST_setIdent(astProp, keyToken);
+
+    // - `class A {async get foo(){}}`
+    let destructPiggies = parseClassMethodAfterKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, keyToken, astProp);
+    ASSERT(!hasAnyFlag(destructPiggies, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_VARNAME), 'yield/await cases are caught before this point (yield/await keyword always illegal in func arg, yield/await as param considered "non-simple"');
+    // - `(class A extends B { constructor() { super() } })`
+    return destructPiggies; // Can have constructor piggy
+  }
+  function parseClassMethodLiteralKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp) {
+    ASSERT(parseClassMethodLiteralKey.length === arguments.length, 'arg count');
+    ASSERT(hasAnyFlag(curtok.type, $NUMBER | $STRING));
+    ASSERT(staticToken === UNDEF_STATIC || staticToken.str === 'static', 'static token');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+
+    let litToken = curtok;
+    AST_setLiteral(astProp, litToken);
+
+    ASSERT_skipRex(litToken.str, lexerFlags); // next is `(`
+
+    // [v]: `class A {"x"(){}}`
+    // [v]: `class A {1(){}}`
+    // [v]: `class A {static 2(){}}`
+    // [v]: `class A {async 3(){}}`
+    // [v]: `class A {*4(){}}`
+    // [v]: `class A {async * 34(){}}`
+    // [v]: `class A {get 5(){}}`
+    // [v]: `class A {static get 6(){}}`
+    // [v]: `class A {set 9(x){}}`
+    // [v]: `class A {static set 10(x){}}`
+    let destructPiggies = parseClassMethodAfterKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, litToken, astProp);
+    ASSERT(!hasAnyFlag(destructPiggies, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_VARNAME), 'yield/await cases are caught before this point (yield/await keyword always illegal in func arg, yield/await as param considered "non-simple"');
+    // - `class A {"constructor"(){}}`
+    return destructPiggies; // Can have constructor piggy
+  }
+  function parseClassMethodComputedKey(lexerFlags, outerLexerFlags, staticToken, asyncToken, starToken, getToken, setToken, astProp) {
+    // skip computed key part first because we need to figure out whether we're parsing a method
+    ASSERT(parseClassMethodComputedKey.length === arguments.length, 'arg count');
+    ASSERT_skipRex('[', lexerFlags); // next is expression
+    ASSERT(staticToken === UNDEF_STATIC || staticToken.str === 'static', 'static token');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+
+    // Note: the expression of computed keys of class methods are parsed with the context before the class
+    // So the context is not guaranteed to be strict.
+    let nowAssignable = parseExpression(outerLexerFlags, ASSIGN_EXPR_IS_OK, astProp);
+    // - `async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }`
+    // - `(fail = class A {[await](){}; "x"(){}}) => {}`
+    // - `function *f(){  class x{[yield foo](a){}}  }`
+    ASSERT(hasNoFlag(nowAssignable, PIGGY_BACK_SAW_YIELD_VARNAME), 'all parts of class are strict so yield can never be varname');
+    // - `(fail = class A {[await](){}; "x"(){}}) => {}`
+
+    skipAnyOrDieSingleChar($$SQUARE_R_5D, lexerFlags); // next is (
+
+    // - `{[foo](){}}`
+    // - `class {[foo](){}}`
+    // - `class x {[x]z){}}`
+    let destructPiggies = parseClassMethodAfterKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, undefined, astProp);
+    ASSERT(!hasAnyFlag(destructPiggies, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_VARNAME), 'yield/await cases are caught before this point (yield/await keyword always illegal in func arg, yield/await as param considered "non-simple"');
+    ASSERT(destructPiggies === CANT_DESTRUCT, 'no piggies');
+
+    // Note: example case where copying the piggies matters
+    // - `async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }`
+    return copyPiggies(CANT_DESTRUCT, nowAssignable);
+  }
+  function parseClassMethodAfterKey(lexerFlags, staticToken, asyncToken, starToken, getToken, setToken, keyToken, astProp) {
+    ASSERT(parseClassMethodAfterKey.length === arguments.length, 'want args');
+    ASSERT(staticToken === UNDEF_STATIC || staticToken.str === 'static', 'static token');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+    ASSERT(keyToken === undefined || keyToken.str, 'keyToken is a token');
+    ASSERT(keyToken === undefined || (keyToken.type === $IDENT || hasAnyFlag(keyToken.type, $STRING | $NUMBER)), 'keyToken is a number, string or ident', ''+keyToken);
+
+    verifyGeneralMethodState(asyncToken, starToken, getToken, setToken, keyToken, true);
+
+    if (keyToken !== undefined && staticToken !== UNDEF_STATIC) {
+      if (keyToken.type === $IDENT && keyToken.canon === 'prototype') {
+        THROW('Static class methods can not be called `prototype`');
+      }
+      else if (hasAnyFlag(keyToken.type, $STRING) && keyToken.canon.slice(1, -1) === 'prototype') {
+        THROW('Static class methods can not be called `prototype`');
+      }
+    }
+
+    let destructible = CANT_DESTRUCT; // this is mostly for piggy flags like detecting duplicate constructors
+
+    AST_wrapClosed(astProp, 'MethodDefinition', 'key');
+    AST_set('static', staticToken !== UNDEF_STATIC);
+    AST_set('computed', keyToken === undefined);
+
+    // https://tc39.github.io/ecma262/#sec-object-initializer-static-semantics-propname
+    // > LiteralPropertyName: StringLiteral
+    // >   Return the String value whose code units are the SV of the StringLiteral.
+    // In other words; `class x{"constructor"(){}}` is also a proper constructor
+    // Constructors can't have get/set/*/async but can be static
+    // https://tc39.github.io/ecma262/#sec-identifier-names-static-semantics-stringvalue
+    // Note: the "constructor" check is determined by the "StringValue" of ident, which is the canonical value
+    // https://tc39.github.io/ecma262/#sec-string-literals-static-semantics-stringvalue
+    // And for strings it is the unquoted canonical value of the string (so "constructor" and 'constructor' + escapes)
+
+    let isConstructor = false; // function parser needs this flag for "can we parse `super`?" state
+    if (
+      keyToken !== undefined &&
+      staticToken === UNDEF_STATIC &&
+      ((
+          hasAnyFlag(keyToken.type, $IDENT) &&
+          keyToken.canon === 'constructor' // "StringValue" of ident is canonical (so escapes resolved)
+        ) ||
+        (
+          hasAnyFlag(keyToken.type, $STRING) &&
+          keyToken.canon.slice(1, -1) === 'constructor' // "StringValue" is canonical (so escapes resolved)
+        ))
+    ) {
+      // This is a proper class constructor
+      isConstructor = true;
+
+      if (asyncToken !== UNDEF_ASYNC) THROW('Class constructors can not be async');
+      if (starToken !== UNDEF_STAR) THROW('Class constructors can not be generators');
+      if (getToken !== UNDEF_GET) THROW('Class constructors can not be getters');
+      if (setToken !== UNDEF_SET) THROW('Class constructors can not be setters');
+
+      AST_set('kind', 'constructor'); // only getters/setters/constructors get special value here
+
+      // This is a constructor method. We need to signal the caller that we parsed one to dedupe them
+      // In order to signal the caller we piggy back on the destructible mechanism which is already a bit-field
+      destructible |= PIGGY_BACK_WAS_CONSTRUCTOR;
+    } else if (getToken !== UNDEF_GET) {
+      // - `class A {get foo(){}}`
+      AST_set('kind', 'get'); // only getters/setters/constructors get special value here
+    } else if (setToken !== UNDEF_SET) {
+      // - `class A {set foo(x){}}`
+      AST_set('kind', 'set'); // only getters/setters/constructors get special value here
+    } else {
+      // [v]: `class x { foo(){ }}`
+      AST_set('kind', 'method'); // only getters/setters/constructors get special value here, else it's method for classes
+    }
+
+    // [v]: `class A {a(){}}`
+    ASSERT(curc === $$PAREN_L_28, 'these (non-assert) checks have already been applied at this point');
+    parseFunctionAfterKeyword(
+      lexerFlags,
+      DO_NOT_BIND,
+      NOT_FUNC_DECL,
+      NOT_FUNC_EXPR,
+      IDENT_OPTIONAL,
+      isConstructor,
+      NOT_FUNCTION_STATEMENT,
+      IS_METHOD,
+      asyncToken,
+      starToken,
+      getToken,
+      setToken,
+      'value'
+    );
+
+    AST_close('MethodDefinition');
+
+    return destructible;
+  }
+
+  function verifyGeneralMethodState(asyncToken, starToken, getToken, setToken, keyToken, isClass) {
+    ASSERT(verifyGeneralMethodState.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+
+    if (curc !== $$PAREN_L_28) {
+      // - `{[foo] * 5}`
+      //           ^
+      // - `class x {async f * 5}`
+      //                     ^
+      // - `({async get foo(){}});`
+      //                ^
+
+      // This is an error branch. Try to give a more sensible error for `async get foo(){}` :
+      switch (keyToken && keyToken.str) {
+        case 'get':
+          getToken = keyToken;
+          break;
+        case 'set':
+          setToken = keyToken;
+          break;
+        case 'async':
+          asyncToken = keyToken;
+          break;
+        case '*':
+          starToken = keyToken;
+          break;
+      }
+
+      if ((asyncToken !== UNDEF_ASYNC || starToken !== UNDEF_STAR) && (getToken !== UNDEF_GET || setToken !== UNDEF_SET)) {
+        THROW('A getter or setter can not be async or a generator as well');
+      }
+
+      if (isClass) {
+        THROW('Class members must be methods so was expect an opening parenthesis after number/string literal key');
+      } else {
+        THROW('Objects with certain modifiers must be methods');
+      }
+    }
+
+    ASSERT(!((asyncToken !== UNDEF_ASYNC || starToken !== UNDEF_STAR) && (getToken !== UNDEF_GET || setToken !== UNDEF_SET)), 'code paths should not allow this state');
+
+    if (asyncToken !== UNDEF_ASYNC) {
       if (!allowAsyncFunctions) {
         THROW('Async functions are not supported in the currently targeted language version');
-      } else if (generatorState === WAS_GENERATOR && !allowAsyncGenerators) {
-        THROW('Async generators are not supported in the currently targeted language version');
-      } else {
-        asyncState = WAS_ASYNC;
-        kindValue = isClassMethod === IS_CLASS_METHOD ? 'method' : 'init';
       }
-    } else {
-      kindValue = isClassMethod === IS_CLASS_METHOD ? 'method' : 'init';
+      else if (starToken !== UNDEF_STAR && !allowAsyncGenerators) {
+        THROW('Async generators are not supported in the currently targeted language version');
+      }
     }
 
-    if (isClassMethod === IS_CLASS_METHOD) {
-      AST_wrapClosed(astProp, 'MethodDefinition', 'key');
-      AST_set('static', !!isStatic);
-      AST_set('computed', true);
-      AST_set('kind', kindValue); // only getters/setters get special value here
-      parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, kind, NOT_FUNCTION_STATEMENT, 'value');
-
-      AST_close('MethodDefinition');
-    } else {
-      AST_wrapClosed(astProp, 'Property', 'key');
-      AST_set('kind', kindValue); // only getters/setters get special value here
-      AST_set('method', kind === NOT_GETSET);
-      AST_set('computed', true);
-      parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, kind, NOT_FUNCTION_STATEMENT, 'value');
-      AST_set('shorthand', false);
-      AST_close('Property');
-      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+    if ((asyncToken !== UNDEF_ASYNC || starToken !== UNDEF_STAR) && (getToken !== UNDEF_GET || setToken !== UNDEF_SET)) {
+      // - `{async set foo(x){}}`
+      // - `{get *foo(){}}`
+      THROW('A getter or setter can not be async or a generator');
+    }
+    if (getToken !== UNDEF_GET && setToken !== UNDEF_SET) {
+      // (This would throw an error for the param arity check, anyways)
+      // - `{get set foo(x){}}`
+      THROW('A getter can not also be a setter');
     }
   }
+
   function verifyDestructible(destructible) {
     // ASSERT(destructible >= 0 && destructible < (1<<16), 'bit-wise field range check');
 
@@ -8465,7 +9059,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       let firstOpNotAssign = curtok.str !== '=';
       if (curc !== $$COMMA_2C && curc !== closingCharOrd) {
-// if (firstOpNotAssign && notAssignable(assignable)) TODO, destructible |= CANT_DESTRUCT; // TODO I think this is redundant
         // From here on out `assignable` is only used to track yield/await state for fringe cases
         assignable |= parseExpressionFromOp(lexerFlags, assignable, astProp);
         if (firstOpNotAssign) {
@@ -8506,21 +9099,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `{ (x = [yield y]) }`
     return copyPiggies(destructible, assignable);
   }
-  function parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncIdent, exportedNames, exportedBindings, astProp) {
+  function parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncToken, exportedNames, exportedBindings, astProp) {
     // parseArrowableRest
     ASSERT(parseArrowableSpreadOrRest.length === arguments.length, 'want all args');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_skipRex('...', lexerFlags); // next is an expression so rex
+
     if (curc === $$DOT_2E && curtok.str === '...') THROW('Can not rest twice');
     AST_open(astProp, 'SpreadElement');
-    let destructible = _parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncIdent, exportedNames, exportedBindings, 'argument');
+    let destructible = _parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncToken, exportedNames, exportedBindings, 'argument');
     AST_close('SpreadElement');
 
     return destructible;
   }
-  function _parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncIdent, exportedNames, exportedBindings, astProp) {
+  function _parseArrowableSpreadOrRest(lexerFlags, scoop, closingCharOrd, bindingType, groupTopLevel, asyncToken, exportedNames, exportedBindings, astProp) {
     ASSERT(_parseArrowableSpreadOrRest.length === arguments.length, 'arg count');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT(typeof bindingType === 'number', 'enum');
     // returns CANT_DESTRUCT if the arg is not only an ident
+
+    // - `[x, y, ...z]`
+    // - `async (a, ...b) => a;`
 
     // Arrays:
     // https://tc39.github.io/ecma262/#prod-SpreadElement
@@ -8715,7 +9314,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `([...{}.x] = x);`
       // - `({...{}[x]} = x);`
       // - `([...{}[x]] = x);`
-      let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, SKIP_INIT, NOT_CLASS_METHOD, exportedNames, exportedBindings, astProp);
+      let nowDestruct = parseObjectLiteralPatternAndAssign(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
       ASSERT(curtok.str !== '=' || (nowDestruct|CANT_DESTRUCT), 'rest can never have default so if there was an assignment dont let it be destructible');
       if (curtok.str !== '=' && curc !== closingCharOrd && curc !== $$COMMA_2C) {
         // - `({ ...{}.x } = x);`
@@ -8834,19 +9433,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // A param object pattern can only have a rest with ident, this was not just an ident, cant destruct to a rest
       if (closingCharOrd === $$CURLY_R_7D && !isAssignable(assignable)) destructible |= CANT_DESTRUCT;
-
-      // TODO: come up with test cases that cover these checks
-      if (hasAllFlags(assignable, PIGGY_BACK_SAW_AWAIT_KEYWORD)) TODO;
-      if (hasAllFlags(assignable, PIGGY_BACK_SAW_AWAIT_VARNAME)) TODO;
-      if (hasAllFlags(assignable, PIGGY_BACK_SAW_YIELD_KEYWORD)) TODO;
-      // if (hasAllFlags(assignable, PIGGY_BACK_SAW_YIELD_VARNAME)) TODO; // `[.../x//yield]` (superseded by another check elsewhere)
+      // [v]: `[.../x/]`
+      // [v]: `[.../x//yield]`
+      ASSERT(hasNoFlag(assignable, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD), 'I htink these are superseded by a new system');
 
       return copyPiggies(destructible, assignable);
     }
 
     if (curc !== closingCharOrd) {
       if (bindingType === BINDING_TYPE_ARG) {
-        if (asyncIdent) {
+        if (asyncToken !== UNDEF_ASYNC) {
           destructible |= CANT_DESTRUCT;
         } else {
           $log('rest crashed, closingCharOrd='+String.fromCharCode(closingCharOrd)+', token: ' + curtok);
@@ -8896,101 +9492,103 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // destructible because the `...` is at the end of the structure and its arg is an ident/array/object and has no tail
     return copyPiggies(destructible, assignable);
   }
-  function parseObjectLikeMethodAfterKey(lexerFlags, isStatic, isGenerator, asyncgetsetToken, keyToken, isClassMethod, isConstructor, isDynamic, isGetSet, astProp) {
+  function parseObjectLikeMethodAfterKey(lexerFlags, asyncToken, starToken, getToken, setToken, keyToken, astProp) {
     ASSERT(arguments.length === parseObjectLikeMethodAfterKey.length, 'want args');
-    ASSERT(asyncgetsetToken === undefined || (asyncgetsetToken.str === 'get' || asyncgetsetToken.str === 'set' || asyncgetsetToken.str === 'async'), 'either pass on token or undefined');
-    ASSERT(isStatic === undefined || isStatic.type === $IDENT, 'isStatic should be token or undefined');
-    ASSERT(isGenerator === undefined || isGenerator.type === $PUNCTUATOR, 'isGenerator should be * token or undefined');
+    ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
+    ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(keyToken === undefined || keyToken.str, 'keyToken is a token');
-    ASSERT(keyToken === undefined || (keyToken.type === $IDENT || hasAnyFlag(keyToken.type, $STRING | $NUMBER)), 'keyToken is a string or ident', ''+keyToken);
-    ASSERT(typeof isClassMethod === 'boolean', 'isClassMethod is a bool');
-    ASSERT(typeof isDynamic === 'boolean', 'isDynamic is a bool');
+    ASSERT(keyToken === undefined || (keyToken.type === $IDENT || hasAnyFlag(keyToken.type, $STRING | $NUMBER)), 'keyToken is a number, string or ident', ''+keyToken);
 
-    let modifier = asyncgetsetToken ? asyncgetsetToken.str : '';
-    let asyncState = NOT_ASYNC;
-    let generatorState = isGenerator ? WAS_GENERATOR : NOT_GENERATOR;
+    let destructible = CANT_DESTRUCT; // this is mostly for piggy flags like detecting duplicate constructors
 
-    if (modifier === 'async') {
+    if (asyncToken !== UNDEF_ASYNC) {
       if (!allowAsyncFunctions) {
         THROW('Async functions are not supported in the currently targeted language version');
-      } else if (isGenerator && !allowAsyncGenerators) {
+      }
+      else if (starToken !== UNDEF_STAR && !allowAsyncGenerators) {
         THROW('Async generators are not supported in the currently targeted language version');
-      } else {
-        asyncState = WAS_ASYNC;
       }
     }
 
-    if (isClassMethod) {
-      AST_wrapClosed(astProp, 'MethodDefinition', 'key');
-      AST_set('static', !!isStatic);
-      AST_set('computed', !!isDynamic);
+    if ((asyncToken !== UNDEF_ASYNC || starToken !== UNDEF_STAR) && (getToken !== UNDEF_GET || setToken !== UNDEF_SET)) {
+      // - `{async set foo(x){}}`
+      // - `{get *foo(){}}`
+      THROW('A getter or setter can not be async or a generator');
+    }
+    if (getToken !== UNDEF_GET && setToken !== UNDEF_SET) {
+      // (This would throw an error for the param arity check, anyways)
+      // - `{get set foo(x){}}`
+      THROW('A getter can not also be a setter');
+    }
 
-      // constructor cant have get/set/*/async but can be static
-      // https://tc39.github.io/ecma262/#sec-object-initializer-static-semantics-propname
-      // > LiteralPropertyName:StringLiteral
-      // >   Return the String value whose code units are the SV of the StringLiteral.
-      // In other words; `class x{"constructor"(){}}` is also a proper constructor
-      if (isConstructor) {
-        // https://tc39.github.io/ecma262/#sec-class-definitions-static-semantics-early-errors
-        // > It is a Syntax Error if PropName of MethodDefinition is "constructor" and SpecialMethod of MethodDefinition is true.
-        // (generator, async, async gen, get, set)
-        if (isGetSet === IS_GETTER || isGetSet === IS_SETTER || isGenerator || asyncState === WAS_ASYNC) {
-          TODO // does that even reach here?
-          THROW('The constructor can not be a getter, setter, async, or generator');
-        }
-        AST_set('kind', 'constructor');
-      } else if (isGetSet === IS_GETTER) {
-        AST_set('kind', 'get'); // only getters/setters get special value here
+    AST_wrapClosed(astProp, 'Property', 'key');
 
-        if (keyToken && !isStatic && (
-          (keyToken.type === $IDENT && keyToken.canon === 'constructor') ||
-          (hasAllFlags(keyToken.type, $STRING) && keyToken.str.slice(1, -1) === 'constructor')
-        )) THROW('Constructors cannot be get/set/async/generators');
-      } else if (isGetSet === IS_SETTER) {
-        AST_set('kind', 'set'); // only getters/setters get special value here
-
-        if (keyToken && !isStatic && (
-          (keyToken.type === $IDENT && keyToken.canon === 'constructor') ||
-          (hasAllFlags(keyToken.type, $STRING) && keyToken.str.slice(1, -1) === 'constructor')
-        )) THROW('Constructors cannot be get/set/async/generators');
-      } else {
-        ASSERT(isGetSet === NOT_GETSET, 'enum');
-        AST_set('kind', 'method'); // only getters/setters get special value here
-
-        if ((isGenerator || asyncState === WAS_ASYNC) && keyToken && !isStatic && (
-          (keyToken.type === $IDENT && keyToken.canon === 'constructor') ||
-          (hasAllFlags(keyToken.type, $STRING) && keyToken.str.slice(1, -1) === 'constructor')
-        )) THROW('Constructors cannot be get/set/async/generators');
-      }
-
-      ASSERT(curc === $$PAREN_L_28, 'should have parsed everything before the method args now');
-      parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, isConstructor, IS_METHOD, isGetSet, NOT_FUNCTION_STATEMENT, 'value');
-
-      AST_close('MethodDefinition');
+    if (getToken !== UNDEF_GET) {
+      // - `{get foo(){}}`
+      //            ^
+      AST_set('kind', 'get'); // only getters/setters get special value here
+    } else if (setToken !== UNDEF_SET) {
+      // - `{set foo(x){}}`
+      //            ^
+      AST_set('kind', 'set'); // only getters/setters get special value here
     } else {
-      if (isStatic) THROW('Only class methods can be `static`');
-      ASSERT(isConstructor === NOT_CONSTRUCTOR, 'should not have constructor for object');
-      AST_wrapClosed(astProp, 'Property', 'key');
-
-      if (isGetSet === IS_GETTER) {
-        AST_set('kind', 'get'); // only getters/setters get special value here
-      } else if (isGetSet === IS_SETTER) {
-        AST_set('kind', 'set'); // only getters/setters get special value here
-      } else {
-        AST_set('kind', 'init'); // classes get methods, objects get init
-      }
-      AST_set('method', isGetSet === NOT_GETSET); // getters and setters are not considered methods here
-      AST_set('computed', !!isDynamic);
-
-      if (curc !== $$PAREN_L_28) {
-        // [x]: `wrap({get 123: x});`
-        THROW('Expected to parse a paren of the method now but found something else');
-      }
-      parseFunctionAfterKeyword(lexerFlags, DO_NOT_BIND, NOT_FUNC_DECL, NOT_FUNC_EXPR, generatorState, asyncState, IDENT_OPTIONAL, NOT_CONSTRUCTOR, IS_METHOD, isGetSet, NOT_FUNCTION_STATEMENT, 'value');
-
-      AST_set('shorthand', false);
-      AST_close('Property');
+      // [v]: `x = { foo(){ }}`
+      //                ^
+      // - `let o = {async await(){}}`
+      AST_set('kind', 'init'); // in objects, non-getset get "init"
     }
+    AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET); // getters and setters are not methods but properties
+    AST_set('computed', keyToken === undefined);
+
+    if (curc !== $$PAREN_L_28) {
+      // TODO: move this to outside of this branch?
+      // [x]: `{get 123: x}`
+      // [x]: `{async foo: x}`
+      THROW('Expected to parse a paren of the method now but found something else');
+
+      // // This is an error path because generators must be methods
+      // if (allowAsyncFunctions) {
+      //   if (curtok.str === 'async') {
+      //     // - `({*async x(){}})`     // NOT an async generator! just an error
+      //     THROW('Found `* async x(){}` but this should be `async * x(){}`'); // provided it's supported at all...
+      //   }
+      // }
+      // if (curtok.str === 'get' || curtok.str === 'set') {
+      //   // - `({*get x(){}})`
+      //   // - `({*set x(){}})`
+      //   THROW('Getters and setters can not be generators'); // (and you would put the get/set before the *, anyways)
+      // }
+      // if (curc === $$COLON_3A) {
+      //   // - `({*ident: x})`
+      //   THROW('Generators must be method shorthands');
+      // }
+      // // - `({*ident x(){}})`
+      // THROW('Unexpected token can not be generator method');
+
+    }
+
+    parseFunctionAfterKeyword(
+      lexerFlags,
+      DO_NOT_BIND,
+      NOT_FUNC_DECL,
+      NOT_FUNC_EXPR,
+      IDENT_OPTIONAL,
+      NOT_CONSTRUCTOR,
+      NOT_FUNCTION_STATEMENT,
+      IS_METHOD,
+      asyncToken,
+      starToken,
+      getToken,
+      setToken,
+      'value'
+    );
+
+    AST_set('shorthand', false);
+    AST_close('Property');
+
+    return destructible;
   }
 
   // <SCRUB AST>
@@ -9007,6 +9605,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   parseTopLevels(initialLexerFlags);
 
   if (curtype !== $EOF) THROW('Unexpected further input');
+
+  if (failForRegexAssertIfPass !== undefined) {
+    // We assume that when we call skipAny that we don't expect the next token to be legally start with a forward slash
+    // But there may still be explicit test cases that assert illegal forward slashes are throwing gracefully
+    ASSERT(false,'Calling skipAny should not legally return a token starting with `/`, but it did; token = ' + failForRegexAssertIfPass + '; stack trace is: ' + regexAssertTrace);
+  }
 
   return {
     ast:
@@ -9057,33 +9661,22 @@ function D(d) {
     arr.push('DESTRUCT_ASSIGN_ONLY');
     d ^= DESTRUCT_ASSIGN_ONLY;
   }
-  if (d & PIGGY_BACK_WAS_CONSTRUCTOR) {
-    arr.push('PIGGY_BACK_WAS_CONSTRUCTOR');
-    d ^= PIGGY_BACK_WAS_CONSTRUCTOR;
+
+  // perhaps we should throw for this kind of contamination...?
+  if (d & NOT_ASSIGNABLE) {
+    arr.push('(NOT_ASSIGNABLE)');
+    d ^= NOT_ASSIGNABLE;
   }
-  if (d & PIGGY_BACK_WAS_PROTO) {
-    arr.push('PIGGY_BACK_WAS_PROTO');
-    d ^= PIGGY_BACK_WAS_PROTO;
-  }
-  if (d & PIGGY_BACK_SAW_AWAIT_KEYWORD) {
-    arr.push('PIGGY_BACK_SAW_AWAIT_KEYWORD');
-    d ^= PIGGY_BACK_SAW_AWAIT_KEYWORD;
-  }
-  if (d & PIGGY_BACK_SAW_AWAIT_VARNAME) {
-    arr.push('PIGGY_BACK_SAW_AWAIT_VARNAME');
-    d ^= PIGGY_BACK_SAW_AWAIT_VARNAME;
-  }
-  if (d & PIGGY_BACK_SAW_YIELD_KEYWORD) {
-    arr.push('PIGGY_BACK_SAW_YIELD_KEYWORD');
-    d ^= PIGGY_BACK_SAW_YIELD_KEYWORD;
-  }
-  if (d & PIGGY_BACK_SAW_YIELD_VARNAME) {
-    arr.push('PIGGY_BACK_SAW_YIELD_VARNAME');
-    d ^= PIGGY_BACK_SAW_YIELD_VARNAME;
+  if (d & IS_ASSIGNABLE) {
+    arr.push('(IS_ASSIGNABLE)');
+    d ^= IS_ASSIGNABLE;
   }
 
+
+  d = _P(d, arr);
+
   if (d !== 0) {
-    $log('Gathered flags so far:', arr.join(', '))
+    console.log('Gathered flags so far:', arr.join(', '))
     _THROW('D: unknown flags left:', d.toString(2));
   }
 
@@ -9103,29 +9696,61 @@ function A(a) {
     arr.push('IS_ASSIGNABLE');
     a ^= IS_ASSIGNABLE;
   }
-  if (a & PIGGY_BACK_SAW_AWAIT_VARNAME) {
-    arr.push('PIGGY_BACK_SAW_AWAIT_VARNAME');
-    a ^= PIGGY_BACK_SAW_AWAIT_VARNAME;
+
+  // perhaps we should throw for this contamination...?
+  if (a & CANT_DESTRUCT) {
+    arr.push('(CANT_DESTRUCT)');
+    a ^= CANT_DESTRUCT;
   }
-  if (a & PIGGY_BACK_SAW_AWAIT_KEYWORD) {
-    arr.push('PIGGY_BACK_SAW_AWAIT_KEYWORD');
-    a ^= PIGGY_BACK_SAW_AWAIT_KEYWORD;
+  if (a & MUST_DESTRUCT) {
+    arr.push('(MUST_DESTRUCT)');
+    a ^= MUST_DESTRUCT;
   }
-  if (a & PIGGY_BACK_SAW_YIELD_VARNAME) {
-    arr.push('PIGGY_BACK_SAW_YIELD_VARNAME');
-    a ^= PIGGY_BACK_SAW_YIELD_VARNAME;
-  }
-  if (a & PIGGY_BACK_SAW_YIELD_KEYWORD) {
-    arr.push('PIGGY_BACK_SAW_YIELD_KEYWORD');
-    a ^= PIGGY_BACK_SAW_YIELD_KEYWORD;
+  if (a & DESTRUCT_ASSIGN_ONLY) {
+    arr.push('(DESTRUCT_ASSIGN_ONLY)');
+    a ^= DESTRUCT_ASSIGN_ONLY;
   }
 
+  a = _P(a, arr);
+
   if (a !== 0) {
-    $log('Gathered flags so far:', arr.join(', '))
+    console.log('Gathered flags so far:', arr.join(', '))
     _THROW('A: unknown flags left:', a.toString(2));
   }
 
   return 'A='+arr.join(', ');
+}
+
+function _P(f, arr) {
+  if (f & PIGGY_BACK_WAS_CONSTRUCTOR) {
+    arr.push('PIGGY_BACK_WAS_CONSTRUCTOR');
+    f ^= PIGGY_BACK_WAS_CONSTRUCTOR;
+  }
+  if (f & PIGGY_BACK_WAS_PROTO) {
+    arr.push('PIGGY_BACK_WAS_PROTO');
+    f ^= PIGGY_BACK_WAS_PROTO;
+  }
+  if (f & PIGGY_BACK_WAS_DOUBLE_PROTO) {
+    arr.push('PIGGY_BACK_WAS_DOUBLE_PROTO');
+    f ^= PIGGY_BACK_WAS_DOUBLE_PROTO;
+  }
+  if (f & PIGGY_BACK_SAW_AWAIT_KEYWORD) {
+    arr.push('PIGGY_BACK_SAW_AWAIT_KEYWORD');
+    f ^= PIGGY_BACK_SAW_AWAIT_KEYWORD;
+  }
+  if (f & PIGGY_BACK_SAW_AWAIT_VARNAME) {
+    arr.push('PIGGY_BACK_SAW_AWAIT_VARNAME');
+    f ^= PIGGY_BACK_SAW_AWAIT_VARNAME;
+  }
+  if (f & PIGGY_BACK_SAW_YIELD_KEYWORD) {
+    arr.push('PIGGY_BACK_SAW_YIELD_KEYWORD');
+    f ^= PIGGY_BACK_SAW_YIELD_KEYWORD;
+  }
+  if (f & PIGGY_BACK_SAW_YIELD_VARNAME) {
+    arr.push('PIGGY_BACK_SAW_YIELD_VARNAME');
+    f ^= PIGGY_BACK_SAW_YIELD_VARNAME;
+  }
+  return f;
 }
 
 // </BODY>

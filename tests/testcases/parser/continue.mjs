@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('continue statement', _ => {

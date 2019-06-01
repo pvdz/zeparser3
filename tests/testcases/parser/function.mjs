@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX} from '../../../src/zetokenizer.mjs';
 
 // TODO: replace the startInStrictMode stuff with sloppy mode results instead
 export default (describe, test) =>

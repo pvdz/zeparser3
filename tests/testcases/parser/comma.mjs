@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $TICK_HEAD, $TICK_BODY, $TICK_TAIL} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $TICK_HEAD, $TICK_BODY, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('comma', _ => {
@@ -843,5 +843,61 @@ export default (describe, test) =>
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
       });
+    });
+
+    test('simple member expression', {
+      code: 'x[a, b]',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'MemberExpression',
+              object: {type: 'Identifier', name: 'x'},
+              property: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+              },
+              computed: true,
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
+
+    test('fuzzed member expression', {
+      code: '(2[x,x],x)>x',
+      desc: 'fuzzed',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {
+                    type: 'MemberExpression',
+                    object: {type: 'Literal', value: '<TODO>', raw: '2'},
+                    property: {
+                      type: 'SequenceExpression',
+                      expressions: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'x'}],
+                    },
+                    computed: true,
+                  },
+                  {type: 'Identifier', name: 'x'},
+                ],
+              },
+              operator: '>',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
     });
   });

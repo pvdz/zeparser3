@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 // ++ and -- are UpdateExpression nodes in the spec, not unary operators
 

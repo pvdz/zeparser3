@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('classes', _ => {
@@ -513,18 +513,14 @@ export default (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('async getter method', {
+      test.fail('async getter method', {
         code: 'class A {async get foo(){}}',
-        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('generator getter method', {
+      test.fail('generator getter method', {
         code: 'class A {* get foo(){}}',
-        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('setter method', {
@@ -632,18 +628,13 @@ export default (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('async setter method', {
+      test.fail('async setter method', {
         code: 'class A {async set foo(x){}}',
-        throws: 'left paren',
-        desc: 'setters dont syntactically support async/generator modifiers',
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('generator setter method', {
+      test.fail('generator setter method', {
         code: 'class A {* set foo(x){}}',
-        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test('class with non-special method named get, set, and async', {
@@ -1050,15 +1041,13 @@ export default (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('async getter method', {
+      test.fail('async getter method', {
         code: 'class A {async get "foo"(){}}',
-        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
       });
 
-      test('generator getter method', {
+      test.fail('generator getter method', {
         code: 'class A {* get "foo"(){}}',
-        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
       });
 
@@ -1167,15 +1156,13 @@ export default (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('async setter method', {
+      test.fail('async setter method', {
         code: 'class A {async set "foo"(x){}}',
-        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
       });
 
-      test('generator setter method', {
+      test.fail('generator setter method', {
         code: 'class A {* set "foo"(x){}}',
-        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
       });
 
@@ -1493,15 +1480,13 @@ export default (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('async getter method', {
+      test.fail('async getter method', {
         code: 'class A {async get 7(){}}',
-        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
       });
 
-      test('generator getter method', {
+      test.fail('generator getter method', {
         code: 'class A {* get 8(){}}',
-        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
       });
 
@@ -1575,15 +1560,13 @@ export default (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('async setter method', {
+      test.fail('async setter method', {
         code: 'class A {async set 11(x){}}',
-        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
       });
 
-      test('generator setter method', {
+      test.fail('generator setter method', {
         code: 'class A {* set 12(x){}}',
-        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
       });
     });
@@ -1800,16 +1783,14 @@ export default (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('generator setter member', {
+      test.fail('generator setter member', {
         code: 'class A {* get [x](){}}',
-        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('async getter member', {
+      test.fail('async getter member', {
         code: 'class A {async get [x](){}}',
-        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
@@ -1884,16 +1865,14 @@ export default (describe, test) =>
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('generator setter member', {
+      test.fail('generator setter member', {
         code: 'class A {* set [foo](x){}}',
-        throws: 'can not be generator',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('async getter member', {
+      test.fail('async getter member', {
         code: 'class A {async get [foo](){}}',
-        throws: 'left paren',
         desc: 'setters dont syntactically support async/generator modifiers',
         tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
@@ -2369,57 +2348,47 @@ export default (describe, test) =>
 
         describe('getter prefix', _ => {
 
-          test('with ident key', {
+          test.fail('with ident key', {
             code: 'class x{get *foo(){}}',
-            throws: 'getter cannot be a generator',
           });
 
-          test('with dynamic key', {
+          test.fail('with dynamic key', {
             code: 'class x{get *[x](){}}',
-            throws: 'getter cannot be a generator',
           });
 
-          test('with string key', {
+          test.fail('with string key', {
             code: 'class x{get *"foo"(){}}',
-            throws: 'getter cannot be a generator',
           });
 
-          test('with number key', {
+          test.fail('with number key', {
             code: 'class x{get *555(){}}',
-            throws: 'getter cannot be a generator',
           });
 
-          test('with crap', {
+          test.fail('with crap', {
             code: 'class x{get *%x(){}}',
-            throws: 'getter cannot be a generator',
           });
         });
 
         describe('setter prefix', _ => {
 
-          test('with ident key', {
+          test.fail('with ident key', {
             code: 'class x{set *foo(a){}}',
-            throws: 'setter cannot be a generator',
           });
 
-          test('with dynamic key', {
+          test.fail('with dynamic key', {
             code: 'class x{set *[x](a){}}',
-            throws: 'setter cannot be a generator',
           });
 
-          test('with string key', {
+          test.fail('with string key', {
             code: 'class x{set *"foo"(a){}}',
-            throws: 'setter cannot be a generator',
           });
 
-          test('with number key', {
+          test.fail('with number key', {
             code: 'class x{set *555(a){}}',
-            throws: 'setter cannot be a generator',
           });
 
-          test('with crap', {
+          test.fail('with crap', {
             code: 'class x{set *%x(a){}}',
-            throws: 'setter cannot be a generator',
           });
         });
 
@@ -2579,9 +2548,8 @@ export default (describe, test) =>
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
-          test('with crap', {
+          test.fail('with crap', {
             code: 'class x{async *%x(a){}}',
-            throws: 'invalid', // just .fail here if the message changes too often
           });
         });
       });
@@ -2738,57 +2706,47 @@ export default (describe, test) =>
 
         describe('getter prefix', _ => {
 
-          test('with ident key', {
+          test.fail('with ident key', {
             code: 'class x{static get *foo(){}}',
-            throws: 'getter cannot be a generator',
           });
 
-          test('with dynamic key', {
+          test.fail('with dynamic key', {
             code: 'class x{static get *[x](){}}',
-            throws: 'getter cannot be a generator',
           });
 
-          test('with string key', {
+          test.fail('with string key', {
             code: 'class x{static get *"foo"(){}}',
-            throws: 'getter cannot be a generator',
           });
 
-          test('with number key', {
+          test.fail('with number key', {
             code: 'class x{static get *555(){}}',
-            throws: 'getter cannot be a generator',
           });
 
-          test('with crap', {
+          test.fail('with crap', {
             code: 'class x{static get *%x(){}}',
-            throws: 'getter cannot be a generator',
           });
         });
 
         describe('setter prefix', _ => {
 
-          test('with ident key', {
+          test.fail('with ident key', {
             code: 'class x{static set *foo(a){}}',
-            throws: 'setter cannot be a generator',
           });
 
-          test('with dynamic key', {
+          test.fail('with dynamic key', {
             code: 'class x{static set *[x](a){}}',
-            throws: 'setter cannot be a generator',
           });
 
-          test('with string key', {
+          test.fail('with string key', {
             code: 'class x{static set *"foo"(a){}}',
-            throws: 'setter cannot be a generator',
           });
 
-          test('with number key', {
+          test.fail('with number key', {
             code: 'class x{static set *555(a){}}',
-            throws: 'setter cannot be a generator',
           });
 
-          test('with crap', {
+          test.fail('with crap', {
             code: 'class x{static set *%x(a){}}',
-            throws: 'setter cannot be a generator',
           });
         });
 
@@ -2946,9 +2904,8 @@ export default (describe, test) =>
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
-          test('with crap', {
+          test.fail('with crap', {
             code: 'class x{static async *%x(a){}}',
-            throws: 'invalid',
           });
         });
       });
@@ -3003,8 +2960,7 @@ export default (describe, test) =>
         test('sans flag', {
           code: 'typeof class{}\n/foo/',
           throws: 'Expected to parse a value',
-          desc:
-            'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
+          desc: 'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
           tokens: [],
         });
 
@@ -3039,8 +2995,7 @@ export default (describe, test) =>
               },
             ],
           },
-          desc:
-            'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
+          desc: 'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
       });
@@ -3109,10 +3064,9 @@ export default (describe, test) =>
             ),
           });
 
-          test('as regular property in class', {
+          test.fail('as regular property in class', {
             code: 'class x {' + ident + ': x}',
             desc: 'we will have to revisit this with class properties later',
-            throws: 'method',
           });
 
           test('as method in class', {
@@ -3538,35 +3492,121 @@ export default (describe, test) =>
       });
     });
 
-    describe('method names cannot be `prototype`', _ => {
+    describe('method names can be `prototype`', _ => {
 
       test('plain', {
         code: 'class x { prototype(){} }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'prototype'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test.pass('getter', {
+        code: 'class x { get prototype(){} }',
+      });
+
+      test.pass('setter', {
+        code: 'class x { set prototype(x){} }',
+      });
+
+      test.pass('generator', {
+        code: 'class x { *prototype(){} }',
+      });
+
+      test.pass('async', {
+        code: 'class x { async prototype(){} }',
+      });
+
+      test.pass('gen async', {
+        code: 'class x { async *prototype(){} }',
+      });
+
+      test.pass('unicode flag, gen async', {
+        code: 'class x { async *prot\\u006ftype(){} }',
+      });
+
+      test.pass('string key', {
+        code: 'class x { "prototype"(){} }',
+      });
+
+      test.pass('string unicode escape key', {
+        code: 'class x { "prot\\u006ftype"(){} }',
+      });
+    });
+
+    describe('static method names can NOT be `prototype`', _ => {
+
+      test('plain', {
+        code: 'class x { static prototype(){} }',
         throws: 'prototype',
       });
 
       test('getter', {
-        code: 'class x { get prototype(){} }',
+        code: 'class x { static get prototype(){} }',
         throws: 'prototype',
       });
 
       test('setter', {
-        code: 'class x { set prototype(x){} }',
+        code: 'class x { static set prototype(x){} }',
         throws: 'prototype',
       });
 
       test('generator', {
-        code: 'class x { *prototype(){} }',
+        code: 'class x { static *prototype(){} }',
         throws: 'prototype',
       });
 
       test('async', {
-        code: 'class x { async prototype(){} }',
+        code: 'class x { static async prototype(){} }',
         throws: 'prototype',
       });
 
-      // test('gen async', {
-      //   code: 'class x { async *prototype(){} }',
+      test('gen async', {
+        code: 'class x { static async *prototype(){} }',
+        throws: 'prototype',
+      });
+
+      test('unicode flag, gen async', {
+        code: 'class x { static async *prot\\u006ftype(){} }',
+        throws: 'prototype',
+      });
+
+      test('string key', {
+        code: 'class x { static "prototype"(){} }',
+        throws: 'prototype',
+      });
+
+      // test('string unicode escape key', {
+      //   code: 'class x { static "prot\\u006ftype"(){} }',
+      //   throws: 'prototype',
       // });
     });
 
@@ -3680,10 +3720,6 @@ export default (describe, test) =>
       code: 'class x {foo: x}',
     });
 
-    test.fail('async class generator members can not be called `prototype`', {
-      code: 'class x {async *prototype(){}}',
-    });
-
     test.fail('dynamic class member paren check', {
       code: 'class x { async [x]s){}}',
     });
@@ -3697,6 +3733,11 @@ export default (describe, test) =>
     });
 
     describe('constructor name checks', _ => {
+
+      // https://tc39.github.io/ecma262/#sec-identifier-names-static-semantics-stringvalue
+      // Note: the "constructor" check is determined by the "StringValue", which canonizes the unicode escapes
+      // https://tc39.github.io/ecma262/#sec-string-literals-static-semantics-stringvalue
+      // And for strings it is the unquoted canonical value of the string (so "constructor" and 'constructor' + escapes)
 
       describe('as ident', _ => {
 
@@ -3934,43 +3975,52 @@ export default (describe, test) =>
         code: 'class x { `constructor`(){} }',
       });
 
-      test.pass('constructor ident can have unicode escape', {
-        code: 'class x { \\u0063onstructor(){} }',
-      });
+      describe('escapes should be canonical', _ => {
 
-      test('unicode escapes should not circumvent the double constructor check AB', {
-        code: 'class x { \\u0063onstructor(){}; constructor(){} }',
-        throws: 'constructor',
-      });
+        describe('unicode in idents', _ => {
 
-      test('unicode escapes should not circumvent the double constructor check BA', {
-        code: 'class x { constructor(){}; \\u0063onstructor(){}; }',
-        throws: 'constructor',
-      });
+          test.pass('constructor ident can have unicode escape', {
+            code: 'class x { \\u0063onstructor(){} }',
+          });
 
-      test('two unicode escaped constructors should still fail', {
-        code: 'class x { \u0063onstructor(){}; \\u0063onstructor(){}; }',
-        throws: 'constructor',
-      });
+          test('unicode escapes should not circumvent the double constructor check AB', {
+            code: 'class x { \\u0063onstructor(){}; constructor(){} }',
+            throws: 'constructor',
+          });
 
-      test('string ident with escape can still be constructor so should still fail the check AB', {
-        code: 'class x { "\u0063onstructor"(){}; constructor(){}; }',
-        throws: 'constructor',
-      });
+          test('unicode escapes should not circumvent the double constructor check BA', {
+            code: 'class x { constructor(){}; \\u0063onstructor(){}; }',
+            throws: 'constructor',
+          });
 
-      test('string ident with old unicode escape can still be constructor so should still fail the check BA', {
-        code: 'class x { constructor(){}; "\u0063onstructor"(){}; }',
-        throws: 'constructor',
-      });
+          test('two unicode escaped constructors should still fail', {
+            code: 'class x { \u0063onstructor(){}; \\u0063onstructor(){}; }',
+            throws: 'constructor',
+          });
+        });
 
-      test('string ident with new unicode escape can still be constructor so should still fail the check BA', {
-        code: 'class x { constructor(){}; "\u{0063}onstructor"(){}; }',
-        throws: 'constructor',
-      });
+        describe('in strings', _ => {
 
-      test('string ident with hex escape can still be constructor so should still fail the check BA', {
-        code: 'class x { constructor(){}; "\x63onstructor"(){}; }',
-        throws: 'constructor',
+          test('string ident with escape can still be constructor so should still fail the check AB', {
+            code: 'class x { "\u0063onstructor"(){}; constructor(){}; }',
+            throws: 'constructor',
+          });
+
+          test('string ident with old unicode escape can still be constructor so should still fail the check BA', {
+            code: 'class x { constructor(){}; "\u0063onstructor"(){}; }',
+            throws: 'constructor',
+          });
+
+          test('string ident with new unicode escape can still be constructor so should still fail the check BA', {
+            code: 'class x { constructor(){}; "\u{0063}onstructor"(){}; }',
+            throws: 'constructor',
+          });
+
+          test('string ident with hex escape can still be constructor so should still fail the check BA', {
+            code: 'class x { constructor(){}; "\x63onstructor"(){}; }',
+            throws: 'constructor',
+          });
+        });
       });
     });
 
@@ -4140,26 +4190,776 @@ export default (describe, test) =>
       tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
-    // test.fail('class extending an arrow', {
-    //   code: [
-    //     'class x extends ()=>{} {}',
-    //     'class x extends ()=>1 {}',
-    //   ],
-    // });
+    test.fail('member expression with dynamic property as class member', {
+      code: 'class w {  t[x](){}  }',
+    });
 
-    // export default class extends F {}
-    // class extends {} {}
-    // async constructor ?
-    // expression classes: (class X{})
-    //class x{static(){}}
-    //class x{static static(){}}
-    //class x{async static(){}}
-    //class x{async static static(){}}
-    //class x{*static(){}}
-    //class x{static *static(){}}
-    // confirm multiple usages of same member modifier is prevented (async async, static async static, etc)
+    test.fail('member expression with ident property as class member', {
+      code: 'class w {  t.x(){}  }',
+    });
+
+    test.fail('class extending an arrow', {
+      code: [
+        'class x extends ()=>{} {}',
+        'class x extends ()=>1 {}',
+      ],
+    });
+
+    test('default exports of an extending class', {
+      code: 'export default class extends F {}',
+      SCRIPT: {throws: true},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExportDefaultDeclaration',
+            declaration: {
+              type: 'ClassDeclaration',
+              id: null,
+              superClass: {type: 'Identifier', name: 'F'},
+              body: {type: 'ClassBody', body: []},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('extending an empty object', {
+      code: 'class x extends {} {}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'x'},
+            superClass: {type: 'ObjectExpression', properties: []},
+            body: {type: 'ClassBody', body: []},
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test.fail('async constructor is disallowed', {
+      code: 'class X {    async constructor() {}   }',
+    });
+
+    test('as expr', {
+      code: '(class X {})',
+      desc: 'this is probably redundant at this point',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ClassExpression',
+              id: {type: 'Identifier', name: 'X'},
+              superClass: null,
+              body: {type: 'ClassBody', body: []},
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+    });
+
+    describe('static as a name', _ => {
+
+      test('method named static', {
+        code: 'class x{   static(){}   }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'static'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static member named static', {
+        code: 'class x{   static static(){}    }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'static'},
+                    static: true,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async member named static', {
+        code: 'class x{   async static(){}    }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'static'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static async member named static', {
+        code: 'class x{   static async static(){}    }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'static'},
+                    static: true,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: true,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test.fail('static modifier comes before the async modifier', {
+        code: 'class x{   async static static(){}    }',
+      });
+
+      test('generator called static', {
+        code: 'class x{   *static(){}    }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'static'},
+                    static: false,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: true,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('static generator called static', {
+        code: 'class x{   static *static(){}    }',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ClassDeclaration',
+              id: {type: 'Identifier', name: 'x'},
+              superClass: null,
+              body: {
+                type: 'ClassBody',
+                body: [
+                  {
+                    type: 'MethodDefinition',
+                    key: {type: 'Identifier', name: 'static'},
+                    static: true,
+                    computed: false,
+                    kind: 'method',
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: true,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+    });
+
+    describe('duplicate member modifiers', _ => {
+
+      test.fail('double static', {
+        code: 'class x {    static static f(){}    }',
+      });
+
+      test.fail('double async', {
+        code: 'class x {    async async f(){}    }',
+      });
+
+      test.fail('double star', {
+        code: 'class x {    * * f(){}    }',
+      });
+
+      test.fail('static star static', {
+        code: 'class x {    static * static f(){}    }',
+      });
+
+      test.fail('async star async', {
+        code: 'class x {    async * async f(){}    }',
+      });
+
+      test.fail('async static async', {
+        code: 'class x {    async static async f(){}    }',
+      });
+
+      test.fail('get get', {
+        code: 'class x {    get get f(){}    }',
+      });
+
+      test.fail('set set', {
+        code: 'class x {    set set f(x){}    }',
+      });
+
+      test.fail('set get', {
+        code: 'class x {    set get f(x){}    }',
+      });
+
+      test.fail('get set', {
+        code: 'class x {    get set f(x){}    }',
+      });
+
+      test.fail('async async get', {
+        code: 'class x {    async async get f(x){}    }',
+      });
+    });
+
+    test.fail('can not make a static method called "prototype"', {
+      code: 'class x {    static prototype(){}    }',
+      // > It is a Syntax Error if PropName of MethodDefinition is "prototype".
+    });
+
+    test.fail('static in obj inside class', {
+      code: 'class x { foo() { return { static foo() {} } } }',
+      desc: 'make sure the class state doesnt somehow propagate while parsing the object',
+    });
+
+    test('computed property method with constructor ident is fine', {
+      code: 'class x{ get [constructor](){} }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'x'},
+            superClass: null,
+            body: {
+              type: 'ClassBody',
+              body: [
+                {
+                  type: 'MethodDefinition',
+                  key: {type: 'Identifier', name: 'constructor'},
+                  static: false,
+                  computed: true,
+                  kind: 'get',
+                  value: {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test.fail('sanity check to confirm certain over accepting errors cannot occur', {
+      code: 'class x { async get foo(){ }}',
+    });
+
+    test('non-idents that are generators', {
+      code: 'class x { *"x"(){} }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'x'},
+            superClass: null,
+            body: {
+              type: 'ClassBody',
+              body: [
+                {
+                  type: 'MethodDefinition',
+                  key: {type: 'Literal', value: '<TODO>', raw: '"x"'},
+                  static: false,
+                  computed: false,
+                  kind: 'method',
+                  value: {
+                    type: 'FunctionExpression',
+                    generator: true,
+                    async: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('computed generators', {
+      code: 'class x { *[expr](){} }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'x'},
+            superClass: null,
+            body: {
+              type: 'ClassBody',
+              body: [
+                {
+                  type: 'MethodDefinition',
+                  key: {type: 'Identifier', name: 'expr'},
+                  static: false,
+                  computed: true,
+                  kind: 'method',
+                  value: {
+                    type: 'FunctionExpression',
+                    generator: true,
+                    async: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test('static computed generators', {
+      code: 'class x { static *[expr](){} }',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ClassDeclaration',
+            id: {type: 'Identifier', name: 'x'},
+            superClass: null,
+            body: {
+              type: 'ClassBody',
+              body: [
+                {
+                  type: 'MethodDefinition',
+                  key: {type: 'Identifier', name: 'expr'},
+                  static: true,
+                  computed: true,
+                  kind: 'method',
+                  value: {
+                    type: 'FunctionExpression',
+                    generator: true,
+                    async: false,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+    });
+
+    test.pass('static is valid as static member of class', {
+      code: 'class x {static static(){}}',
+      desc: 'props are not affected by keyword restrictions',
+    });
+
+    test.fail('checking that forward slash edge case is fixed', {
+      code: 'class x { static / foo(){} }',
+    });
+
+    describe('lexerflag and extends/computed key', _ => {
+
+      describe('yield in class computed key', _ => {
+
+        test.fail('yield expr in computed expression of key', {
+          code: 'class x{[yield](a){}}',
+          desc: 'all class parts are strict',
+        });
+
+        test.fail('yield expr in gen computed expression of key', {
+          code: 'class x{*[yield](a){}}',
+          desc: 'all class parts are strict',
+        });
+
+        test.fail('yield expr in extends of class', {
+          code: 'class x extends yield {}',
+          desc: 'all class parts are strict',
+        });
+
+        test.pass('gen nested yield expr in computed expression of key', {
+          code: 'function *f(){  class x{[yield](a){}}  }',
+        });
+
+        test.pass('gen nested yield expr in gen computed expression of key', {
+          code: 'function *f(){  class x{*[yield](a){}}  }',
+        });
+
+        test.fail('gen nested yield expr in extends of class', {
+          code: 'function *f(){   class x extends yield {}    }',
+          throws: 'yield',
+          desc: 'yield is not a LeftHandSideExpression',
+        });
+      });
+
+      test.fail('the `in` operator inside a class extends inside a for-in header', {
+        code: 'for (class x extends a in b {} in c);',
+        desc: '`in` is not a LeftHandSideExpression so it still throws (but with a different error)',
+      });
+
+      test.fail('classes are not assignable so cannot be lhs of for header', {
+        code: 'for (class x { [a](){} } in c);',
+        desc: 'confirm that the outer flag is passed on but the FOR_IN lexer flag is reset',
+      });
+
+      test.pass('properties of classes could be assignable so this is ok', {
+        code: 'for (class x { [a](){} }.x in c);',
+        desc: 'confirm that the outer flag is passed on but the FOR_IN lexer flag is reset',
+      });
+
+      test.pass('the `in` operator inside a class computed method key inside a for-in header', {
+        code: 'for (class x { [a in b](){} }.x in c);',
+        desc: 'confirm that the outer flag is passed on but the FOR_IN lexer flag is reset',
+      });
+
+      describe('super property in computed method key', _ => {
+
+        test.fail('super prop in computed key of non-extending class without wrapper', {
+          code: 'class x { [super.foo](){} }',
+          desc: 'Just matching others at this point',
+        });
+
+        test.fail('super prop in computed key of extending class without wrapper', {
+          code: 'class x extends y { [super.foo](){} }',
+          desc: 'Just matching others at this point',
+        });
+
+        test.pass('super prop in computed key of non-extending class when wrapped in non-extending class', {
+          code: 'class a { foo(){   class x { [super.foo](){} }    }}',
+          desc: 'Just matching others at this point',
+        });
+
+        test.pass('super prop in computed key of extending calss when wrapped in non-extending class', {
+          code: 'class a { foo(){   class x extends y { [super.foo](){} }    }}',
+          desc: 'Just matching others at this point',
+        });
+
+        test.pass('super prop in computed key of non-extending class when wrapped in extending class', {
+          code: 'class a extends b { foo(){   class x { [super.foo](){} }    }}',
+          desc: 'Just matching others at this point',
+        });
+
+        test.pass('super prop in computed key of extending class when wrapped in extending class', {
+          code: 'class a extends b { foo(){   class x extends y { [super.foo](){} }    }}',
+          desc: 'Just matching others at this point',
+        });
+      });
+
+      describe('super property in extends', _ => {
+
+        test.fail('super prop in extends not wrapped', {
+          code: 'class x extends super.foo {}',
+        });
+
+        test.pass('super prop in extends wrapped in non-extending class', {
+          code: 'class a { foo(){      class x extends super.foo {}    }}',
+        });
+
+        test.pass('super prop in extends wrapped in extending class', {
+          code: 'class a extends b { foo(){      class x extends super.foo {}    }}',
+        });
+      });
+
+      describe('super call in computed method key', _ => {
+
+        test.fail('super call in computed key of non-extending class without wrapper', {
+          code: 'class x { [super()](){} }',
+          desc: 'Just matching others at this point',
+        });
+
+        test.fail('super call in computed key of extending class without wrapper', {
+          code: 'class x extends y { [super()](){} }',
+          desc: 'Just matching others at this point',
+        });
+
+        test.fail('super call in computed key of non-extending class when wrapped in non-extending class', {
+          code: 'class a { constructor(){   class x { [super()](){} }    }}',
+          desc: 'Just matching others at this point',
+        });
+
+        test.fail('super call in computed key of extending class when wrapped in non-extending class', {
+          code: 'class a { constructor(){   class x extends y { [super()](){} }    }}',
+          desc: 'Just matching others at this point',
+        });
+
+        test.pass('super call in computed key of non-extending class when wrapped in extending class', {
+          code: 'class a extends b { constructor(){   class x { [super()](){} }    }}',
+          desc: 'Just matching others at this point',
+        });
+
+        test.pass('super call in computed key of extending class when wrapped in extending class', {
+          code: 'class a extends b { constructor(){   class x extends y { [super()](){} }    }}',
+          desc: 'Just matching others at this point',
+        });
+      });
+
+      describe('super call in extends', _ => {
+
+        test.fail('super call in extends not wrapped', {
+          code: 'class x extends super() {}',
+        });
+
+        test.fail('super call in extends wrapped in non-extending class', {
+          code: 'class a { constructor(){      class x extends super() {}    }}',
+        });
+
+        test.pass('super call in extends wrapped in extending class', {
+          code: 'class a extends b { constructor(){      class x extends super() {}    }}',
+        });
+      });
+    });
+
+    describe('asi and regex cases', _ => {
+
+      describe('class decl', _ => {
+
+        test.fail('newline-regex after class keyword', {
+          code: 'class \n /foo/ x{}',
+        });
+
+        test.fail('newline-regex after class id', {
+          code: 'class x \n /foo/ {}',
+        });
+
+        test.fail('newline-regex after open curly', {
+          code: 'class x { \n /foo/ }',
+        });
+
+        test.fail('newline-regex after method name', {
+          code: 'class x { x \n /foo/ }',
+        });
+
+        test.fail('newline-regex after async', {
+          code: 'class x { async \n /foo/ }',
+        });
+
+        test.fail('newline-regex after get', {
+          code: 'class x { get \n /foo/ }',
+        });
+
+        test.fail('newline-regex after set', {
+          code: 'class x { set \n /foo/ }',
+        });
+
+        test.fail('newline-regex after star', {
+          code: 'class x { * \n /foo/ }',
+        });
+
+        test.fail('newline-regex after open paren', {
+          code: 'class x { y(\n /foo/){} }',
+        });
+
+        test.fail('newline-regex after param', {
+          code: 'class x { y(z, \n /foo/){} }',
+        });
+
+        test.fail('newline-regex after close paren', {
+          code: 'class x { y()\n /foo/{} }',
+        });
+
+        test.fail('newline-regex after method close curly', {
+          code: 'class x { y() {}\n /foo/ }',
+        });
+      });
+
+      describe('class expr', _ => {
+
+        test.fail('newline-regex after class keyword', {
+          code: 'let c = class \n /foo/ x{}',
+        });
+
+        test.fail('newline-regex after class id', {
+          code: 'let c = class x \n /foo/ {}',
+        });
+
+        test.fail('newline-regex after open curly', {
+          code: 'let c = class x { \n /foo/ }',
+        });
+
+        test.fail('newline-regex after method name', {
+          code: 'let c = class x { x \n /foo/ }',
+        });
+
+        test.fail('newline-regex after async', {
+          code: 'let c = class x { async \n /foo/ }',
+        });
+
+        test.fail('newline-regex after get', {
+          code: 'let c = class x { get \n /foo/ }',
+        });
+
+        test.fail('newline-regex after set', {
+          code: 'let c = class x { set \n /foo/ }',
+        });
+
+        test.fail('newline-regex after star', {
+          code: 'let c = class x { * \n /foo/ }',
+        });
+
+        test.fail('newline-regex after open paren', {
+          code: 'let c = class x { y(\n /foo/){} }',
+        });
+
+        test.fail('newline-regex after param', {
+          code: 'let c = class x { y(z, \n /foo/){} }',
+        });
+
+        test.fail('newline-regex after close paren', {
+          code: 'let c = class x { y()\n /foo/{} }',
+        });
+
+        test.fail('newline-regex after method close curly', {
+          code: 'let c = class x { y() {}\n /foo/ }',
+        });
+
+        test.fail('newline-regex after class expr in func call', {
+          code: 'foo(class x { y() {} } \n /foo/)',
+        });
+      });
+    });
+
+    describe('invalid syntax', _ => {
+
+      test.fail('missing a paren', {
+        code: 'class A {"x"){}}',
+      });
+
+      test.fail('missing parens', {
+        code: 'class A {"x"{}}',
+      });
+    })
   });
-
-
-// > It is a Syntax Error if PropName of MethodDefinition is "prototype".
-// (can not make a static method called "prototype")

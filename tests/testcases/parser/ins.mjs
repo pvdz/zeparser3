@@ -1,4 +1,4 @@
-import {$ASI, $IDENT} from '../../../src/zetokenizer';
+import {$ASI, $IDENT} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('in and instanceof', _ => {

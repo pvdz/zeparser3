@@ -140,6 +140,13 @@ function all(parser, tests) {
 }
 function one(parser, testObj, desc, from) {
   let {code} = testObj;
+  if (code instanceof Array) {
+    // code may be an array for a bunch of variation tests
+    for (let i=0; i<code.length; ++i) {
+      one(parser, {...testObj, code: code[i]}, desc + ' (#' + (i+1) + ' / ' + code.length + ')', from);
+    }
+    return;
+  }
   ++testi;
   if (_one(parser, '   ', code, testObj, desc, from)) {
     _one(parser, '[a]', '\n' + code, testObj, desc, from);

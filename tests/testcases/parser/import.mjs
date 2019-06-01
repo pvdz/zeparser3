@@ -1,4 +1,4 @@
-import {$ASI, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE} from '../../../src/zetokenizer';
+import {$ASI, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('import declarations', _ => {

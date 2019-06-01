@@ -42,11 +42,15 @@ function LOG(...args) {
 }
 
 function THROW(str, ...rest) {
-  console.log('error args:', rest.length ? util.inspect(rest, false, null) : '<none>');
+  _LOG('error args:', rest.length ? util.inspect(rest, false, null) : '<none>');
   throw new Error(`Toktest error! ${str} ${rest.length ? util.inspect(rest, false, null) : ''}`);
+}
+function ASSERT(b, ...args) {
+  if (!b) THROW('test env ASSERT error:', ...args);
 }
 
 function toPrint(s) {
+  ASSERT(typeof s === 'string', 'nonstring', s);
   s = s
     .replace(/[^\u0000-\u00ff\u2028]/g, function(s) {
       return (

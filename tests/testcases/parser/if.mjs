@@ -1,4 +1,4 @@
-import {$IDENT, $PUNCTUATOR} from '../../../src/zetokenizer';
+import {$IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('if statement', _ => {
