@@ -2428,13 +2428,84 @@ export default (describe, test) => describe('async keyword', function() {
     // https://twitter.com/Ghost1240145716/status/1127918881727606786
   });
 
-  // test.fail('await in default of async arrow param', {
-  //   code: 'async (a = b => await (0)) => {}'
-  //   // https://twitter.com/Ghost1240145716/status/1127918881727606786
-  // });
+  test('await in default of async arrow param', {
+    code: 'async (a = b => await (0)) => {}',
+    // https://twitter.com/Ghost1240145716/status/1127918881727606786
+    desc: 'this one is funny because in sloppy it becomes the valid callexpression `await(0)`',
+    STRICT: {throws: true},
+    ast: {
+      type: 'Program',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'ArrowFunctionExpression',
+            params: [
+              {
+                type: 'AssignmentPattern',
+                left: {type: 'Identifier', name: 'a'},
+                right: {
+                  type: 'ArrowFunctionExpression',
+                  params: [{type: 'Identifier', name: 'b'}],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {
+                    type: 'CallExpression',
+                    callee: {type: 'Identifier', name: 'await'},
+                    arguments: [{type: 'Literal', value: '<TODO>', raw: '0'}],
+                  },
+                },
+              },
+            ],
+            id: null,
+            generator: false,
+            async: true,
+            expression: false,
+            body: {type: 'BlockStatement', body: []},
+          },
+        },
+      ],
+    },
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+  });
 
-  // test.fail('await as param name of an arrow that is a param default of an async func', {
-  //   code: 'async(a = (await) => {}) => {};',
-  //   // https://twitter.com/Ghost1240145716/status/1127918881727606786
-  // });
+  test('await as param name of an arrow that is a param default of an async func', {
+    code: 'async(a = (await) => {}) => {};',
+    // https://twitter.com/Ghost1240145716/status/1127918881727606786
+    STRICT: {throws: true},
+    ast: {
+      type: 'Program',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'ArrowFunctionExpression',
+            params: [
+              {
+                type: 'AssignmentPattern',
+                left: {type: 'Identifier', name: 'a'},
+                right: {
+                  type: 'ArrowFunctionExpression',
+                  params: [{type: 'Identifier', name: 'await'}],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  body: {type: 'BlockStatement', body: []},
+                },
+              },
+            ],
+            id: null,
+            generator: false,
+            async: true,
+            expression: false,
+            body: {type: 'BlockStatement', body: []},
+          },
+        },
+      ],
+    },
+    tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+  });
 });
