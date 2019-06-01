@@ -5512,9 +5512,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `new b↵++c;`
 
     // Note: the `isNewArg` state will make sure the `parseValueTail` function properly deals with the first call arg
-    parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, IS_NEW_ARG, 'callee');
+    let assignableForPiggies = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, IS_NEW_ARG, 'callee');
     AST_close('NewExpression');
-    return NOT_ASSIGNABLE;
+    // [x]: `async function f(){ (x = new x(await x)) => {} }`
+    return setNotAssignable(assignableForPiggies);
   }
   function parseThisKeyword(astProp) {
     AST_open(astProp, 'ThisExpression');

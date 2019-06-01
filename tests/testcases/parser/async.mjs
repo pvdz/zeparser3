@@ -2423,10 +2423,10 @@ export default (describe, test) => describe('async keyword', function() {
     code: 'async await => {}',
   });
 
-  // test.fail('new (await) inside default of async arrow param', {
-  //   code: 'async function f(){ (x = new x(await x)) => {} }',
-  //   // https://twitter.com/Ghost1240145716/status/1127918881727606786
-  // });
+  test.fail('new (await) inside default of async arrow param', {
+    code: 'async function f(){ (x = new x(await x)) => {} }',
+    // https://twitter.com/Ghost1240145716/status/1127918881727606786
+  });
 
   // test.fail('await in default of async arrow param', {
   //   code: 'async (a = b => await (0)) => {}'
