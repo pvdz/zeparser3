@@ -2508,4 +2508,219 @@ export default (describe, test) => describe('async keyword', function() {
     },
     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
   });
+
+  describe('async division', _ => {
+
+    test('no-whitespace division', {
+      code: 'async/x',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'async'},
+              operator: '/',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('base case', {
+      code: 'async / x',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'async'},
+              operator: '/',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('reverse', {
+      code: 'x / async',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'x'},
+              operator: '/',
+              right: {type: 'Identifier', name: 'async'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('newline', {
+      code: 'async \n / x',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'async'},
+              operator: '/',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('newline multi division', {
+      code: 'async \n / x / g',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'async'},
+                operator: '/',
+                right: {type: 'Identifier', name: 'x'},
+              },
+              operator: '/',
+              right: {type: 'Identifier', name: 'g'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+  });
+
+  describe('await division', _ => {
+
+    test('no-whitespace division', {
+      code: 'await/x',
+      MODULE: {throws: true},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'await'},
+              operator: '/',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('base case', {
+      code: 'await / x',
+      MODULE: {throws: true},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'await'},
+              operator: '/',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('reverse', {
+      code: 'x / await',
+      MODULE: {throws: true},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'x'},
+              operator: '/',
+              right: {type: 'Identifier', name: 'await'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('newline', {
+      code: 'await \n / x',
+      MODULE: {throws: true},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {type: 'Identifier', name: 'await'},
+              operator: '/',
+              right: {type: 'Identifier', name: 'x'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+
+    test('newline multi division', {
+      code: 'await \n / x / g',
+      MODULE: {throws: true},
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'await'},
+                operator: '/',
+                right: {type: 'Identifier', name: 'x'},
+              },
+              operator: '/',
+              right: {type: 'Identifier', name: 'g'},
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+    });
+  });
+
+  test.pass('as ident with comma on top level', {
+    code: 'async, b',
+  });
 });

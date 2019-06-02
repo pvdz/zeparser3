@@ -156,6 +156,13 @@ export default (describe, test) =>
       // function arguments(){}v:switch(x){default:}let arguments=l
       // function package(){}let package=a
       // function v(){}const v=x
-    })
+    });
+
+    test.fail('newline after async in method not proccing error in v8', {
+      code: [
+        'class K extends {} {;async\\n async *1(){}}',
+      ],
+      desc: 'fuzzed',
+    });
   });
 

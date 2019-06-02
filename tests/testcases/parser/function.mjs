@@ -5402,6 +5402,14 @@ export default (describe, test) =>
       // #21
       code: 'function f({[x]: {y = z}}) {}',
     });
+
+    test.fail('bug in v8; cannot assign to call expression', {
+      code: [
+        'function f([x=x()=x]){}',
+        '({x:{1:y()=x},x:{7:3}})>x',
+      ],
+      desc: 'fuzzed',
+    });
   });
 
 // TODO: mirror tests for all functions (regular, expr, arrow, objlit method, class method)

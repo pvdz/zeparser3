@@ -1925,7 +1925,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     switch (curtok.str) {
       case 'async':
         // we deal with async here because it can be a valid label in sloppy mode
-        ASSERT_skipAny('async', lexerFlags); // TODO: async can only be followed by `function`, `(`, `:`, or an ident (arrow)
+        // TODO: test case to this change
+        ASSERT_skipDiv('async', lexerFlags); // TODO: async could be ident, so `async/b` is a division
         if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, astProp);
         parseAsyncStatement(lexerFlags, scoop, identToken, NOT_EXPORT, includeDeclarations, UNDEF_EXPORTS, astProp);
         return;
@@ -2760,7 +2761,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // export async function f(){}
         // (note: no arrows here because we require a name)
         let asyncToken = curtok;
-        ASSERT_skipAny('async', lexerFlags);
+        // TODO: test case to this change
+        ASSERT_skipDiv('async', lexerFlags); // TODO: async could be ident, so `async/b` is a division
 
         if (curtok.str !== 'function') {
           // `export async \n a => b`
@@ -4684,19 +4686,32 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(asyncToken !== UNDEF_ASYNC && asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
+    // This token named "async" has already been verified not to be a bunch of things.
+    // Basically this now ends in one of two ways; Either it's a parenless arrow a plain binding.
+
     if (stmtOrExpr === IS_STATEMENT) {
       AST_open(astProp, 'ExpressionStatement');
       astProp = 'expression'
     }
-    // asyncToken is not yet added to AST
-    let assignable = parseIdentOrParenlessArrow(lexerFlags, asyncToken, IS_ASSIGNABLE, allowAssignment, astProp);
-    assignable = parseValueTail(lexerFlags, assignable, isNewArg, astProp);
+
+    let assignable = NOT_ASSIGNABLE;
+    if (curc === $$IS_3D && curtok.str === '=>') {
+      parseArrowParenlessFromPunc(lexerFlags, asyncToken, allowAssignment, ARGS_SIMPLE, UNDEF_ASYNC, astProp);
+    } else {
+      assignable = parseIdentOrParenlessArrow(lexerFlags, asyncToken, IS_ASSIGNABLE, allowAssignment, astProp);
+      assignable = parseValueTail(lexerFlags, assignable, isNewArg, astProp);
+      if (stmtOrExpr === IS_STATEMENT) {
+        // in expressions operator precedence is handled elsewhere. in statements this is the start,
+        assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
+        if (curc === $$COMMA_2C) {
+          // - `async, b`
+          _parseExpressions(lexerFlags, NOT_ASSIGNABLE, astProp);
+        }
+      }
+    }
 
     ASSERT((isNewArg !== IS_NEW_ARG) || (stmtOrExpr !== IS_STATEMENT), 'this can not be a new arg if it is a statement');
     if (stmtOrExpr === IS_STATEMENT) {
-      // in expressions operator precedence is handled elsewhere. in statements this is the start,
-      assignable = parseExpressionFromOp(lexerFlags, assignable, astProp);
-
       AST_close('ExpressionStatement');
       parseSemiOrAsi(lexerFlags);
     }
