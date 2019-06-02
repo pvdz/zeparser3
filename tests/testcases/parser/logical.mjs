@@ -1,5 +1,5 @@
+/** @format */
 import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('logical ops', _ => {
     test('logical &&', {
@@ -11,16 +11,21 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'LogicalExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: '&&',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
-
     test('logical ||', {
       code: 'a||b',
       ast: {
@@ -30,9 +35,15 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'LogicalExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: '||',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],

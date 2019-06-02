@@ -1,5 +1,4 @@
-import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
-
+/** @format */ import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('let declaration', _ => {
     describe('binding generic', _ => {
@@ -43,7 +42,6 @@ export default (describe, test) =>
       // let [.x] = obj;            // error
       // let [..x] = obj;           // error
       // let [a=[...b], ...c] = obj;
-
       // and these are the object versions:
       // let {} = x;
       // let {,} = x;             // error
@@ -77,122 +75,57 @@ export default (describe, test) =>
       // let {foo:a=b};
       // let {foo}, bar;
       // let foo, {bar};
-
       // All variations of tests are executed for statement start, inside for-headers (4x), and in export declaration
       // When new syntax is introduced that allows let/const binding syntax those variations should apply to them as well
-
       describe('as a statement', _ => {
         describe('regular vars', _ => {
           test('let, one var, no init, semi', {
             code: 'let foo;',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}],
-                },
-              ],
-            },
+            ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}]},
             tokens: [$IDENT, $IDENT, $PUNCTUATOR],
           });
-
           test('let, one var, no init, eof', {
             code: 'let foo',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}],
-                },
-              ],
-            },
+            ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}]},
             tokens: [$IDENT, $IDENT, $ASI],
           });
-
           test('let, two vars, no init, semi', {
             code: 'let foo, bar;',
             ast: {
               type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null}],
-                },
-              ],
+              body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null}]}],
             },
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('let, two vars, no init, eof', {
             code: 'let foo, bar',
             ast: {
               type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null}],
-                },
-              ],
+              body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null}]}],
             },
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
           });
-
           test('let, var with init, semi', {
             code: 'let foo = bar;',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}}],
-                },
-              ],
-            },
+            ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}}]}]},
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('let, var with init, eof', {
             code: 'let foo = bar',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}}],
-                },
-              ],
-            },
+            ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}}]}]},
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
           });
-
           test('let, var with init, asi', {
             code: 'let foo = bar\nlet zoo;',
             ast: {
               type: 'Program',
               body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}}],
-                },
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: null}],
-                },
+                {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}}]},
+                {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: null}]},
               ],
             },
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $IDENT, $IDENT, $PUNCTUATOR],
           });
-
           test('let, two vars with both init, semi', {
             code: 'let foo = bar, zoo = boo;',
             ast: {
@@ -210,7 +143,6 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('let, two vars with both init, asi', {
             code: 'let foo = bar, zoo = boo',
             ast: {
@@ -228,211 +160,70 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
           });
-
           test('var on next line does not trigger asi', {
             code: 'let\nfoo',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [
-                    {
-                      type: 'VariableDeclarator',
-                      id: {type: 'Identifier', name: 'foo'},
-                      init: null,
-                    },
-                  ],
-                },
-              ],
-            },
+            ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}]},
             tokens: [$IDENT, $IDENT, $ASI],
           });
-
-          test('asi can not trigger if next token is ident', {
-            code: 'let\nfoo()',
-            throws: 'ASI',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
+          test('asi can not trigger if next token is ident', {code: 'let\nfoo()', throws: 'ASI', tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
         });
-
         describe('destructuring', _ => {
           describe('array', _ => {
             test('empty "array" should work', {
               code: 'let [] = x;',
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'ArrayPattern', elements: []},
-                        init: {type: 'Identifier', name: 'x'},
-                      },
-                    ],
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: []}, init: {type: 'Identifier', name: 'x'}}]}]},
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('empty array with one comma', {
               code: 'let [,] = x;',
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'ArrayPattern', elements: [null]},
-                        init: {type: 'Identifier', name: 'x'},
-                      },
-                    ],
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null]}, init: {type: 'Identifier', name: 'x'}}]}]},
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('empty array with double comma', {
               code: 'let [,,] = x;',
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'ArrayPattern', elements: [null, null]},
-                        init: {type: 'Identifier', name: 'x'},
-                      },
-                    ],
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, null]}, init: {type: 'Identifier', name: 'x'}}]}]},
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('with one var, no init, semi', {
               code: 'let [foo] = arr;',
               ast: {
                 type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}],
-                  },
-                ],
+                body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]}],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('trailing comma is insignificant', {
               code: 'let [foo,] = arr;',
               ast: {
                 type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'foo'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                    ],
-                  },
-                ],
+                body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]}],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double trailing comma is significant', {
               code: 'let [foo,,] = arr;',
               ast: {
                 type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'foo'}, null],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                    ],
-                  },
-                ],
+                body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null]}, init: {type: 'Identifier', name: 'arr'}}]}],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('leading comma', {
               code: 'let [,foo] = arr;',
               ast: {
                 type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [null, {type: 'Identifier', name: 'foo'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                    ],
-                  },
-                ],
+                body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, {type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]}],
               },
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double leading comma', {
               code: 'let [,,foo] = arr;',
               ast: {
                 type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [null, null, {type: 'Identifier', name: 'foo'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                    ],
-                  },
-                ],
+                body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, null, {type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]}],
               },
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('two vars', {
               code: 'let [foo,bar] = arr;',
               ast: {
@@ -441,22 +232,12 @@ export default (describe, test) =>
                   {
                     type: 'VariableDeclaration',
                     kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                    ],
+                    declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr'}}],
                   },
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('two vars with eliding comma', {
               code: 'let [foo,,bar] = arr;',
               ast: {
@@ -465,22 +246,12 @@ export default (describe, test) =>
                   {
                     type: 'VariableDeclaration',
                     kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'foo'}, null, {type: 'Identifier', name: 'bar'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                    ],
+                    declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null, {type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr'}}],
                   },
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct', {
               code: 'let [foo] = arr, [bar] = arr2;',
               ast: {
@@ -490,29 +261,14 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'foo'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'bar'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr2'},
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+                      {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr2'}},
                     ],
                   },
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('destruct and non-destruct without init', {
               code: 'let [foo] = arr, bar;',
               ast: {
@@ -522,26 +278,14 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'foo'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'bar'},
-                        init: null,
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null},
                     ],
                   },
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('destruct and non-destruct with init', {
               code: 'let [foo] = arr, bar = arr2;',
               ast: {
@@ -551,26 +295,14 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'foo'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'bar'},
-                        init: {type: 'Identifier', name: 'arr2'},
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: {type: 'Identifier', name: 'arr2'}},
                     ],
                   },
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('non-destruct without init and destruct', {
               code: 'let foo, [bar] = arr2;',
               ast: {
@@ -580,26 +312,14 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'foo'},
-                        init: null,
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'bar'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr2'},
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
+                      {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr2'}},
                     ],
                   },
                 ],
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('non-destruct with init and destruct', {
               code: 'let foo = arr, [bar] = arr2;',
               ast: {
@@ -609,26 +329,14 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'foo'},
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'bar'}],
-                        },
-                        init: {type: 'Identifier', name: 'arr2'},
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'arr'}},
+                      {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr2'}},
                     ],
                   },
                 ],
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('one var with initializer', {
               code: 'let [foo=a] = arr;',
               ast: {
@@ -638,27 +346,13 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [
-                            {
-                              type: 'AssignmentPattern',
-                              left: {type: 'Identifier', name: 'foo'},
-                              right: {type: 'Identifier', name: 'a'},
-                            },
-                          ],
-                        },
-                        init: {type: 'Identifier', name: 'arr'},
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}]}, init: {type: 'Identifier', name: 'arr'}},
                     ],
                   },
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('two vars, with and without initializer', {
               code: 'let [foo=a, bar] = arr;',
               ast: {
@@ -670,10 +364,7 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}, {type: 'Identifier', name: 'bar'}],
-                        },
+                        id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}, {type: 'Identifier', name: 'bar'}]},
                         init: {type: 'Identifier', name: 'arr'},
                       },
                     ],
@@ -682,7 +373,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('two vars, without and with initializer', {
               code: 'let [foo, bar=b] = arr;',
               ast: {
@@ -694,10 +384,7 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'foo'}, {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}}],
-                        },
+                        id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}}]},
                         init: {type: 'Identifier', name: 'arr'},
                       },
                     ],
@@ -706,7 +393,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('two vars, without and with initializer', {
               code: 'let [foo=a, bar=b] = arr;',
               ast: {
@@ -733,39 +419,26 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('no assignment without init', {
               code: 'let [foo];',
               throws: 'destructuring must have init',
               desc: 'this could be legal in sloppy except not at the start of a statement',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('no assignment with init', {
               code: 'let [foo = x];',
               throws: 'destructuring must have init',
               desc: 'this could be legal in sloppy except not at the start of a statement',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('no assignment with two declarations first', {
               code: 'let [foo], bar;',
               throws: 'destructuring must have init',
               desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
-            test('no assignment with two declarations second', {
-              code: 'let foo, [bar];',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
-            test('cannot rename a var like obj destruct can', {
-              code: 'let [foo:bar] = obj;',
-              throws: true,
-            });
-
+            test('no assignment with two declarations second', {code: 'let foo, [bar];', throws: 'destructuring must have init', tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+            test('cannot rename a var like obj destruct can', {code: 'let [foo:bar] = obj;', throws: true});
             describe('rest operator', _ => {
               test('rest as the only destruct', {
                 code: 'let [...foo] = obj;',
@@ -775,27 +448,12 @@ export default (describe, test) =>
                     {
                       type: 'VariableDeclaration',
                       kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [
-                              {
-                                type: 'RestElement',
-                                argument: {type: 'Identifier', name: 'foo'},
-                              },
-                            ],
-                          },
-                          init: {type: 'Identifier', name: 'obj'},
-                        },
-                      ],
+                      declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'Identifier', name: 'foo'}}]}, init: {type: 'Identifier', name: 'obj'}}],
                     },
                   ],
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('rest preceded by an ident', {
                 code: 'let [foo, ...bar] = obj;',
                 ast: {
@@ -805,43 +463,16 @@ export default (describe, test) =>
                       type: 'VariableDeclaration',
                       kind: 'let',
                       declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [
-                              {type: 'Identifier', name: 'foo'},
-                              {
-                                type: 'RestElement',
-                                argument: {type: 'Identifier', name: 'bar'},
-                              },
-                            ],
-                          },
-                          init: {type: 'Identifier', name: 'obj'},
-                        },
+                        {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'RestElement', argument: {type: 'Identifier', name: 'bar'}}]}, init: {type: 'Identifier', name: 'obj'}},
                       ],
                     },
                   ],
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('rest followed by an ident', {
-                code: 'let [...foo, bar] = obj;',
-                throws: true,
-              });
-
-              test('rest followed by a trailing comma', {
-                code: 'let [...foo,] = obj;',
-                throws: true,
-                desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
-              });
-
-              test('rest followed by two commas', {
-                code: 'let [...foo,,] = obj;',
-                throws: true,
-              });
-
+              test('rest followed by an ident', {code: 'let [...foo, bar] = obj;', throws: true});
+              test('rest followed by a trailing comma', {code: 'let [...foo,] = obj;', throws: true, desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest'});
+              test('rest followed by two commas', {code: 'let [...foo,,] = obj;', throws: true});
               test('rest on a nested destruct', {
                 code: 'let [...[foo, bar]] = obj;',
                 ast: {
@@ -853,18 +484,7 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [
-                              {
-                                type: 'RestElement',
-                                argument: {
-                                  type: 'ArrayPattern',
-                                  elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                },
-                              },
-                            ],
-                          },
+                          id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]},
                           init: {type: 'Identifier', name: 'obj'},
                         },
                       ],
@@ -873,17 +493,8 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('trailing comma after rest on a nested destruct', {
-                code: 'let [...[foo, bar],] = obj;',
-                throws: true,
-              });
-
-              test('double trailing comma after rest on a nested destruct', {
-                code: 'let [...[foo, bar],,] = obj;',
-                throws: true,
-              });
-
+              test('trailing comma after rest on a nested destruct', {code: 'let [...[foo, bar],] = obj;', throws: true});
+              test('double trailing comma after rest on a nested destruct', {code: 'let [...[foo, bar],,] = obj;', throws: true});
               test('second param rest on a nested destruct', {
                 code: 'let [x, ...[foo, bar]] = obj;',
                 ast: {
@@ -895,19 +506,7 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [
-                              {type: 'Identifier', name: 'x'},
-                              {
-                                type: 'RestElement',
-                                argument: {
-                                  type: 'ArrayPattern',
-                                  elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                },
-                              },
-                            ],
-                          },
+                          id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}, {type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]},
                           init: {type: 'Identifier', name: 'obj'},
                         },
                       ],
@@ -916,39 +515,12 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('rest with default', {
-                code: 'let [...bar = foo] = obj;',
-                throws: true,
-                desc: 'rest cannot get a default in var decls but they can as func args',
-              });
-
-              test('double rest / spread rest', {
-                code: 'let [... ...foo] = obj;',
-                throws: 'Can not rest twice',
-                tokens: [],
-              });
-
-              test('rest without value', {
-                code: 'let [...] = obj;',
-                throws: true,
-              });
-
-              test('rest with comma without value', {
-                code: 'let [...,] = obj;',
-                throws: true,
-              });
-
-              test('single dot vs rest', {
-                code: 'let [.x] = obj;',
-                throws: true,
-              });
-
-              test('double dot vs rest', {
-                code: 'let [..x] = obj;',
-                throws: true,
-              });
-
+              test('rest with default', {code: 'let [...bar = foo] = obj;', throws: true, desc: 'rest cannot get a default in var decls but they can as func args'});
+              test('double rest / spread rest', {code: 'let [... ...foo] = obj;', throws: 'Can not rest twice', tokens: []});
+              test('rest without value', {code: 'let [...] = obj;', throws: true});
+              test('rest with comma without value', {code: 'let [...,] = obj;', throws: true});
+              test('single dot vs rest', {code: 'let [.x] = obj;', throws: true});
+              test('double dot vs rest', {code: 'let [..x] = obj;', throws: true});
               test('spread vs rest', {
                 code: 'let [a=[...b], ...c] = obj;',
                 ast: {
@@ -963,23 +535,8 @@ export default (describe, test) =>
                           id: {
                             type: 'ArrayPattern',
                             elements: [
-                              {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'a'},
-                                right: {
-                                  type: 'ArrayExpression',
-                                  elements: [
-                                    {
-                                      type: 'SpreadElement',
-                                      argument: {type: 'Identifier', name: 'b'},
-                                    },
-                                  ],
-                                },
-                              },
-                              {
-                                type: 'RestElement',
-                                argument: {type: 'Identifier', name: 'c'},
-                              },
+                              {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'a'}, right: {type: 'ArrayExpression', elements: [{type: 'SpreadElement', argument: {type: 'Identifier', name: 'b'}}]}},
+                              {type: 'RestElement', argument: {type: 'Identifier', name: 'c'}},
                             ],
                           },
                           init: {type: 'Identifier', name: 'obj'},
@@ -993,43 +550,14 @@ export default (describe, test) =>
               });
             });
           });
-
           describe('object', _ => {
             test('empty obj', {
               code: 'let {} = obj;',
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'ObjectPattern', properties: []},
-                        init: {type: 'Identifier', name: 'obj'},
-                      },
-                    ],
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: []}, init: {type: 'Identifier', name: 'obj'}}]}]},
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
-            test('empty obj with trailing comma', {
-              code: 'let {,} = obj;',
-              throws: 'Objects cant have comma without something preceding it',
-              desc: 'works for array but not for obj',
-              tokens: [],
-            });
-
-            test('empty obj with elided commas', {
-              code: 'let {,,} = obj;',
-              throws: 'Objects cant have comma without something preceding it',
-              desc: 'works for array but not for obj',
-              tokens: [],
-            });
-
+            test('empty obj with trailing comma', {code: 'let {,} = obj;', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
+            test('empty obj with elided commas', {code: 'let {,,} = obj;', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
             test('single var base case', {
               code: 'let {x} = obj;',
               ast: {
@@ -1041,20 +569,7 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'obj'},
                       },
                     ],
@@ -1063,7 +578,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single var with trailing comma', {
               code: 'let {x,} = obj;',
               ast: {
@@ -1075,20 +589,7 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'obj'},
                       },
                     ],
@@ -1097,28 +598,24 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single var with double trailing comma', {
               code: 'let {x,,} = obj;',
               throws: 'Objects cant have comma without something preceding it',
               desc: 'does not work with obj, only array',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single var with leading comma', {
               code: 'let {,x} = obj;',
               throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single var with double leading comma', {
               code: 'let {,,x} = obj;',
               throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double var simple', {
               code: 'let {x, y} = obj;',
               ast: {
@@ -1133,24 +630,8 @@ export default (describe, test) =>
                         id: {
                           type: 'ObjectPattern',
                           properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
-                            },
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'y'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: true,
-                            },
+                            {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                            {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true},
                           ],
                         },
                         init: {type: 'Identifier', name: 'obj'},
@@ -1161,14 +642,12 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double var with double comma', {
               code: 'let {x,, y} = obj;',
               throws: 'Objects cant have comma without something preceding it',
               desc: 'works with array but not obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double var simple', {
               code: 'let {x} = a, {y} = obj;',
               ast: {
@@ -1180,38 +659,12 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'a'},
                       },
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'y'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'obj'},
                       },
                     ],
@@ -1220,7 +673,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('destruct and non-destruct with init', {
               code: 'let {x} = a, y = obj;',
               ast: {
@@ -1232,34 +684,16 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'a'},
                       },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'y'},
-                        init: {type: 'Identifier', name: 'obj'},
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: {type: 'Identifier', name: 'obj'}},
                     ],
                   },
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('destruct and non-destruct without init', {
               code: 'let {x} = a, obj;',
               ast: {
@@ -1271,34 +705,16 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'a'},
                       },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'obj'},
-                        init: null,
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'obj'}, init: null},
                     ],
                   },
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('non-destruct with ini and destruct', {
               code: 'let x = a, {y} = obj;',
               ast: {
@@ -1308,27 +724,10 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: {type: 'Identifier', name: 'a'}},
                       {
                         type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'x'},
-                        init: {type: 'Identifier', name: 'a'},
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'y'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'obj'},
                       },
                     ],
@@ -1337,7 +736,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('non-destruct without ini and destruct', {
               code: 'let x, {y} = obj;',
               ast: {
@@ -1347,27 +745,10 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
                       {
                         type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'x'},
-                        init: null,
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'y'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'obj'},
                       },
                     ],
@@ -1376,7 +757,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with init', {
               code: 'let {x = y} = obj;',
               ast: {
@@ -1397,11 +777,7 @@ export default (describe, test) =>
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'x'},
-                                right: {type: 'Identifier', name: 'y'},
-                              },
+                              value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                               shorthand: true,
                             },
                           ],
@@ -1415,7 +791,6 @@ export default (describe, test) =>
               desc: 'note: value gets the assignment pattern! not the objectpattern:properties',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with and without init', {
               code: 'let {x = y, z} = obj;',
               ast: {
@@ -1436,22 +811,10 @@ export default (describe, test) =>
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'x'},
-                                right: {type: 'Identifier', name: 'y'},
-                              },
+                              value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                               shorthand: true,
                             },
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'z'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'z'},
-                              shorthand: true,
-                            },
+                            {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                           ],
                         },
                         init: {type: 'Identifier', name: 'obj'},
@@ -1462,7 +825,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct without and with init', {
               code: 'let {x, y = z} = obj;',
               ast: {
@@ -1477,26 +839,14 @@ export default (describe, test) =>
                         id: {
                           type: 'ObjectPattern',
                           properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
-                            },
+                            {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
                             {
                               type: 'Property',
                               key: {type: 'Identifier', name: 'y'},
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'y'},
-                                right: {type: 'Identifier', name: 'z'},
-                              },
+                              value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                               shorthand: true,
                             },
                           ],
@@ -1509,7 +859,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct both with init', {
               code: 'let {x = y, z = a} = obj;',
               ast: {
@@ -1530,11 +879,7 @@ export default (describe, test) =>
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'x'},
-                                right: {type: 'Identifier', name: 'y'},
-                              },
+                              value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                               shorthand: true,
                             },
                             {
@@ -1543,11 +888,7 @@ export default (describe, test) =>
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'z'},
-                                right: {type: 'Identifier', name: 'a'},
-                              },
+                              value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'z'}, right: {type: 'Identifier', name: 'a'}},
                               shorthand: true,
                             },
                           ],
@@ -1560,7 +901,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with rename', {
               code: 'let {x : y} = obj;',
               ast: {
@@ -1572,20 +912,7 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: false,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                         init: {type: 'Identifier', name: 'obj'},
                       },
                     ],
@@ -1594,7 +921,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with and without rename', {
               code: 'let {x : y, z} = obj;',
               ast: {
@@ -1609,24 +935,8 @@ export default (describe, test) =>
                         id: {
                           type: 'ObjectPattern',
                           properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: false,
-                            },
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'z'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'z'},
-                              shorthand: true,
-                            },
+                            {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                            {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                           ],
                         },
                         init: {type: 'Identifier', name: 'obj'},
@@ -1637,7 +947,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct without and with rename', {
               code: 'let {x, y : z} = obj;',
               ast: {
@@ -1652,24 +961,8 @@ export default (describe, test) =>
                         id: {
                           type: 'ObjectPattern',
                           properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'x'},
-                              shorthand: true,
-                            },
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'y'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'z'},
-                              shorthand: false,
-                            },
+                            {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                            {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: false},
                           ],
                         },
                         init: {type: 'Identifier', name: 'obj'},
@@ -1680,7 +973,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct both with rename', {
               code: 'let {x : y, z : a} = obj;',
               ast: {
@@ -1695,24 +987,8 @@ export default (describe, test) =>
                         id: {
                           type: 'ObjectPattern',
                           properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: false,
-                            },
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'z'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'a'},
-                              shorthand: false,
-                            },
+                            {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                            {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: false},
                           ],
                         },
                         init: {type: 'Identifier', name: 'obj'},
@@ -1723,7 +999,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with rename and init', {
               code: 'let {x : y = z} = obj;',
               ast: {
@@ -1744,11 +1019,7 @@ export default (describe, test) =>
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'y'},
-                                right: {type: 'Identifier', name: 'z'},
-                              },
+                              value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                               shorthand: false,
                             },
                           ],
@@ -1761,7 +1032,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with rename and init', {
               code: 'let {x : y, z, a : b = c} = obj;',
               ast: {
@@ -1776,35 +1046,15 @@ export default (describe, test) =>
                         id: {
                           type: 'ObjectPattern',
                           properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: false,
-                            },
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'z'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'z'},
-                              shorthand: true,
-                            },
+                            {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                            {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                             {
                               type: 'Property',
                               key: {type: 'Identifier', name: 'a'},
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'b'},
-                                right: {type: 'Identifier', name: 'c'},
-                              },
+                              value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'b'}, right: {type: 'Identifier', name: 'c'}},
                               shorthand: false,
                             },
                           ],
@@ -1817,72 +1067,25 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
-            test('single destruct no assignment', {
-              code: 'let {x};',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
-            test('double destruct no assignment', {
-              code: 'let {x}, {y} = z;',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
-            test('ident and destruct no assignment', {
-              code: 'let x, {y};',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
-            test('destruct no assignment and ident', {
-              code: 'let {x}, y;',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
-            test('ident with init and destruct no assignment', {
-              code: 'let x = y, {z};',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
-            test('single destruct with rename and no assignment', {
-              code: 'let {x:y};',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
-            test('single destruct with default and no assignment', {
-              code: 'let {x=y};',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
-            test('single destruct with rename and default and no assignment', {
-              code: 'let {x:y=z};',
-              throws: 'destructuring must have init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-            });
-
+            test('single destruct no assignment', {code: 'let {x};', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+            test('double destruct no assignment', {code: 'let {x}, {y} = z;', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+            test('ident and destruct no assignment', {code: 'let x, {y};', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+            test('destruct no assignment and ident', {code: 'let {x}, y;', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+            test('ident with init and destruct no assignment', {code: 'let x = y, {z};', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+            test('single destruct with rename and no assignment', {code: 'let {x:y};', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+            test('single destruct with default and no assignment', {code: 'let {x=y};', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+            test('single destruct with rename and default and no assignment', {code: 'let {x:y=z};', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
             test('double destruct with rename and default and with and without assignment', {
               code: 'let {x:y=z} = obj, {a:b=c};',
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with rename and default and without and with assignment', {
               code: 'let {x:y=z}, {a:b=c} = obj;',
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
-            test('single destruct with colon-eq', {
-              code: 'let {a:=c} = z;',
-              throws: true,
-            });
-
+            test('single destruct with colon-eq', {code: 'let {a:=c} = z;', throws: true});
             test('correct dynamic property destructuring', {
               code: 'let {[x]: y} = z;',
               ast: {
@@ -1894,20 +1097,7 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: true,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: false,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                         init: {type: 'Identifier', name: 'z'},
                       },
                     ],
@@ -1916,32 +1106,11 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
-            test('dynamic property destructuring missing alias', {
-              code: 'let {[x]} = z;',
-              throws: 'computed property name',
-            });
-
-            test('dynamic property destructuring missing alias and init', {
-              code: 'let {[x]};',
-              throws: 'computed property name',
-            });
-
-            test('dynamic property destructuring missing assignment', {
-              code: 'let {[x]: y};',
-              throws: 'destructuring must have init',
-            });
-
-            test('dynamic property destructuring with default missing alias', {
-              code: 'let {[x] = y} = z;',
-              throws: 'computed property name',
-            });
-
-            test('dynamic property destructuring with default and alias missing init', {
-              code: 'let {[x]: y = z};',
-              throws: 'destructuring must have init',
-            });
-
+            test('dynamic property destructuring missing alias', {code: 'let {[x]} = z;', throws: 'computed property name'});
+            test('dynamic property destructuring missing alias and init', {code: 'let {[x]};', throws: 'computed property name'});
+            test('dynamic property destructuring missing assignment', {code: 'let {[x]: y};', throws: 'destructuring must have init'});
+            test('dynamic property destructuring with default missing alias', {code: 'let {[x] = y} = z;', throws: 'computed property name'});
+            test('dynamic property destructuring with default and alias missing init', {code: 'let {[x]: y = z};', throws: 'destructuring must have init'});
             test('correct dynamic property destructuring with default and alias', {
               code: 'let {[x]: y = z} = a;',
               ast: {
@@ -1962,11 +1131,7 @@ export default (describe, test) =>
                               kind: 'init',
                               method: false,
                               computed: true,
-                              value: {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'y'},
-                                right: {type: 'Identifier', name: 'z'},
-                              },
+                              value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                               shorthand: false,
                             },
                           ],
@@ -1979,7 +1144,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('dynamic prop as second prop', {
               code: 'let {a, [x]: y} = a;',
               ast: {
@@ -1994,24 +1158,8 @@ export default (describe, test) =>
                         id: {
                           type: 'ObjectPattern',
                           properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'a'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'a'},
-                              shorthand: true,
-                            },
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'x'},
-                              kind: 'init',
-                              method: false,
-                              computed: true,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: false,
-                            },
+                            {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: true},
+                            {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false},
                           ],
                         },
                         init: {type: 'Identifier', name: 'a'},
@@ -2025,7 +1173,6 @@ export default (describe, test) =>
           });
         });
       });
-
       describe('in a for-header', _ => {
         describe('regular vars', _ => {
           describe('regular for-loop', _ => {
@@ -2034,28 +1181,11 @@ export default (describe, test) =>
               ast: {
                 type: 'Program',
                 body: [
-                  {
-                    type: 'ForStatement',
-                    init: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: null,
-                        },
-                      ],
-                    },
-                    test: null,
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
+                  {type: 'ForStatement', init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}, test: null, update: null, body: {type: 'EmptyStatement'}},
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('let, two vars, no init, semi', {
               code: 'for (let foo, bar;;);',
               ast: {
@@ -2063,22 +1193,7 @@ export default (describe, test) =>
                 body: [
                   {
                     type: 'ForStatement',
-                    init: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: null,
-                        },
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'bar'},
-                          init: null,
-                        },
-                      ],
-                    },
+                    init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null}]},
                     test: null,
                     update: null,
                     body: {type: 'EmptyStatement'},
@@ -2087,7 +1202,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('let, var with init, semi', {
               code: 'for (let foo = bar;;);',
               ast: {
@@ -2095,17 +1209,7 @@ export default (describe, test) =>
                 body: [
                   {
                     type: 'ForStatement',
-                    init: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: {type: 'Identifier', name: 'bar'},
-                        },
-                      ],
-                    },
+                    init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}}]},
                     test: null,
                     update: null,
                     body: {type: 'EmptyStatement'},
@@ -2114,7 +1218,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('let, two vars with both init, semi', {
               code: 'for (let foo = bar, zoo = boo;;);',
               ast: {
@@ -2126,16 +1229,8 @@ export default (describe, test) =>
                       type: 'VariableDeclaration',
                       kind: 'let',
                       declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: {type: 'Identifier', name: 'bar'},
-                        },
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'zoo'},
-                          init: {type: 'Identifier', name: 'boo'},
-                        },
+                        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
+                        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: {type: 'Identifier', name: 'boo'}},
                       ],
                     },
                     test: null,
@@ -2146,79 +1241,38 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('var on next line does not trigger asi', {
               code: 'for (let\nfoo;;);',
               ast: {
                 type: 'Program',
                 body: [
-                  {
-                    type: 'ForStatement',
-                    init: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: null,
-                        },
-                      ],
-                    },
-                    test: null,
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
+                  {type: 'ForStatement', init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}, test: null, update: null, body: {type: 'EmptyStatement'}},
                 ],
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo();;);',
               throws: '(`;`)', // expecting for-header semi
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
-
           describe('invalid colorless for statement', _ => {
-            test('let, one var, no init, semi', {
-              code: 'for (let foo);',
-              throws: '(`;`)',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-            });
-
-            test('let, two vars, no init, semi', {
-              code: 'for (let foo, bar);',
-              throws: '(`;`)',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-            });
-
-            test('let, var with init, semi', {
-              code: 'for (let foo = bar);',
-              throws: '(`;`)',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-            });
-
+            test('let, one var, no init, semi', {code: 'for (let foo);', throws: '(`;`)', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
+            test('let, two vars, no init, semi', {code: 'for (let foo, bar);', throws: '(`;`)', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
+            test('let, var with init, semi', {code: 'for (let foo = bar);', throws: '(`;`)', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
             test('let, two vars with both init, semi', {
               code: 'for (let foo = bar, zoo = boo);',
               throws: '(`;`)',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
-
-            test('var on next line does not trigger asi', {
-              code: 'for (let\nfoo);',
-              throws: '(`;`)',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-            });
-
+            test('var on next line does not trigger asi', {code: 'for (let\nfoo);', throws: '(`;`)', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo());',
               throws: '(`;`)', // expecting for-header semi
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
-
           describe('for-in', _ => {
             test('let, one var, no init, semi', {
               code: 'for (let foo in x);',
@@ -2227,17 +1281,7 @@ export default (describe, test) =>
                 body: [
                   {
                     type: 'ForInStatement',
-                    left: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: null,
-                        },
-                      ],
-                    },
+                    left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]},
                     right: {type: 'Identifier', name: 'x'},
                     body: {type: 'EmptyStatement'},
                   },
@@ -2245,25 +1289,13 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
             });
-
-            test('let, two vars, no init, semi', {
-              code: 'for (let foo, bar in x);',
-              throws: 'can only have one binding',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-            });
-
-            test('let, var with init, semi', {
-              code: 'for (let foo = bar in x);',
-              throws: 'binding can not have an init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-            });
-
+            test('let, two vars, no init, semi', {code: 'for (let foo, bar in x);', throws: 'can only have one binding', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
+            test('let, var with init, semi', {code: 'for (let foo = bar in x);', throws: 'binding can not have an init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
             test('let, two vars with both init, semi', {
               code: 'for (let foo = bar, zoo = boo in x);',
               throws: 'can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('var on next line does not trigger asi', {
               code: 'for (let\nfoo in x);',
               ast: {
@@ -2271,17 +1303,7 @@ export default (describe, test) =>
                 body: [
                   {
                     type: 'ForInStatement',
-                    left: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: null,
-                        },
-                      ],
-                    },
+                    left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]},
                     right: {type: 'Identifier', name: 'x'},
                     body: {type: 'EmptyStatement'},
                   },
@@ -2289,14 +1311,12 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo() in x);',
               throws: '(`;`)', // expecting for-header semi
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
-
           describe('for-of', _ => {
             test('let, one var, no init, semi', {
               code: 'for (let foo of x);',
@@ -2305,17 +1325,7 @@ export default (describe, test) =>
                 body: [
                   {
                     type: 'ForOfStatement',
-                    left: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: null,
-                        },
-                      ],
-                    },
+                    left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]},
                     right: {type: 'Identifier', name: 'x'},
                     await: false,
                     body: {type: 'EmptyStatement'},
@@ -2324,25 +1334,13 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
             });
-
-            test('let, two vars, no init, semi', {
-              code: 'for (let foo, bar of x);',
-              throws: 'can only have one binding',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-            });
-
-            test('let, var with init, semi', {
-              code: 'for (let foo = bar of x);',
-              throws: 'binding can not have an init',
-              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-            });
-
+            test('let, two vars, no init, semi', {code: 'for (let foo, bar of x);', throws: 'can only have one binding', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
+            test('let, var with init, semi', {code: 'for (let foo = bar of x);', throws: 'binding can not have an init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
             test('let, two vars with both init, semi', {
               code: 'for (let foo = bar, zoo = boo of x);',
               throws: 'can only have one binding',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('var on next line does not trigger asi', {
               code: 'for (let\nfoo of x);',
               ast: {
@@ -2350,17 +1348,7 @@ export default (describe, test) =>
                 body: [
                   {
                     type: 'ForOfStatement',
-                    left: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'foo'},
-                          init: null,
-                        },
-                      ],
-                    },
+                    left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]},
                     right: {type: 'Identifier', name: 'x'},
                     await: false,
                     body: {type: 'EmptyStatement'},
@@ -2369,7 +1357,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
             });
-
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo() of x);',
               throws: '(`;`)', // expecting for-header semi
@@ -2377,15 +1364,12 @@ export default (describe, test) =>
             });
           });
         });
-
         describe('destructuring', _ => {
           // note: a for-header must use `in` or `of` for the assignment if and only if it
           //       concerns a for-in or for-of statement respectively. For a regular
           //       for-loop the assignment can still only be `=`.
-
           // note: all tests are mirrored between for-loop for-in and for-of to ensure
           //       they all work (this caught at least one bug by itself; they're staying)
-
           describe('regular for-loop', _ => {
             describe('array', _ => {
               test('empty "array" should work', {
@@ -2395,17 +1379,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: []},
-                            init: {type: 'Identifier', name: 'x'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: []}, init: {type: 'Identifier', name: 'x'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -2414,7 +1388,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('empty array with one comma', {
                 code: 'for (let [,] = x;;);',
                 ast: {
@@ -2422,17 +1395,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: [null]},
-                            init: {type: 'Identifier', name: 'x'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null]}, init: {type: 'Identifier', name: 'x'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -2441,7 +1404,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('empty array with double comma', {
                 code: 'for (let [,,] = x;;);',
                 ast: {
@@ -2449,17 +1411,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: [null, null]},
-                            init: {type: 'Identifier', name: 'x'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, null]}, init: {type: 'Identifier', name: 'x'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -2468,7 +1420,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('with one var, no init, semi', {
                 code: 'for (let [foo] = arr;;);',
                 ast: {
@@ -2476,20 +1427,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -2498,7 +1436,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('trailing comma is insignificant', {
                 code: 'for (let [foo,] = arr;;);',
                 ast: {
@@ -2506,20 +1443,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -2528,7 +1452,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double trailing comma is significant', {
                 code: 'for (let [foo,,] = arr;;);',
                 ast: {
@@ -2536,20 +1459,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, null],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null]}, init: {type: 'Identifier', name: 'arr'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -2558,7 +1468,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('leading comma', {
                 code: 'for (let [,foo] = arr;;);',
                 ast: {
@@ -2566,20 +1475,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [null, {type: 'Identifier', name: 'foo'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, {type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -2588,7 +1484,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double leading comma', {
                 code: 'for (let [,,foo] = arr;;);',
                 ast: {
@@ -2596,20 +1491,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [null, null, {type: 'Identifier', name: 'foo'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, null, {type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -2618,7 +1500,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars', {
                 code: 'for (let [foo,bar] = arr;;);',
                 ast: {
@@ -2629,16 +1510,7 @@ export default (describe, test) =>
                       init: {
                         type: 'VariableDeclaration',
                         kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                        ],
+                        declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr'}}],
                       },
                       test: null,
                       update: null,
@@ -2648,7 +1520,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars with eliding comma', {
                 code: 'for (let [foo,,bar] = arr;;);',
                 ast: {
@@ -2659,16 +1530,7 @@ export default (describe, test) =>
                       init: {
                         type: 'VariableDeclaration',
                         kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, null, {type: 'Identifier', name: 'bar'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                        ],
+                        declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null, {type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr'}}],
                       },
                       test: null,
                       update: null,
@@ -2678,7 +1540,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct', {
                 code: 'for (let [foo] = arr, [bar] = arr2;;);',
                 ast: {
@@ -2690,22 +1551,8 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'bar'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr2'},
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+                          {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr2'}},
                         ],
                       },
                       test: null,
@@ -2716,7 +1563,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct without init', {
                 code: 'for (let [foo] = arr, bar;;);',
                 ast: {
@@ -2728,19 +1574,8 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'Identifier', name: 'bar'},
-                            init: null,
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+                          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null},
                         ],
                       },
                       test: null,
@@ -2751,7 +1586,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct with init', {
                 code: 'for (let [foo] = arr, bar = arr2;;);',
                 ast: {
@@ -2763,19 +1597,8 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'Identifier', name: 'bar'},
-                            init: {type: 'Identifier', name: 'arr2'},
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+                          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: {type: 'Identifier', name: 'arr2'}},
                         ],
                       },
                       test: null,
@@ -2786,7 +1609,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct without init and destruct', {
                 code: 'for (let foo, [bar] = arr2;;);',
                 ast: {
@@ -2798,19 +1620,8 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'Identifier', name: 'foo'},
-                            init: null,
-                          },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'bar'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr2'},
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null},
+                          {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr2'}},
                         ],
                       },
                       test: null,
@@ -2821,7 +1632,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct with init and destruct', {
                 code: 'for (let foo = arr, [bar] = arr2;;);',
                 ast: {
@@ -2833,19 +1643,8 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'Identifier', name: 'foo'},
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'bar'}],
-                            },
-                            init: {type: 'Identifier', name: 'arr2'},
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'arr'}},
+                          {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr2'}},
                         ],
                       },
                       test: null,
@@ -2856,7 +1655,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('one var with initializer', {
                 code: 'for (let [foo=a] = arr;;);',
                 ast: {
@@ -2868,20 +1666,7 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                              ],
-                            },
-                            init: {type: 'Identifier', name: 'arr'},
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}]}, init: {type: 'Identifier', name: 'arr'}},
                         ],
                       },
                       test: null,
@@ -2892,7 +1677,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, with and without initializer', {
                 code: 'for (let [foo=a, bar] = arr;;);',
                 ast: {
@@ -2906,17 +1690,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                                {type: 'Identifier', name: 'bar'},
-                              ],
-                            },
+                            id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}, {type: 'Identifier', name: 'bar'}]},
                             init: {type: 'Identifier', name: 'arr'},
                           },
                         ],
@@ -2929,7 +1703,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, without and with initializer', {
                 code: 'for (let [foo, bar=b] = arr;;);',
                 ast: {
@@ -2943,17 +1716,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {type: 'Identifier', name: 'foo'},
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'bar'},
-                                  right: {type: 'Identifier', name: 'b'},
-                                },
-                              ],
-                            },
+                            id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}}]},
                             init: {type: 'Identifier', name: 'arr'},
                           },
                         ],
@@ -2966,7 +1729,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, with and with initializer', {
                 code: 'for (let [foo=a, bar=b] = arr;;);',
                 ast: {
@@ -2983,16 +1745,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ArrayPattern',
                               elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'bar'},
-                                  right: {type: 'Identifier', name: 'b'},
-                                },
+                                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}},
+                                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}},
                               ],
                             },
                             init: {type: 'Identifier', name: 'arr'},
@@ -3007,34 +1761,29 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment without init', {
                 code: 'for (let [foo];;);',
                 throws: 'destructuring must have init',
                 desc: 'this could be legal in sloppy except not at the start of a statement',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with init', {
                 code: 'for (let [foo = x];;);',
                 throws: 'destructuring must have init',
                 desc: 'this could be legal in sloppy except not at the start of a statement',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with two declarations first', {
                 code: 'for (let [foo], bar;;);',
                 throws: 'destructuring must have init',
                 desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with two declarations second', {
                 code: 'for (let foo, [bar];;);',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               describe('rest operator', _ => {
                 test('rest as the only destruct', {
                   code: 'for (let [...foo] = obj;;);',
@@ -3046,21 +1795,7 @@ export default (describe, test) =>
                         init: {
                           type: 'VariableDeclaration',
                           kind: 'let',
-                          declarations: [
-                            {
-                              type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'foo'},
-                                  },
-                                ],
-                              },
-                              init: {type: 'Identifier', name: 'obj'},
-                            },
-                          ],
+                          declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'Identifier', name: 'foo'}}]}, init: {type: 'Identifier', name: 'obj'}}],
                         },
                         test: null,
                         update: null,
@@ -3070,7 +1805,6 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
                 test('rest preceded by an ident', {
                   code: 'for (let [foo, ...bar] = obj;;);',
                   ast: {
@@ -3082,20 +1816,7 @@ export default (describe, test) =>
                           type: 'VariableDeclaration',
                           kind: 'let',
                           declarations: [
-                            {
-                              type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {type: 'Identifier', name: 'foo'},
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'bar'},
-                                  },
-                                ],
-                              },
-                              init: {type: 'Identifier', name: 'obj'},
-                            },
+                            {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'RestElement', argument: {type: 'Identifier', name: 'bar'}}]}, init: {type: 'Identifier', name: 'obj'}},
                           ],
                         },
                         test: null,
@@ -3106,22 +1827,9 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('rest followed by an ident', {
-                  code: 'for (let [...foo, bar] = obj;;);',
-                  throws: true,
-                });
-
-                test('rest followed by a trailing comma', {
-                  code: 'for (let [...foo,] = obj;;);',
-                  throws: true,
-                });
-
-                test('rest followed by two commas', {
-                  code: 'for (let [...foo,,] = obj;;);',
-                  throws: true,
-                });
-
+                test('rest followed by an ident', {code: 'for (let [...foo, bar] = obj;;);', throws: true});
+                test('rest followed by a trailing comma', {code: 'for (let [...foo,] = obj;;);', throws: true});
+                test('rest followed by two commas', {code: 'for (let [...foo,,] = obj;;);', throws: true});
                 test('rest on a nested destruct', {
                   code: 'for (let [...[foo, bar]] = obj;;);',
                   ast: {
@@ -3135,18 +1843,7 @@ export default (describe, test) =>
                           declarations: [
                             {
                               type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {
-                                    type: 'RestElement',
-                                    argument: {
-                                      type: 'ArrayPattern',
-                                      elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                    },
-                                  },
-                                ],
-                              },
+                              id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]},
                               init: {type: 'Identifier', name: 'obj'},
                             },
                           ],
@@ -3159,17 +1856,8 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('trailing comma after rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar],] = obj;;);',
-                  throws: true,
-                });
-
-                test('double trailing comma after rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar],,] = obj;;);',
-                  throws: true,
-                });
-
+                test('trailing comma after rest on a nested destruct', {code: 'for (let [...[foo, bar],] = obj;;);', throws: true});
+                test('double trailing comma after rest on a nested destruct', {code: 'for (let [...[foo, bar],,] = obj;;);', throws: true});
                 test('second param rest on a nested destruct', {
                   code: 'for (let [x, ...[foo, bar]] = obj;;);',
                   ast: {
@@ -3183,19 +1871,7 @@ export default (describe, test) =>
                           declarations: [
                             {
                               type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {type: 'Identifier', name: 'x'},
-                                  {
-                                    type: 'RestElement',
-                                    argument: {
-                                      type: 'ArrayPattern',
-                                      elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                    },
-                                  },
-                                ],
-                              },
+                              id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}, {type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]},
                               init: {type: 'Identifier', name: 'obj'},
                             },
                           ],
@@ -3208,38 +1884,12 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('rest with default', {
-                  code: 'for (let [...bar = foo] = obj;;);',
-                  throws: true,
-                  desc: 'rest cannot get a default in var decls but they can as func args',
-                });
-
-                test('double rest / spread rest', {
-                  code: 'for (let [... ...foo] = obj;;);',
-                  throws: true,
-                });
-
-                test('rest without value', {
-                  code: 'for (let [...] = obj;;);',
-                  throws: true,
-                });
-
-                test('rest with comma without value', {
-                  code: 'for (let [...,] = obj;;);',
-                  throws: true,
-                });
-
-                test('single dot vs rest', {
-                  code: 'for (let [.x] = obj;;);',
-                  throws: true,
-                });
-
-                test('double dot vs rest', {
-                  code: 'for (let [..x] = obj;;);',
-                  throws: true,
-                });
-
+                test('rest with default', {code: 'for (let [...bar = foo] = obj;;);', throws: true, desc: 'rest cannot get a default in var decls but they can as func args'});
+                test('double rest / spread rest', {code: 'for (let [... ...foo] = obj;;);', throws: true});
+                test('rest without value', {code: 'for (let [...] = obj;;);', throws: true});
+                test('rest with comma without value', {code: 'for (let [...,] = obj;;);', throws: true});
+                test('single dot vs rest', {code: 'for (let [.x] = obj;;);', throws: true});
+                test('double dot vs rest', {code: 'for (let [..x] = obj;;);', throws: true});
                 test('spread and rest', {
                   code: 'for (let [a=[...b], ...c] = obj;;);',
                   ast: {
@@ -3256,23 +1906,8 @@ export default (describe, test) =>
                               id: {
                                 type: 'ArrayPattern',
                                 elements: [
-                                  {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'a'},
-                                    right: {
-                                      type: 'ArrayExpression',
-                                      elements: [
-                                        {
-                                          type: 'SpreadElement',
-                                          argument: {type: 'Identifier', name: 'b'},
-                                        },
-                                      ],
-                                    },
-                                  },
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'c'},
-                                  },
+                                  {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'a'}, right: {type: 'ArrayExpression', elements: [{type: 'SpreadElement', argument: {type: 'Identifier', name: 'b'}}]}},
+                                  {type: 'RestElement', argument: {type: 'Identifier', name: 'c'}},
                                 ],
                               },
                               init: {type: 'Identifier', name: 'obj'},
@@ -3310,7 +1945,6 @@ export default (describe, test) =>
                 });
               });
             });
-
             describe('object', _ => {
               test('empty obj', {
                 code: 'for (let {} = obj;;);',
@@ -3319,17 +1953,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForStatement',
-                      init: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ObjectPattern', properties: []},
-                            init: {type: 'Identifier', name: 'obj'},
-                          },
-                        ],
-                      },
+                      init: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: []}, init: {type: 'Identifier', name: 'obj'}}]},
                       test: null,
                       update: null,
                       body: {type: 'EmptyStatement'},
@@ -3338,21 +1962,8 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
-              test('empty obj with trailing comma', {
-                code: 'for (let {,} = obj;;);',
-                throws: 'Objects cant have comma without something preceding it',
-                desc: 'works for array but not for obj',
-                tokens: [],
-              });
-
-              test('empty obj with elided commas', {
-                code: 'for (let {,,} = obj;;);',
-                throws: 'Objects cant have comma without something preceding it',
-                desc: 'works for array but not for obj',
-                tokens: [],
-              });
-
+              test('empty obj with trailing comma', {code: 'for (let {,} = obj;;);', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
+              test('empty obj with elided commas', {code: 'for (let {,,} = obj;;);', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
               test('single var base case', {
                 code: 'for (let {x} = obj;;);',
                 ast: {
@@ -3366,20 +1977,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: {type: 'Identifier', name: 'obj'},
                           },
                         ],
@@ -3392,7 +1990,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single var with trailing comma', {
                 code: 'for (let {x,} = obj;;);',
                 ast: {
@@ -3406,20 +2003,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: {type: 'Identifier', name: 'obj'},
                           },
                         ],
@@ -3432,28 +2016,24 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single var with double trailing comma', {
                 code: 'for (let {x,,} = obj;;);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'does not work with obj, only array',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('single var with leading comma', {
                 code: 'for (let {,x} = obj;;);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('single var with double leading comma', {
                 code: 'for (let {,,x} = obj;;);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double var simple', {
                 code: 'for (let {x, y} = obj;;);',
                 ast: {
@@ -3470,24 +2050,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true},
                               ],
                             },
                             init: {type: 'Identifier', name: 'obj'},
@@ -3502,14 +2066,12 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double var with double comma', {
                 code: 'for (let {x,, y} = obj;;);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double var simple', {
                 code: 'for (let {x} = a, {y} = obj;;);',
                 ast: {
@@ -3523,38 +2085,12 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: {type: 'Identifier', name: 'a'},
                           },
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                             init: {type: 'Identifier', name: 'obj'},
                           },
                         ],
@@ -3567,7 +2103,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct with init', {
                 code: 'for (let {x} = a, y = obj;;);',
                 ast: {
@@ -3581,27 +2116,10 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: {type: 'Identifier', name: 'a'},
                           },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'Identifier', name: 'y'},
-                            init: {type: 'Identifier', name: 'obj'},
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: {type: 'Identifier', name: 'obj'}},
                         ],
                       },
                       test: null,
@@ -3612,7 +2130,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct without init', {
                 code: 'for (let {x} = a, obj;;);',
                 ast: {
@@ -3626,27 +2143,10 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: {type: 'Identifier', name: 'a'},
                           },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'Identifier', name: 'obj'},
-                            init: null,
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'obj'}, init: null},
                         ],
                       },
                       test: null,
@@ -3657,7 +2157,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct with ini and destruct', {
                 code: 'for (let x = a, {y} = obj;;);',
                 ast: {
@@ -3669,27 +2168,10 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
+                          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: {type: 'Identifier', name: 'a'}},
                           {
                             type: 'VariableDeclarator',
-                            id: {type: 'Identifier', name: 'x'},
-                            init: {type: 'Identifier', name: 'a'},
-                          },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                             init: {type: 'Identifier', name: 'obj'},
                           },
                         ],
@@ -3702,7 +2184,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct without ini and destruct', {
                 code: 'for (let x, {y} = obj;;);',
                 ast: {
@@ -3714,27 +2195,10 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
+                          {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
                           {
                             type: 'VariableDeclarator',
-                            id: {type: 'Identifier', name: 'x'},
-                            init: null,
-                          },
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                             init: {type: 'Identifier', name: 'obj'},
                           },
                         ],
@@ -3747,7 +2211,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with init', {
                 code: 'for (let {x = y} = obj;;);',
                 ast: {
@@ -3770,11 +2233,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
                               ],
@@ -3791,7 +2250,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with and without init', {
                 code: 'for (let {x = y, z} = obj;;);',
                 ast: {
@@ -3814,22 +2272,10 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                               ],
                             },
                             init: {type: 'Identifier', name: 'obj'},
@@ -3844,7 +2290,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct without and with init', {
                 code: 'for (let {x, y = z} = obj;;);',
                 ast: {
@@ -3861,26 +2306,14 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
                                 {
                                   type: 'Property',
                                   key: {type: 'Identifier', name: 'y'},
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: true,
                                 },
                               ],
@@ -3897,7 +2330,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct both with init', {
                 code: 'for (let {x = y, z = a} = obj;;);',
                 ast: {
@@ -3920,11 +2352,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
                                 {
@@ -3933,11 +2361,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'z'},
-                                    right: {type: 'Identifier', name: 'a'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'z'}, right: {type: 'Identifier', name: 'a'}},
                                   shorthand: true,
                                 },
                               ],
@@ -3954,7 +2378,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with rename', {
                 code: 'for (let {x : y} = obj;;);',
                 ast: {
@@ -3968,20 +2391,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                             init: {type: 'Identifier', name: 'obj'},
                           },
                         ],
@@ -3994,7 +2404,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with and without rename', {
                 code: 'for (let {x : y, z} = obj;;);',
                 ast: {
@@ -4011,24 +2420,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                               ],
                             },
                             init: {type: 'Identifier', name: 'obj'},
@@ -4043,7 +2436,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct without and with rename', {
                 code: 'for (let {x, y : z} = obj;;);',
                 ast: {
@@ -4060,24 +2452,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: false},
                               ],
                             },
                             init: {type: 'Identifier', name: 'obj'},
@@ -4092,7 +2468,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct both with rename', {
                 code: 'for (let {x : y, z : a} = obj;;);',
                 ast: {
@@ -4109,24 +2484,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'a'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: false},
                               ],
                             },
                             init: {type: 'Identifier', name: 'obj'},
@@ -4141,7 +2500,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with rename and init', {
                 code: 'for (let {x : y = z} = obj;;);',
                 ast: {
@@ -4164,11 +2522,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: false,
                                 },
                               ],
@@ -4185,7 +2539,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with rename and init', {
                 code: 'for (let {x : y, z, a : b = c} = obj;;);',
                 ast: {
@@ -4202,35 +2555,15 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                                 {
                                   type: 'Property',
                                   key: {type: 'Identifier', name: 'a'},
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'b'},
-                                    right: {type: 'Identifier', name: 'c'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'b'}, right: {type: 'Identifier', name: 'c'}},
                                   shorthand: false,
                                 },
                               ],
@@ -4270,72 +2603,25 @@ export default (describe, test) =>
                   $PUNCTUATOR,
                 ],
               });
-
-              test('single destruct no assignment', {
-                code: 'for (let {x};;);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('double destruct no assignment', {
-                code: 'for (let {x}, {y} = z;;);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('ident and destruct no assignment', {
-                code: 'for (let x, {y};;);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('destruct no assignment and ident', {
-                code: 'for (let {x}, y;;);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('ident with init and destruct no assignment', {
-                code: 'for (let x = y, {z};;);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with rename and no assignment', {
-                code: 'for (let {x:y};;);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with default and no assignment', {
-                code: 'for (let {x=y};;);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with rename and default and no assignment', {
-                code: 'for (let {x:y=z};;);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
+              test('single destruct no assignment', {code: 'for (let {x};;);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('double destruct no assignment', {code: 'for (let {x}, {y} = z;;);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('ident and destruct no assignment', {code: 'for (let x, {y};;);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('destruct no assignment and ident', {code: 'for (let {x}, y;;);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('ident with init and destruct no assignment', {code: 'for (let x = y, {z};;);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with rename and no assignment', {code: 'for (let {x:y};;);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with default and no assignment', {code: 'for (let {x=y};;);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with rename and default and no assignment', {code: 'for (let {x:y=z};;);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
               test('double destruct with rename and default and with and without assignment', {
                 code: 'for (let {x:y=z} = obj, {a:b=c};;);',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double destruct with rename and default and without and with assignment', {
                 code: 'for (let {x:y=z}, {a:b=c} = obj;;);',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('single destruct with colon-eq', {
-                code: 'for (let {a:=c} = z;;);',
-                throws: true,
-              });
-
+              test('single destruct with colon-eq', {code: 'for (let {a:=c} = z;;);', throws: true});
               test('correct dynamic property destructuring', {
                 code: 'for (let {[x]: y} = z;;);',
                 ast: {
@@ -4349,20 +2635,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: true,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                             init: {type: 'Identifier', name: 'z'},
                           },
                         ],
@@ -4375,32 +2648,11 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
-              test('dynamic property destructuring missing alias', {
-                code: 'for (let {[x]} = z;;);',
-                throws: 'computed property name',
-              });
-
-              test('dynamic property destructuring missing alias and init', {
-                code: 'for (let {[x]};;);',
-                throws: 'computed property name',
-              });
-
-              test('dynamic property destructuring missing assignment', {
-                code: 'for (let {[x]: y};;);',
-                throws: 'destructuring must have init',
-              });
-
-              test('dynamic property destructuring with default missing alias', {
-                code: 'for (let {[x] = y} = z;;);',
-                throws: 'computed property name',
-              });
-
-              test('dynamic property destructuring with default and alias missing init', {
-                code: 'for (let {[x]: y = z};;);',
-                throws: 'destructuring must have init',
-              });
-
+              test('dynamic property destructuring missing alias', {code: 'for (let {[x]} = z;;);', throws: 'computed property name'});
+              test('dynamic property destructuring missing alias and init', {code: 'for (let {[x]};;);', throws: 'computed property name'});
+              test('dynamic property destructuring missing assignment', {code: 'for (let {[x]: y};;);', throws: 'destructuring must have init'});
+              test('dynamic property destructuring with default missing alias', {code: 'for (let {[x] = y} = z;;);', throws: 'computed property name'});
+              test('dynamic property destructuring with default and alias missing init', {code: 'for (let {[x]: y = z};;);', throws: 'destructuring must have init'});
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (let {[x]: y = z} = a;;);',
                 ast: {
@@ -4423,11 +2675,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: true,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: false,
                                 },
                               ],
@@ -4444,7 +2692,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('dynamic prop as second prop', {
                 code: 'for (let {a, [x]: y} = a;;);',
                 ast: {
@@ -4461,24 +2708,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'a'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'a'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: true,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false},
                               ],
                             },
                             init: {type: 'Identifier', name: 'a'},
@@ -4495,364 +2726,160 @@ export default (describe, test) =>
               });
             });
           });
-
           describe('invalid colorless for-statement', _ => {
             // these are all the let tests sans `in`, `of`, and double semi in the for-header
-
             describe('array', _ => {
-              test('empty "array" should work', {
-                code: 'for (let [] = x);',
-                throws: true,
-              });
-
-              test('empty array with one comma', {
-                code: 'for (let [,] = x);',
-                throws: true,
-              });
-
-              test('empty array with double comma', {
-                code: 'for (let [,,] = x);',
-                throws: true,
-              });
-
-              test('with one var, no init, semi', {
-                code: 'for (let [foo] = arr);',
-                throws: true,
-              });
-
-              test('trailing comma is insignificant', {
-                code: 'for (let [foo,] = arr);',
-                throws: true,
-              });
-
-              test('double trailing comma is significant', {
-                code: 'for (let [foo,,] = arr);',
-                throws: true,
-              });
-
-              test('leading comma', {
-                code: 'for (let [,foo] = arr);',
-                throws: true,
-              });
-
-              test('double leading comma', {
-                code: 'for (let [,,foo] = arr);',
-                throws: true,
-              });
-
-              test('two vars', {
-                code: 'for (let [foo,bar] = arr);',
-                throws: true,
-              });
-
-              test('two vars with eliding comma', {
-                code: 'for (let [foo,,bar] = arr);',
-                throws: true,
-              });
-
-              test('double destruct', {
-                code: 'for (let [foo] = arr, [bar] = arr2);',
-                throws: true,
-              });
-
-              test('destruct and non-destruct without init', {
-                code: 'for (let [foo] = arr, bar);',
-                throws: true,
-              });
-
-              test('destruct and non-destruct with init', {
-                code: 'for (let [foo] = arr, bar = arr2);',
-                throws: true,
-              });
-
-              test('non-destruct without init and destruct', {
-                code: 'for (let foo, [bar] = arr2);',
-                throws: true,
-              });
-
-              test('non-destruct with init and destruct', {
-                code: 'for (let foo = arr, [bar] = arr2);',
-                throws: true,
-              });
-
-              test('one var with initializer', {
-                code: 'for (let [foo=a] = arr);',
-                throws: true,
-              });
-
-              test('two vars, with and without initializer', {
-                code: 'for (let [foo=a, bar] = arr);',
-                throws: true,
-              });
-
-              test('two vars, without and with initializer', {
-                code: 'for (let [foo, bar=b] = arr);',
-                throws: true,
-              });
-
-              test('two vars, with and with initializer', {
-                code: 'for (let [foo=a, bar=b] = arr);',
-                throws: true,
-              });
-
-              test('no assignment without init', {
-                code: 'for (let [foo]);',
-                desc: 'this could be legal in sloppy except not at the start of a statement',
-                throws: true,
-              });
-
-              test('no assignment with init', {
-                code: 'for (let [foo = x]);',
-                desc: 'this could be legal in sloppy except not at the start of a statement',
-                throws: true,
-              });
-
-              test('no assignment with two declarations first', {
-                code: 'for (let [foo], bar);',
-                desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal',
-                throws: true,
-              });
-
-              test('no assignment with two declarations second', {
-                code: 'for (let foo, [bar]);',
-                throws: true,
-              });
-
+              test('empty "array" should work', {code: 'for (let [] = x);', throws: true});
+              test('empty array with one comma', {code: 'for (let [,] = x);', throws: true});
+              test('empty array with double comma', {code: 'for (let [,,] = x);', throws: true});
+              test('with one var, no init, semi', {code: 'for (let [foo] = arr);', throws: true});
+              test('trailing comma is insignificant', {code: 'for (let [foo,] = arr);', throws: true});
+              test('double trailing comma is significant', {code: 'for (let [foo,,] = arr);', throws: true});
+              test('leading comma', {code: 'for (let [,foo] = arr);', throws: true});
+              test('double leading comma', {code: 'for (let [,,foo] = arr);', throws: true});
+              test('two vars', {code: 'for (let [foo,bar] = arr);', throws: true});
+              test('two vars with eliding comma', {code: 'for (let [foo,,bar] = arr);', throws: true});
+              test('double destruct', {code: 'for (let [foo] = arr, [bar] = arr2);', throws: true});
+              test('destruct and non-destruct without init', {code: 'for (let [foo] = arr, bar);', throws: true});
+              test('destruct and non-destruct with init', {code: 'for (let [foo] = arr, bar = arr2);', throws: true});
+              test('non-destruct without init and destruct', {code: 'for (let foo, [bar] = arr2);', throws: true});
+              test('non-destruct with init and destruct', {code: 'for (let foo = arr, [bar] = arr2);', throws: true});
+              test('one var with initializer', {code: 'for (let [foo=a] = arr);', throws: true});
+              test('two vars, with and without initializer', {code: 'for (let [foo=a, bar] = arr);', throws: true});
+              test('two vars, without and with initializer', {code: 'for (let [foo, bar=b] = arr);', throws: true});
+              test('two vars, with and with initializer', {code: 'for (let [foo=a, bar=b] = arr);', throws: true});
+              test('no assignment without init', {code: 'for (let [foo]);', desc: 'this could be legal in sloppy except not at the start of a statement', throws: true});
+              test('no assignment with init', {code: 'for (let [foo = x]);', desc: 'this could be legal in sloppy except not at the start of a statement', throws: true});
+              test('no assignment with two declarations first', {code: 'for (let [foo], bar);', desc: 'just like `foo[bar],baz` which is a fine expression in sloppy mode, except that it is still illegal', throws: true});
+              test('no assignment with two declarations second', {code: 'for (let foo, [bar]);', throws: true});
               describe('rest operator', _ => {
-                test('rest as the only destruct', {
-                  code: 'for (let [...foo] = obj);',
-                  throws: true,
-                });
-
-                test('rest preceded by an ident', {
-                  code: 'for (let [foo, ...bar] = obj);',
-                  throws: true,
-                });
-
-                test('rest followed by an ident', {
-                  code: 'for (let [...foo, bar] = obj);',
-                  throws: true,
-                });
-
-                test('rest followed by a trailing comma', {
-                  code: 'for (let [...foo,] = obj);',
-                  throws: true,
-                });
-
-                test('rest followed by two commas', {
-                  code: 'for (let [...foo,,] = obj);',
-                  throws: true,
-                });
-
-                test('rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar]] = obj);',
-                  throws: true,
-                });
-
-                test('trailing comma after rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar],] = obj);',
-                  throws: true,
-                });
-
-                test('double trailing comma after rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar],,] = obj);',
-                  throws: true,
-                });
-
-                test('second param rest on a nested destruct', {
-                  code: 'for (let [x, ...[foo, bar]] = obj);',
-                  throws: true,
-                });
-
-                test('rest with default', {
-                  code: 'for (let [...bar = foo] = obj);',
-                  throws: true,
-                  desc: 'rest cannot get a default in var decls but they can as func args',
-                });
-
-                test('double rest / spread rest', {
-                  code: 'for (let [... ...foo] = obj);',
-                  throws: true,
-                });
-
-                test('rest without value', {
-                  code: 'for (let [...] = obj);',
-                  throws: true,
-                });
-
-                test('rest with comma without value', {
-                  code: 'for (let [...,] = obj);',
-                  throws: true,
-                });
-
-                test('single dot vs rest', {
-                  code: 'for (let [.x] = obj);',
-                  throws: true,
-                });
-
-                test('double dot vs rest', {
-                  code: 'for (let [..x] = obj);',
-                  throws: true,
-                });
-
-                test('spread and rest', {
-                  code: 'for (let [a=[...b], ...c] = obj);',
-                  throws: true,
-                });
+                test('rest as the only destruct', {code: 'for (let [...foo] = obj);', throws: true});
+                test('rest preceded by an ident', {code: 'for (let [foo, ...bar] = obj);', throws: true});
+                test('rest followed by an ident', {code: 'for (let [...foo, bar] = obj);', throws: true});
+                test('rest followed by a trailing comma', {code: 'for (let [...foo,] = obj);', throws: true});
+                test('rest followed by two commas', {code: 'for (let [...foo,,] = obj);', throws: true});
+                test('rest on a nested destruct', {code: 'for (let [...[foo, bar]] = obj);', throws: true});
+                test('trailing comma after rest on a nested destruct', {code: 'for (let [...[foo, bar],] = obj);', throws: true});
+                test('double trailing comma after rest on a nested destruct', {code: 'for (let [...[foo, bar],,] = obj);', throws: true});
+                test('second param rest on a nested destruct', {code: 'for (let [x, ...[foo, bar]] = obj);', throws: true});
+                test('rest with default', {code: 'for (let [...bar = foo] = obj);', throws: true, desc: 'rest cannot get a default in var decls but they can as func args'});
+                test('double rest / spread rest', {code: 'for (let [... ...foo] = obj);', throws: true});
+                test('rest without value', {code: 'for (let [...] = obj);', throws: true});
+                test('rest with comma without value', {code: 'for (let [...,] = obj);', throws: true});
+                test('single dot vs rest', {code: 'for (let [.x] = obj);', throws: true});
+                test('double dot vs rest', {code: 'for (let [..x] = obj);', throws: true});
+                test('spread and rest', {code: 'for (let [a=[...b], ...c] = obj);', throws: true});
               });
             });
-
             describe('object', _ => {
-              test('empty obj', {
-                code: 'for (let {} = obj);',
-                throws: '(`;`)',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-              });
-
-              test('empty obj with trailing comma', {
-                code: 'for (let {,} = obj);',
-                throws: 'Objects cant have comma without something preceding it',
-                desc: 'works for array but not for obj',
-                tokens: [],
-              });
-
-              test('empty obj with elided commas', {
-                code: 'for (let {,,} = obj);',
-                throws: 'Objects cant have comma without something preceding it',
-                desc: 'works for array but not for obj',
-                tokens: [],
-              });
-
-              test('single var base case', {
-                code: 'for (let {x} = obj);',
-                throws: '(`;`)',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-              });
-
+              test('empty obj', {code: 'for (let {} = obj);', throws: '(`;`)', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
+              test('empty obj with trailing comma', {code: 'for (let {,} = obj);', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
+              test('empty obj with elided commas', {code: 'for (let {,,} = obj);', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
+              test('single var base case', {code: 'for (let {x} = obj);', throws: '(`;`)', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
               test('single var with trailing comma', {
                 code: 'for (let {x,} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single var with double trailing comma', {
                 code: 'for (let {x,,} = obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'does not work with obj, only array',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('single var with leading comma', {
                 code: 'for (let {,x} = obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('single var with double leading comma', {
                 code: 'for (let {,,x} = obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double var simple', {
                 code: 'for (let {x, y} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double var with double comma', {
                 code: 'for (let {x,, y} = obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double var simple', {
                 code: 'for (let {x} = a, {y} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct with init', {
                 code: 'for (let {x} = a, y = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct without init', {
                 code: 'for (let {x} = a, obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct with ini and destruct', {
                 code: 'for (let x = a, {y} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct without ini and destruct', {
                 code: 'for (let x, {y} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with init', {
                 code: 'for (let {x = y} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with and without init', {
                 code: 'for (let {x = y, z} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct without and with init', {
                 code: 'for (let {x, y = z} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct both with init', {
                 code: 'for (let {x = y, z = a} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with rename', {
                 code: 'for (let {x : y} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with and without rename', {
                 code: 'for (let {x : y, z} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct without and with rename', {
                 code: 'for (let {x, y : z} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct both with rename', {
                 code: 'for (let {x : y, z : a} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with rename and init', {
                 code: 'for (let {x : y = z} = obj);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with rename and init', {
                 code: 'for (let {x : y, z, a : b = c} = obj);',
                 throws: '(`;`)',
@@ -4881,115 +2908,37 @@ export default (describe, test) =>
                   $PUNCTUATOR,
                 ],
               });
-
-              test('single destruct no assignment', {
-                code: 'for (let {x});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('double destruct no assignment', {
-                code: 'for (let {x}, {y} = z);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('ident and destruct no assignment', {
-                code: 'for (let x, {y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('destruct no assignment and ident', {
-                code: 'for (let {x}, y);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('ident with init and destruct no assignment', {
-                code: 'for (let x = y, {z});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('destruct no assignment and ident', {
-                code: 'for (let {x}, y);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with rename and no assignment', {
-                code: 'for (let {x:y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with default and no assignment', {
-                code: 'for (let {x=y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with rename and default and no assignment', {
-                code: 'for (let {x:y=z});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
+              test('single destruct no assignment', {code: 'for (let {x});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('double destruct no assignment', {code: 'for (let {x}, {y} = z);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('ident and destruct no assignment', {code: 'for (let x, {y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('destruct no assignment and ident', {code: 'for (let {x}, y);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('ident with init and destruct no assignment', {code: 'for (let x = y, {z});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('destruct no assignment and ident', {code: 'for (let {x}, y);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with rename and no assignment', {code: 'for (let {x:y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with default and no assignment', {code: 'for (let {x=y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with rename and default and no assignment', {code: 'for (let {x:y=z});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
               test('double destruct with rename and default and with and without assignment', {
                 code: 'for (let {x:y=z} = obj, {a:b=c});',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double destruct with rename and default and without and with assignment', {
                 code: 'for (let {x:y=z}, {a:b=c} = obj);',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('single destruct with colon-eq', {
-                code: 'for (let {a:=c} = z);',
-                throws: true,
-              });
-
-              test('correct dynamic property destructuring', {
-                code: 'for (let {[x]: y} = z);',
-                throws: '(`;`)',
-                desc: 'TODO: the message is actually wrong here (since the init is present). not a big deal right now as long as something throws.',
-              });
-
-              test('dynamic property destructuring missing alias', {
-                code: 'for (let {[x]} = z);',
-                throws: 'computed property name',
-              });
-
-              test('dynamic property destructuring missing alias and init', {
-                code: 'for (let {[x]});',
-                throws: 'computed property name',
-              });
-
-              test('dynamic property destructuring missing assignment', {
-                code: 'for (let {[x]: y});',
-                throws: 'destructuring must have init',
-              });
-
-              test('dynamic property destructuring with default missing alias', {
-                code: 'for (let {[x] = y} = z);',
-                throws: 'computed property name',
-              });
-
-              test('dynamic property destructuring with default and alias missing init', {
-                code: 'for (let {[x]: y = z});',
-                throws: 'destructuring must have init',
-              });
-
+              test('single destruct with colon-eq', {code: 'for (let {a:=c} = z);', throws: true});
+              test('correct dynamic property destructuring', {code: 'for (let {[x]: y} = z);', throws: '(`;`)', desc: 'TODO: the message is actually wrong here (since the init is present). not a big deal right now as long as something throws.'});
+              test('dynamic property destructuring missing alias', {code: 'for (let {[x]} = z);', throws: 'computed property name'});
+              test('dynamic property destructuring missing alias and init', {code: 'for (let {[x]});', throws: 'computed property name'});
+              test('dynamic property destructuring missing assignment', {code: 'for (let {[x]: y});', throws: 'destructuring must have init'});
+              test('dynamic property destructuring with default missing alias', {code: 'for (let {[x] = y} = z);', throws: 'computed property name'});
+              test('dynamic property destructuring with default and alias missing init', {code: 'for (let {[x]: y = z});', throws: 'destructuring must have init'});
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (let {[x]: y = z} = a);',
                 throws: '(`;`)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('dynamic prop as second prop', {
                 code: 'for (let {a, [x]: y} = a);',
                 throws: '(`;`)',
@@ -4997,7 +2946,6 @@ export default (describe, test) =>
               });
             });
           });
-
           describe('for-in', _ => {
             describe('array', _ => {
               test('empty "array" should work', {
@@ -5007,17 +2955,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: []},
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: []}, init: null}]},
                       right: {type: 'Identifier', name: 'x'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5025,7 +2963,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('empty array with one comma', {
                 code: 'for (let [,] in x);',
                 ast: {
@@ -5033,17 +2970,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: [null]},
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null]}, init: null}]},
                       right: {type: 'Identifier', name: 'x'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5051,7 +2978,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('empty array with double comma', {
                 code: 'for (let [,,] in x);',
                 ast: {
@@ -5059,17 +2985,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: [null, null]},
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, null]}, init: null}]},
                       right: {type: 'Identifier', name: 'x'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5077,7 +2993,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('with one var, no init, semi', {
                 code: 'for (let [foo] in arr);',
                 ast: {
@@ -5085,20 +3000,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5106,7 +3008,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('trailing comma is insignificant', {
                 code: 'for (let [foo,] in arr);',
                 ast: {
@@ -5114,20 +3015,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5135,7 +3023,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double trailing comma is significant', {
                 code: 'for (let [foo,,] in arr);',
                 ast: {
@@ -5143,20 +3030,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, null],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5164,7 +3038,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('leading comma', {
                 code: 'for (let [,foo] in arr);',
                 ast: {
@@ -5172,20 +3045,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [null, {type: 'Identifier', name: 'foo'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, {type: 'Identifier', name: 'foo'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5193,7 +3053,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double leading comma', {
                 code: 'for (let [,,foo] in arr);',
                 ast: {
@@ -5201,20 +3060,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [null, null, {type: 'Identifier', name: 'foo'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, null, {type: 'Identifier', name: 'foo'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5222,7 +3068,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars', {
                 code: 'for (let [foo,bar] in arr);',
                 ast: {
@@ -5230,20 +3075,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5251,7 +3083,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars with eliding comma', {
                 code: 'for (let [foo,,bar] in arr);',
                 ast: {
@@ -5259,20 +3090,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, null, {type: 'Identifier', name: 'bar'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null, {type: 'Identifier', name: 'bar'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5280,37 +3098,31 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct', {
                 code: 'for (let [foo] = arr, [bar] in arr);',
                 throws: 'can only have one binding',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct without init', {
                 code: 'for (let [foo], bar in arr);',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct with init', {
                 code: 'for (let [foo] = arr, bar in arr);',
                 throws: 'can only have one binding',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct without init and destruct', {
                 code: 'for (let foo, [bar] in arr);',
                 throws: 'can only have one binding',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct with init and destruct', {
                 code: 'for (let foo = arr, [bar] in arr);',
                 throws: ' can only have one binding',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('one var with initializer', {
                 code: 'for (let [foo=a] in arr);',
                 ast: {
@@ -5321,22 +3133,7 @@ export default (describe, test) =>
                       left: {
                         type: 'VariableDeclaration',
                         kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                              ],
-                            },
-                            init: null,
-                          },
-                        ],
+                        declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}]}, init: null}],
                       },
                       right: {type: 'Identifier', name: 'arr'},
                       body: {type: 'EmptyStatement'},
@@ -5345,7 +3142,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, with and without initializer', {
                 code: 'for (let [foo=a, bar] in arr);',
                 ast: {
@@ -5359,17 +3155,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                                {type: 'Identifier', name: 'bar'},
-                              ],
-                            },
+                            id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}, {type: 'Identifier', name: 'bar'}]},
                             init: null,
                           },
                         ],
@@ -5381,7 +3167,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, without and with initializer', {
                 code: 'for (let [foo, bar=b] in arr);',
                 ast: {
@@ -5395,17 +3180,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {type: 'Identifier', name: 'foo'},
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'bar'},
-                                  right: {type: 'Identifier', name: 'b'},
-                                },
-                              ],
-                            },
+                            id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}}]},
                             init: null,
                           },
                         ],
@@ -5417,7 +3192,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, with and with initializer', {
                 code: 'for (let [foo=a, bar=b] in arr);',
                 ast: {
@@ -5434,16 +3208,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ArrayPattern',
                               elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'bar'},
-                                  right: {type: 'Identifier', name: 'b'},
-                                },
+                                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}},
+                                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}},
                               ],
                             },
                             init: null,
@@ -5457,35 +3223,30 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment without init', {
                 code: 'for (let [foo]);',
                 throws: 'destructuring must have init',
                 desc: '(these mirror tests are kind of moot as per for-in)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with init', {
                 code: 'for (let [foo = x]);',
                 throws: 'destructuring must have init',
                 desc: '(these mirror tests are kind of moot as per for-in)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with two declarations first', {
                 code: 'for (let [foo], bar);',
                 throws: 'destructuring must have init',
                 desc: '(these mirror tests are kind of moot as per for-in)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with two declarations second', {
                 code: 'for (let foo, [bar]);',
                 throws: 'destructuring must have init',
                 desc: '(these mirror tests are kind of moot as per for-in)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               describe('rest operator', _ => {
                 test('rest as the only destruct', {
                   code: 'for (let [...foo] in obj);',
@@ -5494,25 +3255,7 @@ export default (describe, test) =>
                     body: [
                       {
                         type: 'ForInStatement',
-                        left: {
-                          type: 'VariableDeclaration',
-                          kind: 'let',
-                          declarations: [
-                            {
-                              type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'foo'},
-                                  },
-                                ],
-                              },
-                              init: null,
-                            },
-                          ],
-                        },
+                        left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'Identifier', name: 'foo'}}]}, init: null}]},
                         right: {type: 'Identifier', name: 'obj'},
                         body: {type: 'EmptyStatement'},
                       },
@@ -5520,7 +3263,6 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
                 test('rest preceded by an ident', {
                   code: 'for (let [foo, ...bar] in obj);',
                   ast: {
@@ -5531,22 +3273,7 @@ export default (describe, test) =>
                         left: {
                           type: 'VariableDeclaration',
                           kind: 'let',
-                          declarations: [
-                            {
-                              type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {type: 'Identifier', name: 'foo'},
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'bar'},
-                                  },
-                                ],
-                              },
-                              init: null,
-                            },
-                          ],
+                          declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'RestElement', argument: {type: 'Identifier', name: 'bar'}}]}, init: null}],
                         },
                         right: {type: 'Identifier', name: 'obj'},
                         body: {type: 'EmptyStatement'},
@@ -5555,22 +3282,9 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('rest followed by an ident', {
-                  code: 'for (let [...foo, bar] in obj);',
-                  throws: true,
-                });
-
-                test('rest followed by a trailing comma', {
-                  code: 'for (let [...foo,] in obj);',
-                  throws: true,
-                });
-
-                test('rest followed by two commas', {
-                  code: 'for (let [...foo,,] in obj);',
-                  throws: true,
-                });
-
+                test('rest followed by an ident', {code: 'for (let [...foo, bar] in obj);', throws: true});
+                test('rest followed by a trailing comma', {code: 'for (let [...foo,] in obj);', throws: true});
+                test('rest followed by two commas', {code: 'for (let [...foo,,] in obj);', throws: true});
                 test('rest on a nested destruct', {
                   code: 'for (let [...[foo, bar]] in obj);',
                   ast: {
@@ -5582,22 +3296,7 @@ export default (describe, test) =>
                           type: 'VariableDeclaration',
                           kind: 'let',
                           declarations: [
-                            {
-                              type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {
-                                    type: 'RestElement',
-                                    argument: {
-                                      type: 'ArrayPattern',
-                                      elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                    },
-                                  },
-                                ],
-                              },
-                              init: null,
-                            },
+                            {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]}, init: null},
                           ],
                         },
                         right: {type: 'Identifier', name: 'obj'},
@@ -5607,17 +3306,8 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('trailing comma after rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar],] in obj);',
-                  throws: true,
-                });
-
-                test('double trailing comma after rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar],,] in obj);',
-                  throws: true,
-                });
-
+                test('trailing comma after rest on a nested destruct', {code: 'for (let [...[foo, bar],] in obj);', throws: true});
+                test('double trailing comma after rest on a nested destruct', {code: 'for (let [...[foo, bar],,] in obj);', throws: true});
                 test('second param rest on a nested destruct', {
                   code: 'for (let [x, ...[foo, bar]] in obj);',
                   ast: {
@@ -5631,19 +3321,7 @@ export default (describe, test) =>
                           declarations: [
                             {
                               type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {type: 'Identifier', name: 'x'},
-                                  {
-                                    type: 'RestElement',
-                                    argument: {
-                                      type: 'ArrayPattern',
-                                      elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                    },
-                                  },
-                                ],
-                              },
+                              id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}, {type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]},
                               init: null,
                             },
                           ],
@@ -5655,38 +3333,12 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('rest with default', {
-                  code: 'for (let [...bar = foo] in obj);',
-                  desc: 'rest cannot get a default in var decls but they can as func args',
-                  throws: true,
-                });
-
-                test('double rest / spread rest', {
-                  code: 'for (let [... ...foo] in obj);',
-                  throws: true,
-                });
-
-                test('rest without value', {
-                  code: 'for (let [...] in obj);',
-                  throws: true,
-                });
-
-                test('rest with comma without value', {
-                  code: 'for (let [...,] in obj);',
-                  throws: true,
-                });
-
-                test('single dot vs rest', {
-                  code: 'for (let [.x] in obj);',
-                  throws: true,
-                });
-
-                test('double dot vs rest', {
-                  code: 'for (let [..x] in obj);',
-                  throws: true,
-                });
-
+                test('rest with default', {code: 'for (let [...bar = foo] in obj);', desc: 'rest cannot get a default in var decls but they can as func args', throws: true});
+                test('double rest / spread rest', {code: 'for (let [... ...foo] in obj);', throws: true});
+                test('rest without value', {code: 'for (let [...] in obj);', throws: true});
+                test('rest with comma without value', {code: 'for (let [...,] in obj);', throws: true});
+                test('single dot vs rest', {code: 'for (let [.x] in obj);', throws: true});
+                test('double dot vs rest', {code: 'for (let [..x] in obj);', throws: true});
                 test('spread and rest', {
                   code: 'for (let [a=[...b], ...c] in obj);',
                   ast: {
@@ -5703,23 +3355,8 @@ export default (describe, test) =>
                               id: {
                                 type: 'ArrayPattern',
                                 elements: [
-                                  {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'a'},
-                                    right: {
-                                      type: 'ArrayExpression',
-                                      elements: [
-                                        {
-                                          type: 'SpreadElement',
-                                          argument: {type: 'Identifier', name: 'b'},
-                                        },
-                                      ],
-                                    },
-                                  },
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'c'},
-                                  },
+                                  {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'a'}, right: {type: 'ArrayExpression', elements: [{type: 'SpreadElement', argument: {type: 'Identifier', name: 'b'}}]}},
+                                  {type: 'RestElement', argument: {type: 'Identifier', name: 'c'}},
                                 ],
                               },
                               init: null,
@@ -5735,7 +3372,6 @@ export default (describe, test) =>
                 });
               });
             });
-
             describe('object', _ => {
               test('empty obj', {
                 code: 'for (let {} in obj);',
@@ -5744,17 +3380,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForInStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ObjectPattern', properties: []},
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: []}, init: null}]},
                       right: {type: 'Identifier', name: 'obj'},
                       body: {type: 'EmptyStatement'},
                     },
@@ -5762,21 +3388,8 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
-              test('empty obj with trailing comma', {
-                code: 'for (let {,} in obj);',
-                throws: 'Objects cant have comma without something preceding it',
-                desc: 'works for array but not for obj',
-                tokens: [],
-              });
-
-              test('empty obj with elided commas', {
-                code: 'for (let {,,} in obj);',
-                throws: 'Objects cant have comma without something preceding it',
-                desc: 'works for array but not for obj',
-                tokens: [],
-              });
-
+              test('empty obj with trailing comma', {code: 'for (let {,} in obj);', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
+              test('empty obj with elided commas', {code: 'for (let {,,} in obj);', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
               test('single var base case', {
                 code: 'for (let {x} in obj);',
                 ast: {
@@ -5790,20 +3403,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: null,
                           },
                         ],
@@ -5815,7 +3415,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single var with trailing comma', {
                 code: 'for (let {x,} in obj);',
                 ast: {
@@ -5829,20 +3428,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: null,
                           },
                         ],
@@ -5854,28 +3440,24 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single var with double trailing comma', {
                 code: 'for (let {x,,} in obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'does not work with obj, only array',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('single var with leading comma', {
                 code: 'for (let {,x} in obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('single var with double leading comma', {
                 code: 'for (let {,,x} in obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double var simple', {
                 code: 'for (let {x, y} in obj);',
                 ast: {
@@ -5892,24 +3474,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true},
                               ],
                             },
                             init: null,
@@ -5923,49 +3489,42 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double var with double comma', {
                 code: 'for (let {x,, y} in obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double var simple', {
                 code: 'for (let {x} = a, {y} in obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct with init', {
                 code: 'for (let {x} = a, y in obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct without init', {
                 code: 'for (let {x} = a, obj in obj2);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct with ini and destruct', {
                 code: 'for (let x = a, {y} in obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct without ini and destruct', {
                 code: 'for (let x, {y} in obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with init', {
                 code: 'for (let {x = y} in obj);',
                 ast: {
@@ -5988,11 +3547,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
                               ],
@@ -6008,7 +3563,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with and without init', {
                 code: 'for (let {x = y, z} in obj);',
                 ast: {
@@ -6031,22 +3585,10 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                               ],
                             },
                             init: null,
@@ -6060,7 +3602,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct without and with init', {
                 code: 'for (let {x, y = z} in obj);',
                 ast: {
@@ -6077,26 +3618,14 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
                                 {
                                   type: 'Property',
                                   key: {type: 'Identifier', name: 'y'},
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: true,
                                 },
                               ],
@@ -6112,7 +3641,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct both with init', {
                 code: 'for (let {x = y, z = a} in obj);',
                 ast: {
@@ -6135,11 +3663,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
                                 {
@@ -6148,11 +3672,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'z'},
-                                    right: {type: 'Identifier', name: 'a'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'z'}, right: {type: 'Identifier', name: 'a'}},
                                   shorthand: true,
                                 },
                               ],
@@ -6168,7 +3688,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with rename', {
                 code: 'for (let {x : y} in obj);',
                 ast: {
@@ -6182,20 +3701,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                             init: null,
                           },
                         ],
@@ -6207,7 +3713,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with and without rename', {
                 code: 'for (let {x : y, z} in obj);',
                 ast: {
@@ -6224,24 +3729,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                               ],
                             },
                             init: null,
@@ -6255,7 +3744,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct without and with rename', {
                 code: 'for (let {x, y : z} in obj);',
                 ast: {
@@ -6272,24 +3760,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: false},
                               ],
                             },
                             init: null,
@@ -6303,7 +3775,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct both with rename', {
                 code: 'for (let {x : y, z : a} in obj);',
                 ast: {
@@ -6320,24 +3791,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'a'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: false},
                               ],
                             },
                             init: null,
@@ -6351,7 +3806,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with rename and init', {
                 code: 'for (let {x : y = z} in obj);',
                 ast: {
@@ -6374,11 +3828,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: false,
                                 },
                               ],
@@ -6394,7 +3844,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with rename and init', {
                 code: 'for (let {x : y, z, a : b = c} in obj);',
                 ast: {
@@ -6411,35 +3860,15 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                                 {
                                   type: 'Property',
                                   key: {type: 'Identifier', name: 'a'},
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'b'},
-                                    right: {type: 'Identifier', name: 'c'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'b'}, right: {type: 'Identifier', name: 'c'}},
                                   shorthand: false,
                                 },
                               ],
@@ -6455,78 +3884,26 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
-              test('single destruct no assignment', {
-                code: 'for (let {x});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('double destruct no assignment', {
-                code: 'for (let {x}, {y} in z);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('ident and destruct no assignment', {
-                code: 'for (let x, {y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('destruct no assignment and ident', {
-                code: 'for (let {x}, y);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('ident with init and destruct no assignment', {
-                code: 'for (let x = y, {z});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('destruct no assignment and ident', {
-                code: 'for (let {x}, y);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with rename and no assignment', {
-                code: 'for (let {x:y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with default and no assignment', {
-                code: 'for (let {x=y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with rename and default and no assignment', {
-                code: 'for (let {x:y=z});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
+              test('single destruct no assignment', {code: 'for (let {x});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('double destruct no assignment', {code: 'for (let {x}, {y} in z);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('ident and destruct no assignment', {code: 'for (let x, {y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('destruct no assignment and ident', {code: 'for (let {x}, y);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('ident with init and destruct no assignment', {code: 'for (let x = y, {z});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('destruct no assignment and ident', {code: 'for (let {x}, y);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with rename and no assignment', {code: 'for (let {x:y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with default and no assignment', {code: 'for (let {x=y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with rename and default and no assignment', {code: 'for (let {x:y=z});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
               test('double destruct with rename and default and with and without assignment', {
                 code: 'for (let {x:y=z} = obj, {a:b=c});',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double destruct with rename and default and without and with assignment', {
                 code: 'for (let {x:y=z}, {a:b=c} in obj);',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('single destruct with colon-eq', {
-                code: 'for (let {a:=c} in z);',
-                throws: true,
-              });
-
+              test('single destruct with colon-eq', {code: 'for (let {a:=c} in z);', throws: true});
               test('correct dynamic property destructuring', {
                 code: 'for (let {[x]: y} in obj);',
                 ast: {
@@ -6540,20 +3917,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: true,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                             init: null,
                           },
                         ],
@@ -6565,17 +3929,8 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
-              test('dynamic property destructuring missing alias', {
-                code: 'for (let {[x]} in obj);',
-                throws: 'computed property name',
-              });
-
-              test('dynamic property destructuring with default missing alias', {
-                code: 'for (let {[x] = y} in obj);',
-                throws: 'computed property name',
-              });
-
+              test('dynamic property destructuring missing alias', {code: 'for (let {[x]} in obj);', throws: 'computed property name'});
+              test('dynamic property destructuring with default missing alias', {code: 'for (let {[x] = y} in obj);', throws: 'computed property name'});
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (let {[x]: y = z} in obj);',
                 ast: {
@@ -6598,11 +3953,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: true,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: false,
                                 },
                               ],
@@ -6618,7 +3969,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('dynamic prop as second prop', {
                 code: 'for (let {a, [x]: y} in obj);',
                 ast: {
@@ -6635,24 +3985,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'a'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'a'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: true,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false},
                               ],
                             },
                             init: null,
@@ -6668,7 +4002,6 @@ export default (describe, test) =>
               });
             });
           });
-
           describe('for-of', _ => {
             describe('array', _ => {
               test('empty "array" should work', {
@@ -6678,17 +4011,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: []},
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: []}, init: null}]},
                       right: {type: 'Identifier', name: 'x'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6697,7 +4020,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('empty array with one comma', {
                 code: 'for (let [,] of x);',
                 ast: {
@@ -6705,17 +4027,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: [null]},
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null]}, init: null}]},
                       right: {type: 'Identifier', name: 'x'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6724,7 +4036,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('empty array with double comma', {
                 code: 'for (let [,,] of x);',
                 ast: {
@@ -6732,17 +4043,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ArrayPattern', elements: [null, null]},
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, null]}, init: null}]},
                       right: {type: 'Identifier', name: 'x'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6751,7 +4052,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('with one var, no init, semi', {
                 code: 'for (let [foo] of arr);',
                 ast: {
@@ -6759,20 +4059,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6781,7 +4068,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('trailing comma is insignificant', {
                 code: 'for (let [foo,] of arr);',
                 ast: {
@@ -6789,20 +4075,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6811,7 +4084,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double trailing comma is significant', {
                 code: 'for (let [foo,,] of arr);',
                 ast: {
@@ -6819,20 +4091,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, null],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6841,7 +4100,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('leading comma', {
                 code: 'for (let [,foo] of arr);',
                 ast: {
@@ -6849,20 +4107,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [null, {type: 'Identifier', name: 'foo'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, {type: 'Identifier', name: 'foo'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6871,7 +4116,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double leading comma', {
                 code: 'for (let [,,foo] of arr);',
                 ast: {
@@ -6879,20 +4123,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [null, null, {type: 'Identifier', name: 'foo'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [null, null, {type: 'Identifier', name: 'foo'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6901,7 +4132,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars', {
                 code: 'for (let [foo,bar] of arr);',
                 ast: {
@@ -6909,20 +4139,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6931,7 +4148,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars with eliding comma', {
                 code: 'for (let [foo,,bar] of arr);',
                 ast: {
@@ -6939,20 +4155,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [{type: 'Identifier', name: 'foo'}, null, {type: 'Identifier', name: 'bar'}],
-                            },
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null, {type: 'Identifier', name: 'bar'}]}, init: null}]},
                       right: {type: 'Identifier', name: 'arr'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -6961,37 +4164,31 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct', {
                 code: 'for (let [foo] = arr, [bar] of arr);',
                 throws: 'can only have one binding',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct without init', {
                 code: 'for (let [foo], bar of arr);',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct with init', {
                 code: 'for (let [foo] = arr, bar of arr);',
                 throws: 'can only have one binding',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct without init and destruct', {
                 code: 'for (let foo, [bar] of arr);',
                 throws: 'can only have one binding',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct with init and destruct', {
                 code: 'for (let foo = arr, [bar] of arr);',
                 throws: 'can only have one binding',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('one var with initializer', {
                 code: 'for (let [foo=a] of arr);',
                 ast: {
@@ -7002,22 +4199,7 @@ export default (describe, test) =>
                       left: {
                         type: 'VariableDeclaration',
                         kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                              ],
-                            },
-                            init: null,
-                          },
-                        ],
+                        declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}]}, init: null}],
                       },
                       right: {type: 'Identifier', name: 'arr'},
                       await: false,
@@ -7027,7 +4209,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, with and without initializer', {
                 code: 'for (let [foo=a, bar] of arr);',
                 ast: {
@@ -7041,17 +4222,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                                {type: 'Identifier', name: 'bar'},
-                              ],
-                            },
+                            id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}, {type: 'Identifier', name: 'bar'}]},
                             init: null,
                           },
                         ],
@@ -7064,7 +4235,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, without and with initializer', {
                 code: 'for (let [foo, bar=b] of arr);',
                 ast: {
@@ -7078,17 +4248,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {type: 'Identifier', name: 'foo'},
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'bar'},
-                                  right: {type: 'Identifier', name: 'b'},
-                                },
-                              ],
-                            },
+                            id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}}]},
                             init: null,
                           },
                         ],
@@ -7101,7 +4261,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('two vars, with and with initializer', {
                 code: 'for (let [foo=a, bar=b] of arr);',
                 ast: {
@@ -7118,16 +4277,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ArrayPattern',
                               elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'foo'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'bar'},
-                                  right: {type: 'Identifier', name: 'b'},
-                                },
+                                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}},
+                                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}},
                               ],
                             },
                             init: null,
@@ -7142,35 +4293,30 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment without init', {
                 code: 'for (let [foo]);',
                 throws: 'destructuring must have init',
                 desc: '(these mirror tests are kind of moot as per for-of)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with init', {
                 code: 'for (let [foo = x]);',
                 throws: 'destructuring must have init',
                 desc: '(these mirror tests are kind of moot as per for-of)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with two declarations first', {
                 code: 'for (let [foo], bar);',
                 throws: 'destructuring must have init',
                 desc: '(these mirror tests are kind of moot as per for-of)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('no assignment with two declarations second', {
                 code: 'for (let foo, [bar]);',
                 throws: 'destructuring must have init',
                 desc: '(these mirror tests are kind of moot as per for-of)',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               describe('rest operator', _ => {
                 test('rest as the only destruct', {
                   code: 'for (let [...foo] of obj);',
@@ -7179,25 +4325,7 @@ export default (describe, test) =>
                     body: [
                       {
                         type: 'ForOfStatement',
-                        left: {
-                          type: 'VariableDeclaration',
-                          kind: 'let',
-                          declarations: [
-                            {
-                              type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'foo'},
-                                  },
-                                ],
-                              },
-                              init: null,
-                            },
-                          ],
-                        },
+                        left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'Identifier', name: 'foo'}}]}, init: null}]},
                         right: {type: 'Identifier', name: 'obj'},
                         await: false,
                         body: {type: 'EmptyStatement'},
@@ -7206,7 +4334,6 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
                 test('rest preceded by an ident', {
                   code: 'for (let [foo, ...bar] of obj);',
                   ast: {
@@ -7217,22 +4344,7 @@ export default (describe, test) =>
                         left: {
                           type: 'VariableDeclaration',
                           kind: 'let',
-                          declarations: [
-                            {
-                              type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {type: 'Identifier', name: 'foo'},
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'bar'},
-                                  },
-                                ],
-                              },
-                              init: null,
-                            },
-                          ],
+                          declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'RestElement', argument: {type: 'Identifier', name: 'bar'}}]}, init: null}],
                         },
                         right: {type: 'Identifier', name: 'obj'},
                         await: false,
@@ -7242,22 +4354,9 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('rest followed by an ident', {
-                  code: 'for (let [...foo, bar] of obj);',
-                  throws: true,
-                });
-
-                test('rest followed by a trailing comma', {
-                  code: 'for (let [...foo,] of obj);',
-                  throws: true,
-                });
-
-                test('rest followed by two commas', {
-                  code: 'for (let [...foo,,] of obj);',
-                  throws: true,
-                });
-
+                test('rest followed by an ident', {code: 'for (let [...foo, bar] of obj);', throws: true});
+                test('rest followed by a trailing comma', {code: 'for (let [...foo,] of obj);', throws: true});
+                test('rest followed by two commas', {code: 'for (let [...foo,,] of obj);', throws: true});
                 test('rest on a nested destruct', {
                   code: 'for (let [...[foo, bar]] of obj);',
                   ast: {
@@ -7269,22 +4368,7 @@ export default (describe, test) =>
                           type: 'VariableDeclaration',
                           kind: 'let',
                           declarations: [
-                            {
-                              type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {
-                                    type: 'RestElement',
-                                    argument: {
-                                      type: 'ArrayPattern',
-                                      elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                    },
-                                  },
-                                ],
-                              },
-                              init: null,
-                            },
+                            {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]}, init: null},
                           ],
                         },
                         right: {type: 'Identifier', name: 'obj'},
@@ -7295,17 +4379,8 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('trailing comma after rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar],] of obj);',
-                  throws: true,
-                });
-
-                test('double trailing comma after rest on a nested destruct', {
-                  code: 'for (let [...[foo, bar],,] of obj);',
-                  throws: true,
-                });
-
+                test('trailing comma after rest on a nested destruct', {code: 'for (let [...[foo, bar],] of obj);', throws: true});
+                test('double trailing comma after rest on a nested destruct', {code: 'for (let [...[foo, bar],,] of obj);', throws: true});
                 test('second param rest on a nested destruct', {
                   code: 'for (let [x, ...[foo, bar]] of obj);',
                   ast: {
@@ -7319,19 +4394,7 @@ export default (describe, test) =>
                           declarations: [
                             {
                               type: 'VariableDeclarator',
-                              id: {
-                                type: 'ArrayPattern',
-                                elements: [
-                                  {type: 'Identifier', name: 'x'},
-                                  {
-                                    type: 'RestElement',
-                                    argument: {
-                                      type: 'ArrayPattern',
-                                      elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                    },
-                                  },
-                                ],
-                              },
+                              id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}, {type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]},
                               init: null,
                             },
                           ],
@@ -7344,38 +4407,12 @@ export default (describe, test) =>
                   },
                   tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
-
-                test('rest with default', {
-                  code: 'for (let [...bar = foo] of obj);',
-                  desc: 'rest cannot get a default of var decls but they can as func args',
-                  throws: true,
-                });
-
-                test('double rest / spread rest', {
-                  code: 'for (let [... ...foo] of obj);',
-                  throws: true,
-                });
-
-                test('rest without value', {
-                  code: 'for (let [...] of obj);',
-                  throws: true,
-                });
-
-                test('rest with comma without value', {
-                  code: 'for (let [...,] of obj);',
-                  throws: true,
-                });
-
-                test('single dot v rest', {
-                  code: 'for (let [.x] of obj);',
-                  throws: true,
-                });
-
-                test('double dot vs rest', {
-                  code: 'for (let [..x] of obj);',
-                  throws: true,
-                });
-
+                test('rest with default', {code: 'for (let [...bar = foo] of obj);', desc: 'rest cannot get a default of var decls but they can as func args', throws: true});
+                test('double rest / spread rest', {code: 'for (let [... ...foo] of obj);', throws: true});
+                test('rest without value', {code: 'for (let [...] of obj);', throws: true});
+                test('rest with comma without value', {code: 'for (let [...,] of obj);', throws: true});
+                test('single dot v rest', {code: 'for (let [.x] of obj);', throws: true});
+                test('double dot vs rest', {code: 'for (let [..x] of obj);', throws: true});
                 test('spread and rest', {
                   code: 'for (let [a=[...b], ...c] of obj);',
                   ast: {
@@ -7392,23 +4429,8 @@ export default (describe, test) =>
                               id: {
                                 type: 'ArrayPattern',
                                 elements: [
-                                  {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'a'},
-                                    right: {
-                                      type: 'ArrayExpression',
-                                      elements: [
-                                        {
-                                          type: 'SpreadElement',
-                                          argument: {type: 'Identifier', name: 'b'},
-                                        },
-                                      ],
-                                    },
-                                  },
-                                  {
-                                    type: 'RestElement',
-                                    argument: {type: 'Identifier', name: 'c'},
-                                  },
+                                  {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'a'}, right: {type: 'ArrayExpression', elements: [{type: 'SpreadElement', argument: {type: 'Identifier', name: 'b'}}]}},
+                                  {type: 'RestElement', argument: {type: 'Identifier', name: 'c'}},
                                 ],
                               },
                               init: null,
@@ -7425,7 +4447,6 @@ export default (describe, test) =>
                 });
               });
             });
-
             describe('object', _ => {
               test('empty obj', {
                 code: 'for (let {} of obj);',
@@ -7434,17 +4455,7 @@ export default (describe, test) =>
                   body: [
                     {
                       type: 'ForOfStatement',
-                      left: {
-                        type: 'VariableDeclaration',
-                        kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {type: 'ObjectPattern', properties: []},
-                            init: null,
-                          },
-                        ],
-                      },
+                      left: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: []}, init: null}]},
                       right: {type: 'Identifier', name: 'obj'},
                       await: false,
                       body: {type: 'EmptyStatement'},
@@ -7453,21 +4464,8 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
-              test('empty obj with trailing comma', {
-                code: 'for (let {,} of obj);',
-                throws: 'Objects cant have comma without something preceding it',
-                desc: 'works for array but not for obj',
-                tokens: [],
-              });
-
-              test('empty obj with elided commas', {
-                code: 'for (let {,,} of obj);',
-                throws: 'Objects cant have comma without something preceding it',
-                desc: 'works for array but not for obj',
-                tokens: [],
-              });
-
+              test('empty obj with trailing comma', {code: 'for (let {,} of obj);', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
+              test('empty obj with elided commas', {code: 'for (let {,,} of obj);', throws: 'Objects cant have comma without something preceding it', desc: 'works for array but not for obj', tokens: []});
               test('single var base case', {
                 code: 'for (let {x} of obj);',
                 ast: {
@@ -7481,20 +4479,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: null,
                           },
                         ],
@@ -7507,7 +4492,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single var with trailing comma', {
                 code: 'for (let {x,} of obj);',
                 ast: {
@@ -7521,20 +4505,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                             init: null,
                           },
                         ],
@@ -7547,28 +4518,24 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single var with double trailing comma', {
                 code: 'for (let {x,,} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'does not work with obj, only array',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('single var with leading comma', {
                 code: 'for (let {,x} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('single var with double leading comma', {
                 code: 'for (let {,,x} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not with obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double var simple', {
                 code: 'for (let {x, y} of obj);',
                 ast: {
@@ -7585,24 +4552,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true},
                               ],
                             },
                             init: null,
@@ -7617,49 +4568,42 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double var with double comma', {
                 code: 'for (let {x,, y} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works with array but not obj',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double var simple', {
                 code: 'for (let {x} = a, {y} of obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct with init', {
                 code: 'for (let {x} = a, y of obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('destruct and non-destruct without init', {
                 code: 'for (let {x} = a, obj of obj2);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct with ini and destruct', {
                 code: 'for (let x = a, {y} of obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('non-destruct without ini and destruct', {
                 code: 'for (let x, {y} of obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with init', {
                 code: 'for (let {x = y} of obj);',
                 ast: {
@@ -7682,11 +4626,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
                               ],
@@ -7703,7 +4643,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with and without init', {
                 code: 'for (let {x = y, z} of obj);',
                 ast: {
@@ -7726,22 +4665,10 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                               ],
                             },
                             init: null,
@@ -7756,7 +4683,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct without and with init', {
                 code: 'for (let {x, y = z} of obj);',
                 ast: {
@@ -7773,26 +4699,14 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
                                 {
                                   type: 'Property',
                                   key: {type: 'Identifier', name: 'y'},
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: true,
                                 },
                               ],
@@ -7809,7 +4723,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct both with init', {
                 code: 'for (let {x = y, z = a} of obj);',
                 ast: {
@@ -7832,11 +4745,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'x'},
-                                    right: {type: 'Identifier', name: 'y'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                   shorthand: true,
                                 },
                                 {
@@ -7845,11 +4754,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'z'},
-                                    right: {type: 'Identifier', name: 'a'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'z'}, right: {type: 'Identifier', name: 'a'}},
                                   shorthand: true,
                                 },
                               ],
@@ -7866,7 +4771,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with rename', {
                 code: 'for (let {x : y} of obj);',
                 ast: {
@@ -7880,20 +4784,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                             init: null,
                           },
                         ],
@@ -7906,7 +4797,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with and without rename', {
                 code: 'for (let {x : y, z} of obj);',
                 ast: {
@@ -7923,24 +4813,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                               ],
                             },
                             init: null,
@@ -7955,7 +4829,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct without and with rename', {
                 code: 'for (let {x, y : z} of obj);',
                 ast: {
@@ -7972,24 +4845,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'x'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'y'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: false},
                               ],
                             },
                             init: null,
@@ -8004,7 +4861,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct both with rename', {
                 code: 'for (let {x : y, z : a} of obj);',
                 ast: {
@@ -8021,24 +4877,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'a'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: false},
                               ],
                             },
                             init: null,
@@ -8053,7 +4893,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('single destruct with rename and init', {
                 code: 'for (let {x : y = z} of obj);',
                 ast: {
@@ -8076,11 +4915,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: false,
                                 },
                               ],
@@ -8097,7 +4932,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('double destruct with rename and init', {
                 code: 'for (let {x : y, z, a : b = c} of obj);',
                 ast: {
@@ -8114,35 +4948,15 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'z'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'z'},
-                                  shorthand: true,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                                {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                                 {
                                   type: 'Property',
                                   key: {type: 'Identifier', name: 'a'},
                                   kind: 'init',
                                   method: false,
                                   computed: false,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'b'},
-                                    right: {type: 'Identifier', name: 'c'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'b'}, right: {type: 'Identifier', name: 'c'}},
                                   shorthand: false,
                                 },
                               ],
@@ -8159,78 +4973,26 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
-              test('single destruct no assignment', {
-                code: 'for (let {x});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('double destruct no assignment', {
-                code: 'for (let {x}, {y} of z);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('ident and destruct no assignment', {
-                code: 'for (let x, {y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('destruct no assignment and ident', {
-                code: 'for (let {x}, y);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('ident with init and destruct no assignment', {
-                code: 'for (let x = y, {z});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('destruct no assignment and ident', {
-                code: 'for (let {x}, y);',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with rename and no assignment', {
-                code: 'for (let {x:y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with default and no assignment', {
-                code: 'for (let {x=y});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
-              test('single destruct with rename and default and no assignment', {
-                code: 'for (let {x:y=z});',
-                throws: 'destructuring must have init',
-                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-              });
-
+              test('single destruct no assignment', {code: 'for (let {x});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('double destruct no assignment', {code: 'for (let {x}, {y} of z);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('ident and destruct no assignment', {code: 'for (let x, {y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('destruct no assignment and ident', {code: 'for (let {x}, y);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('ident with init and destruct no assignment', {code: 'for (let x = y, {z});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('destruct no assignment and ident', {code: 'for (let {x}, y);', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with rename and no assignment', {code: 'for (let {x:y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with default and no assignment', {code: 'for (let {x=y});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
+              test('single destruct with rename and default and no assignment', {code: 'for (let {x:y=z});', throws: 'destructuring must have init', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR]});
               test('double destruct with rename and default and with and without assignment', {
                 code: 'for (let {x:y=z} = obj, {a:b=c});',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('double destruct with rename and default and without and with assignment', {
                 code: 'for (let {x:y=z}, {a:b=c} of obj);',
                 throws: 'destructuring must have init',
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('single destruct with colon-eq', {
-                code: 'for (let {a:=c} of z);',
-                throws: true,
-              });
-
+              test('single destruct with colon-eq', {code: 'for (let {a:=c} of z);', throws: true});
               test('correct dynamic property destructuring', {
                 code: 'for (let {[x]: y} of obj);',
                 ast: {
@@ -8244,20 +5006,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ObjectPattern',
-                              properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: true,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
-                              ],
-                            },
+                            id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                             init: null,
                           },
                         ],
@@ -8270,17 +5019,8 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
-              test('dynamic property destructuring missing alias', {
-                code: 'for (let {[x]} of obj);',
-                throws: 'computed property name',
-              });
-
-              test('dynamic property destructuring with default missing alias', {
-                code: 'for (let {[x] = y} of obj);',
-                throws: 'computed property name',
-              });
-
+              test('dynamic property destructuring missing alias', {code: 'for (let {[x]} of obj);', throws: 'computed property name'});
+              test('dynamic property destructuring with default missing alias', {code: 'for (let {[x] = y} of obj);', throws: 'computed property name'});
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (let {[x]: y = z} of obj);',
                 ast: {
@@ -8303,11 +5043,7 @@ export default (describe, test) =>
                                   kind: 'init',
                                   method: false,
                                   computed: true,
-                                  value: {
-                                    type: 'AssignmentPattern',
-                                    left: {type: 'Identifier', name: 'y'},
-                                    right: {type: 'Identifier', name: 'z'},
-                                  },
+                                  value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                   shorthand: false,
                                 },
                               ],
@@ -8324,7 +5060,6 @@ export default (describe, test) =>
                 },
                 tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
-
               test('dynamic prop as second prop', {
                 code: 'for (let {a, [x]: y} of obj);',
                 ast: {
@@ -8341,24 +5076,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ObjectPattern',
                               properties: [
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'a'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: false,
-                                  value: {type: 'Identifier', name: 'a'},
-                                  shorthand: true,
-                                },
-                                {
-                                  type: 'Property',
-                                  key: {type: 'Identifier', name: 'x'},
-                                  kind: 'init',
-                                  method: false,
-                                  computed: true,
-                                  value: {type: 'Identifier', name: 'y'},
-                                  shorthand: false,
-                                },
+                                {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: true},
+                                {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false},
                               ],
                             },
                             init: null,
@@ -8377,38 +5096,18 @@ export default (describe, test) =>
           });
         });
       });
-
       describe('in export decl', _ => {
         // not an extensive test suite here since it's always strict mode and uses the same parsing mechanisms
-
         describe('regular vars', _ => {
           test('let, one var, no init, semi', {
             code: 'export let foo;',
             SCRIPT: {throws: 'module goal'},
             ast: {
               type: 'Program',
-              body: [
-                {
-                  type: 'ExportNamedDeclaration',
-                  specifiers: [],
-                  declaration: {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'foo'},
-                        init: null,
-                      },
-                    ],
-                  },
-                  source: null,
-                },
-              ],
+              body: [{type: 'ExportNamedDeclaration', specifiers: [], declaration: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}, source: null}],
             },
             tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR],
           });
-
           test('let, two vars, no init, semi', {
             code: 'export let foo, bar;',
             SCRIPT: {throws: 'module goal'},
@@ -8421,18 +5120,7 @@ export default (describe, test) =>
                   declaration: {
                     type: 'VariableDeclaration',
                     kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'foo'},
-                        init: null,
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'bar'},
-                        init: null,
-                      },
-                    ],
+                    declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'bar'}, init: null}],
                   },
                   source: null,
                 },
@@ -8440,7 +5128,6 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('let, var with init, semi', {
             code: 'export let foo = bar;',
             SCRIPT: {throws: 'module goal'},
@@ -8450,24 +5137,13 @@ export default (describe, test) =>
                 {
                   type: 'ExportNamedDeclaration',
                   specifiers: [],
-                  declaration: {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'foo'},
-                        init: {type: 'Identifier', name: 'bar'},
-                      },
-                    ],
-                  },
+                  declaration: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}}]},
                   source: null,
                 },
               ],
             },
             tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('let, two vars with both init, semi', {
             code: 'export let foo = bar, zoo = boo;',
             SCRIPT: {throws: 'module goal'},
@@ -8481,16 +5157,8 @@ export default (describe, test) =>
                     type: 'VariableDeclaration',
                     kind: 'let',
                     declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'foo'},
-                        init: {type: 'Identifier', name: 'bar'},
-                      },
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'zoo'},
-                        init: {type: 'Identifier', name: 'boo'},
-                      },
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: {type: 'Identifier', name: 'bar'}},
+                      {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'zoo'}, init: {type: 'Identifier', name: 'boo'}},
                     ],
                   },
                   source: null,
@@ -8499,69 +5167,26 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('let on next line does not trigger asi', {
             code: 'export\nlet foo',
             SCRIPT: {throws: 'module goal'},
             ast: {
               type: 'Program',
-              body: [
-                {
-                  type: 'ExportNamedDeclaration',
-                  specifiers: [],
-                  declaration: {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'foo'},
-                        init: null,
-                      },
-                    ],
-                  },
-                  source: null,
-                },
-              ],
+              body: [{type: 'ExportNamedDeclaration', specifiers: [], declaration: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}, source: null}],
             },
             tokens: [$IDENT, $IDENT, $IDENT, $ASI],
           });
-
           test('var on next line does not trigger asi', {
             code: 'export let\nfoo',
             SCRIPT: {throws: 'module goal'},
             ast: {
               type: 'Program',
-              body: [
-                {
-                  type: 'ExportNamedDeclaration',
-                  specifiers: [],
-                  declaration: {
-                    type: 'VariableDeclaration',
-                    kind: 'let',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'foo'},
-                        init: null,
-                      },
-                    ],
-                  },
-                  source: null,
-                },
-              ],
+              body: [{type: 'ExportNamedDeclaration', specifiers: [], declaration: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}, source: null}],
             },
             tokens: [$IDENT, $IDENT, $IDENT, $ASI],
           });
-
-          test('asi can not trigger if next token is ident', {
-            code: 'export let\nfoo()',
-            SCRIPT: {throws: 'module goal'},
-            throws: 'ASI',
-            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
+          test('asi can not trigger if next token is ident', {code: 'export let\nfoo()', SCRIPT: {throws: 'module goal'}, throws: 'ASI', tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
         });
-
         describe('destructuring', _ => {
           describe('array', _ => {
             test('empty "array" should work even if that does not export anything', {
@@ -8573,24 +5198,13 @@ export default (describe, test) =>
                   {
                     type: 'ExportNamedDeclaration',
                     specifiers: [],
-                    declaration: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'ArrayPattern', elements: []},
-                          init: {type: 'Identifier', name: 'x'},
-                        },
-                      ],
-                    },
+                    declaration: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: []}, init: {type: 'Identifier', name: 'x'}}]},
                     source: null,
                   },
                 ],
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('with one var, no init, semi', {
               code: 'export let [foo] = arr;',
               SCRIPT: {throws: 'module goal'},
@@ -8600,27 +5214,13 @@ export default (describe, test) =>
                   {
                     type: 'ExportNamedDeclaration',
                     specifiers: [],
-                    declaration: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [{type: 'Identifier', name: 'foo'}],
-                          },
-                          init: {type: 'Identifier', name: 'arr'},
-                        },
-                      ],
-                    },
+                    declaration: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}}]},
                     source: null,
                   },
                 ],
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double trailing comma is significant', {
               code: 'export let [foo,,] = arr;',
               SCRIPT: {throws: 'module goal'},
@@ -8630,27 +5230,13 @@ export default (describe, test) =>
                   {
                     type: 'ExportNamedDeclaration',
                     specifiers: [],
-                    declaration: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [{type: 'Identifier', name: 'foo'}, null],
-                          },
-                          init: {type: 'Identifier', name: 'arr'},
-                        },
-                      ],
-                    },
+                    declaration: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, null]}, init: {type: 'Identifier', name: 'arr'}}]},
                     source: null,
                   },
                 ],
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('two vars', {
               code: 'export let [foo,bar] = arr;',
               SCRIPT: {throws: 'module goal'},
@@ -8663,16 +5249,7 @@ export default (describe, test) =>
                     declaration: {
                       type: 'VariableDeclaration',
                       kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                          },
-                          init: {type: 'Identifier', name: 'arr'},
-                        },
-                      ],
+                      declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr'}}],
                     },
                     source: null,
                   },
@@ -8680,7 +5257,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct', {
               code: 'export let [foo] = arr, [bar] = arr2;',
               SCRIPT: {throws: 'module goal'},
@@ -8694,22 +5270,8 @@ export default (describe, test) =>
                       type: 'VariableDeclaration',
                       kind: 'let',
                       declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [{type: 'Identifier', name: 'foo'}],
-                          },
-                          init: {type: 'Identifier', name: 'arr'},
-                        },
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [{type: 'Identifier', name: 'bar'}],
-                          },
-                          init: {type: 'Identifier', name: 'arr2'},
-                        },
+                        {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}]}, init: {type: 'Identifier', name: 'arr'}},
+                        {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'bar'}]}, init: {type: 'Identifier', name: 'arr2'}},
                       ],
                     },
                     source: null,
@@ -8718,7 +5280,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('two vars, with and without initializer', {
               code: 'export let [foo=a, bar] = arr;',
               SCRIPT: {throws: 'module goal'},
@@ -8734,17 +5295,7 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ArrayPattern',
-                            elements: [
-                              {
-                                type: 'AssignmentPattern',
-                                left: {type: 'Identifier', name: 'foo'},
-                                right: {type: 'Identifier', name: 'a'},
-                              },
-                              {type: 'Identifier', name: 'bar'},
-                            ],
-                          },
+                          id: {type: 'ArrayPattern', elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}, {type: 'Identifier', name: 'bar'}]},
                           init: {type: 'Identifier', name: 'arr'},
                         },
                       ],
@@ -8755,7 +5306,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('no assignment without init', {
               code: 'export let [foo];',
               SCRIPT: {throws: 'module goal'},
@@ -8763,7 +5313,6 @@ export default (describe, test) =>
               desc: 'module goal is always strict',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('no assignment with init', {
               code: 'export let [foo = x];',
               SCRIPT: {throws: 'module goal'},
@@ -8771,7 +5320,6 @@ export default (describe, test) =>
               desc: 'module goal is always strict',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('no assignment with two declarations first', {
               code: 'export let [foo], bar;',
               SCRIPT: {throws: 'module goal'},
@@ -8779,14 +5327,12 @@ export default (describe, test) =>
               desc: 'module goal is always strict',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('no assignment with two declarations second', {
               code: 'export let foo, [bar];',
               SCRIPT: {throws: 'module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             describe('rest operator', _ => {
               test('rest as the only destruct', {
                 code: 'export let [...foo] = obj;',
@@ -8799,21 +5345,7 @@ export default (describe, test) =>
                       declaration: {
                         type: 'VariableDeclaration',
                         kind: 'let',
-                        declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {
-                                  type: 'RestElement',
-                                  argument: {type: 'Identifier', name: 'foo'},
-                                },
-                              ],
-                            },
-                            init: {type: 'Identifier', name: 'obj'},
-                          },
-                        ],
+                        declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'Identifier', name: 'foo'}}]}, init: {type: 'Identifier', name: 'obj'}}],
                       },
                       source: null,
                     },
@@ -8822,7 +5354,6 @@ export default (describe, test) =>
                 SCRIPT: {throws: 'module goal'},
                 tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
               test('rest preceded by an ident', {
                 code: 'export let [foo, ...bar] = obj;',
                 ast: {
@@ -8835,20 +5366,7 @@ export default (describe, test) =>
                         type: 'VariableDeclaration',
                         kind: 'let',
                         declarations: [
-                          {
-                            type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {type: 'Identifier', name: 'foo'},
-                                {
-                                  type: 'RestElement',
-                                  argument: {type: 'Identifier', name: 'bar'},
-                                },
-                              ],
-                            },
-                            init: {type: 'Identifier', name: 'obj'},
-                          },
+                          {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'RestElement', argument: {type: 'Identifier', name: 'bar'}}]}, init: {type: 'Identifier', name: 'obj'}},
                         ],
                       },
                       source: null,
@@ -8858,23 +5376,9 @@ export default (describe, test) =>
                 SCRIPT: {throws: 'module goal'},
                 tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('rest followed by an ident', {
-                code: 'export let [...foo, bar] = obj;',
-                throws: true,
-              });
-
-              test('rest followed by a trailing comma', {
-                code: 'export let [...foo,] = obj;',
-                desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
-                throws: true,
-              });
-
-              test('rest followed by two commas', {
-                code: 'export let [...foo,,] = obj;',
-                throws: true,
-              });
-
+              test('rest followed by an ident', {code: 'export let [...foo, bar] = obj;', throws: true});
+              test('rest followed by a trailing comma', {code: 'export let [...foo,] = obj;', desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest', throws: true});
+              test('rest followed by two commas', {code: 'export let [...foo,,] = obj;', throws: true});
               test('rest on a nested destruct', {
                 code: 'export let [...[foo, bar]] = obj;',
                 ast: {
@@ -8889,18 +5393,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {
-                                  type: 'RestElement',
-                                  argument: {
-                                    type: 'ArrayPattern',
-                                    elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                  },
-                                },
-                              ],
-                            },
+                            id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]},
                             init: {type: 'Identifier', name: 'obj'},
                           },
                         ],
@@ -8912,17 +5405,8 @@ export default (describe, test) =>
                 SCRIPT: {throws: 'module goal'},
                 tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('trailing comma after rest on a nested destruct', {
-                code: 'export let [...[foo, bar],] = obj;',
-                throws: true,
-              });
-
-              test('double trailing comma after rest on a nested destruct', {
-                code: 'export let [...[foo, bar],,] = obj;',
-                throws: true,
-              });
-
+              test('trailing comma after rest on a nested destruct', {code: 'export let [...[foo, bar],] = obj;', throws: true});
+              test('double trailing comma after rest on a nested destruct', {code: 'export let [...[foo, bar],,] = obj;', throws: true});
               test('second param rest on a nested destruct', {
                 code: 'export let [x, ...[foo, bar]] = obj;',
                 ast: {
@@ -8937,19 +5421,7 @@ export default (describe, test) =>
                         declarations: [
                           {
                             type: 'VariableDeclarator',
-                            id: {
-                              type: 'ArrayPattern',
-                              elements: [
-                                {type: 'Identifier', name: 'x'},
-                                {
-                                  type: 'RestElement',
-                                  argument: {
-                                    type: 'ArrayPattern',
-                                    elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                                  },
-                                },
-                              ],
-                            },
+                            id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}, {type: 'RestElement', argument: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}]}}]},
                             init: {type: 'Identifier', name: 'obj'},
                           },
                         ],
@@ -8961,39 +5433,12 @@ export default (describe, test) =>
                 SCRIPT: {throws: 'module goal'},
                 tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
-
-              test('rest with default', {
-                code: 'export let [...bar = foo] = obj;',
-                desc: 'rest cannot get a default in var decls but they can as func args',
-                throws: true,
-              });
-
-              test('double rest / spread rest', {
-                code: 'export let [... ...foo] = obj;',
-                throws: 'Can not rest twice',
-                SCRIPT: {throws: 'module goal'},
-              });
-
-              test('rest without value', {
-                code: 'export let [...] = obj;',
-                throws: true,
-              });
-
-              test('rest with comma without value', {
-                code: 'export let [...,] = obj;',
-                throws: true,
-              });
-
-              test('single dot vs rest', {
-                code: 'export let [.x] = obj;',
-                throws: true,
-              });
-
-              test('double dot vs rest', {
-                code: 'export let [..x] = obj;',
-                throws: true,
-              });
-
+              test('rest with default', {code: 'export let [...bar = foo] = obj;', desc: 'rest cannot get a default in var decls but they can as func args', throws: true});
+              test('double rest / spread rest', {code: 'export let [... ...foo] = obj;', throws: 'Can not rest twice', SCRIPT: {throws: 'module goal'}});
+              test('rest without value', {code: 'export let [...] = obj;', throws: true});
+              test('rest with comma without value', {code: 'export let [...,] = obj;', throws: true});
+              test('single dot vs rest', {code: 'export let [.x] = obj;', throws: true});
+              test('double dot vs rest', {code: 'export let [..x] = obj;', throws: true});
               test('spread and rest', {
                 code: 'export let [a=[...b], ...c] = obj;',
                 ast: {
@@ -9011,23 +5456,8 @@ export default (describe, test) =>
                             id: {
                               type: 'ArrayPattern',
                               elements: [
-                                {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'a'},
-                                  right: {
-                                    type: 'ArrayExpression',
-                                    elements: [
-                                      {
-                                        type: 'SpreadElement',
-                                        argument: {type: 'Identifier', name: 'b'},
-                                      },
-                                    ],
-                                  },
-                                },
-                                {
-                                  type: 'RestElement',
-                                  argument: {type: 'Identifier', name: 'c'},
-                                },
+                                {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'a'}, right: {type: 'ArrayExpression', elements: [{type: 'SpreadElement', argument: {type: 'Identifier', name: 'b'}}]}},
+                                {type: 'RestElement', argument: {type: 'Identifier', name: 'c'}},
                               ],
                             },
                             init: {type: 'Identifier', name: 'obj'},
@@ -9043,7 +5473,6 @@ export default (describe, test) =>
               });
             });
           });
-
           describe('object', _ => {
             test('empty obj', {
               code: 'export let {} = obj;',
@@ -9054,24 +5483,13 @@ export default (describe, test) =>
                   {
                     type: 'ExportNamedDeclaration',
                     specifiers: [],
-                    declaration: {
-                      type: 'VariableDeclaration',
-                      kind: 'let',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'ObjectPattern', properties: []},
-                          init: {type: 'Identifier', name: 'obj'},
-                        },
-                      ],
-                    },
+                    declaration: {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: []}, init: {type: 'Identifier', name: 'obj'}}]},
                     source: null,
                   },
                 ],
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('empty obj with trailing comma', {
               code: 'export let {,} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9079,7 +5497,6 @@ export default (describe, test) =>
               desc: 'works for array but not for obj',
               tokens: [],
             });
-
             test('empty obj with elided commas', {
               code: 'export let {,,} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9087,7 +5504,6 @@ export default (describe, test) =>
               desc: 'works for array but not for obj',
               tokens: [],
             });
-
             test('single var base case', {
               code: 'export let {x} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9103,20 +5519,7 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'x'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                           init: {type: 'Identifier', name: 'obj'},
                         },
                       ],
@@ -9127,7 +5530,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single var with trailing comma', {
               code: 'export let {x,} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9143,20 +5545,7 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'x'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                           init: {type: 'Identifier', name: 'obj'},
                         },
                       ],
@@ -9167,7 +5556,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single var with double trailing comma', {
               code: 'export let {x,,} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9175,7 +5563,6 @@ export default (describe, test) =>
               desc: 'does not work with obj, only array',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single var with leading comma', {
               code: 'export let {,x} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9183,7 +5570,6 @@ export default (describe, test) =>
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single var with double leading comma', {
               code: 'export let {,,x} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9191,7 +5577,6 @@ export default (describe, test) =>
               desc: 'works with array but not with obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double var simple', {
               code: 'export let {x, y} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9210,24 +5595,8 @@ export default (describe, test) =>
                           id: {
                             type: 'ObjectPattern',
                             properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'x'},
-                                shorthand: true,
-                              },
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'y'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: true,
-                              },
+                              {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                              {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true},
                             ],
                           },
                           init: {type: 'Identifier', name: 'obj'},
@@ -9240,7 +5609,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double var with double comma', {
               code: 'export let {x,, y} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9248,7 +5616,6 @@ export default (describe, test) =>
               desc: 'works with array but not obj',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double var simple', {
               code: 'export let {x} = a, {y} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9264,38 +5631,12 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'x'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                           init: {type: 'Identifier', name: 'a'},
                         },
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'y'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                           init: {type: 'Identifier', name: 'obj'},
                         },
                       ],
@@ -9306,7 +5647,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('destruct and non-destruct with init', {
               code: 'export let {x} = a, y = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9322,27 +5662,10 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'x'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                           init: {type: 'Identifier', name: 'a'},
                         },
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'y'},
-                          init: {type: 'Identifier', name: 'obj'},
-                        },
+                        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: {type: 'Identifier', name: 'obj'}},
                       ],
                     },
                     source: null,
@@ -9351,7 +5674,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('destruct and non-destruct without init', {
               code: 'export let {x} = a, obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9367,27 +5689,10 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'x'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                           init: {type: 'Identifier', name: 'a'},
                         },
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'obj'},
-                          init: null,
-                        },
+                        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'obj'}, init: null},
                       ],
                     },
                     source: null,
@@ -9396,7 +5701,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('non-destruct with ini and destruct', {
               code: 'export let x = a, {y} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9410,27 +5714,10 @@ export default (describe, test) =>
                       type: 'VariableDeclaration',
                       kind: 'let',
                       declarations: [
+                        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: {type: 'Identifier', name: 'a'}},
                         {
                           type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'x'},
-                          init: {type: 'Identifier', name: 'a'},
-                        },
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'y'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                           init: {type: 'Identifier', name: 'obj'},
                         },
                       ],
@@ -9441,7 +5728,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('non-destruct without ini and destruct', {
               code: 'export let x, {y} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9455,27 +5741,10 @@ export default (describe, test) =>
                       type: 'VariableDeclaration',
                       kind: 'let',
                       declarations: [
+                        {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
                         {
                           type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'x'},
-                          init: null,
-                        },
-                        {
-                          type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'y'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: true,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: true}]},
                           init: {type: 'Identifier', name: 'obj'},
                         },
                       ],
@@ -9486,7 +5755,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with init', {
               code: 'export let {x = y} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9511,11 +5779,7 @@ export default (describe, test) =>
                                 kind: 'init',
                                 method: false,
                                 computed: false,
-                                value: {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'x'},
-                                  right: {type: 'Identifier', name: 'y'},
-                                },
+                                value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                 shorthand: true,
                               },
                             ],
@@ -9531,7 +5795,6 @@ export default (describe, test) =>
               desc: 'note: value gets the assignment pattern! not the objectpattern:properties',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with and without init', {
               code: 'export let {x = y, z} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9556,22 +5819,10 @@ export default (describe, test) =>
                                 kind: 'init',
                                 method: false,
                                 computed: false,
-                                value: {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'x'},
-                                  right: {type: 'Identifier', name: 'y'},
-                                },
+                                value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                 shorthand: true,
                               },
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'z'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'z'},
-                                shorthand: true,
-                              },
+                              {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                             ],
                           },
                           init: {type: 'Identifier', name: 'obj'},
@@ -9584,7 +5835,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct without and with init', {
               code: 'export let {x, y = z} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9603,26 +5853,14 @@ export default (describe, test) =>
                           id: {
                             type: 'ObjectPattern',
                             properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'x'},
-                                shorthand: true,
-                              },
+                              {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
                               {
                                 type: 'Property',
                                 key: {type: 'Identifier', name: 'y'},
                                 kind: 'init',
                                 method: false,
                                 computed: false,
-                                value: {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'y'},
-                                  right: {type: 'Identifier', name: 'z'},
-                                },
+                                value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                 shorthand: true,
                               },
                             ],
@@ -9637,7 +5875,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct both with init', {
               code: 'export let {x = y, z = a} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9662,11 +5899,7 @@ export default (describe, test) =>
                                 kind: 'init',
                                 method: false,
                                 computed: false,
-                                value: {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'x'},
-                                  right: {type: 'Identifier', name: 'y'},
-                                },
+                                value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'x'}, right: {type: 'Identifier', name: 'y'}},
                                 shorthand: true,
                               },
                               {
@@ -9675,11 +5908,7 @@ export default (describe, test) =>
                                 kind: 'init',
                                 method: false,
                                 computed: false,
-                                value: {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'z'},
-                                  right: {type: 'Identifier', name: 'a'},
-                                },
+                                value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'z'}, right: {type: 'Identifier', name: 'a'}},
                                 shorthand: true,
                               },
                             ],
@@ -9694,7 +5923,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with rename', {
               code: 'export let {x : y} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9710,20 +5938,7 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: false,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                           init: {type: 'Identifier', name: 'obj'},
                         },
                       ],
@@ -9734,7 +5949,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with and without rename', {
               code: 'export let {x : y, z} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9753,24 +5967,8 @@ export default (describe, test) =>
                           id: {
                             type: 'ObjectPattern',
                             properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: false,
-                              },
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'z'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'z'},
-                                shorthand: true,
-                              },
+                              {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                              {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                             ],
                           },
                           init: {type: 'Identifier', name: 'obj'},
@@ -9783,7 +5981,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct without and with rename', {
               code: 'export let {x, y : z} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9802,24 +5999,8 @@ export default (describe, test) =>
                           id: {
                             type: 'ObjectPattern',
                             properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'x'},
-                                shorthand: true,
-                              },
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'y'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'z'},
-                                shorthand: false,
-                              },
+                              {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true},
+                              {type: 'Property', key: {type: 'Identifier', name: 'y'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: false},
                             ],
                           },
                           init: {type: 'Identifier', name: 'obj'},
@@ -9832,7 +6013,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct both with rename', {
               code: 'export let {x : y, z : a} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9851,24 +6031,8 @@ export default (describe, test) =>
                           id: {
                             type: 'ObjectPattern',
                             properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: false,
-                              },
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'z'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'a'},
-                                shorthand: false,
-                              },
+                              {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                              {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: false},
                             ],
                           },
                           init: {type: 'Identifier', name: 'obj'},
@@ -9881,7 +6045,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with rename and init', {
               code: 'export let {x : y = z} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9906,11 +6069,7 @@ export default (describe, test) =>
                                 kind: 'init',
                                 method: false,
                                 computed: false,
-                                value: {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'y'},
-                                  right: {type: 'Identifier', name: 'z'},
-                                },
+                                value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                 shorthand: false,
                               },
                             ],
@@ -9925,7 +6084,6 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with rename and init', {
               code: 'export let {x : y, z, a : b = c} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
@@ -9944,35 +6102,15 @@ export default (describe, test) =>
                           id: {
                             type: 'ObjectPattern',
                             properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: false,
-                              },
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'z'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'z'},
-                                shorthand: true,
-                              },
+                              {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'y'}, shorthand: false},
+                              {type: 'Property', key: {type: 'Identifier', name: 'z'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'z'}, shorthand: true},
                               {
                                 type: 'Property',
                                 key: {type: 'Identifier', name: 'a'},
                                 kind: 'init',
                                 method: false,
                                 computed: false,
-                                value: {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'b'},
-                                  right: {type: 'Identifier', name: 'c'},
-                                },
+                                value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'b'}, right: {type: 'Identifier', name: 'c'}},
                                 shorthand: false,
                               },
                             ],
@@ -9987,82 +6125,67 @@ export default (describe, test) =>
               },
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct no assignment', {
               code: 'export let {x};',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct no assignment', {
               code: 'export let {x}, {y} = z;',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('ident and destruct no assignment', {
               code: 'export let x, {y};',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('destruct no assignment and ident', {
               code: 'export let {x}, y;',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('ident with init and destruct no assignment', {
               code: 'export let x = y, {z};',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with rename and no assignment', {
               code: 'export let {x:y};',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with default and no assignment', {
               code: 'export let {x=y};',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('single destruct with rename and default and no assignment', {
               code: 'export let {x:y=z};',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with rename and default and with and without assignment', {
               code: 'export let {x:y=z} = obj, {a:b=c};',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('double destruct with rename and default and without and with assignment', {
               code: 'export let {x:y=z}, {a:b=c} = obj;',
               SCRIPT: {throws: 'can only be used with the module goal'},
               throws: 'destructuring must have init',
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
-            test('single destruct with colon-eq', {
-              code: 'export let {a:=c} = z;',
-              throws: true,
-            });
-
+            test('single destruct with colon-eq', {code: 'export let {a:=c} = z;', throws: true});
             test('correct dynamic property destructuring', {
               code: 'export let {[x]: y} = z;',
               ast: {
@@ -10077,20 +6200,7 @@ export default (describe, test) =>
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: {
-                            type: 'ObjectPattern',
-                            properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: true,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: false,
-                              },
-                            ],
-                          },
+                          id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false}]},
                           init: {type: 'Identifier', name: 'z'},
                         },
                       ],
@@ -10102,37 +6212,11 @@ export default (describe, test) =>
               SCRIPT: {throws: 'can only be used with the module goal'},
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
-            test('dynamic property destructuring missing alias', {
-              code: 'export let {[x]} = z;',
-              throws: 'computed property name',
-              SCRIPT: {throws: 'can only be used with the module goal'},
-            });
-
-            test('dynamic property destructuring missing alias and init', {
-              code: 'export let {[x]};',
-              throws: 'computed property name',
-              SCRIPT: {throws: 'can only be used with the module goal'},
-            });
-
-            test('dynamic property destructuring missing assignment', {
-              code: 'export let {[x]: y};',
-              throws: 'destructuring must have init',
-              SCRIPT: {throws: 'can only be used with the module goal'},
-            });
-
-            test('dynamic property destructuring with default missing alias', {
-              code: 'export let {[x] = y} = z;',
-              throws: 'computed property name',
-              SCRIPT: {throws: 'can only be used with the module goal'},
-            });
-
-            test('dynamic property destructuring with default and alias missing init', {
-              code: 'export let {[x]: y = z};',
-              throws: 'destructuring must have init',
-              SCRIPT: {throws: 'can only be used with the module goal'},
-            });
-
+            test('dynamic property destructuring missing alias', {code: 'export let {[x]} = z;', throws: 'computed property name', SCRIPT: {throws: 'can only be used with the module goal'}});
+            test('dynamic property destructuring missing alias and init', {code: 'export let {[x]};', throws: 'computed property name', SCRIPT: {throws: 'can only be used with the module goal'}});
+            test('dynamic property destructuring missing assignment', {code: 'export let {[x]: y};', throws: 'destructuring must have init', SCRIPT: {throws: 'can only be used with the module goal'}});
+            test('dynamic property destructuring with default missing alias', {code: 'export let {[x] = y} = z;', throws: 'computed property name', SCRIPT: {throws: 'can only be used with the module goal'}});
+            test('dynamic property destructuring with default and alias missing init', {code: 'export let {[x]: y = z};', throws: 'destructuring must have init', SCRIPT: {throws: 'can only be used with the module goal'}});
             test('correct dynamic property destructuring with default and alias', {
               code: 'export let {[x]: y = z} = a;',
               ast: {
@@ -10156,11 +6240,7 @@ export default (describe, test) =>
                                 kind: 'init',
                                 method: false,
                                 computed: true,
-                                value: {
-                                  type: 'AssignmentPattern',
-                                  left: {type: 'Identifier', name: 'y'},
-                                  right: {type: 'Identifier', name: 'z'},
-                                },
+                                value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, right: {type: 'Identifier', name: 'z'}},
                                 shorthand: false,
                               },
                             ],
@@ -10176,7 +6256,6 @@ export default (describe, test) =>
               SCRIPT: {throws: 'can only be used with the module goal'},
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
-
             test('dynamic prop as second prop', {
               code: 'export let {a, [x]: y} = a;',
               ast: {
@@ -10194,24 +6273,8 @@ export default (describe, test) =>
                           id: {
                             type: 'ObjectPattern',
                             properties: [
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'a'},
-                                kind: 'init',
-                                method: false,
-                                computed: false,
-                                value: {type: 'Identifier', name: 'a'},
-                                shorthand: true,
-                              },
-                              {
-                                type: 'Property',
-                                key: {type: 'Identifier', name: 'x'},
-                                kind: 'init',
-                                method: false,
-                                computed: true,
-                                value: {type: 'Identifier', name: 'y'},
-                                shorthand: false,
-                              },
+                              {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: true},
+                              {type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: true, value: {type: 'Identifier', name: 'y'}, shorthand: false},
                             ],
                           },
                           init: {type: 'Identifier', name: 'a'},
@@ -10228,37 +6291,17 @@ export default (describe, test) =>
           });
         });
       });
-
       describe('rest', _ => {
         test('rest arr', {
           code: 'let [...x] = y',
           ast: {
             type: 'Program',
             body: [
-              {
-                type: 'VariableDeclaration',
-                kind: 'let',
-                declarations: [
-                  {
-                    type: 'VariableDeclarator',
-                    id: {
-                      type: 'ArrayPattern',
-                      elements: [
-                        {
-                          type: 'RestElement',
-                          argument: {type: 'Identifier', name: 'x'},
-                        },
-                      ],
-                    },
-                    init: {type: 'Identifier', name: 'y'},
-                  },
-                ],
-              },
+              {type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'Identifier', name: 'x'}}]}, init: {type: 'Identifier', name: 'y'}}]},
             ],
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
-
         test('var and rest arr', {
           code: 'let a, [...x] = y',
           ast: {
@@ -10268,31 +6311,14 @@ export default (describe, test) =>
                 type: 'VariableDeclaration',
                 kind: 'let',
                 declarations: [
-                  {
-                    type: 'VariableDeclarator',
-                    id: {type: 'Identifier', name: 'a'},
-                    init: null,
-                  },
-                  {
-                    type: 'VariableDeclarator',
-                    id: {
-                      type: 'ArrayPattern',
-                      elements: [
-                        {
-                          type: 'RestElement',
-                          argument: {type: 'Identifier', name: 'x'},
-                        },
-                      ],
-                    },
-                    init: {type: 'Identifier', name: 'y'},
-                  },
+                  {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: null},
+                  {type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'RestElement', argument: {type: 'Identifier', name: 'x'}}]}, init: {type: 'Identifier', name: 'y'}},
                 ],
               },
             ],
           },
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
-
         test('rest obj', {
           code: 'let {...x} = y',
           ast: {
@@ -10301,119 +6327,46 @@ export default (describe, test) =>
               {
                 type: 'VariableDeclaration',
                 kind: 'let',
-                declarations: [
-                  {
-                    type: 'VariableDeclarator',
-                    id: {
-                      type: 'ObjectPattern',
-                      properties: [
-                        {
-                          type: 'RestElement',
-                          argument: {type: 'Identifier', name: 'x'},
-                        },
-                      ],
-                    },
-                    init: {type: 'Identifier', name: 'y'},
-                  },
-                ],
+                declarations: [{type: 'VariableDeclarator', id: {type: 'ObjectPattern', properties: [{type: 'RestElement', argument: {type: 'Identifier', name: 'x'}}]}, init: {type: 'Identifier', name: 'y'}}],
               },
             ],
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
-
-        test.fail('ummmm no', {
-          code: 'let ...x = y',
-        });
-
-        // Note: object rest can only be on an ident (this can be any pattern in assignment destructuring)
+        test.fail('ummmm no', {code: 'let ...x = y'}); // Note: object rest can only be on an ident (this can be any pattern in assignment destructuring)
         ['let {...obj1,} = foo', 'let {...obj1,a} = foo', 'let {...obj1,...obj2} = foo', 'let {...(obj)} = foo', 'let {...(a,b)} = foo', 'let {...{a,b}} = foo', 'let {...[a,b]} = foo'].forEach((tcase, i) => {
-          test.fail('invalid obj rest case ' + i, {
-            code: tcase,
-          });
+          test.fail('invalid obj rest case ' + i, {code: tcase});
         });
-
-        test.pass('another object destructuring case', {
-          code: 'let {...x} = y',
-        });
+        test.pass('another object destructuring case', {code: 'let {...x} = y'});
       });
-
-      test('arguments check', {
-        code: 'let arguments = x;',
-        throws: true,
-        SLOPPY_SCRIPT: {
-          ast: true,
-          tokens: true,
-        },
-      });
+      test('arguments check', {code: 'let arguments = x;', throws: true, SLOPPY_SCRIPT: {ast: true, tokens: true}});
     });
-
     describe('binding pattern', _ => {
       ['var', 'let', 'const'].forEach(bindingType => {
         describe('bindingType=`' + bindingType + '`', _ => {
-          test.pass('base case array', {
-            code: bindingType + ' [x] = v;',
-          });
-
-          test.pass('base case obj', {
-            code: bindingType + ' {x} = v;',
-          });
-
-          test.fail('arr with parens', {
-            code: bindingType + ' [(x)] = v;',
-          });
-
-          test.fail('obj with parens', {
-            code: bindingType + ' {(x)} = v;',
-          });
-
-          test.fail('value that is a member expression', {
-            code: bindingType + ' {a: b.c} = v;',
-          });
-
-          test.fail('shorthand that is a member expression', {
-            code: bindingType + ' {a.b} = v;',
-          });
-
-          test.fail('key that is a member expression', {
-            code: bindingType + ' {a.b: c} = v;',
-          });
-
-          test.pass('key that is computed', {
-            code: bindingType + ' {[a]: c} = v;',
-          });
-
-          test.pass('member key that is computed', {
-            code: bindingType + ' {[a.b]: c} = v;',
-          });
-
-          test.fail('shorthand that is computed', {
-            code: bindingType + ' {[a]} = v;',
-          });
-
-          test.fail('member value on key that is computed', {
-            code: bindingType + ' {[a]: b.c} = v;',
-          });
+          test.pass('base case array', {code: bindingType + ' [x] = v;'});
+          test.pass('base case obj', {code: bindingType + ' {x} = v;'});
+          test.fail('arr with parens', {code: bindingType + ' [(x)] = v;'});
+          test.fail('obj with parens', {code: bindingType + ' {(x)} = v;'});
+          test.fail('value that is a member expression', {code: bindingType + ' {a: b.c} = v;'});
+          test.fail('shorthand that is a member expression', {code: bindingType + ' {a.b} = v;'});
+          test.fail('key that is a member expression', {code: bindingType + ' {a.b: c} = v;'});
+          test.pass('key that is computed', {code: bindingType + ' {[a]: c} = v;'});
+          test.pass('member key that is computed', {code: bindingType + ' {[a.b]: c} = v;'});
+          test.fail('shorthand that is computed', {code: bindingType + ' {[a]} = v;'});
+          test.fail('member value on key that is computed', {code: bindingType + ' {[a]: b.c} = v;'});
         });
       });
     });
-
     describe('let as identifier in sloppy mode', _ => {
       /*
     See section E: https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
-
     13.2: In ECMAScript 2015, a StatementList beginning with the token let followed by the input elements LineTerminator then Identifier is the start of a LexicalDeclaration. In previous editions, automatic semicolon insertion would always insert a semicolon before the Identifier input element.
-
     13.5: In ECMAScript 2015, a StatementListItem beginning with the token let followed by the token [ is the start of a LexicalDeclaration. In previous editions such a sequence would be the start of an ExpressionStatement.
-
     13.7: In ECMAScript 2015, if the ( token of a for statement is immediately followed by the token sequence let [ then the let is treated as the start of a LexicalDeclaration. In previous editions such a token sequence would be the start of an Expression.
-
     13.7: In ECMAScript 2015, if the ( token of a for-in statement is immediately followed by the token sequence let [ then the let is treated as the start of a ForDeclaration. In previous editions such a token sequence would be the start of an LeftHandSideExpression.
-    */
-
-      // (note: the spec doesn't explicitly allow `let` as a var name but rather forbids
+    */ // (note: the spec doesn't explicitly allow `let` as a var name but rather forbids
       // it under certain situations. For example: in strict mode and as let/const names)
-
       describe('let as var name', _ => {
         describe('in global', _ => {
           test('var decl', {
@@ -10421,54 +6374,19 @@ export default (describe, test) =>
             throws: 'Cannot use this name',
             SLOPPY_SCRIPT: {
               desc: 'let as a var name is only allowed in (non-module) sloppy mode to support pre-es6-code',
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'var',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {type: 'Identifier', name: 'let'},
-                        init: null,
-                      },
-                    ],
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'var', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'let'}, init: null}]}]},
             },
             tokens: [$IDENT, $IDENT, $PUNCTUATOR],
           });
-
           test('var arr destruct', {
             code: 'var [let] = x;',
             throws: true,
             SLOPPY_SCRIPT: {
               desc: 'let as var in destruct can be ok',
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'VariableDeclaration',
-                    kind: 'var',
-                    declarations: [
-                      {
-                        type: 'VariableDeclarator',
-                        id: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'let'}],
-                        },
-                        init: {type: 'Identifier', name: 'x'},
-                      },
-                    ],
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'var', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'let'}]}, init: {type: 'Identifier', name: 'x'}}]}]},
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('var obj destruct', {
             code: 'var {let} = x;',
             throws: true,
@@ -10483,20 +6401,7 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'let'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'let'},
-                              shorthand: true,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'let'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'let'}, shorthand: true}]},
                         init: {type: 'Identifier', name: 'x'},
                       },
                     ],
@@ -10506,7 +6411,6 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('var obj alias destruct', {
             code: 'var {foo: let} = x;',
             throws: true,
@@ -10521,20 +6425,7 @@ export default (describe, test) =>
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: {
-                          type: 'ObjectPattern',
-                          properties: [
-                            {
-                              type: 'Property',
-                              key: {type: 'Identifier', name: 'foo'},
-                              kind: 'init',
-                              method: false,
-                              computed: false,
-                              value: {type: 'Identifier', name: 'let'},
-                              shorthand: false,
-                            },
-                          ],
-                        },
+                        id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'foo'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'let'}, shorthand: false}]},
                         init: {type: 'Identifier', name: 'x'},
                       },
                     ],
@@ -10544,142 +6435,40 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
-          test('let as let name is illegal', {
-            code: 'let let;',
-            throws: 'Cannot use this name',
-            STRICT: {throws: 'Cannot use this name'},
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-          });
-
-          test('let as const name is illegal', {
-            code: 'const let = x;',
-            throws: 'when binding through',
-            STRICT: {throws: 'Cannot use this name'},
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-          });
-
-          test('let let does not get asi', {
-            code: 'let\nlet;',
-            throws: 'Cannot use this name',
-            desc: 'and `let` is always an illegal name for const/let bindings',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR],
-          });
-
+          test('let as let name is illegal', {code: 'let let;', throws: 'Cannot use this name', STRICT: {throws: 'Cannot use this name'}, tokens: [$IDENT, $IDENT, $PUNCTUATOR]});
+          test('let as const name is illegal', {code: 'const let = x;', throws: 'when binding through', STRICT: {throws: 'Cannot use this name'}, tokens: [$IDENT, $IDENT, $PUNCTUATOR]});
+          test('let let does not get asi', {code: 'let\nlet;', throws: 'Cannot use this name', desc: 'and `let` is always an illegal name for const/let bindings', tokens: [$IDENT, $IDENT, $PUNCTUATOR]});
           test('let foo does not get asi', {
             code: 'let\nfoo;',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [
-                    {
-                      type: 'VariableDeclarator',
-                      id: {type: 'Identifier', name: 'foo'},
-                      init: null,
-                    },
-                  ],
-                },
-              ],
-            },
+            ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'foo'}, init: null}]}]},
             desc: 'in es5 this would get ASI',
             tokens: [$IDENT, $IDENT, $PUNCTUATOR],
           });
-
-          test('let at eof', {
-            code: 'let',
-            throws: true,
-            SLOPPY_SCRIPT: {
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Identifier', name: 'let'},
-                  },
-                ],
-              },
-              tokens: [$IDENT, $ASI],
-            },
-          });
-
+          test('let at eof', {code: 'let', throws: true, SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}]}, tokens: [$IDENT, $ASI]}});
           test('prop access as expr stmt', {
             code: 'let.foo;',
             throws: 'Let declaration missing binding names',
             SLOPPY_SCRIPT: {
               desc: 'in sloppy mode this is okay as it is not ambiguous with a let binding',
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {
-                      type: 'MemberExpression',
-                      object: {type: 'Identifier', name: 'let'},
-                      property: {type: 'Identifier', name: 'foo'},
-                      computed: false,
-                    },
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'MemberExpression', object: {type: 'Identifier', name: 'let'}, property: {type: 'Identifier', name: 'foo'}, computed: false}}]},
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             },
           });
-
           test('call as expr stmt', {
             code: 'let();',
             throws: 'Let declaration missing binding names',
             SLOPPY_SCRIPT: {
               desc: 'in sloppy mode this is okay as it is not ambiguous with a let binding',
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {
-                      type: 'CallExpression',
-                      callee: {type: 'Identifier', name: 'let'},
-                      arguments: [],
-                    },
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'CallExpression', callee: {type: 'Identifier', name: 'let'}, arguments: []}}]},
               tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             },
           });
-
-          test('let as name in array destructuring is always illegal', {
-            code: 'let [let] = x;',
-            throws: true,
-          });
-
-          test('let as array destruct name with default', {
-            code: 'let [let = y] = x;',
-            throws: true,
-          });
-
-          test('let as array destruct name as second name', {
-            code: 'let [a, let] = x;',
-            throws: true,
-          });
-
-          test('let as name in object destructuring is always illegal', {
-            code: 'let {let} = x;',
-            throws: true,
-          });
-
-          test('let as object destruct name with default', {
-            code: 'let {let = y} = x;',
-            throws: true,
-          });
-
-          test('let as object destruct name as second name', {
-            code: 'let {a, let} = x;',
-            throws: true,
-          });
-
+          test('let as name in array destructuring is always illegal', {code: 'let [let] = x;', throws: true});
+          test('let as array destruct name with default', {code: 'let [let = y] = x;', throws: true});
+          test('let as array destruct name as second name', {code: 'let [a, let] = x;', throws: true});
+          test('let as name in object destructuring is always illegal', {code: 'let {let} = x;', throws: true});
+          test('let as object destruct name with default', {code: 'let {let = y} = x;', throws: true});
+          test('let as object destruct name as second name', {code: 'let {a, let} = x;', throws: true});
           test('let as _prop_ name in object destructuring is okay', {
             code: 'let {let: foo} = x;',
             ast: {
@@ -10691,20 +6480,7 @@ export default (describe, test) =>
                   declarations: [
                     {
                       type: 'VariableDeclarator',
-                      id: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'let'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'foo'},
-                            shorthand: false,
-                          },
-                        ],
-                      },
+                      id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'let'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'foo'}, shorthand: false}]},
                       init: {type: 'Identifier', name: 'x'},
                     },
                   ],
@@ -10713,7 +6489,6 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('let as _prop_ name in object destruct name with default', {
             code: 'let {let: foo = y} = x;',
             ast: {
@@ -10734,11 +6509,7 @@ export default (describe, test) =>
                             kind: 'init',
                             method: false,
                             computed: false,
-                            value: {
-                              type: 'AssignmentPattern',
-                              left: {type: 'Identifier', name: 'foo'},
-                              right: {type: 'Identifier', name: 'y'},
-                            },
+                            value: {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'y'}},
                             shorthand: false,
                           },
                         ],
@@ -10751,7 +6522,6 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('let as _prop_ name in object destruct name as second name', {
             code: 'let {a, let: foo} = x;',
             ast: {
@@ -10766,24 +6536,8 @@ export default (describe, test) =>
                       id: {
                         type: 'ObjectPattern',
                         properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'a'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'a'},
-                            shorthand: true,
-                          },
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'let'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'foo'},
-                            shorthand: false,
-                          },
+                          {type: 'Property', key: {type: 'Identifier', name: 'a'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'a'}, shorthand: true},
+                          {type: 'Property', key: {type: 'Identifier', name: 'let'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'foo'}, shorthand: false},
                         ],
                       },
                       init: {type: 'Identifier', name: 'x'},
@@ -10794,59 +6548,23 @@ export default (describe, test) =>
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
-          test('let as _alias_ in object destructuring is bad', {
-            code: 'let {foo: let} = x;',
-            throws: true,
-          });
-
-          test('let as _alias_ in object destruct name with default is bad', {
-            code: 'let {foo: let = y} = x;',
-            throws: true,
-          });
-
-          test('let as _alias_ in object destruct name as second name is bad', {
-            code: 'let {a, foo: let} = x;',
-            throws: true,
-          });
-
+          test('let as _alias_ in object destructuring is bad', {code: 'let {foo: let} = x;', throws: true});
+          test('let as _alias_ in object destruct name with default is bad', {code: 'let {foo: let = y} = x;', throws: true});
+          test('let as _alias_ in object destruct name as second name is bad', {code: 'let {a, foo: let} = x;', throws: true});
           test('just let', {
             code: 'let',
             throws: true,
             desc: 'a statement that starts with let should be a binding in strict mode',
-            SLOPPY_SCRIPT: {
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Identifier', name: 'let'},
-                  },
-                ],
-              },
-              tokens: [$IDENT, $ASI],
-            },
+            SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}]}, tokens: [$IDENT, $ASI]},
           });
-
           test('let with semi', {
             code: 'let;',
             throws: true,
             desc: 'a statement that starts with let should be a binding',
-            SLOPPY_SCRIPT: {
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Identifier', name: 'let'},
-                  },
-                ],
-              },
-            },
+            SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}]}},
             tokens: [$IDENT, $PUNCTUATOR],
           });
         });
-
         describe('in for-loop-header', _ => {
           test('var decl', {
             code: 'for (var let;;);',
@@ -10856,334 +6574,106 @@ export default (describe, test) =>
               ast: {
                 type: 'Program',
                 body: [
-                  {
-                    type: 'ForStatement',
-                    init: {
-                      type: 'VariableDeclaration',
-                      kind: 'var',
-                      declarations: [
-                        {
-                          type: 'VariableDeclarator',
-                          id: {type: 'Identifier', name: 'let'},
-                          init: null,
-                        },
-                      ],
-                    },
-                    test: null,
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
+                  {type: 'ForStatement', init: {type: 'VariableDeclaration', kind: 'var', declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'let'}, init: null}]}, test: null, update: null, body: {type: 'EmptyStatement'}},
                 ],
               },
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
-
-          test('let as let name is illegal', {
-            code: 'for (let let;;);',
-            throws: 'Cannot use this name',
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
+          test('let as let name is illegal', {code: 'for (let let;;);', throws: 'Cannot use this name', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
           test('for header never has asi', {
             code: 'for (let\nlet;;);',
             throws: 'when binding through',
             desc: 'and `let` is always an illegal name for const/let bindings',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
           });
-
-          test('let as name in destructuring is always illegal', {
-            code: 'for (let [let] = x;;);',
-            throws: true,
-          });
-
-          test('let as name in destructuring with init', {
-            code: 'for (let [let = y] = x;;);',
-            throws: true,
-          });
-
-          test('let as name in destructuring as second name', {
-            code: 'for (let [a, let] = x;;);',
-            throws: true,
-          });
-
-          test('cannot const let', {
-            code: 'for (const let;;);',
-            throws: true,
-          });
-
+          test('let as name in destructuring is always illegal', {code: 'for (let [let] = x;;);', throws: true});
+          test('let as name in destructuring with init', {code: 'for (let [let = y] = x;;);', throws: true});
+          test('let as name in destructuring as second name', {code: 'for (let [a, let] = x;;);', throws: true});
+          test('cannot const let', {code: 'for (const let;;);', throws: true});
           test('just let as left part', {
             code: 'for (let;;);',
             throws: true,
-            SLOPPY_SCRIPT: {
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ForStatement',
-                    init: {type: 'Identifier', name: 'let'},
-                    test: null,
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
-                ],
-              },
-            },
+            SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'ForStatement', init: {type: 'Identifier', name: 'let'}, test: null, update: null, body: {type: 'EmptyStatement'}}]}},
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
-
           test('just let with comma', {
             code: 'for (let,foo;;);',
             throws: true,
             SLOPPY_SCRIPT: {
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ForStatement',
-                    init: {
-                      type: 'SequenceExpression',
-                      expressions: [{type: 'Identifier', name: 'let'}, {type: 'Identifier', name: 'foo'}],
-                    },
-                    test: null,
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
-                ],
-              },
+              ast: {type: 'Program', body: [{type: 'ForStatement', init: {type: 'SequenceExpression', expressions: [{type: 'Identifier', name: 'let'}, {type: 'Identifier', name: 'foo'}]}, test: null, update: null, body: {type: 'EmptyStatement'}}]},
               tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             },
           });
-
           test('let in part 2', {
             code: 'for (;let;);',
             throws: true,
-            SLOPPY_SCRIPT: {
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ForStatement',
-                    init: null,
-                    test: {type: 'Identifier', name: 'let'},
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
-                ],
-              },
-            },
+            SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'ForStatement', init: null, test: {type: 'Identifier', name: 'let'}, update: null, body: {type: 'EmptyStatement'}}]}},
             tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
-
           test('let in part 3', {
             code: 'for (;let;);',
             throws: true,
-            SLOPPY_SCRIPT: {
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ForStatement',
-                    init: null,
-                    test: {type: 'Identifier', name: 'let'},
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
-                ],
-              },
-            },
+            SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'ForStatement', init: null, test: {type: 'Identifier', name: 'let'}, update: null, body: {type: 'EmptyStatement'}}]}},
             tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
-
           test('prop access as expr stmt', {
             code: 'for (let.foo;;);',
             throws: 'Let binding missing binding names',
             SLOPPY_SCRIPT: {
               ast: {
                 type: 'Program',
-                body: [
-                  {
-                    type: 'ForStatement',
-                    init: {
-                      type: 'MemberExpression',
-                      object: {type: 'Identifier', name: 'let'},
-                      property: {type: 'Identifier', name: 'foo'},
-                      computed: false,
-                    },
-                    test: null,
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
-                ],
+                body: [{type: 'ForStatement', init: {type: 'MemberExpression', object: {type: 'Identifier', name: 'let'}, property: {type: 'Identifier', name: 'foo'}, computed: false}, test: null, update: null, body: {type: 'EmptyStatement'}}],
               },
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
-
           test('call as expr stmt', {
             code: 'for (let();;);',
             throws: 'Let binding missing binding names',
-            SLOPPY_SCRIPT: {
-              ast: {
-                type: 'Program',
-                body: [
-                  {
-                    type: 'ForStatement',
-                    init: {
-                      type: 'CallExpression',
-                      callee: {type: 'Identifier', name: 'let'},
-                      arguments: [],
-                    },
-                    test: null,
-                    update: null,
-                    body: {type: 'EmptyStatement'},
-                  },
-                ],
-              },
-            },
+            SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'ForStatement', init: {type: 'CallExpression', callee: {type: 'Identifier', name: 'let'}, arguments: []}, test: null, update: null, body: {type: 'EmptyStatement'}}]}},
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
         });
-
         describe('in export decl (always strict mode)', _ => {
-          test('var decl', {
-            code: 'export var let;',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-          });
-
-          test('let as let name is illegal', {
-            code: 'export let let;',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
-          test('let let does not get asi', {
-            code: 'export let\nlet;',
-            throws: true,
-            desc: 'and `let` is always an illegal name for const/let bindings',
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
-          test('let as name in destructuring is always illegal', {
-            code: 'export let [let] = x;',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
-          test('let as name in destructuring with default', {
-            code: 'export let [let = a] = x;',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
-          test('let as name in destructuring as second name', {
-            code: 'export let [a, let] = x;',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
-          test('cannot const let', {
-            code: 'export const let;',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
-          test('just let', {
-            code: 'export let;',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-          });
-
-          test('prop access as expr stmt', {
-            code: 'export let.foo;',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-          });
-
-          test('call as expr stmt', {
-            code: 'export let();',
-            throws: true,
-            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-          });
+          test('var decl', {code: 'export var let;', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
+          test('let as let name is illegal', {code: 'export let let;', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
+          test('let let does not get asi', {code: 'export let\nlet;', throws: true, desc: 'and `let` is always an illegal name for const/let bindings', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
+          test('let as name in destructuring is always illegal', {code: 'export let [let] = x;', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
+          test('let as name in destructuring with default', {code: 'export let [let = a] = x;', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
+          test('let as name in destructuring as second name', {code: 'export let [a, let] = x;', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
+          test('cannot const let', {code: 'export const let;', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI]});
+          test('just let', {code: 'export let;', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
+          test('prop access as expr stmt', {code: 'export let.foo;', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
+          test('call as expr stmt', {code: 'export let();', throws: true, tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
         });
       });
-
       describe('dynamic prop on let var', _ => {
         describe('illegal ambiguous cases', _ => {
           // A statement can not start with dynamic property access on `let` (`let[foo]=bar`)
           // because it would be ambiguous with let destructuring. See note in
           // https://tc39.github.io/ecma262/#prod-ExpressionStatement
-
-          test('in global', {
-            code: 'let[foo];',
-            throws: 'destructuring must have init',
-            tokens: [],
-          });
-
+          test('in global', {code: 'let[foo];', throws: 'destructuring must have init', tokens: []});
           test('proper case with confusing newline', {
             code: 'let\n[x] = x;',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [
-                    {
-                      type: 'VariableDeclarator',
-                      id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}]},
-                      init: {type: 'Identifier', name: 'x'},
-                    },
-                  ],
-                },
-              ],
-            },
+            ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}]}, init: {type: 'Identifier', name: 'x'}}]}]},
             desc: 'asi is only applied when the next token would lead to parse error; in this case the [ does not so it cannot parse this as prop-access',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('proper case with less confusing newline', {
             code: 'let [x]\n= x;',
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'VariableDeclaration',
-                  kind: 'let',
-                  declarations: [
-                    {
-                      type: 'VariableDeclarator',
-                      id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}]},
-                      init: {type: 'Identifier', name: 'x'},
-                    },
-                  ],
-                },
-              ],
-            },
+            ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}]}, init: {type: 'Identifier', name: 'x'}}]}]},
             desc: 'I think this is less confusing and not a super important test',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('bad confusing newline', {
             code: 'let\n[foo];',
             throws: 'destructuring must have init',
             desc: 'the newline is confusing here but since the whole thing could be a valid destructuring the token is not an error itself and by the time the parser realizes it is the ASI is not applied retroactively',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
           });
-
-          test('in for-loop-header', {
-            code: 'for (let[foo];;);',
-            throws: 'destructuring must have init',
-            tokens: [],
-          });
-
-          test('in regular function', {
-            code: 'function f(){ let[foo]; }',
-            throws: 'destructuring must have init',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-          });
-
+          test('in for-loop-header', {code: 'for (let[foo];;);', throws: 'destructuring must have init', tokens: []});
+          test('in regular function', {code: 'function f(){ let[foo]; }', throws: 'destructuring must have init', tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR]});
           test('in arrow expr body', {
             code: '_ => let[foo];',
             throws: 'strict mode',
@@ -11200,12 +6690,7 @@ export default (describe, test) =>
                       generator: false,
                       async: false,
                       expression: true,
-                      body: {
-                        type: 'MemberExpression',
-                        object: {type: 'Identifier', name: 'let'},
-                        property: {type: 'Identifier', name: 'foo'},
-                        computed: true,
-                      },
+                      body: {type: 'MemberExpression', object: {type: 'Identifier', name: 'let'}, property: {type: 'Identifier', name: 'foo'}, computed: true},
                     },
                   },
                 ],
@@ -11214,35 +6699,16 @@ export default (describe, test) =>
             desc: '(arrows are not strict by default) the non-block arrow body is an expression',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
           });
-
-          test('in arrow stmt body', {
-            code: '_ => { let[foo]; }',
-            throws: 'destructuring must have init',
-            desc: '(arrows are not strict by default) the non-block arrow body is a statement block',
-            tokens: [],
-          });
-
-          test('in classes', {
-            code: 'class x { foo() { let[foo]; }}',
-            throws: 'destructuring must have init',
-            tokens: [],
-            desc: 'classes are implicitly always strict',
-          });
+          test('in arrow stmt body', {code: '_ => { let[foo]; }', throws: 'destructuring must have init', desc: '(arrows are not strict by default) the non-block arrow body is a statement block', tokens: []});
+          test('in classes', {code: 'class x { foo() { let[foo]; }}', throws: 'destructuring must have init', tokens: [], desc: 'classes are implicitly always strict'});
         });
       });
-
       describe('let asi block', _ => {
         describe('illegal ambiguous cases', _ => {
           // While the spec doesn't mention it explicitly, I'm pretty sure the let-asi-block
           // is illegal since it's equally ambigous as let-dynamic-prop.
           // https://tc39.github.io/ecma262/#prod-ExpressionStatement
-
-          test('in global', {
-            code: 'let\n{foo};',
-            throws: 'destructuring must have init',
-            tokens: [],
-          });
-
+          test('in global', {code: 'let\n{foo};', throws: 'destructuring must have init', tokens: []});
           test('proper case with confusing newline', {
             code: 'let\n{x} = x;',
             ast: {
@@ -11254,20 +6720,7 @@ export default (describe, test) =>
                   declarations: [
                     {
                       type: 'VariableDeclarator',
-                      id: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'x'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'x'},
-                            shorthand: true,
-                          },
-                        ],
-                      },
+                      id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                       init: {type: 'Identifier', name: 'x'},
                     },
                   ],
@@ -11277,7 +6730,6 @@ export default (describe, test) =>
             desc: 'asi is only applied when the next token would lead to parse error; in this case the [ does not so it cannot parse this as prop-access',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
           test('proper case with less confusing newline', {
             code: 'let {x}\n= x;',
             ast: {
@@ -11289,20 +6741,7 @@ export default (describe, test) =>
                   declarations: [
                     {
                       type: 'VariableDeclarator',
-                      id: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'x'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'x'},
-                            shorthand: true,
-                          },
-                        ],
-                      },
+                      id: {type: 'ObjectPattern', properties: [{type: 'Property', key: {type: 'Identifier', name: 'x'}, kind: 'init', method: false, computed: false, value: {type: 'Identifier', name: 'x'}, shorthand: true}]},
                       init: {type: 'Identifier', name: 'x'},
                     },
                   ],
@@ -11312,13 +6751,7 @@ export default (describe, test) =>
             desc: 'I think this is less confusing and not a super important test',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
           });
-
-          test('in regular function', {
-            code: 'function f(){ let\n{foo}; }',
-            throws: 'destructuring must have init',
-            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-          });
-
+          test('in regular function', {code: 'function f(){ let\n{foo}; }', throws: 'destructuring must have init', tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR]});
           test('in arrow expr body', {
             code: '_ => let\n{foo};',
             throws: 'strict mode',
@@ -11326,85 +6759,33 @@ export default (describe, test) =>
               ast: {
                 type: 'Program',
                 body: [
-                  {
-                    type: 'ExpressionStatement',
-                    expression: {
-                      type: 'ArrowFunctionExpression',
-                      params: [{type: 'Identifier', name: '_'}],
-                      id: null,
-                      generator: false,
-                      async: false,
-                      expression: true,
-                      body: {type: 'Identifier', name: 'let'},
-                    },
-                  },
-                  {
-                    type: 'BlockStatement',
-                    body: [
-                      {
-                        type: 'ExpressionStatement',
-                        expression: {type: 'Identifier', name: 'foo'},
-                      },
-                    ],
-                  },
-                  {
-                    type: 'EmptyStatement',
-                  },
+                  {type: 'ExpressionStatement', expression: {type: 'ArrowFunctionExpression', params: [{type: 'Identifier', name: '_'}], id: null, generator: false, async: false, expression: true, body: {type: 'Identifier', name: 'let'}}},
+                  {type: 'BlockStatement', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}}]},
+                  {type: 'EmptyStatement'},
                 ],
               },
             },
             desc: 'mirror case for array destruct, this version is should be fine because the body is an expression so the let would never be parsed as a decl, the curlies always a block',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
           });
-
           test('in arrow expr body', {
             code: '_ => let {foo};',
             throws: 'strict mode',
-            SLOPPY_SCRIPT: {
-              throws: 'ASI',
-            },
+            SLOPPY_SCRIPT: {throws: 'ASI'},
             desc: 'mirror case for array destruct, this version is interesting because it cannot parse a let decl here',
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
           });
-
-          test('in arrow stmt body', {
-            code: '_ => { let\n{foo}; }',
-            throws: 'destructuring must have init',
-            desc: '(arrows are not strict by default) the non-block arrow body is a statement block',
-            tokens: [],
-          });
-
-          test('in classes', {
-            code: 'class x { foo() { let\n{foo}; }}',
-            throws: 'destructuring must have init',
-            tokens: [],
-            desc: 'classes are implicitly always strict',
-          });
+          test('in arrow stmt body', {code: '_ => { let\n{foo}; }', throws: 'destructuring must have init', desc: '(arrows are not strict by default) the non-block arrow body is a statement block', tokens: []});
+          test('in classes', {code: 'class x { foo() { let\n{foo}; }}', throws: 'destructuring must have init', tokens: [], desc: 'classes are implicitly always strict'});
         });
       });
-
       describe('as a label', _ => {
         test('in global', {
           code: 'let: foo;',
           throws: 'Let declaration missing binding names', // TODO: could error about label specifically...
-          SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'LabeledStatement',
-                  label: {type: 'Identifier', name: 'let'},
-                  body: {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Identifier', name: 'foo'},
-                  },
-                },
-              ],
-            },
-          },
+          SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'LabeledStatement', label: {type: 'Identifier', name: 'let'}, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}}}]}},
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
-
         test('in function', {
           code: 'function f(){ let: foo; }',
           throws: 'Let declaration missing binding names', // TODO: could error about label specifically
@@ -11418,26 +6799,13 @@ export default (describe, test) =>
                   async: false,
                   id: {type: 'Identifier', name: 'f'},
                   params: [],
-                  body: {
-                    type: 'BlockStatement',
-                    body: [
-                      {
-                        type: 'LabeledStatement',
-                        label: {type: 'Identifier', name: 'let'},
-                        body: {
-                          type: 'ExpressionStatement',
-                          expression: {type: 'Identifier', name: 'foo'},
-                        },
-                      },
-                    ],
-                  },
+                  body: {type: 'BlockStatement', body: [{type: 'LabeledStatement', label: {type: 'Identifier', name: 'let'}, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}}}]},
                 },
               ],
             },
           },
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
-
         test('as continue arg', {
           code: 'let: while (true) continue let;',
           throws: 'strict mode',
@@ -11445,24 +6813,12 @@ export default (describe, test) =>
             ast: {
               type: 'Program',
               body: [
-                {
-                  type: 'LabeledStatement',
-                  label: {type: 'Identifier', name: 'let'},
-                  body: {
-                    type: 'WhileStatement',
-                    test: {type: 'Literal', value: true, raw: 'true'},
-                    body: {
-                      type: 'ContinueStatement',
-                      label: {type: 'Identifier', name: 'let'},
-                    },
-                  },
-                },
+                {type: 'LabeledStatement', label: {type: 'Identifier', name: 'let'}, body: {type: 'WhileStatement', test: {type: 'Literal', value: true, raw: 'true'}, body: {type: 'ContinueStatement', label: {type: 'Identifier', name: 'let'}}}},
               ],
             },
             tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
           },
         });
-
         test('as sub-statement statement', {
           code: 'if (x) let: y;',
           throws: 'strict mode',
@@ -11473,14 +6829,7 @@ export default (describe, test) =>
                 {
                   type: 'IfStatement',
                   test: {type: 'Identifier', name: 'x'},
-                  consequent: {
-                    type: 'LabeledStatement',
-                    label: {type: 'Identifier', name: 'let'},
-                    body: {
-                      type: 'ExpressionStatement',
-                      expression: {type: 'Identifier', name: 'y'},
-                    },
-                  },
+                  consequent: {type: 'LabeledStatement', label: {type: 'Identifier', name: 'let'}, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'y'}}},
                   alternate: null,
                 },
               ],
@@ -11488,32 +6837,17 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
-
         test('as nested label', {
           code: 'foo: let: y;',
           throws: 'strict mode',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',
-              body: [
-                {
-                  type: 'LabeledStatement',
-                  label: {type: 'Identifier', name: 'foo'},
-                  body: {
-                    type: 'LabeledStatement',
-                    label: {type: 'Identifier', name: 'let'},
-                    body: {
-                      type: 'ExpressionStatement',
-                      expression: {type: 'Identifier', name: 'y'},
-                    },
-                  },
-                },
-              ],
+              body: [{type: 'LabeledStatement', label: {type: 'Identifier', name: 'foo'}, body: {type: 'LabeledStatement', label: {type: 'Identifier', name: 'let'}, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'y'}}}}],
             },
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
-
         test('in arrow', {
           code: '_ => { let: foo; }',
           throws: 'strict mode',
@@ -11530,19 +6864,7 @@ export default (describe, test) =>
                     generator: false,
                     async: false,
                     expression: false,
-                    body: {
-                      type: 'BlockStatement',
-                      body: [
-                        {
-                          type: 'LabeledStatement',
-                          label: {type: 'Identifier', name: 'let'},
-                          body: {
-                            type: 'ExpressionStatement',
-                            expression: {type: 'Identifier', name: 'foo'},
-                          },
-                        },
-                      ],
-                    },
+                    body: {type: 'BlockStatement', body: [{type: 'LabeledStatement', label: {type: 'Identifier', name: 'let'}, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}}}]},
                   },
                 },
               ],
@@ -11550,107 +6872,34 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
         });
-
         test('as label and var name', {
           code: 'let: let;',
           throws: 'strict mode',
-          SLOPPY_SCRIPT: {
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'LabeledStatement',
-                  label: {type: 'Identifier', name: 'let'},
-                  body: {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Identifier', name: 'let'},
-                  },
-                },
-              ],
-            },
-          },
+          SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'LabeledStatement', label: {type: 'Identifier', name: 'let'}, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}}]}},
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
       });
-
       describe('`let` is a decl and in sub statement should result in `let` variable expression', _ => {
         test('base case', {
           code: 'if (x) let;',
           STRICT: {throws: 'strict mode'},
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'IfStatement',
-                test: {type: 'Identifier', name: 'x'},
-                consequent: {
-                  type: 'ExpressionStatement',
-                  expression: {type: 'Identifier', name: 'let'},
-                },
-                alternate: null,
-              },
-            ],
-          },
+          ast: {type: 'Program', body: [{type: 'IfStatement', test: {type: 'Identifier', name: 'x'}, consequent: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}, alternate: null}]},
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
-
         test('fine when destructuring top level', {
           code: 'let \n [x] = y',
           desc: 'does NOT throw in STRICT',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'VariableDeclaration',
-                kind: 'let',
-                declarations: [
-                  {
-                    type: 'VariableDeclarator',
-                    id: {
-                      type: 'ArrayPattern',
-                      elements: [{type: 'Identifier', name: 'x'}],
-                    },
-                    init: {type: 'Identifier', name: 'y'},
-                  },
-                ],
-              },
-            ],
-          },
+          ast: {type: 'Program', body: [{type: 'VariableDeclaration', kind: 'let', declarations: [{type: 'VariableDeclarator', id: {type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'x'}]}, init: {type: 'Identifier', name: 'y'}}]}]},
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
         });
-
-        test('expression statement cannot start with `let [`', {
-          code: 'if (x) let \n [x] = y',
-          STRICT: {throws: 'strict mode'},
-          throws: 'let [',
-        });
-
-        test('silly if else case throws same error  ', {
-          code: 'if (x) let \n [x] = y; else x;',
-          STRICT: {throws: 'strict mode'},
-          throws: 'let [',
-        });
-
+        test('expression statement cannot start with `let [`', {code: 'if (x) let \n [x] = y', STRICT: {throws: 'strict mode'}, throws: 'let ['});
+        test('silly if else case throws same error  ', {code: 'if (x) let \n [x] = y; else x;', STRICT: {throws: 'strict mode'}, throws: 'let ['});
         test('if else', {
           code: 'if (x) ; else let',
           STRICT: {throws: 'strict mode'},
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'IfStatement',
-                test: {type: 'Identifier', name: 'x'},
-                consequent: {type: 'EmptyStatement'},
-                alternate: {
-                  type: 'ExpressionStatement',
-                  expression: {type: 'Identifier', name: 'let'},
-                },
-              },
-            ],
-          },
+          ast: {type: 'Program', body: [{type: 'IfStatement', test: {type: 'Identifier', name: 'x'}, consequent: {type: 'EmptyStatement'}, alternate: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}}]},
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI],
         });
-
         test('newlined decl-looking should trigger asi', {
           code: 'for (;;) let \n x = 1',
           desc: 'should yield an assignment statement as a sibling node to the `for`',
@@ -11658,114 +6907,38 @@ export default (describe, test) =>
           ast: {
             type: 'Program',
             body: [
-              {
-                type: 'ForStatement',
-                init: null,
-                test: null,
-                update: null,
-                body: {
-                  type: 'ExpressionStatement',
-                  expression: {type: 'Identifier', name: 'let'},
-                },
-              },
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'AssignmentExpression',
-                  left: {type: 'Identifier', name: 'x'},
-                  operator: '=',
-                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
-                },
-              },
+              {type: 'ForStatement', init: null, test: null, update: null, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}},
+              {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'x'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '1'}}},
             ],
           },
           tokens: true,
         });
-
         test('asi case for block', {
           code: 'for (;;) let \n {}',
           desc: 'should yield a block statement as a sibling node to the `for`',
           STRICT: {throws: 'strict mode'},
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ForStatement',
-                init: null,
-                test: null,
-                update: null,
-                body: {
-                  type: 'ExpressionStatement',
-                  expression: {type: 'Identifier', name: 'let'},
-                },
-              },
-              {type: 'BlockStatement', body: []},
-            ],
-          },
+          ast: {type: 'Program', body: [{type: 'ForStatement', init: null, test: null, update: null, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}}, {type: 'BlockStatement', body: []}]},
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
         });
-
         test('asi case for if', {
           code: 'if (x) let \n {}',
           desc: 'should yield a block statement as a sibling node to the `if`',
           STRICT: {throws: 'strict mode'},
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'IfStatement',
-                test: {type: 'Identifier', name: 'x'},
-                consequent: {
-                  type: 'ExpressionStatement',
-                  expression: {type: 'Identifier', name: 'let'},
-                },
-                alternate: null,
-              },
-              {type: 'BlockStatement', body: []},
-            ],
-          },
+          ast: {type: 'Program', body: [{type: 'IfStatement', test: {type: 'Identifier', name: 'x'}, consequent: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'let'}}, alternate: null}, {type: 'BlockStatement', body: []}]},
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $PUNCTUATOR],
         });
-
-        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (1)', {
-          code: 'do let \n [x] = 0 \n while (false);',
-        });
-
-        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (2)', {
-          code: 'do let \n [x] = 0; while (false);',
-        });
-
-        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (3)', {
-          code: 'do let \n [x]; while (false);',
-        });
+        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (1)', {code: 'do let \n [x] = 0 \n while (false);'});
+        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (2)', {code: 'do let \n [x] = 0; while (false);'});
+        test.fail('let square bracket is restricted so asi has to happen but inside do-while the `while` must appear after asi (3)', {code: 'do let \n [x]; while (false);'});
       });
     });
-
-    test.fail('double trailing comma no init', {
-      code: 'let foo,,',
-    });
-
-    test.fail('double middle comma no init', {
-      code: 'let foo,,bar',
-    });
-
-    test.fail('silly case when parsing binding not in function', {
-      code: 'let foo,)',
-    });
-
-    test.fail('silly case when parsing binding in for', {
-      code: 'for (let foo,)',
-    });
-
-    test.fail('let in destructuring', {
-      code: 'let [a, let, b] = [1, 2, 3];',
-    });
-  });
-
-// duplicate keys = error
-
+    test.fail('double trailing comma no init', {code: 'let foo,,'});
+    test.fail('double middle comma no init', {code: 'let foo,,bar'});
+    test.fail('silly case when parsing binding not in function', {code: 'let foo,)'});
+    test.fail('silly case when parsing binding in for', {code: 'for (let foo,)'});
+    test.fail('let in destructuring', {code: 'let [a, let, b] = [1, 2, 3];'});
+  }); // duplicate keys = error
 // TODO: can't bind the same var twice in the same scope
 // TODO: can't bind reserved names (etc), both as idents and destructs
 // TODO: mix obj and arr destructurings
-
 // TODO: rest: destruct {a, ...b}

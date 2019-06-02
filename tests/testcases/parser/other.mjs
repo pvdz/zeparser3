@@ -1,5 +1,5 @@
+/** @format */
 import {$ASI, $ERROR, $IDENT, $NUMBER_DEC, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('other, unclassified cases', _ => {
     test('bad whitespace should not be ignored', {
@@ -8,39 +8,30 @@ export default (describe, test) =>
       throws: 'Tokenizer error',
       tokens: [$ERROR],
     });
-
     test.pass('reading from eval', {
       code: 'eval',
     });
-
     test.pass('reading from eval', {
       code: 'log(eval)',
     });
-
     test.pass('reading from eval', {
       code: 'eval.foo',
     });
-
     test.pass('reading from eval', {
       code: 'eval[foo]',
     });
-
     test.pass('reading from eval', {
       code: 'eval.foo = bar',
     });
-
     test.pass('reading from eval', {
       code: 'eval[foo] = bar',
     });
-
     test.pass('reading from arguments', {
       code: 'arguments; log(arguments); arguments.foo; arguments[foo]; arguments.foo = bar; arguments[foo] = bar;',
     });
-
     test.pass('asi with CR', {
       code: 'a\rb',
     });
-
     test.pass('asi with LF', {
       code: 'a\nb',
     });

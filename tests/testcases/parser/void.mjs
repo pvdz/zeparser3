@@ -1,5 +1,6 @@
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
+/** @format */
 
+import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('void', _ => {
     test('base case', {
@@ -13,14 +14,16 @@ export default (describe, test) =>
               type: 'UnaryExpression',
               operator: 'void',
               prefix: true,
-              argument: {type: 'Identifier', name: 'x'},
+              argument: {
+                type: 'Identifier',
+                name: 'x',
+              },
             },
           },
         ],
       },
       tokens: [$IDENT, $IDENT, $ASI],
     });
-
     describe('regex edge case', _ => {
       test('sans flag', {
         code: 'void a\n/foo/',
@@ -28,7 +31,6 @@ export default (describe, test) =>
         desc: 'note: asi explicitly does not apply when next line starts with forward slash',
         tokens: [],
       });
-
       test('with flag', {
         code: 'void a\n/foo/g',
         ast: {
@@ -44,13 +46,22 @@ export default (describe, test) =>
                     type: 'UnaryExpression',
                     operator: 'void',
                     prefix: true,
-                    argument: {type: 'Identifier', name: 'a'},
+                    argument: {
+                      type: 'Identifier',
+                      name: 'a',
+                    },
                   },
                   operator: '/',
-                  right: {type: 'Identifier', name: 'foo'},
+                  right: {
+                    type: 'Identifier',
+                    name: 'foo',
+                  },
                 },
                 operator: '/',
-                right: {type: 'Identifier', name: 'g'},
+                right: {
+                  type: 'Identifier',
+                  name: 'g',
+                },
               },
             },
           ],

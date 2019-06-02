@@ -1,5 +1,5 @@
+/** @format */
 import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('bitwise', _ => {
     test('bin or', {
@@ -11,16 +11,21 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: '|',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
-
     test('bin &', {
       code: 'a&b',
       ast: {
@@ -30,16 +35,21 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: '&',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
-
     test('bin or', {
       code: 'a^b',
       ast: {
@@ -49,16 +59,21 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: '^',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
-
     test('una ~', {
       code: '~a',
       ast: {
@@ -70,14 +85,16 @@ export default (describe, test) =>
               type: 'UnaryExpression',
               operator: '~',
               prefix: true,
-              argument: {type: 'Identifier', name: 'a'},
+              argument: {
+                type: 'Identifier',
+                name: 'a',
+              },
             },
           },
         ],
       },
       tokens: [$PUNCTUATOR, $IDENT, $ASI],
     });
-
     test('rel <<', {
       code: 'a<<b',
       ast: {
@@ -87,16 +104,21 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: '<<',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
-
     test('rel >>', {
       code: 'a>>b',
       ast: {
@@ -106,16 +128,21 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: '>>',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
-
     test('rel >>>', {
       code: 'a>>>b',
       ast: {
@@ -125,9 +152,15 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: '>>>',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],

@@ -1,5 +1,5 @@
+/** @format */
 import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('member expression', _ => {
     test('function call, no args', {
@@ -11,8 +11,14 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'MemberExpression',
-              object: {type: 'Identifier', name: 'foo'},
-              property: {type: 'Identifier', name: 'bar'},
+              object: {
+                type: 'Identifier',
+                name: 'foo',
+              },
+              property: {
+                type: 'Identifier',
+                name: 'bar',
+              },
               computed: false,
             },
           },
@@ -20,7 +26,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
-
     test('property on call', {
       code: 'a().b',
       ast: {
@@ -32,10 +37,16 @@ export default (describe, test) =>
               type: 'MemberExpression',
               object: {
                 type: 'CallExpression',
-                callee: {type: 'Identifier', name: 'a'},
+                callee: {
+                  type: 'Identifier',
+                  name: 'a',
+                },
                 arguments: [],
               },
-              property: {type: 'Identifier', name: 'b'},
+              property: {
+                type: 'Identifier',
+                name: 'b',
+              },
               computed: false,
             },
           },

@@ -1,10 +1,9 @@
+/** @format */
 import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('random stuff', _ => {
     describe('#18', _ => {
       // Just putting the tests here
-
       `
         ({...{eval}.x} = {});
         ({...{b: 0}.x} = {});
@@ -21,7 +20,6 @@ export default (describe, test) =>
             code,
           });
         });
-
       `
         async (a = b => await (0)) => {}
         /**/ --> comment
@@ -34,9 +32,8 @@ export default (describe, test) =>
           test.fail_strict('/' + i, {
             code,
           });
-        });
+        }); // one test per line. they all fail
 
-      // one test per line. they all fail
       `
         
         async function foo(a = () => { "use strict"; return eval =>("x"); }) {}
@@ -109,57 +106,45 @@ export default (describe, test) =>
           });
         });
     });
-
     describe('verified', _ => {
       test.pass('should pass', {
         code: 'for ({[a]: ""[b] = c} of d) {}',
         // This one is actually valid
         desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
       });
-
       test.fail('crappy end not properly rejected', {
         code: 'if (x) {}}dsadsa',
       });
-
       test.fail('crappy end not properly rejected', {
         code: 'for (;;) {}}dsadsa',
       });
-
       test.fail('more regression', {
         code: 'for ({[a]: ""[b] = c} of d) {}}',
         desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
       });
-
       test.fail('original report', {
         code: 'for ({[a]: ""[b] = c} of d) {}})',
         desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
       });
-
       test.pass('regression reporting must destruct cannot be lhs of for loop', {
         code: 'for ({x = y} = z;;) {}',
       });
-
       test.pass('regression with parens', {
         code: 'for ({x = y} = (z);;) {}',
       });
-
       test.pass('for header instancoef', {
         code: 'for ((2935) instanceof ((2e308));;) debugger',
         desc: 'fuzzed',
       });
     });
-
     test.fail('yield double declared according to v8 but not zeparser (in web/sloppy)', {
       code: 'function yield(){switch(e){default:}}switch(x){default:case x:}const yield=x',
     });
-
     test.fail('protected double declraed according to v8', {
-      code: 'function protected(){for(;;)switch(x){default:}}const protected=x',
-      // function arguments(){}v:switch(x){default:}let arguments=l
+      code: 'function protected(){for(;;)switch(x){default:}}const protected=x', // function arguments(){}v:switch(x){default:}let arguments=l
       // function package(){}let package=a
       // function v(){}const v=x
     });
-
     test.fail('newline after async in method not proccing error in v8', {
       code: ['class K extends {} {;async\\n async *1(){}}'],
       desc: 'fuzzed',

@@ -1,16 +1,24 @@
+/** @format */
 import {$IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('return statement', _ => {
     test('empty switch', {
       code: 'switch (foo) {}',
       ast: {
         type: 'Program',
-        body: [{type: 'SwitchStatement', discriminant: {type: 'Identifier', name: 'foo'}, cases: []}],
+        body: [
+          {
+            type: 'SwitchStatement',
+            discriminant: {
+              type: 'Identifier',
+              name: 'foo',
+            },
+            cases: [],
+          },
+        ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
-
     test('switch with a simple case', {
       code: 'switch (A) {case B: C;}',
       ast: {
@@ -18,12 +26,26 @@ export default (describe, test) =>
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: {type: 'Identifier', name: 'A'},
+            discriminant: {
+              type: 'Identifier',
+              name: 'A',
+            },
             cases: [
               {
                 type: 'SwitchCase',
-                test: {type: 'Identifier', name: 'B'},
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'C'}}],
+                test: {
+                  type: 'Identifier',
+                  name: 'B',
+                },
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'C',
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -31,7 +53,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
-
     test('switch with a simple default', {
       code: 'switch (A) {default: B;}',
       ast: {
@@ -39,12 +60,23 @@ export default (describe, test) =>
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: {type: 'Identifier', name: 'A'},
+            discriminant: {
+              type: 'Identifier',
+              name: 'A',
+            },
             cases: [
               {
                 type: 'SwitchCase',
                 test: null,
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'B'}}],
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'B',
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -52,7 +84,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
-
     test('switch with a simple case and default', {
       code: 'switch (A) {case B: C; default: D;}',
       ast: {
@@ -60,17 +91,39 @@ export default (describe, test) =>
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: {type: 'Identifier', name: 'A'},
+            discriminant: {
+              type: 'Identifier',
+              name: 'A',
+            },
             cases: [
               {
                 type: 'SwitchCase',
-                test: {type: 'Identifier', name: 'B'},
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'C'}}],
+                test: {
+                  type: 'Identifier',
+                  name: 'B',
+                },
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'C',
+                    },
+                  },
+                ],
               },
               {
                 type: 'SwitchCase',
                 test: null,
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'D'}}],
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'D',
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -78,7 +131,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
-
     test('switch with a simple default and case', {
       code: 'switch (A) {default: D; case B: C; }',
       ast: {
@@ -86,17 +138,39 @@ export default (describe, test) =>
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: {type: 'Identifier', name: 'A'},
+            discriminant: {
+              type: 'Identifier',
+              name: 'A',
+            },
             cases: [
               {
                 type: 'SwitchCase',
                 test: null,
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'D'}}],
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'D',
+                    },
+                  },
+                ],
               },
               {
                 type: 'SwitchCase',
-                test: {type: 'Identifier', name: 'B'},
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'C'}}],
+                test: {
+                  type: 'Identifier',
+                  name: 'B',
+                },
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'C',
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -104,7 +178,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
-
     test('switch with a two cases', {
       code: 'switch (A) {case B: C; case D: E;}',
       ast: {
@@ -112,17 +185,42 @@ export default (describe, test) =>
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: {type: 'Identifier', name: 'A'},
+            discriminant: {
+              type: 'Identifier',
+              name: 'A',
+            },
             cases: [
               {
                 type: 'SwitchCase',
-                test: {type: 'Identifier', name: 'B'},
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'C'}}],
+                test: {
+                  type: 'Identifier',
+                  name: 'B',
+                },
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'C',
+                    },
+                  },
+                ],
               },
               {
                 type: 'SwitchCase',
-                test: {type: 'Identifier', name: 'D'},
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'E'}}],
+                test: {
+                  type: 'Identifier',
+                  name: 'D',
+                },
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'E',
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -130,7 +228,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
-
     test('switch with a two cases', {
       code: 'switch (A) {case B: C; break; case D: E; break;}',
       ast: {
@@ -138,17 +235,50 @@ export default (describe, test) =>
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: {type: 'Identifier', name: 'A'},
+            discriminant: {
+              type: 'Identifier',
+              name: 'A',
+            },
             cases: [
               {
                 type: 'SwitchCase',
-                test: {type: 'Identifier', name: 'B'},
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'C'}}, {type: 'BreakStatement', label: null}],
+                test: {
+                  type: 'Identifier',
+                  name: 'B',
+                },
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'C',
+                    },
+                  },
+                  {
+                    type: 'BreakStatement',
+                    label: null,
+                  },
+                ],
               },
               {
                 type: 'SwitchCase',
-                test: {type: 'Identifier', name: 'D'},
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'E'}}, {type: 'BreakStatement', label: null}],
+                test: {
+                  type: 'Identifier',
+                  name: 'D',
+                },
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'E',
+                    },
+                  },
+                  {
+                    type: 'BreakStatement',
+                    label: null,
+                  },
+                ],
               },
             ],
           },
@@ -156,7 +286,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
-
     test('switch with a simple default and break', {
       code: 'switch (A) {default: B; break;}',
       ast: {
@@ -164,12 +293,27 @@ export default (describe, test) =>
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: {type: 'Identifier', name: 'A'},
+            discriminant: {
+              type: 'Identifier',
+              name: 'A',
+            },
             cases: [
               {
                 type: 'SwitchCase',
                 test: null,
-                consequent: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'B'}}, {type: 'BreakStatement', label: null}],
+                consequent: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'Identifier',
+                      name: 'B',
+                    },
+                  },
+                  {
+                    type: 'BreakStatement',
+                    label: null,
+                  },
+                ],
               },
             ],
           },
@@ -177,27 +321,22 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
     });
-
     test('empty double default', {
       code: 'switch(x) { default: default: }',
       throws: 'default',
     });
-
     test('normal double default', {
       code: 'switch(x) { default: break; default: break; }',
       throws: 'default',
     });
-
     test('double default with more cases before', {
       code: 'switch(x) { case y: break; case z: break; default: default: }',
       throws: 'default',
     });
-
     test('double default with more cases after', {
       code: 'switch(x) { default: default: case y: break; case z: break; }',
       throws: 'default',
     });
-
     test('double default with cases between', {
       code: 'switch(x) { default: break; case y: break; case z: break; default: break; }',
       throws: 'default',

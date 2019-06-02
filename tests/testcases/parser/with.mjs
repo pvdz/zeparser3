@@ -1,5 +1,6 @@
-import {$IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
+/** @format */
 
+import {$IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('with statement', _ => {
     test('var, one var, no init, semi', {
@@ -11,8 +12,17 @@ export default (describe, test) =>
           body: [
             {
               type: 'WithStatement',
-              object: {type: 'Identifier', name: 'foo'},
-              body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'bar'}},
+              object: {
+                type: 'Identifier',
+                name: 'foo',
+              },
+              body: {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'Identifier',
+                  name: 'bar',
+                },
+              },
             },
           ],
         },

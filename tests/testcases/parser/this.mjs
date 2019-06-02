@@ -1,5 +1,6 @@
-import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
+/** @format */
 
+import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('this keyword', _ => {
     //
@@ -14,7 +15,6 @@ export default (describe, test) =>
     //  ast: {},
     //  tokens: [],
     //});
-
     describe('regex edge cases', _ => {
       test('regex test good', {
         code: 'this\n/foo;',
@@ -25,9 +25,14 @@ export default (describe, test) =>
               type: 'ExpressionStatement',
               expression: {
                 type: 'BinaryExpression',
-                left: {type: 'ThisExpression'},
+                left: {
+                  type: 'ThisExpression',
+                },
                 operator: '/',
-                right: {type: 'Identifier', name: 'foo'},
+                right: {
+                  type: 'Identifier',
+                  name: 'foo',
+                },
               },
             },
           ],
@@ -35,14 +40,12 @@ export default (describe, test) =>
         desc: 'ASI cannot apply so this must be a division which passes because of the `g` "flag"; this is `(this/foo)/g`',
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
-
       test('regex test bad', {
         code: 'this\n/foo/;',
         throws: 'Expected to parse a value',
         desc: 'ASI cannot apply so this must be a division and it will fail',
         tokens: [],
       });
-
       test('regex test good', {
         code: 'this\n/foo/g;',
         ast: {
@@ -54,12 +57,20 @@ export default (describe, test) =>
                 type: 'BinaryExpression',
                 left: {
                   type: 'BinaryExpression',
-                  left: {type: 'ThisExpression'},
+                  left: {
+                    type: 'ThisExpression',
+                  },
                   operator: '/',
-                  right: {type: 'Identifier', name: 'foo'},
+                  right: {
+                    type: 'Identifier',
+                    name: 'foo',
+                  },
                 },
                 operator: '/',
-                right: {type: 'Identifier', name: 'g'},
+                right: {
+                  type: 'Identifier',
+                  name: 'g',
+                },
               },
             },
           ],

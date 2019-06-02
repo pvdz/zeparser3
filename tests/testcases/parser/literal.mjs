@@ -1,5 +1,5 @@
+/** @format */
 import {$ASI, $IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $NUMBER_OLD, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('literals', _ => {
     test('null literal', {
@@ -19,7 +19,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $ASI],
     });
-
     test('true literal', {
       code: 'true',
       ast: {
@@ -37,7 +36,6 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $ASI],
     });
-
     test('false literal', {
       code: 'false',
       ast: {
@@ -55,22 +53,18 @@ export default (describe, test) =>
       },
       tokens: [$IDENT, $ASI],
     });
-
     test('super literal toplevel', {
       code: 'super',
       throws: 'super',
     });
-
     test('super literal in class', {
       code: 'class x { constructor(){ super }}',
       throws: 'super',
     });
-
     test('super literal in extending class', {
       code: 'class x extends y { constructor(){ super }}',
       throws: 'super',
     });
-
     test('double string literal', {
       code: 'x;"foo"',
       desc: 'the x prevents a directive',
@@ -79,17 +73,23 @@ export default (describe, test) =>
         body: [
           {
             type: 'ExpressionStatement',
-            expression: {type: 'Identifier', name: 'x'},
+            expression: {
+              type: 'Identifier',
+              name: 'x',
+            },
           },
           {
             type: 'ExpressionStatement',
-            expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+            expression: {
+              type: 'Literal',
+              value: '<TODO>',
+              raw: '"foo"',
+            },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $STRING_DOUBLE, $ASI],
     });
-
     test('single string literal', {
       code: `x;'foo'`,
       desc: 'the x prevents a directive',
@@ -98,17 +98,23 @@ export default (describe, test) =>
         body: [
           {
             type: 'ExpressionStatement',
-            expression: {type: 'Identifier', name: 'x'},
+            expression: {
+              type: 'Identifier',
+              name: 'x',
+            },
           },
           {
             type: 'ExpressionStatement',
-            expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
+            expression: {
+              type: 'Literal',
+              value: '<TODO>',
+              raw: "'foo'",
+            },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $STRING_SINGLE, $ASI],
     });
-
     test('decimal number', {
       code: '123',
       ast: {
@@ -126,7 +132,6 @@ export default (describe, test) =>
       },
       tokens: [$NUMBER_DEC, $ASI],
     });
-
     test('hexadecimal number', {
       code: '0x123',
       ast: {
@@ -144,7 +149,6 @@ export default (describe, test) =>
       },
       tokens: [$NUMBER_HEX, $ASI],
     });
-
     test('octal number', {
       code: '0o123',
       ast: {
@@ -162,7 +166,6 @@ export default (describe, test) =>
       },
       tokens: [$NUMBER_OCT, $ASI],
     });
-
     describe('binary literal', _ => {
       test('binary number', {
         code: '0b1010',
@@ -181,15 +184,15 @@ export default (describe, test) =>
         },
         tokens: [$NUMBER_BIN, $ASI],
       });
-
       test.fail('illegal binary char', {
         code: '0b2',
       });
     });
-
     test('legacy octal number', {
       code: '0456',
-      STRICT: {throws: true},
+      STRICT: {
+        throws: true,
+      },
       ast: {
         type: 'Program',
         body: [
@@ -205,7 +208,6 @@ export default (describe, test) =>
       },
       tokens: [$NUMBER_OLD, $ASI],
     });
-
     test('this keyword', {
       code: 'this',
       ast: {

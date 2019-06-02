@@ -1,5 +1,5 @@
+/** @format */
 import {$ASI, $IDENT} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('in and instanceof', _ => {
     test('bin in', {
@@ -11,16 +11,21 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: 'in',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],
       },
       tokens: [$IDENT, $IDENT, $IDENT, $ASI],
     });
-
     test('bin instanceof', {
       code: 'a instanceof b',
       ast: {
@@ -30,9 +35,15 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'a'},
+              left: {
+                type: 'Identifier',
+                name: 'a',
+              },
               operator: 'instanceof',
-              right: {type: 'Identifier', name: 'b'},
+              right: {
+                type: 'Identifier',
+                name: 'b',
+              },
             },
           },
         ],

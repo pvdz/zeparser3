@@ -1,5 +1,5 @@
+/** @format */
 import {$IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('if statement', _ => {
     test('simple if without else', {
@@ -9,15 +9,23 @@ export default (describe, test) =>
         body: [
           {
             type: 'IfStatement',
-            test: {type: 'Identifier', name: 'foo'},
-            consequent: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'bar'}},
+            test: {
+              type: 'Identifier',
+              name: 'foo',
+            },
+            consequent: {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'Identifier',
+                name: 'bar',
+              },
+            },
             alternate: null,
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
-
     test('simple if without else', {
       code: 'if (foo) bar; else doo;',
       ast: {
@@ -25,15 +33,29 @@ export default (describe, test) =>
         body: [
           {
             type: 'IfStatement',
-            test: {type: 'Identifier', name: 'foo'},
-            consequent: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'bar'}},
-            alternate: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'doo'}},
+            test: {
+              type: 'Identifier',
+              name: 'foo',
+            },
+            consequent: {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'Identifier',
+                name: 'bar',
+              },
+            },
+            alternate: {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'Identifier',
+                name: 'doo',
+              },
+            },
           },
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR],
     });
-
     test('simple if without else', {
       code: 'if (foo) a; if (bar) b; else c;',
       ast: {
@@ -41,15 +63,39 @@ export default (describe, test) =>
         body: [
           {
             type: 'IfStatement',
-            test: {type: 'Identifier', name: 'foo'},
-            consequent: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'a'}},
+            test: {
+              type: 'Identifier',
+              name: 'foo',
+            },
+            consequent: {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'Identifier',
+                name: 'a',
+              },
+            },
             alternate: null,
           },
           {
             type: 'IfStatement',
-            test: {type: 'Identifier', name: 'bar'},
-            consequent: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'b'}},
-            alternate: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'c'}},
+            test: {
+              type: 'Identifier',
+              name: 'bar',
+            },
+            consequent: {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'Identifier',
+                name: 'b',
+              },
+            },
+            alternate: {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'Identifier',
+                name: 'c',
+              },
+            },
           },
         ],
       },

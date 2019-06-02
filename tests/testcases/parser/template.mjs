@@ -1,5 +1,5 @@
+/** @format */
 import {$ASI, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('templates', _ => {
     test('pure template', {
@@ -12,14 +12,22 @@ export default (describe, test) =>
             expression: {
               type: 'TemplateLiteral',
               expressions: [],
-              quasis: [{type: 'TemplateElement', tail: true, value: {raw: '`foo`', cooked: '<TODO>'}}],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '`foo`',
+                    cooked: '<TODO>',
+                  },
+                },
+              ],
             },
           },
         ],
       },
       tokens: [$TICK_PURE, $ASI],
     });
-
     test('head${expr}tail template', {
       code: '`foo${bar}baz`',
       ast: {
@@ -29,15 +37,36 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'TemplateLiteral',
-              expressions: [{type: 'Identifier', name: 'bar'}],
-              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
+              expressions: [
+                {
+                  type: 'Identifier',
+                  name: 'bar',
+                },
+              ],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '`foo${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '}baz`',
+                    cooked: '<TODO>',
+                  },
+                },
+              ],
             },
           },
         ],
       },
       tokens: [$TICK_HEAD, $IDENT, $TICK_TAIL, $ASI],
     });
-
     test('template with multiple middle pieces', {
       code: '`foo ${a} and ${b} and ${c} baz`',
       ast: {
@@ -47,12 +76,53 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'TemplateLiteral',
-              expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}, {type: 'Identifier', name: 'c'}],
+              expressions: [
+                {
+                  type: 'Identifier',
+                  name: 'a',
+                },
+                {
+                  type: 'Identifier',
+                  name: 'b',
+                },
+                {
+                  type: 'Identifier',
+                  name: 'c',
+                },
+              ],
               quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}},
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '`foo ${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '} and ${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '} and ${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '} baz`',
+                    cooked: '<TODO>',
+                  },
+                },
               ],
             },
           },
@@ -60,7 +130,6 @@ export default (describe, test) =>
       },
       tokens: [$TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $IDENT, $TICK_TAIL, $ASI],
     });
-
     test('block wrapped 1-part template to check disambiguation', {
       code: '{`foo baz`}',
       ast: {
@@ -74,7 +143,16 @@ export default (describe, test) =>
                 expression: {
                   type: 'TemplateLiteral',
                   expressions: [],
-                  quasis: [{type: 'TemplateElement', tail: true, value: {raw: '`foo baz`', cooked: '<TODO>'}}],
+                  quasis: [
+                    {
+                      type: 'TemplateElement',
+                      tail: true,
+                      value: {
+                        raw: '`foo baz`',
+                        cooked: '<TODO>',
+                      },
+                    },
+                  ],
                 },
               },
             ],
@@ -83,7 +161,6 @@ export default (describe, test) =>
       },
       tokens: [$PUNCTUATOR, $TICK_PURE, $ASI, $PUNCTUATOR],
     });
-
     test('block wrapped 2-part template to check disambiguation', {
       code: '{`foo ${a} baz`}',
       ast: {
@@ -96,8 +173,30 @@ export default (describe, test) =>
                 type: 'ExpressionStatement',
                 expression: {
                   type: 'TemplateLiteral',
-                  expressions: [{type: 'Identifier', name: 'a'}],
-                  quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}}],
+                  expressions: [
+                    {
+                      type: 'Identifier',
+                      name: 'a',
+                    },
+                  ],
+                  quasis: [
+                    {
+                      type: 'TemplateElement',
+                      tail: false,
+                      value: {
+                        raw: '`foo ${',
+                        cooked: '<TODO>',
+                      },
+                    },
+                    {
+                      type: 'TemplateElement',
+                      tail: true,
+                      value: {
+                        raw: '} baz`',
+                        cooked: '<TODO>',
+                      },
+                    },
+                  ],
                 },
               },
             ],
@@ -106,7 +205,6 @@ export default (describe, test) =>
       },
       tokens: [$PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_TAIL, $ASI, $PUNCTUATOR],
     });
-
     test('block wrapped 3-part template to check disambiguation', {
       code: '{`foo ${a} and ${b} and ${c} baz`}',
       ast: {
@@ -119,12 +217,53 @@ export default (describe, test) =>
                 type: 'ExpressionStatement',
                 expression: {
                   type: 'TemplateLiteral',
-                  expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}, {type: 'Identifier', name: 'c'}],
+                  expressions: [
+                    {
+                      type: 'Identifier',
+                      name: 'a',
+                    },
+                    {
+                      type: 'Identifier',
+                      name: 'b',
+                    },
+                    {
+                      type: 'Identifier',
+                      name: 'c',
+                    },
+                  ],
                   quasis: [
-                    {type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}},
-                    {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
-                    {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
-                    {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}},
+                    {
+                      type: 'TemplateElement',
+                      tail: false,
+                      value: {
+                        raw: '`foo ${',
+                        cooked: '<TODO>',
+                      },
+                    },
+                    {
+                      type: 'TemplateElement',
+                      tail: false,
+                      value: {
+                        raw: '} and ${',
+                        cooked: '<TODO>',
+                      },
+                    },
+                    {
+                      type: 'TemplateElement',
+                      tail: false,
+                      value: {
+                        raw: '} and ${',
+                        cooked: '<TODO>',
+                      },
+                    },
+                    {
+                      type: 'TemplateElement',
+                      tail: true,
+                      value: {
+                        raw: '} baz`',
+                        cooked: '<TODO>',
+                      },
+                    },
                   ],
                 },
               },
@@ -134,7 +273,6 @@ export default (describe, test) =>
       },
       tokens: [$PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $IDENT, $TICK_TAIL, $ASI, $PUNCTUATOR],
     });
-
     test('object literal inside the tick expression', {
       code: '`foo${{}}baz`',
       ast: {
@@ -144,15 +282,36 @@ export default (describe, test) =>
             type: 'ExpressionStatement',
             expression: {
               type: 'TemplateLiteral',
-              expressions: [{type: 'ObjectExpression', properties: []}],
-              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
+              expressions: [
+                {
+                  type: 'ObjectExpression',
+                  properties: [],
+                },
+              ],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '`foo${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '}baz`',
+                    cooked: '<TODO>',
+                  },
+                },
+              ],
             },
           },
         ],
       },
       tokens: [$TICK_HEAD, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
-
     test('object literal without destruct with multiple shorthands inside the tick expression', {
       code: '`foo${{a,b}}baz`',
       ast: {
@@ -168,20 +327,32 @@ export default (describe, test) =>
                   properties: [
                     {
                       type: 'Property',
-                      key: {type: 'Identifier', name: 'a'},
+                      key: {
+                        type: 'Identifier',
+                        name: 'a',
+                      },
                       kind: 'init',
                       method: false,
                       computed: false,
-                      value: {type: 'Identifier', name: 'a'},
+                      value: {
+                        type: 'Identifier',
+                        name: 'a',
+                      },
                       shorthand: true,
                     },
                     {
                       type: 'Property',
-                      key: {type: 'Identifier', name: 'b'},
+                      key: {
+                        type: 'Identifier',
+                        name: 'b',
+                      },
                       kind: 'init',
                       method: false,
                       computed: false,
-                      value: {type: 'Identifier', name: 'b'},
+                      value: {
+                        type: 'Identifier',
+                        name: 'b',
+                      },
                       shorthand: true,
                     },
                   ],
@@ -191,12 +362,18 @@ export default (describe, test) =>
                 {
                   type: 'TemplateElement',
                   tail: false,
-                  value: {raw: '`foo${', cooked: '<TODO>'},
+                  value: {
+                    raw: '`foo${',
+                    cooked: '<TODO>',
+                  },
                 },
                 {
                   type: 'TemplateElement',
                   tail: true,
-                  value: {raw: '}baz`', cooked: '<TODO>'},
+                  value: {
+                    raw: '}baz`',
+                    cooked: '<TODO>',
+                  },
                 },
               ],
             },
@@ -205,7 +382,6 @@ export default (describe, test) =>
       },
       tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
-
     test('object literal that destructs with multiple shorthands inside the tick expression', {
       code: '`foo${{a,b} = x}baz`',
       ast: {
@@ -223,38 +399,59 @@ export default (describe, test) =>
                     properties: [
                       {
                         type: 'Property',
-                        key: {type: 'Identifier', name: 'a'},
+                        key: {
+                          type: 'Identifier',
+                          name: 'a',
+                        },
                         kind: 'init',
                         method: false,
                         computed: false,
-                        value: {type: 'Identifier', name: 'a'},
+                        value: {
+                          type: 'Identifier',
+                          name: 'a',
+                        },
                         shorthand: true,
                       },
                       {
                         type: 'Property',
-                        key: {type: 'Identifier', name: 'b'},
+                        key: {
+                          type: 'Identifier',
+                          name: 'b',
+                        },
                         kind: 'init',
                         method: false,
                         computed: false,
-                        value: {type: 'Identifier', name: 'b'},
+                        value: {
+                          type: 'Identifier',
+                          name: 'b',
+                        },
                         shorthand: true,
                       },
                     ],
                   },
                   operator: '=',
-                  right: {type: 'Identifier', name: 'x'},
+                  right: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
                 },
               ],
               quasis: [
                 {
                   type: 'TemplateElement',
                   tail: false,
-                  value: {raw: '`foo${', cooked: '<TODO>'},
+                  value: {
+                    raw: '`foo${',
+                    cooked: '<TODO>',
+                  },
                 },
                 {
                   type: 'TemplateElement',
                   tail: true,
-                  value: {raw: '}baz`', cooked: '<TODO>'},
+                  value: {
+                    raw: '}baz`',
+                    cooked: '<TODO>',
+                  },
                 },
               ],
             },
@@ -263,7 +460,6 @@ export default (describe, test) =>
       },
       tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
     });
-
     test('head${expr}tail template', {
       code: '`foo${`foo`}baz`',
       ast: {
@@ -277,17 +473,42 @@ export default (describe, test) =>
                 {
                   type: 'TemplateLiteral',
                   expressions: [],
-                  quasis: [{type: 'TemplateElement', tail: true, value: {raw: '`foo`', cooked: '<TODO>'}}],
+                  quasis: [
+                    {
+                      type: 'TemplateElement',
+                      tail: true,
+                      value: {
+                        raw: '`foo`',
+                        cooked: '<TODO>',
+                      },
+                    },
+                  ],
                 },
               ],
-              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '`foo${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '}baz`',
+                    cooked: '<TODO>',
+                  },
+                },
+              ],
             },
           },
         ],
       },
       tokens: [$TICK_HEAD, $TICK_PURE, $TICK_TAIL, $ASI],
     });
-
     test('nested tick pairs', {
       code: '`foo${`foo${bar}baz`}baz`',
       ast: {
@@ -300,18 +521,56 @@ export default (describe, test) =>
               expressions: [
                 {
                   type: 'TemplateLiteral',
-                  expressions: [{type: 'Identifier', name: 'bar'}],
-                  quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
+                  expressions: [
+                    {
+                      type: 'Identifier',
+                      name: 'bar',
+                    },
+                  ],
+                  quasis: [
+                    {
+                      type: 'TemplateElement',
+                      tail: false,
+                      value: {
+                        raw: '`foo${',
+                        cooked: '<TODO>',
+                      },
+                    },
+                    {
+                      type: 'TemplateElement',
+                      tail: true,
+                      value: {
+                        raw: '}baz`',
+                        cooked: '<TODO>',
+                      },
+                    },
+                  ],
                 },
               ],
-              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '`foo${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '}baz`',
+                    cooked: '<TODO>',
+                  },
+                },
+              ],
             },
           },
         ],
       },
       tokens: [$TICK_HEAD, $TICK_HEAD, $IDENT, $TICK_TAIL, $TICK_TAIL, $ASI],
     });
-
     test('block wrapped 3-part template to check disambiguation', {
       code: '{`foo ${a} and ${b} and ${`w ${d} x ${e} y ${f} z`} baz`}',
       ast: {
@@ -325,24 +584,99 @@ export default (describe, test) =>
                 expression: {
                   type: 'TemplateLiteral',
                   expressions: [
-                    {type: 'Identifier', name: 'a'},
-                    {type: 'Identifier', name: 'b'},
+                    {
+                      type: 'Identifier',
+                      name: 'a',
+                    },
+                    {
+                      type: 'Identifier',
+                      name: 'b',
+                    },
                     {
                       type: 'TemplateLiteral',
-                      expressions: [{type: 'Identifier', name: 'd'}, {type: 'Identifier', name: 'e'}, {type: 'Identifier', name: 'f'}],
+                      expressions: [
+                        {
+                          type: 'Identifier',
+                          name: 'd',
+                        },
+                        {
+                          type: 'Identifier',
+                          name: 'e',
+                        },
+                        {
+                          type: 'Identifier',
+                          name: 'f',
+                        },
+                      ],
                       quasis: [
-                        {type: 'TemplateElement', tail: false, value: {raw: '`w ${', cooked: '<TODO>'}},
-                        {type: 'TemplateElement', tail: false, value: {raw: '} x ${', cooked: '<TODO>'}},
-                        {type: 'TemplateElement', tail: false, value: {raw: '} y ${', cooked: '<TODO>'}},
-                        {type: 'TemplateElement', tail: true, value: {raw: '} z`', cooked: '<TODO>'}},
+                        {
+                          type: 'TemplateElement',
+                          tail: false,
+                          value: {
+                            raw: '`w ${',
+                            cooked: '<TODO>',
+                          },
+                        },
+                        {
+                          type: 'TemplateElement',
+                          tail: false,
+                          value: {
+                            raw: '} x ${',
+                            cooked: '<TODO>',
+                          },
+                        },
+                        {
+                          type: 'TemplateElement',
+                          tail: false,
+                          value: {
+                            raw: '} y ${',
+                            cooked: '<TODO>',
+                          },
+                        },
+                        {
+                          type: 'TemplateElement',
+                          tail: true,
+                          value: {
+                            raw: '} z`',
+                            cooked: '<TODO>',
+                          },
+                        },
                       ],
                     },
                   ],
                   quasis: [
-                    {type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}},
-                    {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
-                    {type: 'TemplateElement', tail: false, value: {raw: '} and ${', cooked: '<TODO>'}},
-                    {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}},
+                    {
+                      type: 'TemplateElement',
+                      tail: false,
+                      value: {
+                        raw: '`foo ${',
+                        cooked: '<TODO>',
+                      },
+                    },
+                    {
+                      type: 'TemplateElement',
+                      tail: false,
+                      value: {
+                        raw: '} and ${',
+                        cooked: '<TODO>',
+                      },
+                    },
+                    {
+                      type: 'TemplateElement',
+                      tail: false,
+                      value: {
+                        raw: '} and ${',
+                        cooked: '<TODO>',
+                      },
+                    },
+                    {
+                      type: 'TemplateElement',
+                      tail: true,
+                      value: {
+                        raw: '} baz`',
+                        cooked: '<TODO>',
+                      },
+                    },
                   ],
                 },
               },
@@ -352,7 +686,6 @@ export default (describe, test) =>
       },
       tokens: [$PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $IDENT, $TICK_TAIL, $TICK_TAIL, $ASI, $PUNCTUATOR],
     });
-
     test('function body disambiguation inside template', {
       code: '`a ${function(){}} b`',
       ast: {
@@ -369,17 +702,36 @@ export default (describe, test) =>
                   async: false,
                   id: null,
                   params: [],
-                  body: {type: 'BlockStatement', body: []},
+                  body: {
+                    type: 'BlockStatement',
+                    body: [],
+                  },
                 },
               ],
-              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}}],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '`a ${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '} b`',
+                    cooked: '<TODO>',
+                  },
+                },
+              ],
             },
           },
         ],
       },
       tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
-
     test('empty arrow with block body disambiguation inside template', {
       code: '`a ${()=>{}} b`',
       ast: {
@@ -397,17 +749,36 @@ export default (describe, test) =>
                   generator: false,
                   async: false,
                   expression: false,
-                  body: {type: 'BlockStatement', body: []},
+                  body: {
+                    type: 'BlockStatement',
+                    body: [],
+                  },
                 },
               ],
-              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}}],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '`a ${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '} b`',
+                    cooked: '<TODO>',
+                  },
+                },
+              ],
             },
           },
         ],
       },
       tokens: [$TICK_HEAD, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
-
     test('arrow with block body disambiguation inside template', {
       code: '`a ${(k)=>{x}} b`',
       ast: {
@@ -420,143 +791,151 @@ export default (describe, test) =>
               expressions: [
                 {
                   type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: 'k'}],
+                  params: [
+                    {
+                      type: 'Identifier',
+                      name: 'k',
+                    },
+                  ],
                   id: null,
                   generator: false,
                   async: false,
                   expression: false,
                   body: {
                     type: 'BlockStatement',
-                    body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}],
+                    body: [
+                      {
+                        type: 'ExpressionStatement',
+                        expression: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                      },
+                    ],
                   },
                 },
               ],
-              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}}],
+              quasis: [
+                {
+                  type: 'TemplateElement',
+                  tail: false,
+                  value: {
+                    raw: '`a ${',
+                    cooked: '<TODO>',
+                  },
+                },
+                {
+                  type: 'TemplateElement',
+                  tail: true,
+                  value: {
+                    raw: '} b`',
+                    cooked: '<TODO>',
+                  },
+                },
+              ],
             },
           },
         ],
       },
       tokens: [$TICK_HEAD, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $TICK_TAIL, $ASI],
     });
-
     describe('bad escapes', _ => {
       // https://tc39.github.io/ecma262/#prod-CodePoint
       // "A conforming implementation must not use the extended definition of EscapeSequence described in B.1.2 when parsing a TemplateCharacter."
       // (these can be extended for string but should always be errors for non-tagged templates)
-
       test.pass('octal zero is ok, even in strict mode', {
         code: '`a\\0b`',
       });
-
       test.fail('octal at start', {
         code: '`\\00`',
       });
-
       test.fail('octal double zero in template is always illegal', {
         code: '`a\\00b`',
       });
-
       describe('in pure', _ => {
         describe('still bad in regular templates', _ => {
           test.fail('illegal escapes are an error < es9', {
             code: '`\\xg`;',
             ES: 8,
           });
-
           test.fail('check illegal escapes in infinity mode', {
             code: '`\\xg`;',
             ES: Infinity,
           });
-
           test.fail('illegal escapes in ticks are still bad in es9', {
             code: '`\\xg`;',
             ES: 9,
           });
         });
-
         describe('only okay in tagged templates in es9', _ => {
           test.fail('illegal escapes are an error < es9', {
             code: 'f`\\xg`;',
             ES: 8,
           });
-
           test.pass('check illegal escapes in infinity mode', {
             code: 'f`\\xg`;',
             ES: Infinity,
           });
-
           test.pass('illegal escapes in ticks are okay in es9', {
             code: 'f`\\xg`;',
             ES: 9,
           });
         });
       });
-
       describe('in head', _ => {
         describe('still bad in regular templates', _ => {
           test.fail('illegal escapes are an error < es9', {
             code: '`\\xg ${x}`;',
             ES: 8,
           });
-
           test.fail('check illegal escapes in infinity mode', {
             code: '`\\xg ${x}`;',
             ES: Infinity,
           });
-
           test.fail('illegal escapes in ticks are still bad in es9', {
             code: '`\\xg ${x}`;',
             ES: 9,
           });
         });
-
         describe('only okay in tagged templates in es9', _ => {
           test.fail('illegal escapes are an error < es9', {
             code: 'f`\\xg ${x}`;',
             ES: 8,
           });
-
           test.pass('check illegal escapes in infinity mode', {
             code: 'f`\\xg ${x}`;',
             ES: Infinity,
           });
-
           test.pass('illegal escapes in ticks are okay in es9', {
             code: 'f`\\xg ${x}`;',
             ES: 9,
           });
         });
       });
-
       describe('in body', _ => {
         describe('still bad in regular templates', _ => {
           test.fail('illegal escapes are an error < es9', {
             code: '`${x} \\xg ${x}`;',
             ES: 8,
           });
-
           test.fail('check illegal escapes in infinity mode', {
             code: '`${x} \\xg ${x}`;',
             ES: Infinity,
           });
-
           test.fail('illegal escapes in ticks are still bad in es9', {
             code: '`${x} \\xg ${x}`;',
             ES: 9,
           });
         });
-
         describe('only okay in tagged templates in es9', _ => {
           test.fail('illegal escapes are an error < es9', {
             code: 'f`${x} \\xg ${x}`;',
             ES: 8,
           });
-
           test.pass('check illegal escapes in infinity mode', {
             code: 'f`${x} \\xg ${x}`;',
             ES: Infinity,
           });
-
           test.pass('illegal escapes in ticks are okay in es9', {
             code: 'f`${x} \\xg ${x}`;',
             ES: 9,
@@ -569,29 +948,24 @@ export default (describe, test) =>
             code: '`${x} \\xg`;',
             ES: 8,
           });
-
           test.fail('check illegal escapes in infinity mode', {
             code: '`${x} \\xg`;',
             ES: Infinity,
           });
-
           test.fail('illegal escapes in ticks are still bad in es9', {
             code: '`${x} \\xg`;',
             ES: 9,
           });
         });
-
         describe('only okay in tagged templates in es9', _ => {
           test.fail('illegal escapes are an error < es9', {
             code: 'f`${x} \\xg`;',
             ES: 8,
           });
-
           test.pass('check illegal escapes in infinity mode', {
             code: 'f`${x} \\xg`;',
             ES: Infinity,
           });
-
           test.pass('illegal escapes in ticks are okay in es9', {
             code: 'f`${x} \\xg`;',
             ES: 9,
@@ -599,12 +973,13 @@ export default (describe, test) =>
         });
       });
     });
-
     describe('and yield', _ => {
       describe('as var name', _ => {
         test('yield in middle', {
           code: 'x = `1 ${ yield } 2`',
-          STRICT: {throws: true},
+          STRICT: {
+            throws: true,
+          },
           ast: {
             type: 'Program',
             body: [
@@ -612,21 +987,35 @@ export default (describe, test) =>
                 type: 'ExpressionStatement',
                 expression: {
                   type: 'AssignmentExpression',
-                  left: {type: 'Identifier', name: 'x'},
+                  left: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
                   operator: '=',
                   right: {
                     type: 'TemplateLiteral',
-                    expressions: [{type: 'Identifier', name: 'yield'}],
+                    expressions: [
+                      {
+                        type: 'Identifier',
+                        name: 'yield',
+                      },
+                    ],
                     quasis: [
                       {
                         type: 'TemplateElement',
                         tail: false,
-                        value: {raw: '`1 ${', cooked: '<TODO>'},
+                        value: {
+                          raw: '`1 ${',
+                          cooked: '<TODO>',
+                        },
                       },
                       {
                         type: 'TemplateElement',
                         tail: true,
-                        value: {raw: '} 2`', cooked: '<TODO>'},
+                        value: {
+                          raw: '} 2`',
+                          cooked: '<TODO>',
+                        },
                       },
                     ],
                   },
@@ -636,10 +1025,11 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_TAIL, $ASI],
         });
-
         test('yield in with another part', {
           code: 'x = `1 ${ yield } 2 ${ 3 } 4`',
-          STRICT: {throws: true},
+          STRICT: {
+            throws: true,
+          },
           ast: {
             type: 'Program',
             body: [
@@ -647,26 +1037,48 @@ export default (describe, test) =>
                 type: 'ExpressionStatement',
                 expression: {
                   type: 'AssignmentExpression',
-                  left: {type: 'Identifier', name: 'x'},
+                  left: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
                   operator: '=',
                   right: {
                     type: 'TemplateLiteral',
-                    expressions: [{type: 'Identifier', name: 'yield'}, {type: 'Literal', value: '<TODO>', raw: '3'}],
+                    expressions: [
+                      {
+                        type: 'Identifier',
+                        name: 'yield',
+                      },
+                      {
+                        type: 'Literal',
+                        value: '<TODO>',
+                        raw: '3',
+                      },
+                    ],
                     quasis: [
                       {
                         type: 'TemplateElement',
                         tail: false,
-                        value: {raw: '`1 ${', cooked: '<TODO>'},
+                        value: {
+                          raw: '`1 ${',
+                          cooked: '<TODO>',
+                        },
                       },
                       {
                         type: 'TemplateElement',
                         tail: false,
-                        value: {raw: '} 2 ${', cooked: '<TODO>'},
+                        value: {
+                          raw: '} 2 ${',
+                          cooked: '<TODO>',
+                        },
                       },
                       {
                         type: 'TemplateElement',
                         tail: true,
-                        value: {raw: '} 4`', cooked: '<TODO>'},
+                        value: {
+                          raw: '} 4`',
+                          cooked: '<TODO>',
+                        },
                       },
                     ],
                   },
@@ -676,16 +1088,13 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $NUMBER_DEC, $TICK_TAIL, $ASI],
         });
-
         test.fail('yield with arg in middle', {
           code: 'x = `1 ${ yield x } 2`',
         });
-
         test.fail('yield with arg  in with another part', {
           code: 'x = `1 ${ yield x } 2 ${ 3 } 4`',
         });
       });
-
       describe('in generator', _ => {
         test('yield in middle', {
           code: 'function *f(){   x = `1 ${ yield } 2`   }',
@@ -696,7 +1105,10 @@ export default (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: true,
                 async: false,
-                id: {type: 'Identifier', name: 'f'},
+                id: {
+                  type: 'Identifier',
+                  name: 'f',
+                },
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -705,21 +1117,36 @@ export default (describe, test) =>
                       type: 'ExpressionStatement',
                       expression: {
                         type: 'AssignmentExpression',
-                        left: {type: 'Identifier', name: 'x'},
+                        left: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
                         operator: '=',
                         right: {
                           type: 'TemplateLiteral',
-                          expressions: [{type: 'YieldExpression', delegate: false, argument: null}],
+                          expressions: [
+                            {
+                              type: 'YieldExpression',
+                              delegate: false,
+                              argument: null,
+                            },
+                          ],
                           quasis: [
                             {
                               type: 'TemplateElement',
                               tail: false,
-                              value: {raw: '`1 ${', cooked: '<TODO>'},
+                              value: {
+                                raw: '`1 ${',
+                                cooked: '<TODO>',
+                              },
                             },
                             {
                               type: 'TemplateElement',
                               tail: true,
-                              value: {raw: '} 2`', cooked: '<TODO>'},
+                              value: {
+                                raw: '} 2`',
+                                cooked: '<TODO>',
+                              },
                             },
                           ],
                         },
@@ -732,7 +1159,6 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_TAIL, $ASI, $PUNCTUATOR],
         });
-
         test('yield in with another part', {
           code: 'function *f(){   x = `1 ${ yield } 2 ${ 3 } 4`   }',
           ast: {
@@ -742,7 +1168,10 @@ export default (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: true,
                 async: false,
-                id: {type: 'Identifier', name: 'f'},
+                id: {
+                  type: 'Identifier',
+                  name: 'f',
+                },
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -751,26 +1180,49 @@ export default (describe, test) =>
                       type: 'ExpressionStatement',
                       expression: {
                         type: 'AssignmentExpression',
-                        left: {type: 'Identifier', name: 'x'},
+                        left: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
                         operator: '=',
                         right: {
                           type: 'TemplateLiteral',
-                          expressions: [{type: 'YieldExpression', delegate: false, argument: null}, {type: 'Literal', value: '<TODO>', raw: '3'}],
+                          expressions: [
+                            {
+                              type: 'YieldExpression',
+                              delegate: false,
+                              argument: null,
+                            },
+                            {
+                              type: 'Literal',
+                              value: '<TODO>',
+                              raw: '3',
+                            },
+                          ],
                           quasis: [
                             {
                               type: 'TemplateElement',
                               tail: false,
-                              value: {raw: '`1 ${', cooked: '<TODO>'},
+                              value: {
+                                raw: '`1 ${',
+                                cooked: '<TODO>',
+                              },
                             },
                             {
                               type: 'TemplateElement',
                               tail: false,
-                              value: {raw: '} 2 ${', cooked: '<TODO>'},
+                              value: {
+                                raw: '} 2 ${',
+                                cooked: '<TODO>',
+                              },
                             },
                             {
                               type: 'TemplateElement',
                               tail: true,
-                              value: {raw: '} 4`', cooked: '<TODO>'},
+                              value: {
+                                raw: '} 4`',
+                                cooked: '<TODO>',
+                              },
                             },
                           ],
                         },
@@ -783,7 +1235,6 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $NUMBER_DEC, $TICK_TAIL, $ASI, $PUNCTUATOR],
         });
-
         test('yield with arg in middle', {
           code: 'function *f(){   x = `1 ${ yield x } 2`   }',
           ast: {
@@ -793,7 +1244,10 @@ export default (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: true,
                 async: false,
-                id: {type: 'Identifier', name: 'f'},
+                id: {
+                  type: 'Identifier',
+                  name: 'f',
+                },
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -802,7 +1256,10 @@ export default (describe, test) =>
                       type: 'ExpressionStatement',
                       expression: {
                         type: 'AssignmentExpression',
-                        left: {type: 'Identifier', name: 'x'},
+                        left: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
                         operator: '=',
                         right: {
                           type: 'TemplateLiteral',
@@ -810,19 +1267,28 @@ export default (describe, test) =>
                             {
                               type: 'YieldExpression',
                               delegate: false,
-                              argument: {type: 'Identifier', name: 'x'},
+                              argument: {
+                                type: 'Identifier',
+                                name: 'x',
+                              },
                             },
                           ],
                           quasis: [
                             {
                               type: 'TemplateElement',
                               tail: false,
-                              value: {raw: '`1 ${', cooked: '<TODO>'},
+                              value: {
+                                raw: '`1 ${',
+                                cooked: '<TODO>',
+                              },
                             },
                             {
                               type: 'TemplateElement',
                               tail: true,
-                              value: {raw: '} 2`', cooked: '<TODO>'},
+                              value: {
+                                raw: '} 2`',
+                                cooked: '<TODO>',
+                              },
                             },
                           ],
                         },
@@ -835,7 +1301,6 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $TICK_HEAD, $IDENT, $IDENT, $TICK_TAIL, $ASI, $PUNCTUATOR],
         });
-
         test('yield with arg  in with another part', {
           code: 'function *f(){   x = `1 ${ yield x } 2 ${ 3 } 4`   }',
           ast: {
@@ -845,7 +1310,10 @@ export default (describe, test) =>
                 type: 'FunctionDeclaration',
                 generator: true,
                 async: false,
-                id: {type: 'Identifier', name: 'f'},
+                id: {
+                  type: 'Identifier',
+                  name: 'f',
+                },
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -854,7 +1322,10 @@ export default (describe, test) =>
                       type: 'ExpressionStatement',
                       expression: {
                         type: 'AssignmentExpression',
-                        left: {type: 'Identifier', name: 'x'},
+                        left: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
                         operator: '=',
                         right: {
                           type: 'TemplateLiteral',
@@ -862,25 +1333,41 @@ export default (describe, test) =>
                             {
                               type: 'YieldExpression',
                               delegate: false,
-                              argument: {type: 'Identifier', name: 'x'},
+                              argument: {
+                                type: 'Identifier',
+                                name: 'x',
+                              },
                             },
-                            {type: 'Literal', value: '<TODO>', raw: '3'},
+                            {
+                              type: 'Literal',
+                              value: '<TODO>',
+                              raw: '3',
+                            },
                           ],
                           quasis: [
                             {
                               type: 'TemplateElement',
                               tail: false,
-                              value: {raw: '`1 ${', cooked: '<TODO>'},
+                              value: {
+                                raw: '`1 ${',
+                                cooked: '<TODO>',
+                              },
                             },
                             {
                               type: 'TemplateElement',
                               tail: false,
-                              value: {raw: '} 2 ${', cooked: '<TODO>'},
+                              value: {
+                                raw: '} 2 ${',
+                                cooked: '<TODO>',
+                              },
                             },
                             {
                               type: 'TemplateElement',
                               tail: true,
-                              value: {raw: '} 4`', cooked: '<TODO>'},
+                              value: {
+                                raw: '} 4`',
+                                cooked: '<TODO>',
+                              },
                             },
                           ],
                         },
@@ -895,14 +1382,10 @@ export default (describe, test) =>
         });
       });
     });
-
     test.fail('bad template expr', {
       code: '`foo ${a b} bar`',
     });
-
     test.fail('bad tagged template expr', {
       code: 'x`foo ${a b} bar`',
-    });
-
-    // empty template `${}`
+    }); // empty template `${}`
   });

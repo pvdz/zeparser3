@@ -1,5 +1,5 @@
+/** @format */
 import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
-
 export default (describe, test) =>
   describe('false keyword', _ => {
     //
@@ -14,14 +14,12 @@ export default (describe, test) =>
     //  ast: {},
     //  tokens: [],
     //});
-
     test('regex test bad', {
       code: 'false\n/foo/;',
       throws: 'Expected to parse a value',
       desc: 'ASI cannot apply so this must be a division and it will fail',
       tokens: [],
     });
-
     test('regex test good', {
       code: 'false\n/foo/g;',
       ast: {
@@ -33,12 +31,22 @@ export default (describe, test) =>
               type: 'BinaryExpression',
               left: {
                 type: 'BinaryExpression',
-                left: {type: 'Literal', value: false, raw: 'false'},
+                left: {
+                  type: 'Literal',
+                  value: false,
+                  raw: 'false',
+                },
                 operator: '/',
-                right: {type: 'Identifier', name: 'foo'},
+                right: {
+                  type: 'Identifier',
+                  name: 'foo',
+                },
               },
               operator: '/',
-              right: {type: 'Identifier', name: 'g'},
+              right: {
+                type: 'Identifier',
+                name: 'g',
+              },
             },
           },
         ],
