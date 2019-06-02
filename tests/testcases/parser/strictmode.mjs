@@ -247,7 +247,6 @@ export default (describe, test) =>
     });
 
     describe('requires simple args', _ => {
-
       describe('sans args', _ => {
         test('func decl', {
           code: 'function f(){"use strict";}',
@@ -262,11 +261,13 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                    directive: 'use strict',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                      directive: 'use strict',
+                    },
+                  ],
                 },
               },
             ],
@@ -293,11 +294,13 @@ export default (describe, test) =>
                     params: [],
                     body: {
                       type: 'BlockStatement',
-                      body: [{
-                        type: 'ExpressionStatement',
-                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                        directive: 'use strict',
-                      }],
+                      body: [
+                        {
+                          type: 'ExpressionStatement',
+                          expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                          directive: 'use strict',
+                        },
+                      ],
                     },
                   },
                 },
@@ -331,11 +334,13 @@ export default (describe, test) =>
                         params: [],
                         body: {
                           type: 'BlockStatement',
-                          body: [{
-                            type: 'ExpressionStatement',
-                            expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                            directive: 'use strict',
-                          }],
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                              directive: 'use strict',
+                            },
+                          ],
                         },
                       },
                       shorthand: false,
@@ -365,11 +370,13 @@ export default (describe, test) =>
                 params: [{type: 'Identifier', name: 'x'}],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                    directive: 'use strict',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                      directive: 'use strict',
+                    },
+                  ],
                 },
               },
             ],
@@ -396,11 +403,13 @@ export default (describe, test) =>
                     params: [{type: 'Identifier', name: 'x'}],
                     body: {
                       type: 'BlockStatement',
-                      body: [{
-                        type: 'ExpressionStatement',
-                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                        directive: 'use strict',
-                      }],
+                      body: [
+                        {
+                          type: 'ExpressionStatement',
+                          expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                          directive: 'use strict',
+                        },
+                      ],
                     },
                   },
                 },
@@ -434,11 +443,13 @@ export default (describe, test) =>
                         params: [{type: 'Identifier', name: 'x'}],
                         body: {
                           type: 'BlockStatement',
-                          body: [{
-                            type: 'ExpressionStatement',
-                            expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                            directive: 'use strict',
-                          }],
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                              directive: 'use strict',
+                            },
+                          ],
                         },
                       },
                       shorthand: false,
@@ -468,11 +479,13 @@ export default (describe, test) =>
                 params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                    directive: 'use strict',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                      directive: 'use strict',
+                    },
+                  ],
                 },
               },
             ],
@@ -499,11 +512,13 @@ export default (describe, test) =>
                     params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                     body: {
                       type: 'BlockStatement',
-                      body: [{
-                        type: 'ExpressionStatement',
-                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                        directive: 'use strict',
-                      }],
+                      body: [
+                        {
+                          type: 'ExpressionStatement',
+                          expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                          directive: 'use strict',
+                        },
+                      ],
                     },
                   },
                 },
@@ -537,11 +552,13 @@ export default (describe, test) =>
                         params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                         body: {
                           type: 'BlockStatement',
-                          body: [{
-                            type: 'ExpressionStatement',
-                            expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                            directive: 'use strict',
-                          }],
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                              directive: 'use strict',
+                            },
+                          ],
                         },
                       },
                       shorthand: false,
@@ -1075,7 +1092,6 @@ export default (describe, test) =>
     });
 
     describe('header requirements for directive in body', _ => {
-
       // these tests should cover cases where the header is fine in sloppy mode and throw when finding a use strict in the body
       // https://tc39.github.io/ecma262/#sec-identifiers-static-semantics-early-errors
       // > It is a Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName
@@ -1084,92 +1100,94 @@ export default (describe, test) =>
       [
         // Explicitly forbidden binding names in strict mode
         // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
-        'eval', 'arguments',
+        'eval',
+        'arguments',
         // Yield is always the YieldExpression in strict mode or in a generator context
         'yield',
         // Let is disallowed through a static semantic rather than cfg
         'let',
         // Other idents that are only keywords in strict mode
-        'implements', 'interface', 'package', 'private', 'protected', 'public', 'static',
+        'implements',
+        'interface',
+        'package',
+        'private',
+        'protected',
+        'public',
+        'static',
       ].forEach(ident => {
-
         describe('ident = [' + ident + ']', _ => {
-
           describe('function decl', _ => {
-
             test.fail_strict('as func name w/o directive', {
-              code: 'function '+ident+'(a){ }',
+              code: 'function ' + ident + '(a){ }',
             });
 
             test.fail('as func name w directive', {
-              code: 'function '+ident+'(b){ "use strict"; }',
+              code: 'function ' + ident + '(b){ "use strict"; }',
             });
 
             test.fail_strict('as param name w/o directive', {
-              code: 'function c('+ident+'){ }',
+              code: 'function c(' + ident + '){ }',
             });
 
             test.fail('as param name w directive', {
-              code: 'function d('+ident+'){ "use strict"; }',
+              code: 'function d(' + ident + '){ "use strict"; }',
             });
 
             test.fail_strict('assigned to in param default w/o directive', {
-              code: 'function e(x='+ident+'=10){ }',
+              code: 'function e(x=' + ident + '=10){ }',
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
             test.fail('assigned to in param default w directive', {
-              code: 'function f(x='+ident+'=10){ "use strict"; }',
+              code: 'function f(x=' + ident + '=10){ "use strict"; }',
               desc: 'the default causes the error, not the usage, but whatever',
             });
           });
 
           describe('function expr', _ => {
-
             test.fail_strict('as func name w/o directive', {
-              code: 'f = function '+ident+'(){ }',
+              code: 'f = function ' + ident + '(){ }',
             });
 
             test.fail('as func name w directive', {
-              code: 'f = function '+ident+'(){ "use strict"; }',
+              code: 'f = function ' + ident + '(){ "use strict"; }',
             });
 
             test.fail_strict('as param name w/o directive', {
-              code: 'f = function f('+ident+'){ }',
+              code: 'f = function f(' + ident + '){ }',
             });
 
             test.fail('as param name w directive', {
-              code: 'f = function f('+ident+'){ "use strict"; }',
+              code: 'f = function f(' + ident + '){ "use strict"; }',
             });
 
             test.fail_strict('assigned to in param default w/o directive', {
-              code: 'f = function f(x='+ident+'=10){ }',
+              code: 'f = function f(x=' + ident + '=10){ }',
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
             test.fail('assigned to in param default w directive', {
-              code: 'f = function f(x='+ident+'=10){ "use strict"; }',
+              code: 'f = function f(x=' + ident + '=10){ "use strict"; }',
               desc: 'the default (always) causes the error, not the usage, but whatever',
             });
           });
 
           describe('arrow', _ => {
-
             test.fail_strict('as param name w/o directive', {
-              code: '('+ident+') => {}',
+              code: '(' + ident + ') => {}',
             });
 
             test.fail('as param name w directive', {
-              code: 'f = ('+ident+') => { "use strict"; }',
+              code: 'f = (' + ident + ') => { "use strict"; }',
             });
 
             test.fail_strict('assigned to in param default w/o directive', {
-              code: '(x='+ident+'=10) => { }',
+              code: '(x=' + ident + '=10) => { }',
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
             test.fail('assigned to in param default w directive', {
-              code: 'f(x='+ident+'=10) => { "use strict"; }',
+              code: 'f(x=' + ident + '=10) => { "use strict"; }',
               desc: 'the default (always) causes the error, not the usage, but whatever',
             });
           });
@@ -1178,28 +1196,28 @@ export default (describe, test) =>
             // Note: method names are irrelevant in this context
 
             test.pass('as method name w/o directive', {
-              code: 'o = {'+ident+'(){ }}',
+              code: 'o = {' + ident + '(){ }}',
             });
 
             test.pass('as method name w directive', {
-              code: 'o = {'+ident+'(){ "use strict"; }}',
+              code: 'o = {' + ident + '(){ "use strict"; }}',
             });
 
             test.fail_strict('as param name w/o directive', {
-              code: 'o = {foo('+ident+'){ }}',
+              code: 'o = {foo(' + ident + '){ }}',
             });
 
             test.fail('as param name w directive', {
-              code: 'o = {foo('+ident+'){ "use strict"; }}',
+              code: 'o = {foo(' + ident + '){ "use strict"; }}',
             });
 
             test.fail_strict('assigned to in param default w/o directive', {
-              code: 'o = {foo(x='+ident+'=y){ }}',
+              code: 'o = {foo(x=' + ident + '=y){ }}',
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
             test.fail('assigned to in param default w directive', {
-              code: 'o = {foo(x='+ident+'=y){ "use strict"; }}',
+              code: 'o = {foo(x=' + ident + '=y){ "use strict"; }}',
               desc: 'the default (always) causes the error, not the usage, but whatever',
             });
           });
@@ -1209,28 +1227,28 @@ export default (describe, test) =>
             // Note: classes are always strict so these tests are a liiiitle redundant
 
             test.pass('as method name w/o directive', {
-              code: 'class c {'+ident+'(){ }}',
+              code: 'class c {' + ident + '(){ }}',
             });
 
             test.pass('as method name w directive', {
-              code: 'class c {'+ident+'(){ "use strict"; }}',
+              code: 'class c {' + ident + '(){ "use strict"; }}',
             });
 
             test.fail('as param name w/o directive', {
-              code: 'class c {foo('+ident+'){ }}',
+              code: 'class c {foo(' + ident + '){ }}',
             });
 
             test.fail('as param name w directive', {
-              code: 'class c {foo('+ident+'){ "use strict"; }}',
+              code: 'class c {foo(' + ident + '){ "use strict"; }}',
             });
 
             test.fail('assigned to in param default w/o directive', {
-              code: 'class c {foo(x='+ident+'=y){ }}',
+              code: 'class c {foo(x=' + ident + '=y){ }}',
               desc: 'the default causes the error, not the usage, but whatever',
             });
 
             test.fail('assigned to in param default w directive', {
-              code: 'class c {foo(x='+ident+'=y){ "use strict"; }}',
+              code: 'class c {foo(x=' + ident + '=y){ "use strict"; }}',
               desc: 'the default (always) causes the error, not the usage, but whatever',
             });
           });
@@ -1241,7 +1259,6 @@ export default (describe, test) =>
         // octal escapes are okay in sloppy mode. package is a keyword only in strict mode. lets combine that into tests
 
         describe('arrow param name', _ => {
-
           test.fail_strict('package as func param, no escape, no directive', {
             code: 'function foo(package) { }',
           });
@@ -1276,7 +1293,6 @@ export default (describe, test) =>
         });
 
         describe('arrow param name', _ => {
-
           test.fail_strict('package as func param, no escape, no directive', {
             code: '(package) => { }',
           });
@@ -1311,7 +1327,6 @@ export default (describe, test) =>
         });
 
         describe('parenless arrow param name', _ => {
-
           test.fail_strict('package as func param, no escape, no directive', {
             code: 'package => { }',
           });
@@ -1348,7 +1363,6 @@ export default (describe, test) =>
     });
 
     describe('octal cases, regressions from #15', _ => {
-
       test.fail_strict('octal in sloppy mode function', {
         code: 'function foo() { 00004; }',
       });
@@ -1367,33 +1381,13 @@ export default (describe, test) =>
     });
 
     describe('asi', _ => {
-
-      [
-        '.foo',
-        '[foo]',
-        '()',
-        '`x`',
-        ' + x',
-        '/f',
-        '/f/g',
-      ].forEach(suffix => {
-
+      ['.foo', '[foo]', '()', '`x`', ' + x', '/f', '/f/g'].forEach(suffix => {
         test.fail_strict('tails that prevent ASI so it is not a directive', {
           code: 'function f(){ "use strict" \n /* suffix = */ ' + suffix + '; eval = 1; }',
         });
       });
 
-      [
-        'foo',
-        '++x',
-        '--x',
-        'function f(){}',
-        '{x}',
-        ';',
-        '25',
-        'true',
-      ].forEach(suffix => {
-
+      ['foo', '++x', '--x', 'function f(){}', '{x}', ';', '25', 'true'].forEach(suffix => {
         test.fail('tails that cause ASI so it is a directive', {
           code: 'function f(){ "use strict" \n ' + suffix + '; eval = 1; }',
         });

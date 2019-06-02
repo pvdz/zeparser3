@@ -2,7 +2,6 @@ import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $TICK_HEAD, $TICK_PURE, 
 
 export default (describe, test) =>
   describe('whitespace', _ => {
-
     test('regression; space token not skipped', {
       code: 'x + y',
       ast: true,
@@ -64,7 +63,6 @@ export default (describe, test) =>
     });
 
     describe('html comments', _ => {
-
       // https://tc39.github.io/ecma262/#sec-html-like-comments
       // Similar to a MultiLineComment that contains a line terminator code point, a SingleLineHTMLCloseComment
       // is considered to be a LineTerminator for purposes of parsing by the syntactic grammar.

@@ -30,10 +30,7 @@ export default (describe, test) =>
             expression: {
               type: 'TemplateLiteral',
               expressions: [{type: 'Identifier', name: 'bar'}],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -100,10 +97,7 @@ export default (describe, test) =>
                 expression: {
                   type: 'TemplateLiteral',
                   expressions: [{type: 'Identifier', name: 'a'}],
-                  quasis: [
-                    {type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}},
-                    {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}},
-                  ],
+                  quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo ${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '} baz`', cooked: '<TODO>'}}],
                 },
               },
             ],
@@ -151,10 +145,7 @@ export default (describe, test) =>
             expression: {
               type: 'TemplateLiteral',
               expressions: [{type: 'ObjectExpression', properties: []}],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -289,10 +280,7 @@ export default (describe, test) =>
                   quasis: [{type: 'TemplateElement', tail: true, value: {raw: '`foo`', cooked: '<TODO>'}}],
                 },
               ],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -313,16 +301,10 @@ export default (describe, test) =>
                 {
                   type: 'TemplateLiteral',
                   expressions: [{type: 'Identifier', name: 'bar'}],
-                  quasis: [
-                    {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
-                    {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
-                  ],
+                  quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
                 },
               ],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`foo${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}baz`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -368,24 +350,7 @@ export default (describe, test) =>
           },
         ],
       },
-      tokens: [
-        $PUNCTUATOR,
-        $TICK_HEAD,
-        $IDENT,
-        $TICK_BODY,
-        $IDENT,
-        $TICK_BODY,
-        $TICK_HEAD,
-        $IDENT,
-        $TICK_BODY,
-        $IDENT,
-        $TICK_BODY,
-        $IDENT,
-        $TICK_TAIL,
-        $TICK_TAIL,
-        $ASI,
-        $PUNCTUATOR,
-      ],
+      tokens: [$PUNCTUATOR, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $TICK_HEAD, $IDENT, $TICK_BODY, $IDENT, $TICK_BODY, $IDENT, $TICK_TAIL, $TICK_TAIL, $ASI, $PUNCTUATOR],
     });
 
     test('function body disambiguation inside template', {
@@ -407,10 +372,7 @@ export default (describe, test) =>
                   body: {type: 'BlockStatement', body: []},
                 },
               ],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -438,10 +400,7 @@ export default (describe, test) =>
                   body: {type: 'BlockStatement', body: []},
                 },
               ],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -472,10 +431,7 @@ export default (describe, test) =>
                   },
                 },
               ],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`a ${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '} b`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -484,7 +440,6 @@ export default (describe, test) =>
     });
 
     describe('bad escapes', _ => {
-
       // https://tc39.github.io/ecma262/#prod-CodePoint
       // "A conforming implementation must not use the extended definition of EscapeSequence described in B.1.2 when parsing a TemplateCharacter."
       // (these can be extended for string but should always be errors for non-tagged templates)
@@ -502,9 +457,7 @@ export default (describe, test) =>
       });
 
       describe('in pure', _ => {
-
         describe('still bad in regular templates', _ => {
-
           test.fail('illegal escapes are an error < es9', {
             code: '`\\xg`;',
             ES: 8,
@@ -522,7 +475,6 @@ export default (describe, test) =>
         });
 
         describe('only okay in tagged templates in es9', _ => {
-
           test.fail('illegal escapes are an error < es9', {
             code: 'f`\\xg`;',
             ES: 8,
@@ -541,9 +493,7 @@ export default (describe, test) =>
       });
 
       describe('in head', _ => {
-
         describe('still bad in regular templates', _ => {
-
           test.fail('illegal escapes are an error < es9', {
             code: '`\\xg ${x}`;',
             ES: 8,
@@ -561,7 +511,6 @@ export default (describe, test) =>
         });
 
         describe('only okay in tagged templates in es9', _ => {
-
           test.fail('illegal escapes are an error < es9', {
             code: 'f`\\xg ${x}`;',
             ES: 8,
@@ -580,9 +529,7 @@ export default (describe, test) =>
       });
 
       describe('in body', _ => {
-
         describe('still bad in regular templates', _ => {
-
           test.fail('illegal escapes are an error < es9', {
             code: '`${x} \\xg ${x}`;',
             ES: 8,
@@ -600,7 +547,6 @@ export default (describe, test) =>
         });
 
         describe('only okay in tagged templates in es9', _ => {
-
           test.fail('illegal escapes are an error < es9', {
             code: 'f`${x} \\xg ${x}`;',
             ES: 8,
@@ -618,9 +564,7 @@ export default (describe, test) =>
         });
       });
       describe('in tail', _ => {
-
         describe('still bad in regular templates', _ => {
-
           test.fail('illegal escapes are an error < es9', {
             code: '`${x} \\xg`;',
             ES: 8,
@@ -638,7 +582,6 @@ export default (describe, test) =>
         });
 
         describe('only okay in tagged templates in es9', _ => {
-
           test.fail('illegal escapes are an error < es9', {
             code: 'f`${x} \\xg`;',
             ES: 8,
@@ -658,9 +601,7 @@ export default (describe, test) =>
     });
 
     describe('and yield', _ => {
-
       describe('as var name', _ => {
-
         test('yield in middle', {
           code: 'x = `1 ${ yield } 2`',
           STRICT: {throws: true},
@@ -746,7 +687,6 @@ export default (describe, test) =>
       });
 
       describe('in generator', _ => {
-
         test('yield in middle', {
           code: 'function *f(){   x = `1 ${ yield } 2`   }',
           ast: {

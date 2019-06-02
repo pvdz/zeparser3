@@ -96,9 +96,7 @@ export default (describe, test) =>
                   expression: {
                     type: 'CallExpression',
                     callee: {type: 'Identifier', name: 'call'},
-                    arguments: [
-                      {type: 'Identifier', name: 'yield'},
-                    ],
+                    arguments: [{type: 'Identifier', name: 'yield'}],
                   },
                 },
               ],
@@ -353,23 +351,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
     });
@@ -750,9 +732,7 @@ export default (describe, test) =>
     });
 
     describe('arguments checks', _ => {
-
       describe('arrow func args inside generator', _ => {
-
         test.fail('as assignment target', {
           code: 'function *g() { yield = {}; }',
         });
@@ -891,7 +871,6 @@ export default (describe, test) =>
       });
 
       describe('arrow func args in block scope', _ => {
-
         test('as assignment target', {
           code: '{ yield = {}; }',
           STRICT: {throws: 'strict mode'},
@@ -1048,7 +1027,6 @@ export default (describe, test) =>
       });
 
       describe('async arrow func args', _ => {
-
         test.fail('as assignment target', {
           code: 'function *g() { async yield = {}; }',
         });
@@ -1192,7 +1170,6 @@ export default (describe, test) =>
       });
 
       describe('more arg checks', _ => {
-
         // https://tc39.github.io/ecma262/#prod-YieldExpression
         // YieldExpression cannot be used within the FormalParameters of a generator function because any expressions that are part of FormalParameters are evaluated before the resulting generator object is in a resumable state.
         // It is a Syntax Error if UniqueFormalParameters Contains YieldExpression is true.
@@ -1399,7 +1376,6 @@ export default (describe, test) =>
     });
 
     describe('regular func args', _ => {
-
       test.pass('yield in param default when function itself is not a generator', {
         code: 'function *g() { function f(x = yield) {}; }',
         STRICT: {throws: true},
@@ -1411,7 +1387,7 @@ export default (describe, test) =>
 
       test('yield bad in generator in complex arrow arg default', {
         code: 'function *g() { (x = u + yield z) => {}; }',
-        desc:' even if this was yield then it would have ot be ident because rhs of +',
+        desc: ' even if this was yield then it would have ot be ident because rhs of +',
         throws: 'yield',
       });
 
@@ -1434,11 +1410,8 @@ export default (describe, test) =>
     });
 
     describe('state resetting edge cases', _ => {
-
       describe('yield with arg', _ => {
-
         describe('nested non-gen funcs inside a generator', _ => {
-
           test.fail('can never yield in args of nested arrow', {
             code: 'function *f(){  return (x=yield y) => x;  }',
           });
@@ -1462,7 +1435,6 @@ export default (describe, test) =>
         });
 
         describe('nested generator funcs inside a generator', _ => {
-
           test.fail('can never yield in args of nested arrow', {
             code: 'function *f(){  return *(x=yield y) => x;  }',
           });
@@ -1481,7 +1453,6 @@ export default (describe, test) =>
         });
 
         describe('nested generator funcs inside a non-gen', _ => {
-
           test.fail('can never yield in args of nested arrow', {
             code: 'function f(){  return *(x=yield y) => x;  }',
           });
@@ -1500,7 +1471,6 @@ export default (describe, test) =>
         });
 
         describe('nested non-gen funcs inside a non-gen', _ => {
-
           test.fail('can never yield in args of nested arrow', {
             code: 'function f(){  return (x=yield y) => x;  }',
           });
@@ -1520,9 +1490,7 @@ export default (describe, test) =>
       });
 
       describe('yield without arg could be var', _ => {
-
         describe('nested non-gen funcs inside a generator', _ => {
-
           test.fail('can never yield in args of nested arrow', {
             code: 'function *f(){  return (x=yield) => x;  }',
           });
@@ -1546,7 +1514,6 @@ export default (describe, test) =>
         });
 
         describe('nested generator funcs inside a generator', _ => {
-
           test.fail('can never yield in args of nested arrow', {
             code: 'function *f(){  return *(x=yield) => x;  }',
           });
@@ -1566,7 +1533,6 @@ export default (describe, test) =>
         });
 
         describe('nested generator funcs inside a non-gen', _ => {
-
           test.fail('can never yield in args of nested arrow', {
             code: 'function f(){  return *(x=yield) => x;  }',
           });
@@ -1585,15 +1551,14 @@ export default (describe, test) =>
         });
 
         describe('nested non-gen funcs inside a non-gen', _ => {
-
           test.pass('can never yield in args of nested arrow', {
             code: 'function f(){  return (x=yield) => x;  }',
-            STRICT: { throws: true },
+            STRICT: {throws: true},
           });
 
           test.pass('yield in args of nested regular function', {
             code: 'function f(){  return function(x=yield) {};  }',
-            STRICT: { throws: true },
+            STRICT: {throws: true},
           });
 
           test.fail('yield in args of class method', {
@@ -1602,7 +1567,7 @@ export default (describe, test) =>
 
           test.pass('yield in args of object method', {
             code: 'function f(){  x = {foo(a=yield){}}  }',
-            STRICT: { throws: true },
+            STRICT: {throws: true},
           });
         });
       });
@@ -1623,9 +1588,7 @@ export default (describe, test) =>
     });
 
     describe('unary operators', _ => {
-
       describe('yield sans arg', _ => {
-
         // note: unary ops cannot parse into a yield expression so have to settle for a `yield`
         // as a var name which should throw inside a generator so all these tests should fail
 
@@ -1670,12 +1633,11 @@ export default (describe, test) =>
 
         test.fail('await', {
           code: 'fuction *f() {  return await yield;  }',
-          desc: 'await requires a unary expression as arg but yield is assignment'
+          desc: 'await requires a unary expression as arg but yield is assignment',
         });
       });
 
       describe('yield with arg', _ => {
-
         test.fail('delete', {
           code: 'function *f() {  return delete yield foo;  }',
           throws: 'yield',
@@ -1717,7 +1679,7 @@ export default (describe, test) =>
 
         test.fail('await', {
           code: 'fuction *f() {  return await yield foo;  }',
-          desc: 'await requires a unary expression as arg but yield is assignment'
+          desc: 'await requires a unary expression as arg but yield is assignment',
         });
       });
     });
@@ -2332,7 +2294,6 @@ export default (describe, test) =>
     });
 
     describe('yield in group in param default', _ => {
-
       // https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
       // > It is a Syntax Error if ArrowParameters Contains YieldExpression is true.
       // The arrow parens inherit the generator state from the parent scope (unlike regular funcs, who reset it)
@@ -2392,7 +2353,6 @@ export default (describe, test) =>
     });
 
     describe('yield *', _ => {
-
       test('yield can be followed by star', {
         code: 'function* f() { yield* x; }',
         ast: {

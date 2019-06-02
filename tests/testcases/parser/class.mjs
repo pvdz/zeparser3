@@ -2,7 +2,6 @@ import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE} from '..
 
 export default (describe, test) =>
   describe('classes', _ => {
-
     describe('empty classes', _ => {
       describe('as declaration', _ => {
         test('base case empty class', {
@@ -197,7 +196,6 @@ export default (describe, test) =>
     });
 
     describe('ident methods', _ => {
-
       test('class with simple ident method', {
         code: 'class A {a(){}}',
         ast: {
@@ -699,32 +697,11 @@ export default (describe, test) =>
             },
           ],
         },
-        tokens: [
-          $IDENT,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-        ],
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
     });
 
     describe('string methods', _ => {
-
       test('class with simple ident method', {
         code: 'class A {"x"(){}}',
         desc: 'should parse as class method',
@@ -1228,12 +1205,31 @@ export default (describe, test) =>
             },
           ],
         },
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        tokens: [
+          $IDENT,
+          $IDENT,
+          $PUNCTUATOR,
+          $STRING_DOUBLE,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $STRING_DOUBLE,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $STRING_DOUBLE,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+        ],
       });
     });
 
     describe('number methods', _ => {
-
       test('class with simple ident method', {
         code: 'class A {1(){}}',
         desc: 'should parse as class method',
@@ -1572,7 +1568,6 @@ export default (describe, test) =>
     });
 
     describe('dynamic methods', _ => {
-
       test('without modifier', {
         code: 'class A {[a](){}}',
         ast: {
@@ -2195,11 +2190,8 @@ export default (describe, test) =>
     });
 
     describe('generators', _ => {
-
       describe('not static', _ => {
-
         describe('no prefix', _ => {
-
           test('with ident key', {
             code: 'class x{*foo(){}}',
             ast: {
@@ -2347,7 +2339,6 @@ export default (describe, test) =>
         });
 
         describe('getter prefix', _ => {
-
           test.fail('with ident key', {
             code: 'class x{get *foo(){}}',
           });
@@ -2370,7 +2361,6 @@ export default (describe, test) =>
         });
 
         describe('setter prefix', _ => {
-
           test.fail('with ident key', {
             code: 'class x{set *foo(a){}}',
           });
@@ -2393,13 +2383,12 @@ export default (describe, test) =>
         });
 
         describe('async prefix', _ => {
-
           // important to assert that the AST marks the methods as both async and a generator and id=null
 
           test('with ident key', {
             code: 'class x{async *foo(a){}}',
-            callback(ast, tokens, astJson){
-              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null')
+            callback(ast, tokens, astJson) {
+              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null');
             },
             ast: {
               type: 'Program',
@@ -2436,8 +2425,8 @@ export default (describe, test) =>
 
           test('with dynamic key', {
             code: 'class x{async *[x](a){}}',
-            callback(ast, tokens, astJson){
-              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null')
+            callback(ast, tokens, astJson) {
+              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null');
             },
             ast: {
               type: 'Program',
@@ -2474,8 +2463,8 @@ export default (describe, test) =>
 
           test('with string key', {
             code: 'class x{async *"foo"(a){}}',
-            callback(ast, tokens, astJson){
-              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null')
+            callback(ast, tokens, astJson) {
+              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null');
             },
             ast: {
               type: 'Program',
@@ -2512,8 +2501,8 @@ export default (describe, test) =>
 
           test('with number key', {
             code: 'class x{async *555(a){}}',
-            callback(ast, tokens, astJson){
-              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null')
+            callback(ast, tokens, astJson) {
+              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null');
             },
             ast: {
               type: 'Program',
@@ -2555,9 +2544,7 @@ export default (describe, test) =>
       });
 
       describe('with static', _ => {
-
         describe('no prefix', _ => {
-
           test('with ident key', {
             code: 'class x{static *foo(){}}',
             ast: {
@@ -2705,7 +2692,6 @@ export default (describe, test) =>
         });
 
         describe('getter prefix', _ => {
-
           test.fail('with ident key', {
             code: 'class x{static get *foo(){}}',
           });
@@ -2728,7 +2714,6 @@ export default (describe, test) =>
         });
 
         describe('setter prefix', _ => {
-
           test.fail('with ident key', {
             code: 'class x{static set *foo(a){}}',
           });
@@ -2751,11 +2736,10 @@ export default (describe, test) =>
         });
 
         describe('async prefix', _ => {
-
           test('with ident key', {
             code: 'class x{static async *foo(a){}}',
-            callback(ast, tokens, astJson){
-              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null') && astJson.includes('"static":true')
+            callback(ast, tokens, astJson) {
+              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null') && astJson.includes('"static":true');
             },
             ast: {
               type: 'Program',
@@ -2792,8 +2776,8 @@ export default (describe, test) =>
 
           test('with dynamic key', {
             code: 'class x{static async *[x](a){}}',
-            callback(ast, tokens, astJson){
-              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null') && astJson.includes('"static":true')
+            callback(ast, tokens, astJson) {
+              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null') && astJson.includes('"static":true');
             },
             ast: {
               type: 'Program',
@@ -2830,8 +2814,8 @@ export default (describe, test) =>
 
           test('with string key', {
             code: 'class x{static async *"foo"(a){}}',
-            callback(ast, tokens, astJson){
-              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null') && astJson.includes('"static":true')
+            callback(ast, tokens, astJson) {
+              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null') && astJson.includes('"static":true');
             },
             ast: {
               type: 'Program',
@@ -2868,8 +2852,8 @@ export default (describe, test) =>
 
           test('with number key', {
             code: 'class x{static async *555(a){}}',
-            callback(ast, tokens, astJson){
-              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null') && astJson.includes('"static":true')
+            callback(ast, tokens, astJson) {
+              return astJson.includes('"generator":true') && astJson.includes('"async":true') && astJson.includes('"id":null') && astJson.includes('"static":true');
             },
             ast: {
               type: 'Program',
@@ -3003,65 +2987,97 @@ export default (describe, test) =>
 
     describe('special keys', _ => {
       [
-        'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
-        'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
-        'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
-        'false', 'enum', 'eval', 'arguments', 'implements', 'package', 'protected', 'interface', 'private',
-        'public', 'await', 'yield',
+        'break',
+        'case',
+        'catch',
+        'class',
+        'const',
+        'continue',
+        'debugger',
+        'default',
+        'delete',
+        'do',
+        'else',
+        'export',
+        'extends',
+        'finally',
+        'for',
+        'function',
+        'if',
+        'import',
+        'in',
+        'instanceof',
+        'new',
+        'return',
+        'super',
+        'switch',
+        'this',
+        'throw',
+        'try',
+        'typeof',
+        'var',
+        'void',
+        'while',
+        'with',
+        'null',
+        'true',
+        'false',
+        'enum',
+        'eval',
+        'arguments',
+        'implements',
+        'package',
+        'protected',
+        'interface',
+        'private',
+        'public',
+        'await',
+        'yield',
         'let', // "Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName"
         'static', // "Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName"
-        'async', 'get', 'set',
+        'async',
+        'get',
+        'set',
       ].forEach(ident => {
-
         describe('ident=' + ident, _ => {
-
           test('as class name', {
             code: 'class ' + ident + ' {}',
-            ...(
-              ['async', 'get', 'set'].indexOf(ident) >= 0 ?
-                {
+            ...(['async', 'get', 'set'].indexOf(ident) >= 0
+              ? {
                   ast: true,
                   tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 }
-                :
-                ['await'].indexOf(ident) >= 0 ?
-                  {
-                    ast: true,
-                    tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-                    // await is only considered a keyword when parsing in module mode
-                    MODULE: {
-                      throws: true,
-                    },
-                  }
-                  :
-                {
-                  throws: 'variable name',
+              : ['await'].indexOf(ident) >= 0
+              ? {
+                  ast: true,
+                  tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+                  // await is only considered a keyword when parsing in module mode
+                  MODULE: {
+                    throws: true,
+                  },
                 }
-            ),
+              : {
+                  throws: 'variable name',
+                }),
           });
 
           test('as super class name', {
             code: 'class x extends ' + ident + ' {}',
             desc: 'since extends accept an arbitrary expression certain keywords lead to different errors',
-            ...(
-              ['async', 'this', 'null', 'true', 'false', 'eval', 'arguments', 'get', 'set'].indexOf(ident) >= 0 ?
-              {
-                ast: true,
-                tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-              }
-                :
-              ident === 'await'
-                ?
-              {
-                MODULE: {throws: true},
-                ast: true,
-                tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-              }
-                :
-              {
-                throws: true,
-              }
-            ),
+            ...(['async', 'this', 'null', 'true', 'false', 'eval', 'arguments', 'get', 'set'].indexOf(ident) >= 0
+              ? {
+                  ast: true,
+                  tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+                }
+              : ident === 'await'
+              ? {
+                  MODULE: {throws: true},
+                  ast: true,
+                  tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+                }
+              : {
+                  throws: true,
+                }),
           });
 
           test.fail('as regular property in class', {
@@ -3493,7 +3509,6 @@ export default (describe, test) =>
     });
 
     describe('method names can be `prototype`', _ => {
-
       test('plain', {
         code: 'class x { prototype(){} }',
         ast: {
@@ -3563,7 +3578,6 @@ export default (describe, test) =>
     });
 
     describe('static method names can NOT be `prototype`', _ => {
-
       test('plain', {
         code: 'class x { static prototype(){} }',
         throws: 'prototype',
@@ -3615,7 +3629,6 @@ export default (describe, test) =>
     });
 
     describe('duplicate keys', _ => {
-
       // https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
       // 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object Initializers.
 
@@ -3636,9 +3649,7 @@ export default (describe, test) =>
       });
 
       describe('constructor', _ => {
-
         describe('regular', _ => {
-
           // https://tc39.github.io/ecma262/#sec-static-semantics-constructormethod
           // > Early Error rules ensure that there is only one method definition named "constructor" and that it is not an accessor property or generator definition.
 
@@ -3663,7 +3674,6 @@ export default (describe, test) =>
         });
 
         describe('static', _ => {
-
           // https://tc39.github.io/ecma262/#sec-static-semantics-constructormethod
           // > It is a Syntax Error if PrototypePropertyNameList of ClassElementList contains more than one occurrence of "constructor".
           // static members do not end up on the prototype so should not get this treatment
@@ -3733,18 +3743,18 @@ export default (describe, test) =>
     });
 
     describe('constructor name checks', _ => {
-
       // https://tc39.github.io/ecma262/#sec-identifier-names-static-semantics-stringvalue
       // Note: the "constructor" check is determined by the "StringValue", which canonizes the unicode escapes
       // https://tc39.github.io/ecma262/#sec-string-literals-static-semantics-stringvalue
       // And for strings it is the unquoted canonical value of the string (so "constructor" and 'constructor' + escapes)
 
       describe('as ident', _ => {
-
         test('constructor as dynamic property should be a method', {
           code: 'class x { [constructor](){} }',
           desc: 'checking the token name of the key is insufficient if the dynamic aspect is left unchecked',
-          callback(ast, tokens, astJson) { return astJson.includes('"computed":true') && astJson.includes('"kind":"method"'); },
+          callback(ast, tokens, astJson) {
+            return astJson.includes('"computed":true') && astJson.includes('"kind":"method"');
+          },
           ast: {
             type: 'Program',
             body: [
@@ -3780,7 +3790,9 @@ export default (describe, test) =>
 
         test('static constructor is ok and just a method', {
           code: 'class x { static constructor(){} }',
-          callback(ast, tokens, astJson) { return astJson.includes('"static":true') && astJson.includes('"kind":"method"'); },
+          callback(ast, tokens, astJson) {
+            return astJson.includes('"static":true') && astJson.includes('"kind":"method"');
+          },
           ast: {
             type: 'Program',
             body: [
@@ -3846,11 +3858,12 @@ export default (describe, test) =>
       });
 
       describe('as string', _ => {
-
         test('constructor as dynamic property should be a method', {
           code: 'class x { ["constructor"](){} }',
           desc: 'checking the token name of the key is insufficient if the dynamic aspect is left unchecked',
-          callback(ast, tokens, astJson) { return astJson.includes('"computed":true') && astJson.includes('"kind":"method"'); },
+          callback(ast, tokens, astJson) {
+            return astJson.includes('"computed":true') && astJson.includes('"kind":"method"');
+          },
           ast: {
             type: 'Program',
             body: [
@@ -3886,7 +3899,9 @@ export default (describe, test) =>
 
         test('static constructor is ok and just a method', {
           code: 'class x { static "constructor"(){} }',
-          callback(ast, tokens, astJson) { return astJson.includes('"static":true') && astJson.includes('"kind":"method"'); },
+          callback(ast, tokens, astJson) {
+            return astJson.includes('"static":true') && astJson.includes('"kind":"method"');
+          },
           ast: {
             type: 'Program',
             body: [
@@ -3976,9 +3991,7 @@ export default (describe, test) =>
       });
 
       describe('escapes should be canonical', _ => {
-
         describe('unicode in idents', _ => {
-
           test.pass('constructor ident can have unicode escape', {
             code: 'class x { \\u0063onstructor(){} }',
           });
@@ -4000,7 +4013,6 @@ export default (describe, test) =>
         });
 
         describe('in strings', _ => {
-
           test('string ident with escape can still be constructor so should still fail the check AB', {
             code: 'class x { "\u0063onstructor"(){}; constructor(){}; }',
             throws: 'constructor',
@@ -4199,10 +4211,7 @@ export default (describe, test) =>
     });
 
     test.fail('class extending an arrow', {
-      code: [
-        'class x extends ()=>{} {}',
-        'class x extends ()=>1 {}',
-      ],
+      code: ['class x extends ()=>{} {}', 'class x extends ()=>1 {}'],
     });
 
     test('default exports of an extending class', {
@@ -4266,7 +4275,6 @@ export default (describe, test) =>
     });
 
     describe('static as a name', _ => {
-
       test('method named static', {
         code: 'class x{   static(){}   }',
         ast: {
@@ -4483,7 +4491,6 @@ export default (describe, test) =>
     });
 
     describe('duplicate member modifiers', _ => {
-
       test.fail('double static', {
         code: 'class x {    static static f(){}    }',
       });
@@ -4693,9 +4700,7 @@ export default (describe, test) =>
     });
 
     describe('lexerflag and extends/computed key', _ => {
-
       describe('yield in class computed key', _ => {
-
         test.fail('yield expr in computed expression of key', {
           code: 'class x{[yield](a){}}',
           desc: 'all class parts are strict',
@@ -4747,7 +4752,6 @@ export default (describe, test) =>
       });
 
       describe('super property in computed method key', _ => {
-
         test.fail('super prop in computed key of non-extending class without wrapper', {
           code: 'class x { [super.foo](){} }',
           desc: 'Just matching others at this point',
@@ -4780,7 +4784,6 @@ export default (describe, test) =>
       });
 
       describe('super property in extends', _ => {
-
         test.fail('super prop in extends not wrapped', {
           code: 'class x extends super.foo {}',
         });
@@ -4795,7 +4798,6 @@ export default (describe, test) =>
       });
 
       describe('super call in computed method key', _ => {
-
         test.fail('super call in computed key of non-extending class without wrapper', {
           code: 'class x { [super()](){} }',
           desc: 'Just matching others at this point',
@@ -4828,7 +4830,6 @@ export default (describe, test) =>
       });
 
       describe('super call in extends', _ => {
-
         test.fail('super call in extends not wrapped', {
           code: 'class x extends super() {}',
         });
@@ -4844,9 +4845,7 @@ export default (describe, test) =>
     });
 
     describe('asi and regex cases', _ => {
-
       describe('class decl', _ => {
-
         test.fail('newline-regex after class keyword', {
           code: 'class \n /foo/ x{}',
         });
@@ -4897,7 +4896,6 @@ export default (describe, test) =>
       });
 
       describe('class expr', _ => {
-
         test.fail('newline-regex after class keyword', {
           code: 'let c = class \n /foo/ x{}',
         });
@@ -4953,7 +4951,6 @@ export default (describe, test) =>
     });
 
     describe('invalid syntax', _ => {
-
       test.fail('missing a paren', {
         code: 'class A {"x"){}}',
       });
@@ -4961,5 +4958,5 @@ export default (describe, test) =>
       test.fail('missing parens', {
         code: 'class A {"x"{}}',
       });
-    })
+    });
   });

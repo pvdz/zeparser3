@@ -2,19 +2,19 @@ import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE, 
 
 export default (describe, test) =>
   describe('directive prologues', _ => {
-
     describe('default expression statement behavior', _ => {
-
       describe('global', _ => {
         test('single directive single string', {
           code: "'foo';",
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
-              directive: 'foo',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
+                directive: 'foo',
+              },
+            ],
           },
           tokens: [$STRING_SINGLE, $PUNCTUATOR],
         });
@@ -23,11 +23,13 @@ export default (describe, test) =>
           code: '"foo";',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-              directive: 'foo',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                directive: 'foo',
+              },
+            ],
           },
           tokens: [$STRING_DOUBLE, $PUNCTUATOR],
         });
@@ -36,11 +38,13 @@ export default (describe, test) =>
           code: '"foo"',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-              directive: 'foo',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                directive: 'foo',
+              },
+            ],
           },
           tokens: [$STRING_DOUBLE, $ASI],
         });
@@ -68,15 +72,18 @@ export default (describe, test) =>
           code: '"foo";"bar";',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-              directive: 'foo',
-            }, {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-              directive: 'bar',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                directive: 'foo',
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                directive: 'bar',
+              },
+            ],
           },
           tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
         });
@@ -90,15 +97,18 @@ export default (describe, test) =>
           code: '"foo";\n"bar";',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-              directive: 'foo',
-            }, {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-              directive: 'bar',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                directive: 'foo',
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                directive: 'bar',
+              },
+            ],
           },
           tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
         });
@@ -107,15 +117,18 @@ export default (describe, test) =>
           code: "'foo';\n'bar';",
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
-              directive: 'foo',
-            }, {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: "'bar'"},
-              directive: 'bar',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
+                directive: 'foo',
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: "'bar'"},
+                directive: 'bar',
+              },
+            ],
           },
           tokens: [$STRING_SINGLE, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR],
         });
@@ -124,15 +137,18 @@ export default (describe, test) =>
           code: '\'foo\';\n"bar";',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
-              directive: 'foo',
-            }, {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-              directive: 'bar',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
+                directive: 'foo',
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                directive: 'bar',
+              },
+            ],
           },
           tokens: [$STRING_SINGLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
         });
@@ -141,15 +157,18 @@ export default (describe, test) =>
           code: '"foo";\n\'bar\';',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-              directive: 'foo',
-            }, {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: "'bar'"},
-              directive: 'bar',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                directive: 'foo',
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: "'bar'"},
+                directive: 'bar',
+              },
+            ],
           },
           tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_SINGLE, $PUNCTUATOR],
         });
@@ -158,15 +177,18 @@ export default (describe, test) =>
           code: '"foo"\n// stuff here\n"bar";',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-              directive: 'foo',
-            }, {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-              directive: 'bar',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                directive: 'foo',
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                directive: 'bar',
+              },
+            ],
           },
           tokens: [$STRING_DOUBLE, $ASI, $STRING_DOUBLE, $PUNCTUATOR],
         });
@@ -175,15 +197,18 @@ export default (describe, test) =>
           code: '"foo";/*abc\nxyz*/"bar";',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-              directive: 'foo',
-            }, {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-              directive: 'bar',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                directive: 'foo',
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                directive: 'bar',
+              },
+            ],
           },
           tokens: [$STRING_DOUBLE, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR],
         });
@@ -192,15 +217,18 @@ export default (describe, test) =>
           code: '"foo"/*abc\nxyz*/"bar";',
           ast: {
             type: 'Program',
-            body: [{
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-              directive: 'foo',
-            }, {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-              directive: 'bar',
-            }],
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                directive: 'foo',
+              },
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                directive: 'bar',
+              },
+            ],
           },
           tokens: [$STRING_DOUBLE, $ASI, $STRING_DOUBLE, $PUNCTUATOR],
         });
@@ -316,11 +344,13 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                    directive: 'use strict',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                      directive: 'use strict',
+                    },
+                  ],
                 },
               },
             ],
@@ -343,11 +373,13 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
-                    directive: 'foo',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
+                      directive: 'foo',
+                    },
+                  ],
                 },
               },
             ],
@@ -368,11 +400,13 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                    directive: 'foo',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      directive: 'foo',
+                    },
+                  ],
                 },
               },
             ],
@@ -393,11 +427,13 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                    directive: 'foo',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      directive: 'foo',
+                    },
+                  ],
                 },
               },
             ],
@@ -449,15 +485,18 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                    directive: 'foo',
-                  }, {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-                    directive: 'bar',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      directive: 'foo',
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                      directive: 'bar',
+                    },
+                  ],
                 },
               },
             ],
@@ -483,15 +522,18 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                    directive: 'foo',
-                  }, {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-                    directive: 'bar',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      directive: 'foo',
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                      directive: 'bar',
+                    },
+                  ],
                 },
               },
             ],
@@ -512,15 +554,18 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
-                    directive: 'foo',
-                  }, {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: "'bar'"},
-                    directive: 'bar',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
+                      directive: 'foo',
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: "'bar'"},
+                      directive: 'bar',
+                    },
+                  ],
                 },
               },
             ],
@@ -541,15 +586,18 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
-                    directive: 'foo',
-                  }, {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-                    directive: 'bar',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: "'foo'"},
+                      directive: 'foo',
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                      directive: 'bar',
+                    },
+                  ],
                 },
               },
             ],
@@ -570,15 +618,18 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                    directive: 'foo',
-                  }, {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: "'bar'"},
-                    directive: 'bar',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      directive: 'foo',
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: "'bar'"},
+                      directive: 'bar',
+                    },
+                  ],
                 },
               },
             ],
@@ -599,15 +650,18 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                    directive: 'foo',
-                  }, {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-                    directive: 'bar',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      directive: 'foo',
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                      directive: 'bar',
+                    },
+                  ],
                 },
               },
             ],
@@ -628,15 +682,18 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                    directive: 'foo',
-                  }, {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-                    directive: 'bar',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      directive: 'foo',
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                      directive: 'bar',
+                    },
+                  ],
                 },
               },
             ],
@@ -657,15 +714,18 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
-                    directive: 'foo',
-                  }, {
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
-                    directive: 'bar',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"foo"'},
+                      directive: 'foo',
+                    },
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"bar"'},
+                      directive: 'bar',
+                    },
+                  ],
                 },
               },
             ],
@@ -694,11 +754,13 @@ export default (describe, test) =>
                   expression: false,
                   body: {
                     type: 'BlockStatement',
-                    body: [{
-                      type: 'ExpressionStatement',
-                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                      directive: 'use strict',
-                    }],
+                    body: [
+                      {
+                        type: 'ExpressionStatement',
+                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                        directive: 'use strict',
+                      },
+                    ],
                   },
                 },
               },
@@ -723,11 +785,13 @@ export default (describe, test) =>
                   expression: false,
                   body: {
                     type: 'BlockStatement',
-                    body: [{
-                      type: 'ExpressionStatement',
-                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                      directive: 'use strict',
-                    }],
+                    body: [
+                      {
+                        type: 'ExpressionStatement',
+                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                        directive: 'use strict',
+                      },
+                    ],
                   },
                 },
               },
@@ -752,11 +816,13 @@ export default (describe, test) =>
                   expression: false,
                   body: {
                     type: 'BlockStatement',
-                    body: [{
-                      type: 'ExpressionStatement',
-                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                      directive: 'use strict',
-                    }],
+                    body: [
+                      {
+                        type: 'ExpressionStatement',
+                        expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                        directive: 'use strict',
+                      },
+                    ],
                   },
                 },
               },
@@ -778,11 +844,13 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                    directive: 'use strict',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                      directive: 'use strict',
+                    },
+                  ],
                 },
               },
             ],
@@ -803,11 +871,13 @@ export default (describe, test) =>
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  body: [{
-                    type: 'ExpressionStatement',
-                    expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
-                    directive: 'use strict',
-                  }],
+                  body: [
+                    {
+                      type: 'ExpressionStatement',
+                      expression: {type: 'Literal', value: '<TODO>', raw: '"use strict"'},
+                      directive: 'use strict',
+                    },
+                  ],
                 },
               },
             ],
@@ -818,7 +888,6 @@ export default (describe, test) =>
     });
 
     describe('into Directive node', _ => {
-
       describe('global', _ => {
         test('single directive single string', {
           code: "'foo';",
@@ -1482,7 +1551,6 @@ export default (describe, test) =>
     });
 
     describe('eval/arguments in arg and strict mode in body', _ => {
-
       test.fail_strict('eval in parenless arrow sans directive', {
         code: 'eval => { }',
       });
@@ -1546,10 +1614,9 @@ export default (describe, test) =>
       test.fail('arguments as second arg in parened arrow', {
         code: 'function f(a, arguments) { "use strict"; }',
       });
-
     });
 
-    test("regression: single use strict in arrow", {
+    test('regression: single use strict in arrow', {
       code: '(w, o, e, m) => { "use strict" }',
       ast: {
         type: 'Program',
@@ -1580,7 +1647,7 @@ export default (describe, test) =>
       tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $STRING_DOUBLE, $ASI, $PUNCTUATOR, $ASI],
     });
 
-    test("regression: double use strict in arrow", {
+    test('regression: double use strict in arrow', {
       desc: 'this was throwing at some point, complaining about non-simple args',
       code: '(w, o, e, m) => { "use strict"; "use strict" }',
       ast: {

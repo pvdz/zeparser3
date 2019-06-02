@@ -67,7 +67,7 @@ export default (describe, test) =>
 
     test('async asi edge case call', {
       code: 'do async \n () \n while (y)',
-      desc:' such sad. not an error, just `async()` func call and legit',
+      desc: ' such sad. not an error, just `async()` func call and legit',
       ast: {
         type: 'Program',
         body: [
@@ -90,7 +90,7 @@ export default (describe, test) =>
 
     test.fail('async bad case', {
       code: 'do async \n f(){}; while (y)',
-      desc:' should not attempt to parse the async function because the newline prevents it',
+      desc: ' should not attempt to parse the async function because the newline prevents it',
     });
 
     test.fail('async arrow bad case 1', {
@@ -104,7 +104,6 @@ export default (describe, test) =>
     });
 
     describe('asi problem case that almost all parsers seem to accept', _ => {
-
       // This case is (currently) accepted by all parsers except traceur.
       // And only for sub-statements that don't require ASI (like block, switch, try). It's almost as if that's
       // universally stopping ASI in its tracks..? Even v8 suffers from this at the time of writing.

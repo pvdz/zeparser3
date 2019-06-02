@@ -410,24 +410,7 @@ export default (describe, test) =>
         },
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       },
-      tokens: [
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $NUMBER_DEC,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-      ],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('something with grouping', {
@@ -436,24 +419,7 @@ export default (describe, test) =>
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
       },
-      tokens: [
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $NUMBER_DEC,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-      ],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('something with rhs grouping', {
@@ -462,24 +428,7 @@ export default (describe, test) =>
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
       },
-      tokens: [
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $NUMBER_DEC,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-      ],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('can never use await expression as default arg value (slightly more complex)', {
@@ -488,24 +437,7 @@ export default (describe, test) =>
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
       },
-      tokens: [
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $NUMBER_DEC,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-      ],
+      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('make failing code is inside async function, should still fail for being in parameter head', {
@@ -514,25 +446,7 @@ export default (describe, test) =>
       SLOPPY_SCRIPT: {
         throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
       },
-      tokens: [
-        $IDENT,
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-      ],
+      tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
 
     test('the async property is not inherited from parent functions', {
@@ -677,7 +591,6 @@ export default (describe, test) =>
     });
 
     describe('unicode escape edge case', _ => {
-
       test('var await should throw in async', {
         code: 'async () => { var await; }',
         throws: 'await',
@@ -749,7 +662,6 @@ export default (describe, test) =>
     });
 
     describe('await as func id', _ => {
-
       test.pass('plain function decl', {
         code: 'function await(){}',
         MODULE: {throws: 'await'},
@@ -824,9 +736,7 @@ export default (describe, test) =>
     });
 
     describe('await as arg name', _ => {
-
       describe('non-arrow', _ => {
-
         test.pass('plain function decl', {
           code: 'function f(await){}',
           MODULE: {throws: 'await'},
@@ -909,7 +819,6 @@ export default (describe, test) =>
       });
 
       describe('arrow', _ => {
-
         test.pass('plain arrow in global', {
           code: '(await) => x',
           MODULE: {throws: 'await'},
@@ -972,11 +881,8 @@ export default (describe, test) =>
     });
 
     describe('await as arg default', _ => {
-
       describe('argless await', _ => {
-
         describe('non-arrow', _ => {
-
           test.pass('plain function decl', {
             code: 'function f(foo = await){}',
             MODULE: {throws: 'await'},
@@ -1060,11 +966,8 @@ export default (describe, test) =>
       });
 
       describe('await with arg', _ => {
-
         describe('in global', _ => {
-
           describe('non-arrow, just an await', _ => {
-
             test.fail('plain function decl', {
               code: 'function f(foo = await bar){}',
             });
@@ -1139,7 +1042,6 @@ export default (describe, test) =>
           });
 
           describe('non-arrow, complex nested await', _ => {
-
             test.fail('plain function decl', {
               code: 'function f(foo = [{m: t(await bar)}]){}',
             });
@@ -1214,7 +1116,6 @@ export default (describe, test) =>
           });
 
           describe('arrow, just an await', _ => {
-
             test.fail('plain arrow', {
               code: '(foo = await bar) => {}',
             });
@@ -1265,7 +1166,6 @@ export default (describe, test) =>
           });
 
           describe('arrow, complex await', _ => {
-
             test.fail('plain arrow', {
               code: '(foo = [{m: 5 + t(await bar)}]) => {}',
             });
@@ -1313,9 +1213,7 @@ export default (describe, test) =>
         });
 
         describe('in async', _ => {
-
           describe('non-arrow, just an await', _ => {
-
             test.fail('plain function decl', {
               code: 'async function g(){    function f(foo = await bar){}    }',
             });
@@ -1390,7 +1288,6 @@ export default (describe, test) =>
           });
 
           describe('non-arrow, complex nested await', _ => {
-
             test.fail('plain function decl', {
               code: 'async function g(){    function f(foo = [h, {m: t(await bar)}]){}    }',
             });
@@ -1465,7 +1362,6 @@ export default (describe, test) =>
           });
 
           describe('arrow, just an await', _ => {
-
             test.fail('plain arrow', {
               // https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
               code: 'async function a(){     (foo = await bar) => {}     }',
@@ -1513,7 +1409,6 @@ export default (describe, test) =>
           });
 
           describe('arrow, complex await', _ => {
-
             test.fail('plain arrow', {
               code: 'async function a(){     (foo = [{m: 5 + t(await bar)}]) => {}     }',
             });
@@ -1620,7 +1515,6 @@ export default (describe, test) =>
     });
 
     describe('await in group in param default', _ => {
-
       // https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
       // > It is a Syntax Error if ArrowParameters Contains AwaitExpression is true.
       // The arrow parens inherit the async state from the parent scope (unlike regular funcs, who reset it)
@@ -1691,5 +1585,4 @@ export default (describe, test) =>
     });
 
     // async function f(){ await; }   (make sure the arg is mandatory)
-
   });

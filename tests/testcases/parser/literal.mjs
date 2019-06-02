@@ -164,7 +164,6 @@ export default (describe, test) =>
     });
 
     describe('binary literal', _ => {
-
       test('binary number', {
         code: '0b1010',
         ast: {
@@ -187,8 +186,6 @@ export default (describe, test) =>
         code: '0b2',
       });
     });
-
-
 
     test('legacy octal number', {
       code: '0456',

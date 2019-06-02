@@ -165,5 +165,4 @@ export default (describe, test) =>
     test.fail('non-assignment binary op is not assignable', {
       code: 'a|b = c',
     });
-
   });

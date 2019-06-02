@@ -41,7 +41,6 @@ export default (describe, test) =>
     });
 
     describe('unicode escapes', _ => {
-
       test.pass('classic unicode escape at start', {
         code: '\\u0065xxx',
       });
@@ -109,7 +108,7 @@ export default (describe, test) =>
       code: 'pa\\u0073s();',
       desc: 'do not make the name include the escape',
       callback(_a, _b, astJson) {
-        console.log(astJson)
+        console.log(astJson);
         return astJson.includes(':"pass"');
       },
       ast: {

@@ -14,7 +14,8 @@ export default (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: false,
-              async: false,              id: {type: 'Identifier', name: 'f'},
+              async: false,
+              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {
                 type: 'BlockStatement',
@@ -231,14 +232,16 @@ export default (describe, test) =>
               expression: {
                 type: 'CallExpression',
                 callee: {type: 'Identifier', name: 'foo'},
-                arguments: [{
-                  type: 'FunctionExpression',
-                  generator: false,
-                  async: true,
-                  id: null,
-                  params: [],
-                  body: {type: 'BlockStatement', body: []}
-                }],
+                arguments: [
+                  {
+                    type: 'FunctionExpression',
+                    generator: false,
+                    async: true,
+                    id: null,
+                    params: [],
+                    body: {type: 'BlockStatement', body: []},
+                  },
+                ],
               },
             },
           ],
@@ -282,7 +285,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {
                     type: 'RestElement',
@@ -304,7 +308,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {type: 'Identifier', name: 'a'},
                   {type: 'Identifier', name: 'b'},
@@ -362,7 +367,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -384,7 +390,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -403,8 +410,7 @@ export default (describe, test) =>
             test('sans flag', {
               code: 'typeof function f(){}\n/foo/',
               throws: 'Expected to parse a value',
-              desc:
-                'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
+              desc: 'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
               tokens: [],
             });
 
@@ -441,8 +447,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              desc:
-                'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
+              desc: 'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
               tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
             });
           });
@@ -458,7 +463,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: true,                    id: {type: 'Identifier', name: 'f'},
+                    async: true,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -480,7 +486,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: true,                    id: {type: 'Identifier', name: 'f'},
+                    async: true,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -499,8 +506,7 @@ export default (describe, test) =>
             test('sans flag', {
               code: 'typeof async function f(){}\n/foo/',
               throws: 'Expected to parse a value',
-              desc:
-                'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
+              desc: 'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
               tokens: [],
             });
 
@@ -537,8 +543,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              desc:
-                'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
+              desc: 'note: an expression statement requires a semi so ASI is attempted and will fail because it will not apply when the next line starts with a forward slash so it is a division',
               tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
             });
           });
@@ -548,7 +553,6 @@ export default (describe, test) =>
     });
 
     describe('function args', _ => {
-
       describe('classic vars', _ => {
         test('one arg', {
           code: 'function f(a){}',
@@ -558,7 +562,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [{type: 'Identifier', name: 'a'}],
                 body: {type: 'BlockStatement', body: []},
               },
@@ -575,7 +580,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
                 body: {type: 'BlockStatement', body: []},
               },
@@ -586,9 +592,7 @@ export default (describe, test) =>
       });
 
       describe('trailing comma', _ => {
-
         describe('enabled', _ => {
-
           [undefined, 8, 9, Infinity].forEach(ES => {
             test.fail('must have args to trail', {
               code: 'function f(,){}',
@@ -609,7 +613,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [{type: 'Identifier', name: 'a'}],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -627,7 +632,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
                     body: {type: 'BlockStatement', body: []},
                   },
@@ -650,7 +656,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -679,7 +686,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -702,7 +710,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ObjectPattern',
@@ -740,7 +749,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -767,7 +777,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -798,7 +809,6 @@ export default (describe, test) =>
         });
 
         describe('disabled', _ => {
-
           [6, 7].forEach(ES => {
             test.fail('must have args to trail', {
               code: 'function f(,){}',
@@ -872,7 +882,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {
                     type: 'AssignmentPattern',
@@ -895,7 +906,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {
                     type: 'AssignmentPattern',
@@ -1057,7 +1069,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [{type: 'ArrayPattern', elements: []}],
                   body: {type: 'BlockStatement', body: []},
                 },
@@ -1074,7 +1087,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1097,7 +1111,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [{type: 'ArrayPattern', elements: [null]}],
                   body: {type: 'BlockStatement', body: []},
                 },
@@ -1114,7 +1129,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1137,7 +1153,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [{type: 'ArrayPattern', elements: [null, null]}],
                   body: {type: 'BlockStatement', body: []},
                 },
@@ -1154,7 +1171,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1177,7 +1195,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1199,7 +1218,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1225,7 +1245,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1247,7 +1268,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1273,7 +1295,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1295,7 +1318,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1321,7 +1345,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1343,7 +1368,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1369,7 +1395,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1391,7 +1418,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1417,7 +1445,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1439,7 +1468,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1465,7 +1495,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1487,7 +1518,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1518,7 +1550,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1544,7 +1577,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1567,25 +1601,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('destruct and ident sans default', {
@@ -1596,7 +1612,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1619,7 +1636,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1646,7 +1664,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1673,7 +1692,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1693,23 +1713,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('ident and destruct sans default', {
@@ -1720,7 +1724,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {type: 'Identifier', name: 'x'},
                     {
@@ -1743,7 +1748,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {type: 'Identifier', name: 'x'},
                     {
@@ -1770,7 +1776,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1790,23 +1797,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('ident and destruct left default', {
@@ -1817,7 +1808,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1844,7 +1836,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1872,7 +1865,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1904,7 +1898,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -1933,7 +1928,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -1955,23 +1951,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('double ident in array sans default and with default, sans default', {
@@ -1982,7 +1962,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2011,7 +1992,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2033,23 +2015,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('double ident in array both default, sans default', {
@@ -2060,7 +2026,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2082,23 +2049,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('double ident in array both default, with default', {
@@ -2109,7 +2060,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2135,25 +2087,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('ident with default that is an assignment sans default', {
@@ -2164,7 +2098,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2197,7 +2132,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2230,7 +2166,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'AssignmentPattern',
@@ -2256,23 +2193,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('regression case 1', {
@@ -2283,7 +2204,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ObjectPattern',
@@ -2315,7 +2237,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2352,7 +2275,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2379,24 +2303,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           test('array in object', {
@@ -2407,7 +2314,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'fk'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'fk'},
                   params: [
                     {
                       type: 'ObjectPattern',
@@ -2479,7 +2387,8 @@ export default (describe, test) =>
                 {
                   type: 'FunctionDeclaration',
                   generator: false,
-                  async: false,                  id: {type: 'Identifier', name: 'f'},
+                  async: false,
+                  id: {type: 'Identifier', name: 'f'},
                   params: [
                     {
                       type: 'ArrayPattern',
@@ -2497,23 +2406,7 @@ export default (describe, test) =>
                 },
               ],
             },
-            tokens: [
-              $IDENT,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $IDENT,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-              $PUNCTUATOR,
-            ],
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
           });
 
           describe('rest operator', _ => {
@@ -2525,7 +2418,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -2552,7 +2446,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -2583,7 +2478,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -2611,7 +2507,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -2673,7 +2570,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -2692,22 +2590,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              tokens: [
-                $IDENT,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-              ],
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('rest with destruct with two ident with default', {
@@ -2718,7 +2601,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -2741,24 +2625,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              tokens: [
-                $IDENT,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-              ],
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('rest with destruct with two ident with trailing comma sans default', {
@@ -2789,7 +2656,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -2809,24 +2677,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              tokens: [
-                $IDENT,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-              ],
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('nested rest as second with default', {
@@ -2837,7 +2688,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -2861,26 +2713,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              tokens: [
-                $IDENT,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-              ],
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('rest with local default sans default', {
@@ -2941,7 +2774,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'ArrayPattern',
@@ -2970,25 +2804,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              tokens: [
-                $IDENT,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-              ],
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('spread and rest with default', {
@@ -2999,7 +2815,8 @@ export default (describe, test) =>
                   {
                     type: 'FunctionDeclaration',
                     generator: false,
-                    async: false,                    id: {type: 'Identifier', name: 'f'},
+                    async: false,
+                    id: {type: 'Identifier', name: 'f'},
                     params: [
                       {
                         type: 'AssignmentPattern',
@@ -3032,27 +2849,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              tokens: [
-                $IDENT,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-              ],
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
             });
 
             test('spread on array with default on function', {
@@ -3073,12 +2870,12 @@ export default (describe, test) =>
 
         test.fail('param with array rest in obj', {
           code: 'function f({...[a, b]}){}',
-          desc: 'illegal because obj destructuring only allows ident'
+          desc: 'illegal because obj destructuring only allows ident',
         });
 
         test.fail('param with obj rest in obj', {
           code: 'function f({...{a: b}}){}',
-          desc: 'illegal because obj destructuring only allows ident'
+          desc: 'illegal because obj destructuring only allows ident',
         });
 
         test.fail('param with member rest in obj', {
@@ -3100,7 +2897,8 @@ export default (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: false,
-              async: false,              id: {type: 'Identifier', name: 'f'},
+              async: false,
+              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {
                 type: 'BlockStatement',
@@ -3120,7 +2918,8 @@ export default (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: false,
-              async: false,              id: {type: 'Identifier', name: 'f'},
+              async: false,
+              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {
                 type: 'BlockStatement',
@@ -3143,7 +2942,8 @@ export default (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: false,
-              async: true,              id: {type: 'Identifier', name: 'f'},
+              async: true,
+              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {type: 'BlockStatement', body: []},
             },
@@ -3163,7 +2963,8 @@ export default (describe, test) =>
             {
               type: 'FunctionDeclaration',
               generator: true,
-              async: false,              id: {type: 'Identifier', name: 'f'},
+              async: false,
+              id: {type: 'Identifier', name: 'f'},
               params: [],
               body: {type: 'BlockStatement', body: []},
             },
@@ -3186,7 +2987,6 @@ export default (describe, test) =>
     });
 
     describe('yield and await keyword cases', _ => {
-
       // barring exceptions -- for all functions and methods goes:
       // - name of the func keeps outer scope await/yield state. exception: function expressions clear it.
       // - args and body explicitly set it according to the type of this function (so async sets await clears yield, etc)
@@ -3196,11 +2996,8 @@ export default (describe, test) =>
       // <global, inside async, inside generator> * <yield, await> * <regular, async, generator, async gen> * <name, arg-name, arg-default, body> * <class method, obj method, decl, expr, default>
 
       describe('global', _ => {
-
         describe('name', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
-
             test.pass('func decl can be called yield', {
               code: 'function yield() {}',
               // only illegal in strict mode
@@ -3224,7 +3021,7 @@ export default (describe, test) =>
             test.pass('async generator func decl can be called yield', {
               code: 'async function *yield() {}',
               // only illegal in strict mode
-              STRICT: { throws: 'yield' },
+              STRICT: {throws: 'yield'},
             });
 
             test.pass('func decl can be called await', {
@@ -3259,7 +3056,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x expr', _ => {
-
             test.fail_strict('func expr called yield', {
               code: 'let f = function yield() {}',
             });
@@ -3304,7 +3100,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x class method', _ => {
-
             // since class methods are properties the name can be keywords so skipping the other tests for this
             test.pass('class method can be called yield', {
               code: 'class A {yield() {}}',
@@ -3312,7 +3107,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x obj method', _ => {
-
             // since obj methods are properties the name can be keywords so skipping the other tests for this
             test.pass('obj method can be called yield', {
               code: 'A = {yield() {}}',
@@ -3321,9 +3115,7 @@ export default (describe, test) =>
         });
 
         describe('arg-name', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x decl', _ => {
-
             test.pass('func decl arg called yield', {
               code: 'function f(yield) {}',
               // only illegal in strict mode
@@ -3378,7 +3170,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x expr', _ => {
-
             test.pass('func expr arg called yield', {
               code: 'let f = function f(yield) {}',
               // only illegal in strict mode
@@ -3433,7 +3224,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test.fail('class method arg called yield', {
@@ -3484,7 +3274,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x obj method', _ => {
-
             test.pass('obj method arg called yield', {
               code: 'o = {f(yield) {}}',
               // only illegal in strict mode
@@ -3540,9 +3329,7 @@ export default (describe, test) =>
         });
 
         describe('arg-default', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
-
             test.fail('func decl yield', {
               code: 'function f(x=yield 100) {}',
             });
@@ -3554,7 +3341,7 @@ export default (describe, test) =>
 
             test.fail('generator func decl yield', {
               code: 'function *f(x=yield 100) {}',
-              desc:' explicitly disallowed',
+              desc: ' explicitly disallowed',
             });
 
             test('async generator func decl yield', {
@@ -3582,7 +3369,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
-
             test.fail('func expr yield', {
               code: 'let f = function f(x=yield 100) {}',
             });
@@ -3620,7 +3406,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test.fail('class method yield', {
@@ -3663,7 +3448,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
-
             test.fail('obj method yield', {
               code: 'o = {f(x=yield 100) {}}',
             });
@@ -3705,9 +3489,7 @@ export default (describe, test) =>
         });
 
         describe('body', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
-
             test.fail('func decl yield', {
               code: 'function f() { return yield 100; }',
             });
@@ -3743,7 +3525,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
-
             test.fail('func expr yield', {
               code: 'let f = function f() { return yield 100; }',
             });
@@ -3778,7 +3559,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test.fail('class method yield', {
@@ -3817,7 +3597,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
-
             test.fail('obj method yield', {
               code: 'o = {f() { return yield 100; }}',
             });
@@ -3854,11 +3633,8 @@ export default (describe, test) =>
       });
 
       describe('normal async', _ => {
-
         describe('name', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
-
             test.pass('func decl can be called yield', {
               code: 'async function as(){ function yield() {} }',
               // only illegal in strict mode
@@ -3882,7 +3658,7 @@ export default (describe, test) =>
             test.pass('async generator func decl can be called yield', {
               code: 'async function as(){ async function *yield() {} }',
               // only illegal in strict mode
-              STRICT: { throws: 'yield' },
+              STRICT: {throws: 'yield'},
             });
 
             test.fail('func decl can be called await', {
@@ -3907,7 +3683,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x expr', _ => {
-
             test.fail_strict('func expr can be called yield', {
               code: 'async function as(){ let f = function yield() {} }',
             });
@@ -3947,7 +3722,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x class method', _ => {
-
             // since class methods are properties the name can be keywords so skipping the other tests for this
             test.pass('class method can be called yield', {
               code: 'async function as(){ class A {yield() {}} }',
@@ -3959,7 +3733,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x obj method', _ => {
-
             // since obj methods are properties the name can be keywords so skipping the other tests for this
             test.pass('obj method can be called yield', {
               code: 'async function as(){ A = {yield() {}} }',
@@ -3972,9 +3745,7 @@ export default (describe, test) =>
         });
 
         describe('arg-name', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x decl', _ => {
-
             test.pass('func decl arg called yield', {
               code: 'async function as(){ function f(yield) {} }',
               // only illegal in strict mode
@@ -4028,7 +3799,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x expr', _ => {
-
             test.pass('func expr arg called yield', {
               code: 'async function as(){ let f = function f(yield) {} }',
               // only illegal in strict mode
@@ -4081,7 +3851,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test.fail('class method arg called yield', {
@@ -4130,7 +3899,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x obj method', _ => {
-
             test.pass('obj method arg called yield', {
               code: 'async function as(){ o = {f(yield) {}} }',
               // only illegal in strict mode
@@ -4184,9 +3952,7 @@ export default (describe, test) =>
         });
 
         describe('arg-default', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
-
             test.fail('func decl yield', {
               code: 'async function as(){ function f(x=yield 100) {} }',
             });
@@ -4198,7 +3964,7 @@ export default (describe, test) =>
 
             test.fail('generator func decl yield', {
               code: 'async function as(){ function *f(x=yield 100) {} }',
-              desc:' explicitly disallowed',
+              desc: ' explicitly disallowed',
             });
 
             test('async generator func decl yield', {
@@ -4225,7 +3991,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
-
             test.fail('func expr yield', {
               code: 'async function as(){ let f = function f(x=yield 100) {} }',
             });
@@ -4262,7 +4027,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test.fail('class method yield', {
@@ -4304,7 +4068,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
-
             test.fail('obj method yield', {
               code: 'async function as(){ o = {f(x=yield 100) {}} }',
             });
@@ -4345,9 +4108,7 @@ export default (describe, test) =>
         });
 
         describe('body', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
-
             test.fail('func decl yield', {
               code: 'async function as(){ function f() { return yield 100; } }',
             });
@@ -4383,7 +4144,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
-
             test.fail('func expr yield', {
               code: 'async function as(){ let f = function f() { return yield 100; } }',
             });
@@ -4418,7 +4178,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test.fail('class method yield', {
@@ -4457,7 +4216,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
-
             test.fail('obj method yield', {
               code: 'async function as(){ o = {f() { return yield 100; }} }',
             });
@@ -4494,11 +4252,8 @@ export default (describe, test) =>
       });
 
       describe('generator', _ => {
-
         describe('name', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
-
             test.fail('func decl can be called yield', {
               code: 'function *as(){ function yield() {} }',
               throws: 'yield',
@@ -4548,7 +4303,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x expr', _ => {
-
             test.fail_strict('func expr can be called yield', {
               code: 'function *as(){ let f = function yield() {} }',
             });
@@ -4586,7 +4340,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x class method', _ => {
-
             // since class methods are properties the name can be keywords so skipping the other tests for this
             test.pass('class method can be called yield', {
               code: 'function *as(){ class A {yield() {}} }',
@@ -4598,7 +4351,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x obj method', _ => {
-
             // since obj methods are properties the name can be keywords so skipping the other tests for this
             test.pass('obj method can be called yield', {
               code: 'function *as(){ A = {yield() {}} }',
@@ -4611,9 +4363,7 @@ export default (describe, test) =>
         });
 
         describe('arg-name', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x decl', _ => {
-
             test.pass('func decl arg called yield', {
               code: 'function *as(){ function f(yield) {} }',
               STRICT: {throws: 'yield'},
@@ -4661,7 +4411,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x expr', _ => {
-
             test.pass('func expr arg called yield', {
               code: 'function *as(){ let f = function f(yield) {} }',
               STRICT: {throws: 'yield'},
@@ -4708,7 +4457,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test('class method arg called yield', {
@@ -4757,7 +4505,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x obj method', _ => {
-
             test.pass('obj method arg called yield', {
               code: 'function *as(){ o = {f(yield) {}} }',
               STRICT: {throws: 'yield'},
@@ -4805,9 +4552,7 @@ export default (describe, test) =>
         });
 
         describe('arg-default', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
-
             test.fail('func decl yield in arg is okay as long as the func is not a generator itself', {
               code: 'function *as(){ function f(x=yield 100) {} }',
             });
@@ -4819,7 +4564,7 @@ export default (describe, test) =>
 
             test.fail('generator func decl yield', {
               code: 'function *as(){ function *f(x=yield 100) {} }',
-              desc:' explicitly disallowed',
+              desc: ' explicitly disallowed',
             });
 
             test('async generator func decl yield', {
@@ -4846,7 +4591,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
-
             test.fail('yield is okay in func arg as long as the arg is not a generator itself', {
               code: 'function *as(){ let f = function f(x=yield 100) {} }',
             });
@@ -4883,7 +4627,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test.fail('class method yield is okay in args as long as the method is not a generator', {
@@ -4922,7 +4665,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
-
             test.fail('obj method yield is okay in param if the func is not a generator itself', {
               code: 'function *as(){ o = {f(x=yield 100) {}} }',
             });
@@ -4963,9 +4705,7 @@ export default (describe, test) =>
         });
 
         describe('body', _ => {
-
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x decl', _ => {
-
             test.fail('func decl yield', {
               code: 'function *as(){ function f() { return yield 100; } }',
             });
@@ -5001,7 +4741,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x expr', _ => {
-
             test.fail('func expr yield', {
               code: 'function *as(){ let f = function f() { return yield 100; } }',
             });
@@ -5036,7 +4775,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x class method', _ => {
-
             // note: classes are strict mode so `yield` is always illegal as method arg name
 
             test.fail('class method yield', {
@@ -5073,7 +4811,6 @@ export default (describe, test) =>
           });
 
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-default x obj method', _ => {
-
             test.fail('obj method yield', {
               code: 'function *as(){ o = {f() { return yield 100; }} }',
             });
@@ -5111,9 +4848,7 @@ export default (describe, test) =>
     });
 
     describe('eval/args name', _ => {
-
       describe('decl', _ => {
-
         test.fail('eval in strict mode', {
           code: '"use strict"; function eval(){}',
         });
@@ -5132,7 +4867,6 @@ export default (describe, test) =>
       });
 
       describe('expr', _ => {
-
         test.fail('eval in strict mode', {
           code: '"use strict"; (function eval(){})',
         });
@@ -5152,7 +4886,6 @@ export default (describe, test) =>
     });
 
     describe('func statements', _ => {
-
       test('base if', {
         code: 'if (x) function f(){}',
         WEB: {
@@ -5196,10 +4929,7 @@ export default (describe, test) =>
     });
 
     test.fail('bug in v8; cannot assign to call expression', {
-      code: [
-        'function f([x=x()=x]){}',
-        '({x:{1:y()=x},x:{7:3}})>x',
-      ],
+      code: ['function f([x=x()=x]){}', '({x:{1:y()=x},x:{7:3}})>x'],
       desc: 'fuzzed',
     });
   });

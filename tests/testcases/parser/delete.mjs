@@ -115,7 +115,6 @@ export default (describe, test) =>
     });
 
     describe('single ident cases', _ => {
-
       test.fail_strict('wrapping in empty group should not matter for the error', {
         code: 'delete (foo);',
       });
@@ -407,6 +406,4 @@ export default (describe, test) =>
     test.pass('detect yield keyword in weird delete construct 1', {
       code: 'function *f(){ delete ("x"[(yield)]) }',
     });
-
-
   });

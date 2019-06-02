@@ -770,7 +770,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -1271,7 +1272,6 @@ export default (describe, test) =>
         });
 
         describe('new async', _ => {
-
           test('async keyword sans parens', {
             code: 'new async',
             desc: 'okay in sloppy mode...',
@@ -1283,7 +1283,7 @@ export default (describe, test) =>
                   expression: {
                     type: 'NewExpression',
                     arguments: [],
-                    callee: {type: 'Identifier', name: 'async'}
+                    callee: {type: 'Identifier', name: 'async'},
                   },
                 },
               ],
@@ -1385,7 +1385,6 @@ export default (describe, test) =>
             code: 'new async () \n => x',
           });
 
-
           test('async func', {
             code: 'new async function(){}',
             ast: {
@@ -1450,7 +1449,6 @@ export default (describe, test) =>
         // For more generic unary tests see the unary test file...
 
         describe('delete async', _ => {
-
           test('async keyword sans parens', {
             code: 'delete async',
             STRICT: {throws: 'without tail'},
@@ -2078,7 +2076,8 @@ export default (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,                        id: null,
+                        async: false,
+                        id: null,
                         params: [],
                         body: {
                           type: 'BlockStatement',
@@ -2130,7 +2129,8 @@ export default (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,                        id: null,
+                        async: false,
+                        id: null,
                         params: [],
                         body: {
                           type: 'BlockStatement',
@@ -2386,7 +2386,6 @@ export default (describe, test) =>
       });
 
       describe('assignment expressions as arg', _ => {
-
         test.fail('new argless arrow', {
           code: 'new ()=>{}',
         });
@@ -2409,7 +2408,7 @@ export default (describe, test) =>
 
         test.pass('new ternary', {
           code: 'new a ? b : c  ',
-          desc: 'fine because `new` is stronger than `?`'
+          desc: 'fine because `new` is stronger than `?`',
         });
       });
 
@@ -2479,7 +2478,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2508,7 +2508,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2553,7 +2554,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2597,7 +2599,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2635,7 +2638,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2726,7 +2730,7 @@ export default (describe, test) =>
         });
 
         test.fail('not decremental', {
-         code: 'function f(){ new.target-- }',
+          code: 'function f(){ new.target-- }',
         });
 
         test('operable left', {
@@ -2737,7 +2741,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2771,7 +2776,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2805,7 +2811,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -2856,7 +2863,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {
                               type: 'BlockStatement',
@@ -2907,7 +2915,8 @@ export default (describe, test) =>
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
-                          async: false,                          id: null,
+                          async: false,
+                          id: null,
                           params: [],
                           body: {
                             type: 'BlockStatement',
@@ -2953,7 +2962,8 @@ export default (describe, test) =>
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
-                          async: false,                          id: null,
+                          async: false,
+                          id: null,
                           params: [],
                           body: {
                             type: 'BlockStatement',
@@ -2999,7 +3009,8 @@ export default (describe, test) =>
                         value: {
                           type: 'FunctionExpression',
                           generator: false,
-                          async: false,                          id: null,
+                          async: false,
+                          id: null,
                           params: [],
                           body: {
                             type: 'BlockStatement',
@@ -3035,7 +3046,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [
                   {
                     type: 'AssignmentPattern',
@@ -3119,7 +3131,8 @@ export default (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,                        id: null,
+                        async: false,
+                        id: null,
                         params: [
                           {
                             type: 'AssignmentPattern',
@@ -3136,23 +3149,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $ASI,
-          ],
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
         });
 
         test('class constructor', {
@@ -3176,7 +3173,8 @@ export default (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,                        id: null,
+                        async: false,
+                        id: null,
                         params: [
                           {
                             type: 'AssignmentPattern',
@@ -3216,7 +3214,8 @@ export default (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,                        id: null,
+                        async: false,
+                        id: null,
                         params: [
                           {
                             type: 'AssignmentPattern',
@@ -3256,7 +3255,8 @@ export default (describe, test) =>
                       value: {
                         type: 'FunctionExpression',
                         generator: false,
-                        async: false,                        id: null,
+                        async: false,
+                        id: null,
                         params: [
                           {
                             type: 'AssignmentPattern',
@@ -3285,7 +3285,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -3322,7 +3323,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -3356,7 +3358,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'f'},
+                async: false,
+                id: {type: 'Identifier', name: 'f'},
                 params: [],
                 body: {
                   type: 'BlockStatement',
@@ -3393,27 +3396,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $ASI,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
         });
       });
     });

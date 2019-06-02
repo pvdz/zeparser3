@@ -2,7 +2,6 @@ import {$IDENT, $NUMBER_HEX, $NUMBER_DEC, $NUMBER_BIN, $NUMBER_OCT, $PUNCTUATOR,
 
 export default (describe, test) =>
   describe('objects', _ => {
-
     describe('literals', _ => {
       test('empty object', {
         code: 'wrap({});',
@@ -1275,32 +1274,13 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $NUMBER_DEC,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         // computed property that is a comma expression
       });
 
       describe('identifier method', _ => {
-
         test('object with one method', {
           code: 'wrap({foo(){}});',
           ast: {
@@ -1324,7 +1304,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1341,17 +1322,59 @@ export default (describe, test) =>
         });
 
         [
-          'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
-          'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
-          'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
-          'false', 'enum', 'eval', 'arguments', 'implements', 'package', 'protected', 'interface', 'private',
-          'public', 'await', 'yield',
+          'break',
+          'case',
+          'catch',
+          'class',
+          'const',
+          'continue',
+          'debugger',
+          'default',
+          'delete',
+          'do',
+          'else',
+          'export',
+          'extends',
+          'finally',
+          'for',
+          'function',
+          'if',
+          'import',
+          'in',
+          'instanceof',
+          'new',
+          'return',
+          'super',
+          'switch',
+          'this',
+          'throw',
+          'try',
+          'typeof',
+          'var',
+          'void',
+          'while',
+          'with',
+          'null',
+          'true',
+          'false',
+          'enum',
+          'eval',
+          'arguments',
+          'implements',
+          'package',
+          'protected',
+          'interface',
+          'private',
+          'public',
+          'await',
+          'yield',
           'let',
-          'static', 'async', 'get', 'set',
+          'static',
+          'async',
+          'get',
+          'set',
         ].forEach(ident => {
-
           describe('special keys with ident=' + ident, _ => {
-
             test('as regular property in object', {
               code: '({' + ident + ': x});',
               ast: {
@@ -1467,7 +1490,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1515,7 +1539,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1548,7 +1573,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1615,7 +1641,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1685,7 +1712,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1724,7 +1752,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1763,7 +1792,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1802,7 +1832,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1817,7 +1848,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1830,25 +1862,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with one method with params', {
@@ -1874,7 +1888,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}, {type: 'Identifier', name: 'c'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1887,24 +1902,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
 
@@ -1932,7 +1930,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1971,7 +1970,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -1986,7 +1986,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2001,7 +2002,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2016,7 +2018,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2031,7 +2034,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2108,7 +2112,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2147,7 +2152,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2188,7 +2194,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2227,7 +2234,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2266,7 +2274,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2305,7 +2314,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2323,7 +2333,9 @@ export default (describe, test) =>
 
         test('object with one async dstring method', {
           code: 'wrap({async "foo"(){}});',
-          callback(ast, tokens, astJson) { return astJson.includes('"async":true'); },
+          callback(ast, tokens, astJson) {
+            return astJson.includes('"async":true');
+          },
           ast: {
             type: 'Program',
             body: [
@@ -2345,7 +2357,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2384,7 +2397,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2423,7 +2437,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2462,7 +2477,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2475,22 +2491,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with two async methods', {
@@ -2516,7 +2517,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2531,7 +2533,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2544,27 +2547,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with an async method and an ident method', {
@@ -2590,7 +2573,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2605,7 +2589,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2618,26 +2603,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with an async method and an ident method', {
@@ -2663,7 +2629,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2678,7 +2645,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: true,                            id: null,
+                            async: true,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2691,26 +2659,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
 
@@ -2738,7 +2687,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2777,7 +2727,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2816,7 +2767,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2855,7 +2807,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2894,7 +2847,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2933,7 +2887,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -2972,7 +2927,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3011,7 +2967,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3024,22 +2981,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with two generator methods', {
@@ -3065,7 +3007,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3080,7 +3023,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3139,7 +3083,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3154,7 +3099,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3167,26 +3113,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with an ident method and a generator method', {
@@ -3212,7 +3139,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3227,7 +3155,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: true,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3240,26 +3169,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
 
@@ -3287,7 +3197,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3326,7 +3237,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3365,7 +3277,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3380,7 +3293,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3393,27 +3307,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with an getter method and an ident method', {
@@ -3439,7 +3333,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3454,7 +3349,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3467,26 +3363,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with an getter method and an ident method', {
@@ -3512,7 +3389,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3527,7 +3405,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3540,26 +3419,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test.fail('getters can not have arguments', {
@@ -3591,7 +3451,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3604,22 +3465,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with two getter methods', {
@@ -3645,7 +3491,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3660,7 +3507,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3723,7 +3571,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3738,7 +3587,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3800,7 +3650,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3815,7 +3666,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3879,7 +3731,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3918,7 +3771,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3957,7 +3811,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -3983,7 +3838,6 @@ export default (describe, test) =>
       });
 
       describe('setters (ident)', _ => {
-
         test('object with one setter method', {
           code: 'wrap({set foo(a){}});',
           ast: {
@@ -4087,7 +3941,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'b'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4102,7 +3957,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'd'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4163,7 +4019,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'c'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4178,7 +4035,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4191,27 +4049,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with an setter method and an ident method', {
@@ -4237,7 +4075,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4252,7 +4091,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'e'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4265,27 +4105,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test.fail('setters must have some args', {
@@ -4321,7 +4141,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'a'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4334,23 +4155,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object with two setter methods', {
@@ -4376,7 +4181,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'b'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4391,7 +4197,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'd'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4456,7 +4263,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'c'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4471,7 +4279,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4534,7 +4343,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4549,7 +4359,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'e'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4599,7 +4410,8 @@ export default (describe, test) =>
               {
                 type: 'FunctionDeclaration',
                 generator: false,
-                async: false,                id: {type: 'Identifier', name: 'x'},
+                async: false,
+                id: {type: 'Identifier', name: 'x'},
                 params: [
                   {
                     type: 'ArrayPattern',
@@ -4637,7 +4449,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'ArrayPattern', elements: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}]}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4650,27 +4463,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
       });
 
@@ -4698,7 +4491,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'a'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4737,7 +4531,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'a'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4776,7 +4571,8 @@ export default (describe, test) =>
                           value: {
                             type: 'FunctionExpression',
                             generator: false,
-                            async: false,                            id: null,
+                            async: false,
+                            id: null,
                             params: [{type: 'Identifier', name: 'a'}],
                             body: {type: 'BlockStatement', body: []},
                           },
@@ -4830,14 +4626,13 @@ export default (describe, test) =>
 
       test.pass('setters with zero param count', {
         code: '({get foo(){}});',
-       });
+      });
 
       test.fail('setters with two params', {
         code: '({get foo(x,y){}});',
       });
 
       describe('dont allow semi because it shares code with class', _ => {
-
         test.fail('instead of comma', {
           code: '({x:y;a:b})',
         });
@@ -4994,92 +4789,117 @@ export default (describe, test) =>
       });
 
       [
-        'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
-        'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
-        'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
-        'false', 'enum',
+        'break',
+        'case',
+        'catch',
+        'class',
+        'const',
+        'continue',
+        'debugger',
+        'default',
+        'delete',
+        'do',
+        'else',
+        'export',
+        'extends',
+        'finally',
+        'for',
+        'function',
+        'if',
+        'import',
+        'in',
+        'instanceof',
+        'new',
+        'return',
+        'super',
+        'switch',
+        'this',
+        'throw',
+        'try',
+        'typeof',
+        'var',
+        'void',
+        'while',
+        'with',
+        'null',
+        'true',
+        'false',
+        'enum',
       ].forEach(keyword => {
-        test.fail('cannot use as shorthand objlit ['+keyword+']', {
-          code: '({'+keyword+'});',
+        test.fail('cannot use as shorthand objlit [' + keyword + ']', {
+          code: '({' + keyword + '});',
         });
 
-        test.fail('cannot use as assignment pattern ['+keyword+']', {
-          code: '({'+keyword+'} = x);',
+        test.fail('cannot use as assignment pattern [' + keyword + ']', {
+          code: '({' + keyword + '} = x);',
         });
 
-        test.fail('cannot use as arrow header ['+keyword+']', {
-          code: '({'+keyword+'}) => x;',
+        test.fail('cannot use as arrow header [' + keyword + ']', {
+          code: '({' + keyword + '}) => x;',
         });
 
-        test.fail('cannot use as binding destruct ['+keyword+']', {
-          code: 'const {'+keyword+'} = x;',
+        test.fail('cannot use as binding destruct [' + keyword + ']', {
+          code: 'const {' + keyword + '} = x;',
         });
       });
 
-      [
-        'implements', 'package', 'protected', 'interface',
-        'private', 'public', 'await', 'yield', 'static', 'let',
-      ].forEach(keyword => {
-        test.fail_strict('cannot use as shorthand objlit ['+keyword+']', {
-          code: '({'+keyword+'});',
+      ['implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield', 'static', 'let'].forEach(keyword => {
+        test.fail_strict('cannot use as shorthand objlit [' + keyword + ']', {
+          code: '({' + keyword + '});',
         });
 
-        test.fail_strict('cannot use as assignment pattern ['+keyword+']', {
-          code: '({'+keyword+'} = x);',
+        test.fail_strict('cannot use as assignment pattern [' + keyword + ']', {
+          code: '({' + keyword + '} = x);',
         });
 
-        test.fail_strict('cannot use as arrow header ['+keyword+']', {
-          code: '({'+keyword+'}) => x;',
+        test.fail_strict('cannot use as arrow header [' + keyword + ']', {
+          code: '({' + keyword + '}) => x;',
         });
 
         if (keyword !== 'let') {
-          test.fail_strict('cannot use as binding destruct ['+keyword+']', {
-            code: 'const {'+keyword+'} = x;',
+          test.fail_strict('cannot use as binding destruct [' + keyword + ']', {
+            code: 'const {' + keyword + '} = x;',
           });
         }
       });
 
-      [
-        'await',
-      ].forEach(keyword => {
-        test.pass('cannot use as shorthand objlit ['+keyword+']', {
-          code: '({'+keyword+'});',
+      ['await'].forEach(keyword => {
+        test.pass('cannot use as shorthand objlit [' + keyword + ']', {
+          code: '({' + keyword + '});',
           MODULE: {throws: true},
         });
 
-        test.pass('cannot use as assignment pattern ['+keyword+']', {
-          code: '({'+keyword+'} = x);',
+        test.pass('cannot use as assignment pattern [' + keyword + ']', {
+          code: '({' + keyword + '} = x);',
           MODULE: {throws: true},
         });
 
-        test.pass('cannot use as arrow header ['+keyword+']', {
-          code: '({'+keyword+'}) => x;',
+        test.pass('cannot use as arrow header [' + keyword + ']', {
+          code: '({' + keyword + '}) => x;',
           MODULE: {throws: true},
         });
 
-        test.pass('cannot use as binding destruct ['+keyword+']', {
-          code: 'const {'+keyword+'} = x;',
+        test.pass('cannot use as binding destruct [' + keyword + ']', {
+          code: 'const {' + keyword + '} = x;',
           MODULE: {throws: true},
         });
       });
 
-      [
-        'eval', 'arguments',
-      ].forEach(keyword => {
-        test.pass('cannot use as shorthand objlit ['+keyword+']', {
-          code: '({'+keyword+'});',
+      ['eval', 'arguments'].forEach(keyword => {
+        test.pass('cannot use as shorthand objlit [' + keyword + ']', {
+          code: '({' + keyword + '});',
         });
 
-        test.fail_strict('cannot use as assignment pattern ['+keyword+']', {
-          code: '({'+keyword+'} = x);',
+        test.fail_strict('cannot use as assignment pattern [' + keyword + ']', {
+          code: '({' + keyword + '} = x);',
         });
 
-        test.fail_strict('cannot use as arrow header ['+keyword+']', {
-          code: '({'+keyword+'}) => x;',
+        test.fail_strict('cannot use as arrow header [' + keyword + ']', {
+          code: '({' + keyword + '}) => x;',
         });
 
-        test.fail_strict('cannot use as binding destruct ['+keyword+']', {
-          code: 'const {'+keyword+'} = x;',
+        test.fail_strict('cannot use as binding destruct [' + keyword + ']', {
+          code: 'const {' + keyword + '} = x;',
         });
       });
 
@@ -5290,23 +5110,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('object destruct with a shorthand and a classic property', {
@@ -5519,13 +5323,45 @@ export default (describe, test) =>
 
         describe('shorthand identifiers check', _ => {
           [
-            'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
-            'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
-            'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
-            'false', 'enum',
+            'break',
+            'case',
+            'catch',
+            'class',
+            'const',
+            'continue',
+            'debugger',
+            'default',
+            'delete',
+            'do',
+            'else',
+            'export',
+            'extends',
+            'finally',
+            'for',
+            'function',
+            'if',
+            'import',
+            'in',
+            'instanceof',
+            'new',
+            'return',
+            'super',
+            'switch',
+            'this',
+            'throw',
+            'try',
+            'typeof',
+            'var',
+            'void',
+            'while',
+            'with',
+            'null',
+            'true',
+            'false',
+            'enum',
           ].forEach(keyword => {
-            test('keyword='+keyword, {
-              code: '({'+keyword+'}) => null',
+            test('keyword=' + keyword, {
+              code: '({' + keyword + '}) => null',
               throws: true,
             });
           });
@@ -5542,7 +5378,7 @@ export default (describe, test) =>
 
           ['static', 'implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield'].forEach(keyword => {
             test('strict-mode only keyword=' + keyword, {
-              code: '({'+keyword+'}) => null',
+              code: '({' + keyword + '}) => null',
               throws: true,
               SLOPPY_SCRIPT: {
                 ast: {
@@ -5584,30 +5420,62 @@ export default (describe, test) =>
 
           ['eval', 'arguments'].forEach(keyword => {
             test.fail_strict('eval/arguments =' + keyword, {
-              code: '({'+keyword+'}) => null',
+              code: '({' + keyword + '}) => null',
             });
           });
         });
 
         describe('a:b identifier check', _ => {
           [
-            'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
-            'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
-            'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
-            'false', 'enum',
+            'break',
+            'case',
+            'catch',
+            'class',
+            'const',
+            'continue',
+            'debugger',
+            'default',
+            'delete',
+            'do',
+            'else',
+            'export',
+            'extends',
+            'finally',
+            'for',
+            'function',
+            'if',
+            'import',
+            'in',
+            'instanceof',
+            'new',
+            'return',
+            'super',
+            'switch',
+            'this',
+            'throw',
+            'try',
+            'typeof',
+            'var',
+            'void',
+            'while',
+            'with',
+            'null',
+            'true',
+            'false',
+            'enum',
           ].forEach(keyword => {
-            test('arrow, keyword='+keyword, {
-              code: '({ggg: '+keyword+'}) => null',
+            test('arrow, keyword=' + keyword, {
+              code: '({ggg: ' + keyword + '}) => null',
               throws: true,
             });
 
-            test('assign, keyword='+keyword, {
-              code: '({ggg: '+keyword+'} = null)',
+            test('assign, keyword=' + keyword, {
+              code: '({ggg: ' + keyword + '} = null)',
               throws: true,
             });
 
-            test('objlit, keyword='+keyword, {
-              code: '({ggg: '+keyword+'} = null)',
+            test('objlit, keyword=' + keyword, {
+              code: '({ggg: ' + keyword + '} = null)',
               throws: true,
             });
           });
@@ -5689,7 +5557,7 @@ export default (describe, test) =>
 
           ['eval', 'arguments', 'static', 'implements', 'package', 'protected', 'interface', 'private', 'public', 'await', 'yield'].forEach(keyword => {
             test('strict-mode only, arrow, keyword=' + keyword, {
-              code: '({xxxx:'+keyword+'}) => null',
+              code: '({xxxx:' + keyword + '}) => null',
               throws: true,
               SLOPPY_SCRIPT: {
                 ast: {
@@ -5729,7 +5597,7 @@ export default (describe, test) =>
             });
 
             test('strict-mode only, assign, keyword=' + keyword, {
-              code: '({xxxx:'+keyword+'} = null)',
+              code: '({xxxx:' + keyword + '} = null)',
               throws: true,
               SLOPPY_SCRIPT: {
                 ast: {
@@ -5764,12 +5632,14 @@ export default (describe, test) =>
             });
 
             test('strict-mode only, objlit, keyword=' + keyword, {
-              code: '({xxxx:'+keyword+'})',
-              ...(['eval', 'arguments'].includes(keyword) ? {} : {
-                STRICT: {
-                  throws: true,
-                },
-              }),
+              code: '({xxxx:' + keyword + '})',
+              ...(['eval', 'arguments'].includes(keyword)
+                ? {}
+                : {
+                    STRICT: {
+                      throws: true,
+                    },
+                  }),
               ast: {
                 type: 'Program',
                 body: [
@@ -6112,7 +5982,6 @@ export default (describe, test) =>
         });
 
         describe('value that would never destruct', _ => {
-
           test('object', {
             code: '({"x": y+z})',
             ast: {
@@ -6157,9 +6026,7 @@ export default (describe, test) =>
         });
 
         describe('array value', _ => {
-
           describe('destructible', _ => {
-
             test('object', {
               code: '({"x": [y]})',
               ast: {
@@ -6267,7 +6134,6 @@ export default (describe, test) =>
           });
 
           describe('non-destructible', _ => {
-
             test('object', {
               code: '({"x": [y + x]})',
               ast: {
@@ -6317,7 +6183,6 @@ export default (describe, test) =>
           });
 
           describe('with tail', _ => {
-
             test('object', {
               code: '({"x": [y].slice(0)})',
               ast: {
@@ -6369,9 +6234,7 @@ export default (describe, test) =>
         });
 
         describe('object value', _ => {
-
           describe('destructible', _ => {
-
             test('object', {
               code: '({"x": {y: z}})',
               ast: {
@@ -6509,7 +6372,6 @@ export default (describe, test) =>
           });
 
           describe('non-destructible', _ => {
-
             test('object', {
               code: '({"x": {a: y + x}})',
               ast: {
@@ -6567,7 +6429,6 @@ export default (describe, test) =>
           });
 
           describe('with tail', _ => {
-
             test('object', {
               code: '({"x": {a: y + x}.slice(0)})',
               ast: {
@@ -6635,9 +6496,7 @@ export default (describe, test) =>
         });
 
         describe('number value', _ => {
-
           describe('non-destructible', _ => {
-
             test('object', {
               code: '({"x": 600})',
               ast: {
@@ -6677,8 +6536,7 @@ export default (describe, test) =>
           });
 
           describe('with tail', _ => {
--
-            test('object', {
+            -test('object', {
               code: '({"x": 600..xyz})',
               ast: {
                 type: 'Program',
@@ -6723,7 +6581,6 @@ export default (describe, test) =>
       });
 
       describe('computed properties', _ => {
-
         test('object literal, one computed property', {
           code: 'wrap({[a]:b}=obj);',
           desc: 'you can destructure computed properties all the same',
@@ -6807,27 +6664,7 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $NUMBER_DEC,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         // computed property that is a comma expression
@@ -7147,7 +6984,6 @@ export default (describe, test) =>
       });
 
       describe('ident', _ => {
-
         test.fail('destruct to keyword with destruct', {
           code: 's = {s: true = x} = x',
         });
@@ -7232,7 +7068,6 @@ export default (describe, test) =>
       });
 
       describe('string', _ => {
-
         test.fail('destruct to `true` with destruct', {
           code: 's = {"foo": true = x} = x',
         });
@@ -7387,7 +7222,6 @@ export default (describe, test) =>
       });
 
       describe('spreadrest keywords', _ => {
-
         test.pass('spread a value keyword', {
           code: 'x={...true}',
           desc: 'runtime error',
@@ -7474,10 +7308,8 @@ export default (describe, test) =>
     });
 
     describe('non-ident key with keyword value', _ => {
-
       ['true', 'false', 'null', 'this'].forEach(keyword => {
         describe('string key', _ => {
-
           test.pass('object', {
             code: `({"foo": ${keyword}})`,
           });
@@ -7492,7 +7324,6 @@ export default (describe, test) =>
         });
 
         describe('number key', _ => {
-
           test.pass('object', {
             code: `({790: ${keyword}})`,
           });
@@ -7508,7 +7339,6 @@ export default (describe, test) =>
       });
 
       describe('good supers', _ => {
-
         // I can't find any rule that restricts the lexical position of `super()` beyond "in a proper constructor"
         // https://tc39.github.io/ecma262/#sec-super-keyword-runtime-semantics-evaluation
         // So it should syntactically be ok to use inside a property as long as it's inside a proper constructor
@@ -7517,7 +7347,6 @@ export default (describe, test) =>
         // -> https://tc39.github.io/ecma262/#sec-static-semantics-static-semantics-assignmenttargettype
         ['super()', 'super.cool', 'super[cool]'].forEach(keyword => {
           describe('string key', _ => {
-
             test.pass('object', {
               code: `class x extends y {constructor(){    ({"foo": ${keyword}})    }}`,
             });
@@ -7536,7 +7365,6 @@ export default (describe, test) =>
           });
 
           describe('number key', _ => {
-
             test.pass('object', {
               code: `class x extends y {constructor(){    ({790: ${keyword}})    }}`,
             });
@@ -7557,10 +7385,8 @@ export default (describe, test) =>
       });
 
       describe('bad supers', _ => {
-
         ['super'].forEach(keyword => {
           describe('string key', _ => {
-
             test.fail('object', {
               code: `class x extends y {constructor(){    ({"foo": ${keyword}})    }}`,
             });
@@ -7575,7 +7401,6 @@ export default (describe, test) =>
           });
 
           describe('number key', _ => {
-
             test.fail('object', {
               code: `class x extends y {constructor(){    ({790: ${keyword}})    }}`,
             });
@@ -7593,7 +7418,6 @@ export default (describe, test) =>
     });
 
     describe('ellipsis', _ => {
-
       test('base case', {
         code: 'x = {...y}',
         ast: {
@@ -7929,9 +7753,7 @@ export default (describe, test) =>
       });
 
       describe('parened', _ => {
-
         describe('group', _ => {
-
           // ast tests are redundant with general tests
 
           test.pass('object base', {
@@ -7987,7 +7809,6 @@ export default (describe, test) =>
         });
 
         describe('destruct assignment', _ => {
-
           test('object base', {
             code: '({...a} = x)',
             ast: {
@@ -8037,7 +7858,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test('object base', {
             code: '({...a}) => x',
             ast: {
@@ -8096,9 +7916,7 @@ export default (describe, test) =>
     });
 
     describe('duplicate keys', _ => {
-
       describe('obj expr', _ => {
-
         // https://tc39.github.io/ecma262/#sec-additions-and-changes-that-introduce-incompatibilities-with-prior-editions
         // 12.2.6.1: In ECMAScript 2015, it is no longer an early error to have duplicate property names in Object Initializers.
 
@@ -8147,7 +7965,6 @@ export default (describe, test) =>
         });
 
         describe('dunderproto __proto__', _ => {
-
           // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
           // > It is a Syntax Error if PropertyNameList of PropertyDefinitionList contains any duplicate entries for
           //   "__proto__" and at least two of those entries were obtained from productions of the form PropertyDefinition:PropertyName:AssignmentExpression .
@@ -8155,7 +7972,6 @@ export default (describe, test) =>
           // This restriction only applies to webcompat mode (annex B)
 
           describe('without webcompat', _ => {
-
             test.pass('bad case with two idents', {
               code: 'x = {__proto__: 1, __proto__: 2}',
             });
@@ -8169,7 +7985,7 @@ export default (describe, test) =>
             });
 
             test.pass('bad case with string and ident', {
-              code: 'x = {\'__proto__\': 1, __proto__: 2}',
+              code: "x = {'__proto__': 1, __proto__: 2}",
             });
 
             test.pass('paren wrapped', {
@@ -8214,13 +8030,11 @@ export default (describe, test) =>
             });
 
             describe('exceptions', _ => {
-
               // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
               // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
               // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
 
               describe('not async', _ => {
-
                 test.pass('obj plain group', {
                   code: '({web: false, __proto__: a, __proto__: b});',
                 });
@@ -8255,7 +8069,6 @@ export default (describe, test) =>
               });
 
               describe('with async', _ => {
-
                 test.pass('plain group', {
                   code: 'async ({__proto__: a, __proto__: b});',
                 });
@@ -8272,7 +8085,6 @@ export default (describe, test) =>
           });
 
           describe('with webcompat', _ => {
-
             test('bad case with two idents', {
               code: 'x = {__proto__: 1, __proto__: 2}',
               throws: '__proto__',
@@ -8322,7 +8134,7 @@ export default (describe, test) =>
             });
 
             test('bad case with string and ident', {
-              code: 'x = {\'__proto__\': 1, __proto__: 2}',
+              code: "x = {'__proto__': 1, __proto__: 2}",
               throws: '__proto__',
               WEB: true,
             });
@@ -8374,13 +8186,11 @@ export default (describe, test) =>
             });
 
             describe('exceptions', _ => {
-
               // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
               // When ObjectLiteral appears in a context where ObjectAssignmentPattern is required the Early Error rule is not applied.
               // In addition, it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or a CoverCallExpressionAndAsyncArrowHead.
 
               describe('not async', _ => {
-
                 test.pass('plain group', {
                   code: '({__proto__: a, __proto__: b});',
                   WEB: true,
@@ -8418,7 +8228,6 @@ export default (describe, test) =>
               });
 
               describe('with async', _ => {
-
                 test.pass('plain group', {
                   code: 'async ({__proto__: a, __proto__: b});',
                   WEB: true,
@@ -8440,7 +8249,6 @@ export default (describe, test) =>
       });
 
       describe('let binding pattern', _ => {
-
         test.fail('simple pattern', {
           code: 'let x, {a: x} = obj',
         });
@@ -8507,7 +8315,6 @@ export default (describe, test) =>
       });
 
       describe('function binding pattern', _ => {
-
         test.fail('simple pattern', {
           code: 'function f(x, {a: x}) {}',
         });
@@ -8574,7 +8381,6 @@ export default (describe, test) =>
       });
 
       describe('arrow binding pattern', _ => {
-
         test.fail('simple pattern', {
           code: '(x, {a: x}) => {}',
         });
@@ -8641,7 +8447,6 @@ export default (describe, test) =>
       });
 
       describe('async arrow binding pattern', _ => {
-
         test.fail('simple pattern', {
           code: 'async (x, {a: x}) => {}',
         });
@@ -8833,13 +8638,13 @@ export default (describe, test) =>
         test.fail('rest init', {
           code: '({a: x, ...x = y} = obj)',
           // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible'
+          desc: 'rest on anything but an ident is not destructible',
         });
 
         test.fail('rest nested', {
           code: '({a: x, ...{x}} = obj)',
           // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible'
+          desc: 'rest on anything but an ident is not destructible',
         });
       });
 
@@ -8897,18 +8702,17 @@ export default (describe, test) =>
         test.fail('rest init', {
           code: 'async({a: x, ...x = y} = obj)',
           // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible'
+          desc: 'rest on anything but an ident is not destructible',
         });
 
         test.fail('rest nested', {
           code: 'async({a: x, ...{x}} = obj)',
           // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible'
+          desc: 'rest on anything but an ident is not destructible',
         });
       });
 
       describe('for-header assigment pattern', _ => {
-
         test.pass('simple pattern', {
           code: 'for ({x, a: x} in obj);',
         });
@@ -8960,46 +8764,27 @@ export default (describe, test) =>
         test.fail('rest init', {
           code: 'for ({a: x, ...x = y} in obj);',
           // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible'
+          desc: 'rest on anything but an ident is not destructible',
         });
 
         test.fail('rest nested', {
           code: 'for ({a: x, ...{x}} in obj);',
           // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible'
+          desc: 'rest on anything but an ident is not destructible',
         });
       });
     });
 
     describe('keywords should not parse as regular idents in awkward places', _ => {
-
       // see counter-test in arrow where this stuff is disallowed
-      [
-        'async ()=>x',
-        'class{}',
-        'delete x.y',
-        'false',
-        'function(){}',
-        'new x',
-        'null',
-        'true',
-        'this',
-        'typeof x',
-        'void x',
-        'x + y',
-        '[].length',
-        '[x].length',
-        '{}.length',
-        '{x: y}.length',
-      ].forEach(str => {
-
+      ['async ()=>x', 'class{}', 'delete x.y', 'false', 'function(){}', 'new x', 'null', 'true', 'this', 'typeof x', 'void x', 'x + y', '[].length', '[x].length', '{}.length', '{x: y}.length'].forEach(str => {
         test.fail('[' + str + '] in destructuring assignment as shorthand', {
-          code: '({'+str+'} = x);',
+          code: '({' + str + '} = x);',
         });
 
         // (can't really test these as property names because half of the input values are not a single ident)
         test.pass('[' + str + '] in destructuring assignment as property value', {
-          code: '({x: '+str+'} = x);',
+          code: '({x: ' + str + '} = x);',
           throws: str.includes('.length') ? undefined : true,
           ast: str.includes('.length') ? true : undefined, // property is valid assignment target so should work
           tokens: str.includes('.length') ? true : undefined,
@@ -9007,22 +8792,22 @@ export default (describe, test) =>
 
         // `({function(){}})` is quite beautiful in its own way. and valid.
         test('[' + str + '] in object as shorthand', {
-          code: '({'+str+'});',
+          code: '({' + str + '});',
           throws: str === 'function(){}' ? undefined : true,
           ast: str !== 'function(){}' ? undefined : true,
           tokens: str !== 'function(){}' ? undefined : true,
         });
 
         test.pass('[' + str + '] in object as value', {
-          code: '({x: '+str+'});',
+          code: '({x: ' + str + '});',
         });
 
         test.fail('[' + str + '] in arrow head as shorthand', {
-          code: '({'+str+'}) => x;',
+          code: '({' + str + '}) => x;',
         });
 
         test.fail('[' + str + '] in arrow head as alias', {
-          code: '({x: '+str+'}) => x;',
+          code: '({x: ' + str + '}) => x;',
         });
       });
     });
@@ -9068,9 +8853,7 @@ export default (describe, test) =>
     });
 
     describe('ident key with yield values', _ => {
-
       describe('global', _ => {
-
         test.fail_strict('string key sans yield arg', {
           code: 's = {foo: yield}',
         });
@@ -9089,7 +8872,6 @@ export default (describe, test) =>
       });
 
       describe('generator', _ => {
-
         test.pass('string key sans yield arg', {
           code: 'function *f(){   s = {foo: yield}   }',
         });
@@ -9109,9 +8891,7 @@ export default (describe, test) =>
     });
 
     describe('string key with yield values', _ => {
-
       describe('global', _ => {
-
         test.fail_strict('string key sans yield arg', {
           code: 's = {"foo": yield}',
         });
@@ -9130,7 +8910,6 @@ export default (describe, test) =>
       });
 
       describe('generator', _ => {
-
         test.pass('string key sans yield arg', {
           code: 'function *f(){   s = {"foo": yield}   }',
         });
@@ -9150,42 +8929,40 @@ export default (describe, test) =>
     });
 
     describe('invalid destructuring assignments (#16)', _ => {
-
       test.pass('make sure init isnt clobbered', {
-        code:'({a: b = c} = [2])',
+        code: '({a: b = c} = [2])',
       });
 
       test.pass('init to group on simple assignment', {
-        code:'({a: (b) = c} = [2])',
+        code: '({a: (b) = c} = [2])',
       });
 
       test.pass('group that ends with property is simple too', {
-        code:'({a: (b).c} = [2])',
+        code: '({a: (b).c} = [2])',
       });
 
       test.pass('group with prop with default', {
-        code:'({a: (b).c = d} = [2])',
+        code: '({a: (b).c = d} = [2])',
       });
 
       test.fail('obj pattern with value being an arrow', {
-        code:'({a: b => []} = [2])',
+        code: '({a: b => []} = [2])',
       });
 
       test.fail('obj pattern with "shorthand" being an arrow', {
-        code:'({b => []} = [2])',
+        code: '({b => []} = [2])',
       });
 
       test.fail('obj pattern with value being an addition', {
-        code:'({a: b + c} = [2])',
+        code: '({a: b + c} = [2])',
       });
 
       test.fail('obj pattern with value of a computed property being an arrow', {
-        code:'({[a]: b => []} = [2])',
+        code: '({[a]: b => []} = [2])',
       });
     });
 
     describe('method names can be `prototype`', _ => {
-
       test('plain', {
         code: 'x= { prototype(){} }',
         ast: {

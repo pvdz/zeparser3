@@ -1,137 +1,1914 @@
 import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE, $TICK_HEAD, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 
-export default (describe, test) => describe('parens', _ => {
-  describe('group', _ => {
-    test('silly group', {
-      code: '(x);',
-      ast: {
-        type: 'Program',
-        body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
+export default (describe, test) =>
+  describe('parens', _ => {
+    describe('group', _ => {
+      test('silly group', {
+        code: '(x);',
+        ast: {
+          type: 'Program',
+          body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
 
-    test('silly double group', {
-      code: '((x));',
-      ast: {
-        type: 'Program',
-        body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
+      test('silly double group', {
+        code: '((x));',
+        ast: {
+          type: 'Program',
+          body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
 
-    test('oh come on', {
-      code: '((((((((((x))))))))));',
-      ast: {
-        type: 'Program',
-        body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}],
-      },
-      tokens: [
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-      ],
-    });
-
-    test('group of two vars', {
-      code: '(a, b);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'SequenceExpression',
-              expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-            },
-          },
+      test('oh come on', {
+        code: '((((((((((x))))))))));',
+        ast: {
+          type: 'Program',
+          body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}],
+        },
+        tokens: [
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $IDENT,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
         ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
+      });
 
-    test('group of some simple values', {
-      code: '(a, 1, "c", d, e, f);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'SequenceExpression',
-              expressions: [
-                {type: 'Identifier', name: 'a'},
-                {type: 'Literal', value: '<TODO>', raw: '1'},
-                {type: 'Literal', value: '<TODO>', raw: '"c"'},
-                {type: 'Identifier', name: 'd'},
-                {type: 'Identifier', name: 'e'},
-                {type: 'Identifier', name: 'f'},
+      test('group of two vars', {
+        code: '(a, b);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('group of some simple values', {
+        code: '(a, 1, "c", d, e, f);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {type: 'Identifier', name: 'a'},
+                  {type: 'Literal', value: '<TODO>', raw: '1'},
+                  {type: 'Literal', value: '<TODO>', raw: '"c"'},
+                  {type: 'Identifier', name: 'd'},
+                  {type: 'Identifier', name: 'e'},
+                  {type: 'Identifier', name: 'f'},
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('group of some two assignments', {
+        code: '(a = 1, b = 2);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'a'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '1'}},
+                  {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'b'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '2'}},
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      describe('regular assignment to group', _ => {
+        test('assignment to a wrapped identifier, silly but valid', {
+          // https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget
+          code: '(a) = 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'a'},
+                  operator: '=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped property, silly but valid', {
+          code: '(a.b) = 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: false},
+                  operator: '=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped property, silly but valid', {
+          code: '(a[b]) = 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: true},
+                  operator: '=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped complex value that ends in a property, silly but valid', {
+          code: '(a.b().c().d) = 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'CallExpression',
+                      callee: {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'CallExpression',
+                          callee: {
+                            type: 'MemberExpression',
+                            object: {type: 'Identifier', name: 'a'},
+                            property: {type: 'Identifier', name: 'b'},
+                            computed: false,
+                          },
+                          arguments: [],
+                        },
+                        property: {type: 'Identifier', name: 'c'},
+                        computed: false,
+                      },
+                      arguments: [],
+                    },
+                    property: {type: 'Identifier', name: 'd'},
+                    computed: false,
+                  },
+                  operator: '=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped super property, silly but valid', {
+          code: 'class x{ constructor(){  (super.a) = 1;  }}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: null,
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'constructor'},
+                      static: false,
+                      computed: false,
+                      kind: 'constructor',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {
+                                type: 'AssignmentExpression',
+                                left: {
+                                  type: 'MemberExpression',
+                                  object: {type: 'Super'},
+                                  property: {type: 'Identifier', name: 'a'},
+                                  computed: false,
+                                },
+                                operator: '=',
+                                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped super property, silly but valid', {
+          code: 'class x{ constructor(){  (super[a]) = 1;  }}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: null,
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'constructor'},
+                      static: false,
+                      computed: false,
+                      kind: 'constructor',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {
+                                type: 'AssignmentExpression',
+                                left: {
+                                  type: 'MemberExpression',
+                                  object: {type: 'Super'},
+                                  property: {type: 'Identifier', name: 'a'},
+                                  computed: true,
+                                },
+                                operator: '=',
+                                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped this property, silly but valid', {
+          code: '(this.a) = 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'MemberExpression',
+                    object: {type: 'ThisExpression'},
+                    property: {type: 'Identifier', name: 'a'},
+                    computed: false,
+                  },
+                  operator: '=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped this property, silly but valid', {
+          code: '(this[b]) = 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'MemberExpression',
+                    object: {type: 'ThisExpression'},
+                    property: {type: 'Identifier', name: 'b'},
+                    computed: true,
+                  },
+                  operator: '=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to array is destructuring', {
+          code: '[x, y] = z;',
+          desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
+          // https://tc39.github.io/ecma262/#_ref_10683
+          //   AssignmentExpression: LeftHandSideExpression = AssignmentExpression
+          //     It is a Syntax Error if LeftHandSideExpression is either an ObjectLiteral or an ArrayLiteral and LeftHandSideExpression is not covering an AssignmentPattern.
+          //     It is an early Reference Error if LeftHandSideExpression is neither an ObjectLiteral nor an ArrayLiteral and IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
+          //   AssignmentExpression: LeftHandSideExpression AssignmentOperator AssignmentExpression
+          //     It is an early Reference Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test.fail('assignment to grouped array is not okay', {
+          code: '([x, y]) = z;',
+          desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
+        });
+
+        test('assignment to array grouped is destructuring', {
+          code: '([x, y] = z);',
+          desc: 'the group is fine otherwise',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ArrayPattern',
+                    elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('assignment to array grouped can be arrow', {
+          code: '([x, y] = z) => x;',
+          desc: 'the group is fine otherwise',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [
+                    {
+                      type: 'AssignmentPattern',
+                      left: {
+                        type: 'ArrayPattern',
+                        elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                      },
+                      right: {type: 'Identifier', name: 'z'},
+                    },
+                  ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('assignment to array in array can have no arrow', {
+          code: '([[x, y] = z]);',
+          desc: 'the group is fine otherwise',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'AssignmentExpression',
+                      left: {
+                        type: 'ArrayPattern',
+                        elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                      },
+                      operator: '=',
+                      right: {type: 'Identifier', name: 'z'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('assignment to array in array can have arrow', {
+          code: '([[x, y] = z]) => x;',
+          desc: 'the group is fine otherwise',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [
+                    {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'AssignmentPattern',
+                          left: {
+                            type: 'ArrayPattern',
+                            elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                          },
+                          right: {type: 'Identifier', name: 'z'},
+                        },
+                      ],
+                    },
+                  ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('assignment to array in array must destructuring', {
+          code: '([[x, y] = z]) => x;',
+          desc: 'the group is fine otherwise',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [
+                    {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'AssignmentPattern',
+                          left: {
+                            type: 'ArrayPattern',
+                            elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                          },
+                          right: {type: 'Identifier', name: 'z'},
+                        },
+                      ],
+                    },
+                  ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        });
+
+        test('assignment to object as statmeent is error', {
+          code: '{x, y} = z;',
+          desc: 'top level object is parsed as a block',
+          throws: 'can not start with object destructuring',
+        });
+
+        test('assignment to object as expression is destructuring', {
+          code: '({x, y} = z);',
+          desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
+          // https://tc39.github.io/ecma262/#_ref_10683
+          //   AssignmentExpression: LeftHandSideExpression = AssignmentExpression
+          //     It is a Syntax Error if LeftHandSideExpression is either an ObjectLiteral or an ArrayLiteral and LeftHandSideExpression is not covering an AssignmentPattern.
+          //     It is an early Reference Error if LeftHandSideExpression is neither an ObjectLiteral nor an ArrayLiteral and IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
+          //   AssignmentExpression: LeftHandSideExpression AssignmentOperator AssignmentExpression
+          //     It is an early Reference Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'ObjectPattern',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'x'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'x'},
+                        shorthand: true,
+                      },
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'y'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'y'},
+                        shorthand: true,
+                      },
+                    ],
+                  },
+                  operator: '=',
+                  right: {type: 'Identifier', name: 'z'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test.fail('assignment to grouped array is not okay', {
+          code: '({x, y}) = z;',
+          desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
+        });
+      });
+
+      describe('compound assignment to group', _ => {
+        test('assignment to a wrapped identifier, silly but valid', {
+          // https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget
+          code: '(a) += 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'a'},
+                  operator: '+=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped property, silly but valid', {
+          code: '(a.b) += 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: false},
+                  operator: '+=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped property, silly but valid', {
+          code: '(a[b]) += 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: true},
+                  operator: '+=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped complex value that ends in a property, silly but valid', {
+          code: '(a.b().c().d) += 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'MemberExpression',
+                    object: {
+                      type: 'CallExpression',
+                      callee: {
+                        type: 'MemberExpression',
+                        object: {
+                          type: 'CallExpression',
+                          callee: {
+                            type: 'MemberExpression',
+                            object: {type: 'Identifier', name: 'a'},
+                            property: {type: 'Identifier', name: 'b'},
+                            computed: false,
+                          },
+                          arguments: [],
+                        },
+                        property: {type: 'Identifier', name: 'c'},
+                        computed: false,
+                      },
+                      arguments: [],
+                    },
+                    property: {type: 'Identifier', name: 'd'},
+                    computed: false,
+                  },
+                  operator: '+=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped super property, silly but valid', {
+          code: 'class x{ constructor(){  (super.a) += 1;  }}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: null,
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'constructor'},
+                      static: false,
+                      computed: false,
+                      kind: 'constructor',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {
+                                type: 'AssignmentExpression',
+                                left: {
+                                  type: 'MemberExpression',
+                                  object: {type: 'Super'},
+                                  property: {type: 'Identifier', name: 'a'},
+                                  computed: false,
+                                },
+                                operator: '+=',
+                                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped super property, silly but valid', {
+          code: 'class x{ constructor(){  (super[a]) += 1;  }}',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ClassDeclaration',
+                id: {type: 'Identifier', name: 'x'},
+                superClass: null,
+                body: {
+                  type: 'ClassBody',
+                  body: [
+                    {
+                      type: 'MethodDefinition',
+                      key: {type: 'Identifier', name: 'constructor'},
+                      static: false,
+                      computed: false,
+                      kind: 'constructor',
+                      value: {
+                        type: 'FunctionExpression',
+                        generator: false,
+                        async: false,
+                        id: null,
+                        params: [],
+                        body: {
+                          type: 'BlockStatement',
+                          body: [
+                            {
+                              type: 'ExpressionStatement',
+                              expression: {
+                                type: 'AssignmentExpression',
+                                left: {
+                                  type: 'MemberExpression',
+                                  object: {type: 'Super'},
+                                  property: {type: 'Identifier', name: 'a'},
+                                  computed: true,
+                                },
+                                operator: '+=',
+                                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped this property, silly but valid', {
+          code: '(this.a) += 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'MemberExpression',
+                    object: {type: 'ThisExpression'},
+                    property: {type: 'Identifier', name: 'a'},
+                    computed: false,
+                  },
+                  operator: '+=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+
+        test('assignment to a wrapped this property, silly but valid', {
+          code: '(this[b]) += 1;',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {
+                    type: 'MemberExpression',
+                    object: {type: 'ThisExpression'},
+                    property: {type: 'Identifier', name: 'b'},
+                    computed: true,
+                  },
+                  operator: '+=',
+                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        });
+      });
+
+      describe('sans arr', _ => {
+        test('new inside array', {
+          code: '(new x);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'NewExpression',
+                  arguments: [],
+                  callee: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('delete inside array', {
+          code: '(delete foo.bar);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'UnaryExpression',
+                  operator: 'delete',
+                  prefix: true,
+                  argument: {
+                    type: 'MemberExpression',
+                    object: {type: 'Identifier', name: 'foo'},
+                    property: {type: 'Identifier', name: 'bar'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('objlit inside array', {
+          code: '({});',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'ObjectExpression', properties: []},
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('division inside array', {
+          code: '(a / b);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'a'},
+                  operator: '/',
+                  right: {type: 'Identifier', name: 'b'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('div newline inside array', {
+          code: '(a \n/b/g);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'BinaryExpression',
+                  left: {
+                    type: 'BinaryExpression',
+                    left: {type: 'Identifier', name: 'a'},
+                    operator: '/',
+                    right: {type: 'Identifier', name: 'b'},
+                  },
+                  operator: '/',
+                  right: {type: 'Identifier', name: 'g'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('div newline 2 inside array', {
+          code: '(a \n/b/);',
+          throws: 'Expected to parse a value',
+        });
+
+        test('regex case 1', {
+          code: '(delete /a/.x);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'UnaryExpression',
+                  operator: 'delete',
+                  prefix: true,
+                  argument: {
+                    type: 'MemberExpression',
+                    object: {type: 'Literal', value: '<TODO>', raw: '/a/'},
+                    property: {type: 'Identifier', name: 'x'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('regex case 2', {
+          code: '(delete /a/g.x);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'UnaryExpression',
+                  operator: 'delete',
+                  prefix: true,
+                  argument: {
+                    type: 'MemberExpression',
+                    object: {type: 'Literal', value: '<TODO>', raw: '/a/g'},
+                    property: {type: 'Identifier', name: 'x'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('first char after ident is unsufficient 1', {
+          code: '(foo /=g/m.x);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'AssignmentExpression',
+                  left: {type: 'Identifier', name: 'foo'},
+                  operator: '/=',
+                  right: {
+                    type: 'BinaryExpression',
+                    left: {type: 'Identifier', name: 'g'},
+                    operator: '/',
+                    right: {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'm'},
+                      property: {type: 'Identifier', name: 'x'},
+                      computed: false,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('first char after ident is unsufficient 2', {
+          code: '(void /=g/m.x);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'UnaryExpression',
+                  operator: 'void',
+                  prefix: true,
+                  argument: {
+                    type: 'MemberExpression',
+                    object: {type: 'Literal', value: '<TODO>', raw: '/=g/m'},
+                    property: {type: 'Identifier', name: 'x'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('first char after ident is unsufficient 3', {
+          code: '(void /=/g/m.x);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'BinaryExpression',
+                  left: {
+                    type: 'UnaryExpression',
+                    operator: 'void',
+                    prefix: true,
+                    argument: {type: 'Literal', value: '<TODO>', raw: '/=/g'},
+                  },
+                  operator: '/',
+                  right: {
+                    type: 'MemberExpression',
+                    object: {type: 'Identifier', name: 'm'},
+                    property: {type: 'Identifier', name: 'x'},
+                    computed: false,
+                  },
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+        });
+      });
+
+      describe('with arr', _ => {
+        test('new inside array', {
+          code: '([new x]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'NewExpression',
+                      arguments: [],
+                      callee: {type: 'Identifier', name: 'x'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('delete inside array', {
+          code: '([delete foo.bar]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'UnaryExpression',
+                      operator: 'delete',
+                      prefix: true,
+                      argument: {
+                        type: 'MemberExpression',
+                        object: {type: 'Identifier', name: 'foo'},
+                        property: {type: 'Identifier', name: 'bar'},
+                        computed: false,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('objlit inside array', {
+          code: '([{}]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [{type: 'ObjectExpression', properties: []}],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('division inside array', {
+          code: '([a / b]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'BinaryExpression',
+                      left: {type: 'Identifier', name: 'a'},
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'b'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('div newline inside array', {
+          code: '([a \n/b/g]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'BinaryExpression',
+                      left: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Identifier', name: 'a'},
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'b'},
+                      },
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'g'},
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('div newline 2 inside array', {
+          code: '([a \n/b/]);',
+          throws: 'Expected to parse a value',
+        });
+
+        test('regex case 1', {
+          code: '([delete /a/.x]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'UnaryExpression',
+                      operator: 'delete',
+                      prefix: true,
+                      argument: {
+                        type: 'MemberExpression',
+                        object: {type: 'Literal', value: '<TODO>', raw: '/a/'},
+                        property: {type: 'Identifier', name: 'x'},
+                        computed: false,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('regex case 2', {
+          code: '([delete /a/g.x]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'UnaryExpression',
+                      operator: 'delete',
+                      prefix: true,
+                      argument: {
+                        type: 'MemberExpression',
+                        object: {type: 'Literal', value: '<TODO>', raw: '/a/g'},
+                        property: {type: 'Identifier', name: 'x'},
+                        computed: false,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('first char after ident is unsufficient 1', {
+          code: '([foo /=g/m.x]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'AssignmentExpression',
+                      left: {type: 'Identifier', name: 'foo'},
+                      operator: '/=',
+                      right: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Identifier', name: 'g'},
+                        operator: '/',
+                        right: {
+                          type: 'MemberExpression',
+                          object: {type: 'Identifier', name: 'm'},
+                          property: {type: 'Identifier', name: 'x'},
+                          computed: false,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('first char after ident is unsufficient 2', {
+          code: '([void /=g/m.x]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'UnaryExpression',
+                      operator: 'void',
+                      prefix: true,
+                      argument: {
+                        type: 'MemberExpression',
+                        object: {type: 'Literal', value: '<TODO>', raw: '/=g/m'},
+                        property: {type: 'Identifier', name: 'x'},
+                        computed: false,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+
+        test('first char after ident is unsufficient 3', {
+          code: '([void /=/g/m.x]);',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrayExpression',
+                  elements: [
+                    {
+                      type: 'BinaryExpression',
+                      left: {
+                        type: 'UnaryExpression',
+                        operator: 'void',
+                        prefix: true,
+                        argument: {type: 'Literal', value: '<TODO>', raw: '/=/g'},
+                      },
+                      operator: '/',
+                      right: {
+                        type: 'MemberExpression',
+                        object: {type: 'Identifier', name: 'm'},
+                        property: {type: 'Identifier', name: 'x'},
+                        computed: false,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+        });
+      });
+
+      test('unary ++ prefix', {
+        code: '(++x);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'UpdateExpression',
+                operator: '++',
+                prefix: true,
+                argument: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('sequence of unary ++ prefix', {
+        code: '(++x, y);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {
+                    type: 'UpdateExpression',
+                    operator: '++',
+                    prefix: true,
+                    argument: {type: 'Identifier', name: 'x'},
+                  },
+                  {type: 'Identifier', name: 'y'},
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('unary -- suffix', {
+        code: '(x--);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'UpdateExpression',
+                argument: {type: 'Identifier', name: 'x'},
+                operator: '--',
+                prefix: false,
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('sequence of unary -- suffix', {
+        code: '(x--, y);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {
+                    type: 'UpdateExpression',
+                    argument: {type: 'Identifier', name: 'x'},
+                    operator: '--',
+                    prefix: false,
+                  },
+                  {type: 'Identifier', name: 'y'},
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('missing spread/rest arg', {
+        code: '(...);',
+        throws: 'missing an argument',
+      });
+
+      test.fail('invalid spread/rest', {
+        code: '(...x);',
+      });
+
+      test('empty group at eof', {
+        code: '()',
+        throws: 'Empty group',
+      });
+
+      test('empty group with semi', {
+        code: '();',
+        throws: 'Empty group',
+      });
+
+      test.fail('grouped assignment is _not_ a valid assignment target', {
+        code: '(a=1)=2',
+        desc: 'https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
+      });
+
+      test('grouped compound assignment is _not_ a valid assignment target', {
+        code: '(a=1)+=2',
+        desc: 'nope: https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
+        throws: true,
+      });
+
+      test('cannot assign to group with comma', {
+        code: '(a,b)=2',
+        throws: 'Cannot assign',
+      });
+
+      test('cannot compound assign to group with comma', {
+        code: '(a,b)+=2',
+        throws: 'Cannot assign',
+      });
+
+      // TODO: confirm that `async` is not a reserved word in any case
+      // TODO: confirm `let` is assignable even in strict mode
+
+      // keywords
+      [
+        'break',
+        'case',
+        'catch',
+        'class',
+        'const',
+        'continue',
+        'debugger',
+        'default',
+        'delete',
+        'do',
+        'else',
+        'export',
+        'extends',
+        'finally',
+        'for',
+        'function',
+        'if',
+        'import',
+        'in',
+        'instanceof',
+        'new',
+        'return',
+        'super',
+        'switch',
+        'this',
+        'throw',
+        'try',
+        'typeof',
+        'var',
+        'void',
+        'while',
+        'with',
+        'null',
+        'true',
+        'false',
+        'enum',
+      ].forEach(keyword => {
+        test('cannot assign to group with keyword: `' + keyword + '`', {
+          code: '(' + keyword + ')=2',
+          // Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
+          // Invalid assignment because group does not wrap just a var name or just a property access
+          throws: true,
+        });
+      });
+
+      // strict-mode only keywords
+      [
+        'eval',
+        'arguments',
+        'implements',
+        'package',
+        'protected',
+        'interface',
+        'private',
+        'public',
+        'await',
+        'yield',
+        'static', // Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is
+        'let', // Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is
+      ].forEach(keyword => {
+        test('cannot assign to group with reserved word in strict mode: `' + keyword + '`', {
+          code: '(' + keyword + ')=2',
+          throws: true,
+          SLOPPY_SCRIPT: {
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'AssignmentExpression',
+                    left: {type: 'Identifier', name: keyword},
+                    operator: '=',
+                    right: {type: 'Literal', value: '<TODO>', raw: '2'},
+                  },
+                },
               ],
             },
+            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $ASI],
           },
-        ],
-      },
-      tokens: [
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $NUMBER_DEC,
-        $PUNCTUATOR,
-        $STRING_DOUBLE,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-      ],
-    });
+        });
+      });
 
-    test('group of some two assignments', {
-      code: '(a = 1, b = 2);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'SequenceExpression',
-              expressions: [
-                {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'a'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '1'}},
-                {type: 'AssignmentExpression', left: {type: 'Identifier', name: 'b'}, operator: '=', right: {type: 'Literal', value: '<TODO>', raw: '2'}},
-              ],
+      // non-keywords
+      [
+        'async', // not an actual keyword
+      ].forEach(keyword => {
+        test('cannot assign to group with keyword: `' + keyword + '`', {
+          code: '(' + keyword + ')=2',
+          // Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
+          // Invalid assignment because group does not wrap just a var name or just a property access
+          ast: true,
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $ASI],
+        });
+      });
+
+      test('non-destructible should throw when attempted anyways', {
+        code: '([a + b] = x);',
+        throws: 'not destructible',
+      });
+
+      test('arr with tail', {
+        code: '([].x);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'MemberExpression',
+                object: {type: 'ArrayExpression', elements: []},
+                property: {type: 'Identifier', name: 'x'},
+                computed: false,
+              },
             },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async call arr with tail', {
+        code: 'async([].x);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {type: 'Identifier', name: 'async'},
+                arguments: [
+                  {
+                    type: 'MemberExpression',
+                    object: {type: 'ArrayExpression', elements: []},
+                    property: {type: 'Identifier', name: 'x'},
+                    computed: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async arrow with arr with tail is bad', {
+        code: 'async([].x) => x;',
+        throws: true,
+      });
+
+      test('obj with tail', {
+        code: '({} + 1);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {type: 'ObjectExpression', properties: []},
+                operator: '+',
+                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async call with obj with tail', {
+        code: 'async ({} + 1);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {type: 'Identifier', name: 'async'},
+                arguments: [
+                  {
+                    type: 'BinaryExpression',
+                    left: {type: 'ObjectExpression', properties: []},
+                    operator: '+',
+                    right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('async call with obj with tail', {
+        code: 'async ({} + 1) => x;',
+        throws: true,
+      });
+
+      test('do not consider `>=` a compound assignment', {
+        code: '(x + y) >= z',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'x'},
+                  operator: '+',
+                  right: {type: 'Identifier', name: 'y'},
+                },
+                operator: '>=',
+                right: {type: 'Identifier', name: 'z'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('do not consider `<=` a compound assignment', {
+        code: '(x + y) <= z',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'x'},
+                  operator: '+',
+                  right: {type: 'Identifier', name: 'y'},
+                },
+                operator: '<=',
+                right: {type: 'Identifier', name: 'z'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('do not consider `!=` a compound assignment', {
+        code: '(x + y) != z',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'x'},
+                  operator: '+',
+                  right: {type: 'Identifier', name: 'y'},
+                },
+                operator: '!=',
+                right: {type: 'Identifier', name: 'z'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('do not consider `==` a compound assignment', {
+        code: '(x + y) == z',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'x'},
+                  operator: '+',
+                  right: {type: 'Identifier', name: 'y'},
+                },
+                operator: '==',
+                right: {type: 'Identifier', name: 'z'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      describe('regex cases', _ => {
+        test('regex sans flag in group start', {
+          code: '(/x/)',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '/x/'},
+              },
+            ],
           },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
-    });
+          tokens: [$PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+        });
 
-    describe('regular assignment to group', _ => {
-      test('assignment to a wrapped identifier, silly but valid', {
-        // https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget
-        code: '(a) = 1;',
+        test('regex with flag in group start', {
+          code: '(/x/g)',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {type: 'Literal', value: '<TODO>', raw: '/x/g'},
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+        });
+
+        test('regex sans flag in group second', {
+          code: '(x, /x/)',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'SequenceExpression',
+                  expressions: [{type: 'Identifier', name: 'x'}, {type: 'Literal', value: '<TODO>', raw: '/x/'}],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+        });
+
+        test('regex with flag in group second', {
+          code: '(x, /x/g)',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'SequenceExpression',
+                  expressions: [{type: 'Identifier', name: 'x'}, {type: 'Literal', value: '<TODO>', raw: '/x/g'}],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
+        });
+
+        test('group division', {
+          code: '(x) / y',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'x'},
+                  operator: '/',
+                  right: {type: 'Identifier', name: 'y'},
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
+      });
+
+      test('regression1', {
+        code: '([a.b] = x);',
         ast: {
           type: 'Program',
           body: [
@@ -139,18 +1916,28 @@ export default (describe, test) => describe('parens', _ => {
               type: 'ExpressionStatement',
               expression: {
                 type: 'AssignmentExpression',
-                left: {type: 'Identifier', name: 'a'},
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [
+                    {
+                      type: 'MemberExpression',
+                      object: {type: 'Identifier', name: 'a'},
+                      property: {type: 'Identifier', name: 'b'},
+                      computed: false,
+                    },
+                  ],
+                },
                 operator: '=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                right: {type: 'Identifier', name: 'x'},
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('assignment to a wrapped property, silly but valid', {
-        code: '(a.b) = 1;',
+      test('regression full', {
+        code: '([target()[targetKey()]] = x);',
         ast: {
           type: 'Program',
           body: [
@@ -158,18 +1945,36 @@ export default (describe, test) => describe('parens', _ => {
               type: 'ExpressionStatement',
               expression: {
                 type: 'AssignmentExpression',
-                left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: false},
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [
+                    {
+                      type: 'MemberExpression',
+                      object: {
+                        type: 'CallExpression',
+                        callee: {type: 'Identifier', name: 'target'},
+                        arguments: [],
+                      },
+                      property: {
+                        type: 'CallExpression',
+                        callee: {type: 'Identifier', name: 'targetKey'},
+                        arguments: [],
+                      },
+                      computed: true,
+                    },
+                  ],
+                },
                 operator: '=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                right: {type: 'Identifier', name: 'x'},
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('assignment to a wrapped property, silly but valid', {
-        code: '(a[b]) = 1;',
+      test('assignment inside pattern', {
+        code: '([target()[targetKey(a=b)]] = x);',
         ast: {
           type: 'Program',
           body: [
@@ -177,18 +1982,67 @@ export default (describe, test) => describe('parens', _ => {
               type: 'ExpressionStatement',
               expression: {
                 type: 'AssignmentExpression',
-                left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: true},
+                left: {
+                  type: 'ArrayPattern',
+                  elements: [
+                    {
+                      type: 'MemberExpression',
+                      object: {
+                        type: 'CallExpression',
+                        callee: {type: 'Identifier', name: 'target'},
+                        arguments: [],
+                      },
+                      property: {
+                        type: 'CallExpression',
+                        callee: {type: 'Identifier', name: 'targetKey'},
+                        arguments: [
+                          {
+                            type: 'AssignmentExpression', // THIS IS IMPORTANT! Not a pattern
+                            left: {type: 'Identifier', name: 'a'},
+                            operator: '=',
+                            right: {type: 'Identifier', name: 'b'},
+                          },
+                        ],
+                      },
+                      computed: true,
+                    },
+                  ],
+                },
                 operator: '=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                right: {type: 'Identifier', name: 'x'},
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('assignment to a wrapped complex value that ends in a property, silly but valid', {
-        code: '(a.b().c().d) = 1;',
+      test('empty array literal that is a property is assignable', {
+        code: '([].length) = y',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'MemberExpression',
+                  object: {type: 'ArrayExpression', elements: []},
+                  property: {type: 'Identifier', name: 'length'},
+                  computed: false,
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'y'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('array literal that is a property is assignable', {
+        code: '([x].length) = y',
         ast: {
           type: 'Program',
           body: [
@@ -199,161 +2053,23 @@ export default (describe, test) => describe('parens', _ => {
                 left: {
                   type: 'MemberExpression',
                   object: {
-                    type: 'CallExpression',
-                    callee: {
-                      type: 'MemberExpression',
-                      object: {
-                        type: 'CallExpression',
-                        callee: {
-                          type: 'MemberExpression',
-                          object: {type: 'Identifier', name: 'a'},
-                          property: {type: 'Identifier', name: 'b'},
-                          computed: false,
-                        },
-                        arguments: [],
-                      },
-                      property: {type: 'Identifier', name: 'c'},
-                      computed: false,
-                    },
-                    arguments: [],
+                    type: 'ArrayExpression',
+                    elements: [{type: 'Identifier', name: 'x'}],
                   },
-                  property: {type: 'Identifier', name: 'd'},
+                  property: {type: 'Identifier', name: 'length'},
                   computed: false,
                 },
                 operator: '=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                right: {type: 'Identifier', name: 'y'},
               },
             },
           ],
         },
-        tokens: [
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $NUMBER_DEC,
-          $PUNCTUATOR,
-        ],
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
       });
 
-      test('assignment to a wrapped super property, silly but valid', {
-        code: 'class x{ constructor(){  (super.a) = 1;  }}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ClassDeclaration',
-              id: {type: 'Identifier', name: 'x'},
-              superClass: null,
-              body: {
-                type: 'ClassBody',
-                body: [
-                  {
-                    type: 'MethodDefinition',
-                    key: {type: 'Identifier', name: 'constructor'},
-                    static: false,
-                    computed: false,
-                    kind: 'constructor',
-                    value: {
-                      type: 'FunctionExpression',
-                      generator: false,
-                      async: false,
-                      id: null,
-                      params: [],
-                      body: {
-                        type: 'BlockStatement',
-                        body: [
-                          {
-                            type: 'ExpressionStatement',
-                            expression: {
-                              type: 'AssignmentExpression',
-                              left: {
-                                type: 'MemberExpression',
-                                object: {type: 'Super'},
-                                property: {type: 'Identifier', name: 'a'},
-                                computed: false,
-                              },
-                              operator: '=',
-                              right: {type: 'Literal', value: '<TODO>', raw: '1'},
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped super property, silly but valid', {
-        code: 'class x{ constructor(){  (super[a]) = 1;  }}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ClassDeclaration',
-              id: {type: 'Identifier', name: 'x'},
-              superClass: null,
-              body: {
-                type: 'ClassBody',
-                body: [
-                  {
-                    type: 'MethodDefinition',
-                    key: {type: 'Identifier', name: 'constructor'},
-                    static: false,
-                    computed: false,
-                    kind: 'constructor',
-                    value: {
-                      type: 'FunctionExpression',
-                      generator: false,
-                      async: false,
-                      id: null,
-                      params: [],
-                      body: {
-                        type: 'BlockStatement',
-                        body: [
-                          {
-                            type: 'ExpressionStatement',
-                            expression: {
-                              type: 'AssignmentExpression',
-                              left: {
-                                type: 'MemberExpression',
-                                object: {type: 'Super'},
-                                property: {type: 'Identifier', name: 'a'},
-                                computed: true,
-                              },
-                              operator: '=',
-                              right: {type: 'Literal', value: '<TODO>', raw: '1'},
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped this property, silly but valid', {
-        code: '(this.a) = 1;',
+      test('empty object literal that is a property is assignable', {
+        code: '({}.length) = z',
         ast: {
           type: 'Program',
           body: [
@@ -363,65 +2079,554 @@ export default (describe, test) => describe('parens', _ => {
                 type: 'AssignmentExpression',
                 left: {
                   type: 'MemberExpression',
-                  object: {type: 'ThisExpression'},
-                  property: {type: 'Identifier', name: 'a'},
+                  object: {type: 'ObjectExpression', properties: []},
+                  property: {type: 'Identifier', name: 'length'},
                   computed: false,
-                },
-                operator: '=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped this property, silly but valid', {
-        code: '(this[b]) = 1;',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'MemberExpression',
-                  object: {type: 'ThisExpression'},
-                  property: {type: 'Identifier', name: 'b'},
-                  computed: true,
-                },
-                operator: '=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      });
-
-      test('assignment to array is destructuring', {
-        code: '[x, y] = z;',
-        desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
-        // https://tc39.github.io/ecma262/#_ref_10683
-        //   AssignmentExpression: LeftHandSideExpression = AssignmentExpression
-        //     It is a Syntax Error if LeftHandSideExpression is either an ObjectLiteral or an ArrayLiteral and LeftHandSideExpression is not covering an AssignmentPattern.
-        //     It is an early Reference Error if LeftHandSideExpression is neither an ObjectLiteral nor an ArrayLiteral and IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
-        //   AssignmentExpression: LeftHandSideExpression AssignmentOperator AssignmentExpression
-        //     It is an early Reference Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'ArrayPattern',
-                  elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
                 },
                 operator: '=',
                 right: {type: 'Identifier', name: 'z'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('object literal that is a property is assignable', {
+        code: '({x: y}.length) = z',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'MemberExpression',
+                  object: {
+                    type: 'ObjectExpression',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'x'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {type: 'Identifier', name: 'y'},
+                        shorthand: false,
+                      },
+                    ],
+                  },
+                  property: {type: 'Identifier', name: 'length'},
+                  computed: false,
+                },
+                operator: '=',
+                right: {type: 'Identifier', name: 'z'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test('true should be a literal (base case)', {
+        code: 'true',
+        desc: '(just to proof this is a group specific regression)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'Literal', value: true, raw: 'true'},
+            },
+          ],
+        },
+        tokens: [$IDENT, $ASI],
+      });
+
+      test('true in group should yield a literal, not ident', {
+        code: '(true)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'Literal', value: true, raw: 'true'},
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('false in group should yield a literal, not ident', {
+        code: '(false)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'Literal', value: false, raw: 'false'},
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('null in group should yield a literal, not ident', {
+        code: '(null)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'Literal', value: null, raw: 'null'},
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      test('this in group should not yield an ident', {
+        code: '(this)',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {type: 'ThisExpression'},
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+      });
+
+      describe('invalid arrow header things that are valid in a group', _ => {
+        // see counter-test in arrow where this stuff is disallowed
+        [
+          'arguments',
+          'async ()=>x',
+          'class{}',
+          'delete x.y',
+          'eval',
+          'false',
+          'function(){}',
+          'new x',
+          'null',
+          // 'super', // setup too annoying, simply assuming this works too
+          'true',
+          'this',
+          'typeof x',
+          'void x',
+          'x + y',
+          '[].length',
+          '[x].length',
+          '{}.length',
+          '{x: y}.length',
+        ].forEach(str => {
+          test.pass('[' + str + '] in group', {
+            code: '(' + str + ');',
+          });
+
+          if (str !== 'arguments' && str !== 'eval') {
+            // tested elsewhere
+            test.fail('[' + str + '] in arrow', {
+              code: '(' + str + ') => x;',
+            });
+          }
+        });
+
+        // soe things are special
+        ['await', 'let', 'yield'].forEach(str => {
+          test('[' + str + '] in group', {
+            code: '(' + str + ');',
+            throws: true,
+            SLOPPY_SCRIPT: {
+              ast: true,
+              tokens: true,
+            },
+          });
+        });
+      });
+
+      test('comma in a group should make the group non-assignable', {
+        code: '(a, b) = c',
+        throws: 'not assign',
+      });
+
+      describe('trailing comma without arrow', _ => {
+        describe('non-assign', _ => {
+          // trailing comma in just a group is always an error
+          [undefined, 6, 7, 8, 9, Infinity].forEach(ES => {
+            test.fail('must have args to trail', {
+              code: '(,)',
+              ES,
+            });
+
+            test.fail('just commas is error', {
+              code: '(,,)',
+              ES,
+            });
+
+            test.fail('one arg', {
+              code: '(a,)',
+              ES,
+            });
+
+            test.fail('two args', {
+              code: '(a,b,)',
+              ES,
+            });
+
+            test.fail('cannot elide', {
+              code: '(a,,)',
+              ES,
+            });
+
+            test.fail('after default', {
+              code: '(a = b,)',
+              ES,
+            });
+
+            test.fail('not allowed after rest', {
+              code: '(...a,)',
+              ES,
+            });
+
+            test.fail('after array destruct', {
+              code: '([x],)',
+              ES,
+            });
+
+            test.fail('after object destruct', {
+              code: '({a},)',
+              ES,
+            });
+
+            test.fail('rest cant even have an default', {
+              code: '(...a = x,)',
+              ES,
+            });
+
+            test.fail('after array destruct with default', {
+              code: '([x] = y,)',
+              ES,
+            });
+
+            test.fail('after object destruct with default', {
+              code: '({a} = b,)',
+              ES,
+            });
+          });
+        });
+
+        describe('assigned', _ => {
+          [undefined, 6, 7, 8, 9, Infinity].forEach(ES => {
+            test.fail('must have args to trail', {
+              code: '(,) = x',
+              ES,
+            });
+
+            test.fail('just commas is error', {
+              code: '(,,) = x',
+              ES,
+            });
+
+            test.fail('one arg', {
+              code: '(a,) = x',
+              ES,
+            });
+
+            test.fail('two args', {
+              code: '(a,b,) = x',
+              ES,
+            });
+
+            test.fail('cannot elide', {
+              code: '(a,,) = x',
+              ES,
+            });
+
+            test.fail('after default', {
+              code: '(a = b,) = x',
+              ES,
+            });
+
+            test.fail('not allowed after rest', {
+              code: '(...a,) = x',
+              ES,
+            });
+
+            test.fail('after array destruct', {
+              code: '([x],) = x',
+              ES,
+            });
+
+            test.fail('after object destruct', {
+              code: '({a},) = x',
+              ES,
+            });
+
+            test.fail('rest cant even have an default', {
+              code: '(...a = x,) = x',
+              ES,
+            });
+
+            test.fail('after array destruct with default', {
+              code: '([x] = y,) = x',
+              ES,
+            });
+
+            test.fail('after object destruct with default', {
+              code: '({a} = b,) = x',
+              ES,
+            });
+          });
+        });
+      });
+
+      describe('destructuring obj rest property for assignments', _ => {
+        test.fail('obj rest pattern must be simple', {
+          code: '({...[]} = x);',
+        });
+
+        test.pass('arr rest pattern is more freeform', {
+          code: '([...[]] = x);',
+        });
+
+        test.pass('rest in obj pattern on arr pattern with prop', {
+          code: '({...[].x} = x);',
+        });
+
+        test.pass('rest in obj pattern on ident with prop', {
+          code: '({...a.x} = x);',
+        });
+
+        test.pass('rest in obj pattern on string with prop', {
+          code: '({..."x".x} = x);',
+        });
+
+        test.pass('rest in obj pattern on obj pattern with prop', {
+          code: '({...{}.x} = x);',
+        });
+
+        test.pass('rest in arr pattern on arr pattern with prop', {
+          code: '([...[].x] = x);',
+        });
+
+        test.pass('rest in arr pattern on obj pattern with prop', {
+          code: '([...{}.x] = x);',
+        });
+
+        test.pass('rest in obj pattern on ident with dynamic prop', {
+          code: '({...a[x]} = x);',
+        });
+
+        test.pass('rest in obj pattern on string with dynamic prop', {
+          code: '({..."x"[x]} = x);',
+        });
+
+        test.pass('rest in obj pattern on arr pattern with dynamic prop', {
+          code: '({...[][x]} = x);',
+        });
+
+        test.pass('rest in obj pattern on obj pattern with dynamic prop', {
+          code: '({...{}[x]} = x);',
+        });
+
+        test.pass('rest in arr pattern on arr pattern with dynamic prop', {
+          code: '([...[][x]] = x);',
+        });
+
+        test.pass('rest in arr pattern on obj pattern with dynamic prop', {
+          code: '([...{}[x]] = x);',
+        });
+
+        describe('regression #13, destructuring with arr/obj literal with property', _ => {
+          test.pass('obj pattern with property', {
+            code: '({...{b: 0}.x} = {});',
+          });
+
+          test.pass('arr pattern with property', {
+            code: '({...[0].x} = {});',
+          });
+
+          test.pass('obj pattern with dynamic property', {
+            code: '({...{b: 0}[x]} = {});',
+          });
+
+          test.pass('arr pattern with dynamic property', {
+            code: '({...[0][x]} = {});',
+          });
+        });
+      });
+
+      test('paren wrapped arrow can have binary op', {
+        code: `(() => {}) << x`,
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'BinaryExpression',
+                left: {
+                  type: 'ArrowFunctionExpression',
+                  params: [],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: false,
+                  body: {type: 'BlockStatement', body: []},
+                },
+                operator: '<<',
+                right: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
+
+      test.pass('paren wrapped argless arrow with dot property is ok', {
+        desc: 'regression',
+        code: '(() => {}).x',
+      });
+
+      test.pass('paren wrapped parenless arrow with dot property is ok', {
+        desc: 'regression',
+        code: '(x => {}).x',
+      });
+    });
+
+    describe('arrow', _ => {
+      test('arrow, one arg without parens, expr', {
+        code: 'x=>x;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'x'}],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('arrow, no args, expr', {
+        code: '()=>x;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrowFunctionExpression',
+                params: [],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('arrow, one arg, expr', {
+        code: '(x)=>x;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'x'}],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('arrow, one arg, block', {
+        code: '(x)=>{x}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'x'}],
+                id: null,
+                generator: false,
+                async: false,
+                expression: false,
+                body: {type: 'BlockStatement', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}]},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $ASI],
+      });
+
+      test('arrow, one arg, block with a regex literal', {
+        code: '(x)=>{/x/}',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'x'}],
+                id: null,
+                generator: false,
+                async: false,
+                expression: false,
+                body: {
+                  type: 'BlockStatement',
+                  body: [{type: 'ExpressionStatement', expression: {type: 'Literal', value: '<TODO>', raw: '/x/'}}],
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI, $PUNCTUATOR, $ASI],
+      });
+
+      test('arrow, one arg, expr', {
+        code: '(x, y)=>x;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrowFunctionExpression',
+                params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'x'},
               },
             },
           ],
@@ -429,37 +2634,32 @@ export default (describe, test) => describe('parens', _ => {
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
 
-      test.fail('assignment to grouped array is not okay', {
-        code: '([x, y]) = z;',
-        desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
-      });
+      //{ error
+      //  code: '((x)) => x;',
+      //  ast: {type: 'Program', body: [
+      //    {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}},
+      //  ]},
+      //  desc: 'silly double group',
+      //  tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      //},
+      //{ error
+      //  code: '(a, 1, "c", d, e, f) => x;',
+      //  ast: {type: 'Program', body: [
+      //    {type: 'ExpressionStatement', expression: {type: 'SequenceExpression', expressions: [
+      //      {type: 'Identifier', name: 'a'},
+      //      {type: 'Literal', value: '<TODO>', raw: '1'},
+      //      {type: 'Literal', value: '<TODO>', raw: '"c"'},
+      //      {type: 'Identifier', name: 'd'},
+      //      {type: 'Identifier', name: 'e'},
+      //      {type: 'Identifier', name: 'f'},
+      //    ]}},
+      //  ]},
+      //  desc: 'group of some simple values',
+      //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      //});
 
-      test('assignment to array grouped is destructuring', {
-        code: '([x, y] = z);',
-        desc: 'the group is fine otherwise',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'ArrayPattern',
-                  elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
-                },
-                operator: '=',
-                right: {type: 'Identifier', name: 'z'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('assignment to array grouped can be arrow', {
-        code: '([x, y] = z) => x;',
-        desc: 'the group is fine otherwise',
+      test('group of some two assignments', {
+        code: '(a = 1, b = 2) => x;',
         ast: {
           type: 'Program',
           body: [
@@ -470,172 +2670,313 @@ export default (describe, test) => describe('parens', _ => {
                 params: [
                   {
                     type: 'AssignmentPattern',
-                    left: {
-                      type: 'ArrayPattern',
-                      elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+                    left: {type: 'Identifier', name: 'a'},
+                    right: {type: 'Literal', value: '<TODO>', raw: '1'},
+                  },
+                  {
+                    type: 'AssignmentPattern',
+                    left: {type: 'Identifier', name: 'b'},
+                    right: {type: 'Literal', value: '<TODO>', raw: '2'},
+                  },
+                ],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'x'},
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      //{ error
+      //  code: '(a.b) => x;',
+      //  ast: {type: 'Program', body: [
+      //    {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
+      //      left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: false},
+      //      operator: '=',
+      //      right: {type: 'Literal', value: '<TODO>', raw: '1'},
+      //    }},
+      //  ]},
+      //  desc: 'assignment to a wrapped property, silly but valid',
+      //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+      //},
+      //{ error
+      //  code: '(a[b]) => x;',
+      //  ast: {type: 'Program', body: [
+      //    {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
+      //      left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: true},
+      //      operator: '=',
+      //      right: {type: 'Literal', value: '<TODO>', raw: '1'},
+      //    }},
+      //  ]},
+      //  desc: 'assignment to a wrapped property, silly but valid',
+      //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
+      //},
+      //{ error
+      //  code: '/i/ * ()=>j',
+      //  ast: {type: 'Program', body: [
+      //    {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
+      //      left: {type: 'Literal', value: '<TODO>', raw: '/i/'},
+      //      operator: '*',
+      //      right: {type: 'ArrowFunctionExpression',
+      //        params: [],
+      //        id: null,
+      //      }
+      //    }},
+      //  ]},
+      //  desc: 'this is invalid because you cannot match an arrow (in the grammar) on the rhs of a non-assignment operator',
+      //  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      //}
+
+      test('group of some two assignments', {
+        code: 'var a = (b) => c;',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'VariableDeclaration',
+              kind: 'var',
+              declarations: [
+                {
+                  type: 'VariableDeclarator',
+                  id: {type: 'Identifier', name: 'a'},
+                  init: {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'b'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'c'},
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+      });
+
+      test('arrow inside template disambiguation test 1', {
+        code: '`X${a => b}Y`',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'TemplateLiteral',
+                expressions: [
+                  {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'a'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'Identifier', name: 'b'},
+                  },
+                ],
+                quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}}],
+              },
+            },
+          ],
+        },
+        tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
+      });
+
+      test('arrow inside template disambiguation test 1', {
+        code: '`X${a => b + c}Y`',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'TemplateLiteral',
+                expressions: [
+                  {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'a'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {type: 'BinaryExpression', left: {type: 'Identifier', name: 'b'}, operator: '+', right: {type: 'Identifier', name: 'c'}},
+                  },
+                ],
+                quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}}],
+              },
+            },
+          ],
+        },
+        tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
+      });
+
+      test('arrow inside template disambiguation test 2; regular curlies in the arrow', {
+        code: '`X${a => b + {}}Y`',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'TemplateLiteral',
+                expressions: [
+                  {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: 'a'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {
+                      type: 'BinaryExpression',
+                      left: {type: 'Identifier', name: 'b'},
+                      operator: '+',
+                      right: {type: 'ObjectExpression', properties: []},
                     },
-                    right: {type: 'Identifier', name: 'z'},
                   },
                 ],
-                id: null,
-                generator: false,
-                async: false,
-                expression: true,
-                body: {type: 'Identifier', name: 'x'},
+                quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}}],
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
+        tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
       });
 
-      test('assignment to array in array can have no arrow', {
-        code: '([[x, y] = z]);',
-        desc: 'the group is fine otherwise',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'AssignmentExpression',
-                    left: {
-                      type: 'ArrayPattern',
-                      elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
+      test('unary ++ prefix', {
+        code: '(++x) => x;',
+        throws: 'Unable to ASI',
+      });
+
+      test('sequence of unary ++ prefix', {
+        code: '(++x, y) => x;',
+        throws: 'Unable to ASI',
+      });
+
+      test('unary -- suffix', {
+        code: '(x--) => x;',
+        throws: 'not destructible',
+      });
+
+      test('sequence of unary -- suffix', {
+        code: '(x--, y) => x;',
+        throws: 'not destructible',
+      });
+
+      describe('regex edge case', _ => {
+        describe('with expr', _ => {
+          test('sans flag', {
+            code: '_ => _\n/foo/',
+            throws: 'Expected to parse a value',
+            desc: 'the expression becomes a division which fails to parse properly in this case',
+            tokens: [],
+          });
+
+          test('sans flag', {
+            code: '_ => _\n/foo/g',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'ArrowFunctionExpression',
+                    params: [{type: 'Identifier', name: '_'}],
+                    id: null,
+                    generator: false,
+                    async: false,
+                    expression: true,
+                    body: {
+                      type: 'BinaryExpression',
+                      left: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Identifier', name: '_'},
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'foo'},
+                      },
+                      operator: '/',
+                      right: {type: 'Identifier', name: 'g'},
                     },
-                    operator: '=',
-                    right: {type: 'Identifier', name: 'z'},
                   },
-                ],
-              },
+                },
+              ],
             },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            desc: 'the expression becomes a division which is fine ((_/foo)/g) (make sure tree is correct)',
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
+          });
+        });
+
+        describe('with block', _ => {
+          test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (div)', {
+            code: '_ => {}\n/foo',
+            HAS_AST: true,
+          });
+
+          test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (regex no flag)', {
+            code: '_ => {}\n/foo/',
+            HAS_AST: true,
+          });
+
+          test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (regex + flag)', {
+            code: '_ => {}\n/foo/g',
+            HAS_AST: true,
+          });
+        });
       });
 
-      test('assignment to array in array can have arrow', {
-        code: '([[x, y] = z]) => x;',
-        desc: 'the group is fine otherwise',
+      test('empty parens, newline', {
+        code: '()\n=>x',
+        throws: 'restricted production',
+      });
+
+      describe('keywords ok in group not allowed in arrow header', _ => {
+        ['true', 'false', 'null', 'this'].forEach(keyword => {
+          test('arrow; keyword=' + keyword, {
+            code: '(' + keyword + ') => x',
+            throws: 'not destructible',
+          });
+
+          test.pass('group; keyword=' + keyword, {
+            code: '(' + keyword + ');',
+          });
+        });
+      });
+
+      test('object in group with shorthand', {
+        code: '({x});',
         ast: {
           type: 'Program',
           body: [
             {
               type: 'ExpressionStatement',
               expression: {
-                type: 'ArrowFunctionExpression',
-                params: [
+                type: 'ObjectExpression',
+                properties: [
                   {
-                    type: 'ArrayPattern',
-                    elements: [
-                      {
-                        type: 'AssignmentPattern',
-                        left: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
-                        },
-                        right: {type: 'Identifier', name: 'z'},
-                      },
-                    ],
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'x'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {type: 'Identifier', name: 'x'},
+                    shorthand: true,
                   },
                 ],
-                id: null,
-                generator: false,
-                async: false,
-                expression: true,
-                body: {type: 'Identifier', name: 'x'},
               },
             },
           ],
         },
-        tokens: [
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-        ],
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test('assignment to array in array must destructuring', {
-        code: '([[x, y] = z]) => x;',
-        desc: 'the group is fine otherwise',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrowFunctionExpression',
-                params: [
-                  {
-                    type: 'ArrayPattern',
-                    elements: [
-                      {
-                        type: 'AssignmentPattern',
-                        left: {
-                          type: 'ArrayPattern',
-                          elements: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
-                        },
-                        right: {type: 'Identifier', name: 'z'},
-                      },
-                    ],
-                  },
-                ],
-                id: null,
-                generator: false,
-                async: false,
-                expression: true,
-                body: {type: 'Identifier', name: 'x'},
-              },
-            },
-          ],
-        },
-        tokens: [
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-        ],
-      });
-
-      test('assignment to object as statmeent is error', {
-        code: '{x, y} = z;',
-        desc: 'top level object is parsed as a block',
-        throws: 'can not start with object destructuring',
-      });
-
-      test('assignment to object as expression is destructuring', {
-        code: '({x, y} = z);',
-        desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
-        // https://tc39.github.io/ecma262/#_ref_10683
-        //   AssignmentExpression: LeftHandSideExpression = AssignmentExpression
-        //     It is a Syntax Error if LeftHandSideExpression is either an ObjectLiteral or an ArrayLiteral and LeftHandSideExpression is not covering an AssignmentPattern.
-        //     It is an early Reference Error if LeftHandSideExpression is neither an ObjectLiteral nor an ArrayLiteral and IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
-        //   AssignmentExpression: LeftHandSideExpression AssignmentOperator AssignmentExpression
-        //     It is an early Reference Error if IsValidSimpleAssignmentTarget of LeftHandSideExpression is false.
+      test('destruct assign in group', {
+        code: '({x} = y);',
         ast: {
           type: 'Program',
           body: [
@@ -655,2457 +2996,27 @@ export default (describe, test) => describe('parens', _ => {
                       value: {type: 'Identifier', name: 'x'},
                       shorthand: true,
                     },
-                    {
-                      type: 'Property',
-                      key: {type: 'Identifier', name: 'y'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {type: 'Identifier', name: 'y'},
-                      shorthand: true,
-                    },
                   ],
                 },
                 operator: '=',
-                right: {type: 'Identifier', name: 'z'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test.fail('assignment to grouped array is not okay', {
-        code: '({x, y}) = z;',
-        desc: 'while not a prod, the assignment to array/object is an explicit exception (search for `assignmentpattern`)',
-      });
-    });
-
-    describe('compound assignment to group', _ => {
-      test('assignment to a wrapped identifier, silly but valid', {
-        // https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget
-        code: '(a) += 1;',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {type: 'Identifier', name: 'a'},
-                operator: '+=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped property, silly but valid', {
-        code: '(a.b) += 1;',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: false},
-                operator: '+=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped property, silly but valid', {
-        code: '(a[b]) += 1;',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: true},
-                operator: '+=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped complex value that ends in a property, silly but valid', {
-        code: '(a.b().c().d) += 1;',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'MemberExpression',
-                  object: {
-                    type: 'CallExpression',
-                    callee: {
-                      type: 'MemberExpression',
-                      object: {
-                        type: 'CallExpression',
-                        callee: {
-                          type: 'MemberExpression',
-                          object: {type: 'Identifier', name: 'a'},
-                          property: {type: 'Identifier', name: 'b'},
-                          computed: false,
-                        },
-                        arguments: [],
-                      },
-                      property: {type: 'Identifier', name: 'c'},
-                      computed: false,
-                    },
-                    arguments: [],
-                  },
-                  property: {type: 'Identifier', name: 'd'},
-                  computed: false,
-                },
-                operator: '+=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
-              },
-            },
-          ],
-        },
-        tokens: [
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $NUMBER_DEC,
-          $PUNCTUATOR,
-        ],
-      });
-
-      test('assignment to a wrapped super property, silly but valid', {
-        code: 'class x{ constructor(){  (super.a) += 1;  }}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ClassDeclaration',
-              id: {type: 'Identifier', name: 'x'},
-              superClass: null,
-              body: {
-                type: 'ClassBody',
-                body: [
-                  {
-                    type: 'MethodDefinition',
-                    key: {type: 'Identifier', name: 'constructor'},
-                    static: false,
-                    computed: false,
-                    kind: 'constructor',
-                    value: {
-                      type: 'FunctionExpression',
-                      generator: false,
-                      async: false,
-                      id: null,
-                      params: [],
-                      body: {
-                        type: 'BlockStatement',
-                        body: [
-                          {
-                            type: 'ExpressionStatement',
-                            expression: {
-                              type: 'AssignmentExpression',
-                              left: {
-                                type: 'MemberExpression',
-                                object: {type: 'Super'},
-                                property: {type: 'Identifier', name: 'a'},
-                                computed: false,
-                              },
-                              operator: '+=',
-                              right: {type: 'Literal', value: '<TODO>', raw: '1'},
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped super property, silly but valid', {
-        code: 'class x{ constructor(){  (super[a]) += 1;  }}',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ClassDeclaration',
-              id: {type: 'Identifier', name: 'x'},
-              superClass: null,
-              body: {
-                type: 'ClassBody',
-                body: [
-                  {
-                    type: 'MethodDefinition',
-                    key: {type: 'Identifier', name: 'constructor'},
-                    static: false,
-                    computed: false,
-                    kind: 'constructor',
-                    value: {
-                      type: 'FunctionExpression',
-                      generator: false,
-                      async: false,
-                      id: null,
-                      params: [],
-                      body: {
-                        type: 'BlockStatement',
-                        body: [
-                          {
-                            type: 'ExpressionStatement',
-                            expression: {
-                              type: 'AssignmentExpression',
-                              left: {
-                                type: 'MemberExpression',
-                                object: {type: 'Super'},
-                                property: {type: 'Identifier', name: 'a'},
-                                computed: true,
-                              },
-                              operator: '+=',
-                              right: {type: 'Literal', value: '<TODO>', raw: '1'},
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped this property, silly but valid', {
-        code: '(this.a) += 1;',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'MemberExpression',
-                  object: {type: 'ThisExpression'},
-                  property: {type: 'Identifier', name: 'a'},
-                  computed: false,
-                },
-                operator: '+=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      });
-
-      test('assignment to a wrapped this property, silly but valid', {
-        code: '(this[b]) += 1;',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {
-                  type: 'MemberExpression',
-                  object: {type: 'ThisExpression'},
-                  property: {type: 'Identifier', name: 'b'},
-                  computed: true,
-                },
-                operator: '+=',
-                right: {type: 'Literal', value: '<TODO>', raw: '1'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      });
-    });
-
-    describe('sans arr', _ => {
-      test('new inside array', {
-        code: '(new x);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'NewExpression',
-                arguments: [],
-                callee: {type: 'Identifier', name: 'x'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('delete inside array', {
-        code: '(delete foo.bar);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'UnaryExpression',
-                operator: 'delete',
-                prefix: true,
-                argument: {
-                  type: 'MemberExpression',
-                  object: {type: 'Identifier', name: 'foo'},
-                  property: {type: 'Identifier', name: 'bar'},
-                  computed: false,
-                },
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('objlit inside array', {
-        code: '({});',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {type: 'ObjectExpression', properties: []},
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('division inside array', {
-        code: '(a / b);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'BinaryExpression',
-                left: {type: 'Identifier', name: 'a'},
-                operator: '/',
-                right: {type: 'Identifier', name: 'b'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('div newline inside array', {
-        code: '(a \n/b/g);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'BinaryExpression',
-                left: {
-                  type: 'BinaryExpression',
-                  left: {type: 'Identifier', name: 'a'},
-                  operator: '/',
-                  right: {type: 'Identifier', name: 'b'},
-                },
-                operator: '/',
-                right: {type: 'Identifier', name: 'g'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('div newline 2 inside array', {
-        code: '(a \n/b/);',
-        throws: 'Expected to parse a value',
-      });
-
-      test('regex case 1', {
-        code: '(delete /a/.x);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'UnaryExpression',
-                operator: 'delete',
-                prefix: true,
-                argument: {
-                  type: 'MemberExpression',
-                  object: {type: 'Literal', value: '<TODO>', raw: '/a/'},
-                  property: {type: 'Identifier', name: 'x'},
-                  computed: false,
-                },
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('regex case 2', {
-        code: '(delete /a/g.x);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'UnaryExpression',
-                operator: 'delete',
-                prefix: true,
-                argument: {
-                  type: 'MemberExpression',
-                  object: {type: 'Literal', value: '<TODO>', raw: '/a/g'},
-                  property: {type: 'Identifier', name: 'x'},
-                  computed: false,
-                },
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('first char after ident is unsufficient 1', {
-        code: '(foo /=g/m.x);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'AssignmentExpression',
-                left: {type: 'Identifier', name: 'foo'},
-                operator: '/=',
-                right: {
-                  type: 'BinaryExpression',
-                  left: {type: 'Identifier', name: 'g'},
-                  operator: '/',
-                  right: {
-                    type: 'MemberExpression',
-                    object: {type: 'Identifier', name: 'm'},
-                    property: {type: 'Identifier', name: 'x'},
-                    computed: false,
-                  },
-                },
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('first char after ident is unsufficient 2', {
-        code: '(void /=g/m.x);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'UnaryExpression',
-                operator: 'void',
-                prefix: true,
-                argument: {
-                  type: 'MemberExpression',
-                  object: {type: 'Literal', value: '<TODO>', raw: '/=g/m'},
-                  property: {type: 'Identifier', name: 'x'},
-                  computed: false,
-                },
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('first char after ident is unsufficient 3', {
-        code: '(void /=/g/m.x);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'BinaryExpression',
-                left: {
-                  type: 'UnaryExpression',
-                  operator: 'void',
-                  prefix: true,
-                  argument: {type: 'Literal', value: '<TODO>', raw: '/=/g'},
-                },
-                operator: '/',
-                right: {
-                  type: 'MemberExpression',
-                  object: {type: 'Identifier', name: 'm'},
-                  property: {type: 'Identifier', name: 'x'},
-                  computed: false,
-                },
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      });
-    });
-
-    describe('with arr', _ => {
-      test('new inside array', {
-        code: '([new x]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'NewExpression',
-                    arguments: [],
-                    callee: {type: 'Identifier', name: 'x'},
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('delete inside array', {
-        code: '([delete foo.bar]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'UnaryExpression',
-                    operator: 'delete',
-                    prefix: true,
-                    argument: {
-                      type: 'MemberExpression',
-                      object: {type: 'Identifier', name: 'foo'},
-                      property: {type: 'Identifier', name: 'bar'},
-                      computed: false,
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('objlit inside array', {
-        code: '([{}]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [{type: 'ObjectExpression', properties: []}],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('division inside array', {
-        code: '([a / b]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'BinaryExpression',
-                    left: {type: 'Identifier', name: 'a'},
-                    operator: '/',
-                    right: {type: 'Identifier', name: 'b'},
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('div newline inside array', {
-        code: '([a \n/b/g]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'BinaryExpression',
-                    left: {
-                      type: 'BinaryExpression',
-                      left: {type: 'Identifier', name: 'a'},
-                      operator: '/',
-                      right: {type: 'Identifier', name: 'b'},
-                    },
-                    operator: '/',
-                    right: {type: 'Identifier', name: 'g'},
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('div newline 2 inside array', {
-        code: '([a \n/b/]);',
-        throws: 'Expected to parse a value',
-      });
-
-      test('regex case 1', {
-        code: '([delete /a/.x]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'UnaryExpression',
-                    operator: 'delete',
-                    prefix: true,
-                    argument: {
-                      type: 'MemberExpression',
-                      object: {type: 'Literal', value: '<TODO>', raw: '/a/'},
-                      property: {type: 'Identifier', name: 'x'},
-                      computed: false,
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('regex case 2', {
-        code: '([delete /a/g.x]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'UnaryExpression',
-                    operator: 'delete',
-                    prefix: true,
-                    argument: {
-                      type: 'MemberExpression',
-                      object: {type: 'Literal', value: '<TODO>', raw: '/a/g'},
-                      property: {type: 'Identifier', name: 'x'},
-                      computed: false,
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('first char after ident is unsufficient 1', {
-        code: '([foo /=g/m.x]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'AssignmentExpression',
-                    left: {type: 'Identifier', name: 'foo'},
-                    operator: '/=',
-                    right: {
-                      type: 'BinaryExpression',
-                      left: {type: 'Identifier', name: 'g'},
-                      operator: '/',
-                      right: {
-                        type: 'MemberExpression',
-                        object: {type: 'Identifier', name: 'm'},
-                        property: {type: 'Identifier', name: 'x'},
-                        computed: false,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('first char after ident is unsufficient 2', {
-        code: '([void /=g/m.x]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'UnaryExpression',
-                    operator: 'void',
-                    prefix: true,
-                    argument: {
-                      type: 'MemberExpression',
-                      object: {type: 'Literal', value: '<TODO>', raw: '/=g/m'},
-                      property: {type: 'Identifier', name: 'x'},
-                      computed: false,
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-
-      test('first char after ident is unsufficient 3', {
-        code: '([void /=/g/m.x]);',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrayExpression',
-                elements: [
-                  {
-                    type: 'BinaryExpression',
-                    left: {
-                      type: 'UnaryExpression',
-                      operator: 'void',
-                      prefix: true,
-                      argument: {type: 'Literal', value: '<TODO>', raw: '/=/g'},
-                    },
-                    operator: '/',
-                    right: {
-                      type: 'MemberExpression',
-                      object: {type: 'Identifier', name: 'm'},
-                      property: {type: 'Identifier', name: 'x'},
-                      computed: false,
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      });
-    });
-
-    test('unary ++ prefix', {
-      code: '(++x);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'UpdateExpression',
-              operator: '++',
-              prefix: true,
-              argument: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('sequence of unary ++ prefix', {
-      code: '(++x, y);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'SequenceExpression',
-              expressions: [
-                {
-                  type: 'UpdateExpression',
-                  operator: '++',
-                  prefix: true,
-                  argument: {type: 'Identifier', name: 'x'},
-                },
-                {type: 'Identifier', name: 'y'},
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('unary -- suffix', {
-      code: '(x--);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'UpdateExpression',
-              argument: {type: 'Identifier', name: 'x'},
-              operator: '--',
-              prefix: false,
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('sequence of unary -- suffix', {
-      code: '(x--, y);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'SequenceExpression',
-              expressions: [
-                {
-                  type: 'UpdateExpression',
-                  argument: {type: 'Identifier', name: 'x'},
-                  operator: '--',
-                  prefix: false,
-                },
-                {type: 'Identifier', name: 'y'},
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('missing spread/rest arg', {
-      code: '(...);',
-      throws: 'missing an argument',
-    });
-
-    test.fail('invalid spread/rest', {
-      code: '(...x);',
-    });
-
-    test('empty group at eof', {
-      code: '()',
-      throws: 'Empty group',
-    });
-
-    test('empty group with semi', {
-      code: '();',
-      throws: 'Empty group',
-    });
-
-    test.fail('grouped assignment is _not_ a valid assignment target', {
-      code: '(a=1)=2',
-      desc: 'https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
-    });
-
-    test('grouped compound assignment is _not_ a valid assignment target', {
-      code: '(a=1)+=2',
-      desc: 'nope: https://tc39.github.io/ecma262/#sec-assignment-operators-static-semantics-isvalidsimpleassignmenttarget',
-      throws: true,
-    });
-
-    test('cannot assign to group with comma', {
-      code: '(a,b)=2',
-      throws: 'Cannot assign',
-    });
-
-    test('cannot compound assign to group with comma', {
-      code: '(a,b)+=2',
-      throws: 'Cannot assign',
-    });
-
-    // TODO: confirm that `async` is not a reserved word in any case
-    // TODO: confirm `let` is assignable even in strict mode
-
-    // keywords
-    [
-      'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
-      'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
-      'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
-      'false', 'enum',
-    ].forEach(keyword => {
-      test('cannot assign to group with keyword: `' + keyword + '`', {
-        code: '('+keyword+')=2',
-        // Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
-        // Invalid assignment because group does not wrap just a var name or just a property access
-        throws: true,
-      });
-    });
-
-    // strict-mode only keywords
-    [
-      'eval', 'arguments', 'implements', 'package',
-      'protected', 'interface', 'private', 'public', 'await', 'yield',
-      'static', // Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is
-      'let', // Syntax Error if this phrase is contained in strict mode code and the StringValue of IdentifierName is
-    ].forEach(keyword => {
-      test('cannot assign to group with reserved word in strict mode: `' + keyword + '`', {
-        code: '('+keyword+')=2',
-        throws: true,
-        SLOPPY_SCRIPT: {
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'AssignmentExpression',
-                  left: {type: 'Identifier', name: keyword},
-                  operator: '=',
-                  right: {type: 'Literal', value: '<TODO>', raw: '2'},
-                },
-              },
-            ],
-          },
-          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $ASI],
-        },
-      });
-    });
-
-    // non-keywords
-    [
-      'async',     // not an actual keyword
-    ].forEach(keyword => {
-      test('cannot assign to group with keyword: `' + keyword + '`', {
-        code: '('+keyword+')=2',
-        // Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
-        // Invalid assignment because group does not wrap just a var name or just a property access
-        ast: true,
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $ASI],
-      });
-    });
-
-    test('non-destructible should throw when attempted anyways', {
-      code: '([a + b] = x);',
-      throws: 'not destructible',
-    });
-
-    test('arr with tail', {
-      code: '([].x);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'MemberExpression',
-              object: {type: 'ArrayExpression', elements: []},
-              property: {type: 'Identifier', name: 'x'},
-              computed: false,
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('async call arr with tail', {
-      code: 'async([].x);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'CallExpression',
-              callee: {type: 'Identifier', name: 'async'},
-              arguments: [
-                {
-                  type: 'MemberExpression',
-                  object: {type: 'ArrayExpression', elements: []},
-                  property: {type: 'Identifier', name: 'x'},
-                  computed: false,
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('async arrow with arr with tail is bad', {
-      code: 'async([].x) => x;',
-      throws: true,
-    });
-
-    test('obj with tail', {
-      code: '({} + 1);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'BinaryExpression',
-              left: {type: 'ObjectExpression', properties: []},
-              operator: '+',
-              right: {type: 'Literal', value: '<TODO>', raw: '1'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('async call with obj with tail', {
-      code: 'async ({} + 1);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'CallExpression',
-              callee: {type: 'Identifier', name: 'async'},
-              arguments: [
-                {
-                  type: 'BinaryExpression',
-                  left: {type: 'ObjectExpression', properties: []},
-                  operator: '+',
-                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('async call with obj with tail', {
-      code: 'async ({} + 1) => x;',
-      throws: true,
-    });
-
-    test('do not consider `>=` a compound assignment', {
-      code: '(x + y) >= z',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'BinaryExpression',
-              left: {
-                type: 'BinaryExpression',
-                left: {type: 'Identifier', name: 'x'},
-                operator: '+',
-                right: {type: 'Identifier', name: 'y'},
-              },
-              operator: '>=',
-              right: {type: 'Identifier', name: 'z'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test('do not consider `<=` a compound assignment', {
-      code: '(x + y) <= z',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'BinaryExpression',
-              left: {
-                type: 'BinaryExpression',
-                left: {type: 'Identifier', name: 'x'},
-                operator: '+',
-                right: {type: 'Identifier', name: 'y'},
-              },
-              operator: '<=',
-              right: {type: 'Identifier', name: 'z'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test('do not consider `!=` a compound assignment', {
-      code: '(x + y) != z',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'BinaryExpression',
-              left: {
-                type: 'BinaryExpression',
-                left: {type: 'Identifier', name: 'x'},
-                operator: '+',
-                right: {type: 'Identifier', name: 'y'},
-              },
-              operator: '!=',
-              right: {type: 'Identifier', name: 'z'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test('do not consider `==` a compound assignment', {
-      code: '(x + y) == z',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'BinaryExpression',
-              left: {
-                type: 'BinaryExpression',
-                left: {type: 'Identifier', name: 'x'},
-                operator: '+',
-                right: {type: 'Identifier', name: 'y'},
-              },
-              operator: '==',
-              right: {type: 'Identifier', name: 'z'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    describe('regex cases', _ => {
-
-      test('regex sans flag in group start', {
-        code: '(/x/)',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '/x/'},
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
-      });
-
-      test('regex with flag in group start', {
-        code: '(/x/g)',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {type: 'Literal', value: '<TODO>', raw: '/x/g'},
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
-      });
-
-      test('regex sans flag in group second', {
-        code: '(x, /x/)',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'SequenceExpression',
-                expressions: [{type: 'Identifier', name: 'x'}, {type: 'Literal', value: '<TODO>', raw: '/x/'}],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
-      });
-
-      test('regex with flag in group second', {
-        code: '(x, /x/g)',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'SequenceExpression',
-                expressions: [{type: 'Identifier', name: 'x'}, {type: 'Literal', value: '<TODO>', raw: '/x/g'}],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
-      });
-
-      test('group division', {
-        code: '(x) / y',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'BinaryExpression',
-                left: {type: 'Identifier', name: 'x'},
-                operator: '/',
                 right: {type: 'Identifier', name: 'y'},
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-      });
-    });
-
-    test('regression1', {
-      code: '([a.b] = x);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'ArrayPattern',
-                elements: [
-                  {
-                    type: 'MemberExpression',
-                    object: {type: 'Identifier', name: 'a'},
-                    property: {type: 'Identifier', name: 'b'},
-                    computed: false,
-                  },
-                ],
-              },
-              operator: '=',
-              right: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('regression full', {
-      code: '([target()[targetKey()]] = x);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'ArrayPattern',
-                elements: [
-                  {
-                    type: 'MemberExpression',
-                    object: {
-                      type: 'CallExpression',
-                      callee: {type: 'Identifier', name: 'target'},
-                      arguments: [],
-                    },
-                    property: {
-                      type: 'CallExpression',
-                      callee: {type: 'Identifier', name: 'targetKey'},
-                      arguments: [],
-                    },
-                    computed: true,
-                  },
-                ],
-              },
-              operator: '=',
-              right: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('assignment inside pattern', {
-      code: '([target()[targetKey(a=b)]] = x);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'ArrayPattern',
-                elements: [
-                  {
-                    type: 'MemberExpression',
-                    object: {
-                      type: 'CallExpression',
-                      callee: {type: 'Identifier', name: 'target'},
-                      arguments: [],
-                    },
-                    property: {
-                      type: 'CallExpression',
-                      callee: {type: 'Identifier', name: 'targetKey'},
-                      arguments: [
-                        {
-                          type: 'AssignmentExpression', // THIS IS IMPORTANT! Not a pattern
-                          left: {type: 'Identifier', name: 'a'},
-                          operator: '=',
-                          right: {type: 'Identifier', name: 'b'},
-                        },
-                      ],
-                    },
-                    computed: true,
-                  },
-                ],
-              },
-              operator: '=',
-              right: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('empty array literal that is a property is assignable', {
-      code: '([].length) = y',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'MemberExpression',
-                object: {type: 'ArrayExpression', elements: []},
-                property: {type: 'Identifier', name: 'length'},
-                computed: false,
-              },
-              operator: '=',
-              right: {type: 'Identifier', name: 'y'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test('array literal that is a property is assignable', {
-      code: '([x].length) = y',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'MemberExpression',
-                object: {
-                  type: 'ArrayExpression',
-                  elements: [{type: 'Identifier', name: 'x'}],
-                },
-                property: {type: 'Identifier', name: 'length'},
-                computed: false,
-              },
-              operator: '=',
-              right: {type: 'Identifier', name: 'y'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test('empty object literal that is a property is assignable', {
-      code: '({}.length) = z',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'MemberExpression',
-                object: {type: 'ObjectExpression', properties: []},
-                property: {type: 'Identifier', name: 'length'},
-                computed: false,
-              },
-              operator: '=',
-              right: {type: 'Identifier', name: 'z'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test('object literal that is a property is assignable', {
-      code: '({x: y}.length) = z',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'MemberExpression',
-                object: {
-                  type: 'ObjectExpression',
-                  properties: [
-                    {
-                      type: 'Property',
-                      key: {type: 'Identifier', name: 'x'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {type: 'Identifier', name: 'y'},
-                      shorthand: false,
-                    },
-                  ],
-                },
-                property: {type: 'Identifier', name: 'length'},
-                computed: false,
-              },
-              operator: '=',
-              right: {type: 'Identifier', name: 'z'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test('true should be a literal (base case)', {
-      code: 'true',
-      desc: '(just to proof this is a group specific regression)',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {type: 'Literal', value: true, raw: 'true'},
-          },
-        ],
-      },
-      tokens: [$IDENT, $ASI],
-    });
-
-    test('true in group should yield a literal, not ident', {
-      code: '(true)',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {type: 'Literal', value: true, raw: 'true'},
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-    });
-
-    test('false in group should yield a literal, not ident', {
-      code: '(false)',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {type: 'Literal', value: false, raw: 'false'},
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-    });
-
-    test('null in group should yield a literal, not ident', {
-      code: '(null)',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {type: 'Literal', value: null, raw: 'null'},
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-    });
-
-    test('this in group should not yield an ident', {
-      code: '(this)',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {type: 'ThisExpression'},
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-    });
-
-    describe('invalid arrow header things that are valid in a group', _ => {
-
-      // see counter-test in arrow where this stuff is disallowed
-      [
-        'arguments',
-        'async ()=>x',
-        'class{}',
-        'delete x.y',
-        'eval',
-        'false',
-        'function(){}',
-        'new x',
-        'null',
-        // 'super', // setup too annoying, simply assuming this works too
-        'true',
-        'this',
-        'typeof x',
-        'void x',
-        'x + y',
-        '[].length',
-        '[x].length',
-        '{}.length',
-        '{x: y}.length',
-      ].forEach(str => {
-        test.pass('[' + str + '] in group', {
-          code: '('+str+');',
-        });
-
-        if (str !== 'arguments' && str !== 'eval') { // tested elsewhere
-          test.fail('[' + str + '] in arrow', {
-            code: '('+str+') => x;',
-          });
-        }
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      // soe things are special
-      [
-        'await',
-        'let',
-        'yield',
-      ].forEach(str => {
-        test('[' + str + '] in group', {
-          code: '('+str+');',
-          throws: true,
-          SLOPPY_SCRIPT: {
-            ast: true,
-            tokens: true,
-          },
-        });
-      });
-    });
-
-    test('comma in a group should make the group non-assignable', {
-      code: '(a, b) = c',
-      throws: 'not assign',
-    });
-
-    describe('trailing comma without arrow', _ => {
-
-      describe('non-assign', _ => {
-
-        // trailing comma in just a group is always an error
-        [undefined, 6, 7, 8, 9, Infinity].forEach(ES => {
-          test.fail('must have args to trail', {
-            code: '(,)',
-            ES,
-          });
-
-          test.fail('just commas is error', {
-            code: '(,,)',
-            ES,
-          });
-
-          test.fail('one arg', {
-            code: '(a,)',
-            ES,
-          });
-
-          test.fail('two args', {
-            code: '(a,b,)',
-            ES,
-          });
-
-          test.fail('cannot elide', {
-            code: '(a,,)',
-            ES,
-          });
-
-          test.fail('after default', {
-            code: '(a = b,)',
-            ES,
-          });
-
-          test.fail('not allowed after rest', {
-            code: '(...a,)',
-            ES,
-          });
-
-          test.fail('after array destruct', {
-            code: '([x],)',
-            ES,
-          });
-
-          test.fail('after object destruct', {
-            code: '({a},)',
-            ES,
-          });
-
-          test.fail('rest cant even have an default', {
-            code: '(...a = x,)',
-            ES,
-          });
-
-          test.fail('after array destruct with default', {
-            code: '([x] = y,)',
-            ES,
-          });
-
-          test.fail('after object destruct with default', {
-            code: '({a} = b,)',
-            ES,
-          });
-        });
-      });
-
-      describe('assigned', _ => {
-
-        [undefined, 6, 7, 8, 9, Infinity].forEach(ES => {
-          test.fail('must have args to trail', {
-            code: '(,) = x',
-            ES,
-          });
-
-          test.fail('just commas is error', {
-            code: '(,,) = x',
-            ES,
-          });
-
-          test.fail('one arg', {
-            code: '(a,) = x',
-            ES,
-          });
-
-          test.fail('two args', {
-            code: '(a,b,) = x',
-            ES,
-          });
-
-          test.fail('cannot elide', {
-            code: '(a,,) = x',
-            ES,
-          });
-
-          test.fail('after default', {
-            code: '(a = b,) = x',
-            ES,
-          });
-
-          test.fail('not allowed after rest', {
-            code: '(...a,) = x',
-            ES,
-          });
-
-          test.fail('after array destruct', {
-            code: '([x],) = x',
-            ES,
-          });
-
-          test.fail('after object destruct', {
-            code: '({a},) = x',
-            ES,
-          });
-
-          test.fail('rest cant even have an default', {
-            code: '(...a = x,) = x',
-            ES,
-          });
-
-          test.fail('after array destruct with default', {
-            code: '([x] = y,) = x',
-            ES,
-          });
-
-          test.fail('after object destruct with default', {
-            code: '({a} = b,) = x',
-            ES,
-          });
-        });
-      });
-    });
-
-    describe('destructuring obj rest property for assignments', _ => {
-
-      test.fail('obj rest pattern must be simple', {
-        code: '({...[]} = x);',
-      });
-
-      test.pass('arr rest pattern is more freeform', {
-        code: '([...[]] = x);',
-      });
-
-      test.pass('rest in obj pattern on arr pattern with prop', {
-        code: '({...[].x} = x);',
-      });
-
-      test.pass('rest in obj pattern on ident with prop', {
-        code: '({...a.x} = x);',
-      });
-
-      test.pass('rest in obj pattern on string with prop', {
-        code: '({..."x".x} = x);',
-      });
-
-      test.pass('rest in obj pattern on obj pattern with prop', {
-        code: '({...{}.x} = x);',
-      });
-
-      test.pass('rest in arr pattern on arr pattern with prop', {
-        code: '([...[].x] = x);',
-      });
-
-      test.pass('rest in arr pattern on obj pattern with prop', {
-        code: '([...{}.x] = x);',
-      });
-
-      test.pass('rest in obj pattern on ident with dynamic prop', {
-        code: '({...a[x]} = x);',
-      });
-
-      test.pass('rest in obj pattern on string with dynamic prop', {
-        code: '({..."x"[x]} = x);',
-      });
-
-      test.pass('rest in obj pattern on arr pattern with dynamic prop', {
-        code: '({...[][x]} = x);',
-      });
-
-      test.pass('rest in obj pattern on obj pattern with dynamic prop', {
-        code: '({...{}[x]} = x);',
-      });
-
-      test.pass('rest in arr pattern on arr pattern with dynamic prop', {
-        code: '([...[][x]] = x);',
-      });
-
-      test.pass('rest in arr pattern on obj pattern with dynamic prop', {
-        code: '([...{}[x]] = x);',
-      });
-
-      describe('regression #13, destructuring with arr/obj literal with property', _ => {
-
-        test.pass('obj pattern with property', {
-          code: '({...{b: 0}.x} = {});',
-        });
-
-        test.pass('arr pattern with property', {
-          code: '({...[0].x} = {});',
-        });
-
-        test.pass('obj pattern with dynamic property', {
-          code: '({...{b: 0}[x]} = {});',
-        });
-
-        test.pass('arr pattern with dynamic property', {
-          code: '({...[0][x]} = {});',
-        });
-      });
-    });
-
-    test("paren wrapped arrow can have binary op", {
-      code: `(() => {}) << x`,
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'BinaryExpression',
-              left: {
-                type: 'ArrowFunctionExpression',
-                params: [],
-                id: null,
-                generator: false,
-                async: false,
-                expression: false,
-                body: {type: 'BlockStatement', body: []},
-              },
-              operator: '<<',
-              right: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test.pass('paren wrapped argless arrow with dot property is ok', {
-      desc: 'regression',
-      code: '(() => {}).x',
-    });
-
-    test.pass('paren wrapped parenless arrow with dot property is ok', {
-      desc: 'regression',
-      code: '(x => {}).x',
-    });
-  });
-
-  describe('arrow', _ => {
-
-    test('arrow, one arg without parens, expr', {
-      code: 'x=>x;',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [{type: 'Identifier', name: 'x'}],
-              id: null,
-              generator: false,
-              async: false,
-              expression: true,
-              body: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-
-    test('arrow, no args, expr', {
-      code: '()=>x;',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [],
-              id: null,
-              generator: false,
-              async: false,
-              expression: true,
-              body: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-
-    test('arrow, one arg, expr', {
-      code: '(x)=>x;',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [{type: 'Identifier', name: 'x'}],
-              id: null,
-              generator: false,
-              async: false,
-              expression: true,
-              body: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-
-    test('arrow, one arg, block', {
-      code: '(x)=>{x}',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [{type: 'Identifier', name: 'x'}],
-              id: null,
-              generator: false,
-              async: false,
-              expression: false,
-              body: {type: 'BlockStatement', body: [{type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}}]},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI, $PUNCTUATOR, $ASI],
-    });
-
-    test('arrow, one arg, block with a regex literal', {
-      code: '(x)=>{/x/}',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [{type: 'Identifier', name: 'x'}],
-              id: null,
-              generator: false,
-              async: false,
-              expression: false,
-              body: {
-                type: 'BlockStatement',
-                body: [{type: 'ExpressionStatement', expression: {type: 'Literal', value: '<TODO>', raw: '/x/'}}],
-              },
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $REGEX, $ASI, $PUNCTUATOR, $ASI],
-    });
-
-    test('arrow, one arg, expr', {
-      code: '(x, y)=>x;',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [{type: 'Identifier', name: 'x'}, {type: 'Identifier', name: 'y'}],
-              id: null,
-              generator: false,
-              async: false,
-              expression: true,
-              body: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-
-    //{ error
-    //  code: '((x)) => x;',
-    //  ast: {type: 'Program', body: [
-    //    {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}},
-    //  ]},
-    //  desc: 'silly double group',
-    //  tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    //},
-    //{ error
-    //  code: '(a, 1, "c", d, e, f) => x;',
-    //  ast: {type: 'Program', body: [
-    //    {type: 'ExpressionStatement', expression: {type: 'SequenceExpression', expressions: [
-    //      {type: 'Identifier', name: 'a'},
-    //      {type: 'Literal', value: '<TODO>', raw: '1'},
-    //      {type: 'Literal', value: '<TODO>', raw: '"c"'},
-    //      {type: 'Identifier', name: 'd'},
-    //      {type: 'Identifier', name: 'e'},
-    //      {type: 'Identifier', name: 'f'},
-    //    ]}},
-    //  ]},
-    //  desc: 'group of some simple values',
-    //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    //});
-
-    test('group of some two assignments', {
-      code: '(a = 1, b = 2) => x;',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [
-                {
-                  type: 'AssignmentPattern',
-                  left: {type: 'Identifier', name: 'a'},
-                  right: {type: 'Literal', value: '<TODO>', raw: '1'},
-                },
-                {
-                  type: 'AssignmentPattern',
-                  left: {type: 'Identifier', name: 'b'},
-                  right: {type: 'Literal', value: '<TODO>', raw: '2'},
-                },
-              ],
-              id: null,
-              generator: false,
-              async: false,
-              expression: true,
-              body: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-
-    //{ error
-    //  code: '(a.b) => x;',
-    //  ast: {type: 'Program', body: [
-    //    {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
-    //      left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: false},
-    //      operator: '=',
-    //      right: {type: 'Literal', value: '<TODO>', raw: '1'},
-    //    }},
-    //  ]},
-    //  desc: 'assignment to a wrapped property, silly but valid',
-    //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    //},
-    //{ error
-    //  code: '(a[b]) => x;',
-    //  ast: {type: 'Program', body: [
-    //    {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
-    //      left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: true},
-    //      operator: '=',
-    //      right: {type: 'Literal', value: '<TODO>', raw: '1'},
-    //    }},
-    //  ]},
-    //  desc: 'assignment to a wrapped property, silly but valid',
-    //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-    //},
-    //{ error
-    //  code: '/i/ * ()=>j',
-    //  ast: {type: 'Program', body: [
-    //    {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
-    //      left: {type: 'Literal', value: '<TODO>', raw: '/i/'},
-    //      operator: '*',
-    //      right: {type: 'ArrowFunctionExpression',
-    //        params: [],
-    //        id: null,
-    //      }
-    //    }},
-    //  ]},
-    //  desc: 'this is invalid because you cannot match an arrow (in the grammar) on the rhs of a non-assignment operator',
-    //  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    //}
-
-    test('group of some two assignments', {
-      code: 'var a = (b) => c;',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'VariableDeclaration',
-            kind: 'var',
-            declarations: [
-              {
-                type: 'VariableDeclarator',
-                id: {type: 'Identifier', name: 'a'},
-                init: {
-                  type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: 'b'}],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'c'},
-                },
-              },
-            ],
-          },
-        ],
-      },
-      tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-    });
-
-    test('arrow inside template disambiguation test 1', {
-      code: '`X${a => b}Y`',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'TemplateLiteral',
-              expressions: [
-                {
-                  type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: 'a'}],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'Identifier', name: 'b'},
-                },
-              ],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}},
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
-    });
-
-    test('arrow inside template disambiguation test 1', {
-      code: '`X${a => b + c}Y`',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'TemplateLiteral',
-              expressions: [
-                {
-                  type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: 'a'}],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {type: 'BinaryExpression', left: {type: 'Identifier', name: 'b'}, operator: '+', right: {type: 'Identifier', name: 'c'}},
-                },
-              ],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}},
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $TICK_TAIL, $ASI],
-    });
-
-    test('arrow inside template disambiguation test 2; regular curlies in the arrow', {
-      code: '`X${a => b + {}}Y`',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'TemplateLiteral',
-              expressions: [
-                {
-                  type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: 'a'}],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {
-                    type: 'BinaryExpression',
-                    left: {type: 'Identifier', name: 'b'},
-                    operator: '+',
-                    right: {type: 'ObjectExpression', properties: []},
-                  },
-                },
-              ],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`X${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}Y`', cooked: '<TODO>'}},
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$TICK_HEAD, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $TICK_TAIL, $ASI],
-    });
-
-    test('unary ++ prefix', {
-      code: '(++x) => x;',
-      throws: 'Unable to ASI',
-    });
-
-    test('sequence of unary ++ prefix', {
-      code: '(++x, y) => x;',
-      throws: 'Unable to ASI',
-    });
-
-    test('unary -- suffix', {
-      code: '(x--) => x;',
-      throws: 'not destructible',
-    });
-
-    test('sequence of unary -- suffix', {
-      code: '(x--, y) => x;',
-      throws: 'not destructible',
-    });
-
-    describe('regex edge case', _ => {
-      describe('with expr', _ => {
-        test('sans flag', {
-          code: '_ => _\n/foo/',
-          throws: 'Expected to parse a value',
-          desc: 'the expression becomes a division which fails to parse properly in this case',
-          tokens: [],
-        });
-
-        test('sans flag', {
-          code: '_ => _\n/foo/g',
-          ast: {
-            type: 'Program',
-            body: [
-              {
-                type: 'ExpressionStatement',
-                expression: {
-                  type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: '_'}],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {
-                    type: 'BinaryExpression',
-                    left: {
-                      type: 'BinaryExpression',
-                      left: {type: 'Identifier', name: '_'},
-                      operator: '/',
-                      right: {type: 'Identifier', name: 'foo'},
-                    },
-                    operator: '/',
-                    right: {type: 'Identifier', name: 'g'},
-                  },
-                },
-              },
-            ],
-          },
-          desc: 'the expression becomes a division which is fine ((_/foo)/g) (make sure tree is correct)',
-          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-        });
-      });
-
-      describe('with block', _ => {
-
-        test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (div)', {
-          code: '_ => {}\n/foo',
-          HAS_AST: true,
-        });
-
-        test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (regex no flag)', {
-          code: '_ => {}\n/foo/',
-          HAS_AST: true,
-        });
-
-        test.fail('cannot divide an arrow and cannot asi with forward slash at start of next line (regex + flag)', {
-          code: '_ => {}\n/foo/g',
-          HAS_AST: true,
-        });
-      });
-    });
-
-    test('empty parens, newline', {
-      code: '()\n=>x',
-      throws: 'restricted production',
-    });
-
-    describe('keywords ok in group not allowed in arrow header', _ => {
-      ['true', 'false', 'null', 'this'].forEach(keyword => {
-        test('arrow; keyword=' + keyword, {
-          code: '(' + keyword +') => x',
-          throws: 'not destructible',
-        });
-
-        test.pass('group; keyword=' + keyword, {
-          code: '(' + keyword +');',
-        });
-      });
-    });
-
-    test('object in group with shorthand', {
-      code: '({x});',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ObjectExpression',
-              properties: [
-                {
-                  type: 'Property',
-                  key: {type: 'Identifier', name: 'x'},
-                  kind: 'init',
-                  method: false,
-                  computed: false,
-                  value: {type: 'Identifier', name: 'x'},
-                  shorthand: true,
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('destruct assign in group', {
-      code: '({x} = y);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'ObjectPattern',
-                properties: [
-                  {
-                    type: 'Property',
-                    key: {type: 'Identifier', name: 'x'},
-                    kind: 'init',
-                    method: false,
-                    computed: false,
-                    value: {type: 'Identifier', name: 'x'},
-                    shorthand: true,
-                  },
-                ],
-              },
-              operator: '=',
-              right: {type: 'Identifier', name: 'y'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('dynamic property object in group', {
-      code: '({[x]:y});',
-      desc: 'the dynamic property makes the object non-destructible',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ObjectExpression',
-              properties: [
-                {
-                  type: 'Property',
-                  key: {type: 'Identifier', name: 'x'},
-                  kind: 'init',
-                  method: false,
-                  computed: true,
-                  value: {type: 'Identifier', name: 'y'},
-                  shorthand: false,
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
-
-    test('assign to non-destructible dynamic prop object in group', {
-      code: '({[x]:y} = z);',
-      desc: 'the dynamic property is destructible',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'AssignmentExpression',
-              left: {
-                type: 'ObjectPattern',
+      test('dynamic property object in group', {
+        code: '({[x]:y});',
+        desc: 'the dynamic property makes the object non-destructible',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
                 properties: [
                   {
                     type: 'Property',
@@ -3118,267 +3029,249 @@ export default (describe, test) => describe('parens', _ => {
                   },
                 ],
               },
-              operator: '=',
-              right: {type: 'Identifier', name: 'z'},
             },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-    });
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
 
-    test('dynamic method object in group', {
-      code: '({[x](){}});',
-      desc: 'the dynamic property makes the object non-destructible',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ObjectExpression',
-              properties: [
-                {
-                  type: 'Property',
-                  key: {type: 'Identifier', name: 'x'},
-                  kind: 'init',
-                  method: true,
-                  computed: true,
-                  value: {
-                    type: 'FunctionExpression',
-                    generator: false,
-                    async: false,
-                    id: null,
-                    params: [],
-                    body: {type: 'BlockStatement', body: []},
-                  },
-                  shorthand: false,
+      test('assign to non-destructible dynamic prop object in group', {
+        code: '({[x]:y} = z);',
+        desc: 'the dynamic property is destructible',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'AssignmentExpression',
+                left: {
+                  type: 'ObjectPattern',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'x'},
+                      kind: 'init',
+                      method: false,
+                      computed: true,
+                      value: {type: 'Identifier', name: 'y'},
+                      shorthand: false,
+                    },
+                  ],
                 },
-              ],
+                operator: '=',
+                right: {type: 'Identifier', name: 'z'},
+              },
             },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('dynamic method object in group', {
+        code: '({[x](){}});',
+        desc: 'the dynamic property makes the object non-destructible',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'x'},
+                    kind: 'init',
+                    method: true,
+                    computed: true,
+                    value: {
+                      type: 'FunctionExpression',
+                      generator: false,
+                      async: false,
+                      id: null,
+                      params: [],
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
+
+      test('assign to non-destructible dynamic method object in group', {
+        code: '({[x](){}} = z);',
+        desc: 'the dynamic property makes the object non-destructible',
+        throws: 'not destructible',
+      });
+
+      describe('spread', _ => {
+        // TODO: copy to group tests as well, with and without assignments
+
+        test('only', {
+          code: '(...x) => x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [
+                    {
+                      type: 'RestElement',
+                      argument: {type: 'Identifier', name: 'x'},
+                    },
+                  ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
+              },
+            ],
           },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
 
-    test('assign to non-destructible dynamic method object in group', {
-      code: '({[x](){}} = z);',
-      desc: 'the dynamic property makes the object non-destructible',
-      throws: 'not destructible',
-    });
+        test('cannot start any statement', {
+          code: '...x => x',
+          throws: 'Unexpected spread/rest dots',
+        });
 
-    describe('spread', _ => {
-      // TODO: copy to group tests as well, with and without assignments
+        test('cannot start any expression', {
+          code: 'y, ...x => x',
+          throws: 'Unexpected spread/rest dots',
+        });
 
-      test('only', {
-        code: '(...x) => x',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrowFunctionExpression',
-                params: [
-                  {
-                    type: 'RestElement',
-                    argument: {type: 'Identifier', name: 'x'},
-                  },
-                ],
-                id: null,
-                generator: false,
-                async: false,
-                expression: true,
-                body: {type: 'Identifier', name: 'x'},
+        test('last', {
+          code: '(x, ...y) => x',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ArrowFunctionExpression',
+                  params: [
+                    {type: 'Identifier', name: 'x'},
+                    {
+                      type: 'RestElement',
+                      argument: {type: 'Identifier', name: 'y'},
+                    },
+                  ],
+                  id: null,
+                  generator: false,
+                  async: false,
+                  expression: true,
+                  body: {type: 'Identifier', name: 'x'},
+                },
               },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-      });
+            ],
+          },
+          tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+        });
 
-      test('cannot start any statement', {
-        code: '...x => x',
-        throws: 'Unexpected spread/rest dots',
-      });
+        test('middle is bad', {
+          code: '(x, ...y, z) => x',
+          throws: 'destructible',
+        });
 
-      test('cannot start any expression', {
-        code: 'y, ...x => x',
-        throws: 'Unexpected spread/rest dots',
-      });
+        test('first but not last is bad', {
+          code: '(...x, y) => x',
+          throws: 'destructible',
+        });
 
-      test('last', {
-        code: '(x, ...y) => x',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ArrowFunctionExpression',
-                params: [
-                  {type: 'Identifier', name: 'x'},
-                  {
-                    type: 'RestElement',
-                    argument: {type: 'Identifier', name: 'y'},
-                  },
-                ],
-                id: null,
-                generator: false,
-                async: false,
-                expression: true,
-                body: {type: 'Identifier', name: 'x'},
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-      });
+        test('cannot have init', {
+          code: '(...x = y) => x',
+          throws: 'destructible',
+        });
 
-      test('middle is bad', {
-        code: '(x, ...y, z) => x',
-        throws: 'destructible',
-      });
+        test('can not spread member', {
+          code: '([...x.y]) => z',
+          desc: 'would be valid in group; `[...x.y];`',
+          throws: 'illegal',
+        });
 
-      test('first but not last is bad', {
-        code: '(...x, y) => x',
-        throws: 'destructible',
-      });
-
-      test('cannot have init', {
-        code: '(...x = y) => x',
-        throws: 'destructible',
-      });
-
-      test('can not spread member', {
-        code: '([...x.y]) => z',
-        desc: 'would be valid in group; `[...x.y];`',
-        throws: 'illegal',
-      });
-
-      [
-        '({...(obj)}) => {}',
-        '({...(a,b)}) => {}',
-        '({...{a,b}}) => {}',
-        '({...[a,b]}) => {}',
-      ].forEach((tcase,i) => {
-        test.fail('bad arrow destruct of obj case ' + i, {
-          code: tcase,
+        ['({...(obj)}) => {}', '({...(a,b)}) => {}', '({...{a,b}}) => {}', '({...[a,b]}) => {}'].forEach((tcase, i) => {
+          test.fail('bad arrow destruct of obj case ' + i, {
+            code: tcase,
+          });
+        });
+        ['({a:b,...obj}) => {}', '({...obj} = {}) => {}', '({...(a,b),c})', '({...a,b,c})'].forEach((tcase, i) => {
+          test.pass('bad arrow destruct of obj case ' + i, {
+            code: tcase,
+          });
         });
       });
-      [
-        '({a:b,...obj}) => {}',
-        '({...obj} = {}) => {}',
-        '({...(a,b),c})',
-        '({...a,b,c})',
-      ].forEach((tcase,i) => {
-        test.pass('bad arrow destruct of obj case ' + i, {
-          code: tcase,
-        });
+
+      test('non-destructible should throw when attempted anyways', {
+        code: '([a + b] = x) => a;',
+        throws: 'not destructible',
       });
-    });
 
-    test('non-destructible should throw when attempted anyways', {
-      code: '([a + b] = x) => a;',
-      throws: 'not destructible',
-    });
-
-    describe('obj lit with array value that cant destruct', _ => {
-
-      test('method call as group', {
-        code: '({ident: [foo, bar].join("")})',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ObjectExpression',
-                properties: [
-                  {
-                    type: 'Property',
-                    key: {type: 'Identifier', name: 'ident'},
-                    kind: 'init',
-                    method: false,
-                    computed: false,
-                    value: {
-                      type: 'CallExpression',
-                      callee: {
-                        type: 'MemberExpression',
-                        object: {
-                          type: 'ArrayExpression',
-                          elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
+      describe('obj lit with array value that cant destruct', _ => {
+        test('method call as group', {
+          code: '({ident: [foo, bar].join("")})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'ident'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'CallExpression',
+                        callee: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'ArrayExpression',
+                            elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
+                          },
+                          property: {type: 'Identifier', name: 'join'},
+                          computed: false,
                         },
-                        property: {type: 'Identifier', name: 'join'},
-                        computed: false,
+                        arguments: [{type: 'Literal', value: '<TODO>', raw: '""'}],
                       },
-                      arguments: [{type: 'Literal', value: '<TODO>', raw: '""'}],
+                      shorthand: false,
                     },
-                    shorthand: false,
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-      });
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
 
-      test('division as group', {
-        code: '({ident: [foo, bar]/x})',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ObjectExpression',
-                properties: [
-                  {
-                    type: 'Property',
-                    key: {type: 'Identifier', name: 'ident'},
-                    kind: 'init',
-                    method: false,
-                    computed: false,
-                    value: {
-                      type: 'BinaryExpression',
-                      left: {
-                        type: 'ArrayExpression',
-                        elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
-                      },
-                      operator: '/',
-                      right: {type: 'Identifier', name: 'x'},
-                    },
-                    shorthand: false,
-                  },
-                ],
-              },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-      });
-
-      test('regex-like division as group', {
-        code: '({ident: [foo, bar]/x/g})',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ObjectExpression',
-                properties: [
-                  {
-                    type: 'Property',
-                    key: {type: 'Identifier', name: 'ident'},
-                    kind: 'init',
-                    method: false,
-                    computed: false,
-                    value: {
-                      type: 'BinaryExpression',
-                      left: {
+        test('division as group', {
+          code: '({ident: [foo, bar]/x})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'ident'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
                         type: 'BinaryExpression',
                         left: {
                           type: 'ArrayExpression',
@@ -3387,8 +3280,133 @@ export default (describe, test) => describe('parens', _ => {
                         operator: '/',
                         right: {type: 'Identifier', name: 'x'},
                       },
-                      operator: '/',
-                      right: {type: 'Identifier', name: 'g'},
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('regex-like division as group', {
+          code: '({ident: [foo, bar]/x/g})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'ident'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'BinaryExpression',
+                        left: {
+                          type: 'BinaryExpression',
+                          left: {
+                            type: 'ArrayExpression',
+                            elements: [{type: 'Identifier', name: 'foo'}, {type: 'Identifier', name: 'bar'}],
+                          },
+                          operator: '/',
+                          right: {type: 'Identifier', name: 'x'},
+                        },
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'g'},
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test.pass('bin op should pass as prop value', {
+          code: '({ident: [foo, bar] + x})',
+        });
+
+        test.fail('compound assignment should fail when assigning to an array', {
+          code: '({ident: [foo, bar] += x})',
+        });
+
+        test.fail('bin op should fail as assign destruct', {
+          code: '({ident: [foo, bar] + x} = y)',
+        });
+
+        test.fail('compound assignment should fail as assign destruct', {
+          code: '({ident: [foo, bar] += x} = y)',
+        });
+
+        test('method call as arrow', {
+          code: '({ident: [foo, bar].join("")}) => x',
+          throws: 'not destructible',
+        });
+
+        test('division as arrow', {
+          code: '({ident: [foo, bar]/x}) => x',
+          throws: 'not destructible',
+        });
+
+        test('regex-like division as arrow', {
+          code: '({ident: [foo, bar]/x/g}) => x',
+          throws: 'not destructible',
+        });
+
+        test.fail('arr with numbers', {
+          code: '([0])=>0;',
+        });
+
+        test.fail('arr with numbers', {
+          code: '([0])=>0;',
+        });
+
+        test.fail('property is not arrowable', {
+          code: '({a:b[0]}) => x',
+        });
+
+        test.fail('property wrapped in arrs is still not arrowable', {
+          code: '([[[[[[[[[[[[[[[[[[[[{a:b[0]}]]]]]]]]]]]]]]]]]]]])=>0;',
+        });
+      });
+
+      test('nested objects', {
+        code: '({ident: {x: y}})',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'ident'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'x'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'y'},
+                          shorthand: false,
+                        },
+                      ],
                     },
                     shorthand: false,
                   },
@@ -3397,261 +3415,120 @@ export default (describe, test) => describe('parens', _ => {
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       });
 
-      test.pass('bin op should pass as prop value', {
-        code: '({ident: [foo, bar] + x})',
+      test('nested object can use shorthand', {
+        code: '({ident: {x}})',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ObjectExpression',
+                properties: [
+                  {
+                    type: 'Property',
+                    key: {type: 'Identifier', name: 'ident'},
+                    kind: 'init',
+                    method: false,
+                    computed: false,
+                    value: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'Property',
+                          key: {type: 'Identifier', name: 'x'},
+                          kind: 'init',
+                          method: false,
+                          computed: false,
+                          value: {type: 'Identifier', name: 'x'},
+                          shorthand: true,
+                        },
+                      ],
+                    },
+                    shorthand: false,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       });
 
-      test.fail('compound assignment should fail when assigning to an array', {
-        code: '({ident: [foo, bar] += x})',
-      });
-
-      test.fail('bin op should fail as assign destruct', {
-        code: '({ident: [foo, bar] + x} = y)',
-      });
-
-      test.fail('compound assignment should fail as assign destruct', {
-        code: '({ident: [foo, bar] += x} = y)',
-      });
-
-      test('method call as arrow', {
-        code: '({ident: [foo, bar].join("")}) => x',
-        throws: 'not destructible',
-      });
-
-      test('division as arrow', {
-        code: '({ident: [foo, bar]/x}) => x',
-        throws: 'not destructible',
-      });
-
-      test('regex-like division as arrow', {
-        code: '({ident: [foo, bar]/x/g}) => x',
-        throws: 'not destructible',
-      });
-
-      test.fail('arr with numbers', {
-        code: '([0])=>0;',
-      });
-
-      test.fail('arr with numbers', {
-        code: '([0])=>0;',
-      });
-
-      test.fail('property is not arrowable', {
-        code: '({a:b[0]}) => x',
-      });
-
-      test.fail('property wrapped in arrs is still not arrowable', {
-        code: '([[[[[[[[[[[[[[[[[[[[{a:b[0]}]]]]]]]]]]]]]]]]]]]])=>0;',
-      });
-    });
-
-    test('nested objects', {
-      code: '({ident: {x: y}})',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ObjectExpression',
-              properties: [
-                {
-                  type: 'Property',
-                  key: {type: 'Identifier', name: 'ident'},
-                  kind: 'init',
-                  method: false,
-                  computed: false,
-                  value: {
-                    type: 'ObjectExpression',
+      test('nested destructuring arrow', {
+        code: '({ident: {x: y}}) => x',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'ArrowFunctionExpression',
+                params: [
+                  {
+                    type: 'ObjectPattern',
                     properties: [
                       {
                         type: 'Property',
-                        key: {type: 'Identifier', name: 'x'},
+                        key: {type: 'Identifier', name: 'ident'},
                         kind: 'init',
                         method: false,
                         computed: false,
-                        value: {type: 'Identifier', name: 'y'},
+                        value: {
+                          type: 'ObjectPattern',
+                          properties: [
+                            {
+                              type: 'Property',
+                              key: {type: 'Identifier', name: 'x'},
+                              kind: 'init',
+                              method: false,
+                              computed: false,
+                              value: {type: 'Identifier', name: 'y'},
+                              shorthand: false,
+                            },
+                          ],
+                        },
                         shorthand: false,
                       },
                     ],
                   },
-                  shorthand: false,
-                },
-              ],
+                ],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'x'},
+              },
             },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-    });
+          ],
+        },
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
+      });
 
-    test('nested object can use shorthand', {
-      code: '({ident: {x}})',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ObjectExpression',
-              properties: [
-                {
-                  type: 'Property',
-                  key: {type: 'Identifier', name: 'ident'},
-                  kind: 'init',
-                  method: false,
-                  computed: false,
-                  value: {
-                    type: 'ObjectExpression',
-                    properties: [
-                      {
-                        type: 'Property',
-                        key: {type: 'Identifier', name: 'x'},
-                        kind: 'init',
-                        method: false,
-                        computed: false,
-                        value: {type: 'Identifier', name: 'x'},
-                        shorthand: true,
-                      },
-                    ],
-                  },
-                  shorthand: false,
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-    });
-
-    test('nested destructuring arrow', {
-      code: '({ident: {x: y}}) => x',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [
-                {
-                  type: 'ObjectPattern',
-                  properties: [
-                    {
-                      type: 'Property',
-                      key: {type: 'Identifier', name: 'ident'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'x'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'y'},
-                            shorthand: false,
-                          },
-                        ],
-                      },
-                      shorthand: false,
-                    },
-                  ],
-                },
-              ],
-              id: null,
-              generator: false,
-              async: false,
-              expression: true,
-              body: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    test('nested object with shorthand and arrow', {
-      code: '({ident: {x}}) => x',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'ArrowFunctionExpression',
-              params: [
-                {
-                  type: 'ObjectPattern',
-                  properties: [
-                    {
-                      type: 'Property',
-                      key: {type: 'Identifier', name: 'ident'},
-                      kind: 'init',
-                      method: false,
-                      computed: false,
-                      value: {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'x'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'x'},
-                            shorthand: true,
-                          },
-                        ],
-                      },
-                      shorthand: false,
-                    },
-                  ],
-                },
-              ],
-              id: null,
-              generator: false,
-              async: false,
-              expression: true,
-              body: {type: 'Identifier', name: 'x'},
-            },
-          },
-        ],
-      },
-      tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
-    });
-
-    describe('obj lit with obj value that cant destruct', _ => {
-
-      test('method call as group', {
-        code: '({ident: {x: y}.join("")})',
+      test('nested object with shorthand and arrow', {
+        code: '({ident: {x}}) => x',
         ast: {
           type: 'Program',
           body: [
             {
               type: 'ExpressionStatement',
               expression: {
-                type: 'ObjectExpression',
-                properties: [
+                type: 'ArrowFunctionExpression',
+                params: [
                   {
-                    type: 'Property',
-                    key: {type: 'Identifier', name: 'ident'},
-                    kind: 'init',
-                    method: false,
-                    computed: false,
-                    value: {
-                      type: 'CallExpression',
-                      callee: {
-                        type: 'MemberExpression',
-                        object: {
-                          type: 'ObjectExpression',
+                    type: 'ObjectPattern',
+                    properties: [
+                      {
+                        type: 'Property',
+                        key: {type: 'Identifier', name: 'ident'},
+                        kind: 'init',
+                        method: false,
+                        computed: false,
+                        value: {
+                          type: 'ObjectPattern',
                           properties: [
                             {
                               type: 'Property',
@@ -3659,90 +3536,95 @@ export default (describe, test) => describe('parens', _ => {
                               kind: 'init',
                               method: false,
                               computed: false,
-                              value: {type: 'Identifier', name: 'y'},
-                              shorthand: false,
+                              value: {type: 'Identifier', name: 'x'},
+                              shorthand: true,
                             },
                           ],
                         },
-                        property: {type: 'Identifier', name: 'join'},
-                        computed: false,
+                        shorthand: false,
                       },
-                      arguments: [{type: 'Literal', value: '<TODO>', raw: '""'}],
-                    },
-                    shorthand: false,
+                    ],
                   },
                 ],
+                id: null,
+                generator: false,
+                async: false,
+                expression: true,
+                body: {type: 'Identifier', name: 'x'},
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $ASI],
       });
 
-      test('division as group', {
-        code: '({ident: {x:y}/x})',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ObjectExpression',
-                properties: [
-                  {
-                    type: 'Property',
-                    key: {type: 'Identifier', name: 'ident'},
-                    kind: 'init',
-                    method: false,
-                    computed: false,
-                    value: {
-                      type: 'BinaryExpression',
-                      left: {
-                        type: 'ObjectExpression',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'x'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'y'},
-                            shorthand: false,
+      describe('obj lit with obj value that cant destruct', _ => {
+        test('method call as group', {
+          code: '({ident: {x: y}.join("")})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'ident'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'CallExpression',
+                        callee: {
+                          type: 'MemberExpression',
+                          object: {
+                            type: 'ObjectExpression',
+                            properties: [
+                              {
+                                type: 'Property',
+                                key: {type: 'Identifier', name: 'x'},
+                                kind: 'init',
+                                method: false,
+                                computed: false,
+                                value: {type: 'Identifier', name: 'y'},
+                                shorthand: false,
+                              },
+                            ],
                           },
-                        ],
+                          property: {type: 'Identifier', name: 'join'},
+                          computed: false,
+                        },
+                        arguments: [{type: 'Literal', value: '<TODO>', raw: '""'}],
                       },
-                      operator: '/',
-                      right: {type: 'Identifier', name: 'x'},
+                      shorthand: false,
                     },
-                    shorthand: false,
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-        },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-      });
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
 
-      test('regex-like division as group', {
-        code: '({ident: {x:y}/x/g})',
-        ast: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: {
-                type: 'ObjectExpression',
-                properties: [
-                  {
-                    type: 'Property',
-                    key: {type: 'Identifier', name: 'ident'},
-                    kind: 'init',
-                    method: false,
-                    computed: false,
-                    value: {
-                      type: 'BinaryExpression',
-                      left: {
+        test('division as group', {
+          code: '({ident: {x:y}/x})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'ident'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
                         type: 'BinaryExpression',
                         left: {
                           type: 'ObjectExpression',
@@ -3761,82 +3643,185 @@ export default (describe, test) => describe('parens', _ => {
                         operator: '/',
                         right: {type: 'Identifier', name: 'x'},
                       },
-                      operator: '/',
-                      right: {type: 'Identifier', name: 'g'},
+                      shorthand: false,
                     },
-                    shorthand: false,
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test('regex-like division as group', {
+          code: '({ident: {x:y}/x/g})',
+          ast: {
+            type: 'Program',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'ObjectExpression',
+                  properties: [
+                    {
+                      type: 'Property',
+                      key: {type: 'Identifier', name: 'ident'},
+                      kind: 'init',
+                      method: false,
+                      computed: false,
+                      value: {
+                        type: 'BinaryExpression',
+                        left: {
+                          type: 'BinaryExpression',
+                          left: {
+                            type: 'ObjectExpression',
+                            properties: [
+                              {
+                                type: 'Property',
+                                key: {type: 'Identifier', name: 'x'},
+                                kind: 'init',
+                                method: false,
+                                computed: false,
+                                value: {type: 'Identifier', name: 'y'},
+                                shorthand: false,
+                              },
+                            ],
+                          },
+                          operator: '/',
+                          right: {type: 'Identifier', name: 'x'},
+                        },
+                        operator: '/',
+                        right: {type: 'Identifier', name: 'g'},
+                      },
+                      shorthand: false,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        });
+
+        test.fail('compound assignment should fail when assigning to an object', {
+          code: '({ident: {x:y} += x})',
+        });
+
+        test.fail('compound assignment should fail as destruct assign', {
+          code: '({ident: {x:y} += x} = y)',
+        });
+
+        test('method call as arrow', {
+          code: '({ident: {x}.join("")}) => x',
+          throws: 'not destructible',
+        });
+
+        test('division as arrow', {
+          code: '({ident: {x}/x}) => x',
+          throws: 'not destructible',
+        });
+
+        test('regex-like division as arrow', {
+          code: '({ident: {x}/x/g}) => x',
+          throws: 'not destructible',
+        });
+      });
+
+      describe('regex cases', _ => {
+        test('regex sans flag in group start', {
+          code: '(/x/) => x',
+          throws: true,
+        });
+
+        test('regex with flag in group start', {
+          code: '(/x/) => x',
+          throws: true,
+        });
+
+        test('regex sans flag in group second', {
+          code: '(x, /x/g) => x',
+          throws: true,
+        });
+
+        test('regex with flag in group second', {
+          code: '(x, /x/g) => x',
+          throws: true,
+        });
+      });
+
+      test('arrow with one arg inside an arg list', {
+        code: 'f(((a) => a + b)(1, 4), 5);',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {type: 'Identifier', name: 'f'},
+                arguments: [
+                  {
+                    type: 'CallExpression',
+                    callee: {
+                      type: 'ArrowFunctionExpression',
+                      params: [{type: 'Identifier', name: 'a'}],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: true,
+                      body: {
+                        type: 'BinaryExpression',
+                        left: {type: 'Identifier', name: 'a'},
+                        operator: '+',
+                        right: {type: 'Identifier', name: 'b'},
+                      },
+                    },
+                    arguments: [{type: 'Literal', value: '<TODO>', raw: '1'}, {type: 'Literal', value: '<TODO>', raw: '4'}],
                   },
+                  {type: 'Literal', value: '<TODO>', raw: '5'},
                 ],
               },
             },
           ],
         },
-        tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+        tokens: [
+          $IDENT,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $IDENT,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $IDENT,
+          $PUNCTUATOR,
+          $IDENT,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $NUMBER_DEC,
+          $PUNCTUATOR,
+          $NUMBER_DEC,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+          $NUMBER_DEC,
+          $PUNCTUATOR,
+          $PUNCTUATOR,
+        ],
       });
 
-      test.fail('compound assignment should fail when assigning to an object', {
-        code: '({ident: {x:y} += x})',
-      });
-
-      test.fail('compound assignment should fail as destruct assign', {
-        code: '({ident: {x:y} += x} = y)',
-      });
-
-      test('method call as arrow', {
-        code: '({ident: {x}.join("")}) => x',
-        throws: 'not destructible',
-      });
-
-      test('division as arrow', {
-        code: '({ident: {x}/x}) => x',
-        throws: 'not destructible',
-      });
-
-      test('regex-like division as arrow', {
-        code: '({ident: {x}/x/g}) => x',
-        throws: 'not destructible',
-      });
-    });
-
-    describe('regex cases', _ => {
-
-      test('regex sans flag in group start', {
-        code: '(/x/) => x',
-        throws: true,
-      });
-
-      test('regex with flag in group start', {
-        code: '(/x/) => x',
-        throws: true,
-      });
-
-      test('regex sans flag in group second', {
-        code: '(x, /x/g) => x',
-        throws: true,
-      });
-
-      test('regex with flag in group second', {
-        code: '(x, /x/g) => x',
-        throws: true,
-      });
-    });
-
-    test('arrow with one arg inside an arg list', {
-      code: 'f(((a) => a + b)(1, 4), 5);',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'CallExpression',
-              callee: {type: 'Identifier', name: 'f'},
-              arguments: [
-                {
-                  type: 'CallExpression',
-                  callee: {
+      test('arrow with two args inside an arg list', {
+        code: 'f(((a, b) => a + b));',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'CallExpression',
+                callee: {type: 'Identifier', name: 'f'},
+                arguments: [
+                  {
                     type: 'ArrowFunctionExpression',
-                    params: [{type: 'Identifier', name: 'a'}],
+                    params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
                     id: null,
                     generator: false,
                     async: false,
@@ -3848,484 +3833,360 @@ export default (describe, test) => describe('parens', _ => {
                       right: {type: 'Identifier', name: 'b'},
                     },
                   },
-                  arguments: [{type: 'Literal', value: '<TODO>', raw: '1'}, {type: 'Literal', value: '<TODO>', raw: '4'}],
-                },
-                {type: 'Literal', value: '<TODO>', raw: '5'},
-              ],
+                ],
+              },
             },
-          },
-        ],
-      },
-      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR],
-    });
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+      });
 
-    test('arrow with two args inside an arg list', {
-      code: 'f(((a, b) => a + b));',
-      ast: {
-        type: 'Program',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'CallExpression',
-              callee: {type: 'Identifier', name: 'f'},
-              arguments: [
-                {
-                  type: 'ArrowFunctionExpression',
-                  params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-                  id: null,
-                  generator: false,
-                  async: false,
-                  expression: true,
-                  body: {
-                    type: 'BinaryExpression',
-                    left: {type: 'Identifier', name: 'a'},
-                    operator: '+',
-                    right: {type: 'Identifier', name: 'b'},
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-      tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    });
+      test.fail('cannot assign to group with assignment', {
+        code: '(a=/i/) = /i/',
+      });
 
-    test.fail('cannot assign to group with assignment', {
-      code: '(a=/i/) = /i/',
-    });
+      test.fail('a group that only has a comma is not arrowable', {
+        code: '(,)=>x',
+      });
 
-    test.fail('a group that only has a comma is not arrowable', {
-      code: '(,)=>x',
-    });
+      describe('MUST_DESTRUCT cases', _ => {
+        // I believe the fail cases fail because https://tc39.github.io/ecma262/#prod-DestructuringAssignmentTarget
+        // (The object is treated as an expression, not a pattern, and so the {a=b} is an error as per CoverInitializedName
+        // in https://tc39.github.io/ecma262/#sec-object-initializer-static-semantics-early-errors )
 
-    describe('MUST_DESTRUCT cases', _ => {
+        describe('group toplevel', _ => {
+          test.fail('something that MUST be a pattern can not be an object', {
+            code: '({x = y})',
+          });
 
-      // I believe the fail cases fail because https://tc39.github.io/ecma262/#prod-DestructuringAssignmentTarget
-      // (The object is treated as an expression, not a pattern, and so the {a=b} is an error as per CoverInitializedName
-      // in https://tc39.github.io/ecma262/#sec-object-initializer-static-semantics-early-errors )
+          test.pass('assignment to something that MUST be a pattern', {
+            code: '({x = y} = z)',
+          });
 
-      describe('group toplevel', _ => {
+          test.pass('something that MUST be a pattern as arrow head', {
+            code: '({x = y}) => z',
+          });
 
-        test.fail('something that MUST be a pattern can not be an object', {
-          code: '({x = y})',
+          test.fail('property on something that MUST be a pattern', {
+            code: '({x = y}.z)',
+          });
+
+          test.fail('assignment to a property on something that MUST be a pattern', {
+            code: '({x = y}.z = obj)',
+          });
+
+          test.fail('arrow on property on something that MUST be a pattern', {
+            code: '({x = y}.z) => obj',
+          });
+
+          test.fail('property on group on something that MUST be a pattern', {
+            code: '({x = y}).z',
+          });
         });
 
-        test.pass('assignment to something that MUST be a pattern', {
-          code: '({x = y} = z)',
+        describe('nested in array', _ => {
+          test.fail('something that MUST be a pattern can not be an object', {
+            code: '([{x = y}])',
+          });
+
+          test.pass('assignment to something that MUST be a pattern', {
+            code: '([{x = y}] = z)',
+          });
+
+          test.pass('something that MUST be a pattern as arrow head', {
+            code: '([{x = y}]) => z',
+          });
+
+          test.fail('property on something that MUST be a pattern', {
+            code: '([{x = y}].z)',
+          });
+
+          test.fail('assignment to a property on something that MUST be a pattern', {
+            code: '([{x = y}].z = obj)',
+          });
+
+          test.fail('property even without assign', {
+            code: '([{x = y}.z])',
+          });
+
+          test.fail('property inside', {
+            code: '([{x = y}.z] = obj)',
+          });
+
+          test.fail('arrow on property on something that MUST be a pattern', {
+            code: '([{x = y}].z) => obj',
+          });
+
+          test.fail('property on group on something that MUST be a pattern', {
+            code: '([{x = y}]).z',
+          });
         });
 
-        test.pass('something that MUST be a pattern as arrow head', {
-          code: '({x = y}) => z',
+        describe('array without nesting', _ => {
+          // I mean, it belongs in this set of tests
+
+          test.fail('something that MUST be a pattern can not be an object', {
+            code: '[{x = y}]',
+          });
+
+          test.pass('assignment to something that MUST be a pattern', {
+            code: '[{x = y}] = z',
+          });
+
+          test.fail('just messing with a heuristic', {
+            code: '[{x = y}] in z',
+            desc: 'note that {x=y} must always destruct and this exmple would only be valid inside a for-in/of header',
+          });
+
+          test.pass('in a for-in', {
+            code: 'for ([{x = y}] in y);',
+          });
+
+          test.pass('in a for-of', {
+            code: 'for ([{x = y}] of y);',
+          });
+
+          test.fail('in a for-loop', {
+            code: 'for ([{x = y}] ;;);',
+          });
+
+          test.fail('something that MUST be a pattern as arrow head without parens', {
+            code: '[{x = y}] => z',
+          });
+
+          test.fail('property on something that MUST be a pattern', {
+            code: '[{x = y}].z',
+          });
+
+          test.fail('assignment to a property on something that MUST be a pattern', {
+            code: '[{x = y}].z = obj',
+          });
+
+          test.fail('property inside', {
+            code: '[{x = y}.z] = obj',
+          });
+
+          test.fail('arrow on property on something that MUST be a pattern', {
+            code: '[{x = y}].z => obj',
+          });
         });
 
-        test.fail('property on something that MUST be a pattern', {
-          code: '({x = y}.z)',
-        });
+        describe('nested in object', _ => {
+          test.fail('something that MUST be a pattern can not be an object', {
+            code: '({a: {x = y}})',
+          });
 
-        test.fail('assignment to a property on something that MUST be a pattern', {
-          code: '({x = y}.z = obj)',
-        });
+          test.pass('assignment to something that MUST be a pattern', {
+            code: '({a: {x = y}} = z)',
+          });
 
-        test.fail('arrow on property on something that MUST be a pattern', {
-          code: '({x = y}.z) => obj',
-        });
+          test.pass('something that MUST be a pattern as arrow head', {
+            code: '({a: {x = y}}) => z',
+          });
 
-        test.fail('property on group on something that MUST be a pattern', {
-          code: '({x = y}).z',
+          test.fail('property on something that MUST be a pattern', {
+            code: '({a: {x = y}}.z)',
+          });
+
+          test.fail('property inside', {
+            code: '({a: {x = y}.z})',
+          });
+
+          test.fail('assignment to a property on something that MUST be a pattern', {
+            code: '({a: {x = y}}.z = obj)',
+          });
+
+          test.fail('arrow on property on something that MUST be a pattern', {
+            code: '({a: {x = y}}.z) => obj',
+          });
+
+          test.fail('property on group on something that MUST be a pattern', {
+            code: '({a: {x = y}}).z',
+          });
         });
       });
 
-      describe('nested in array', _ => {
-
-        test.fail('something that MUST be a pattern can not be an object', {
-          code: '([{x = y}])',
+      describe('invalid arrow header things', _ => {
+        // always:
+        [
+          'async ()=>x',
+          // 'await foo',
+          'class{}',
+          'delete x.x',
+          'false',
+          'function(){}',
+          // 'let',
+          'new x',
+          'null',
+          // 'super',
+          'true',
+          'this',
+          'typeof x',
+          'void x',
+          // 'yield x',
+          'x + y',
+          '[].length',
+          '[x].length',
+          '{}.length',
+          '{x: y}.length',
+        ].forEach(str => {
+          test('[' + str + '] in arrow params', {
+            code: '(' + str + ') => y',
+            throws: 'destructible',
+          });
         });
 
-        test.pass('assignment to something that MUST be a pattern', {
-          code: '([{x = y}] = z)',
-        });
-
-        test.pass('something that MUST be a pattern as arrow head', {
-          code: '([{x = y}]) => z',
-        });
-
-        test.fail('property on something that MUST be a pattern', {
-          code: '([{x = y}].z)',
-        });
-
-        test.fail('assignment to a property on something that MUST be a pattern', {
-          code: '([{x = y}].z = obj)',
-        });
-
-        test.fail('property even without assign', {
-          code: '([{x = y}.z])',
-        });
-
-        test.fail('property inside', {
-          code: '([{x = y}.z] = obj)',
-        });
-
-        test.fail('arrow on property on something that MUST be a pattern', {
-          code: '([{x = y}].z) => obj',
-        });
-
-        test.fail('property on group on something that MUST be a pattern', {
-          code: '([{x = y}]).z',
+        // only in strict mode:
+        ['arguments', 'eval', 'static'].forEach(str => {
+          test('[' + str + '] in arrow params', {
+            code: '(' + str + ') => y',
+            throws: true,
+            SLOPPY_SCRIPT: {
+              ast: true,
+              tokens: true,
+            },
+          });
         });
       });
 
-      describe('array without nesting', _ => {
-        // I mean, it belongs in this set of tests
+      describe('trailing comma', _ => {
+        describe('enabled', _ => {
+          [undefined, 8, 9, Infinity].forEach(ES => {
+            test.fail('must have args to trail', {
+              code: '(,) => {}',
+              ES,
+            });
 
-        test.fail('something that MUST be a pattern can not be an object', {
-          code: '[{x = y}]',
-        });
+            test.fail('just commas is error', {
+              code: '(,,) => {}',
+              ES,
+            });
 
-        test.pass('assignment to something that MUST be a pattern', {
-          code: '[{x = y}] = z',
-        });
-
-        test.fail('just messing with a heuristic', {
-          code: '[{x = y}] in z',
-          desc: 'note that {x=y} must always destruct and this exmple would only be valid inside a for-in/of header',
-        });
-
-        test.pass('in a for-in', {
-          code: 'for ([{x = y}] in y);',
-        });
-
-        test.pass('in a for-of', {
-          code: 'for ([{x = y}] of y);',
-        });
-
-        test.fail('in a for-loop', {
-          code: 'for ([{x = y}] ;;);',
-        });
-
-        test.fail('something that MUST be a pattern as arrow head without parens', {
-          code: '[{x = y}] => z',
-        });
-
-        test.fail('property on something that MUST be a pattern', {
-          code: '[{x = y}].z',
-        });
-
-        test.fail('assignment to a property on something that MUST be a pattern', {
-          code: '[{x = y}].z = obj',
-        });
-
-        test.fail('property inside', {
-          code: '[{x = y}.z] = obj',
-        });
-
-        test.fail('arrow on property on something that MUST be a pattern', {
-          code: '[{x = y}].z => obj',
-        });
-      });
-
-      describe('nested in object', _ => {
-
-        test.fail('something that MUST be a pattern can not be an object', {
-          code: '({a: {x = y}})',
-        });
-
-        test.pass('assignment to something that MUST be a pattern', {
-          code: '({a: {x = y}} = z)',
-        });
-
-        test.pass('something that MUST be a pattern as arrow head', {
-          code: '({a: {x = y}}) => z',
-        });
-
-        test.fail('property on something that MUST be a pattern', {
-          code: '({a: {x = y}}.z)',
-        });
-
-        test.fail('property inside', {
-          code: '({a: {x = y}.z})',
-        });
-
-        test.fail('assignment to a property on something that MUST be a pattern', {
-          code: '({a: {x = y}}.z = obj)',
-        });
-
-        test.fail('arrow on property on something that MUST be a pattern', {
-          code: '({a: {x = y}}.z) => obj',
-        });
-
-        test.fail('property on group on something that MUST be a pattern', {
-          code: '({a: {x = y}}).z',
-        });
-      });
-    });
-
-    describe('invalid arrow header things', _ => {
-
-      // always:
-      [
-        'async ()=>x',
-        // 'await foo',
-        'class{}',
-        'delete x.x',
-        'false',
-        'function(){}',
-        // 'let',
-        'new x',
-        'null',
-        // 'super',
-        'true',
-        'this',
-        'typeof x',
-        'void x',
-        // 'yield x',
-        'x + y',
-        '[].length',
-        '[x].length',
-        '{}.length',
-        '{x: y}.length',
-      ].forEach(str => {
-        test('[' + str + '] in arrow params', {
-          code: '('+str+') => y',
-          throws: 'destructible',
-        });
-      });
-
-      // only in strict mode:
-      [
-        'arguments',
-        'eval',
-        'static',
-      ].forEach(str => {
-        test('[' + str + '] in arrow params', {
-          code: '('+str+') => y',
-          throws: true,
-          SLOPPY_SCRIPT: {
-            ast: true,
-            tokens: true,
-          },
-        });
-      });
-    });
-
-    describe('trailing comma', _ => {
-
-      describe('enabled', _ => {
-
-        [undefined, 8, 9, Infinity].forEach(ES => {
-          test.fail('must have args to trail', {
-            code: '(,) => {}',
-            ES,
-          });
-
-          test.fail('just commas is error', {
-            code: '(,,) => {}',
-            ES,
-          });
-
-          test('one arg', {
-            code: '(a,) => {}',
-            ES,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [{type: 'Identifier', name: 'a'}],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {type: 'BlockStatement', body: []},
+            test('one arg', {
+              code: '(a,) => {}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [{type: 'Identifier', name: 'a'}],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      body: {type: 'BlockStatement', body: []},
+                    },
                   },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
+                ],
+              },
+              tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
 
-          test('two args', {
-            code: '(a,b,) => {}',
-            ES,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {type: 'BlockStatement', body: []},
+            test('two args', {
+              code: '(a,b,) => {}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      body: {type: 'BlockStatement', body: []},
+                    },
                   },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
+                ],
+              },
+              tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
 
-          test.fail('cannot elide', {
-            code: '(a,,) => {}',
-            ES,
-          });
+            test.fail('cannot elide', {
+              code: '(a,,) => {}',
+              ES,
+            });
 
-          test('after default', {
-            code: '(a = b,) => {}',
-            ES,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [
-                      {
-                        type: 'AssignmentPattern',
-                        left: {type: 'Identifier', name: 'a'},
-                        right: {type: 'Identifier', name: 'b'},
-                      },
-                    ],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {type: 'BlockStatement', body: []},
+            test('after default', {
+              code: '(a = b,) => {}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [
+                        {
+                          type: 'AssignmentPattern',
+                          left: {type: 'Identifier', name: 'a'},
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      body: {type: 'BlockStatement', body: []},
+                    },
                   },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
+                ],
+              },
+              tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
 
-          test.fail('not allowed after rest', {
-            code: '(...a,) => {}',
-            ES,
-          });
+            test.fail('not allowed after rest', {
+              code: '(...a,) => {}',
+              ES,
+            });
 
-          test('after array destruct', {
-            code: '([x],) => {}',
-            ES,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [
-                      {
-                        type: 'ArrayPattern',
-                        elements: [{type: 'Identifier', name: 'x'}],
-                      },
-                    ],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {type: 'BlockStatement', body: []},
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
-          test('after object destruct', {
-            code: '({a},) => {}',
-            ES,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [
-                      {
-                        type: 'ObjectPattern',
-                        properties: [
-                          {
-                            type: 'Property',
-                            key: {type: 'Identifier', name: 'a'},
-                            kind: 'init',
-                            method: false,
-                            computed: false,
-                            value: {type: 'Identifier', name: 'a'},
-                            shorthand: true,
-                          },
-                        ],
-                      },
-                    ],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {type: 'BlockStatement', body: []},
-                  },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-
-          test.fail('rest cant even have an default', {
-            code: '(...a = x,) => {}',
-            ES,
-          });
-
-          test('after array destruct with default', {
-            code: '([x] = y,) => {}',
-            ES,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [
-                      {
-                        type: 'AssignmentPattern',
-                        left: {
+            test('after array destruct', {
+              code: '([x],) => {}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [
+                        {
                           type: 'ArrayPattern',
                           elements: [{type: 'Identifier', name: 'x'}],
                         },
-                        right: {type: 'Identifier', name: 'y'},
-                      },
-                    ],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {type: 'BlockStatement', body: []},
+                      ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      body: {type: 'BlockStatement', body: []},
+                    },
                   },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
 
-          test('after object destruct with default', {
-            code: '({a} = b,) => {}',
-            ES,
-            ast: {
-              type: 'Program',
-              body: [
-                {
-                  type: 'ExpressionStatement',
-                  expression: {
-                    type: 'ArrowFunctionExpression',
-                    params: [
-                      {
-                        type: 'AssignmentPattern',
-                        left: {
+            test('after object destruct', {
+              code: '({a},) => {}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [
+                        {
                           type: 'ObjectPattern',
                           properties: [
                             {
@@ -4339,344 +4200,414 @@ export default (describe, test) => describe('parens', _ => {
                             },
                           ],
                         },
-                        right: {type: 'Identifier', name: 'b'},
-                      },
-                    ],
-                    id: null,
-                    generator: false,
-                    async: false,
-                    expression: false,
-                    body: {type: 'BlockStatement', body: []},
+                      ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      body: {type: 'BlockStatement', body: []},
+                    },
                   },
-                },
-              ],
-            },
-            tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
-          });
-        });
-      });
-
-      describe('disabled', _ => {
-
-        [6, 7].forEach(ES => {
-          test.fail('must have args to trail', {
-            code: '(,) => {}',
-            ES,
-          });
-
-          test.fail('just commas is error', {
-            code: '(,,) => {}',
-            ES,
-          });
-
-          test.fail('one arg', {
-            code: '(a,) => {}',
-            ES,
-          });
-
-          test.fail('two args', {
-            code: '(a,b,) => {}',
-            ES,
-          });
-
-          test.fail('cannot elide', {
-            code: '(a,,) => {}',
-            ES,
-          });
-
-          test.fail('after default', {
-            code: '(a = b,) => {}',
-            ES,
-          });
-
-          test.fail('not allowed after rest', {
-            code: '(...a,) => {}',
-            ES,
-          });
-
-          test.fail('after array destruct', {
-            code: '([x],) => {}',
-            ES,
-          });
-
-          test.fail('after object destruct', {
-            code: '({a},) => {}',
-            ES,
-          });
-
-          test.fail('rest cant even have an default', {
-            code: '(...a = x,) => {}',
-            ES,
-          });
-
-          test.fail('after array destruct with default', {
-            code: '([x] = y,) => {}',
-            ES,
-          });
-
-          test.fail('after object destruct with default', {
-            code: '({a} = b,) => {}',
-            ES,
-          });
-        });
-      });
-    });
-
-    describe('arrow param destructuring should not do the same as assignment destructuring', _ => {
-
-      test.fail('obj with alias to property sans init', {
-        code: '({x: y.z}) => b',
-      });
-
-      test.pass('confirm destructuring assignment still works', {
-        code: '({x: y.z} = b)',
-      });
-
-      test.fail('obj with alias to property with init', {
-        code: '({x: y.z} = a) => b',
-      });
-
-      test.fail('obj wrapped in array with alias to property sans init', {
-        code: '([{x: y.z}]) => b',
-      });
-
-      test.fail('obj wrapped in array with alias to property array init', {
-        code: '([{x: y.z}] = a) => b',
-      });
-
-      test.fail('obj wrapped in array with alias to property obj init', {
-        code: '([{x: y.z} = a]) => b',
-      });
-
-      test.fail('obj destructuring rest with complex obj arg', {
-        code: '({...{x} }) => {}',
-      });
-
-      test.fail('obj destructuring rest with paren wrapped arg', {
-        // Arrow cover grammar is not determined by "AssignmentTargetType" so these parens are not "okay"
-        code: '({...(x) }) => {}',
-      });
-
-      test.fail('obj destructuring rest with complex arr arg', {
-        code: '({...[x] }) => {}',
-      });
-    });
-
-    describe('arrows is not a normal expression value', _ => {
-
-      test.pass('expr; lhs of addition', {
-        code: 'a => a + x',
-      });
-
-      test.fail('body; lhs of addition', {
-        code: 'a => {} + x',
-        HAS_AST: true,
-      });
-
-      test.fail('expr; rhs of addition', {
-        code: 'x + a => a',
-      });
-
-      test.fail('body; rhs of addition', {
-        code: 'x + a => {}',
-      });
-
-      test.pass('expr; division', {
-        code: 'a => a / x',
-      });
-
-      test.fail('body; division', {
-        code: 'a => {} / x',
-        HAS_AST: true,
-      });
-
-      test.fail('arrow regex requires semi', {
-        code: 'a => {} /x/',
-        HAS_AST: true,
-      });
-
-      test.fail('arrow regex with newline', {
-        code: 'a => {}\n/x/',
-        HAS_AST: true,
-      });
-
-      test.pass('expr; arrow dot', {
-        code: 'a => x.foo',
-      });
-
-      test.fail('body; arrow dot', {
-        code: 'a => {}.foo',
-        HAS_AST: true,
-      });
-
-      test.pass('expr; dynamic prop', {
-        code: 'a => x[foo]',
-      });
-
-      test.fail('body; dynamic prop', {
-        code: 'a => {}[foo]',
-        HAS_AST: true,
-      });
-
-      test.pass('expr; call', {
-        code: 'a => x()',
-      });
-
-      test.fail('body; call', {
-        code: 'a => {}()',
-        HAS_AST: true,
-      });
-
-      test.pass('asi and the + is a unary operator', {
-        code: '() => {}\n+function(){}',
-      });
-
-      test.fail('newest victim of asi', {
-        code: '() => {}\n/function(){}',
-        HAS_AST: true,
-      });
-    });
-
-    describe('regressions #12, obj pattern with computed props', _ => {
-
-      test.pass('object pattern alias can be pattern too', {
-        code: '({a,b=b,a:c,[a]:[d]})=>0;',
-      });
-
-      test.pass('object pattern alias can be property too', {
-        code: '({a, a:a, a:a=a, [a]:{a}, a:some_call()[a], a:this.a} = 0);',
-      });
-    });
-
-    describe('directives for arrows', _ => {
-
-      describe('eval', _ => {
-
-        test.fail_strict('eval as parenless arrow arg name without directive', {
-          code: 'eval => {}',
-        });
-
-        test.fail_strict('eval as arrow arg name without directive', {
-          code: '(eval) => {}',
-        });
-
-        test.fail_strict('eval as second arrow arg name without directive', {
-          code: '(a, eval) => {}',
-        });
-
-        test.fail('eval in parenless arrow arg name with directive', {
-          code: 'eval => {"use strict";}',
-        });
-
-        test.fail('eval in arrow arg name with directive', {
-          code: '(eval) => {"use strict";}',
-        });
-
-        test.fail_strict('eval as parenless async arrow arg name without directive', {
-          code: 'async eval => {}',
-        });
-
-        test.fail_strict('eval as async arrow arg name without directive', {
-          code: 'async (eval) => {}',
-        });
-
-        test.fail_strict('eval as second async arrow arg name without directive', {
-          code: 'async (a, eval) => {}',
-        });
-
-        test.fail('eval in parenless async arrow arg name with directive', {
-          code: 'async eval => {"use strict";}',
-        });
-
-        test.fail('eval in async arrow arg name with directive', {
-          code: 'async (eval) => {"use strict";}',
-        });
-      });
-
-      describe('arguments', _ => {
-
-        test.fail_strict('arguments as parenless arrow arg name without directive', {
-          code: 'arguments => {}',
-        });
-
-        test.fail_strict('arguments as arrow arg name without directive', {
-          code: '(arguments) => {}',
-        });
-
-        test.fail_strict('arguments as second arrow arg name without directive', {
-          code: '(a, arguments) => {}',
-        });
-
-        test.fail('arguments in parenless arrow arg name with directive', {
-          code: 'arguments => {"use strict";}',
-        });
-
-        test.fail('arguments in arrow arg name with directive', {
-          code: '(arguments) => {"use strict";}',
-        });
-
-        test.fail_strict('arguments as parenless async arrow arg name without directive', {
-          code: 'async arguments => {}',
-        });
-
-        test.fail_strict('arguments as async arrow arg name without directive', {
-          code: 'async (arguments) => {}',
-        });
-
-        test.fail_strict('arguments as second async arrow arg name without directive', {
-          code: 'async (a, arguments) => {}',
-        });
-
-        test.fail('arguments in parenless async arrow arg name with directive', {
-          code: 'async arguments => {"use strict";}',
-        });
-
-        test.fail('arguments in async arrow arg name with directive', {
-          code: 'async (arguments) => {"use strict";}',
-        });
-      });
-    });
-  });
-
-  test('propagating the lhs-paren state', {
-    code: '(foo + (bar + boo) + ding)',
-    ast: {
-      type: 'Program',
-      body: [
-        {
-          type: 'ExpressionStatement',
-          expression: {
-            type: 'BinaryExpression',
-            left: {
-              type: 'BinaryExpression',
-              left: {type: 'Identifier', name: 'foo'},
-              operator: '+',
-              right: {
-                type: 'BinaryExpression',
-                left: {type: 'Identifier', name: 'bar'},
-                operator: '+',
-                right: {type: 'Identifier', name: 'boo'},
+                ],
               },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test.fail('rest cant even have an default', {
+              code: '(...a = x,) => {}',
+              ES,
+            });
+
+            test('after array destruct with default', {
+              code: '([x] = y,) => {}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [
+                        {
+                          type: 'AssignmentPattern',
+                          left: {
+                            type: 'ArrayPattern',
+                            elements: [{type: 'Identifier', name: 'x'}],
+                          },
+                          right: {type: 'Identifier', name: 'y'},
+                        },
+                      ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+
+            test('after object destruct with default', {
+              code: '({a} = b,) => {}',
+              ES,
+              ast: {
+                type: 'Program',
+                body: [
+                  {
+                    type: 'ExpressionStatement',
+                    expression: {
+                      type: 'ArrowFunctionExpression',
+                      params: [
+                        {
+                          type: 'AssignmentPattern',
+                          left: {
+                            type: 'ObjectPattern',
+                            properties: [
+                              {
+                                type: 'Property',
+                                key: {type: 'Identifier', name: 'a'},
+                                kind: 'init',
+                                method: false,
+                                computed: false,
+                                value: {type: 'Identifier', name: 'a'},
+                                shorthand: true,
+                              },
+                            ],
+                          },
+                          right: {type: 'Identifier', name: 'b'},
+                        },
+                      ],
+                      id: null,
+                      generator: false,
+                      async: false,
+                      expression: false,
+                      body: {type: 'BlockStatement', body: []},
+                    },
+                  },
+                ],
+              },
+              tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+            });
+          });
+        });
+
+        describe('disabled', _ => {
+          [6, 7].forEach(ES => {
+            test.fail('must have args to trail', {
+              code: '(,) => {}',
+              ES,
+            });
+
+            test.fail('just commas is error', {
+              code: '(,,) => {}',
+              ES,
+            });
+
+            test.fail('one arg', {
+              code: '(a,) => {}',
+              ES,
+            });
+
+            test.fail('two args', {
+              code: '(a,b,) => {}',
+              ES,
+            });
+
+            test.fail('cannot elide', {
+              code: '(a,,) => {}',
+              ES,
+            });
+
+            test.fail('after default', {
+              code: '(a = b,) => {}',
+              ES,
+            });
+
+            test.fail('not allowed after rest', {
+              code: '(...a,) => {}',
+              ES,
+            });
+
+            test.fail('after array destruct', {
+              code: '([x],) => {}',
+              ES,
+            });
+
+            test.fail('after object destruct', {
+              code: '({a},) => {}',
+              ES,
+            });
+
+            test.fail('rest cant even have an default', {
+              code: '(...a = x,) => {}',
+              ES,
+            });
+
+            test.fail('after array destruct with default', {
+              code: '([x] = y,) => {}',
+              ES,
+            });
+
+            test.fail('after object destruct with default', {
+              code: '({a} = b,) => {}',
+              ES,
+            });
+          });
+        });
+      });
+
+      describe('arrow param destructuring should not do the same as assignment destructuring', _ => {
+        test.fail('obj with alias to property sans init', {
+          code: '({x: y.z}) => b',
+        });
+
+        test.pass('confirm destructuring assignment still works', {
+          code: '({x: y.z} = b)',
+        });
+
+        test.fail('obj with alias to property with init', {
+          code: '({x: y.z} = a) => b',
+        });
+
+        test.fail('obj wrapped in array with alias to property sans init', {
+          code: '([{x: y.z}]) => b',
+        });
+
+        test.fail('obj wrapped in array with alias to property array init', {
+          code: '([{x: y.z}] = a) => b',
+        });
+
+        test.fail('obj wrapped in array with alias to property obj init', {
+          code: '([{x: y.z} = a]) => b',
+        });
+
+        test.fail('obj destructuring rest with complex obj arg', {
+          code: '({...{x} }) => {}',
+        });
+
+        test.fail('obj destructuring rest with paren wrapped arg', {
+          // Arrow cover grammar is not determined by "AssignmentTargetType" so these parens are not "okay"
+          code: '({...(x) }) => {}',
+        });
+
+        test.fail('obj destructuring rest with complex arr arg', {
+          code: '({...[x] }) => {}',
+        });
+      });
+
+      describe('arrows is not a normal expression value', _ => {
+        test.pass('expr; lhs of addition', {
+          code: 'a => a + x',
+        });
+
+        test.fail('body; lhs of addition', {
+          code: 'a => {} + x',
+          HAS_AST: true,
+        });
+
+        test.fail('expr; rhs of addition', {
+          code: 'x + a => a',
+        });
+
+        test.fail('body; rhs of addition', {
+          code: 'x + a => {}',
+        });
+
+        test.pass('expr; division', {
+          code: 'a => a / x',
+        });
+
+        test.fail('body; division', {
+          code: 'a => {} / x',
+          HAS_AST: true,
+        });
+
+        test.fail('arrow regex requires semi', {
+          code: 'a => {} /x/',
+          HAS_AST: true,
+        });
+
+        test.fail('arrow regex with newline', {
+          code: 'a => {}\n/x/',
+          HAS_AST: true,
+        });
+
+        test.pass('expr; arrow dot', {
+          code: 'a => x.foo',
+        });
+
+        test.fail('body; arrow dot', {
+          code: 'a => {}.foo',
+          HAS_AST: true,
+        });
+
+        test.pass('expr; dynamic prop', {
+          code: 'a => x[foo]',
+        });
+
+        test.fail('body; dynamic prop', {
+          code: 'a => {}[foo]',
+          HAS_AST: true,
+        });
+
+        test.pass('expr; call', {
+          code: 'a => x()',
+        });
+
+        test.fail('body; call', {
+          code: 'a => {}()',
+          HAS_AST: true,
+        });
+
+        test.pass('asi and the + is a unary operator', {
+          code: '() => {}\n+function(){}',
+        });
+
+        test.fail('newest victim of asi', {
+          code: '() => {}\n/function(){}',
+          HAS_AST: true,
+        });
+      });
+
+      describe('regressions #12, obj pattern with computed props', _ => {
+        test.pass('object pattern alias can be pattern too', {
+          code: '({a,b=b,a:c,[a]:[d]})=>0;',
+        });
+
+        test.pass('object pattern alias can be property too', {
+          code: '({a, a:a, a:a=a, [a]:{a}, a:some_call()[a], a:this.a} = 0);',
+        });
+      });
+
+      describe('directives for arrows', _ => {
+        describe('eval', _ => {
+          test.fail_strict('eval as parenless arrow arg name without directive', {
+            code: 'eval => {}',
+          });
+
+          test.fail_strict('eval as arrow arg name without directive', {
+            code: '(eval) => {}',
+          });
+
+          test.fail_strict('eval as second arrow arg name without directive', {
+            code: '(a, eval) => {}',
+          });
+
+          test.fail('eval in parenless arrow arg name with directive', {
+            code: 'eval => {"use strict";}',
+          });
+
+          test.fail('eval in arrow arg name with directive', {
+            code: '(eval) => {"use strict";}',
+          });
+
+          test.fail_strict('eval as parenless async arrow arg name without directive', {
+            code: 'async eval => {}',
+          });
+
+          test.fail_strict('eval as async arrow arg name without directive', {
+            code: 'async (eval) => {}',
+          });
+
+          test.fail_strict('eval as second async arrow arg name without directive', {
+            code: 'async (a, eval) => {}',
+          });
+
+          test.fail('eval in parenless async arrow arg name with directive', {
+            code: 'async eval => {"use strict";}',
+          });
+
+          test.fail('eval in async arrow arg name with directive', {
+            code: 'async (eval) => {"use strict";}',
+          });
+        });
+
+        describe('arguments', _ => {
+          test.fail_strict('arguments as parenless arrow arg name without directive', {
+            code: 'arguments => {}',
+          });
+
+          test.fail_strict('arguments as arrow arg name without directive', {
+            code: '(arguments) => {}',
+          });
+
+          test.fail_strict('arguments as second arrow arg name without directive', {
+            code: '(a, arguments) => {}',
+          });
+
+          test.fail('arguments in parenless arrow arg name with directive', {
+            code: 'arguments => {"use strict";}',
+          });
+
+          test.fail('arguments in arrow arg name with directive', {
+            code: '(arguments) => {"use strict";}',
+          });
+
+          test.fail_strict('arguments as parenless async arrow arg name without directive', {
+            code: 'async arguments => {}',
+          });
+
+          test.fail_strict('arguments as async arrow arg name without directive', {
+            code: 'async (arguments) => {}',
+          });
+
+          test.fail_strict('arguments as second async arrow arg name without directive', {
+            code: 'async (a, arguments) => {}',
+          });
+
+          test.fail('arguments in parenless async arrow arg name with directive', {
+            code: 'async arguments => {"use strict";}',
+          });
+
+          test.fail('arguments in async arrow arg name with directive', {
+            code: 'async (arguments) => {"use strict";}',
+          });
+        });
+      });
+    });
+
+    test('propagating the lhs-paren state', {
+      code: '(foo + (bar + boo) + ding)',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'BinaryExpression',
+                left: {type: 'Identifier', name: 'foo'},
+                operator: '+',
+                right: {
+                  type: 'BinaryExpression',
+                  left: {type: 'Identifier', name: 'bar'},
+                  operator: '+',
+                  right: {type: 'Identifier', name: 'boo'},
+                },
+              },
+              operator: '+',
+              right: {type: 'Identifier', name: 'ding'},
             },
-            operator: '+',
-            right: {type: 'Identifier', name: 'ding'},
           },
-        },
-      ],
-    },
-    tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-  });
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+    });
 
-  test.pass('async call with trailing comma in arg list', {
-    code: 'async(x,)',
-    desc: 'the only case when parsing groups where the trailing comma does NOT mean an arrow must be parsed',
-  });
+    test.pass('async call with trailing comma in arg list', {
+      code: 'async(x,)',
+      desc: 'the only case when parsing groups where the trailing comma does NOT mean an arrow must be parsed',
+    });
 
-  test.pass('async arrow with trailing comma in arg list', {
-    code: 'async(x,) => x',
-    desc: 'the only case when parsing groups where the trailing comma does NOT mean an arrow must be parsed',
+    test.pass('async arrow with trailing comma in arg list', {
+      code: 'async(x,) => x',
+      desc: 'the only case when parsing groups where the trailing comma does NOT mean an arrow must be parsed',
+    });
   });
-});
 
 // arrow params and arrow can not have newline (asi breaks an arrow into group and syntax error)
 // cannot have yield or await in the params

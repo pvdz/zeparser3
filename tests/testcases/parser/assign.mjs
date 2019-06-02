@@ -411,7 +411,6 @@ export default (describe, test) =>
     });
 
     describe('assigning to keyword', _ => {
-
       [
         'break',
         'case',
@@ -495,12 +494,11 @@ export default (describe, test) =>
         });
 
         test.fail('should listen to use strict in getters [' + keyword + ']', {
-          code : 'x = { get x() { "use strict"; ' + keyword + ' = 787984536; } }',
+          code: 'x = { get x() { "use strict"; ' + keyword + ' = 787984536; } }',
         });
       });
 
       describe('`await` is only but always an illegal var name with the _module_ goal', _ => {
-
         test.pass('no directive', {
           code: '(await = "sentinal 543665")',
           MODULE: {throws: true},
@@ -542,7 +540,6 @@ export default (describe, test) =>
       });
 
       describe('yield is not keyword', _ => {
-
         test.fail_strict('assign to yield as a var name', {
           code: 'yield = 1;',
         });
@@ -577,9 +574,7 @@ export default (describe, test) =>
       });
 
       // should be fine for non-keywords
-      [
-        'foo',
-      ].forEach(keyword => {
+      ['foo'].forEach(keyword => {
         test.pass('assignment to [' + keyword + ']', {
           code: '(' + keyword + ' = "sentinal 453188")',
         });
@@ -587,7 +582,6 @@ export default (describe, test) =>
     });
 
     describe('keyword with escapes check', _ => {
-
       [
         'break',
         'case',
@@ -626,9 +620,14 @@ export default (describe, test) =>
         'false',
         'enum',
       ].forEach(keyword => {
-
         // this should turn `switch` into `\u0073witch`
-        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+        let prefixed =
+          '\\u' +
+          keyword
+            .charCodeAt(0)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(1);
         if (keyword === 'switch' && prefixed !== '\\u0073witch') throw new Error('Test is broken, fixmeee');
 
         test('leading escape [' + keyword + ' => ' + prefixed + ']', {
@@ -637,7 +636,14 @@ export default (describe, test) =>
         });
 
         // this should turn `switch` into `s\u0077itch`
-        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+        let middled =
+          keyword.slice(0, 1) +
+          '\\u' +
+          keyword
+            .charCodeAt(1)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(2);
         if (keyword === 'switch' && middled !== 's\\u0077itch') throw new Error('Test is broken, fixmeee');
 
         test('second char escaped [' + keyword + ' => ' + middled + ']', {
@@ -658,16 +664,28 @@ export default (describe, test) =>
         // special non-keywords
         'static',
       ].forEach(keyword => {
-
         // this should turn `switch` into `\u0073witch`
-        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+        let prefixed =
+          '\\u' +
+          keyword
+            .charCodeAt(0)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(1);
 
         test.fail_strict('leading escape [' + keyword + ' => ' + prefixed + ']', {
           code: '(' + prefixed + ' = "sentinal 3435")',
         });
 
         // this should turn `switch` into `s\u0077itch`
-        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+        let middled =
+          keyword.slice(0, 1) +
+          '\\u' +
+          keyword
+            .charCodeAt(1)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(2);
 
         test.fail_strict('second char escaped [' + keyword + ' => ' + middled + ']', {
           code: '(' + middled + ' = "sentinal 6543322")',
@@ -678,9 +696,14 @@ export default (describe, test) =>
         // special context
         'await',
       ].forEach(keyword => {
-
         // this should turn `switch` into `\u0073witch`
-        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+        let prefixed =
+          '\\u' +
+          keyword
+            .charCodeAt(0)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(1);
 
         test.fail('leading escape [' + keyword + ' => ' + prefixed + ']', {
           code: 'async function f(){   (' + prefixed + ' "sentinal 45334")   }',
@@ -691,7 +714,14 @@ export default (describe, test) =>
         });
 
         // this should turn `switch` into `s\u0077itch`
-        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+        let middled =
+          keyword.slice(0, 1) +
+          '\\u' +
+          keyword
+            .charCodeAt(1)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(2);
 
         test.fail('second char escaped [' + keyword + ' => ' + middled + ']', {
           code: 'async function f(){   (' + middled + ' "sentinal 45334")   }',
@@ -706,9 +736,14 @@ export default (describe, test) =>
         // special context
         'yield',
       ].forEach(keyword => {
-
         // this should turn `switch` into `\u0073witch`
-        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+        let prefixed =
+          '\\u' +
+          keyword
+            .charCodeAt(0)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(1);
 
         test.fail('cannot be yield expression [' + keyword + ' => ' + prefixed + ']', {
           code: 'function *f(){   (' + prefixed + ' "sentinal 89456")   }',
@@ -719,7 +754,14 @@ export default (describe, test) =>
         });
 
         // this should turn `switch` into `s\u0077itch`
-        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+        let middled =
+          keyword.slice(0, 1) +
+          '\\u' +
+          keyword
+            .charCodeAt(1)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(2);
 
         test.fail('cannot be yield expression [' + keyword + ' => ' + middled + ']', {
           code: 'function *f(){   (' + middled + ' "sentinal 78432")   }',
@@ -731,14 +773,15 @@ export default (describe, test) =>
       });
 
       // should be fine for non-keywords
-      [
-        'foo',
-        'eval',
-        'arguments',
-      ].forEach(keyword => {
-
+      ['foo', 'eval', 'arguments'].forEach(keyword => {
         // this should turn `switch` into `\u0073witch`
-        let prefixed = '\\u' + keyword.charCodeAt(0).toString(16).padStart(4, '0')+keyword.slice(1);
+        let prefixed =
+          '\\u' +
+          keyword
+            .charCodeAt(0)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(1);
 
         test.pass('leading escape [' + keyword + ' => ' + prefixed + ']', {
           code: '(' + prefixed + ' = "sentinal 432432")',
@@ -746,7 +789,14 @@ export default (describe, test) =>
         });
 
         // this should turn `switch` into `s\u0077itch`
-        let middled = keyword.slice(0, 1) + '\\u' + keyword.charCodeAt(1).toString(16).padStart(4, '0')+keyword.slice(2);
+        let middled =
+          keyword.slice(0, 1) +
+          '\\u' +
+          keyword
+            .charCodeAt(1)
+            .toString(16)
+            .padStart(4, '0') +
+          keyword.slice(2);
 
         test.pass('second char escaped [' + keyword + ' => ' + middled + ']', {
           code: '(' + middled + ' = "sentinal 62435")',
@@ -976,13 +1026,7 @@ export default (describe, test) =>
 
     // https://tc39.github.io/ecma262/#sec-destructuring-assignment-static-semantics-early-errors
     // It is a Syntax Error if LeftHandSideExpression is neither an ObjectLiteral nor an ArrayLiteral and AssignmentTargetType(LeftHandSideExpression) is not simple.
-    [
-      '({...obj1,} = foo)',
-      '({...obj1,a} = foo)',
-      '({...obj1,...obj2} = foo)',
-      '({...(a,b)} = foo)',
-      '({...{}} = {})',
-    ].forEach((tcase,i) => {
+    ['({...obj1,} = foo)', '({...obj1,a} = foo)', '({...obj1,...obj2} = foo)', '({...(a,b)} = foo)', '({...{}} = {})'].forEach((tcase, i) => {
       test.fail('bad destruct assign of obj case ' + i, {
         code: tcase,
       });
@@ -993,14 +1037,13 @@ export default (describe, test) =>
       '({...obj.x} = foo)',
       '({...{}.x} = foo)',
       '({...[].x} = foo)',
-    ].forEach((tcase,i) => {
+    ].forEach((tcase, i) => {
       test.pass('good destruct assign of obj case ' + i, {
         code: tcase,
       });
     });
 
     describe('assignment to number', _ => {
-
       test.fail('base case should fail', {
         code: '1 = x',
       });

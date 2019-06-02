@@ -1178,7 +1178,6 @@ export default (describe, test) =>
     });
 
     describe('** is right associative', _ => {
-
       test('* ** precedent test 1/2', {
         code: 'a ** b * c',
         ast: {
@@ -1548,7 +1547,6 @@ export default (describe, test) =>
     });
 
     describe('comma is right associative', _ => {
-
       // desc but because its prio is so low (the lowest!) there is no real risk of ambiguation.
       // additionally they don't create a nested tree of nodes but rather end up in an array of expressions
 
@@ -1561,10 +1559,14 @@ export default (describe, test) =>
               type: 'ExpressionStatement',
               expression: {
                 type: 'SequenceExpression',
-                expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}, {
-                  type: 'Identifier',
-                  name: 'c'
-                }],
+                expressions: [
+                  {type: 'Identifier', name: 'a'},
+                  {type: 'Identifier', name: 'b'},
+                  {
+                    type: 'Identifier',
+                    name: 'c',
+                  },
+                ],
               },
             },
           ],
@@ -1620,7 +1622,6 @@ export default (describe, test) =>
     });
 
     describe('ternary is right associative', _ => {
-
       test('simple ?:?:', {
         code: 'a ? b : c ? d : e',
         ast: {
@@ -2251,7 +2252,6 @@ export default (describe, test) =>
     });
 
     describe('various priority checks GENERATED', _ => {
-
       test('regression 1', {
         code: 'b && c == d',
         desc: '--> b && (c == d)',
@@ -2293,7 +2293,6 @@ export default (describe, test) =>
                       ['|'].forEach(t7 => {
                         ['&&'].forEach(t6 => {
                           ['||'].forEach(t5 => {
-
                             // This checks all binary ops per level so this generates a lot of cases..
                             // Randomly throw together some orders and their reverse and yolo it.
                             // (This test is confirmed by comparing to other parsers that hopefully do this right ;)

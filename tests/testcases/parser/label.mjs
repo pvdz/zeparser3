@@ -34,10 +34,42 @@ export default (describe, test) =>
     });
 
     [
-      'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger', 'default', 'delete', 'do', 'else',
-      'export', 'extends', 'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'new', 'return',
-      'super', 'switch', 'this', 'throw', 'try', 'typeof', 'var', 'void', 'while', 'with', 'null', 'true',
-      'false', 'enum',
+      'break',
+      'case',
+      'catch',
+      'class',
+      'const',
+      'continue',
+      'debugger',
+      'default',
+      'delete',
+      'do',
+      'else',
+      'export',
+      'extends',
+      'finally',
+      'for',
+      'function',
+      'if',
+      'import',
+      'in',
+      'instanceof',
+      'new',
+      'return',
+      'super',
+      'switch',
+      'this',
+      'throw',
+      'try',
+      'typeof',
+      'var',
+      'void',
+      'while',
+      'with',
+      'null',
+      'true',
+      'false',
+      'enum',
     ].forEach(keyword => {
       test('can not use keywords as label name [' + keyword + ']', {
         code: keyword + ': x;',
@@ -46,9 +78,15 @@ export default (describe, test) =>
     });
 
     [
-      'implements', 'package', 'protected', 'interface', 'private', 'public',
+      'implements',
+      'package',
+      'protected',
+      'interface',
+      'private',
+      'public',
       // > In strict mode code, let and static are treated as reserved words through static semantic restrictions
-      'let', 'static',
+      'let',
+      'static',
     ].forEach(keyword => {
       test.fail_strict('can not use certain reserved keywords as label name in strict mode: keyword=`' + keyword + '`', {
         code: keyword + ': x;',
@@ -57,7 +95,6 @@ export default (describe, test) =>
     });
 
     describe('await', _ => {
-
       test.pass('in sloppy', {
         code: 'await: x',
         MODULE: {throws: true},
@@ -83,7 +120,6 @@ export default (describe, test) =>
     });
 
     describe('await', _ => {
-
       test.fail_strict('in sloppy', {
         code: 'yield: x',
       });
@@ -131,7 +167,6 @@ export default (describe, test) =>
     test.pass('arguments is NOT a reserved word at all so ok to use as label', {
       code: 'arguments: x;',
     });
-
 
     // TODO: label:functiondecl is explicitly considered a syntax error
     // TODO: labels must be "identifiers", which may not be reserved

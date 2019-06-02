@@ -3,9 +3,7 @@ import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 // await, (yield), delete, and new have their own file
 
 export default (describe, test) =>
-
   describe('unary ops', _ => {
-
     describe('positive prefix +x', _ => {
       // See also the generic unary tests
 
@@ -174,7 +172,6 @@ export default (describe, test) =>
     });
 
     describe('generic unary tests (GENERATED)', _ => {
-
       [
         '+',
         '-',
@@ -184,11 +181,8 @@ export default (describe, test) =>
         '!',
         // 'await',  // this requires async func wrapper to work so we're skipping this. perhaps we can duplicate, later
       ].map(opstr => {
-
-        describe('batch for `'+opstr+'`', _ => {
-
+        describe('batch for `' + opstr + '`', _ => {
           describe('disambiguation', _ => {
-
             test('disambiguation left', {
               code: opstr + ' x.abc + y.x',
               ast: {
@@ -225,7 +219,7 @@ export default (describe, test) =>
             });
 
             test('disambiguation right', {
-              code: 'x + '+opstr+' y.x',
+              code: 'x + ' + opstr + ' y.x',
               ast: {
                 type: 'Program',
                 body: [
@@ -255,7 +249,7 @@ export default (describe, test) =>
             });
 
             test('disambiguation both', {
-              code: opstr+' x.def + '+opstr+' y.x',
+              code: opstr + ' x.def + ' + opstr + ' y.x',
               ast: {
                 type: 'Program',
                 body: [
@@ -297,7 +291,7 @@ export default (describe, test) =>
 
           describe('regex edge case', _ => {
             test('division', {
-              code: opstr+' a.b\n/foo',
+              code: opstr + ' a.b\n/foo',
               ast: {
                 type: 'Program',
                 body: [
@@ -327,13 +321,13 @@ export default (describe, test) =>
             });
 
             test('sans flag', {
-              code: opstr+'  a.b\n/foo/',
+              code: opstr + '  a.b\n/foo/',
               throws: 'Expected to parse a value',
               desc: 'note: asi explicitly does not apply when next line starts with forward slash',
             });
 
             test('with flag', {
-              code: opstr+' a.b\n/foo/g',
+              code: opstr + ' a.b\n/foo/g',
               ast: {
                 type: 'Program',
                 body: [
@@ -368,9 +362,8 @@ export default (describe, test) =>
           });
 
           describe('async args', _ => {
-
             test.pass('async keyword sans parens', {
-              code: opstr === 'delete' ? opstr + ' async.x' : (opstr + ' async'), // delete cannot do just ident
+              code: opstr === 'delete' ? opstr + ' async.x' : opstr + ' async', // delete cannot do just ident
             });
 
             test('async parens', {
@@ -514,7 +507,6 @@ export default (describe, test) =>
           });
 
           describe('as new arg', _ => {
-
             test.fail('with ident', {
               code: 'new ' + opstr,
             });
@@ -532,34 +524,33 @@ export default (describe, test) =>
             // for the sake of completeness (the actual problem is about using a pattern with a func call)
 
             test.pass('counter-example where the object is not (necessarily) a pattern', {
-              code: opstr+' async({a});',
+              code: opstr + ' async({a});',
             });
 
             test.fail('1', {
-              code: opstr+' async({a = 1});',
+              code: opstr + ' async({a = 1});',
             });
 
             test.fail('2', {
-              code: opstr+' async({a = 1}, {b = 2}, {c = 3} = {});',
+              code: opstr + ' async({a = 1}, {b = 2}, {c = 3} = {});',
             });
 
             test.fail('3', {
-              code: opstr+' async({a = 1}, {b = 2} = {}, {c = 3} = {});',
+              code: opstr + ' async({a = 1}, {b = 2} = {}, {c = 3} = {});',
             });
           });
 
           describe('return state propagation', fromString => {
-
             test.pass('await as arg inside async base case', {
-              code :'async function f(){   ' + opstr + ' await x;   }',
+              code: 'async function f(){   ' + opstr + ' await x;   }',
             });
 
             test.fail('await as arg in non-async func default', {
-              code :'async function f(){   function g(x = ' + opstr + ' await x) {}  }',
+              code: 'async function f(){   function g(x = ' + opstr + ' await x) {}  }',
             });
 
             test.fail('await as arg in non-async func arg default with strict mode', {
-              code :'async function f(){   function g(x = ' + opstr + ' await x) { "use strict"; }  }',
+              code: 'async function f(){   function g(x = ' + opstr + ' await x) { "use strict"; }  }',
               desc: 'notorious case; this test ensures the "parsed await" flags properly propagate back down',
             });
 
@@ -580,11 +571,11 @@ export default (describe, test) =>
             });
 
             test.fail('await as arg in async func default is always illegal', {
-              code :'async function f(){   async function g(x = ' + opstr + ' await x) {}  }',
+              code: 'async function f(){   async function g(x = ' + opstr + ' await x) {}  }',
             });
 
             test.fail('await as arg in async func arg default with strict mode is always illegal', {
-              code :'async function f(){   async function g(x = ' + opstr + ' await x) { "use strict"; }  }',
+              code: 'async function f(){   async function g(x = ' + opstr + ' await x) { "use strict"; }  }',
               desc: 'notorious case; this test ensures the "parsed await" flags properly propagate back down',
             });
 

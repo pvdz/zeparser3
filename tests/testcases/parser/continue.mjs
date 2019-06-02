@@ -2,7 +2,6 @@ import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('continue statement', _ => {
-
     describe('in a loop', _ => {
       test('continue without label inside a for-loop', {
         code: 'for (;;) continue',
@@ -201,7 +200,6 @@ export default (describe, test) =>
     });
 
     describe('cannot use in a switch', _ => {
-
       test.fail('continue without label inside a case', {
         code: 'switch (x) { case x: continue; }',
       });
@@ -268,11 +266,8 @@ export default (describe, test) =>
     });
 
     describe('nesting', _ => {
-
       describe('bad', _ => {
-
         describe('global', _ => {
-
           test.fail('plain', {
             code: 'continue',
           });
@@ -295,7 +290,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.fail('plain', {
             code: 'function f(){    continue    }',
           });
@@ -318,7 +312,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.fail('expr', {
             code: '() =>     continue',
           });
@@ -346,9 +339,7 @@ export default (describe, test) =>
       });
 
       describe('switch', _ => {
-
         describe('global', _ => {
-
           test.fail('plain', {
             code: 'switch (x){ case z:    continue   }',
           });
@@ -371,7 +362,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.fail('plain', {
             code: 'function f(){ switch (x){ case z:       continue    }}',
           });
@@ -394,7 +384,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.fail('plain', {
             code: '() => { switch (x){ case z:       continue    }}',
           });
@@ -414,9 +403,7 @@ export default (describe, test) =>
       });
 
       describe('for', _ => {
-
         describe('global', _ => {
-
           test.pass('plain', {
             code: 'for (;;) continue',
           });
@@ -439,7 +426,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.pass('plain', {
             code: 'function f(){ for (;;)       continue    }',
           });
@@ -462,7 +448,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.pass('plain', {
             code: '() => { for (;;)       continue    }',
           });
@@ -486,9 +471,7 @@ export default (describe, test) =>
       });
 
       describe('while', _ => {
-
         describe('global', _ => {
-
           test.pass('plain', {
             code: 'while (true)    continue',
           });
@@ -511,7 +494,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.pass('plain', {
             code: 'function f(){ while (true)       continue }',
           });
@@ -534,7 +516,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.pass('plain', {
             code: '() => { while (true)       continue    }',
           });
@@ -558,9 +539,7 @@ export default (describe, test) =>
       });
 
       describe('do-while', _ => {
-
         describe('global', _ => {
-
           test.pass('plain', {
             code: 'do     continue   ; while(true);',
           });
@@ -583,7 +562,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.pass('plain', {
             code: 'function f(){ do        continue    ; while(true);}',
           });
@@ -606,7 +584,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.pass('plain', {
             code: '() => { do        continue    ; while(true);}',
           });
@@ -631,7 +608,6 @@ export default (describe, test) =>
     });
 
     describe('labels', _ => {
-
       test.pass('continue to label in while', {
         code: 'foo: while(true)continue foo;',
       });

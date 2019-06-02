@@ -453,7 +453,6 @@ export default (describe, test) =>
     });
 
     describe('destructuring', _ => {
-
       test('one var, no init, semi', {
         code: '[foo] = arr;',
         ast: {
@@ -575,26 +574,7 @@ export default (describe, test) =>
             },
           ],
         },
-        tokens: [
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-        ],
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
 
       test('let, super nested array pattern to make sure that isnt hardcoded', {
@@ -744,11 +724,7 @@ export default (describe, test) =>
                     {type: 'Identifier', name: 'foo'},
                     {
                       type: 'ArrayPattern',
-                      elements: [
-                        {type: 'Identifier', name: 'x'},
-                        {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, /*operator: '=',*/ right: {type: 'Literal', value: '<TODO>', raw: '20'}},
-                        {type: 'Identifier', name: 'z'},
-                      ],
+                      elements: [{type: 'Identifier', name: 'x'}, {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'y'}, /*operator: '=',*/ right: {type: 'Literal', value: '<TODO>', raw: '20'}}, {type: 'Identifier', name: 'z'}],
                     },
                     {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, /*operator: '=',*/ right: {type: 'Identifier', name: 'B'}},
                   ],
@@ -759,28 +735,7 @@ export default (describe, test) =>
             },
           ],
         },
-        tokens: [
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $NUMBER_DEC,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-        ],
+        tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
       });
 
       test('destructuring array as call arg', {
@@ -1214,7 +1169,6 @@ export default (describe, test) =>
       });
 
       describe('forward slash cases', _ => {
-
         test('spread with array-division', {
           code: '[...[x]/y]',
           ast: {
@@ -1434,7 +1388,6 @@ export default (describe, test) =>
       });
 
       describe('member exprs', _ => {
-
         test('property of ident is assignable', {
           code: '[x.y] = z',
           ast: {
@@ -2488,7 +2441,6 @@ export default (describe, test) =>
       });
 
       describe('spreadrest keywords', _ => {
-
         test.pass('spread a value keyword', {
           code: '[...true]',
           desc: 'runtime error',
@@ -2619,40 +2571,21 @@ export default (describe, test) =>
     });
 
     describe('keywords should not parse as regular idents in awkward places', _ => {
-
       // see counter-test in arrow where this stuff is disallowed
-      [
-        'async ()=>x',
-        'class{}',
-        'delete x.y',
-        'false',
-        'function(){}',
-        'new x',
-        'null',
-        'true',
-        'this',
-        'typeof x',
-        'void x',
-        'x + y',
-        '[].length',
-        '[x].length',
-        '{}.length',
-        '{x: y}.length',
-      ].forEach(str => {
-
+      ['async ()=>x', 'class{}', 'delete x.y', 'false', 'function(){}', 'new x', 'null', 'true', 'this', 'typeof x', 'void x', 'x + y', '[].length', '[x].length', '{}.length', '{x: y}.length'].forEach(str => {
         test.fail('[' + str + '] in destructuring assignment as shorthand', {
-          code: '['+str+'] = x;',
+          code: '[' + str + '] = x;',
           throws: str.includes('.length') ? undefined : true,
           ast: str.includes('.length') ? true : undefined, // property is valid assignment target so should work
           tokens: str.includes('.length') ? true : undefined,
         });
 
         test.pass('[' + str + '] in array', {
-          code: '['+str+']',
+          code: '[' + str + ']',
         });
 
         test.fail('[' + str + '] in arrow head', {
-          code: '(['+str+']) => x;',
+          code: '([' + str + ']) => x;',
         });
       });
     });

@@ -446,10 +446,7 @@ export default (describe, test) =>
             declaration: {
               type: 'VariableDeclaration',
               kind: 'var',
-              declarations: [
-                {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
-                {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: null},
-              ],
+              declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: null}],
             },
             source: null,
           },
@@ -515,10 +512,7 @@ export default (describe, test) =>
             declaration: {
               type: 'VariableDeclaration',
               kind: 'let',
-              declarations: [
-                {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null},
-                {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: null},
-              ],
+              declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'x'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'y'}, init: null}],
             },
             source: null,
           },
@@ -998,10 +992,7 @@ export default (describe, test) =>
     });
 
     describe('confirm when a semi is not needed', _ => {
-
       describe('non-default', _ => {
-
-
         test.pass('regular func', {
           code: 'export function f(){} foo',
           SCRIPT: {throws: 'module'},
@@ -1064,7 +1055,6 @@ export default (describe, test) =>
       });
 
       describe('default', _ => {
-
         test.pass('regular func', {
           code: 'export default function f(){} foo',
           SCRIPT: {throws: 'module'},
@@ -1182,7 +1172,6 @@ export default (describe, test) =>
     });
 
     describe('scoping', _ => {
-
       test('block', {
         code: '{export {x};}',
         SCRIPT: {throws: 'module'},
@@ -1309,7 +1298,6 @@ export default (describe, test) =>
     });
 
     describe('export object is not generic', _ => {
-
       test('cannot destructure a rest', {
         code: 'var foo, bar; export {foo, ...bar}',
         SCRIPT: {throws: 'module'},

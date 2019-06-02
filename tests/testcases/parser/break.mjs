@@ -2,9 +2,7 @@ import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('break statement', _ => {
-
     describe('in a switch', _ => {
-
       test('break without label inside a case', {
         code: 'switch (x) { case x: break; }',
         ast: {
@@ -238,7 +236,6 @@ export default (describe, test) =>
     });
 
     describe('in a loop', _ => {
-
       test('break without label inside a for-loop', {
         code: 'for (;;) break',
         ast: {
@@ -494,13 +491,10 @@ export default (describe, test) =>
     test.fail('double break with label and asi', {
       code: 'foo: break foo\nbreak;',
     });
-    
+
     describe('nesting', _ => {
-
       describe('bad', _ => {
-        
         describe('global', _ => {
-
           test.fail('plain', {
             code: 'break',
           });
@@ -515,7 +509,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.fail('plain', {
             code: 'function f(){    break    }',
           });
@@ -538,7 +531,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.fail('expr', {
             code: '() =>     break',
           });
@@ -566,9 +558,7 @@ export default (describe, test) =>
       });
 
       describe('switch', _ => {
-
         describe('global', _ => {
-
           test.pass('plain', {
             code: 'switch (x){ case z:    break   }',
           });
@@ -591,7 +581,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.pass('plain', {
             code: 'function f(){ switch (x){ case z:       break    }}',
           });
@@ -614,7 +603,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.pass('plain', {
             code: '() => { switch (x){ case z:       break    }}',
           });
@@ -634,9 +622,7 @@ export default (describe, test) =>
       });
 
       describe('for', _ => {
-
         describe('global', _ => {
-
           test.pass('plain', {
             code: 'for (;;)    break',
           });
@@ -659,7 +645,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.pass('plain', {
             code: 'function f(){ for (;;)       break    }',
           });
@@ -682,7 +667,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.pass('plain', {
             code: '() => { for (;;)       break    }',
           });
@@ -706,9 +690,7 @@ export default (describe, test) =>
       });
 
       describe('while', _ => {
-
         describe('global', _ => {
-
           test.pass('plain', {
             code: 'while (true)    break',
           });
@@ -731,7 +713,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.pass('plain', {
             code: 'function f(){ while (true)       break    }',
           });
@@ -754,7 +735,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.pass('plain', {
             code: '() => { while (true)       break    }',
           });
@@ -778,9 +758,7 @@ export default (describe, test) =>
       });
 
       describe('do-while', _ => {
-
         describe('global', _ => {
-
           test.pass('plain', {
             code: 'do     break   ; while(true);',
           });
@@ -803,7 +781,6 @@ export default (describe, test) =>
         });
 
         describe('function', _ => {
-
           test.pass('plain', {
             code: 'function f(){ do        break    ; while(true);}',
           });
@@ -826,7 +803,6 @@ export default (describe, test) =>
         });
 
         describe('arrow', _ => {
-
           test.pass('plain', {
             code: '() => { do        break    ; while(true);}',
           });
@@ -851,7 +827,6 @@ export default (describe, test) =>
     });
 
     describe('labels', _ => {
-
       test.pass('break to label in while', {
         code: 'foo: while(true)break foo;',
       });

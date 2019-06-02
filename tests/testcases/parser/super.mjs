@@ -2,11 +2,8 @@ import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAI
 
 export default (describe, test) =>
   describe('super keyword', _ => {
-
     describe('super()', _ => {
-
       describe('class constructors', _ => {
-
         test('okay to omit without constructor', {
           code: 'class x extends y { }',
           ast: {
@@ -259,7 +256,30 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          tokens: [
+            $IDENT,
+            $IDENT,
+            $IDENT,
+            $IDENT,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+          ],
         });
 
         test('allowed in constructor arg defaults', {
@@ -573,7 +593,30 @@ export default (describe, test) =>
               },
             ],
           },
-          tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          tokens: [
+            $IDENT,
+            $IDENT,
+            $IDENT,
+            $IDENT,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $IDENT,
+            $IDENT,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $IDENT,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+            $PUNCTUATOR,
+          ],
         });
 
         test('can call functions before calling `super()`', {
@@ -633,7 +676,6 @@ export default (describe, test) =>
       });
 
       describe('methods', _ => {
-
         test('can not even call `super()` in a method when extending', {
           code: 'class x extends y { foo(){ super(); } }',
           throws: 'super',
@@ -702,7 +744,6 @@ export default (describe, test) =>
     });
 
     describe('super.foo', _ => {
-
       test.pass('allowed in constructor of non-extending class', {
         code: 'class x { constructor(){ super.foo; }}',
       });
@@ -780,7 +821,6 @@ export default (describe, test) =>
     });
 
     describe('super() in arrows', _ => {
-
       test('illegal in toplevel', {
         code: 'let f = () => super();',
         throws: 'super',
@@ -845,7 +885,6 @@ export default (describe, test) =>
     });
 
     describe('super.foo in arrows', _ => {
-
       test('illegal in toplevel', {
         code: 'let f = () => super.foo;',
         throws: 'super',
@@ -953,8 +992,6 @@ export default (describe, test) =>
 // > It is a Syntax Error if HasDirectSuper of MethodDefinition is true.
 // (cannot super() in object literal methods)
 
-
-
 // TODO
 // function f(){super}
 // function super(){}
@@ -969,4 +1006,3 @@ export default (describe, test) =>
 // class A { f(){ super(); } }
 // class A { f(super){ } }
 // class A { f(x=super()){ } }
-

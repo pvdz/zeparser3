@@ -783,10 +783,7 @@ export default (describe, test) =>
                         type: 'VariableDeclarator',
                         id: {
                           type: 'ArrayPattern',
-                          elements: [
-                            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}},
-                            {type: 'Identifier', name: 'bar'},
-                          ],
+                          elements: [{type: 'AssignmentPattern', left: {type: 'Identifier', name: 'foo'}, right: {type: 'Identifier', name: 'a'}}, {type: 'Identifier', name: 'bar'}],
                         },
                         init: {type: 'Identifier', name: 'arr'},
                       },
@@ -810,10 +807,7 @@ export default (describe, test) =>
                         type: 'VariableDeclarator',
                         id: {
                           type: 'ArrayPattern',
-                          elements: [
-                            {type: 'Identifier', name: 'foo'},
-                            {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}},
-                          ],
+                          elements: [{type: 'Identifier', name: 'foo'}, {type: 'AssignmentPattern', left: {type: 'Identifier', name: 'bar'}, right: {type: 'Identifier', name: 'b'}}],
                         },
                         init: {type: 'Identifier', name: 'arr'},
                       },
@@ -956,7 +950,7 @@ export default (describe, test) =>
               test('rest followed by two commas', {
                 code: 'const [...foo,,] = obj;',
                 throws: 'not destructible',
-                });
+              });
 
               test('rest on a nested that cant destruct', {
                 code: 'const [...[foo + bar]] = obj;',
@@ -1004,7 +998,7 @@ export default (describe, test) =>
               test('double trailing comma after rest on a nested destruct', {
                 code: 'const [...[foo, bar],,] = obj;',
                 throws: 'not destructible',
-                });
+              });
 
               test('second param rest on a nested destruct', {
                 code: 'const [x, ...[foo, bar]] = obj;',
@@ -1036,22 +1030,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('rest with default', {
@@ -1125,23 +1104,7 @@ export default (describe, test) =>
                   ],
                 },
                 desc: 'expecting both a rest and spread node in the ast',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
             });
           });
@@ -1897,25 +1860,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              tokens: [
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-              ],
+              tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct no assignment', {
@@ -2568,22 +2513,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('leading comma', {
@@ -2643,22 +2573,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('two vars', {
@@ -2688,22 +2603,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('two vars with eliding comma', {
@@ -2733,23 +2633,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double destruct', {
@@ -2787,26 +2671,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('destruct and non-destruct without init', {
@@ -2846,24 +2711,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('non-destruct without init and destruct', {
@@ -2903,24 +2751,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('one var with initializer', {
@@ -2956,22 +2787,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('two vars, with and without initializer', {
@@ -3008,24 +2824,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('two vars, without and with initializer', {
@@ -3062,24 +2861,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('two vars, with and with initializer', {
@@ -3120,26 +2902,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('no assignment without init', {
@@ -3231,23 +2994,7 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
                 });
 
                 test('rest followed by an ident', {
@@ -3264,7 +3011,7 @@ export default (describe, test) =>
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] = obj;;);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] = obj;;);',
@@ -3301,25 +3048,7 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
                 });
 
                 test('trailing comma after rest on a nested destruct', {
@@ -3331,7 +3060,7 @@ export default (describe, test) =>
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] = obj;;);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('second param rest on a nested destruct', {
                   code: 'for (const [x, ...[foo, bar]] = obj;;);',
@@ -3369,27 +3098,7 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
                 });
 
                 test('rest with default', {
@@ -3495,7 +3204,6 @@ export default (describe, test) =>
             });
 
             describe('object', _ => {
-
               test('empty obj', {
                 code: 'for (const {} = obj;;);',
                 ast: {
@@ -3577,13 +3285,13 @@ export default (describe, test) =>
                 code: 'for (const {,} = obj;;);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                });
+              });
 
               test('empty obj with elided commas', {
                 code: 'for (const {,,} = obj;;);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                });
+              });
 
               test('single var base case', {
                 code: 'for (const {x} = obj;;);',
@@ -3732,22 +3440,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double var with double comma', {
@@ -3812,26 +3505,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('destruct and non-destruct with init', {
@@ -3876,24 +3550,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('destruct and non-destruct without init', {
@@ -3943,24 +3600,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('non-destruct without ini and destruct', {
@@ -4009,22 +3649,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double destruct with and without init', {
@@ -4077,24 +3702,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double destruct without and with init', {
@@ -4147,24 +3755,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double destruct both with init', {
@@ -4221,26 +3812,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single destruct with rename', {
@@ -4280,22 +3852,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double destruct with and without rename', {
@@ -4344,24 +3901,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double destruct without and with rename', {
@@ -4410,24 +3950,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double destruct both with rename', {
@@ -4476,26 +3999,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single destruct with rename and init', {
@@ -4539,24 +4043,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('double destruct with rename and init', {
@@ -4736,24 +4223,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('dynamic property destructuring missing alias', {
@@ -4822,26 +4292,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('dynamic prop as second prop', {
@@ -4890,26 +4341,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
             });
           });
@@ -4994,22 +4426,7 @@ export default (describe, test) =>
               test('one var with initializer', {
                 code: 'for (const [foo=a] = arr);',
                 throws: '(`;`)',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('two vars, with and without initializer', {
@@ -5020,49 +4437,13 @@ export default (describe, test) =>
               test('two vars, without and with initializer', {
                 code: 'for (const [foo, bar=b] = arr);',
                 throws: '(`;`)',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('two vars, with and with initializer', {
                 code: 'for (const [foo=a, bar=b] = arr);',
                 throws: '(`;`)',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('no assignment without init', {
@@ -5109,7 +4490,7 @@ export default (describe, test) =>
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] = obj);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] = obj);',
@@ -5130,22 +4511,7 @@ export default (describe, test) =>
                 test('second param rest on a nested destruct', {
                   code: 'for (const [x, ...[foo, bar]] = obj);',
                   throws: '(`;`)',
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
                 });
 
                 test('rest with default', {
@@ -5197,13 +4563,13 @@ export default (describe, test) =>
                 code: 'for (const {,} = obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                });
+              });
 
               test('empty obj with elided commas', {
                 code: 'for (const {,,} = obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                });
+              });
 
               test('single var base case', {
                 code: 'for (const {x} = obj);',
@@ -5417,51 +4783,13 @@ export default (describe, test) =>
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (const {[x]: y = z} = a);',
                 throws: '(`;`)',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('dynamic prop as second prop', {
                 code: 'for (const {a, [x]: y} = a);',
                 throws: '(`;`)',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
             });
           });
@@ -5752,26 +5080,7 @@ export default (describe, test) =>
               test('double destruct', {
                 code: 'for (const [foo] = arr, [bar] in arr);',
                 throws: 'can only have one binding',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('destruct and non-destruct without init', {
@@ -5782,24 +5091,7 @@ export default (describe, test) =>
               test('destruct and non-destruct with init', {
                 code: 'for (const [foo] = arr, bar in arr);',
                 throws: 'can only have one binding',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('non-destruct without init and destruct', {
@@ -5810,24 +5102,7 @@ export default (describe, test) =>
               test('non-destruct with init and destruct', {
                 code: 'for (const foo = arr, [bar] in arr);',
                 throws: 'can only have one binding',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('one var with initializer', {
@@ -5974,24 +5249,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('no assignment without init', {
@@ -6092,7 +5350,7 @@ export default (describe, test) =>
                 test('rest followed by an ident', {
                   code: 'for (const [...foo, bar] in obj);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (const [...foo,] in obj);',
@@ -6103,7 +5361,7 @@ export default (describe, test) =>
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] in obj);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] in obj);',
@@ -6139,23 +5397,7 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
 
                 test('trailing comma after rest on a nested destruct', {
@@ -6167,7 +5409,7 @@ export default (describe, test) =>
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] in obj);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('second param rest on a nested destruct', {
                   code: 'for (const [x, ...[foo, bar]] in obj);',
@@ -6204,32 +5446,14 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
 
                 test('rest with default', {
                   code: 'for (const [...bar = foo] in obj);',
                   throws: 'not destructible',
                   desc: 'rest cannot get a default in var decls but they can as func args',
-                    });
+                });
 
                 test('double rest / spread rest', {
                   code: 'for (const [... ...foo] in obj);',
@@ -6300,26 +5524,7 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
               });
             });
@@ -6355,13 +5560,13 @@ export default (describe, test) =>
                 code: 'for (const {,} in obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                });
+              });
 
               test('empty obj with elided commas', {
                 code: 'for (const {,,} in obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                });
+              });
 
               test('single var base case', {
                 code: 'for (const {x} in obj);',
@@ -6521,96 +5726,28 @@ export default (describe, test) =>
                 code: 'for (const {x} = a, {y} in obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('destruct and non-destruct with init', {
                 code: 'for (const {x} = a, y in obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('destruct and non-destruct without init', {
                 code: 'for (const {x} = a, obj in obj2);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('non-destruct with ini and destruct', {
                 code: 'for (const x = a, {y} in obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('non-destruct without ini and destruct', {
@@ -6819,24 +5956,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single destruct with rename', {
@@ -7019,24 +6139,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single destruct with rename and init', {
@@ -7140,28 +6243,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single destruct no assignment', {
@@ -7266,12 +6348,12 @@ export default (describe, test) =>
               test('dynamic property destructuring missing alias', {
                 code: 'for (const {[x]} in obj);',
                 throws: 'computed property',
-                });
+              });
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (const {[x] = y} in obj);',
                 throws: 'computed property',
-                });
+              });
 
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (const {[x]: y = z} in obj);',
@@ -7313,24 +6395,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('dynamic prop as second prop', {
@@ -7378,24 +6443,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
             });
           });
@@ -7866,24 +6914,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('no assignment without init', {
@@ -7985,7 +7016,7 @@ export default (describe, test) =>
                 test('rest followed by an ident', {
                   code: 'for (const [...foo, bar] of obj);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('rest followed by a trailing comma', {
                   code: 'for (const [...foo,] of obj);',
@@ -7996,7 +7027,7 @@ export default (describe, test) =>
                 test('rest followed by two commas', {
                   code: 'for (const [...foo,,] of obj);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('rest on a nested destruct', {
                   code: 'for (const [...[foo, bar]] of obj);',
@@ -8033,23 +7064,7 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
 
                 test('trailing comma after rest on a nested destruct', {
@@ -8061,7 +7076,7 @@ export default (describe, test) =>
                 test('double trailing comma after rest on a nested destruct', {
                   code: 'for (const [...[foo, bar],,] of obj);',
                   throws: 'not destructible',
-                    });
+                });
 
                 test('second param rest on a nested destruct', {
                   code: 'for (const [x, ...[foo, bar]] of obj);',
@@ -8099,32 +7114,14 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
 
                 test('rest with default', {
                   code: 'for (const [...bar = foo] of obj);',
                   throws: 'not destructible',
                   desc: 'rest cannot get a default of var decls but they can as func args',
-                    });
+                });
 
                 test('double rest / spread rest', {
                   code: 'for (const [... ...foo] of obj);',
@@ -8196,26 +7193,7 @@ export default (describe, test) =>
                       },
                     ],
                   },
-                  tokens: [
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $IDENT,
-                    $IDENT,
-                    $PUNCTUATOR,
-                    $PUNCTUATOR,
-                  ],
+                  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
                 });
               });
             });
@@ -8252,13 +7230,13 @@ export default (describe, test) =>
                 code: 'for (const {,} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                });
+              });
 
               test('empty obj with elided commas', {
                 code: 'for (const {,,} of obj);',
                 throws: 'Objects cant have comma without something preceding it',
                 desc: 'works for array but not for obj',
-                });
+              });
 
               test('single var base case', {
                 code: 'for (const {x} of obj);',
@@ -8421,96 +7399,28 @@ export default (describe, test) =>
                 code: 'for (const {x} = a, {y} of obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('destruct and non-destruct with init', {
                 code: 'for (const {x} = a, y of obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('destruct and non-destruct without init', {
                 code: 'for (const {x} = a, obj of obj2);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('non-destruct with ini and destruct', {
                 code: 'for (const x = a, {y} of obj);',
                 throws: 'can only have one binding',
                 desc: 'confusing message for only supporting one var with this for-statement type',
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('non-destruct without ini and destruct', {
@@ -8723,24 +7633,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single destruct with rename', {
@@ -8927,24 +7820,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single destruct with rename and init', {
@@ -9050,28 +7926,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('single destruct no assignment', {
@@ -9177,12 +8032,12 @@ export default (describe, test) =>
               test('dynamic property destructuring missing alias', {
                 code: 'for (const {[x]} of obj);',
                 throws: 'computed property',
-                });
+              });
 
               test('dynamic property destructuring with default missing alias', {
                 code: 'for (const {[x] = y} of obj);',
                 throws: 'computed property',
-                });
+              });
 
               test('correct dynamic property destructuring with default and alias', {
                 code: 'for (const {[x]: y = z} of obj);',
@@ -9225,24 +8080,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
 
               test('dynamic prop as second prop', {
@@ -9291,24 +8129,7 @@ export default (describe, test) =>
                     },
                   ],
                 },
-                tokens: [
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
               });
             });
           });
@@ -9717,13 +8538,13 @@ export default (describe, test) =>
                 throws: 'not destructible',
                 desc: 'while feasible the syntax spec currently does not have a rule for allowing trailing commas after rest',
                 SCRIPT: {throws: 'module goal'},
-                });
+              });
 
               test('rest followed by two commas', {
                 code: 'export const [...foo,,] = obj;',
                 throws: 'not destructible',
                 SCRIPT: {throws: 'module goal'},
-                });
+              });
 
               test('rest on a nested destruct', {
                 code: 'export const [...[foo, bar]] = obj;',
@@ -9774,7 +8595,7 @@ export default (describe, test) =>
                 code: 'export const [...[foo, bar],,] = obj;',
                 throws: 'not destructible',
                 SCRIPT: {throws: 'module goal'},
-                });
+              });
 
               test('second param rest on a nested destruct', {
                 code: 'export const [x, ...[foo, bar]] = obj;',
@@ -9812,23 +8633,7 @@ export default (describe, test) =>
                   ],
                 },
                 SCRIPT: {throws: 'module goal'},
-                tokens: [
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
 
               test('rest with default', {
@@ -9909,24 +8714,7 @@ export default (describe, test) =>
                   ],
                 },
                 SCRIPT: {throws: 'the module goal'},
-                tokens: [
-                  $IDENT,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                  $PUNCTUATOR,
-                  $IDENT,
-                  $PUNCTUATOR,
-                ],
+                tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
               });
             });
           });
@@ -10792,26 +9580,7 @@ export default (describe, test) =>
                   },
                 ],
               },
-              tokens: [
-                $IDENT,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-                $PUNCTUATOR,
-                $IDENT,
-                $PUNCTUATOR,
-              ],
+              tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
             });
 
             test('single destruct no assignment', {
@@ -11133,7 +9902,7 @@ export default (describe, test) =>
         ast: true,
         tokens: true,
       },
-    })
+    });
 
     test.fail('must have init one var', {
       code: 'const foo;',

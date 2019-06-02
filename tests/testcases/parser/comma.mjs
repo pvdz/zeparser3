@@ -505,10 +505,7 @@ export default (describe, test) =>
             expression: {
               type: 'TemplateLiteral',
               expressions: [{type: 'SequenceExpression', expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}]}],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`x${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}y`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`x${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}y`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -526,10 +523,7 @@ export default (describe, test) =>
             expression: {
               type: 'TemplateLiteral',
               expressions: [{type: 'SequenceExpression', expressions: [{type: 'Identifier', name: 'a'}, {type: 'Identifier', name: 'b'}]}],
-              quasis: [
-                {type: 'TemplateElement', tail: false, value: {raw: '`x${', cooked: '<TODO>'}},
-                {type: 'TemplateElement', tail: true, value: {raw: '}y`', cooked: '<TODO>'}},
-              ],
+              quasis: [{type: 'TemplateElement', tail: false, value: {raw: '`x${', cooked: '<TODO>'}}, {type: 'TemplateElement', tail: true, value: {raw: '}y`', cooked: '<TODO>'}}],
             },
           },
         ],
@@ -684,7 +678,6 @@ export default (describe, test) =>
     });
 
     describe('toplevel statement expression', _ => {
-
       test('after a number', {
         code: '0,1;',
         ast: {

@@ -2,7 +2,6 @@ import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR} from '../../../src/zetokenizer.m
 
 export default (describe, test) =>
   describe('call expression', _ => {
-
     test('function call, no args', {
       code: 'foo()',
       ast: {
@@ -155,33 +154,12 @@ export default (describe, test) =>
           },
         ],
       },
-      tokens: [
-        $IDENT,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $PUNCTUATOR,
-        $IDENT,
-        $PUNCTUATOR,
-        $ASI,
-      ],
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
     });
 
     describe('trailing comma', _ => {
-
       describe('enabled', _ => {
-
         [undefined, 8, 9, Infinity].forEach(ES => {
-
           test('not on no args', {
             code: 'foo(,);',
             ES,
@@ -246,9 +224,7 @@ export default (describe, test) =>
       });
 
       describe('disabled', _ => {
-
         [6, 7].forEach(ES => {
-
           test.fail('not on no args', {
             code: 'foo(,);',
             ES,
@@ -286,7 +262,6 @@ export default (describe, test) =>
       // The object must be a pattern because of the assignment
 
       describe('with plain func name', _ => {
-
         test.pass('when the object is an expression', {
           code: 'foo({a})',
         });
@@ -305,7 +280,6 @@ export default (describe, test) =>
       });
 
       describe('when the func name is `async`', _ => {
-
         test.pass('when the object is an expression', {
           code: 'async({a})',
         });
@@ -324,7 +298,6 @@ export default (describe, test) =>
       });
 
       describe('when the func name is `yield`', _ => {
-
         test.fail_strict('when the object is an expression', {
           code: 'yield({a})',
         });

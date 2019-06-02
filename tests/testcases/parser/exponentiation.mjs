@@ -2,9 +2,7 @@ import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $STRING_SINGLE} 
 
 export default (describe, test) =>
   describe('exponentiation op', _ => {
-
     describe('statement', _ => {
-
       test('base case', {
         code: '2 ** 4',
         ast: {
@@ -354,7 +352,6 @@ export default (describe, test) =>
     });
 
     describe('expr', _ => {
-
       test('base case', {
         code: '(2 ** 4)',
         ast: {
@@ -659,4 +656,3 @@ export default (describe, test) =>
       });
     });
   });
-

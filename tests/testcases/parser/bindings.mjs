@@ -2,7 +2,6 @@ import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAI
 
 export default (describe, test) =>
   describe('tests related to bindings', _ => {
-
     // in strict mode only;
     // dupe param decls, dupe local bindings, binding that also appears as param
     // arrow params somehow
@@ -38,7 +37,6 @@ export default (describe, test) =>
     });
 
     describe('for', _ => {
-
       // https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-early-errors
       // > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in the
       //   VarDeclaredNames of Statement.
@@ -104,7 +102,6 @@ export default (describe, test) =>
     });
 
     describe('catch', _ => {
-
       // https://tc39.github.io/ecma262/#sec-try-statement-static-semantics-early-errors
       // > It is a Syntax Error if any element of the BoundNames of CatchParameter also occurs in the LexicallyDeclaredNames of Block.
       // > It is a Syntax Error if any element of the BoundNames of CatchParameter also occurs in the VarDeclaredNames of Block.
@@ -140,7 +137,6 @@ export default (describe, test) =>
       });
 
       describe('for-in edge case', _ => {
-
         // https://tc39.github.io/ecma262/#sec-variablestatements-in-catch-blocks
         // > It is a Syntax Error if any element of the BoundNames of CatchParameter also occurs in the VarDeclaredNames of Block
         //   unless CatchParameter is CatchParameter:BindingIdentifier and that element is only bound by
@@ -151,7 +147,6 @@ export default (describe, test) =>
         // (explicitly not for-of, which makes sense as its only for backwards compat and for-of is too new)
 
         describe('without webcompat', _ => {
-
           test.fail('catch var as var statement', {
             code: 'try {} catch (e) { var e = x; }',
           });
@@ -208,7 +203,6 @@ export default (describe, test) =>
         });
 
         describe('with webcompat', _ => {
-
           test.pass('catch var as var statement', {
             code: 'try {} catch (e) { var e = x; }',
             WEB: true,
@@ -283,9 +277,7 @@ export default (describe, test) =>
     });
 
     describe('functions', _ => {
-
       describe('dupe args with local bindings', _ => {
-
         // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
         // > It is a Syntax Error if any element of the BoundNames of FormalParameters also occurs in the LexicallyDeclaredNames of FunctionBody.
         //   > The LexicallyDeclaredNames of a FunctionBody does not include identifiers bound using var or function declarations.
@@ -327,17 +319,14 @@ export default (describe, test) =>
       });
 
       describe('dupe args definitions', _ => {
-
         // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
         // > It is a Syntax Error if (IsSimpleParameterList of FormalParameterList is false or strict mode is true)
         //   and BoundNames of FormalParameterList contains any duplicate elements.
 
         describe('simple args', _ => {
-
           // dupe bindings are okay in simple args in sloppy script
 
           describe('without explicit directive', _ => {
-
             test.fail_strict('a a', {
               code: 'function f(a, a) {}',
             });
@@ -375,7 +364,6 @@ export default (describe, test) =>
           });
 
           describe('with explicit directive', _ => {
-
             test('a a', {
               code: 'function f(a, a) {"use strict"}',
               throws: 'bound',
@@ -419,7 +407,6 @@ export default (describe, test) =>
         });
 
         describe('complex args', _ => {
-
           test('a a', {
             code: 'function f([a, a]) {}',
             throws: 'bound',
@@ -468,7 +455,6 @@ export default (describe, test) =>
       });
 
       describe('dupe local vars', _ => {
-
         // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
         // > It is a Syntax Error if any element of the LexicallyDeclaredNames of FunctionStatementList also occurs in the VarDeclaredNames of FunctionStatementList.
         //   > The LexicallyDeclaredNames of a FunctionBody does not include identifiers bound using var or function declarations.
@@ -523,14 +509,12 @@ export default (describe, test) =>
       });
 
       describe('rebinding func name', _ => {
-
         // the func name is lexical but in its own scope, even for func exprs, however;
         // https://tc39.github.io/ecma262/#sec-block-static-semantics-toplevellexicallydeclarednames
         // > At the top level of a function, or script, function declarations are treated like var declarations
         //   rather than like lexical declarations.
 
         describe('plain function', _ => {
-
           test.pass('func decl and var', {
             code: 'function f(){ var f }',
           });
@@ -571,7 +555,6 @@ export default (describe, test) =>
         });
 
         describe('async function', _ => {
-
           test.pass('func decl and var', {
             code: 'async function f(){ var f }',
           });
@@ -598,7 +581,6 @@ export default (describe, test) =>
         });
 
         describe('generator function', _ => {
-
           test.pass('func decl and var', {
             code: 'function *f(){ var f }',
           });
@@ -625,7 +607,6 @@ export default (describe, test) =>
         });
 
         describe('async generator function', _ => {
-
           test.pass('func decl and var', {
             code: 'async function *f(){ var f }',
           });
@@ -654,9 +635,7 @@ export default (describe, test) =>
     });
 
     describe('arrow args', _ => {
-
       describe('dupe between args and local bindings', _ => {
-
         // https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
         // > It is a Syntax Error if any element of the BoundNames of ArrowParameters also occurs in the LexicallyDeclaredNames of ConciseBody.
 
@@ -697,7 +676,6 @@ export default (describe, test) =>
       });
 
       describe('dupe args definitions', _ => {
-
         // https://tc39.github.io/ecma262/#prod-ArrowFormalParameters
         // https://tc39.github.io/ecma262/#prod-UniqueFormalParameters
         // https://tc39.github.io/ecma262/#prod-FormalParameters
@@ -706,7 +684,6 @@ export default (describe, test) =>
         // (stricter than func decls since there's no exception for simple args and sloppy mode)
 
         describe('simple args', _ => {
-
           test('a a', {
             code: '(a, a) => {}',
             throws: 'bound',
@@ -749,7 +726,6 @@ export default (describe, test) =>
         });
 
         describe('complex args', _ => {
-
           test('a a', {
             code: '([a, a]) => {}',
             throws: 'bound',
@@ -799,11 +775,8 @@ export default (describe, test) =>
     });
 
     describe('methods', _ => {
-      
       describe('object literal', _ => {
-
         describe('dupe args with local bindings', _ => {
-
           // https://tc39.github.io/ecma262/#sec-method-definitions-static-semantics-early-errors
           // > It is a Syntax Error if any element of the BoundNames of UniqueFormalParameters also occurs in the LexicallyDeclaredNames of FunctionBody.
           //   > The LexicallyDeclaredNames of a FunctionBody does not include identifiers bound using var or function declarations.
@@ -833,13 +806,11 @@ export default (describe, test) =>
         });
 
         describe('dupe args definitions', _ => {
-
           // https://tc39.github.io/ecma262/#sec-method-definitions-static-semantics-early-errors
           // > It is a Syntax Error if any element of the BoundNames of UniqueFormalParameters also occurs in the
           //   LexicallyDeclaredNames of FunctionBody.
 
           describe('simple args', _ => {
-
             test('a a', {
               code: 'o = {f(a, a) {}}',
               throws: 'bound',
@@ -882,7 +853,6 @@ export default (describe, test) =>
           });
 
           describe('complex args', _ => {
-
             test('a a', {
               code: 'o = {f([a, a]) {}}',
               throws: 'bound',
@@ -931,7 +901,6 @@ export default (describe, test) =>
         });
 
         describe('dupe local vars', _ => {
-
           // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
           // > It is a Syntax Error if any element of the LexicallyDeclaredNames of FunctionStatementList also occurs in the VarDeclaredNames of FunctionStatementList.
           //   > The LexicallyDeclaredNames of a FunctionBody does not include identifiers bound using var or function declarations.
@@ -983,9 +952,7 @@ export default (describe, test) =>
       });
 
       describe('classes', _ => {
-
         describe('dupe args with local bindings', _ => {
-
           // https://tc39.github.io/ecma262/#sec-method-definitions-static-semantics-early-errors
           // > It is a Syntax Error if any element of the BoundNames of UniqueFormalParameters also occurs in the LexicallyDeclaredNames of FunctionBody.
           //   > The LexicallyDeclaredNames of a FunctionBody does not include identifiers bound using var or function declarations.
@@ -1015,13 +982,11 @@ export default (describe, test) =>
         });
 
         describe('dupe args definitions', _ => {
-
           // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
           // > It is a Syntax Error if (IsSimpleParameterList of FormalParameterList is false or strict mode is true)
           //   and BoundNames of FormalParameterList contains any duplicate elements.
 
           describe('simple args', _ => {
-
             test('a a', {
               code: 'class o {f(a, a) {}}',
               throws: 'bound',
@@ -1064,7 +1029,6 @@ export default (describe, test) =>
           });
 
           describe('complex args', _ => {
-
             test('a a', {
               code: 'class o {f([a, a]) {}}',
               throws: 'bound',
@@ -1113,7 +1077,6 @@ export default (describe, test) =>
         });
 
         describe('dupe local vars', _ => {
-
           // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
           // > It is a Syntax Error if any element of the LexicallyDeclaredNames of FunctionStatementList also occurs in the VarDeclaredNames of FunctionStatementList.
           //   > The LexicallyDeclaredNames of a FunctionBody does not include identifiers bound using var or function declarations.
@@ -1166,7 +1129,6 @@ export default (describe, test) =>
     });
 
     describe('import', _ => {
-
       // https://tc39.github.io/ecma262/#sec-imports-static-semantics-early-errors
       // > It is a Syntax Error if the BoundNames of ImportDeclaration contains any duplicate entries.
 
@@ -1175,7 +1137,6 @@ export default (describe, test) =>
       // immutable indirect binding for the name N. A binding must not already exist in this Environment Record for N.
 
       describe('in a single import', _ => {
-
         test.pass('a b', {
           code: 'import {a, b} from "c"',
           SCRIPT: {throws: 'module'},
@@ -1237,7 +1198,6 @@ export default (describe, test) =>
       });
 
       describe('in a multiple imports', _ => {
-
         test.pass('a b', {
           code: 'import {a} from "c"; import {b} from "c"',
           SCRIPT: {throws: 'module'},
@@ -1288,7 +1248,6 @@ export default (describe, test) =>
     });
 
     describe('export', _ => {
-
       // https://tc39.github.io/ecma262/#sec-module-semantics-static-semantics-early-errors
       // > It is a Syntax Error if the ExportedNames of ModuleItemList contains any duplicate entries.
       //   > The duplicate ExportedNames rule implies that multiple export default ExportDeclaration items within a ModuleBody is a Syntax Error.
@@ -1296,7 +1255,6 @@ export default (describe, test) =>
       //   the VarDeclaredNames of ModuleItemList, or the LexicallyDeclaredNames of ModuleItemList.
 
       describe('in a single export', _ => {
-
         test.pass('a b', {
           code: 'var a,b; export {a, b}',
           SCRIPT: {throws: 'module'},
@@ -1388,7 +1346,6 @@ export default (describe, test) =>
       });
 
       describe('multiple exports', _ => {
-
         test.pass('a b', {
           code: 'var a,b; export {a}; export {b};',
           SCRIPT: {throws: 'module'},
@@ -1477,7 +1434,6 @@ export default (describe, test) =>
       });
 
       describe('default', _ => {
-
         test('double default', {
           code: 'export default function(){}; export default function(){};',
           SCRIPT: {throws: 'module'},
@@ -1504,7 +1460,6 @@ export default (describe, test) =>
     });
 
     describe('switch', _ => {
-
       // https://tc39.github.io/ecma262/#sec-switch-statement-static-semantics-early-errors
       // > It is a Syntax Error if the LexicallyDeclaredNames of CaseBlock contains any duplicate entries.
       // > It is a Syntax Error if any element of the LexicallyDeclaredNames of CaseBlock also occurs in the VarDeclaredNames of CaseBlock.
@@ -1583,7 +1538,6 @@ export default (describe, test) =>
     });
 
     describe('global', _ => {
-
       // https://tc39.github.io/ecma262/#sec-scripts-static-semantics-early-errors
       // https://tc39.github.io/ecma262/#sec-module-semantics-static-semantics-early-errors
       // > It is a Syntax Error if the LexicallyDeclaredNames of ScriptBody contains any duplicate entries.
@@ -1635,7 +1589,6 @@ export default (describe, test) =>
     });
 
     describe('block', _ => {
-
       // https://tc39.github.io/ecma262/#sec-block-duplicates-allowed-static-semantics
       // duplicate function decl names do not cause an error in BlockStatement and SwitchStatement
 
@@ -1650,31 +1603,31 @@ export default (describe, test) =>
       });
 
       test.pass('can redeclare arg as var', {
-        code: 'function f(x) {var x}'
+        code: 'function f(x) {var x}',
       });
 
       test.pass('can redeclare arg as blocked var', {
-        code: 'function f(x) {{var x}}'
+        code: 'function f(x) {{var x}}',
       });
 
       test.pass('can redeclare arg as blocked let', {
-        code: 'function f(x) {{let x}}'
+        code: 'function f(x) {{let x}}',
       });
 
       test.pass('can redeclare func name as var', {
-        code: 'function f() {var f}'
+        code: 'function f() {var f}',
       });
 
       test.pass('can redeclare func name as blocked var', {
-        code: 'function f() {{var f}}'
+        code: 'function f() {{var f}}',
       });
 
       test.pass('can redeclare func name as let', {
-        code: 'function f() {let f}'
+        code: 'function f() {let f}',
       });
 
       test.pass('can redeclare func name as blocked let', {
-        code: 'function f() {{let f}}'
+        code: 'function f() {{let f}}',
       });
 
       test.fail('var and let in same lexical scope', {
@@ -1703,9 +1656,7 @@ export default (describe, test) =>
       });
 
       describe('annex b function statement exception', _ => {
-
         describe('without webcompat', _ => {
-
           test.fail('in block, illegal without webcompat', {
             code: '{ function f() {} ; function f() {} }',
           });
@@ -1734,7 +1685,6 @@ export default (describe, test) =>
         });
 
         describe('with webcompat', _ => {
-
           test('in block, in webcompat, lexical declarations should not trigger syntax error if only bound to function decl names', {
             code: '{ function f() {} ; function f() {} }',
             WEB: true,
@@ -1835,7 +1785,6 @@ export default (describe, test) =>
     });
 
     describe('var/lex dupe checks', _ => {
-
       // In general, you can not declare a lex binding if a var binding exists on the same statement level or below
       // but this check stops at function boundaries. There are no further restriction for var bindings beyond that.
 
@@ -1892,5 +1841,3 @@ export default (describe, test) =>
       });
     });
   });
-
-

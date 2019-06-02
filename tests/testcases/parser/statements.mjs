@@ -2,17 +2,13 @@ import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
   describe('statements and declarations', _ => {
-
     describe('cannot nest a declaration inside a non-block statement', _ => {
-
       // there are a bunch of declarations and statements to mix-and-match test. anything with sub statements / decls
       // if/else, try/catch/finally, for, while, do, block, case/default, with
       // const, let, class, function
 
       describe('function', _ => {
-
         describe('regular', _ => {
-
           test.fail('if', {
             code: 'if (x) function f() {}',
           });
@@ -68,7 +64,6 @@ export default (describe, test) =>
         });
 
         describe('async', _ => {
-
           test.fail('if', {
             code: 'if (x) async function f() {}',
           });
@@ -124,7 +119,6 @@ export default (describe, test) =>
         });
 
         describe('generator', _ => {
-
           test.fail('if', {
             code: 'if (x) function * f() {}',
           });
@@ -181,9 +175,8 @@ export default (describe, test) =>
 
         // TODO: async generator too
       });
-      
-      describe('let', _ => {
 
+      describe('let', _ => {
         test.fail('if', {
           code: 'if (x) let y = x',
         });
@@ -239,7 +232,6 @@ export default (describe, test) =>
       });
 
       describe('const', _ => {
-
         test.fail('if', {
           code: 'if (x) const y = x',
         });
@@ -295,7 +287,6 @@ export default (describe, test) =>
       });
 
       describe('class', _ => {
-
         test.fail('if', {
           code: 'if (x) class X {}',
         });

@@ -51,9 +51,7 @@ export default (describe, test) =>
     });
 
     describe('catch arg', _ => {
-
       describe('present', _ => {
-
         test('no arg', {
           code: 'try {} catch(){}',
           throws: 'Missing catch clause',
@@ -233,13 +231,10 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
-
       });
 
       [undefined, 9, Infinity].forEach(VER => {
-
-        describe('optional catch binding supported from ES9 upward (version=`'+VER+'`)', _ => {
-
+        describe('optional catch binding supported from ES9 upward (version=`' + VER + '`)', _ => {
           test('try/catch no finally', {
             code: 'try {} catch {}',
             ES: VER,
@@ -300,9 +295,7 @@ export default (describe, test) =>
       });
 
       [6, 7, 8, 9].forEach(VER => {
-
-        describe('optional catch binding not supported in ES8 downward (version=`'+VER+'`)', _ => {
-
+        describe('optional catch binding not supported in ES8 downward (version=`' + VER + '`)', _ => {
           test.pass('try/catch no finally', {
             code: 'try {} catch {}',
             ES: VER,

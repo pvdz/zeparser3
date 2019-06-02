@@ -445,7 +445,6 @@ export default (describe, test) =>
     });
 
     describe('scoping', _ => {
-
       test('block', {
         code: '{import {x} from "y";}',
         SCRIPT: {throws: 'module'},
@@ -562,5 +561,5 @@ export default (describe, test) =>
         SCRIPT: {throws: 'module'},
         throws: 'top level',
       });
-    })
+    });
   });

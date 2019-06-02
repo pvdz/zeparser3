@@ -2,7 +2,6 @@ import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR} from '../../../src/zetokenizer.m
 
 export default (describe, test) =>
   describe('return statement', _ => {
-
     test('return, no value, semi', {
       code: 'function f(){   return;    }',
       ast: {
@@ -282,7 +281,6 @@ export default (describe, test) =>
     });
 
     describe('return with option', _ => {
-
       test('return, no value, eof', {
         code: 'return',
         OPTIONS: {allowGlobalReturn: true},

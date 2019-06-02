@@ -5,11 +5,10 @@ import fs from 'fs';
 import path from 'path';
 
 // node does not expose __dirname under module mode, but we can use import.meta to get it
-let filePath = import.meta.url.replace(/^file:\/\//,'');
+let filePath = import.meta.url.replace(/^file:\/\//, '');
 let dirname = path.dirname(filePath);
 
 const PATH262 = path.join(dirname, '../../../ignore/test262/test');
-
 
 let files = {};
 function read(path, file) {
@@ -17,7 +16,9 @@ function read(path, file) {
   if (fs.statSync(combo).isFile()) {
     if (file.slice(-3) === '.js') {
       let lcname = combo.toLowerCase();
-      function has(s) { return lcname.includes(s.toLowerCase()); }
+      function has(s) {
+        return lcname.includes(s.toLowerCase());
+      }
       files[combo] = {
         path: combo,
         contents: fs.readFileSync(combo),
@@ -26,9 +27,7 @@ function read(path, file) {
           // TODO: file report; I think the following rule applies here and as such should not throw:
           // https://tc39.github.io/ecma262/#sec-__proto__-property-names-in-object-initializers
           // > it is not applied when initially parsing a CoverParenthesizedExpressionAndArrowParameterList or
-          has('annexB/language/expressions/object/__proto__-duplicate.js') ||
-
-          false
+          has('annexB/language/expressions/object/__proto__-duplicate.js') || false,
       };
     }
   } else {
@@ -68,7 +67,9 @@ export default function f(describe, test, list = files) {
           debug: 'test6262 file path: ' + obj.path,
         };
 
-        function has(s) { return testFileName.toLowerCase().includes(s.toLowerCase()); }
+        function has(s) {
+          return testFileName.toLowerCase().includes(s.toLowerCase());
+        }
 
         if (obj.skip) {
           testObj.SKIP = true;
@@ -90,7 +91,6 @@ export default function f(describe, test, list = files) {
             has('delete/11.4.1-2-3.js') || // delete true
             has('labeled/value-await-non-module-escaped.js') || // asserts `await` can be a label name in sloppy and strict, only valid in SCRIPT goal
             has('labeled/value-await-non-module.js') || // asserts `await` can be a label name in sloppy and strict, only valid in SCRIPT goal
-
             // tests that dont work because a func decl in global is assumed to be `var`, which is `lex` in module goal
             has('RegExp/prototype/exec/S15.10.6.2_A1_T9') ||
             has('RegExp/prototype/test/S15.10.6.3_A1_T9') ||
@@ -102,7 +102,8 @@ export default function f(describe, test, list = files) {
             has('language/statements/function/S13_A19_T1') ||
             has('language/statements/function/S13_A6_T1') ||
             has('language/statements/function/S13_A6_T2') ||
-          false) {
+            false
+          ) {
             testObj.MODULE = {SKIP: true};
           }
 
@@ -131,4 +132,4 @@ export default function f(describe, test, list = files) {
         test(testFileName, testObj);
       }
     }
-};
+}

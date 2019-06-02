@@ -1,11 +1,8 @@
 import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 
 export default (describe, test) =>
-
   describe('random stuff', _ => {
-
     describe('#18', _ => {
-
       // Just putting the tests here
 
       `
@@ -16,25 +13,28 @@ export default (describe, test) =>
         async function foo(a = () => { "use strict"; return eval("x"); }) {}
         async function foo(a = () => { "use strict"; return eval("x") }) { var x; return a(); }
       `
-      .split('\n').map(s => s.trim().replace(/\\n/g, '\n')).filter(Boolean).forEach((code, i) => {
-
-        test.pass('/' + i, {
-          code,
+        .split('\n')
+        .map(s => s.trim().replace(/\\n/g, '\n'))
+        .filter(Boolean)
+        .forEach((code, i) => {
+          test.pass('/' + i, {
+            code,
+          });
         });
-      });
-
 
       `
         async (a = b => await (0)) => {}
         /**/ --> comment
         while(true) let[a] = 0
       `
-      .split('\n').map(s => s.trim().replace(/\\n/g, '\n')).filter(Boolean).forEach((code, i) => {
-
-        test.fail_strict('/' + i, {
-          code,
+        .split('\n')
+        .map(s => s.trim().replace(/\\n/g, '\n'))
+        .filter(Boolean)
+        .forEach((code, i) => {
+          test.fail_strict('/' + i, {
+            code,
+          });
         });
-      });
 
       // one test per line. they all fail
       `
@@ -99,16 +99,18 @@ export default (describe, test) =>
         for (((a,b)) in c);
         for ({}.x);
         for ([...[a]] = 0 in {});
-      `.split('\n').map(s => s.trim().replace(/\\n/g, '\n')).filter(Boolean).forEach((code, i) => {
-
-        test.fail('/' + i, {
-          code,
+      `
+        .split('\n')
+        .map(s => s.trim().replace(/\\n/g, '\n'))
+        .filter(Boolean)
+        .forEach((code, i) => {
+          test.fail('/' + i, {
+            code,
+          });
         });
-      });
     });
 
     describe('verified', _ => {
-
       test.pass('should pass', {
         code: 'for ({[a]: ""[b] = c} of d) {}',
         // This one is actually valid
@@ -159,10 +161,7 @@ export default (describe, test) =>
     });
 
     test.fail('newline after async in method not proccing error in v8', {
-      code: [
-        'class K extends {} {;async\\n async *1(){}}',
-      ],
+      code: ['class K extends {} {;async\\n async *1(){}}'],
       desc: 'fuzzed',
     });
   });
-

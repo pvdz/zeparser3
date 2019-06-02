@@ -176,25 +176,7 @@ export default (describe, test) =>
             },
           ],
         },
-        tokens: [
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $IDENT,
-          $PUNCTUATOR,
-          $PUNCTUATOR,
-        ],
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
 
       test.pass('you can have `in` inside the ternary', {
@@ -202,7 +184,6 @@ export default (describe, test) =>
       });
 
       describe('destructuring non-binding cases', _ => {
-
         test.pass('array that would be valid to destructure', {
           code: 'for ([x];;);',
         });
@@ -277,7 +258,6 @@ export default (describe, test) =>
       });
 
       describe('lhs assign expr edge cases', _ => {
-
         test.pass('parenless arrow lhs', {
           code: 'for (x=>{};;);',
         });
@@ -371,7 +351,7 @@ export default (describe, test) =>
         });
       });
 
-      test("postfix update in for-header", {
+      test('postfix update in for-header', {
         code: 'for (x--;;);',
         ast: {
           type: 'Program',
@@ -393,9 +373,9 @@ export default (describe, test) =>
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
 
-      test("postfix on yield in for-header", {
+      test('postfix on yield in for-header', {
         code: 'for (yield[g]--;;);',
-        STRICT: { throws: true },
+        STRICT: {throws: true},
         ast: {
           type: 'Program',
           body: [
@@ -456,7 +436,6 @@ export default (describe, test) =>
       });
 
       describe('binary ops in lhs', _ => {
-
         test('for header !==', {
           code: 'for ([] !== x;;);',
           desc: 'regression',
@@ -506,7 +485,6 @@ export default (describe, test) =>
       });
 
       describe('double proto', _ => {
-
         test('double proto of lhs obj no web compat', {
           code: 'for ({__proto__: 1, __proto__: 2};;);',
           ast: {
@@ -804,10 +782,7 @@ export default (describe, test) =>
               init: {
                 type: 'VariableDeclaration',
                 kind: 'var',
-                declarations: [
-                  {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: {type: 'Literal', value: '<TODO>', raw: '1'}},
-                  {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'b'}, init: null},
-                ],
+                declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: {type: 'Literal', value: '<TODO>', raw: '1'}}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'b'}, init: null}],
               },
               test: null,
               update: null,
@@ -828,10 +803,7 @@ export default (describe, test) =>
               init: {
                 type: 'VariableDeclaration',
                 kind: 'var',
-                declarations: [
-                  {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: null},
-                  {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'b'}, init: {type: 'Literal', value: '<TODO>', raw: '1'}},
-                ],
+                declarations: [{type: 'VariableDeclarator', id: {type: 'Identifier', name: 'a'}, init: null}, {type: 'VariableDeclarator', id: {type: 'Identifier', name: 'b'}, init: {type: 'Literal', value: '<TODO>', raw: '1'}}],
               },
               test: null,
               update: null,
@@ -868,7 +840,6 @@ export default (describe, test) =>
     });
 
     describe('for-in', _ => {
-
       test('empty for-in', {
         code: 'for (a in b);',
         ast: {
@@ -1064,23 +1035,7 @@ export default (describe, test) =>
               ],
             },
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $NUMBER_DEC,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('grouped init left of `in`', {
@@ -1126,24 +1081,7 @@ export default (describe, test) =>
               ],
             },
           },
-          tokens: [
-            $IDENT,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-            $NUMBER_DEC,
-            $PUNCTUATOR,
-            $IDENT,
-            $IDENT,
-            $PUNCTUATOR,
-            $PUNCTUATOR,
-          ],
+          tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
 
         test('comma expression right of `in`', {
@@ -1650,110 +1588,110 @@ export default (describe, test) =>
 
       // In web compat assignments are allowed in the lhs of a `for-in` with `var` decl (but that's it)
       // https://tc39.github.io/ecma262/#sec-initializers-in-forin-statement-heads
-      [true, false].forEach(WEB => describe('webcompat='+WEB, _ => {
+      [true, false].forEach(WEB =>
+        describe('webcompat=' + WEB, _ => {
+          describe('regressions #8', _ => {
+            // As reported by https://github.com/pvdz/zeparser3/issues/8
 
-        describe('regressions #8', _ => {
-          // As reported by https://github.com/pvdz/zeparser3/issues/8
+            test.fail('lhs rest with trailing comma', {
+              code: 'for ([...x,] in [[]]);',
+              WEB,
+            });
 
-          test.fail('lhs rest with trailing comma', {
-            code: 'for ([...x,] in [[]]);',
-            WEB,
+            test.fail('lhs empty arr with number init', {
+              code: 'for ([] = 0 in {});',
+              WEB,
+            });
+
+            test.fail('lhs arr with rest with number init', {
+              code: 'for ([...[a]] = 0 in {});',
+              WEB,
+            });
+
+            test.fail('lhs obj with init', {
+              code: 'for ({x} = 0 in {});',
+              WEB,
+            });
+
+            test.fail('lhs obj with prop init', {
+              code: 'for ({p: x = 0} = 0 in {});',
+              WEB,
+            });
+
+            test.fail('for await with arr destruct lhs', {
+              code: 'async function f() { for await ([x] in y) {} }',
+              WEB,
+            });
+
+            test.fail('for await with obj destruct lhs', {
+              code: 'async function f() { for await ({x} in y) {} }',
+              WEB,
+            });
+
+            test.fail('for await with valid strange lhs', {
+              code: 'async function f() { for await ("foo".x in y) {} }',
+              WEB,
+            });
+
+            test.fail('for await with valid grouped lhs', {
+              code: 'async function f() { for await ((x) in y) {} }',
+              WEB,
+            });
+
+            test.fail('for await with var', {
+              code: 'async function f() { for await (var x in y) {} }',
+              WEB,
+            });
+
+            test.fail('for await with let', {
+              code: 'async function f() { for await (let x in y) {} }',
+              WEB,
+            });
+
+            test.fail('for await with const', {
+              code: 'async function f() { for await (const x in y) {} }',
+              WEB,
+            });
+
+            test.fail('lhs assignment', {
+              code: 'for (x = 0 in {});',
+              WEB,
+            });
+
+            test.fail('lhs dynamic property assignment', {
+              code: 'for(o[0] = 0 in {});',
+              WEB,
+            });
+
+            test.fail('lhs paren wrapped unary increment', {
+              code: 'for ((a++) in c);',
+              WEB,
+            });
+
+            test.fail('lhs plus-prefixed expr', {
+              code: 'for (+a().b in c);',
+              WEB,
+            });
+
+            test.fail('lhs is void', {
+              code: 'for (void a.b in c);',
+              WEB,
+            });
+
+            test.fail('lhs is regex', {
+              code: 'for (/foo/ in {});',
+              WEB,
+            });
+
+            test.pass('sneaky lhs contains `in`', {
+              code: 'for ((a in b).x in {});',
+              WEB,
+            });
           });
-
-          test.fail('lhs empty arr with number init', {
-            code: 'for ([] = 0 in {});',
-            WEB,
-          });
-
-          test.fail('lhs arr with rest with number init', {
-            code: 'for ([...[a]] = 0 in {});',
-            WEB,
-          });
-
-          test.fail('lhs obj with init', {
-            code: 'for ({x} = 0 in {});',
-            WEB,
-          });
-
-          test.fail('lhs obj with prop init', {
-            code: 'for ({p: x = 0} = 0 in {});',
-            WEB,
-          });
-
-          test.fail('for await with arr destruct lhs', {
-            code: 'async function f() { for await ([x] in y) {} }',
-            WEB,
-          });
-
-          test.fail('for await with obj destruct lhs', {
-            code: 'async function f() { for await ({x} in y) {} }',
-            WEB,
-          });
-
-          test.fail('for await with valid strange lhs', {
-            code: 'async function f() { for await ("foo".x in y) {} }',
-            WEB,
-          });
-
-          test.fail('for await with valid grouped lhs', {
-            code: 'async function f() { for await ((x) in y) {} }',
-            WEB,
-          });
-
-          test.fail('for await with var', {
-            code: 'async function f() { for await (var x in y) {} }',
-            WEB,
-          });
-
-          test.fail('for await with let', {
-            code: 'async function f() { for await (let x in y) {} }',
-            WEB,
-          });
-
-          test.fail('for await with const', {
-            code: 'async function f() { for await (const x in y) {} }',
-            WEB,
-          });
-
-          test.fail('lhs assignment', {
-            code: 'for (x = 0 in {});',
-            WEB,
-          });
-
-          test.fail('lhs dynamic property assignment', {
-            code: 'for(o[0] = 0 in {});',
-            WEB,
-          });
-
-          test.fail('lhs paren wrapped unary increment', {
-            code: 'for ((a++) in c);',
-            WEB,
-          });
-
-          test.fail('lhs plus-prefixed expr', {
-            code: 'for (+a().b in c);',
-            WEB,
-          });
-
-          test.fail('lhs is void', {
-            code: 'for (void a.b in c);',
-            WEB,
-          });
-
-          test.fail('lhs is regex', {
-            code: 'for (/foo/ in {});',
-            WEB,
-          });
-
-          test.pass('sneaky lhs contains `in`', {
-            code: 'for ((a in b).x in {});',
-            WEB,
-          });
-        });
-      }));
+        }),
+      );
 
       describe('lhs edge cases', _ => {
-
         test.fail('parenless arrow lhs', {
           code: 'for (x=>{} in y);',
         });
@@ -1838,7 +1776,6 @@ export default (describe, test) =>
       });
 
       describe('binary ops in lhs', _ => {
-
         test.fail('init part can be any expression', {
           code: 'for (a + b in obj);',
         });
@@ -1870,13 +1807,15 @@ export default (describe, test) =>
         code: 'for (a of b);',
         ast: {
           type: 'Program',
-          body: [{
-            type: 'ForOfStatement',
-            left: {type: 'Identifier', name: 'a'},
-            right: {type: 'Identifier', name: 'b'},
-            await: false,
-            body: {type: 'EmptyStatement'}
-          }],
+          body: [
+            {
+              type: 'ForOfStatement',
+              left: {type: 'Identifier', name: 'a'},
+              right: {type: 'Identifier', name: 'b'},
+              await: false,
+              body: {type: 'EmptyStatement'},
+            },
+          ],
         },
         tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
@@ -2179,7 +2118,7 @@ export default (describe, test) =>
 
         test.fail('lhs plus-prefixed expr', {
           code: 'for (+a().b of c);',
-        })
+        });
 
         test.fail('lhs is void', {
           code: 'for (void a.b of c);',
@@ -2195,7 +2134,6 @@ export default (describe, test) =>
       });
 
       describe('lhs edge cases', _ => {
-
         test.fail('parenless arrow lhs', {
           code: 'for (x=>{} of y);',
         });
@@ -2289,7 +2227,6 @@ export default (describe, test) =>
       });
 
       describe('binary ops in lhs', _ => {
-
         test.fail('init part can be any expression', {
           code: 'for (a + b of obj);',
         });
@@ -2336,10 +2273,11 @@ export default (describe, test) =>
     });
 
     describe('for-await', _ => {
-
       test('for await of inside async func', {
         code: 'async function f(){ for await (x of y) {} }',
-        callback(ast, tokens, astJson) { return astJson.includes('"await":true'); },
+        callback(ast, tokens, astJson) {
+          return astJson.includes('"await":true');
+        },
         ast: {
           type: 'Program',
           body: [
@@ -2455,7 +2393,6 @@ export default (describe, test) =>
       });
 
       describe('regressions as reported in #10', _ => {
-
         // These all fail because they have an assignment left of the `of` or `in` keyword
 
         test.fail('1', {
@@ -2467,7 +2404,7 @@ export default (describe, test) =>
         });
 
         test.fail('3', {
-          code: 'async function f() { \'use strict\'; for await ({a} = 1 of []); }',
+          code: "async function f() { 'use strict'; for await ({a} = 1 of []); }",
         });
 
         test.fail('4', {
@@ -2484,7 +2421,6 @@ export default (describe, test) =>
       });
 
       describe('regressions (fixed) as reported in #10', _ => {
-
         test.pass('1', {
           code: 'async function f() { for await ([a] of []); }',
         });
@@ -2494,7 +2430,7 @@ export default (describe, test) =>
         });
 
         test.pass('3', {
-          code: 'async function f() { \'use strict\'; for await ({a} of []); }',
+          code: "async function f() { 'use strict'; for await ({a} of []); }",
         });
 
         test.pass('4', {

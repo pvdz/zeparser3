@@ -3,11 +3,8 @@ import {$ASI, $IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
 // ++ and -- are UpdateExpression nodes in the spec, not unary operators
 
 export default (describe, test) =>
-
   describe('update (increment/decrement) ops', _ => {
-
     describe('incremental prefix', _ => {
-
       describe('sans newline', _ => {
         test('base', {
           code: '++a',
@@ -422,7 +419,6 @@ export default (describe, test) =>
     });
 
     describe('decremental prefix', _ => {
-
       describe('sans newline', _ => {
         test('base', {
           code: '--a',
@@ -793,7 +789,6 @@ export default (describe, test) =>
     });
 
     describe('incremental suffix', _ => {
-
       describe('sans newline', _ => {
         test('base', {
           code: 'a++',
@@ -1038,7 +1033,6 @@ export default (describe, test) =>
     });
 
     describe('decremental suffix', _ => {
-
       describe('sans newline', _ => {
         test('base', {
           code: 'a--',
@@ -1275,7 +1269,6 @@ export default (describe, test) =>
     });
 
     describe('update expression ambiguity', _ => {
-
       describe('as statement', _ => {
         test('asi before', {
           code: 'a\n++b',
@@ -1378,7 +1371,6 @@ export default (describe, test) =>
       });
 
       describe('in statement header', _ => {
-
         test.fail('asi before', {
           code: 'if (a\n++b);',
           desc: 'postfix is restricted so ASI should happen', // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
