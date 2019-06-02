@@ -12,9 +12,9 @@ Anything <= ES9 (ES2018) stage 4 should be supported by this parser, opted in by
 
 ## ES modules
 
-Note that the files use `import` and `export` declarations and `import()`, which requires node 10+ or a cutting edge browsers.
+Note that the files use `import` and `export` declarations and `import()`, which requires node 10+ or a cutting edge browser.
 
-At the time of writing node requires an experimental flag (rendering shebang useless).
+At the time of writing node requires the experimental `--experimental-modules` flag (rendering the hashbang useless).
 
 It's a burden in some ways and nice in others. A prod build would not have any modules.
 
@@ -118,7 +118,6 @@ The parser itself supports ES5-ES9 but is not production ready;
 - Harden the parser and find and fix more edge cases that currently pester the parser
 - Add location to AST nodes
 - Setup a test running that confirms AST nodes against other engines (Babel/Flow/etc)
-- Setup tests on a "prod" build, sans assertions
 - Wire up the fuzzer
 - Tighter integration between parser and tokenizer of pre-known tokens
   - This ties into enforcing reserved keyword checks
@@ -127,8 +126,8 @@ The parser itself supports ES5-ES9 but is not production ready;
   - Add better benchmarking
   - Do perf traces to find hot code
   - Make sure the parser works without AST building
-- Improve code coverage
+- Improve and visualize test coverage
 - Add a way to put input test cases inline and assert they reach that point. Helps with understanding why something is doing what.
-- Setup a repl
 - Find out what the memory footprint is like, how much can it parse before bailing
+- Automatic test case updating (inline)
 
