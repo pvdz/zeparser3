@@ -12,7 +12,7 @@ export default (describe, test) =>
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $ASI],
       });
 
-      test('empty array', {
+      test('simple array', {
         code: '[x]',
         ast: {
           type: 'Program',
