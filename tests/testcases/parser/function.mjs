@@ -1,6 +1,5 @@
 import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX} from '../../../src/zetokenizer.mjs';
 
-// TODO: replace the startInStrictMode stuff with sloppy mode results instead
 export default (describe, test) =>
   describe('functions', _ => {
     // arrow specific tests go into expressions/arrow
@@ -56,140 +55,40 @@ export default (describe, test) =>
       //
       //   test('inside if', {
       //     code: `if (false) function g() {}`,
-      //     startInStrictMode: true,
       //     throws: 'Function statement',
-      //     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       //   });
       //
       //   test('inside else', {
       //     code: `if (false) foo; else function g() {}`,
-      //     startInStrictMode: true,
       //     throws: 'Function statement',
-      //     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       //   });
       //
       //   test('inside for', {
       //     code: `for (a in b) function g() {}`,
-      //     startInStrictMode: true,
       //     throws: 'Function statement',
-      //     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       //   });
       //
       //   test('inside do', {
       //     code: `do function g() {} while (false)`,
-      //     startInStrictMode: true,
       //     throws: 'Function statement',
-      //     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
       //   });
       //
       //   test('inside label', {
       //     code: `foo: function g() {}`,
-      //     startInStrictMode: true,
       //     throws: 'Function statement',
-      //     tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
       //   });
       //
       //   test('deep nested', {
       //     code: `if (x) if (x) if (x) if (x) if (x) if (x) function g() {}`,
-      //     startInStrictMode: true,
       //     throws: 'Function statement',
-      //     tokens: [
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $PUNCTUATOR,
-      //       $PUNCTUATOR,
-      //       $PUNCTUATOR,
-      //       $ASI,
-      //     ],
       //   });
       //
       //   test('inside block', {
       //     code: `{ function g() {} }`,
-      //     startInStrictMode: true,
-      //     ast: {
-      //       type: 'Program',
-      //       body: [
-      //         {
-      //           type: 'BlockStatement',
-      //           body: [
-      //             {
-      //               type: 'FunctionDeclaration',
-      //               generator: false,
-      //               async: false,
-      //      //               id: {type: 'Identifier', name: 'g'},
-      //               params: [],
-      //               body: {
-      //                 type: 'BlockStatement',
-      //                 body: [],
-      //               },
-      //             },
-      //           ],
-      //         },
-      //       ],
-      //     },
-      //     tokens: [$PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       //   });
       //
       //   test('inside nested block', {
       //     code: `{{{ function g() {} }}}`,
-      //     startInStrictMode: true,
-      //     ast: {
-      //       type: 'Program',
-      //       body: [
-      //         {
-      //           type: 'BlockStatement',
-      //           body: [
-      //             {
-      //               type: 'BlockStatement',
-      //               body: [
-      //                 {
-      //                   type: 'BlockStatement',
-      //                   body: [
-      //                     {
-      //                       type: 'FunctionDeclaration',
-      //                       generator: false,
-      //                       async: false,
-      //      //                       id: {type: 'Identifier', name: 'g'},
-      //                       params: [],
-      //                       body: {
-      //                         type: 'BlockStatement',
-      //                         body: [],
-      //                       },
-      //                     },
-      //                   ],
-      //                 },
-      //               ],
-      //             },
-      //           ],
-      //         },
-      //       ],
-      //     },
-      //     tokens: [$PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       //     desc: 'make sure lexerflags get reset on block boundary',
       //   });
       //
@@ -200,65 +99,11 @@ export default (describe, test) =>
       //       function g() {}
       //     }
       //   `,
-      //     startInStrictMode: true,
-      //     ast: {
-      //       type: 'Program',
-      //       body: [
-      //         {
-      //           type: 'BlockStatement',
-      //           body: [
-      //             {
-      //               type: 'IfStatement',
-      //               test: {type: 'Identifier', name: 'x'},
-      //               consequent: {
-      //                 type: 'ExpressionStatement',
-      //                 expression: {type: 'Identifier', name: 'y'},
-      //               },
-      //               alternate: null,
-      //             },
-      //             {
-      //               type: 'FunctionDeclaration',
-      //               generator: false,
-      //               async: false,
-      //      //               id: {type: 'Identifier', name: 'g'},
-      //               params: [],
-      //               body: {type: 'BlockStatement', body: []},
-      //             },
-      //           ],
-      //         },
-      //       ],
-      //     },
-      //     tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       //     desc: 'slightly redundant but lexerflags should not flow over from previous statement',
       //   });
       //
       //   test('nested inside block', {
       //     code: `if (x) { function g() {} }`,
-      //     startInStrictMode: true,
-      //     ast: {
-      //       type: 'Program',
-      //       body: [
-      //         {
-      //           type: 'IfStatement',
-      //           test: {type: 'Identifier', name: 'x'},
-      //           consequent: {
-      //             type: 'BlockStatement',
-      //             body: [
-      //               {
-      //                 type: 'FunctionDeclaration',
-      //                 generator: false,
-      //                 async: false,
-      //      //                 id: {type: 'Identifier', name: 'g'},
-      //                 params: [],
-      //                 body: {type: 'BlockStatement', body: []},
-      //               },
-      //             ],
-      //           },
-      //           alternate: null,
-      //         },
-      //       ],
-      //     },
-      //     tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       //     desc: 'block should reset lexerflags',
       //   });
       //
@@ -269,59 +114,6 @@ export default (describe, test) =>
       //       function g() {}
       //     }
       //   `,
-      //     startInStrictMode: true,
-      //     ast: {
-      //       type: 'Program',
-      //       body: [
-      //         {
-      //           type: 'IfStatement',
-      //           test: {type: 'Identifier', name: 'z'},
-      //           consequent: {
-      //             type: 'BlockStatement',
-      //             body: [
-      //               {
-      //                 type: 'IfStatement',
-      //                 test: {type: 'Identifier', name: 'x'},
-      //                 consequent: {
-      //                   type: 'ExpressionStatement',
-      //                   expression: {type: 'Identifier', name: 'y'},
-      //                 },
-      //                 alternate: null,
-      //               },
-      //               {
-      //                 type: 'FunctionDeclaration',
-      //                 generator: false,
-      //                 async: false,
-      //      //                 id: {type: 'Identifier', name: 'g'},
-      //                 params: [],
-      //                 body: {type: 'BlockStatement', body: []},
-      //               },
-      //             ],
-      //           },
-      //           alternate: null,
-      //         },
-      //       ],
-      //     },
-      //     tokens: [
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $IDENT,
-      //       $IDENT,
-      //       $PUNCTUATOR,
-      //       $PUNCTUATOR,
-      //       $PUNCTUATOR,
-      //       $PUNCTUATOR,
-      //       $PUNCTUATOR,
-      //     ],
       //     desc: 'make sure lexerflags get reset on block boundary',
       //   });
       // });

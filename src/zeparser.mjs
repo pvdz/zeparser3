@@ -825,7 +825,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function softError() {
-    THROW_TOKEN('Tokenizer soft error: ' + (tok.regexerror() ? 'Regex: ' +tok.regexerror() : '(but not regex)'), curtok);
+    THROW_TOKEN('Tokenizer error: ' + (tok.regexerror() ? 'Regex: ' +tok.regexerror() : '(but not regex)'), curtok);
   }
 
   function skipRex(lexerFlags) {

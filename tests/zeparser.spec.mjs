@@ -134,28 +134,39 @@ if (INPUT_OVERRIDE) cases.push({obj: {code: INPUT_OVERRIDE}});
 let checkAST = true;
 let parserDesc = '';
 function all(parser, tests) {
-  for (let {desc, from, obj: test} of tests) {
-    one(parser, test, desc, from);
+  for (let testCase of tests) {
+    oneInutTestcase(parser, testCase);
   }
 }
-function one(parser, testObj, desc, from) {
-  let {code} = testObj;
+function oneInutTestcase(parser, testCase) {
+  // Start of one test case as it appears in the test files, or one entry of code if it's an array
+
+  let {odesc: testDesc, desc: longDesc, from, obj: testObjArg} = testCase;
+  let {code} = testObjArg;
   if (code instanceof Array) {
-    // code may be an array for a bunch of variation tests
+    // code may be an array for a bunch of variation tests with the same result or where the ast/error doesnt matter
     for (let i=0; i<code.length; ++i) {
-      one(parser, {...testObj, code: code[i]}, desc + ' (#' + (i+1) + ' / ' + code.length + ')', from);
+      let singleTestObj = {...testObjArg, code: code[i]};
+      let indexedLongDesc = longDesc + ' (#' + (i+1) + ' / ' + code.length + ')';
+      oneTestCase(parser, code[i], singleTestObj, indexedLongDesc, from, testDesc);
     }
-    return;
-  }
-  ++testi;
-  if (_one(parser, '   ', code, testObj, desc, from)) {
-    _one(parser, '[a]', '\n' + code, testObj, desc, from);
-    _one(parser, '[b]', code + '\n', testObj, desc, from);
-    _one(parser, '[c]', ' ' + code, testObj, desc, from);
-    _one(parser, '[d]', code + ' ', testObj, desc, from);
+  } else {
+    oneTestCase(parser, code, testObjArg, longDesc, from, testDesc);
   }
 }
-function _one(Parser, testSuffix, code, testObj, desc, from) {
+function oneTestCase(parser, code, testObjArg, longDesc, from, testDesc) {
+  // Either one test case as it is is in the source, or one test of such where code is an array of inputs
+  ++testi;
+  if (oneCodeVaration(parser, '   ', code, testObjArg, longDesc, from, testDesc)) {
+    // oneCodeVaration(parser, '[a]', '\n' + code, testObj, longDesc, from, testCase);
+    // oneCodeVaration(parser, '[b]', code + '\n', testObj, longDesc, from, testCase);
+    // oneCodeVaration(parser, '[c]', ' ' + code, testObj, longDesc, from, testCase);
+    // oneCodeVaration(parser, '[d]', code + ' ', testObj, longDesc, from, testCase);
+  }
+}
+function oneCodeVaration(Parser, testSuffix, code, testObj, desc, from, testDesc) {
+  // Test case with maybe prefix/suffix whitespace modifications
+
   // shorthand for just goal_script/sloppy settings (prevents unncessary object wrapping *shrug*)
   if (testObj.WEB && testObj.WEB !== true) {
     if (testObj.SLOPPY_SCRIPT !== undefined) throw new Error('SLOPPY_SCRIPT should not be set if WEB is set');
@@ -163,6 +174,7 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
     testObj.SLOPPY_SCRIPT = testObj.WEB;
     testObj.WEB = true;
   }
+
   let sloppyScriptOptions = testObj.SLOPPY_SCRIPT;
   if (sloppyScriptOptions) {
     if (testObj.SLOPPY !== undefined) throw new Error('SLOPPY and SLOPPY_SCRIPT should not both be set');
@@ -178,24 +190,18 @@ function _one(Parser, testSuffix, code, testObj, desc, from) {
     // goal + strict test
     if (goal === RUN_MODE_MODULE) {
       // the MODULE_MODE and SCRIPT_MODE properties to override the expectations.
-      let totalTestOptions = override(testObj.STRICT, Object.assign({startInStrictMode: true}, testObj));
+      let totalTestOptions = override(testObj.STRICT, {...testObj});
       // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
-      // TODO: replace startInStrictMode with expectations of sloppy mode
-      if (totalTestOptions.startInStrictMode) {
         if (!testObj.STRICT || !testObj.STRICT.SKIP) {
-          __one(Parser, testSuffix + ms, code, goal, totalTestOptions, desc, from);
+          __one(Parser, true, testSuffix + ms, code, goal, totalTestOptions, desc, from, testDesc);
         }
-      }
     }
     // goal + sloppy test
     // module mode is ALWAYS strict mode so skip sloppy
     if (goal === RUN_MODE_SCRIPT && (!testObj.SLOPPY || !testObj.SLOPPY.SKIP)) {
-      let totalTestOptions = override(testObj.SLOPPY, Object.assign({startInStrictMode: false}, testObj));
+      let totalTestOptions = override(testObj.SLOPPY, {...testObj});
       // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
-      // TODO: replace startInStrictMode with expectations of sloppy mode
-      if (!totalTestOptions.startInStrictMode) {
-        __one(Parser, testSuffix + ms, code, goal, totalTestOptions, desc, from);
-      }
+      __one(Parser, false, testSuffix + ms, code, goal, totalTestOptions, desc, from, testDesc);
     }
   });
 }
@@ -208,7 +214,7 @@ function override(wantObj, baseObj) {
   }
   return baseObj;
 }
-function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
+function __one(Parser, startInStrictMode, testSuffix, code = '', mode, testDetails, desc, from) {
   if (testi < SKIP_TO) return;
   let {
     ast: expectedAst,
@@ -217,7 +223,6 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     MODULE: moduleModeObj,
     throws: expectedThrows,
     tokens: expectedTokens,
-    startInStrictMode,
     debug: _debug,
     SKIP,
     WEB,
@@ -256,7 +261,6 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       expectedAst = scriptModeObj.ast;
     }
     if (scriptModeObj.tokens) expectedTokens = scriptModeObj.tokens;
-    if (scriptModeObj.startInStrictMode !== undefined) startInStrictMode = scriptModeObj.startInStrictMode;
   }
   if (mode === RUN_MODE_MODULE && moduleModeObj) {
     if (moduleModeObj.SKIP !== undefined) SKIP = moduleModeObj.SKIP;
@@ -271,7 +275,6 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       expectedAst = moduleModeObj.ast;
     }
     if (moduleModeObj.tokens) expectedTokens = moduleModeObj.tokens;
-    if (moduleModeObj.startInStrictMode !== undefined) startInStrictMode = moduleModeObj.startInStrictMode;
   }
 
   // https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
@@ -341,15 +344,16 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
   }
 
   if (wasError) {
-    let wasTodo = wasError.indexOf('TODO') >= 0;
-    if (wasError.indexOf('Parser error!') < 0 && wasError.indexOf('Tokenizer error!') < 0 && !wasTodo) {
+    let wasTodo = wasError.includes('TODO');
+    let wasCrash = !wasError.includes('Parser error!') && !wasError.includes('Tokenizer error!');
+    if (!wasTodo && wasCrash) {
       LOG(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
       LOG_THROW('unexpected CRASH', code, stack, desc);
       LOG(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
       LOG('Thrown error:', wasError);
       ++fail;
       ++crash;
-    } else if (wasError.indexOf('Assertion fail') >= 0) {
+    } else if (wasError.toUpperCase().includes('ASSERT')) {
       LOG(`${RED}####  ${BLINK}ASSERTION BROKEN${RESET}${RED}  ####${RESET}`);
       LOG_THROW('Invariant violated', code, stack, desc);
       LOG(`${RED}####  ${BLINK}ASSERTION BROKEN${RESET}${RED}  ####${RESET}`);
@@ -361,16 +365,11 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       LOG('Thrown error:', wasError);
       ++fail;
       ++crash;
-    } else if (wasError.indexOf('Parser error') !== 0 && wasError.indexOf('Tokenizer error') !== 0) {
-      if (wasTodo) {
-        LOG_THROW('TODO', code, stack, desc);
-      } else {
-        LOG_THROW('Unhandled exception path', code, stack, desc);
-        LOG('Thrown error:', wasError);
-      }
+    } else if (wasCrash) {
+      LOG_THROW('TODO', code, stack, desc);
       ++fail;
       ++crash;
-    } else if (!wasTodo && (expectedThrows === true || wasError.toUpperCase().indexOf(expectedThrows.toUpperCase()) >= 0)) {
+    } else if (!wasTodo && (expectedThrows === true || wasError.toUpperCase().includes(expectedThrows.toUpperCase()))) {
       LOG(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
       ++pass;
     } else {
@@ -383,14 +382,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
     LOG(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
     ++pass;
     LOG('ast:', formatAst(obj.ast) + ',');
-    LOG(
-      'tokens: [$' +
-      obj.tokens
-      .slice(0, -1)
-      .map(o => debug_toktype(o.type))
-      .join(', $') +
-      '],',
-    );
+    LOG(formatTokens(obj.tokens));
   } else if (expectedThrows) {
     ++fail;
     LOG_THROW('_failed_ to throw ANY error', code, '', desc, true, false);
@@ -398,14 +390,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       LOG('Expected an error message containing: "' + expectedThrows + '"');
     }
     LOG('Actual ast:', formatAst(obj.ast) + ',');
-    LOG(
-      'tokens: [$' +
-      obj.tokens
-      .slice(0, -1)
-      .map(o => debug_toktype(o.type))
-      .join(', $') +
-      '],',
-    );
+    LOG(formatTokens(obj.tokens));
   } else if (!checkAST) {
     if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
       LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true, false);
@@ -413,14 +398,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       LOG('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
       LOG('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
       // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
-      LOG(
-        'tokens: [$' +
-        obj.tokens
-        .slice(0, -1)
-        .map(o => debug_toktype(o.type))
-        .join(', $') +
-        '],',
-      );
+      LOG(formatTokens(obj.tokens));
       ++fail;
     } else {
       LOG(`${prefix} ${GREEN}PASS${RESET} (skipped ast check): \`${toPrint(code)}\`${suffix}`);
@@ -437,14 +415,7 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       LOG_THROW(missingAst ? 'AST missing' : 'AST mismatch', code, '', desc, true, false);
 
       LOG('Actual ast:', formatAst(obj.ast) + ',');
-      LOG(
-        'tokens: [$' +
-          obj.tokens
-            .slice(0, -1)
-            .map(o => debug_toktype(o.type))
-            .join(', $') +
-        '],',
-      );
+      LOG(formatTokens(obj.tokens));
 
       if (missingAst) {
         LOG('(No expected AST given...)');
@@ -459,14 +430,8 @@ function __one(Parser, testSuffix, code = '', mode, testDetails, desc, from) {
       LOG('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
       LOG('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
       // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
-      LOG(
-        'tokens: [$' +
-        obj.tokens
-        .slice(0, -1)
-        .map(o => debug_toktype(o.type))
-        .join(', $') +
-        '],',
-      );
+      LOG(formatTokens(obj.tokens));
+
       ++fail;
     } else if (expectedCallback && expectedCallback(obj.ast, obj.tokens, actualJson) === false) {
       LOG_THROW('input parsed properly but ' + BOLD + 'CALLBACK' + RESET + ' rejected', code, undefined, desc, false, false);
@@ -665,6 +630,14 @@ function formatAst(ast) {
     parser: 'babylon',
   }).replace(/(?:^;?\(?)|(?:\)[\s\n]*$)/g, '');
 }
+function formatTokens(tokens) {
+  return 'tokens: [$' +
+    tokens
+    .slice(0, -1)
+    .map(o => debug_toktype(o.type))
+    .join(', $') +
+    '],';
+}
 
 if (TEST262) LOG('Running test262 provided tests instead');
 if (SKIP_TO) LOG('Warning: Skipping the first', SKIP_TO, 'tests');
@@ -742,7 +715,7 @@ const start = async () => {
         descStack.pop();
       }
       function test(desc, obj) {
-        return cases.push({desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + BOLD + desc + RESET + ' \u2B88', from: path, obj});
+        return cases.push({odesc: desc, desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + BOLD + desc + RESET + ' \u2B88', from: path, obj});
       }
       test.pass = (desc, obj) => test(desc, {ast: true, tokens: true, ...obj});
       test.fail = (desc, obj) => test(desc, {throws: true, ...obj});

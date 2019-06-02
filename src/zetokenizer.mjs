@@ -1863,9 +1863,9 @@ function ZeTokenizer(
             // Found a quantified assertion
             // Only `(?=` and `(?!` can be legal in web compat mode and without the u-flag. Anything else is always bad.
             if (wasAssertion && webCompat === WEB_COMPAT_ON) {
-              uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
+              uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex A.ssertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
             } else {
-              uflagStatus = regexSyntaxError('Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
+              uflagStatus = regexSyntaxError('Regex A.ssertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
             }
           }
 

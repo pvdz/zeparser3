@@ -5,7 +5,7 @@ export default (describe, test) =>
     test('bad whitespace should not be ignored', {
       desc: 'from test262 7.4_A2_T2',
       code: `/*CHECK#1/`,
-      throws: 'Tokenizer soft error',
+      throws: 'Tokenizer error',
       tokens: [$ERROR],
     });
 

@@ -130,4 +130,4 @@ The parser itself supports ES5-ES9 but is not production ready;
 - Add a way to put input test cases inline and assert they reach that point. Helps with understanding why something is doing what.
 - Find out what the memory footprint is like, how much can it parse before bailing
 - Automatic test case updating (inline)
-
+- Improved error messages with proper token locations and good semantics etc
