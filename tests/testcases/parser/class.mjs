@@ -5830,4 +5830,1946 @@ export default (describe, test) =>
         code: 'class A {"x"{}}',
       });
     });
+    describe('piggies in classes', _ => {
+      describe('yield', _ => {
+        describe('unwrapped', _ => {
+          test('as class name', {
+            code: 'class yield { }',
+            throws: 'Parser error! Cannot use this name (yield) as a variable name because: Cannot use this reserved word as a variable name in strict mode',
+          });
+          test('in extends no args', {
+            code: 'class x extends yield { }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('in extends with args', {
+            code: 'class x extends yield y { }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('in wrapped extends no args', {
+            code: 'class x extends feh(yield) { }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('in wrapped extends with args', {
+            code: 'class x extends feh(yield y) { }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('as param', {
+            code: 'class x { foo(yield){} }',
+            throws: 'Parser error! Cannot use this name (yield) as a variable name because: Cannot use this reserved word as a variable name in strict mode',
+          });
+          test('as default no arg', {
+            code: 'class x { foo(x=yield){} }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('as default with arg', {
+            code: 'class x { foo(x=yield y){} }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('nested', {
+            code: 'class x { foo(x=new (yield)()){} }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('method key', {
+            code: 'class x { yield(){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'yield',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed no arg', {
+            code: 'class x { [yield](){} }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('computed with arg', {
+            code: 'class x { [yield y](){} }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+        });
+        describe('wrapped in plain func', _ => {
+          test('as class name', {
+            code: 'function f(){  class yield { }  }',
+            throws: 'Parser error! Cannot use this name (yield) as a variable name because: Cannot use this reserved word as a variable name in strict mode',
+          });
+          test('in extends no args', {
+            code: 'function f(){  class x extends yield { }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('in extends with args', {
+            code: 'function f(){  class x extends yield y { }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('in wrapped extends no args', {
+            code: 'function f(){  class x extends feh(yield) { }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('in wrapped extends with args', {
+            code: 'function f(){  class x extends feh(yield y) { }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('as param', {
+            code: 'function f(){  class x { foo(yield){} }  }',
+            throws: 'Parser error! Cannot use this name (yield) as a variable name because: Cannot use this reserved word as a variable name in strict mode',
+          });
+          test('as default no arg', {
+            code: 'function f(){  class x { foo(x=yield){} }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('as default with arg', {
+            code: 'function f(){  class x { foo(x=yield y){} }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('nested', {
+            code: 'function f(){  class x { foo(x=new (yield)()){} }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('method key', {
+            code: 'function f(){  class x { yield(){} }  }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'yield',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed no arg', {
+            code: 'function f(){  class x { [yield](){} }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('computed with arg', {
+            code: 'function f(){  class x { [yield y](){} }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+        });
+        describe('wrapped in generator', _ => {
+          test('as class name', {
+            code: 'function *f(){  class yield { }  }',
+            throws: 'Parser error! Cannot use this name (yield) as a variable name because: Cannot use this reserved word as a variable name in strict mode',
+          });
+          test('in extends no args', {
+            code: 'function *f(){  class x extends yield { }  }',
+            throws: 'Parser error! Did not expect to parse an AssignmentExpression but found `yield`',
+          });
+          test('in extends with args', {
+            code: 'function *f(){  class x extends yield y { }  }',
+            throws: 'Parser error! Did not expect to parse an AssignmentExpression but found `yield`',
+          });
+          test('in wrapped extends no args', {
+            code: 'function *f(){  class x extends feh(yield) { }  }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: true,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: {
+                          type: 'CallExpression',
+                          callee: {
+                            type: 'Identifier',
+                            name: 'feh',
+                          },
+                          arguments: [
+                            {
+                              type: 'YieldExpression',
+                              delegate: false,
+                              argument: null,
+                            },
+                          ],
+                        },
+                        body: {
+                          type: 'ClassBody',
+                          body: [],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in wrapped extends with args', {
+            code: 'function *f(){  class x extends feh(yield y) { }  }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: true,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: {
+                          type: 'CallExpression',
+                          callee: {
+                            type: 'Identifier',
+                            name: 'feh',
+                          },
+                          arguments: [
+                            {
+                              type: 'YieldExpression',
+                              delegate: false,
+                              argument: {
+                                type: 'Identifier',
+                                name: 'y',
+                              },
+                            },
+                          ],
+                        },
+                        body: {
+                          type: 'ClassBody',
+                          body: [],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('as param', {
+            code: 'function *f(){  class x { foo(yield){} }  }',
+            throws: 'Parser error! Cannot use this name (yield) as a variable name because: Cannot use this reserved word as a variable name in strict mode',
+          });
+          test('as default no arg', {
+            code: 'function *f(){  class x { foo(x=yield){} }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('as default with arg', {
+            code: 'function *f(){  class x { foo(x=yield y){} }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('nested', {
+            code: 'function *f(){  class x { foo(x=new (yield)()){} }  }',
+            throws: 'Parser error! Cannot use `yield` outside of generator functions when in strict mode',
+          });
+          test('method key', {
+            code: 'function *f(){  class x { yield(){} }  }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: true,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'yield',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed no arg', {
+            code: 'function *f(){  class x { [yield](){} }  }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: true,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'YieldExpression',
+                                delegate: false,
+                                argument: null,
+                              },
+                              static: false,
+                              computed: true,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed with arg', {
+            code: 'function *f(){  class x { [yield y](){} }  }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: true,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'YieldExpression',
+                                delegate: false,
+                                argument: {
+                                  type: 'Identifier',
+                                  name: 'y',
+                                },
+                              },
+                              static: false,
+                              computed: true,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+        });
+      });
+      describe('await', _ => {
+        describe('unwrapped', _ => {
+          test('as class name', {
+            code: 'class await { }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'await',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('in extends no args', {
+            code: 'class x extends await { }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'await',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('in extends with args', {
+            code: 'class x extends await y { }',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('in wrapped extends no args', {
+            code: 'class x extends feh(await) { }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: {
+                    type: 'CallExpression',
+                    callee: {
+                      type: 'Identifier',
+                      name: 'feh',
+                    },
+                    arguments: [
+                      {
+                        type: 'Identifier',
+                        name: 'await',
+                      },
+                    ],
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('in wrapped extends with args', {
+            code: 'class x extends feh(await y) { }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('as param no arg', {
+            code: 'class x { foo(await){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'foo',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [
+                            {
+                              type: 'Identifier',
+                              name: 'await',
+                            },
+                          ],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('as param with arg', {
+            code: 'class x { foo(await y){} }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('as default no arg', {
+            code: 'class x { foo(x=await){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'foo',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [
+                            {
+                              type: 'AssignmentPattern',
+                              left: {
+                                type: 'Identifier',
+                                name: 'x',
+                              },
+                              right: {
+                                type: 'Identifier',
+                                name: 'await',
+                              },
+                            },
+                          ],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('as default with arg', {
+            code: 'class x { foo(x=await y){} }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('nested no arg', {
+            code: 'class x { foo(x=new (await)()){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'foo',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [
+                            {
+                              type: 'AssignmentPattern',
+                              left: {
+                                type: 'Identifier',
+                                name: 'x',
+                              },
+                              right: {
+                                type: 'NewExpression',
+                                arguments: [],
+                                callee: {
+                                  type: 'Identifier',
+                                  name: 'await',
+                                },
+                              },
+                            },
+                          ],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('nested with arg', {
+            code: 'class x { foo(x=new (await y)()){} }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('method key no arg', {
+            code: 'class x { await(){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'await',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('method key with arg', {
+            code: 'class x { await y(){} }',
+            throws: 'Parser error! Either the current modifier is unknown or the input that followed was unexpected',
+          });
+          test('computed no arg', {
+            code: 'class x { [await](){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'await',
+                        },
+                        static: false,
+                        computed: true,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('computed with arg', {
+            code: 'class x { [await y](){} }',
+            throws: 'Parser error! Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+        });
+        describe('wrapped in plain func', _ => {
+          test('as class name', {
+            code: 'function f() {   class await { }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'await',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('in extends no args', {
+            code: 'function f() {   class x extends await { }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: {
+                          type: 'Identifier',
+                          name: 'await',
+                        },
+                        body: {
+                          type: 'ClassBody',
+                          body: [],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('in extends with args', {
+            code: 'function f() {   class x extends await y { }   }',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('in wrapped extends no args', {
+            code: 'function f() {   class x extends feh(await) { }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: {
+                          type: 'CallExpression',
+                          callee: {
+                            type: 'Identifier',
+                            name: 'feh',
+                          },
+                          arguments: [
+                            {
+                              type: 'Identifier',
+                              name: 'await',
+                            },
+                          ],
+                        },
+                        body: {
+                          type: 'ClassBody',
+                          body: [],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('in wrapped extends with args', {
+            code: 'function f() {   class x extends feh(await y) { }   }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('as param no arg', {
+            code: 'function f() {   class x { foo(await){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'foo',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [
+                                  {
+                                    type: 'Identifier',
+                                    name: 'await',
+                                  },
+                                ],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('as param with arg', {
+            code: 'function f() {   class x { foo(await y){} }   }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('as default no arg', {
+            code: 'function f() {   class x { foo(x=await){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'foo',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [
+                                  {
+                                    type: 'AssignmentPattern',
+                                    left: {
+                                      type: 'Identifier',
+                                      name: 'x',
+                                    },
+                                    right: {
+                                      type: 'Identifier',
+                                      name: 'await',
+                                    },
+                                  },
+                                ],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('as default with arg', {
+            code: 'function f() {   class x { foo(x=await y){} }   }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('nested no arg', {
+            code: 'function f() {   class x { foo(x=new (await)()){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'foo',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [
+                                  {
+                                    type: 'AssignmentPattern',
+                                    left: {
+                                      type: 'Identifier',
+                                      name: 'x',
+                                    },
+                                    right: {
+                                      type: 'NewExpression',
+                                      arguments: [],
+                                      callee: {
+                                        type: 'Identifier',
+                                        name: 'await',
+                                      },
+                                    },
+                                  },
+                                ],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('nested with arg', {
+            code: 'function f() {   class x { foo(x=new (await y)()){} }   }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('method key no arg', {
+            code: 'function f() {   class x { await(){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'await',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('method key with arg', {
+            code: 'function f() {   class x { await y(){} }   }',
+            throws: 'Parser error! Either the current modifier is unknown or the input that followed was unexpected',
+          });
+          test('computed no arg', {
+            code: 'function f() {   class x { [await](){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: false,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'await',
+                              },
+                              static: false,
+                              computed: true,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('computed with arg', {
+            code: 'function f() {   class x { [await y](){} }   }',
+            throws: 'Parser error! Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+        });
+        describe('wrapped in async func', _ => {
+          test('as class name', {
+            code: 'async function f() {   class await { }   }',
+            throws: 'Parser error! Cannot use this name (await) as a variable name because: Await not allowed here',
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('in extends no args', {
+            code: 'async function f() {   class x extends await { }   }',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 125 (curc: `}`, token: `}`)',
+          });
+          test('in extends with args', {
+            code: 'async function f() {   class x extends await y { }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: true,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: {
+                          type: 'AwaitExpression',
+                          argument: {
+                            type: 'Identifier',
+                            name: 'y',
+                          },
+                        },
+                        body: {
+                          type: 'ClassBody',
+                          body: [],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in wrapped extends no args', {
+            code: 'async function f() {   class x extends feh(await) { }   }',
+            throws: 'Parser error! Expected to parse a value',
+          });
+          test('in wrapped extends with args', {
+            code: 'async function f() {   class x extends feh(await y) { }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: true,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: {
+                          type: 'CallExpression',
+                          callee: {
+                            type: 'Identifier',
+                            name: 'feh',
+                          },
+                          arguments: [
+                            {
+                              type: 'AwaitExpression',
+                              argument: {
+                                type: 'Identifier',
+                                name: 'y',
+                              },
+                            },
+                          ],
+                        },
+                        body: {
+                          type: 'ClassBody',
+                          body: [],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('as param no arg', {
+            code: 'async function f() {   class x { foo(await){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: true,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'foo',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [
+                                  {
+                                    type: 'Identifier',
+                                    name: 'await',
+                                  },
+                                ],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('as param with arg', {
+            code: 'async function f() {   class x { foo(await y){} }   }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use this name (await) as a variable name because: Await is illegal outside of async body with module goal',
+            },
+          });
+          test('as default no arg', {
+            code: 'async function f() {   class x { foo(x=await){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: true,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'foo',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [
+                                  {
+                                    type: 'AssignmentPattern',
+                                    left: {
+                                      type: 'Identifier',
+                                      name: 'x',
+                                    },
+                                    right: {
+                                      type: 'Identifier',
+                                      name: 'await',
+                                    },
+                                  },
+                                ],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('as default with arg', {
+            code: 'async function f() {   class x { foo(x=await y){} }   }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('nested no arg', {
+            code: 'async function f() {   class x { foo(x=new (await)()){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: true,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'foo',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [
+                                  {
+                                    type: 'AssignmentPattern',
+                                    left: {
+                                      type: 'Identifier',
+                                      name: 'x',
+                                    },
+                                    right: {
+                                      type: 'NewExpression',
+                                      arguments: [],
+                                      callee: {
+                                        type: 'Identifier',
+                                        name: 'await',
+                                      },
+                                    },
+                                  },
+                                ],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('nested with arg', {
+            code: 'async function f() {   class x { foo(x=new (await y)()){} }   }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+            STRICT: {
+              throws: 'Parser error! Cannot use `await` as var when goal=module but found `await` outside an async function',
+            },
+          });
+          test('method key no arg', {
+            code: 'async function f() {   class x { await(){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: true,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'Identifier',
+                                name: 'await',
+                              },
+                              static: false,
+                              computed: false,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('method key with arg', {
+            code: 'async function f() {   class x { await y(){} }   }',
+            throws: 'Parser error! Either the current modifier is unknown or the input that followed was unexpected',
+          });
+          test('computed no arg', {
+            code: 'async function f() {   class x { [await](){} }   }',
+            throws: 'Parser error! Expected to parse a value',
+          });
+          test('computed with arg', {
+            code: 'async function f() {   class x { [await y](){} }   }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'FunctionDeclaration',
+                  generator: false,
+                  async: true,
+                  id: {
+                    type: 'Identifier',
+                    name: 'f',
+                  },
+                  params: [],
+                  body: {
+                    type: 'BlockStatement',
+                    body: [
+                      {
+                        type: 'ClassDeclaration',
+                        id: {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                        superClass: null,
+                        body: {
+                          type: 'ClassBody',
+                          body: [
+                            {
+                              type: 'MethodDefinition',
+                              key: {
+                                type: 'AwaitExpression',
+                                argument: {
+                                  type: 'Identifier',
+                                  name: 'y',
+                                },
+                              },
+                              static: false,
+                              computed: true,
+                              kind: 'method',
+                              value: {
+                                type: 'FunctionExpression',
+                                generator: false,
+                                async: false,
+                                id: null,
+                                params: [],
+                                body: {
+                                  type: 'BlockStatement',
+                                  body: [],
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+        });
+      });
+    });
   });
