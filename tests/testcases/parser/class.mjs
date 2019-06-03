@@ -1,6 +1,6 @@
 /** @format */
 import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $REGEX, $STRING_DOUBLE} from '../../../src/zetokenizer.mjs';
-export default (describe, test) =>
+export default (describe, test) => {
   describe('classes', _ => {
     describe('empty classes', _ => {
       describe('as declaration', _ => {
@@ -7771,5 +7771,3494 @@ export default (describe, test) =>
           });
         });
       });
+      describe('super ident', _ => {
+        describe('unwrapped', _ => {
+          test('as class name', {
+            code: 'class super { }',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class x extends super { }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in extends with args', {
+            code: 'class x extends super y { }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends no args', {
+            code: 'class x extends feh(super) { }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends with args', {
+            code: 'class x extends feh(super y) { }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as param', {
+            code: 'class x { foo(super){} }',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class x { foo(x=super){} }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as default with arg', {
+            code: 'class x { foo(x=super y){} }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('nested', {
+            code: 'class x { foo(x=new (super)()){} }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('method key', {
+            code: 'class x { super(){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'super',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed no arg', {
+            code: 'class x { [super](){} }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('computed with arg', {
+            code: 'class x { [super y](){} }',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+        });
+        describe('wrapped in plain class in constructor', _ => {
+          test('as class name', {
+            code: 'class outer { constructor(){  class super { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer { constructor(){  class x extends super { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in extends with args', {
+            code: 'class outer { constructor(){  class x extends super y { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer { constructor(){  class x extends feh(super) { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer { constructor(){  class x extends feh(super y) { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as param', {
+            code: 'class outer { constructor(){  class x { foo(super){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer { constructor(){  class x { foo(x=super){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as default with arg', {
+            code: 'class outer { constructor(){  class x { foo(x=super y){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('nested', {
+            code: 'class outer { constructor(){  class x { foo(x=new (super)()){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('method key', {
+            code: 'class outer { constructor(){  class x { super(){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'super',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed no arg', {
+            code: 'class outer { constructor(){  class x { [super](){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('computed with arg', {
+            code: 'class outer { constructor(){  class x { [super y](){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+        });
+        describe('wrapped in plain class in method', _ => {
+          test('as class name', {
+            code: 'class outer { meh(){  class super { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer { meh(){  class x extends super { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in extends with args', {
+            code: 'class outer { meh(){  class x extends super y { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer { meh(){  class x extends feh(super) { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer { meh(){  class x extends feh(super y) { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as param', {
+            code: 'class outer { meh(){  class x { foo(super){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer { meh(){  class x { foo(x=super){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as default with arg', {
+            code: 'class outer { meh(){  class x { foo(x=super y){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('nested', {
+            code: 'class outer { meh(){  class x { foo(x=new (super)()){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('method key', {
+            code: 'class outer { meh(){  class x { super(){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'super',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed no arg', {
+            code: 'class outer { meh(){  class x { [super](){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('computed with arg', {
+            code: 'class outer { meh(){  class x { [super y](){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+        });
+        describe('wrapped in extending class in constructor', _ => {
+          test('as class name', {
+            code: 'class outer extends S { constructor(){  class super { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer extends S { constructor(){  class x extends super { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in extends with args', {
+            code: 'class outer extends S { constructor(){  class x extends super y { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer extends S { constructor(){  class x extends feh(super) { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer extends S { constructor(){  class x extends feh(super y) { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as param', {
+            code: 'class outer extends S { constructor(){  class x { foo(super){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=super){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as default with arg', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=super y){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('nested', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=new (super)()){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('method key', {
+            code: 'class outer extends S { constructor(){  class x { super(){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'super',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed no arg', {
+            code: 'class outer extends S { constructor(){  class x { [super](){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('computed with arg', {
+            code: 'class outer extends S { constructor(){  class x { [super y](){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+        });
+        describe('wrapped in extending class in method', _ => {
+          test('as class name', {
+            code: 'class outer extends S { meh(){  class super { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer extends S { meh(){  class x extends super { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in extends with args', {
+            code: 'class outer extends S { meh(){  class x extends super y { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer extends S { meh(){  class x extends feh(super) { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer extends S { meh(){  class x extends feh(super y) { }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as param', {
+            code: 'class outer extends S { meh(){  class x { foo(super){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer extends S { meh(){  class x { foo(x=super){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('as default with arg', {
+            code: 'class outer extends S { meh(){  class x { foo(x=super y){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('nested', {
+            code: 'class outer extends S { meh(){  class x { foo(x=new (super)()){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('method key', {
+            code: 'class outer extends S { meh(){  class x { super(){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'super',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('computed no arg', {
+            code: 'class outer extends S { meh(){  class x { [super](){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+          test('computed with arg', {
+            code: 'class outer extends S { meh(){  class x { [super y](){} }  }}',
+            throws: 'Parser error! The `super` keyword can only be used as call or member expression',
+          });
+        });
+      });
+      describe('super prop', _ => {
+        describe('unwrapped', _ => {
+          test('as class name', {
+            code: 'class super.foo { }',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class x extends super.foo { }',
+            throws: 'Parser error! Can only use `super.foo` in class or object methods or in arrows nested in those methods/arrows',
+          });
+          test('in extends with args', {
+            code: 'class x extends super.foo y { }',
+            throws: 'Parser error! Can only use `super.foo` in class or object methods or in arrows nested in those methods/arrows',
+          });
+          test('in wrapped extends no args', {
+            code: 'class x extends feh(super.foo) { }',
+            throws: 'Parser error! Can only use `super.foo` in class or object methods or in arrows nested in those methods/arrows',
+          });
+          test('in wrapped extends with args', {
+            code: 'class x extends feh(super.foo y) { }',
+            throws: 'Parser error! Can only use `super.foo` in class or object methods or in arrows nested in those methods/arrows',
+          });
+          test('as param', {
+            code: 'class x { foo(super.foo){} }',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class x { foo(x=super.foo){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'foo',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [
+                            {
+                              type: 'AssignmentPattern',
+                              left: {
+                                type: 'Identifier',
+                                name: 'x',
+                              },
+                              right: {
+                                type: 'MemberExpression',
+                                object: {
+                                  type: 'Super',
+                                },
+                                property: {
+                                  type: 'Identifier',
+                                  name: 'foo',
+                                },
+                                computed: false,
+                              },
+                            },
+                          ],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('as default of constructor', {
+            code: 'class x { constructor(x=super.foo y){} }',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('nested', {
+            code: 'class x { foo(x=new (super.foo)()){} }',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'foo',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [
+                            {
+                              type: 'AssignmentPattern',
+                              left: {
+                                type: 'Identifier',
+                                name: 'x',
+                              },
+                              right: {
+                                type: 'NewExpression',
+                                arguments: [],
+                                callee: {
+                                  type: 'MemberExpression',
+                                  object: {
+                                    type: 'Super',
+                                  },
+                                  property: {
+                                    type: 'Identifier',
+                                    name: 'foo',
+                                  },
+                                  computed: false,
+                                },
+                              },
+                            },
+                          ],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('method key', {
+            code: 'class x { super.foo(){} }',
+            throws: 'Parser error! Either the current modifier is unknown or the input that followed was unexpected',
+          });
+          test('computed no arg', {
+            code: 'class x { [super.foo](){} }',
+            throws: 'Parser error! Can only use `super.foo` in class or object methods or in arrows nested in those methods/arrows',
+          });
+          test('computed with arg', {
+            code: 'class x { [super.foo y](){} }',
+            throws: 'Parser error! Can only use `super.foo` in class or object methods or in arrows nested in those methods/arrows',
+          });
+        });
+        describe('wrapped in plain class in constructor', _ => {
+          test('as class name', {
+            code: 'class outer { constructor(){  class super.foo { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer { constructor(){  class x extends super.foo { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'MemberExpression',
+                                  object: {
+                                    type: 'Super',
+                                  },
+                                  property: {
+                                    type: 'Identifier',
+                                    name: 'foo',
+                                  },
+                                  computed: false,
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in extends with args', {
+            code: 'class outer { constructor(){  class x extends super.foo y { }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer { constructor(){  class x extends feh(super.foo) { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'CallExpression',
+                                  callee: {
+                                    type: 'Identifier',
+                                    name: 'feh',
+                                  },
+                                  arguments: [
+                                    {
+                                      type: 'MemberExpression',
+                                      object: {
+                                        type: 'Super',
+                                      },
+                                      property: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      computed: false,
+                                    },
+                                  ],
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer { constructor(){  class x extends feh(super.foo y) { }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('as param', {
+            code: 'class outer { constructor(){  class x { foo(super.foo){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer { constructor(){  class x { foo(x=super.foo){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [
+                                          {
+                                            type: 'AssignmentPattern',
+                                            left: {
+                                              type: 'Identifier',
+                                              name: 'x',
+                                            },
+                                            right: {
+                                              type: 'MemberExpression',
+                                              object: {
+                                                type: 'Super',
+                                              },
+                                              property: {
+                                                type: 'Identifier',
+                                                name: 'foo',
+                                              },
+                                              computed: false,
+                                            },
+                                          },
+                                        ],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('as default with arg', {
+            code: 'class outer { constructor(){  class x { foo(x=super.foo y){} }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('nested', {
+            code: 'class outer { constructor(){  class x { foo(x=new (super.foo)()){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [
+                                          {
+                                            type: 'AssignmentPattern',
+                                            left: {
+                                              type: 'Identifier',
+                                              name: 'x',
+                                            },
+                                            right: {
+                                              type: 'NewExpression',
+                                              arguments: [],
+                                              callee: {
+                                                type: 'MemberExpression',
+                                                object: {
+                                                  type: 'Super',
+                                                },
+                                                property: {
+                                                  type: 'Identifier',
+                                                  name: 'foo',
+                                                },
+                                                computed: false,
+                                              },
+                                            },
+                                          },
+                                        ],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('method key', {
+            code: 'class outer { constructor(){  class x { super.foo(){} }  }}',
+            throws: 'Parser error! Either the current modifier is unknown or the input that followed was unexpected',
+          });
+          test('computed no arg', {
+            code: 'class outer { constructor(){  class x { [super.foo](){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'MemberExpression',
+                                        object: {
+                                          type: 'Super',
+                                        },
+                                        property: {
+                                          type: 'Identifier',
+                                          name: 'foo',
+                                        },
+                                        computed: false,
+                                      },
+                                      static: false,
+                                      computed: true,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('computed with arg', {
+            code: 'class outer { constructor(){  class x { [super.foo y](){} }  }}',
+            throws: 'Parser error! Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)',
+          });
+        });
+        describe('wrapped in plain class in method', _ => {
+          test('as class name', {
+            code: 'class outer { meh(){  class super.foo { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer { meh(){  class x extends super.foo { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'MemberExpression',
+                                  object: {
+                                    type: 'Super',
+                                  },
+                                  property: {
+                                    type: 'Identifier',
+                                    name: 'foo',
+                                  },
+                                  computed: false,
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in extends with args', {
+            code: 'class outer { meh(){  class x extends super.foo y { }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer { meh(){  class x extends feh(super.foo) { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'CallExpression',
+                                  callee: {
+                                    type: 'Identifier',
+                                    name: 'feh',
+                                  },
+                                  arguments: [
+                                    {
+                                      type: 'MemberExpression',
+                                      object: {
+                                        type: 'Super',
+                                      },
+                                      property: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      computed: false,
+                                    },
+                                  ],
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer { meh(){  class x extends feh(super.foo y) { }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('as param', {
+            code: 'class outer { meh(){  class x { foo(super.foo){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer { meh(){  class x { foo(x=super.foo){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [
+                                          {
+                                            type: 'AssignmentPattern',
+                                            left: {
+                                              type: 'Identifier',
+                                              name: 'x',
+                                            },
+                                            right: {
+                                              type: 'MemberExpression',
+                                              object: {
+                                                type: 'Super',
+                                              },
+                                              property: {
+                                                type: 'Identifier',
+                                                name: 'foo',
+                                              },
+                                              computed: false,
+                                            },
+                                          },
+                                        ],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('as default with arg', {
+            code: 'class outer { meh(){  class x { foo(x=super.foo y){} }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('nested', {
+            code: 'class outer { meh(){  class x { foo(x=new (super.foo)()){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [
+                                          {
+                                            type: 'AssignmentPattern',
+                                            left: {
+                                              type: 'Identifier',
+                                              name: 'x',
+                                            },
+                                            right: {
+                                              type: 'NewExpression',
+                                              arguments: [],
+                                              callee: {
+                                                type: 'MemberExpression',
+                                                object: {
+                                                  type: 'Super',
+                                                },
+                                                property: {
+                                                  type: 'Identifier',
+                                                  name: 'foo',
+                                                },
+                                                computed: false,
+                                              },
+                                            },
+                                          },
+                                        ],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('method key', {
+            code: 'class outer { meh(){  class x { super.foo(){} }  }}',
+            throws: 'Parser error! Either the current modifier is unknown or the input that followed was unexpected',
+          });
+          test('computed no arg', {
+            code: 'class outer { meh(){  class x { [super.foo](){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: null,
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'MemberExpression',
+                                        object: {
+                                          type: 'Super',
+                                        },
+                                        property: {
+                                          type: 'Identifier',
+                                          name: 'foo',
+                                        },
+                                        computed: false,
+                                      },
+                                      static: false,
+                                      computed: true,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('computed with arg', {
+            code: 'class outer { meh(){  class x { [super.foo y](){} }  }}',
+            throws: 'Parser error! Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)',
+          });
+        });
+        describe('wrapped in extending class in constructor', _ => {
+          test('as class name', {
+            code: 'class outer extends S { constructor(){  class super.foo { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer extends S { constructor(){  class x extends super.foo { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'MemberExpression',
+                                  object: {
+                                    type: 'Super',
+                                  },
+                                  property: {
+                                    type: 'Identifier',
+                                    name: 'foo',
+                                  },
+                                  computed: false,
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in extends with args', {
+            code: 'class outer extends S { constructor(){  class x extends super.foo y { }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer extends S { constructor(){  class x extends feh(super.foo) { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'CallExpression',
+                                  callee: {
+                                    type: 'Identifier',
+                                    name: 'feh',
+                                  },
+                                  arguments: [
+                                    {
+                                      type: 'MemberExpression',
+                                      object: {
+                                        type: 'Super',
+                                      },
+                                      property: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      computed: false,
+                                    },
+                                  ],
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer extends S { constructor(){  class x extends feh(super.foo y) { }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('as param', {
+            code: 'class outer extends S { constructor(){  class x { foo(super.foo){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=super.foo){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [
+                                          {
+                                            type: 'AssignmentPattern',
+                                            left: {
+                                              type: 'Identifier',
+                                              name: 'x',
+                                            },
+                                            right: {
+                                              type: 'MemberExpression',
+                                              object: {
+                                                type: 'Super',
+                                              },
+                                              property: {
+                                                type: 'Identifier',
+                                                name: 'foo',
+                                              },
+                                              computed: false,
+                                            },
+                                          },
+                                        ],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('as default with arg', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=super.foo y){} }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('nested', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=new (super.foo)()){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [
+                                          {
+                                            type: 'AssignmentPattern',
+                                            left: {
+                                              type: 'Identifier',
+                                              name: 'x',
+                                            },
+                                            right: {
+                                              type: 'NewExpression',
+                                              arguments: [],
+                                              callee: {
+                                                type: 'MemberExpression',
+                                                object: {
+                                                  type: 'Super',
+                                                },
+                                                property: {
+                                                  type: 'Identifier',
+                                                  name: 'foo',
+                                                },
+                                                computed: false,
+                                              },
+                                            },
+                                          },
+                                        ],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('method key', {
+            code: 'class outer extends S { constructor(){  class x { super.foo(){} }  }}',
+            throws: 'Parser error! Either the current modifier is unknown or the input that followed was unexpected',
+          });
+          test('computed no arg', {
+            code: 'class outer extends S { constructor(){  class x { [super.foo](){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'MemberExpression',
+                                        object: {
+                                          type: 'Super',
+                                        },
+                                        property: {
+                                          type: 'Identifier',
+                                          name: 'foo',
+                                        },
+                                        computed: false,
+                                      },
+                                      static: false,
+                                      computed: true,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('computed with arg', {
+            code: 'class outer extends S { constructor(){  class x { [super.foo y](){} }  }}',
+            throws: 'Parser error! Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)',
+          });
+        });
+        describe('wrapped in extending class in method', _ => {
+          test('as class name', {
+            code: 'class outer extends S { meh(){  class super.foo { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer extends S { meh(){  class x extends super.foo { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'MemberExpression',
+                                  object: {
+                                    type: 'Super',
+                                  },
+                                  property: {
+                                    type: 'Identifier',
+                                    name: 'foo',
+                                  },
+                                  computed: false,
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in extends with args', {
+            code: 'class outer extends S { meh(){  class x extends super.foo y { }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer extends S { meh(){  class x extends feh(super.foo) { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'CallExpression',
+                                  callee: {
+                                    type: 'Identifier',
+                                    name: 'feh',
+                                  },
+                                  arguments: [
+                                    {
+                                      type: 'MemberExpression',
+                                      object: {
+                                        type: 'Super',
+                                      },
+                                      property: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      computed: false,
+                                    },
+                                  ],
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer extends S { meh(){  class x extends feh(super.foo y) { }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('as param', {
+            code: 'class outer extends S { meh(){  class x { foo(super.foo){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer extends S { meh(){  class x { foo(x=super.foo){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [
+                                          {
+                                            type: 'AssignmentPattern',
+                                            left: {
+                                              type: 'Identifier',
+                                              name: 'x',
+                                            },
+                                            right: {
+                                              type: 'MemberExpression',
+                                              object: {
+                                                type: 'Super',
+                                              },
+                                              property: {
+                                                type: 'Identifier',
+                                                name: 'foo',
+                                              },
+                                              computed: false,
+                                            },
+                                          },
+                                        ],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('as default with arg', {
+            code: 'class outer extends S { meh(){  class x { foo(x=super.foo y){} }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('nested', {
+            code: 'class outer extends S { meh(){  class x { foo(x=new (super.foo)()){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'Identifier',
+                                        name: 'foo',
+                                      },
+                                      static: false,
+                                      computed: false,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [
+                                          {
+                                            type: 'AssignmentPattern',
+                                            left: {
+                                              type: 'Identifier',
+                                              name: 'x',
+                                            },
+                                            right: {
+                                              type: 'NewExpression',
+                                              arguments: [],
+                                              callee: {
+                                                type: 'MemberExpression',
+                                                object: {
+                                                  type: 'Super',
+                                                },
+                                                property: {
+                                                  type: 'Identifier',
+                                                  name: 'foo',
+                                                },
+                                                computed: false,
+                                              },
+                                            },
+                                          },
+                                        ],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('method key', {
+            code: 'class outer extends S { meh(){  class x { super.foo(){} }  }}',
+            throws: 'Parser error! Either the current modifier is unknown or the input that followed was unexpected',
+          });
+          test('computed no arg', {
+            code: 'class outer extends S { meh(){  class x { [super.foo](){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'meh',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'method',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'MemberExpression',
+                                        object: {
+                                          type: 'Super',
+                                        },
+                                        property: {
+                                          type: 'Identifier',
+                                          name: 'foo',
+                                        },
+                                        computed: false,
+                                      },
+                                      static: false,
+                                      computed: true,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('computed with arg', {
+            code: 'class outer extends S { meh(){  class x { [super.foo y](){} }  }}',
+            throws: 'Parser error! Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)',
+          });
+        });
+      });
+      describe('super call', _ => {
+        describe('unwrapped', _ => {
+          test('as class name', {
+            code: 'class super() { }',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class x extends super() { }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in extends with args', {
+            code: 'class x extends super() y { }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in wrapped extends no args', {
+            code: 'class x extends feh(super()) { }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in wrapped extends with args', {
+            code: 'class x extends feh(super() y) { }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as param', {
+            code: 'class x { foo(super()){} }',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class x { foo(x=super()){} }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as default of constructor', {
+            code: 'class x { constructor(x=super()){} }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as default with arg', {
+            code: 'class x { foo(x=super() y){} }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('nested', {
+            code: 'class x { foo(x=new (super())()){} }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('method key', {
+            code: 'class x { super()(){} }',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 40 (curc: `(`, token: `(`)',
+          });
+          test('computed no arg', {
+            code: 'class x { [super()](){} }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('computed with arg', {
+            code: 'class x { [super() y](){} }',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+        });
+        describe('wrapped in plain class in constructor', _ => {
+          test('as class name', {
+            code: 'class outer { constructor(){  class super() { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer { constructor(){  class x extends super() { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in extends with args', {
+            code: 'class outer { constructor(){  class x extends super() y { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer { constructor(){  class x extends feh(super()) { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer { constructor(){  class x extends feh(super() y) { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as param', {
+            code: 'class outer { constructor(){  class x { foo(super()){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer { constructor(){  class x { foo(x=super()){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as default with arg', {
+            code: 'class outer { constructor(){  class x { foo(x=super() y){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('nested', {
+            code: 'class outer { constructor(){  class x { foo(x=new (super())()){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('method key', {
+            code: 'class outer { constructor(){  class x { super()(){} }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 40 (curc: `(`, token: `(`)',
+          });
+          test('computed no arg', {
+            code: 'class outer { constructor(){  class x { [super()](){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('computed with arg', {
+            code: 'class outer { constructor(){  class x { [super() y](){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+        });
+        describe('wrapped in plain class in method', _ => {
+          test('as class name', {
+            code: 'class outer { meh(){  class super() { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer { meh(){  class x extends super() { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in extends with args', {
+            code: 'class outer { meh(){  class x extends super() y { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer { meh(){  class x extends feh(super()) { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer { meh(){  class x extends feh(super() y) { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as param', {
+            code: 'class outer { meh(){  class x { foo(super()){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer { meh(){  class x { foo(x=super()){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as default with arg', {
+            code: 'class outer { meh(){  class x { foo(x=super() y){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('nested', {
+            code: 'class outer { meh(){  class x { foo(x=new (super())()){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('method key', {
+            code: 'class outer { meh(){  class x { super()(){} }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 40 (curc: `(`, token: `(`)',
+          });
+          test('computed no arg', {
+            code: 'class outer { meh(){  class x { [super()](){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('computed with arg', {
+            code: 'class outer { meh(){  class x { [super() y](){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+        });
+        describe('wrapped in extending class in constructor', _ => {
+          test('as class name', {
+            code: 'class outer extends S { constructor(){  class super() { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer extends S { constructor(){  class x extends super() { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'CallExpression',
+                                  callee: {
+                                    type: 'Super',
+                                  },
+                                  arguments: [],
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
+          });
+          test('in extends with args', {
+            code: 'class outer extends S { constructor(){  class x extends super() y { }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer extends S { constructor(){  class x extends feh(super()) { }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: {
+                                  type: 'CallExpression',
+                                  callee: {
+                                    type: 'Identifier',
+                                    name: 'feh',
+                                  },
+                                  arguments: [
+                                    {
+                                      type: 'CallExpression',
+                                      callee: {
+                                        type: 'Super',
+                                      },
+                                      arguments: [],
+                                    },
+                                  ],
+                                },
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer extends S { constructor(){  class x extends feh(super() y) { }  }}',
+            throws: 'Parser error! Next ord should be 41 (`)`) but was 121 (curc: `y`, token: `y`)',
+          });
+          test('as param', {
+            code: 'class outer extends S { constructor(){  class x { foo(super()){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=super()){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as default with arg', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=super() y){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('nested', {
+            code: 'class outer extends S { constructor(){  class x { foo(x=new (super())()){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('method key', {
+            code: 'class outer extends S { constructor(){  class x { super()(){} }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 40 (curc: `(`, token: `(`)',
+          });
+          test('computed no arg', {
+            code: 'class outer extends S { constructor(){  class x { [super()](){} }  }}',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ClassDeclaration',
+                  id: {
+                    type: 'Identifier',
+                    name: 'outer',
+                  },
+                  superClass: {
+                    type: 'Identifier',
+                    name: 'S',
+                  },
+                  body: {
+                    type: 'ClassBody',
+                    body: [
+                      {
+                        type: 'MethodDefinition',
+                        key: {
+                          type: 'Identifier',
+                          name: 'constructor',
+                        },
+                        static: false,
+                        computed: false,
+                        kind: 'constructor',
+                        value: {
+                          type: 'FunctionExpression',
+                          generator: false,
+                          async: false,
+                          id: null,
+                          params: [],
+                          body: {
+                            type: 'BlockStatement',
+                            body: [
+                              {
+                                type: 'ClassDeclaration',
+                                id: {
+                                  type: 'Identifier',
+                                  name: 'x',
+                                },
+                                superClass: null,
+                                body: {
+                                  type: 'ClassBody',
+                                  body: [
+                                    {
+                                      type: 'MethodDefinition',
+                                      key: {
+                                        type: 'CallExpression',
+                                        callee: {
+                                          type: 'Super',
+                                        },
+                                        arguments: [],
+                                      },
+                                      static: false,
+                                      computed: true,
+                                      kind: 'method',
+                                      value: {
+                                        type: 'FunctionExpression',
+                                        generator: false,
+                                        async: false,
+                                        id: null,
+                                        params: [],
+                                        body: {
+                                          type: 'BlockStatement',
+                                          body: [],
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            tokens: [
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $IDENT,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+              $PUNCTUATOR,
+            ],
+          });
+          test('computed with arg', {
+            code: 'class outer extends S { constructor(){  class x { [super() y](){} }  }}',
+            throws: 'Parser error! Next ord should be 93 (`]`) but was 121 (curc: `y`, token: `y`)',
+          });
+        });
+        describe('wrapped in extending class in method', _ => {
+          test('as class name', {
+            code: 'class outer extends S { meh(){  class super() { }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('in extends no args', {
+            code: 'class outer extends S { meh(){  class x extends super() { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in extends with args', {
+            code: 'class outer extends S { meh(){  class x extends super() y { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in wrapped extends no args', {
+            code: 'class outer extends S { meh(){  class x extends feh(super()) { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('in wrapped extends with args', {
+            code: 'class outer extends S { meh(){  class x extends feh(super() y) { }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as param', {
+            code: 'class outer extends S { meh(){  class x { foo(super()){} }  }}',
+            throws: 'Parser error! Cannot use this name (super) as a variable name because: Cannot never use this reserved word as a variable name',
+          });
+          test('as default no arg', {
+            code: 'class outer extends S { meh(){  class x { foo(x=super()){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('as default with arg', {
+            code: 'class outer extends S { meh(){  class x { foo(x=super() y){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('nested', {
+            code: 'class outer extends S { meh(){  class x { foo(x=new (super())()){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('method key', {
+            code: 'class outer extends S { meh(){  class x { super()(){} }  }}',
+            throws: 'Parser error! Next ord should be 123 (`{`) but was 40 (curc: `(`, token: `(`)',
+          });
+          test('computed no arg', {
+            code: 'class outer extends S { meh(){  class x { [super()](){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+          test('computed with arg', {
+            code: 'class outer extends S { meh(){  class x { [super() y](){} }  }}',
+            throws: 'Parser error! Can only use `super()` in constructors of classes that extend another class',
+          });
+        });
+      });
     });
   });
+};
