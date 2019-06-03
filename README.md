@@ -131,3 +131,4 @@ The parser itself supports ES5-ES9 but is not production ready;
 - Find out what the memory footprint is like, how much can it parse before bailing
 - Automatic test case updating (inline)
 - Improved error messages with proper token locations and good semantics etc
+- At error location in tests with `at: '         ^'` pointing to the code: field above
