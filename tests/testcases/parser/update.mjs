@@ -1402,8 +1402,10 @@ export default (describe, test) =>
               },
             ],
           },
-          desc: 'postfix is restricted so ASI should happen',
-          // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
+          desc: `
+            postfix is restricted so ASI should happen
+            https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
+          `,
           tokens: [$IDENT, $ASI, $PUNCTUATOR, $IDENT, $ASI],
         });
         test('regression', {
@@ -1503,7 +1505,10 @@ export default (describe, test) =>
       describe('in statement header', _ => {
         test.fail('asi before', {
           code: 'if (a\n++b);',
-          desc: 'postfix is restricted so ASI should happen', // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
+          desc: `
+            postfix is restricted so ASI should happen 
+            https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
+          `,
         });
         test.fail('asi after', {
           code: 'if (a++\nb);',
@@ -1555,8 +1560,10 @@ export default (describe, test) =>
               },
             ],
           },
-          desc: 'postfix is restricted so ASI should happen',
-          // https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
+          desc: `
+            postfix is restricted so ASI should happen
+            https://tc39.github.io/ecma262/#sec-rules-of-automatic-semicolon-insertion (see notes)
+          `,
           tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $ASI, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
         });
         test('asi after', {

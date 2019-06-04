@@ -61,7 +61,7 @@ export default (describe, test) =>
       // yield a pseudo-newline (in particular, I don't think it closes an html open...)
       test('html comment ok except in module goal', {
         code: '<!-- foo -->',
-        // because you can't start an expression with `<`
+        desc: 'because you cant start an expression with `<`',
         MODULE: {
           throws: true,
         },
@@ -73,7 +73,7 @@ export default (describe, test) =>
         MODULE: {
           throws: true,
         },
-        // because `;<` is illegal
+        desc: 'because `;<` is illegal',
         ast: {
           type: 'Program',
           body: [
@@ -154,7 +154,7 @@ export default (describe, test) =>
         MODULE: {
           throws: true,
         },
-        // but only because you cant decl pre and postfix dec the same var (well and the rest)
+        desc: 'but only because you cant decl pre and postfix dec the same var (well and the rest)',
         ast: {
           type: 'Program',
           body: [
@@ -268,15 +268,18 @@ export default (describe, test) =>
         MODULE: {
           throws: true,
         },
-        // because `foo()--` is illegal
-        throws: true, // will also parse `foo()--` and fail
+        desc: `
+          because "foo()--" is illegal
+          will also parse "foo()--" and fail
+        `,
+        throws: true,
       });
       test('same test with newline', {
         code: 'foo()\n--> foo',
         MODULE: {
           throws: true,
         },
-        // because `foo()--` is illegal
+        desc: 'because `foo()--` is illegal',
         ast: {
           type: 'Program',
           body: [

@@ -647,7 +647,9 @@ export default (describe, test) =>
       });
       test('with statement', {
         code: 'with (x) import {x} from "y";',
-        // with is illegal in module goal because it is strict by default, anyways
+        desc: `
+          with is illegal in module goal because it is strict by default, anyways
+        `,
         SCRIPT: {
           throws: 'module',
         },

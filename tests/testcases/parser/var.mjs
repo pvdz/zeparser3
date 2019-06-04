@@ -137,7 +137,7 @@ export default (describe, test) =>
             });
             test(`function object alias destructured arg`, {
               code: `function fh({x: ${name}}) {}`,
-              // certain tokens fail because they are part of a multi-token expression
+              desc: 'certain tokens fail because they are part of a multi-token expression',
               throws: true,
             });
             test(`function array destructured arg`, {
@@ -3039,7 +3039,7 @@ export default (describe, test) =>
             test('asi can not trigger if next token is ident', {
               code: 'for (var\nfoo();;);',
               throws: '(`;`)',
-              // expecting for-header semi
+              desc: 'expecting for-header semi',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -3072,7 +3072,7 @@ export default (describe, test) =>
             test('asi can not trigger if next token is ident', {
               code: 'for (var\nfoo());',
               throws: '(`;`)',
-              // expecting for-header semi
+              desc: 'expecting for-header semi',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -3162,7 +3162,7 @@ export default (describe, test) =>
             test('asi can not trigger if next token is ident', {
               code: 'for (var\nfoo() in x);',
               throws: '(`;`)',
-              // expecting for-header semi
+              desc: 'expecting for-header semi',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -3253,7 +3253,7 @@ export default (describe, test) =>
             test('asi can not trigger if next token is ident', {
               code: 'for (var\nfoo() of x);',
               throws: '(`;`)',
-              // expecting for-header semi
+              desc: 'expecting for-header semi',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -13091,7 +13091,8 @@ export default (describe, test) =>
     test('html comment close marks start of single line comment', {
       code: 'var foo = [23]\n-->[0];',
       MODULE: {
-        throws: true, // because `[23]\n--` is actually `[23];--` and `>` is not a valid operand
+        throws: true,
+        desc: 'because `[23]\n--` is actually `[23];--` and `>` is not a valid operand',
       },
       ast: {
         type: 'Program',

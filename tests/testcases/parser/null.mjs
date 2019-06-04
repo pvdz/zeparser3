@@ -2,18 +2,45 @@
 import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('null keyword', _ => {
-    //
-    //test('as a statement', {
-    //  code: 'null',
-    //  ast: {},
-    //  tokens: [],
-    //});
-    //
-    //test('as an expression', {
-    //  code: 'null',
-    //  ast: {},
-    //  tokens: [],
-    //});
+    test('as a statement', {
+      code: 'null',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'Literal',
+              value: null,
+              raw: 'null',
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $ASI],
+    });
+    test('as an expression', {
+      code: '+null',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'UnaryExpression',
+              operator: '+',
+              prefix: true,
+              argument: {
+                type: 'Literal',
+                value: null,
+                raw: 'null',
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $ASI],
+    });
     describe('regex edge cases', _ => {
       test('division', {
         code: 'null\n/foo;',

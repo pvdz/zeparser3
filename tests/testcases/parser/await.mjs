@@ -507,7 +507,10 @@ export default (describe, test) =>
       code: 'function call(foo=await bar){}',
       throws: 'await',
       SLOPPY_SCRIPT: {
-        throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
+        throws: 'Next ord should be 41 (`)`)',
+        desc: `
+          it's by far too much effort to proc a nice message here
+        `,
       },
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
@@ -515,7 +518,10 @@ export default (describe, test) =>
       code: 'function call(foo=await bar=10){}',
       throws: 'await',
       SLOPPY_SCRIPT: {
-        throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
+        desc: `
+          it's by far too much effort to proc a nice message here
+        `,
+        throws: 'Next ord should be 41 (`)`)',
       },
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
@@ -547,7 +553,10 @@ export default (describe, test) =>
       code: '(await bar())',
       throws: 'await',
       SLOPPY_SCRIPT: {
-        throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
+        desc: `
+          it's by far too much effort to proc a nice message here
+        `,
+        throws: 'Next ord should be 41 (`)`)',
       },
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
@@ -555,7 +564,10 @@ export default (describe, test) =>
       code: '5 + (await bar())',
       throws: 'await',
       SLOPPY_SCRIPT: {
-        throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
+        desc: `
+          it's by far too much effort to proc a nice message here
+        `,
+        throws: 'Next ord should be 41 (`)`)',
       },
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
@@ -563,7 +575,10 @@ export default (describe, test) =>
       code: 'function call(foo= 5 + (await bar())){}',
       throws: 'await',
       SLOPPY_SCRIPT: {
-        throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
+        desc: `
+          it's by far too much effort to proc a nice message here
+        `,
+        throws: 'Next ord should be 41 (`)`)',
       },
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
@@ -571,7 +586,10 @@ export default (describe, test) =>
       code: 'async function x(){ function y(s=await foo){}}',
       throws: 'await',
       SLOPPY_SCRIPT: {
-        throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
+        desc: `
+          it's by far too much effort to proc a nice message here
+        `,
+        throws: 'Next ord should be 41 (`)`)',
       },
       tokens: [$IDENT, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
     });
@@ -587,7 +605,10 @@ export default (describe, test) =>
       code: 'let f = () => (y=await foo) => y;',
       throws: 'await',
       SLOPPY_SCRIPT: {
-        throws: 'Next ord should be 41 (`)`)', // it's by far too much effort to proc a nice message here
+        desc: `
+          it's by far too much effort to proc a nice message here
+        `,
+        throws: 'Next ord should be 41 (`)`)',
       },
       tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
     });
@@ -1398,7 +1419,9 @@ export default (describe, test) =>
           });
           describe('arrow, just an await', _ => {
             test.fail('plain arrow', {
-              // https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
+              desc: `
+                https://tc39.github.io/ecma262/#sec-arrow-function-definitions-static-semantics-early-errors
+              `,
               code: 'async function a(){     (foo = await bar) => {}     }',
             });
             test.fail('async arrow', {

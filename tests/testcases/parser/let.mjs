@@ -1253,7 +1253,8 @@ export default (describe, test) =>
             });
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo();;);',
-              throws: '(`;`)', // expecting for-header semi
+              throws: '(`;`)',
+              desc: 'expecting for-header semi',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -1269,7 +1270,8 @@ export default (describe, test) =>
             test('var on next line does not trigger asi', {code: 'for (let\nfoo);', throws: '(`;`)', tokens: [$IDENT, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR]});
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo());',
-              throws: '(`;`)', // expecting for-header semi
+              throws: '(`;`)',
+              desc: 'expecting for-header semi',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -1313,7 +1315,8 @@ export default (describe, test) =>
             });
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo() in x);',
-              throws: '(`;`)', // expecting for-header semi
+              throws: '(`;`)',
+              desc: 'expecting for-header semi',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -1359,7 +1362,8 @@ export default (describe, test) =>
             });
             test('asi can not trigger if next token is ident', {
               code: 'for (let\nfoo() of x);',
-              throws: '(`;`)', // expecting for-header semi
+              throws: '(`;`)',
+              desc: 'expecting for-header semi',
               tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
             });
           });
@@ -6782,13 +6786,15 @@ export default (describe, test) =>
       describe('as a label', _ => {
         test('in global', {
           code: 'let: foo;',
-          throws: 'Let declaration missing binding names', // TODO: could error about label specifically...
+          throws: 'Let declaration missing binding names',
+          desc: 'TODO: could error about label specifically...',
           SLOPPY_SCRIPT: {ast: {type: 'Program', body: [{type: 'LabeledStatement', label: {type: 'Identifier', name: 'let'}, body: {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'foo'}}}]}},
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
         });
         test('in function', {
           code: 'function f(){ let: foo; }',
-          throws: 'Let declaration missing binding names', // TODO: could error about label specifically
+          throws: 'Let declaration missing binding names',
+          desc: 'TODO: could error about label specifically',
           SLOPPY_SCRIPT: {
             ast: {
               type: 'Program',

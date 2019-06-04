@@ -1,5 +1,4 @@
 /** @format */
-
 import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('yield', _ => {
@@ -760,7 +759,7 @@ export default (describe, test) =>
           code: 'yield\n/foo',
           throws: 'yield',
           SLOPPY_SCRIPT: {
-            // If `yield` is not considered a keyword then it follows regular var name rules so division is fine
+            desc: 'If `yield` is not considered a keyword then it follows regular var name rules so division is fine',
             ast: {
               type: 'Program',
               body: [
@@ -2348,10 +2347,50 @@ export default (describe, test) =>
         ],
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-    }); // test('dinges', {
-    //   code: 'function *g() { yield {...(x),}}',
-    // });
-
+    });
+    test('singes', {
+      code: 'function *g() { yield {...(x),}}',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'FunctionDeclaration',
+            generator: true,
+            async: false,
+            id: {
+              type: 'Identifier',
+              name: 'g',
+            },
+            params: [],
+            body: {
+              type: 'BlockStatement',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'YieldExpression',
+                    delegate: false,
+                    argument: {
+                      type: 'ObjectExpression',
+                      properties: [
+                        {
+                          type: 'SpreadElement',
+                          argument: {
+                            type: 'Identifier',
+                            name: 'x',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI, $PUNCTUATOR],
+    });
     test('dinges', {
       code: 'function *g() { yield {...(x,y),}}',
       ast: {

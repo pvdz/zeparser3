@@ -130,32 +130,16 @@ export default (describe, test) =>
           desc: 'ASI explicitly does not apply if the next line starts with a forward slash so this is a division',
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
         });
-      }); // TODO: add this to lexer tests
-      //test('char class with escaped backslash and trailing dash',{
-      //  code: `middleDashMatch = /[\\-]/.exec`,
-      //  ast: {type: 'Program', body: [{
-      //    type: 'ExpressionStatement', expression: {
-      //      type: 'AssignmentExpression',
-      //      left: {type: 'Identifier', name: 'middleDashMatch'},
-      //      operator: '=',
-      //      right: {
-      //        type: 'MemberExpression',
-      //        object: {type: 'Literal', value: '<TODO>', raw: '/[\\-]/'},
-      //        property: {type: 'Identifier', name: 'exec'},
-      //        computed: false
-      //      }
-      //    },
-      //  }]},
-      //  tokens: [$IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $IDENT, $ASI],
-      //  desc: 'the dash should not be considered a range and the backslash should not change this either way',
-      //});
-      // TODO: add to lexer tests
-      //test('decimal escapes (annex B.4.1)', {
-      //  code: '/[\\12-\\14]/',
-      //  ast: {},
-      //  tokens: [$REGEX],
-      //});
-      // (new) regular expression edge cases. in particular with destructuring patterns and asi
+      });
+      test('char class with escaped backslash and trailing dash', {
+        code: `middleDashMatch = /[\\-]/.exec`,
+        desc: 'the dash should not be considered a range and the backslash should not change this either way',
+        throws: 'Parser error! Expected to parse a value',
+      });
+      test('decimal escapes (annex B.4.1)', {
+        code: '/[\\12-\\14]/',
+        throws: 'Parser error! Tokenizer error: Regex: Encountered early EOF while parsing char class (3)',
+      }); // TODO: (new) regular expression edge cases. in particular with destructuring patterns and asi
       // `[]\n/x` (division)
       // `[]\n/x/` (Error)
       // `[]\n/x/g` (division)
@@ -165,32 +149,104 @@ export default (describe, test) =>
       // x => {} / y  (Illegal; {} is a body statement, has no value. no prod parses it)
       // new/x/g
       // new\n/x/g
-      //describe('tokenizer hints', _ => {
-      //
-      //  describe('new', _ => {
-      //
-      //    test('after new sans flag', {
-      //      code: 'new /foo/.expando()',
-      //      desc: 'like, RegExp.prototype.expando = function(){}; new /foo/expando(); would be valid and work and confuse you to heck'
-      //    });
-      //
-      //    test('after new with flag', {
-      //      code: 'new /foo/g.expando()',
-      //    });
-      //
-      //    test('after new spaceless', {
-      //      code: 'new/foo/g.expando()',
-      //      desc: 'a little artificial',
-      //    });
-      //  });
-      //
-      //  // test all operators and keywords in the same way
-      //});
-      //test('named back reference', {
-      //  code: `match(/(?x.).\kx/u)`,
-      //  throws: 'xxx',
-      //  tokens: [$IDENT, $PUNCTUATOR, $REGEX, $PUNCTUATOR, $ASI],
-      //});
+
+      describe('tokenizer hints', _ => {
+        describe('new', _ => {
+          test('after new sans flag', {
+            code: 'new /foo/.expando()',
+            desc: 'like, RegExp.prototype.expando = function(){}; new /foo/expando(); would be valid and work and confuse you to heck',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'MemberExpression',
+                      object: {
+                        type: 'Literal',
+                        value: '<TODO>',
+                        raw: '/foo/',
+                      },
+                      property: {
+                        type: 'Identifier',
+                        name: 'expando',
+                      },
+                      computed: false,
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+          test('after new with flag', {
+            code: 'new /foo/g.expando()',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'MemberExpression',
+                      object: {
+                        type: 'Literal',
+                        value: '<TODO>',
+                        raw: '/foo/g',
+                      },
+                      property: {
+                        type: 'Identifier',
+                        name: 'expando',
+                      },
+                      computed: false,
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+          test('after new spaceless', {
+            code: 'new/foo/g.expando()',
+            desc: 'a little artificial',
+            ast: {
+              type: 'Program',
+              body: [
+                {
+                  type: 'ExpressionStatement',
+                  expression: {
+                    type: 'NewExpression',
+                    arguments: [],
+                    callee: {
+                      type: 'MemberExpression',
+                      object: {
+                        type: 'Literal',
+                        value: '<TODO>',
+                        raw: '/foo/g',
+                      },
+                      property: {
+                        type: 'Identifier',
+                        name: 'expando',
+                      },
+                      computed: false,
+                    },
+                  },
+                },
+              ],
+            },
+            tokens: [$IDENT, $REGEX, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $ASI],
+          });
+        }); // TODO: test all operators and keywords in the same way
+      });
+      test('named back reference', {
+        code: `match(/(?x.).\kx/u)`,
+        throws: 'Parser error! Expected to parse a value',
+      });
     });
     test('weird escape in char class is okay without u flag', {
       code: '/[\\ ]/',
@@ -983,7 +1039,7 @@ export default (describe, test) =>
       });
     });
     test.pass('hex escaped zero in character class should not be considered an error', {
-      // regression: was comparing the decoded escape to absolute error codes
+      desc: `regression: was comparing the decoded escape to absolute error codes`,
       code: 'x = /[\\x00]/;',
     });
     test.pass('shorter lodash case', {

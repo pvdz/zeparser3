@@ -260,8 +260,10 @@ export default (describe, test) =>
       });
       test('after await 1', {
         code: 'async function f(){ await\n++c; }',
-        desc: 'this may throw off the restricted production check for ++ since the newline is fine here',
-        // note: await is not restricted so the newline is fine here. the await arg is mandatory.
+        desc: `
+          this may throw off the restricted production check for ++ since the newline is fine here
+          note: await is not restricted so the newline is fine here. the await arg is mandatory.
+        `,
         ast: {
           type: 'Program',
           body: [

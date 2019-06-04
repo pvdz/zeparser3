@@ -416,24 +416,25 @@ export default (describe, test) =>
         });
         test.fail('arrow expr with `in` should fail', {
           code: 'for (x=>x in y;;);',
-          desc: 'because the parser should be greedy (otoh the arrow can only be valid in regular loop so theres no ambiguity once the arrow is seen...)',
-          /*
-        https://tc39.github.io/ecma262/#sec-statements
-        Note: +In means "is allowed", ~In means "not allowed", without prefix means "same as input"
-        IterationStatement[Yield, Await, Return]:
-        for([lookahead ≠ let []Expression[~In, ?Yield, ?Await]opt ; ; ) ;
-        Expression[In, Yield, Await]:
-        AssignmentExpression[?In, ?Yield, ?Await]
-        AssignmentExpression[In, Yield, Await]:
-        ArrowFunction[?In, ?Yield, ?Await]
-        ArrowFunction[In, Yield, Await]:
-        ArrowParameters[?Yield, ?Await][no LineTerminator here]=>ConciseBody[?In]
-        ConciseBody[In]:
-        [lookahead ≠ {]AssignmentExpression[?In, ~Yield, ~Await]
-        {FunctionBody[~Yield, ~Await]}
-        So a block-arrow doesn't care but an expression arrow propagates the `in` flag and disallows it in the
-        expression, just like a regular lhs would. So it's not allowed.
-        */
+          desc: `
+            because the parser should be greedy (otoh the arrow can only be valid in regular loop so theres no ambiguity once the arrow is seen...)
+
+            https://tc39.github.io/ecma262/#sec-statements
+            Note: +In means "is allowed", ~In means "not allowed", without prefix means "same as input"
+            IterationStatement[Yield, Await, Return]:
+            for([lookahead ≠ let []Expression[~In, ?Yield, ?Await]opt ; ; ) ;
+            Expression[In, Yield, Await]:
+            AssignmentExpression[?In, ?Yield, ?Await]
+            AssignmentExpression[In, Yield, Await]:
+            ArrowFunction[?In, ?Yield, ?Await]
+            ArrowFunction[In, Yield, Await]:
+            ArrowParameters[?Yield, ?Await][no LineTerminator here]=>ConciseBody[?In]
+            ConciseBody[In]:
+            [lookahead ≠ {]AssignmentExpression[?In, ~Yield, ~Await]
+            {FunctionBody[~Yield, ~Await]}
+            So a block-arrow doesn't care but an expression arrow propagates the "in" flag and disallows it in the
+            expression, just like a regular lhs would. So it's not allowed.
+          `,
         });
         test.pass('arrow body with `in` should pass', {
           code: 'for (x=>{x in y};;);',
@@ -983,11 +984,11 @@ export default (describe, test) =>
         });
         test('ummmm no', {
           code: 'for (const ...x in y){}',
-          throws: true, // TODO
+          throws: 'Parser error! Expected identifier, or array/object destructuring, next token is: {# PUNCTUATOR : nl=N ws=N 11:14 curc=46 `...`#}',
         });
         test('absolutely no', {
           code: 'for (...x in y){}',
-          throws: true, // TODO
+          throws: 'Parser error! Unexpected spread/rest dots',
         });
       });
     });
@@ -1330,8 +1331,10 @@ export default (describe, test) =>
           code: 'for (var a = b in c);',
           throws: 'can not have an init',
           WEB: {
-            // this is an annexB web compat thing and only valid in sloppy mode
-            desc: 'https://tc39.github.io/ecma262/#sec-initializers-in-forin-statement-heads',
+            desc: `
+              this is an annexB web compat thing and only valid in sloppy mode
+              https://tc39.github.io/ecma262/#sec-initializers-in-forin-statement-heads
+            `,
             ast: {
               type: 'Program',
               body: [
@@ -1371,7 +1374,9 @@ export default (describe, test) =>
           code: 'for (var a = ++b in c);',
           throws: 'can not have an init',
           WEB: {
-            // this is an annexB web compat thing
+            desc: `
+              this is an annexB web compat thing 
+            `,
             ast: {
               type: 'Program',
               body: [
@@ -1416,7 +1421,9 @@ export default (describe, test) =>
           code: 'for (var a = 0 in stored = a, {});',
           throws: 'can not have an init',
           WEB: {
-            // this is an annexB web compat thing
+            desc: `
+              this is an annexB web compat thing 
+            `,
             ast: {
               type: 'Program',
               body: [
@@ -1474,7 +1481,9 @@ export default (describe, test) =>
           code: 'for (var a = (++effects, -1) in x);',
           throws: 'can not have an init',
           WEB: {
-            // this is an annexB web compat thing
+            desc: `
+              this is an annexB web compat thing 
+            `,
             ast: {
               type: 'Program',
               body: [
@@ -1659,7 +1668,9 @@ export default (describe, test) =>
           code: 'for (var a = (++effects, -1) in stored = a, {a: 0, b: 1, c: 2});',
           throws: 'can not have an init',
           WEB: {
-            // this is an annexB web compat thing
+            desc: `
+              this is an annexB web compat thing 
+            `,
             ast: {
               type: 'Program',
               body: [
@@ -2067,12 +2078,16 @@ export default (describe, test) =>
         tokens: true,
       });
       test.fail('lhs cannot be an assignment', {
-        // https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors
-        // It is a Syntax Error if AssignmentTargetType of LeftHandSideExpression is not simple.
+        desc: `
+          https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors
+          It is a Syntax Error if AssignmentTargetType of LeftHandSideExpression is not simple.
+        `,
         code: 'for (x = y in z) ;',
       });
       test.fail('lhs cannot be a paren wrapped assignment', {
-        // https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors
+        desc: `
+          https://tc39.github.io/ecma262/#sec-for-in-and-for-of-statements-static-semantics-early-errors
+        `,
         code: 'for ((x = y) in z) ;',
       });
       describe('destructuring edge cases', _ => {

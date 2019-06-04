@@ -109,8 +109,10 @@ export default (describe, test) =>
     describe('verified', _ => {
       test.pass('should pass', {
         code: 'for ({[a]: ""[b] = c} of d) {}',
-        // This one is actually valid
-        desc: 'https://twitter.com/Ghost1240145716/status/1128459606047412224',
+        desc: `
+          https://twitter.com/Ghost1240145716/status/1128459606047412224
+          This one is actually valid
+        `,
       });
       test.fail('crappy end not properly rejected', {
         code: 'if (x) {}}dsadsa',
@@ -141,9 +143,12 @@ export default (describe, test) =>
       code: 'function yield(){switch(e){default:}}switch(x){default:case x:}const yield=x',
     });
     test.fail('protected double declraed according to v8', {
-      code: 'function protected(){for(;;)switch(x){default:}}const protected=x', // function arguments(){}v:switch(x){default:}let arguments=l
-      // function package(){}let package=a
-      // function v(){}const v=x
+      code: [
+        'function protected(){for(;;)switch(x){default:}}const protected=x',
+        'function arguments(){}v:switch(x){default:}let arguments=l',
+        'function package(){}let package=a',
+        'function v(){}const v=x',
+      ],
     });
     test.fail('newline after async in method not proccing error in v8', {
       code: ['class K extends {} {;async\\n async *1(){}}'],

@@ -2015,8 +2015,8 @@ export default (describe, test) =>
         });
         test('class baited', {
           code: 'new class extends{}',
-          desc: 'it might be valid to extend an expression that starts with an object literal',
-          throws: true, // but this isnt valid
+          desc: 'it might be valid to extend an expression that starts with an object literal but this isnt valid',
+          throws: true,
         });
         test('class extending', {
           code: 'new class extends x{}',

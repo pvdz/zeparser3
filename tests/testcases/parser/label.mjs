@@ -1,5 +1,5 @@
 /** @format */
-import {$IDENT, $PUNCTUATOR} from '../../../src/zetokenizer.mjs';
+import {$IDENT, $PUNCTUATOR, $REGEX, $ASI} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('debugger statement', _ => {
     test('debugger with semi', {
@@ -131,9 +131,78 @@ export default (describe, test) =>
       });
     });
     describe('regex edge cases', _ => {
-      // foo:/bar/
-      // foo:\n/bar/
-      // foo:\n/bar/g
+      test('1', {
+        code: 'foo:/bar/',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'LabeledStatement',
+              label: {
+                type: 'Identifier',
+                name: 'foo',
+              },
+              body: {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'Literal',
+                  value: '<TODO>',
+                  raw: '/bar/',
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $REGEX, $ASI],
+      });
+      test('2', {
+        code: 'foo:\n/bar/',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'LabeledStatement',
+              label: {
+                type: 'Identifier',
+                name: 'foo',
+              },
+              body: {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'Literal',
+                  value: '<TODO>',
+                  raw: '/bar/',
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $REGEX, $ASI],
+      });
+      test('3', {
+        code: 'foo:\n/bar/g',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'LabeledStatement',
+              label: {
+                type: 'Identifier',
+                name: 'foo',
+              },
+              body: {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'Literal',
+                  value: '<TODO>',
+                  raw: '/bar/g',
+                },
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $REGEX, $ASI],
+      });
     });
     test('cannot use the same label twice', {
       code: 'foo: foo: x',

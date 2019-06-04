@@ -617,7 +617,6 @@ export default (describe, test) =>
                         type: 'Identifier',
                         name: 'foo',
                       },
-                      //operator: '=', // innocent artifact because the AssignmentPattern was an AssignmentExpression before
                       right: {
                         type: 'Identifier',
                         name: 'A',
@@ -1519,7 +1518,6 @@ export default (describe, test) =>
                           type: 'Identifier',
                           name: 'b',
                         },
-                        //operator: '=', NO!
                         right: {
                           type: 'ArrayExpression',
                           elements: [
@@ -3293,7 +3291,9 @@ export default (describe, test) =>
           code: '[' + str + '] = x;',
           throws: str.includes('.length') ? undefined : true,
           ast: str.includes('.length') ? true : undefined,
-          // property is valid assignment target so should work
+          desc: `
+            property is valid assignment target so should work
+          `,
           tokens: str.includes('.length') ? true : undefined,
         });
         test.pass('[' + str + '] in array', {

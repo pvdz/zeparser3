@@ -1,20 +1,42 @@
 /** @format */
-
 import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('this keyword', _ => {
-    //
-    //test('as a statement', {
-    //  code: 'this',
-    //  ast: {},
-    //  tokens: [],
-    //});
-    //
-    //test('as an expression', {
-    //  code: 'this',
-    //  ast: {},
-    //  tokens: [],
-    //});
+    test('as a statement', {
+      code: 'this',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'ThisExpression',
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $ASI],
+    });
+    test('as an expression', {
+      code: '+this',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'UnaryExpression',
+              operator: '+',
+              prefix: true,
+              argument: {
+                type: 'ThisExpression',
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $ASI],
+    });
     describe('regex edge cases', _ => {
       test('regex test good', {
         code: 'this\n/foo;',

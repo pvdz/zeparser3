@@ -1123,7 +1123,10 @@ export default (describe, test) =>
           SCRIPT: {
             throws: 'module',
           },
-          throws: 'bound', // the let binding error will trigger first
+          desc: `
+            the let binding error will trigger first
+          `,
+          throws: 'bound',
         });
         test('let x, [x]', {
           code: 'export let x = y, [x] = y;',

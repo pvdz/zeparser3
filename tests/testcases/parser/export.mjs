@@ -1415,10 +1415,12 @@ export default (describe, test) =>
           SCRIPT: {
             throws: 'module',
           },
-        }); // test.pass('async generator func', {
-        //   code: 'export async function *f(){} foo',
-        // SCRIPT: {throws: 'module'},
-        // });
+        });
+        test.pass('async generator func', {
+          code: 'export async function *f(){} foo',
+          SCRIPT: {throws: 'module'},
+          SKIP: true,
+        });
 
         test.pass('regular class', {
           code: 'export class x {} foo',
@@ -1505,14 +1507,17 @@ export default (describe, test) =>
           SCRIPT: {
             throws: 'module',
           },
-        }); // test.pass('async generator func', {
-        //   code: 'export default async function *f(){} foo',
-        // SCRIPT: {throws: 'module'},
-        // });
-        // test.pass('async generator anon func', {
-        //   code: 'export default async function *(){} foo',
-        // SCRIPT: {throws: 'module'},
-        // });
+        });
+        test.pass('async generator func', {
+          code: 'export default async function *f(){} foo',
+          SCRIPT: {throws: 'module'},
+          SKIP: true,
+        });
+        test.pass('async generator anon func', {
+          code: 'export default async function *(){} foo',
+          SCRIPT: {throws: 'module'},
+          SKIP: true,
+        });
 
         test.pass('regular class', {
           code: 'export default class x {} foo',
@@ -1563,35 +1568,35 @@ export default (describe, test) =>
     });
     test.pass('edge case regarding `in`', {
       code: 'export default a in b',
-      // always allowed by cfg
+      desc: 'always allowed by cfg',
       SCRIPT: {
         throws: 'module',
       },
     });
     test.fail('edge case regarding `await`', {
       code: 'export default await',
-      // always forbidden by cfg
+      desc: 'always forbidden by cfg',
       SCRIPT: {
         throws: 'module',
       },
     });
     test.fail('edge case regarding `await x`', {
       code: 'export default await x',
-      // always forbidden by cfg
+      desc: 'always forbidden by cfg',
       SCRIPT: {
         throws: 'module',
       },
     });
     test.fail('edge case regarding `yield`', {
       code: 'export default yield',
-      // always forbidden by cfg
+      desc: 'always forbidden by cfg',
       SCRIPT: {
         throws: 'module',
       },
     });
     test.fail('edge case regarding `yield x`', {
       code: 'export default yield x',
-      // always forbidden by cfg
+      desc: 'always forbidden by cfg',
       SCRIPT: {
         throws: 'module',
       },
@@ -1684,7 +1689,7 @@ export default (describe, test) =>
       });
       test('with statement', {
         code: 'with (x) export {x};',
-        // with is illegal in module goal because it is strict by default, anyways
+        desc: 'with is illegal in module goal because it is strict by default, anyways',
         SCRIPT: {
           throws: 'module',
         },

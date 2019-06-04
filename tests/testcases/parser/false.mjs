@@ -2,18 +2,45 @@
 import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('false keyword', _ => {
-    //
-    //test('as a statement', {
-    //  code: 'false',
-    //  ast: {},
-    //  tokens: [],
-    //});
-    //
-    //test('as an expression', {
-    //  code: 'false',
-    //  ast: {},
-    //  tokens: [],
-    //});
+    test('as a statement', {
+      code: 'false',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'Literal',
+              value: false,
+              raw: 'false',
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $ASI],
+    });
+    test('as an expression', {
+      code: '+false',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'UnaryExpression',
+              operator: '+',
+              prefix: true,
+              argument: {
+                type: 'Literal',
+                value: false,
+                raw: 'false',
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $ASI],
+    });
     test('regex test bad', {
       code: 'false\n/foo/;',
       throws: 'Expected to parse a value',

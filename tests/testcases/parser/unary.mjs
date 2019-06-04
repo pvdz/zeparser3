@@ -413,7 +413,8 @@ export default (describe, test) =>
           });
           describe('async args', _ => {
             test.pass('async keyword sans parens', {
-              code: opstr === 'delete' ? opstr + ' async.x' : opstr + ' async', // delete cannot do just ident
+              code: opstr === 'delete' ? opstr + ' async.x' : opstr + ' async',
+              desc: 'delete cannot do just ident',
             });
             test('async parens', {
               code: opstr + ' async ()',

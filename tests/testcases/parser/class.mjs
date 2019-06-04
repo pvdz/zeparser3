@@ -196,24 +196,28 @@ export default (describe, test) => {
         code: 'class x extends () => x {}',
       });
       test.pass('regression: should not try to record class in scope at all', {
-        // #11
+        desc: '#11',
         code: '(class A extends B { constructor() { super() } })',
         WEB: false,
       });
       test.pass('regression: should not try to record class in scope in web compat', {
-        // #11
+        desc: '#11',
         code: '(class A extends B { constructor() { super() } })',
         WEB: true,
       });
       test.fail('regression: crashed (unexpectedly), web=false', {
-        // #11
-        // This should throw an error because super can only be called in a constructor
+        desc: `
+        #11
+        This should throw an error because super can only be called in a constructor
+        `,
         code: '(class A extends B { method() { super() } })',
         WEB: false,
       });
       test.fail('regression: crashed (unexpectedly), web=true', {
-        // #11
-        // This should throw an error because super can only be called in a constructor
+        desc: `
+        #11
+        This should throw an error because super can only be called in a constructor
+        `,
         code: '(class A extends B { method() { super() } })',
         web: true,
       });
@@ -3774,7 +3778,9 @@ export default (describe, test) => {
               ? {
                   ast: true,
                   tokens: [$IDENT, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-                  // await is only considered a keyword when parsing in module mode
+                  desc: `
+                    await is only considered a keyword when parsing in module mode
+                  `,
                   MODULE: {
                     throws: true,
                   },
@@ -4437,10 +4443,12 @@ export default (describe, test) => {
       test('string key', {
         code: 'class x { static "prototype"(){} }',
         throws: 'prototype',
-      }); // test('string unicode escape key', {
-      //   code: 'class x { static "prot\\u006ftype"(){} }',
-      //   throws: 'prototype',
-      // });
+      });
+      test('string unicode escape key', {
+        code: 'class x { static "prot\\u006ftype"(){} }',
+        throws: 'prototype',
+        SKIP: true,
+      });
     });
     test.fail('cannot extend an assignment', {
       code: 'class x extends a = b {}',
@@ -5435,7 +5443,10 @@ export default (describe, test) => {
       });
     });
     test.fail('can not make a static method called "prototype"', {
-      code: 'class x {    static prototype(){}    }', // > It is a Syntax Error if PropName of MethodDefinition is "prototype".
+      code: 'class x {    static prototype(){}    }',
+      desc: `
+        > It is a Syntax Error if PropName of MethodDefinition is "prototype".
+      `,
     });
     test.fail('static in obj inside class', {
       code: 'class x { foo() { return { static foo() {} } } }',

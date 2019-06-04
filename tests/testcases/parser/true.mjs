@@ -1,20 +1,46 @@
 /** @format */
-
 import {$ASI, $IDENT, $PUNCTUATOR, $TICK_BODY, $TICK_HEAD, $TICK_PURE, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
 export default (describe, test) =>
   describe('true keyword', _ => {
-    //
-    //test('as a statement', {
-    //  code: 'true',
-    //  ast: {},
-    //  tokens: [],
-    //});
-    //
-    //test('as an expression', {
-    //  code: 'true',
-    //  ast: {},
-    //  tokens: [],
-    //});
+    test('as a statement', {
+      code: 'true',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'Literal',
+              value: true,
+              raw: 'true',
+            },
+          },
+        ],
+      },
+      tokens: [$IDENT, $ASI],
+    });
+    test('as an expression', {
+      code: '+true',
+      ast: {
+        type: 'Program',
+        body: [
+          {
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'UnaryExpression',
+              operator: '+',
+              prefix: true,
+              argument: {
+                type: 'Literal',
+                value: true,
+                raw: 'true',
+              },
+            },
+          },
+        ],
+      },
+      tokens: [$PUNCTUATOR, $IDENT, $ASI],
+    });
     describe('regex edge cases', _ => {
       test('division', {
         code: 'true\n/foo;',

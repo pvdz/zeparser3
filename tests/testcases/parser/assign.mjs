@@ -99,16 +99,22 @@ export default (describe, test) =>
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
     });
     test.fail('regression with invalid lhs of compound assignment', {
-      // https://github.com/pvdz/zeparser3/issues/3
+      desc: `
+        https://github.com/pvdz/zeparser3/issues/3
+      `,
       code: '({x:y} += x)',
     });
     test.fail('do not be fooled by compound assigning to a grouped object', {
-      // https://github.com/pvdz/zeparser3/issues/3
-      // Basically, this proofs merely asserting the previous token is insufficient
+      desc: `
+        https://github.com/pvdz/zeparser3/issues/3
+        Basically, this proofs merely asserting the previous token is insufficient
+      `,
       code: '(({x:y}) += x)',
     });
     test.fail('regression with invalid lhs that looks like destructuring', {
-      // https://github.com/pvdz/zeparser3/issues/3
+      desc: `
+        https://github.com/pvdz/zeparser3/issues/3
+      `,
       code: '({foo: {x:y} += x})',
     });
     test('bin -=', {
@@ -567,9 +573,10 @@ export default (describe, test) =>
         test.fail('should listen to use strict directive in getter [' + keyword + ']', {
           code: 'foo = { get x(){  "use strict"; (' + keyword + ' = "sentinal 79845134");   }}',
         });
-      }); // strict mode only
+      });
 
       [
+        // strict mode only
         'let',
         'implements',
         'package',
@@ -876,11 +883,15 @@ export default (describe, test) =>
       });
     });
     test.fail('assignment to array pattern with grouped assignment is illegal', {
-      // https://github.com/pvdz/zeparser3/issues/3#issuecomment-471157627
+      desc: `
+        https://github.com/pvdz/zeparser3/issues/3#issuecomment-471157627
+      `,
       code: '[(a = 0)] = 1',
     });
     test.pass('assignment to paren wrapped ident in array is okay', {
-      // https://github.com/pvdz/zeparser3/issues/3#issuecomment-471157627
+      desc: `
+        https://github.com/pvdz/zeparser3/issues/3#issuecomment-471157627
+      `,
       code: '[(a)] = x',
     });
     test.pass('assignment destructuring with noop-group with default being an assignable', {
@@ -929,7 +940,9 @@ export default (describe, test) =>
       code: 'x, {a: 1} = [];',
     });
     test.pass('destruct assignment to prop of obj pattern where alias is number is valid', {
-      // Regression: the number was causing the whole obj pattern to be marked non-destructible
+      desc: `
+        Regression: the number was causing the whole obj pattern to be marked non-destructible
+      `,
       code: '[{a: 1}.c] = [];',
     });
     test.pass('noop-group edge case for destruct assignment to prop of obj pattern where alias is number is valid', {
@@ -1112,16 +1125,14 @@ export default (describe, test) =>
         code: tcase,
       });
     });
-    [
-      '({...(obj)} = foo)', // rest arg must be "simple" assignment. parenthesized expr is simple if its arg is. so ok.
-      '({...obj} = foo)',
-      '({...obj.x} = foo)',
-      '({...{}.x} = foo)',
-      '({...[].x} = foo)',
-    ].forEach((tcase, i) => {
-      test.pass('good destruct assign of obj case ' + i, {
-        code: tcase,
-      });
+    test.pass('good destruct assign of obj case', {
+      code: [
+        '({...(obj)} = foo)', // rest arg must be "simple" assignment. parenthesized expr is simple if its arg is. so ok.
+        '({...obj} = foo)',
+        '({...obj.x} = foo)',
+        '({...{}.x} = foo)',
+        '({...[].x} = foo)',
+      ],
     });
     describe('assignment to number', _ => {
       test.fail('base case should fail', {

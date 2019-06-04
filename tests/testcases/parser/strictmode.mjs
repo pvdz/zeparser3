@@ -843,49 +843,59 @@ export default (describe, test) =>
           },
           tokens: [$IDENT, $PUNCTUATOR, $IDENT, $ASI],
         },
-      }); // TODO: will have to circle back for these later. they require a large architectural change.
-      // test('cannot destruct assign to eval', {
-      //   code: '([eval]) = [x]',
-      //   desc: 'vs `([eval]) => [x]`',
-      //   throws: 'eval',
-      //   SLOPPY_SCRIPT: {
-      //     ast: { type: 'Program',
-      //       body:
-      //         [ { type: 'ExpressionStatement',
-      //           expression:
-      //             { type: 'AssignmentExpression',
-      //               left:
-      //                 { type: 'ArrayPattern',
-      //                   elements: [ { type: 'Identifier', name: 'eval' } ] },
-      //               operator: '=',
-      //               right:
-      //                 { type: 'ArrayExpression',
-      //                   elements: [ { type: 'Identifier', name: 'x' } ] } } } ] },
-      //     tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-      //   },
-      // });
-      //
-      // test('groups are just one way to destruct', {
-      //   code: 'x, [eval] = [x]',
-      //   desc: 'vs `x, [eval].foo`; make sure we dont assume destructuring without var/let/const happens with a group; that is just a way to disambiguate',
-      //   throws: 'eval',
-      //   SLOPPY_SCRIPT: {
-      //     ast: { type: 'Program',
-      //       body:
-      //         [ { type: 'ExpressionStatement',
-      //           expression:
-      //             { type: 'AssignmentExpression',
-      //               left:
-      //                 { type: 'ArrayPattern',
-      //                   elements: [ { type: 'Identifier', name: 'eval' } ] },
-      //               operator: '=',
-      //               right:
-      //                 { type: 'ArrayExpression',
-      //                   elements: [ { type: 'Identifier', name: 'x' } ] } } } ] },
-      //     tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
-      //   },
-      // });
-
+      });
+      test('cannot destruct assign to eval', {
+        code: '([eval]) = [x]',
+        desc: 'vs `([eval]) => [x]`',
+        throws: 'Parser error! Cannot assign to lhs because it is not a valid assignment target',
+      });
+      test('groups are just one way to destruct', {
+        code: 'x, [eval] = [x]',
+        desc: 'vs `x, [eval].foo`; make sure we dont assume destructuring without var/let/const happens with a group; that is just a way to disambiguate',
+        ast: {
+          type: 'Program',
+          body: [
+            {
+              type: 'ExpressionStatement',
+              expression: {
+                type: 'SequenceExpression',
+                expressions: [
+                  {
+                    type: 'Identifier',
+                    name: 'x',
+                  },
+                  {
+                    type: 'AssignmentExpression',
+                    left: {
+                      type: 'ArrayPattern',
+                      elements: [
+                        {
+                          type: 'Identifier',
+                          name: 'eval',
+                        },
+                      ],
+                    },
+                    operator: '=',
+                    right: {
+                      type: 'ArrayExpression',
+                      elements: [
+                        {
+                          type: 'Identifier',
+                          name: 'x',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tokens: [$IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $ASI],
+        STRICT: {
+          throws: 'Parser error! Tried to destructure something that is not destructible',
+        },
+      });
       test('cannot import an eval', {
         code: 'import eval from "x";',
         throws: 'eval',
@@ -1114,7 +1124,7 @@ export default (describe, test) =>
       test('cannot assign to grouped eval', {
         code: '(eval) = x;',
         throws: true,
-        // Invalid assignment because `eval` is not assignable
+        desc: 'Invalid assignment because `eval` is not assignable',
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',
@@ -1142,7 +1152,7 @@ export default (describe, test) =>
       test('should not pass because of newline / asi', {
         code: '(eval)\n = x;',
         throws: true,
-        // Invalid assignment, applies ASI but then hits a wall because `eval` is not assignable
+        desc: 'Invalid assignment, applies ASI but then hits a wall because `eval` is not assignable',
         SLOPPY_SCRIPT: {
           ast: {
             type: 'Program',

@@ -142,7 +142,7 @@ export default (describe, test) =>
         },
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
       });
-      test('group of some two assignments', {
+      test('group of some two assignments 3', {
         code: '(a = 1, b = 2);',
         ast: {
           type: 'Program',
@@ -187,7 +187,7 @@ export default (describe, test) =>
       });
       describe('regular assignment to group', _ => {
         test('assignment to a wrapped identifier, silly but valid', {
-          // https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget
+          desc: 'https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget',
           code: '(a) = 1;',
           ast: {
             type: 'Program',
@@ -872,7 +872,7 @@ export default (describe, test) =>
       });
       describe('compound assignment to group', _ => {
         test('assignment to a wrapped identifier, silly but valid', {
-          // https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget
+          desc: 'https://tc39.github.io/ecma262/#sec-semantics-static-semantics-isvalidsimpleassignmenttarget',
           code: '(a) += 1;',
           ast: {
             type: 'Program',
@@ -1992,9 +1992,7 @@ export default (describe, test) =>
       test('cannot compound assign to group with comma', {
         code: '(a,b)+=2',
         throws: 'Cannot assign',
-      }); // TODO: confirm that `async` is not a reserved word in any case
-      // TODO: confirm `let` is assignable even in strict mode
-      // keywords
+      }); // keywords
 
       [
         'break',
@@ -2036,8 +2034,10 @@ export default (describe, test) =>
       ].forEach(keyword => {
         test('cannot assign to group with keyword: `' + keyword + '`', {
           code: '(' + keyword + ')=2',
-          // Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
-          // Invalid assignment because group does not wrap just a var name or just a property access
+          desc: `
+            Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
+            Invalid assignment because group does not wrap just a var name or just a property access
+          `,
           throws: true,
         });
       }); // strict-mode only keywords
@@ -2089,8 +2089,10 @@ export default (describe, test) =>
       ['async'].forEach(keyword => {
         test('cannot assign to group with keyword: `' + keyword + '`', {
           code: '(' + keyword + ')=2',
-          // Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
-          // Invalid assignment because group does not wrap just a var name or just a property access
+          desc: `
+            Cannot use this name (break) as a variable name because: Cannot never use this reserved word as a variable name
+            Invalid assignment because group does not wrap just a var name or just a property access
+          `,
           ast: true,
           tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $ASI],
         });
@@ -2547,6 +2549,7 @@ export default (describe, test) =>
       });
       test('assignment inside pattern', {
         code: '([target()[targetKey(a=b)]] = x);',
+        desc: 'THIS IS IMPORTANT! Not a pattern',
         ast: {
           type: 'Program',
           body: [
@@ -2576,7 +2579,6 @@ export default (describe, test) =>
                         arguments: [
                           {
                             type: 'AssignmentExpression',
-                            // THIS IS IMPORTANT! Not a pattern
                             left: {
                               type: 'Identifier',
                               name: 'a',
@@ -3282,31 +3284,16 @@ export default (describe, test) =>
           ],
         },
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      }); //{ error
-      //  code: '((x)) => x;',
-      //  ast: {type: 'Program', body: [
-      //    {type: 'ExpressionStatement', expression: {type: 'Identifier', name: 'x'}},
-      //  ]},
-      //  desc: 'silly double group',
-      //  tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
-      //},
-      //{ error
-      //  code: '(a, 1, "c", d, e, f) => x;',
-      //  ast: {type: 'Program', body: [
-      //    {type: 'ExpressionStatement', expression: {type: 'SequenceExpression', expressions: [
-      //      {type: 'Identifier', name: 'a'},
-      //      {type: 'Literal', value: '<TODO>', raw: '1'},
-      //      {type: 'Literal', value: '<TODO>', raw: '"c"'},
-      //      {type: 'Identifier', name: 'd'},
-      //      {type: 'Identifier', name: 'e'},
-      //      {type: 'Identifier', name: 'f'},
-      //    ]}},
-      //  ]},
-      //  desc: 'group of some simple values',
-      //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR],
-      //});
-
-      test('group of some two assignments', {
+      });
+      test('double wrapped paren', {
+        code: '((x)) => x;',
+        throws: 'Parser error! Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N 6:8 curc=61 `=>`#}',
+      });
+      test('weird param', {
+        code: '(a, 1, "c", d, e, f) => x;',
+        throws: 'Parser error! Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N 21:23 curc=61 `=>`#}',
+      });
+      test('group of some two assignments 1', {
         code: '(a = 1, b = 2) => x;',
         ast: {
           type: 'Program',
@@ -3354,47 +3341,20 @@ export default (describe, test) =>
           ],
         },
         tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      }); //{ error
-      //  code: '(a.b) => x;',
-      //  ast: {type: 'Program', body: [
-      //    {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
-      //      left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: false},
-      //      operator: '=',
-      //      right: {type: 'Literal', value: '<TODO>', raw: '1'},
-      //    }},
-      //  ]},
-      //  desc: 'assignment to a wrapped property, silly but valid',
-      //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      //},
-      //{ error
-      //  code: '(a[b]) => x;',
-      //  ast: {type: 'Program', body: [
-      //    {type: 'ExpressionStatement', expression: {type: 'AssignmentExpression',
-      //      left: {type: 'MemberExpression', object: {type: 'Identifier', name: 'a'}, property: {type: 'Identifier', name: 'b'}, computed: true},
-      //      operator: '=',
-      //      right: {type: 'Literal', value: '<TODO>', raw: '1'},
-      //    }},
-      //  ]},
-      //  desc: 'assignment to a wrapped property, silly but valid',
-      //  tokens: [$PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $NUMBER_DEC, $PUNCTUATOR],
-      //},
-      //{ error
-      //  code: '/i/ * ()=>j',
-      //  ast: {type: 'Program', body: [
-      //    {type: 'ExpressionStatement', expression: {type: 'BinaryExpression',
-      //      left: {type: 'Literal', value: '<TODO>', raw: '/i/'},
-      //      operator: '*',
-      //      right: {type: 'ArrowFunctionExpression',
-      //        params: [],
-      //        id: null,
-      //      }
-      //    }},
-      //  ]},
-      //  desc: 'this is invalid because you cannot match an arrow (in the grammar) on the rhs of a non-assignment operator',
-      //  tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR],
-      //}
-
-      test('group of some two assignments', {
+      });
+      test('arrow param property', {
+        code: '(a.b) => x;',
+        throws: 'Parser error! The left hand side of the arrow is not destructible so arrow is illegal',
+      });
+      test('arrow param computed property', {
+        code: '(a[b]) => x;',
+        throws: 'Parser error! The left hand side of the arrow is not destructible so arrow is illegal',
+      });
+      test('this is invalid because you cannot match an arrow (in the grammar) on the rhs of a non-assignment operator', {
+        code: '/i/ * ()=>j',
+        throws: 'Parser error! Was parsing a value that could not be AssignmentExpression but found an arrow',
+      });
+      test('group of some two assignments 2', {
         code: 'var a = (b) => c;',
         ast: {
           type: 'Program',
@@ -5330,7 +5290,7 @@ export default (describe, test) =>
           code: '({...{x} }) => {}',
         });
         test.fail('obj destructuring rest with paren wrapped arg', {
-          // Arrow cover grammar is not determined by "AssignmentTargetType" so these parens are not "okay"
+          desc: 'Arrow cover grammar is not determined by "AssignmentTargetType" so these parens are not "okay"',
           code: '({...(x) }) => {}',
         });
         test.fail('obj destructuring rest with complex arr arg', {

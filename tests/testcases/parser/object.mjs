@@ -5958,12 +5958,15 @@ export default (describe, test) =>
         tokens: [$PUNCTUATOR, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $REGEX, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR],
       });
       test.fail('happy learned to putt', {
-        code: '({this});', // https://tc39.github.io/ecma262/#prod-ObjectLiteral
-        // https://tc39.github.io/ecma262/#prod-PropertyDefinitionList
-        // https://tc39.github.io/ecma262/#prod-PropertyDefinition
-        // https://tc39.github.io/ecma262/#prod-IdentifierReference
-        // https://tc39.github.io/ecma262/#prod-Identifier
-        // Identifier : IdentifierName but not ReservedWord
+        code: '({this});',
+        desc: `
+          https://tc39.github.io/ecma262/#prod-ObjectLiteral
+          https://tc39.github.io/ecma262/#prod-PropertyDefinitionList
+          https://tc39.github.io/ecma262/#prod-PropertyDefinition
+          https://tc39.github.io/ecma262/#prod-IdentifierReference
+          https://tc39.github.io/ecma262/#prod-Identifier
+          Identifier : IdentifierName but not ReservedWord
+        `,
       });
       [
         'break',
@@ -9052,7 +9055,7 @@ export default (describe, test) =>
             });
             test('destructuring', {
               code: `class x extends y {constructor(){    ({"foo": ${keyword}} = x)    }}`,
-              // Note: super property is valid here, like any other property
+              desc: 'Note: super property is valid here, like any other property',
               throws: keyword === 'super()',
               ast: true,
               tokens: true,
@@ -9067,7 +9070,7 @@ export default (describe, test) =>
             });
             test('destructuring', {
               code: `class x extends y {constructor(){    ({790: ${keyword}} = x)    }}`,
-              // Note: super property is valid here, like any other property
+              desc: 'Note: super property is valid here, like any other property',
               throws: keyword === 'super()',
               ast: true,
               tokens: true,
@@ -9140,7 +9143,8 @@ export default (describe, test) =>
       });
       test.pass('base case', {
         code: 'x = {...y}',
-        ES: 9, // first version where this was introduced
+        ES: 9,
+        desc: 'first version where this was introduced',
       });
       test.fail('base case', {
         code: 'x = {...y}',
@@ -10249,13 +10253,17 @@ export default (describe, test) =>
         });
         test.fail('rest init', {
           code: '({a: x, ...x = y} = obj)',
-          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible',
+          desc: `
+            https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+            rest on anything but an ident is not destructible
+          `,
         });
         test.fail('rest nested', {
           code: '({a: x, ...{x}} = obj)',
-          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible',
+          desc: `
+            rest on anything but an ident is not destructible
+            https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          `,
         });
       });
       describe('async call wrapping an assigment pattern', _ => {
@@ -10298,13 +10306,17 @@ export default (describe, test) =>
         });
         test.fail('rest init', {
           code: 'async({a: x, ...x = y} = obj)',
-          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible',
+          desc: `
+            rest on anything but an ident is not destructible
+            https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          `,
         });
         test.fail('rest nested', {
           code: 'async({a: x, ...{x}} = obj)',
-          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible',
+          desc: `
+            rest on anything but an ident is not destructible
+            https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+          `,
         });
       });
       describe('for-header assigment pattern', _ => {
@@ -10346,13 +10358,17 @@ export default (describe, test) =>
         });
         test.fail('rest init', {
           code: 'for ({a: x, ...x = y} in obj);',
-          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible',
+          desc: `
+            https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+            rest on anything but an ident is not destructible
+          `,
         });
         test.fail('rest nested', {
           code: 'for ({a: x, ...{x}} in obj);',
-          // https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
-          desc: 'rest on anything but an ident is not destructible',
+          desc: `
+            https://tc39.github.io/ecma262/#prod-AssignmentRestProperty
+            rest on anything but an ident is not destructible
+          `,
         });
       });
     });
@@ -10367,7 +10383,7 @@ export default (describe, test) =>
           code: '({x: ' + str + '} = x);',
           throws: str.includes('.length') ? undefined : true,
           ast: str.includes('.length') ? true : undefined,
-          // property is valid assignment target so should work
+          desc: 'property is valid assignment target so should work',
           tokens: str.includes('.length') ? true : undefined,
         }); // `({function(){}})` is quite beautiful in its own way. and valid.
 

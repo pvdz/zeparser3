@@ -1452,8 +1452,8 @@ export default (describe, test) =>
               },
             ],
           },
+          desc2: 'NOT regex!',
           tokens: [$STRING_DOUBLE, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $IDENT, $ASI],
-          // NOT regex!
           OPTIONS: {
             AST_directiveNodes: true,
           },

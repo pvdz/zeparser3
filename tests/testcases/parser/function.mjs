@@ -4029,14 +4029,18 @@ export default (describe, test) =>
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
             test.pass('func decl can be called yield', {
               code: 'function yield() {}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
             });
             test.pass('async func decl can be called yield', {
               code: 'async function yield() {}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
@@ -4046,35 +4050,45 @@ export default (describe, test) =>
             });
             test.pass('async generator func decl can be called yield', {
               code: 'async function *yield() {}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
             });
             test.pass('func decl can be called await', {
               code: 'function await() {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
             });
             test.pass('async func decl can be called await', {
               code: 'async function await() {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
             });
             test.pass('generator func decl can be called await', {
               code: 'function *await() {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
             });
             test.pass('async generator func decl can be called await', {
               code: 'async function *await() {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4096,7 +4110,9 @@ export default (describe, test) =>
             });
             test.pass('func expr can be called await', {
               code: 'let f = function await() {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4106,7 +4122,9 @@ export default (describe, test) =>
             });
             test.pass('generator func expr can be called await', {
               code: 'let f = function *await() {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4133,14 +4151,18 @@ export default (describe, test) =>
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x decl', _ => {
             test.pass('func decl arg called yield', {
               code: 'function f(yield) {}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
             });
             test.pass('async func decl arg called yield', {
               code: 'async function f(yield) {}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
@@ -4155,7 +4177,9 @@ export default (describe, test) =>
             });
             test.pass('func decl arg called await', {
               code: 'function f(await) {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4166,7 +4190,9 @@ export default (describe, test) =>
             });
             test.pass('generator func decl arg called await', {
               code: 'function *f(await) {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4179,14 +4205,18 @@ export default (describe, test) =>
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x expr', _ => {
             test.pass('func expr arg called yield', {
               code: 'let f = function f(yield) {}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
             });
             test.pass('async func expr arg called yield', {
               code: 'let f = async function f(yield) {}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
@@ -4201,7 +4231,9 @@ export default (describe, test) =>
             });
             test.pass('func expr arg called await', {
               code: 'let f = function f(await) {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4212,7 +4244,9 @@ export default (describe, test) =>
             });
             test.pass('generator func expr arg called await', {
               code: 'let f = function *f(await) {}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4242,7 +4276,9 @@ export default (describe, test) =>
             });
             test.pass('class method arg called await', {
               code: 'class A {f(await) {}}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4253,7 +4289,9 @@ export default (describe, test) =>
             });
             test.pass('generator class method arg called await', {
               code: 'class A {*f(await) {}}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4266,7 +4304,9 @@ export default (describe, test) =>
           describe('global x <yield, await> x <regular, async, generator, async gen> x arg-name x obj method', _ => {
             test.pass('obj method arg called yield', {
               code: 'o = {f(yield) {}}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
@@ -4288,7 +4328,9 @@ export default (describe, test) =>
             });
             test.pass('obj method arg called await', {
               code: 'o = {f(await) {}}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4299,7 +4341,9 @@ export default (describe, test) =>
             });
             test.pass('generator obj method arg called await', {
               code: 'o = {*f(await) {}}',
-              // only illegal in goal mode
+              desc: `
+                only illegal in module goal
+              `,
               MODULE: {
                 throws: 'await',
               },
@@ -4397,9 +4441,11 @@ export default (describe, test) =>
               code: 'class A {*f(x=await foo) {}}',
             });
             test('async generator class method await', {
-              // https://tc39.github.io/ecma262/#prod-AwaitExpression
-              // In the FormalParameters of an AsyncFunctionDeclaration, AsyncFunctionExpression, AsyncGeneratorDeclaration, or AsyncGeneratorExpression. AwaitExpression;
-              // in this position is a Syntax error via static semantics.
+              desc: `
+                In the FormalParameters of an AsyncFunctionDeclaration, AsyncFunctionExpression, AsyncGeneratorDeclaration, or AsyncGeneratorExpression. AwaitExpression;
+                https://tc39.github.io/ecma262/#prod-AwaitExpression
+                in this position is a Syntax error via static semantics.
+              `,
               code: 'class A {async *f(x=await foo) {}}',
               throws: 'await',
             });
@@ -4416,7 +4462,9 @@ export default (describe, test) =>
             });
             test.fail('async generator obj method yield', {
               code: 'o = {async *f(x=yield 100) {}}',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
@@ -4553,14 +4601,18 @@ export default (describe, test) =>
           describe('global x <yield, await> x <regular, async, generator, async gen> x name x decl', _ => {
             test.pass('func decl can be called yield', {
               code: 'async function as(){ function yield() {} }',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
             });
             test.pass('async func decl can be called yield', {
               code: 'async function as(){ async function yield() {} }',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },
@@ -4570,7 +4622,9 @@ export default (describe, test) =>
             });
             test.pass('async generator func decl can be called yield', {
               code: 'async function as(){ async function *yield() {} }',
-              // only illegal in strict mode
+              desc: `
+                only illegal in strict mode
+              `,
               STRICT: {
                 throws: 'yield',
               },

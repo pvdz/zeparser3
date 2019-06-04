@@ -1189,7 +1189,10 @@ export default (describe, test) =>
       code: 'let f = async\nfunction g(){await x}',
       throws: 'await',
       SLOPPY_SCRIPT: {
-        throws: 'Unable to ASI', // because `await x` requires a semi between now
+        desc: `
+          because 'await x' requires a semi between now
+        `,
+        throws: 'Unable to ASI',
       },
       tokens: [$IDENT, $PUNCTUATOR, $IDENT, $PUNCTUATOR, $PUNCTUATOR, $PUNCTUATOR, $ASI],
     });
@@ -1766,32 +1769,30 @@ export default (describe, test) =>
       });
     });
     describe('newline behavior', _ => {
-      /*
-    // always an error to have an arrow with newline after async
-    async \n () => x
-    foo + async \n () => x
-    return async \n () => x
-    break async \n () => x
-    var x = async \n () => x, y
-    let x = async \n () => x, y
-    const x = async \n () => x, y
-    export async \n () => x
-    (async \n () => x)
-    [async \n () => x]
-    {x: async \n () => x}
-    x[async \n () => x]
-    x(async \n () => x)
-    function f(x = async \n () => x){}
-    `${async \n () => x}`
-    do async \n () => x while (x);
-    if (async \n () => x) x
-    try {} catch(e = async \n () => x) {}   (if that's even legal)
-    if (x) async \n () => x else y
-    class x extends async \n () => x {}
-    // "legal" other forms, though it won't create async functions
-    (async \n x => x)
-    (async \n function(){})
-    */
+      test.fail('always an error to have an arrow with newline after async', {
+        code: [
+          'async \n () => x',
+          'foo + async \n () => x',
+          'return async \n () => x',
+          'break async \n () => x',
+          'var x = async \n () => x, y',
+          'let x = async \n () => x, y',
+          'const x = async \n () => x, y',
+          'export async \n () => x',
+          '(async \n () => x)',
+          '[async \n () => x]',
+          '{x: async \n () => x}',
+          'x[async \n () => x]',
+          'x(async \n () => x)',
+          'function f(x = async \n () => x){}',
+          '`${async \n () => x}`',
+          'do async \n () => x while (x);',
+          'if (async \n () => x) x',
+          'try {} catch(e = async \n () => x) {}', //  (if that's even legal)
+          'if (x) async \n () => x else y',
+          'class x extends async \n () => x {}',
+        ],
+      });
       describe('statement', _ => {
         test('just a var name', {
           code: 'async',
@@ -2923,8 +2924,10 @@ export default (describe, test) =>
     });
     test('await in default of async arrow param', {
       code: 'async (a = b => await (0)) => {}',
-      // https://twitter.com/Ghost1240145716/status/1127918881727606786
-      desc: 'this one is funny because in sloppy it becomes the valid callexpression `await(0)`',
+      desc: `
+        https://twitter.com/Ghost1240145716/status/1127918881727606786
+        this one is funny because in sloppy it becomes the valid callexpression "await(0)"
+      `,
       STRICT: {
         throws: true,
       },
@@ -2987,7 +2990,9 @@ export default (describe, test) =>
     });
     test('await as param name of an arrow that is a param default of an async func', {
       code: 'async(a = (await) => {}) => {};',
-      // https://twitter.com/Ghost1240145716/status/1127918881727606786
+      desc: `
+        https://twitter.com/Ghost1240145716/status/1127918881727606786
+      `,
       STRICT: {
         throws: true,
       },
