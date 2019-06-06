@@ -523,7 +523,27 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(hasAnyFlag(token.type,  $NUMBER | $STRING | $REGEX), 'should be number or string');
 
     AST_open(astProp, 'Literal');
-    AST_set('value', '<TODO>');
+
+    let c = token.str.charCodeAt(0);
+    if (c === $$SQUOTE_27 || c === $$DQUOTE_22) {
+      AST_set('value', unescape(token.str.slice(1, -1)));
+    } else if ((c >= $$0_30 && c <= $$9_39) || c === $$DOT_2E) {
+      AST_set('value', parseFloat(token.str));
+    } else if (c === $$FWDSLASH_2F) {
+      // https://github.com/estree/estree/blob/master/es5.md#regexpliteral
+      ASSERT(token.str.split('/').length > 2);
+      let pos = token.str.lastIndexOf('/');
+      let body = token.str.slice(1, pos);
+      let tail = token.str.slice(pos + 1);
+      AST_set('value', null);
+      AST_set('regex', {
+        pattern: body,
+        flags: tail,
+      });
+    } else {
+      ASSERT(false, 'what kind of literal is this?');
+    }
+
     AST_set('raw', token.str);
     AST_close('Literal');
   }

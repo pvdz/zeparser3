@@ -3,7 +3,40 @@
  * @format
  **/
 
-import {$ASI, $IDENT, $NUMBER_DEC, $PUNCTUATOR, $TICK_HEAD, $TICK_TAIL} from '../../../src/zetokenizer.mjs';
+import {
+  $ASI,
+  $COMMENT,
+  $COMMENT_HTML,
+  $COMMENT_SINGLE,
+  $COMMENT_MULTI,
+  $CRLF,
+  $EOF,
+  $ERROR,
+  $IDENT,
+  $NL,
+  $NUMBER,
+  $NUMBER_HEX,
+  $NUMBER_DEC,
+  $NUMBER_BIN,
+  $NUMBER_OCT,
+  $NUMBER_OLD,
+  $PUNCTUATOR,
+  $REGEX,
+  $REGEXU,
+  $SPACE,
+  $STRING,
+  $STRING_DOUBLE,
+  $STRING_SINGLE,
+  $TAB,
+  $TICK,
+  $TICK_BAD_ESCAPE,
+  $TICK_BODY,
+  $TICK_HEAD,
+  $TICK_PURE,
+  $TICK_TAIL,
+  $WHITE,
+} from '../../../src/zetokenizer.mjs';
+
 export default (describe, test) =>
   describe('delete', _ => {
     test('base case', {
