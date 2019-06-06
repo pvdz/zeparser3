@@ -1476,12 +1476,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$SEMI_3B) {
       ASSERT_skipRex(';', lexerFlags);
     } else if (hasAllFlags(lexerFlags, LF_DO_WHILE_ASI)) {
-      if (curtok.nl) tok.asi();
+      if (curtok.nl > 0) tok.asi();
       else THROW('Unable to ASI inside a do-while statement without a newline');
     } else {
       ASSERT(hasNoFlag(lexerFlags, LF_NO_ASI), 'this case should have been caught sooner');
       // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
-      if (curc === $$CURLY_R_7D || curtok.nl || curtype === $EOF) {
+      if (curc === $$CURLY_R_7D || curtok.nl > 0 || curtype === $EOF) {
         tok.asi();
       } else {
         $log('parse error at curc', curc, String.fromCharCode(curc), curtok.str);
@@ -2194,7 +2194,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return parseExpressionAfterAsyncAsVarName(lexerFlags, fromStmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp);
     }
 
-    let newlineAfterAsync = curtok.nl;
+    let newlineAfterAsync = curtok.nl > 0;
 
     if (curtype === $IDENT) {
       // - `async foo ...`
@@ -2474,7 +2474,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // break with label is only valid if the label exists in the current statement tree
 
     // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
-    if (curtype === $IDENT && !curtok.nl) {
+    if (curtype === $IDENT && curtok.nl === 0) {
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
       AST_setIdent('label', curtok);
 
@@ -2528,7 +2528,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // otherwise it's just a continue to the nearest loop (most likely).
 
     // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
-    if (curtype === $IDENT && !(curtok.nl || curtype === $EOF || curtok.value === ';')) {
+    if (curtype === $IDENT && !(curtok.nl > 0 || curtype === $EOF || curtok.value === ';')) {
       // TODO: validate ident; must be declared label (we can skip reserved name checks assuming that happens at the label declaration)
 
       AST_setIdent('label', curtok);
@@ -2788,7 +2788,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // `export async \n a => b`
           THROW('Can only export async functions (not arrows), did not find a function');
         }
-        if (curtok.nl) {
+        if (curtok.nl > 0) {
           // `export async \n function(){}`
           THROW('Async can not be followed by a newline as it results in `export async;`, which is not valid (and probably not what you wanted)');
         }
@@ -3635,7 +3635,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // parsing `let` as an expression
     if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       THROW('`let` declaration not allowed here and `let` cannot be a regular var name in strict mode');
-    } else if (curc === $$SQUARE_L_5B && curtok.nl) {
+    } else if (curc === $$SQUARE_L_5B && curtok.nl > 0) {
       // `let \n [` is a restricted production at the start of a statement (and only then)
       // This means that `let [` can not be the start of an ExpressionStatement (which is what we'd be parsing here)
       THROW('Must parse expression statement here but that is not allowed to start with `let [` which we just parsed');
@@ -3673,7 +3673,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ReturnStatement');
     ASSERT_skipRex('return', lexerFlags);
 
-    if (!curtok.nl && curtype !== $EOF && curc !== $$SEMI_3B && curc !== $$CURLY_R_7D) {
+    if (curtok.nl === 0 && curtype !== $EOF && curc !== $$SEMI_3B && curc !== $$CURLY_R_7D) {
       parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'argument');
     } else {
       AST_set('argument', null);
@@ -3737,7 +3737,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseThrowStatement(lexerFlags, astProp) {
     AST_open(astProp, 'ThrowStatement');
     ASSERT_skipRex('throw', lexerFlags);
-    if (curtok.nl) THROW('Premature newline');
+    if (curtok.nl > 0) THROW('Premature newline');
     parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'argument'); // mandatory1
     parseSemiOrAsi(lexerFlags);
     AST_close('ThrowStatement');
@@ -4007,7 +4007,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // the object reference to curtok remains the same. In that case only identToken was parsed as the value.
 
         THROW('Cannot delete an identifier without tail, in strict mode');
-      } else if (afterIdentToken.nl && afterIdentToken.str === '(' && identToken.str === 'async' && curtok.str === '=>' && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      } else if (afterIdentToken.nl > 0 && afterIdentToken.str === '(' && identToken.str === 'async' && curtok.str === '=>' && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
         // - `delete async \n (...) => x`
         // which is effectively `delete async; () => x;`, which is still an error
         THROW('Cannot delete an identifier without tail, in strict mode');
@@ -4740,7 +4740,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseParenlessArrowAfterAsync(lexerFlags, fromStmtOrExpr, allowAssignment, asyncToken, astProp) {
     ASSERT(parseParenlessArrowAfterAsync.length === arguments.length, 'arg count');
     ASSERT(curtok.str !== 'function', '(Function and newline have already been asserted)');
-    ASSERT(!curtok.nl, '(Function and newline have already been asserted)');
+    ASSERT(curtok.nl === 0, '(Function and newline have already been asserted)');
     ASSERT(curtype === $IDENT, 'dont have to skip the ident to assert it having to be an arrow');
     ASSERT_ASSIGN_EXPR(allowAssignment);
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
@@ -5651,7 +5651,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('The `yield` keyword in arg default must be a var name but that is not allowed inside a generator');
     }
 
-    if (curc === $$FWDSLASH_2F && curtok.nl) {
+    if (curc === $$FWDSLASH_2F && curtok.nl > 0) {
       // [x]: `function* f(){ yield↵/foo }`
       // [x]: `function* f(){ yield↵/foo/ }`
       // [x]: `function* f(){ yield↵/foo/g }`
@@ -5703,7 +5703,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseYieldArgument(lexerFlags, astProp) {
     // there can be no newline between keyword `yield` and its argument (restricted production)
-    let hadValue = curtok.nl ? false : parseYieldValueMaybe(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
+    let hadValue = curtok.nl > 0 ? false : parseYieldValueMaybe(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
     if (hadValue === YIELD_WITHOUT_VALUE) {
       AST_set(astProp, null);
     } else {
@@ -5771,7 +5771,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `eval => x`
     // - `async eval => x`
 
-    if (curtok.nl) {
+    if (curtok.nl > 0) {
       // - `async x \n => x`
       THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
     }
@@ -6001,7 +6001,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // ok when inside a: expression statement, return statement, throw statement, var/let/const decl, export (?)
 
-    if (curtok.nl) {
+    if (curtok.nl > 0) {
       // note: this is ++/-- SUFFIX. This version DOES have newline restrictions!
       // a restricted production has no tail
       // do nothing. nothing further gets parsed. and since next token is ++ or -- there is no risk of "overaccepting" here
@@ -6152,11 +6152,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curc === $$TICK_60) {
       THROW('Block body arrows can not be immediately tagged without a group');
     }
-    if ((isAssignBinOp() || isNonAssignBinOp(lexerFlags)) && (!curtok.nl || curc === $$FWDSLASH_2F)) {
+    if ((isAssignBinOp() || isNonAssignBinOp(lexerFlags)) && (curtok.nl === 0 || curc === $$FWDSLASH_2F)) {
       // - `()=>{}+a'
       THROW('An arrow function can not be part of an operator to the right');
     }
-    if ((curtok.str === '++' || curtok.str === '--') && !curtok.nl) {
+    if ((curtok.str === '++' || curtok.str === '--') && curtok.nl === 0) {
       // - `()=>{}++'
       // - `()=>{}--'
       // - `()=>{}\n++x'
@@ -6245,7 +6245,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       lexerFlags = lexerFlagsBeforeParen; // reset no_asi state to before the group
 
-      if (curtok.nl) {
+      if (curtok.nl > 0) {
         // arrows with newlines are always an error
         // - `() \n => x`
         THROW('The arrow token `=>` is a restricted production and cannot have a newline preceding it');
@@ -6584,7 +6584,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isArrow) {
       // These are some errors for async and plain arrows
 
-      if (curtok.nl) {
+      if (curtok.nl > 0) {
         // we can safely throw here because there's no way that the `=>` token is valid without an arrow header
         THROW('Arrow is restricted production; cannot have newline before the arrow token');
       }
@@ -6761,7 +6761,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // this is called after parsing a group that followed an `async` when it might be an async arrow
     if (curtok.str === '=>') {
-      if (curtok.nl) {
+      if (curtok.nl > 0) {
         THROW('The arrow is a restricted production an there can not be a newline before `=>` token');
       }
       else if (newlineAfterAsync === IS_ASYNC_PREFIXED) {
@@ -8003,7 +8003,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (allowAsyncFunctions) {
       // Note: `{async\n(){}}` is legal in sloppy so we do have to check the paren
-      if (curc !== $$PAREN_L_28 && curtok.nl && propLeadingIdentToken.str === 'async') {
+      if (curc !== $$PAREN_L_28 && curtok.nl > 0 && propLeadingIdentToken.str === 'async') {
         // - `{async \n key(){}}`
         //              ^
         // Always an error due to async being a restricted production
@@ -8686,7 +8686,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipAny($IDENT, lexerFlags); // TODO: set of allowed characters is wide but limited
 
     if (allowAsyncFunctions) {
-      if (curc !== $$PAREN_L_28 && curtok.nl && identToken.str === 'async') {
+      if (curc !== $$PAREN_L_28 && curtok.nl > 0 && identToken.str === 'async') {
         // - `{async \n key(){}}`
         //              ^
         // Always an error due to async being a restricted production

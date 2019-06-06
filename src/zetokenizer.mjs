@@ -415,7 +415,7 @@ function ZeTokenizer(
   let len = input.length;
 
   let wasWhite = false;
-  let consumedNewline = false; // whitespace newline token or string token that contained newline or multiline comment
+  let consumedNewlines = 0; // whitespace newline token or string token that contained newline or multiline comment
   let consumedComment = false; // needed to confirm requirement to parse --> closing html comment
   let finished = false; // generated an $EOF?
   let lastParsedIdent = ''; // updated after parsing an ident. used to canonicalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
@@ -538,10 +538,10 @@ function ZeTokenizer(
         let start = startForError = pointer; // TODO: see if startForError makes a dent at all
         wasWhite = false;
         let consumedTokenType = next(lexerFlags);
-        token = createToken(consumedTokenType, start, pointer, consumedNewline, wasWhite, cstart);
+        token = createToken(consumedTokenType, start, pointer, consumedNewlines, wasWhite, cstart);
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
-        token = createToken($EOF, pointer, pointer, consumedNewline, WHITESPACE_TOKEN, 0);
+        token = createToken($EOF, pointer, pointer, consumedNewlines, WHITESPACE_TOKEN, 0);
         finished = true;
         break;
       }
@@ -549,7 +549,7 @@ function ZeTokenizer(
     ++solidTokenCount;
     if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
     if (!wasWhite) {
-      consumedNewline = false;
+      consumedNewlines = 0;
       consumedComment = false;
     }
 
@@ -557,7 +557,7 @@ function ZeTokenizer(
   }
 
   function addAsi() {
-    let token = createToken($ASI, pointer, pointer, consumedNewline, SOLID_TOKEN, $$SEMI_3B);
+    let token = createToken($ASI, pointer, pointer, consumedNewlines, SOLID_TOKEN, $$SEMI_3B);
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
     if (collectTokens !== COLLECT_TOKENS_NONE) tokens.push(token, tokens.pop());
@@ -578,7 +578,7 @@ function ZeTokenizer(
       // </SCRUB DEV>
       type,
       ws, // is this token considered whitespace? (space, tab, newline, comment)
-      nl, // was there a newline between the start of the previous relevant token and this one?
+      nl, // how many newlines between the start of the previous relevant token and the start of this one?
       start,
       stop, // start of next token
       c,
@@ -654,7 +654,7 @@ function ZeTokenizer(
         // TODO: only support this under the webcompat flag
         // TODO: and properly parse this, not like the duplicate hack it is now
         if (!eofd(1) && moduleGoal === GOAL_SCRIPT && peek() === $$DASH_2D && peekd(1) === $$GT_3E) {
-          if (consumedNewline || consumedComment) {
+          if (consumedNewlines > 0 || consumedComment) {
             return parseCommentHtmlClose();
           } else {
             // Note that the `-->` is not picked up as a comment since that requires a newline to precede it.
@@ -751,7 +751,7 @@ function ZeTokenizer(
   }
 
   function parseCR() {
-    consumedNewline = true;
+    ++consumedNewlines;
     wasWhite = true;
     if (neof() && peeky($$LF_0A)) {
       ASSERT_skip($$LF_0A);
@@ -1494,7 +1494,7 @@ function ZeTokenizer(
       }
       if (c === $$CR_0D || isLfPsLs(c)) {
         // if we implement line numbers, make sure to count crlf as one here
-        consumedNewline = true;
+        ++consumedNewlines;
       }
     }
     $warn('Tokenizer $ERROR: unclosed multi line comment, early eof');
@@ -1574,7 +1574,7 @@ function ZeTokenizer(
   }
 
   function parseNewline() {
-    consumedNewline = true;
+    ++consumedNewlines;
     wasWhite = true;
     return $NL;
   }
