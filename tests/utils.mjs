@@ -92,6 +92,7 @@ export {
   WEB_COMPAT_ALWAYS,
   WEB_COMPAT_NEVER,
 
+  ASSERT,
   _LOG,
   LOG,
   toPrint,
