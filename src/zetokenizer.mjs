@@ -2036,7 +2036,7 @@ function ZeTokenizer(
       }
     }
 
-    ASSERT(input[pointer] === '>', 'to be clear, call site assumes this');
+    ASSERT(webCompat === WEB_COMPAT_ON || input[pointer] === '>', 'should not have parsed the closing `>` (so this must be a bad token)');
     return ALWAYS_GOOD;
   }
   function parseRegexAtomEscape(c, namedBackRefs) {

@@ -53,10 +53,33 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
-throws: Parser error!
-  Assertion fail: to be clear, call site assumes this 
+ast: {
+  type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 8 } },
+  body: [
+    {
+      type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 8 },
+        source: ''
+      },
+      expression: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 8 },
+          source: ''
+        },
+        value: null,
+        regex: { pattern: '(?<aa)', flags: '' },
+        raw: '/(?<aa)/'
+      }
+    }
+  ]
+}
 
-/(?<aa)/
-^------- error
+tokens (3x):
+       REGEX ASI
 `````
 
