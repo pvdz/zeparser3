@@ -118,7 +118,7 @@ function inspect(...args) {
 }
 
 function ASSERT(bool, desc, ...rest) {
-  if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>'), ...rest);
+  if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>'), ':', ...rest);
 }
 
 function THROW(str, ...rest) {

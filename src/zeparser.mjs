@@ -217,7 +217,7 @@ const VERSION_TRAILING_FUNC_COMMAS = 8;
 const VERSION_ASYNC_GEN = 9;
 const VERSION_OBJECTSPREAD = 9;
 const VERSION_TAGGED_TEMPLATE_BAD_ESCAPES = 9;
-const VERSION_OPTIONAL_CATCH = 9; // TODO: this was ratified in es10 (2019), not es9
+const VERSION_OPTIONAL_CATCH = 10;
 const VERSION_WHATEVER = Infinity;
 
 const IS_ASYNC_PREFIXED = {};
@@ -408,7 +408,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage, $log, $warn, $error);
 
-  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 9) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 or infin');
+  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 10) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 10 or infin');
 
   let allowTrailingFunctionComma = targetEsVersion >= VERSION_TRAILING_FUNC_COMMAS || targetEsVersion === VERSION_WHATEVER;
   let allowAsyncFunctions = targetEsVersion >= VERSION_ASYNC || targetEsVersion === VERSION_WHATEVER;
@@ -3844,8 +3844,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // create a scope for the catch body. this way var decls can search for the catch scope to assert new vars
       let catchBodyScoop = SCOPE_addLexTo(catchHeadScoop, BLOCK_SCOPE, 'parseTryStatement(catch-body)');
 
-      // Catch clause is optional since es9
-      if (allowOptionalCatchBinding && curc === $$PAREN_L_28) {
+      // Catch clause is optional since es10
+      if (!allowOptionalCatchBinding || curc === $$PAREN_L_28) {
         skipAnyOrDieSingleChar($$PAREN_L_28, lexerFlags); // TODO: optimize; next MUST be one arg (ident/destructuring)
 
         if (curc === $$PAREN_R_29) THROW('Missing catch clause parameter');
