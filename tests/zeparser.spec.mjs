@@ -195,8 +195,18 @@ async function postProcessResult({r, e, tok}, testVariant, file) {
   // This is where by far the most time is spent... roughly 90% of the time is this function.
   // Most of that is Prettier. If we replace it with JSON.stringify the total runtime goes down 2 minutes to 11 seconds
   if (e) {
-    if (e.startsWith('Parser error!')) e = e.slice(0, 'Parser error!'.length) + '\n  ' + e.slice('Parser error!'.length + 1);
-    else if (e.startsWith('Tokenizer error!')) e = e.slice(0, 'Tokenizer error!'.length) + '\n    ' + e.slice('Tokenizer error!'.length + 1);
+    if (e.includes('Assertion fail')) {
+      console.error('####\nThe following assertion error was thrown:\n');
+      console.error(e);
+      console.error('####');
+      throw new Error('Assertion error. Mode = ' + testVariant + ', file = ' + file + '; ' + e.message);
+    }
+    if (e.startsWith('Parser error!')) {
+      e = e.slice(0, 'Parser error!'.length) + '\n  ' + e.slice('Parser error!'.length + 1);
+    }
+    else if (e.startsWith('Tokenizer error!')) {
+      e = e.slice(0, 'Tokenizer error!'.length) + '\n    ' + e.slice('Tokenizer error!'.length + 1);
+    }
     else {
       console.error('####\nThe following unexpected error was thrown:\n');
       console.error(e);
