@@ -25,6 +25,11 @@ const RUN_SLOPPY = (a || (!b && !c && !d)) || (INPUT_OVERRIDE && !(b || c || d))
 const RUN_STRICT = b || (!a && !c && !d && !INPUT_OVERRIDE);
 const RUN_MODULE = c || (!a && !b && !d && !INPUT_OVERRIDE);
 const RUN_WEB = d || (!a && !b && !c && !INPUT_OVERRIDE);
+const TARGET_ES6 = process.argv.includes('--es6');
+const TARGET_ES7 = process.argv.includes('--es7');
+const TARGET_ES8 = process.argv.includes('--es8');
+const TARGET_ES9 = process.argv.includes('--es9');
+const TARGET_ES10 = process.argv.includes('--es10');
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -50,6 +55,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --strict      Only run tests in strict mode (can be combined with other modes like --module)
     --module      Only run tests with module goal (can be combined with other modes like --strict)
     --web         Only run tests in sloppy mode with web compat mode on (can be combined with other modes like --strict)
+    --esX         Where X is one of 6 through 10, like --es6. For -i only, forces the code to run in that version
 `);
   process.exit();
 }
@@ -319,7 +325,16 @@ async function loadParserAndPrettier() {
 async function cli() {
   let zeparser = await loadParserAndPrettier();
 
-  let list = [{file: '<cli>', input: INPUT_OVERRIDE, params: {}}];
+  let forcedTarget = TARGET_ES6 ? 6 : TARGET_ES7 ? 7 : TARGET_ES8 ? 8 : TARGET_ES9 ? 9 : TARGET_ES10 ? 10 : undefined;
+  if (forcedTarget) console.log('Forcing target version: ES' + forcedTarget);
+
+  let list = [{
+    file: '<cli>',
+    input: INPUT_OVERRIDE,
+    params: {
+      es: TARGET_ES6 ? 6 : TARGET_ES7 ? 7 : TARGET_ES8 ? 8 : TARGET_ES9 ? 9 : TARGET_ES10 ? 10 : undefined,
+    }
+  }];
   await runTests(list, zeparser);
 
   console.log('=============================================');
