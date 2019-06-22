@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Tokenizer error: Regex: Regex had syntax that is only valid with the u-flag and flag was in fact not present
+  Tokenizer error: Regex: Encountered early EOF while parsing char class (3)
 
 /[\p{Hex}\P{Hex}]/
 ^------- error

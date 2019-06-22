@@ -30,10 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The rest argument was not destructible as it must be last and can not have a trailing comma
-
-function f(...a,){}
-               ^------- error
+  Assertion fail: only support v6~9 right now 
 `````
 
 ### Strict mode

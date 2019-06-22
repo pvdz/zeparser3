@@ -51,7 +51,7 @@ ast: {
           type: 'Identifier',
           loc: {
             start: { line: 1, col: 0 },
-            end: { line: 1, col: 7 },
+            end: { line: 1, col: 5 },
             source: ''
           },
           name: 'async'

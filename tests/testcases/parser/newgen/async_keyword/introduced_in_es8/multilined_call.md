@@ -52,7 +52,7 @@ ast: {
           type: 'Identifier',
           loc: {
             start: { line: 1, col: 0 },
-            end: { line: 2, col: 3 },
+            end: { line: 2, col: 1 },
             source: ''
           },
           name: 'async'

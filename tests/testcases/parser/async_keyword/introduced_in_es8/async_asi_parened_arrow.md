@@ -33,7 +33,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  A newline after async is always a syntax error if the rhs turns to be an arrow function
+  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N 11:13 curc=61 `=>`#}
 
 async 
  () => x

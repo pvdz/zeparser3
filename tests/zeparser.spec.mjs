@@ -431,7 +431,7 @@ async function gen() {
       .filter(s => s[0] === '-')
       .reduce((obj, s) => {
         ASSERT(s[1] === ' ' && s[2] === '`' && s[s.length - 1] === '`', 'param composition', obj.file, s);
-        let [k, v] = s.slice(2, -1).split(' = ');
+        let [k, v] = s.slice(3, -1).split(' = ');
         if (String(parseInt(v, 10)) === v) v = parseInt(k, 10);
         else if (v === 'true') v = true;
         else if (v === 'false') v = false;
@@ -546,7 +546,7 @@ function parseTestFile(data, file) {
     // Each line should be ``- `name = value` ``
     ASSERT(s[0] === '-', 'expecting whitespace and a list of options between input header and start', file, s);
     ASSERT(s[2] === '`' && s.slice(-1) === '`', 'backtick quote the contents', file, s, s[2], s.slice(-1));
-    let [k, is, ...v] = s.slice(2, -1).split(' ');
+    let [k, is, ...v] = s.slice(3, -1).split(' ');
     ASSERT(is === '=', 'key=value', file, s);
     v = v.join(' ');
     obj[k] = v;

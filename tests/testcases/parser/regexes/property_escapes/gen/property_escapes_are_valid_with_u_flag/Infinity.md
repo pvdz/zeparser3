@@ -8,7 +8,7 @@
 
 ## Input
 
-- ``es = Infinity`
+- `es = Infinity`
 
 `````js
 p{x}b/u
@@ -28,10 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N 1:2 curc=123 `{`#}
-
-p{x}b/u
- ^------- error
+  Assertion fail: only support v6~9 right now 
 `````
 
 ### Strict mode

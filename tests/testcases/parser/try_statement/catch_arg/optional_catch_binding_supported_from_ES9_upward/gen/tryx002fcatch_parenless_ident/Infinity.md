@@ -8,7 +8,7 @@
 
 ## Input
 
-- ``es = Infinity`
+- `es = Infinity`
 
 `````js
 try {} catch foo {}
@@ -28,10 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 123 (`{`) but was 102 (curc: `f`, token: `foo`)
-
-try {} catch foo {}
-             ^------- error
+  Assertion fail: only support v6~9 right now 
 `````
 
 ### Strict mode
