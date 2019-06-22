@@ -34,7 +34,7 @@ throws: Parser error!
   Cannot use this name (static) as a variable name because: `static` is a reserved word in strict mode
 
 class A {
-  d(static){ 
+  d(static){
     ^------- error
 
     "use strict";

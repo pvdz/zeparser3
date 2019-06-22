@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   A newline after async is always a syntax error if the rhs turns to be an arrow function
 
-with (async 
+with (async
  () => x) {}
     ^------- error
 `````
@@ -44,7 +44,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 throws: Parser error!
   The `with` statement is not allowed in strict mode
 
-with (async 
+with (async
 ^------- error
 
  () => x) {}

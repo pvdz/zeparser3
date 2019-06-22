@@ -34,10 +34,10 @@ throws: Parser error!
   Illegal keyword encountered; is not a value [interface]
 
 class A {
-  f(x=interface=10){ 
+  f(x=interface=10){
                ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

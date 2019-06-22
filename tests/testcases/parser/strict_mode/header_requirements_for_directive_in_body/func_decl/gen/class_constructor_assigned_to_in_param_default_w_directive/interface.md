@@ -34,10 +34,10 @@ throws: Parser error!
   Illegal keyword encountered; is not a value [interface]
 
 class A {
-  constructor(x=interface=10){ 
+  constructor(x=interface=10){
                          ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

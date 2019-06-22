@@ -35,7 +35,7 @@ throws: Parser error!
   The `with` statement is not allowed in strict mode
 
 // one comment
-/* two 
+/* two
  comment */ "use strict"; with (x) y;
                           ^------- error
 `````

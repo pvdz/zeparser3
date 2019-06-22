@@ -34,10 +34,10 @@ throws: Parser error!
   Illegal keyword encountered; is not a value [package]
 
 class A {
-  f(x=package=10){ 
+  f(x=package=10){
              ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

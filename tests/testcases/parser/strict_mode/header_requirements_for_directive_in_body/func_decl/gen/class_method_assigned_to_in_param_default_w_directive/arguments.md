@@ -34,10 +34,10 @@ throws: Parser error!
   Cannot assign to `eval` and `arguments` in strict mode
 
 class A {
-  f(x=arguments=10){ 
+  f(x=arguments=10){
                ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

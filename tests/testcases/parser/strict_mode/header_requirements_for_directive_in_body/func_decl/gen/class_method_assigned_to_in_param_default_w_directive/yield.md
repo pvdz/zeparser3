@@ -34,10 +34,10 @@ throws: Parser error!
   Cannot use `yield` outside of generator functions when in strict mode
 
 class A {
-  f(x=yield=10){ 
+  f(x=yield=10){
            ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

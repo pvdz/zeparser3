@@ -34,10 +34,10 @@ throws: Parser error!
   Cannot use this name (arguments) as a variable name because: Cannot create a binding named `arguments` in strict mode
 
 class A {
-  constructor(arguments){ 
+  constructor(arguments){
               ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

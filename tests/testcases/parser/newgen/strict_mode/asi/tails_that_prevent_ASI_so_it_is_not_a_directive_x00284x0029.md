@@ -151,7 +151,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 throws: Parser error!
   Cannot assign to `eval` and `arguments` in strict mode
 
-function f(){ "use strict" 
+function f(){ "use strict"
  /* suffix = */  + x; eval = 1; }
                            ^------- error
 `````

@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Class decl missing required ident, `extends` is not a valid variable name
 
-class 
+class
  /foo/ x{}
  ^------- error
 `````

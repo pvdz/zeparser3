@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Next ord should be 41 (`)`) but was 102 (curc: `f`, token: `foo`)
 
-let f = async 
+let f = async
  (g = await foo) => g
             ^------- error
 `````
@@ -50,7 +50,7 @@ Parsed with the module goal.
 throws: Parser error!
   Cannot use `await` as var when goal=module but found `await` outside an async function
 
-let f = async 
+let f = async
  (g = await foo) => g
             ^------- error
 `````

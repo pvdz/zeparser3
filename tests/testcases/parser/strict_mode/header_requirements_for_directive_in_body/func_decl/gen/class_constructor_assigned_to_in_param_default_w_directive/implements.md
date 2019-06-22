@@ -34,10 +34,10 @@ throws: Parser error!
   Illegal keyword encountered; is not a value [implements]
 
 class A {
-  constructor(x=implements=10){ 
+  constructor(x=implements=10){
                           ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

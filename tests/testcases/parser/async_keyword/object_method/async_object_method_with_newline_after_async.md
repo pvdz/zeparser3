@@ -33,7 +33,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Async methods are a restricted production and cannot have a newline following it
 
-({async 
+({async
  foo() {}})
  ^------- error
 `````

@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `export` keyword can only be used with the module goal
 
-export async 
+export async
 ^------- error
 
  () => x
@@ -51,7 +51,7 @@ Parsed with the module goal.
 throws: Parser error!
   Can only export async functions (not arrows), did not find a function
 
-export async 
+export async
  () => x
  ^------- error
 `````

@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  f(x=yield=10){ 
-    "use strict"; 
+  f(x=yield=10){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Cannot use `yield` outside of generator functions when in strict mode
 
 f = {
-  f(x=yield=10){ 
+  f(x=yield=10){
            ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

@@ -218,6 +218,7 @@ async function postProcessResult({r, e, tok}, testVariant, file) {
     if (tok) {
       let context = tok.getErrorContext();
       if (context.slice(-1) === '\n') context = context.slice(0, -1);
+      context = context.split('\n').map(s => s.trimRight()).join('\n');
       if (INPUT_OVERRIDE) context = '```\n' + context + '\n```\n';
       e += '\n\n' + context;
     }

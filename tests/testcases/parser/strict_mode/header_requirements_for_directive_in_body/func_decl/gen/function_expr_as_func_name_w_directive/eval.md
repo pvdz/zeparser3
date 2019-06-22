@@ -31,8 +31,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Can not use reserved keyword `eval` in strict mode as id for function that has a use strict directive
 
-f = function eval(b){ 
-  "use strict"; 
+f = function eval(b){
+  "use strict";
 }
 ^------- error
 `````
@@ -45,10 +45,10 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 throws: Parser error!
   Cannot use this name (eval) as a variable name because: Cannot create a binding named `eval` in strict mode
 
-f = function eval(b){ 
+f = function eval(b){
              ^------- error
 
-  "use strict"; 
+  "use strict";
 }
 `````
 

@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `new` keyword can not be applied to an arrow
 
-new async 
+new async
  () => x
     ^------- error
 `````

@@ -50,17 +50,17 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   A newline after async is always a syntax error if the rhs turns to be an arrow function
 
-async 
- () => x,foo + async 
+async
+ () => x,foo + async
     ^------- error
 
- () => x,return async 
- () => x,break async 
- () => x,var x = async 
- () => x, y,let x = async 
- () => x, y,const x = async 
- () => x, y,export async 
- () => x,(async 
+ () => x,return async
+ () => x,break async
+ () => x,var x = async
+ () => x, y,let x = async
+ () => x, y,const x = async
+ () => x, y,export async
+ () => x,(async
  ()
 `````
 

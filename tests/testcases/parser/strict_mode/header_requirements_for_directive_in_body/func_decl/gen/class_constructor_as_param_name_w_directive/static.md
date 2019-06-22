@@ -34,10 +34,10 @@ throws: Parser error!
   Cannot use this name (static) as a variable name because: `static` is a reserved word in strict mode
 
 class A {
-  constructor(static){ 
+  constructor(static){
               ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

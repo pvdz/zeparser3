@@ -34,10 +34,10 @@ throws: Parser error!
   Illegal keyword encountered; is not a value [private]
 
 class A {
-  f(x=private=10){ 
+  f(x=private=10){
              ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

@@ -44,8 +44,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Must parse expression statement here but that is not allowed to start with `let [` which we just parsed
 
-do let 
- [x] = 0 
+do let
+ [x] = 0
  ^------- error
 
  while (false);
@@ -59,8 +59,8 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 throws: Parser error!
   `let` declaration not allowed here and `let` cannot be a regular var name in strict mode
 
-do let 
- [x] = 0 
+do let
+ [x] = 0
  ^------- error
 
  while (false);

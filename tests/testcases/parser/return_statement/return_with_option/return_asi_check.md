@@ -33,7 +33,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Not configured to parse `return` statement in global, bailing
 
-return 
+return
 ^------- error
 
  foo;

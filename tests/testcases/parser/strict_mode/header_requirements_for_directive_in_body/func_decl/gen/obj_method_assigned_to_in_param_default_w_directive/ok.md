@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  f(x=ok=10){ 
-    "use strict"; 
+  f(x=ok=10){
+    "use strict";
   }
   ^------- error
 

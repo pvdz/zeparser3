@@ -33,7 +33,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The arrow is a restricted production an there can not be a newline before `=>` token
 
-do async () 
+do async ()
  => x; while(y)
  ^------- error
 `````

@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `with` statement is not allowed in strict mode
 
-function f(){ "use strict"; foo; function g() { with (x) y; } } 
+function f(){ "use strict"; foo; function g() { with (x) y; } }
                                                 ^------- error
 `````
 

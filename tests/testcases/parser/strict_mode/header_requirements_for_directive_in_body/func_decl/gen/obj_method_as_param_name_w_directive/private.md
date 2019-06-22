@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  d(private){ 
-    "use strict"; 
+  d(private){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Cannot use this name (private) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 f = {
-  d(private){ 
+  d(private){
     ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

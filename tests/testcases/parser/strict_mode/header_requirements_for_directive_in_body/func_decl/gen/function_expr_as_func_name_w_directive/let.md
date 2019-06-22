@@ -31,8 +31,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Can not use reserved keyword `let` in strict mode as id for function that has a use strict directive
 
-f = function let(b){ 
-  "use strict"; 
+f = function let(b){
+  "use strict";
 }
 ^------- error
 `````
@@ -45,10 +45,10 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 throws: Parser error!
   Cannot use this name (let) as a variable name because: Can not use `let` as variable name in strict mode
 
-f = function let(b){ 
+f = function let(b){
              ^------- error
 
-  "use strict"; 
+  "use strict";
 }
 `````
 

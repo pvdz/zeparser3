@@ -60,7 +60,7 @@ throws: Parser error!
   Expected to parse a value
 
 /*
-a b c 
+a b c
 */ --> foo bar baz
      ^------- error
 `````

@@ -34,10 +34,10 @@ throws: Parser error!
   Illegal keyword encountered; is not a value [private]
 
 class A {
-  constructor(x=private=10){ 
+  constructor(x=private=10){
                        ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

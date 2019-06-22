@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 class A {
-  constructor(x=ok=10){ 
-    "use strict"; 
+  constructor(x=ok=10){
+    "use strict";
   }
   ^------- error
 

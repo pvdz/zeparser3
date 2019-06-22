@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  d(static){ 
-    "use strict"; 
+  d(static){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Cannot use this name (static) as a variable name because: `static` is a reserved word in strict mode
 
 f = {
-  d(static){ 
+  d(static){
     ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

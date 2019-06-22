@@ -34,10 +34,10 @@ throws: Parser error!
   Cannot use this name (let) as a variable name because: Can not use `let` as variable name in strict mode
 
 class A {
-  constructor(let){ 
+  constructor(let){
               ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

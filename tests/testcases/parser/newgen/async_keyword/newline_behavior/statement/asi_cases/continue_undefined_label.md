@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Can only `continue` inside a loop
 
-continue async 
+continue async
 ^------- error
 
  () => x

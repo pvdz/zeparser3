@@ -34,7 +34,7 @@ throws: Parser error!
   Cannot use this name (eval) as a variable name because: Cannot create a binding named `eval` in strict mode
 
 class A {
-  d(eval){ 
+  d(eval){
     ^------- error
 
     "use strict";

@@ -32,7 +32,7 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 function f(x=ok=10){
-  "use strict"; 
+  "use strict";
 }
 ^------- error
 `````

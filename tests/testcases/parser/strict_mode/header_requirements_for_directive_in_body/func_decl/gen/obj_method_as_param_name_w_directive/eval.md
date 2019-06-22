@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  d(eval){ 
-    "use strict"; 
+  d(eval){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Cannot use this name (eval) as a variable name because: Cannot create a binding named `eval` in strict mode
 
 f = {
-  d(eval){ 
+  d(eval){
     ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

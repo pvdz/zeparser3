@@ -31,8 +31,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Can not use reserved keyword `static` in strict mode as id for function that has a use strict directive
 
-f = function static(b){ 
-  "use strict"; 
+f = function static(b){
+  "use strict";
 }
 ^------- error
 `````
@@ -45,10 +45,10 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 throws: Parser error!
   Cannot use this name (static) as a variable name because: `static` is a reserved word in strict mode
 
-f = function static(b){ 
+f = function static(b){
              ^------- error
 
-  "use strict"; 
+  "use strict";
 }
 `````
 

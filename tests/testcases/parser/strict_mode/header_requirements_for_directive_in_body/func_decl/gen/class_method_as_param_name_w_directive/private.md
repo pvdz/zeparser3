@@ -34,7 +34,7 @@ throws: Parser error!
   Cannot use this name (private) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 class A {
-  d(private){ 
+  d(private){
     ^------- error
 
     "use strict";

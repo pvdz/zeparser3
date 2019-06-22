@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  f(x=let=10){ 
-    "use strict"; 
+  f(x=let=10){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Can not use `let` as variable name in strict mode
 
 f = {
-  f(x=let=10){ 
+  f(x=let=10){
          ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

@@ -34,10 +34,10 @@ throws: Parser error!
   Cannot use this name (private) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 class A {
-  constructor(private){ 
+  constructor(private){
               ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

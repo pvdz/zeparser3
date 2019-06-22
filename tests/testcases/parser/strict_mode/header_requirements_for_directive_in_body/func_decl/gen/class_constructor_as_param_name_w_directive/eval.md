@@ -34,10 +34,10 @@ throws: Parser error!
   Cannot use this name (eval) as a variable name because: Cannot create a binding named `eval` in strict mode
 
 class A {
-  constructor(eval){ 
+  constructor(eval){
               ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

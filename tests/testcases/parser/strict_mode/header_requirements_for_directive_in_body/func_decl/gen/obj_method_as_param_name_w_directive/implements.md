@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  d(implements){ 
-    "use strict"; 
+  d(implements){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Cannot use this name (implements) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
 f = {
-  d(implements){ 
+  d(implements){
     ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

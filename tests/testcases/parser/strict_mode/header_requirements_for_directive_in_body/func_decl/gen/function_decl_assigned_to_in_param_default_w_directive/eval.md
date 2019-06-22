@@ -32,7 +32,7 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 function f(x=eval=10){
-  "use strict"; 
+  "use strict";
 }
 ^------- error
 `````
@@ -48,7 +48,7 @@ throws: Parser error!
 function f(x=eval=10){
                  ^------- error
 
-  "use strict"; 
+  "use strict";
 }
 `````
 

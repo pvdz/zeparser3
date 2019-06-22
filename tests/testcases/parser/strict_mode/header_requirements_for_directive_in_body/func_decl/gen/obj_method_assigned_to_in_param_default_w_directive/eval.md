@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  f(x=eval=10){ 
-    "use strict"; 
+  f(x=eval=10){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Cannot assign to `eval` and `arguments` in strict mode
 
 f = {
-  f(x=eval=10){ 
+  f(x=eval=10){
           ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

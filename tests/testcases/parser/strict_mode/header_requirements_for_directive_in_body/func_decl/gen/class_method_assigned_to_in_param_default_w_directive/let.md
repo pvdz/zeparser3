@@ -34,10 +34,10 @@ throws: Parser error!
   Can not use `let` as variable name in strict mode
 
 class A {
-  f(x=let=10){ 
+  f(x=let=10){
          ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

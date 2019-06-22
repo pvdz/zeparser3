@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Invalid objlit key character after generator star
 
-class x { * 
+class x { *
  /foo/ }
  ^------- error
 `````

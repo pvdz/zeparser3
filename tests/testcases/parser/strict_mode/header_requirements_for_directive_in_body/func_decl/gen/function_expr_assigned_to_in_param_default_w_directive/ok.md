@@ -31,8 +31,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Can only declare use strict if func params are "simple"
 
-f = function f(x=ok=10){ 
-  "use strict"; 
+f = function f(x=ok=10){
+  "use strict";
 }
 ^------- error
 `````

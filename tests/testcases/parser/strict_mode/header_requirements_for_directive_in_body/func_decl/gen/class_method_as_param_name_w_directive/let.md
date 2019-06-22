@@ -34,7 +34,7 @@ throws: Parser error!
   Cannot use this name (let) as a variable name because: Can not use `let` as variable name in strict mode
 
 class A {
-  d(let){ 
+  d(let){
     ^------- error
 
     "use strict";

@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  f(x=package=10){ 
-    "use strict"; 
+  f(x=package=10){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Illegal keyword encountered; is not a value [package]
 
 f = {
-  f(x=package=10){ 
+  f(x=package=10){
              ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

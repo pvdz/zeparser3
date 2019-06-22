@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Next ord should be 41 (`)`) but was 120 (curc: `x`, token: `x`)
 
-(delete (((x))) 
+(delete (((x)))
  x)
  ^------- error
 `````
@@ -44,7 +44,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 throws: Parser error!
   Bad delete case, can not delete an ident wrapped in parens
 
-(delete (((x))) 
+(delete (((x)))
  x)
  ^------- error
 `````

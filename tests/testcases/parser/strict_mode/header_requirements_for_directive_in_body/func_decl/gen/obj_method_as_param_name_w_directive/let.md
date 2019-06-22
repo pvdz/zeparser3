@@ -34,8 +34,8 @@ throws: Parser error!
   Can only declare use strict if func params are "simple"
 
 f = {
-  d(let){ 
-    "use strict"; 
+  d(let){
+    "use strict";
   }
   ^------- error
 
@@ -51,10 +51,10 @@ throws: Parser error!
   Cannot use this name (let) as a variable name because: Can not use `let` as variable name in strict mode
 
 f = {
-  d(let){ 
+  d(let){
     ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````

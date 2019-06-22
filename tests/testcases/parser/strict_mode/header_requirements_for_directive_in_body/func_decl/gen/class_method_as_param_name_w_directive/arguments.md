@@ -34,7 +34,7 @@ throws: Parser error!
   Cannot use this name (arguments) as a variable name because: Cannot create a binding named `arguments` in strict mode
 
 class A {
-  d(arguments){ 
+  d(arguments){
     ^------- error
 
     "use strict";

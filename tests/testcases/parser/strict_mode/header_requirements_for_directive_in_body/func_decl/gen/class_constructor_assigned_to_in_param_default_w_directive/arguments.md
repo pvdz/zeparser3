@@ -34,10 +34,10 @@ throws: Parser error!
   Cannot assign to `eval` and `arguments` in strict mode
 
 class A {
-  constructor(x=arguments=10){ 
+  constructor(x=arguments=10){
                          ^------- error
 
-    "use strict"; 
+    "use strict";
   }
 }
 `````
