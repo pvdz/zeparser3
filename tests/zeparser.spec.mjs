@@ -1,5 +1,6 @@
-#!/usr/bin/env node
-// For as long as node does not support it out of the box you can only execute this through:
+#!/usr/bin/env node --experimental-modules
+
+// For as long as node does not support it out of the box and you use nvm you can only execute this through:
 //
 //     node --experimental-modules tests/zeparser.spec.mjs
 //
@@ -15,8 +16,15 @@ const SEARCH = process.argv.includes('-s');
 const SKIP_BUILDS = process.argv.includes('-q') || SEARCH;
 const TEST262 = process.argv.includes('-t');
 const SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
-const STOP_AFTER_FAIL = !process.argv.includes('-F');
+const STOP_AFTER_FAIL = process.argv.includes('-f');
 const TRUNC_STACK_TRACE = !process.argv.includes('-S');
+const AUTO_UPDATE = process.argv.includes('-u');
+const AUTO_GENERATE = process.argv.includes('-g');
+let [a,b,c,d] = [process.argv.includes('--sloppy'), process.argv.includes('--strict'), process.argv.includes('--module'), process.argv.includes('--web')];
+const RUN_SLOPPY = (a || (!b && !c && !d)) || (INPUT_OVERRIDE && !(b || c || d));
+const RUN_STRICT = b || (!a && !c && !d && !INPUT_OVERRIDE);
+const RUN_MODULE = c || (!a && !b && !d && !INPUT_OVERRIDE);
+const RUN_WEB = d || (!a && !b && !c && !INPUT_OVERRIDE);
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -30,23 +38,39 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     \`node --experimental-modules cli/build.mjs; node --experimental-modules tests/zeparser.spec.mjs\` [options]
 
   Options:
-    -i "input"    Test input only (sloppy, strict, module)
-    -q            Quick: don't run builds as well
-    -t            Run test262 suite
-    -F            Do not stop after first fail
+    -b            Quick: don't run builds as well (implied if they don't exist)
+    -f "path"     Only test this file / dir
+    -i "input"    Test input only (sloppy, strict, module), implies --sloppy unless at least one mode explicitly given
+    -g            Regenerate computed test case blocks (process all autogen.md files)
+    -q            Stop after first fail
     -s            Use HIT() in code and only print tests that execute at least one HIT(), implies -q
+    -t            Run test262 suite
+    -u            Auto-update tests with the results (tests silently updated inline, use source control to diff)
+    --sloppy      Only run tests in sloppy mode (can be combined with other modes like --strict)
+    --strict      Only run tests in strict mode (can be combined with other modes like --module)
+    --module      Only run tests with module goal (can be combined with other modes like --strict)
+    --web         Only run tests in sloppy mode with web compat mode on (can be combined with other modes like --strict)
 `);
   process.exit();
 }
+
+if (AUTO_UPDATE && AUTO_GENERATE) throw new Error('Cannot use auto update and auto generate together');
 
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
 
+let babelCore;
+let babelTypes;
+let babelGenerate;
+let babelTemplate;
+
 let prettierFormat = () => { return 'prettier not loaded'; }; // if available, loaded through import() below
 let babelParse = undefined; // if available, loaded through import() below
 
 import {
+  ASSERT,
+  getTestFiles,
   toPrint,
   _LOG,
 } from './utils.mjs';
@@ -80,10 +104,15 @@ const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
 const RESET = '\x1b[0m';
 
+const TEST_SLOPPY = 'sloppy';
+const TEST_STRICT = 'strict';
+const TEST_MODULE = 'module';
+const TEST_WEB = 'web';
+
 // use -s and call HIT in some part of the code to log all test cases that visit that particular branch(es)
-let found = false;
+let wasHit = false;
 let foundCache = new Set; // dont print multiples
-let foundTest = (x) => found = x || true;
+let foundTest = (x) => wasHit = x || true;
 let PRINT_HIT = console.log;
 if (SEARCH) {
   global.HIT = foundTest; // faster to quickly search than exporting and having to uncomment the import...
@@ -97,529 +126,380 @@ if (SEARCH) {
   global.HIT = ()=>{};
 }
 
-let dir = path.join(dirname, 'testcases/parser');
-let files = [];
-function read(path, file) {
-  let combo = path + file;
-  LOG('read:', path + file);
-  if (fs.statSync(combo).isFile()) {
-    files.push(combo);
-  } else {
-    fs.readdirSync(combo + '/').forEach(s => read(combo + '/', s));
-  }
+async function readFiles(files) {
+  console.time('$$ Test file read time');
+  let list = await Promise.all(files.map(file => {
+    let res,rej,p = new Promise((resolve, reject) => (res = resolve, rej = reject));
+    fs.readFile(file, 'utf8', (err, data) => err ? rej(err) : res({file, _data: data, data}));
+    return p;
+  }));
+  console.timeEnd('$$ Test file read time');
+  console.log('Read', list.length, 'files');
+  return list;
 }
-if (INPUT_OVERRIDE) {
-  LOG('Using override input and only testing that...');
-  LOG('=============================================\n');
-} else {
-  read(dir, '');
-}
-
-files = files.filter(f => f.indexOf('test262') >= 0 === TEST262);
-
-files.sort((a, b) => {
-  // push test262 to the back so our own unit tests can find problems first
-  if (a.indexOf('test262') >= 0) return 1;
-  if (b.indexOf('test262') >= 0) return -1;
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
-});
-
-let cases = [];
-let descStack = [];
-
-if (INPUT_OVERRIDE) cases.push({obj: {code: INPUT_OVERRIDE}});
-
-let checkAST = true;
-let parserDesc = '';
-function all(parser, tests) {
-  for (let testCase of tests) {
-    oneInutTestcase(parser, testCase);
-  }
-}
-function oneInutTestcase(parser, testCase) {
-  // Start of one test case as it appears in the test files, or one entry of code if it's an array
-
-  let {odesc: testDesc, desc: longDesc, from, obj: testObjArg} = testCase;
-  let {code} = testObjArg;
-  if (code instanceof Array) {
-    // code may be an array for a bunch of variation tests with the same result or where the ast/error doesnt matter
-    for (let i=0; i<code.length; ++i) {
-      let singleTestObj = {...testObjArg, code: code[i]};
-      let indexedLongDesc = longDesc + ' (#' + (i+1) + ' / ' + code.length + ')';
-      oneTestCase(parser, code[i], singleTestObj, indexedLongDesc, from, testDesc);
-    }
-  } else {
-    oneTestCase(parser, code, testObjArg, longDesc, from, testDesc);
-  }
-}
-function oneTestCase(parser, code, testObjArg, longDesc, from, testDesc) {
-  // Either one test case as it is is in the source, or one test of such where code is an array of inputs
-  ++testi;
-  if (oneCodeVaration(parser, '   ', code, testObjArg, longDesc, from, testDesc)) {
-    // oneCodeVaration(parser, '[a]', '\n' + code, testObj, longDesc, from, testCase);
-    // oneCodeVaration(parser, '[b]', code + '\n', testObj, longDesc, from, testCase);
-    // oneCodeVaration(parser, '[c]', ' ' + code, testObj, longDesc, from, testCase);
-    // oneCodeVaration(parser, '[d]', code + ' ', testObj, longDesc, from, testCase);
-  }
-}
-function oneCodeVaration(Parser, testSuffix, code, testObj, desc, from, testDesc) {
-  // Test case with maybe prefix/suffix whitespace modifications
-
-  // shorthand for just goal_script/sloppy settings (prevents unncessary object wrapping *shrug*)
-  if (testObj.WEB && testObj.WEB !== true) {
-    if (testObj.SLOPPY_SCRIPT !== undefined) throw new Error('SLOPPY_SCRIPT should not be set if WEB is set');
-    // TODO: run sloppy mode tests with and without the web compat flag instead of targeting them explicitly
-    testObj.SLOPPY_SCRIPT = testObj.WEB;
-    testObj.WEB = true;
-  }
-
-  let sloppyScriptOptions = testObj.SLOPPY_SCRIPT;
-  if (sloppyScriptOptions) {
-    if (testObj.SLOPPY !== undefined) throw new Error('SLOPPY and SLOPPY_SCRIPT should not both be set');
-    if (testObj.SCRIPT !== undefined) throw new Error('SCRIPT and SLOPPY_SCRIPT should not both be set');
-    delete testObj.SLOPPY_SCRIPT;
-    testObj.SLOPPY = {SCRIPT: sloppyScriptOptions};
-  }
-
-  // test both module and script parsing modes. if a test should have different outcomes between them then it should use
-  [RUN_MODE_SCRIPT, RUN_MODE_MODULE].forEach(goal => {
-    // similarly, run all tests in both sloppy and strict mode. use STRICT and SLOPPY to add exceptions.
-    let ms = '[' + (goal === RUN_MODE_SCRIPT ? 'Script' : 'Module') + ']';
-    // goal + strict test
-    if (goal === RUN_MODE_MODULE) {
-      // the MODULE_MODE and SCRIPT_MODE properties to override the expectations.
-      let totalTestOptions = override(testObj.STRICT, {...testObj});
-      // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
-        if (!testObj.STRICT || !testObj.STRICT.SKIP) {
-          __one(Parser, true, testSuffix + ms, code, goal, totalTestOptions, desc, from, testDesc);
-        }
-    }
-    // goal + sloppy test
-    // module mode is ALWAYS strict mode so skip sloppy
-    if (goal === RUN_MODE_SCRIPT && (!testObj.SLOPPY || !testObj.SLOPPY.SKIP)) {
-      let totalTestOptions = override(testObj.SLOPPY, {...testObj});
-      // dont run sloppy tests in module goal since that's an impossible situation (old tests still use this flag)
-      __one(Parser, false, testSuffix + ms, code, goal, totalTestOptions, desc, from, testDesc);
-    }
+async function extractFiles(list) {
+  console.time('$$ Test file extraction time');
+  let bytes = 0;
+  list.forEach(obj => {
+    const {file, data} = obj;
+    ({options: obj.params, input: obj.input} = parseTestFile(data, file));
+    bytes += obj.input.length;
   });
+  console.timeEnd('$$ Test file extraction time');
+  console.log('Total input size:', bytes, 'bytes');
 }
-function override(wantObj, baseObj) {
-  if (wantObj) {
-    Object.assign(baseObj, wantObj);
-    // must cleanup if ast/throws is used from wantObj
-    if (wantObj.ast) delete baseObj.throws;
-    if (wantObj.throws) delete baseObj.ast;
-  }
-  return baseObj;
-}
-function __one(Parser, startInStrictMode, testSuffix, code = '', mode, testDetails, desc, from) {
-  if (testi < SKIP_TO) return;
-  let {
-    ast: expectedAst,
-    callback: expectedCallback,
-    SCRIPT: scriptModeObj,
-    MODULE: moduleModeObj,
-    throws: expectedThrows,
-    tokens: expectedTokens,
-    debug: _debug,
-    SKIP,
-    WEB,
-    ES,
-    OPTIONS,
-    HAS_AST,
-  } = testDetails;
-
-  ++testj;
-
-  // Skip if it requires an AST or no AST and the parser currently has no ast
-  if (typeof HAS_AST === 'boolean' && HAS_AST !== checkAST) return;
-
-  found = false; // reset -s search state
-
-  //if (testj !== 3319) return;
-  testSuffix += '[' + (startInStrictMode ? 'Strict' : 'Sloppy') + ']';
-  testSuffix += '[' + testj + ']';
-  if (WEB) testSuffix += '[' + BLINK + 'WEB' + BOLD + ']';
-  if (ES) testSuffix += '[' + BLINK + 'ES' + ES + BOLD + ']';
-  if (OPTIONS) testSuffix += '[' + BLINK + 'OPTIONS=' + JSON.stringify(OPTIONS) + BOLD + ']';
-
-  // goal specific overrides
-  // (throws override ast and ast overrides throws)
-  let brake = testDetails.brake;
-  if (mode === RUN_MODE_SCRIPT && scriptModeObj) {
-    if (scriptModeObj.STRICT || scriptModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
-    if (scriptModeObj.throws) {
-      expectedAst = undefined;
-      expectedThrows = scriptModeObj.throws;
-    }
-    if (scriptModeObj && 'brake' in scriptModeObj) brake = scriptModeObj.brake;
-    if (scriptModeObj.SKIP !== undefined) SKIP = scriptModeObj.SKIP;
-    if (scriptModeObj.ast) {
-      expectedThrows = undefined;
-      expectedAst = scriptModeObj.ast;
-    }
-    if (scriptModeObj.tokens) expectedTokens = scriptModeObj.tokens;
-  }
-  if (mode === RUN_MODE_MODULE && moduleModeObj) {
-    if (moduleModeObj.SKIP !== undefined) SKIP = moduleModeObj.SKIP;
-    if (moduleModeObj.STRICT || moduleModeObj.SLOPPY) throw new Error('Bad test: Put STRICT/SLOPPY before MODULE mode');
-    if (moduleModeObj.throws) {
-      expectedAst = undefined;
-      expectedThrows = moduleModeObj.throws;
-    }
-    if (moduleModeObj && 'brake' in moduleModeObj) brake = moduleModeObj.brake;
-    if (moduleModeObj.ast) {
-      expectedThrows = undefined;
-      expectedAst = moduleModeObj.ast;
-    }
-    if (moduleModeObj.tokens) expectedTokens = moduleModeObj.tokens;
-  }
-
-  // https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences
-  let prefix = BOLD + parserDesc + ': ' + testi + testSuffix;
-  let suffix = RESET;
-
-  if (mode === RUN_MODE_MODULE && !startInStrictMode) {
-    throw new Error('Should not test module goal in sloppy mode because that is impossible anyways; ' + SKIP);
-  }
-
-  if (SKIP) {
-    if (!SEARCH) LOG(`${prefix} SKIP: \`${toPrint(code)}\`${suffix}`);
-    ++skips;
-    if (brake) throw BOLD + RED + 'stopped for test';
-    return;
-  }
-
-  // pass references so we can report partial state in case of a crash
-  let ast = {};
-  let path = [];
-  let tokens = [];
-
-  let goalMode = mode === RUN_MODE_MODULE ? GOAL_MODULE : mode === RUN_MODE_SCRIPT ? GOAL_SCRIPT : MODE_VALUE_ERROR;
-  let wasError = '';
-  let stack;
-  let tokenizer;
-  let astPath;
+async function coreTest(input, zeparser, goal, options) {
+  wasHit = false;
+  let tok;
+  let r, e = '';
   try {
-    var obj = Parser.parse(code, goalMode, COLLECT_TOKENS_SOLID, {
-      strictMode: startInStrictMode,
-      webCompat: !!WEB,
-      trailingArgComma: testDetails.options && testDetails.options.trailingArgComma,
-      astRoot: ast,
-      tokenStorage: tokens,
-      getTokenizer: tok => tokenizer = tok,
-      targetEsVersion: ES || Infinity,
-      ...OPTIONS,
-    });
-  } catch (f) {
-    wasError = f.message;
-    var obj = '' + f.stack;
-    stack = f.stack;
+    r = zeparser(
+      input,
+      goal,
+      COLLECT_TOKENS_SOLID,
+      {
+        ...options,
+        getTokenizer: tokenizer => tok = tokenizer,
+        $log: INPUT_OVERRIDE ? undefined : () => {},
+        $warn: INPUT_OVERRIDE ? undefined : () => {},
+        $error: INPUT_OVERRIDE ? undefined : () => {},
+      },
+    );
+  } catch (_e) {
+    e = _e.message;
   }
 
   if (SEARCH) {
     // If you use -q -i then you just want to know whether or not some codepath hits some code
     if (INPUT_OVERRIDE) {
-      PRINT_HIT(`[${(wasError.indexOf('TODO') >= 0 ?'T':wasError?RED+'x':GREEN+'v')+RESET}] Input ${found ? 'WAS' : 'was NOT'} hit` + (found === true ? '' : '    (' + found + ')'));
-    } else if (found) {
-      if (!foundCache.has(code)) {
-        PRINT_HIT(`// [${(wasError.indexOf('TODO') >= 0 ?'T':wasError?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(code)}\`` + (found === true ? '' : '    (' + found + ')'));
-        foundCache.add(code);
+      PRINT_HIT(`[${(e.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+    } else if (wasHit) {
+      if (!foundCache.has(input)) {
+        PRINT_HIT(`// [${(e.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(input)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+        foundCache.add(input);
       }
     }
     return; // dont care about further result
   }
 
-  astPath = ast.pathNames;
-  delete ast.path; // meh
-  delete ast.pathNames;
-
-  if (!expectedTokens) {
-    expectedTokens = ['<not given>'];
-  }
-  if (!expectedAst) {
-    expectedAst = {'<not given>': true};
-  }
-
-  if (wasError) {
-    let wasTodo = wasError.includes('TODO');
-    let wasCrash = !wasError.includes('Parser error!') && !wasError.includes('Tokenizer error!');
-    if (!wasTodo && wasCrash) {
-      LOG(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
-      LOG_THROW('unexpected CRASH', code, stack, desc);
-      LOG(`${RED}####  ${BLINK}CRASHED HARD${RESET}${RED}  ####${RESET}`);
-      LOG('Thrown error:', wasError);
-      ++fail;
-      ++crash;
-    } else if (wasError.toUpperCase().includes('ASSERT')) {
-      LOG(`${RED}####  ${BLINK}ASSERTION BROKEN${RESET}${RED}  ####${RESET}`);
-      LOG_THROW('Invariant violated', code, stack, desc);
-      LOG(`${RED}####  ${BLINK}ASSERTION BROKEN${RESET}${RED}  ####${RESET}`);
-      LOG('Assertion expected:', wasError);
-      ++fail;
-      ++crash;
-    } else if (!expectedThrows) {
-      LOG_THROW(`${BOLD}unexpected ${RED}${wasTodo?'TODO':'ERROR'}${RESET}`, code, stack, desc);
-      LOG('Thrown error:', wasError);
-      ++fail;
-      ++crash;
-    } else if (wasCrash) {
-      LOG_THROW('TODO', code, stack, desc);
-      ++fail;
-      ++crash;
-    } else if (!wasTodo && (expectedThrows === true || wasError.toUpperCase().includes(expectedThrows.toUpperCase()))) {
-      LOG(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\` :: (properly throws)${suffix}`);
-      ++pass;
-    } else {
-      LOG_THROW('thrown message mismatch', code, stack, desc);
-      LOG('Thrown error:', wasError);
-      LOG('Expected error message to contain: "' + expectedThrows + '"');
-      ++fail;
-    }
-  } else if (INPUT_OVERRIDE) {
-    LOG(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
-    ++pass;
-    LOG('ast:', formatAst(obj.ast) + ',');
-    LOG(formatTokens(obj.tokens));
-  } else if (expectedThrows) {
-    ++fail;
-    LOG_THROW('_failed_ to throw ANY error', code, '', desc, true, false);
-    if (expectedThrows !== true) {
-      LOG('Expected an error message containing: "' + expectedThrows + '"');
-    }
-    LOG('Actual ast:', formatAst(obj.ast) + ',');
-    LOG(formatTokens(obj.tokens));
-  } else if (!checkAST) {
-    if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-      LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true, false);
-
-      LOG('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
-      LOG('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
-      // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
-      LOG(formatTokens(obj.tokens));
-      ++fail;
-    } else {
-      LOG(`${prefix} ${GREEN}PASS${RESET} (skipped ast check): \`${toPrint(code)}\`${suffix}`);
-      ++pass;
-    }
-  } else {
-    let mustVerify = checkAST && expectedAst !== true;
-    let expectedJson = mustVerify && JSON.stringify(expectedAst); // note: do not ignore prop order because there are perf implications if the order is not fixed
-    let actualJson = (mustVerify || expectedCallback !== undefined) && JSON.stringify(obj.ast);
-
-    if (mustVerify && expectedJson !== actualJson) {
-      let missingAst = expectedJson === '{"<not given>":true}';
-
-      LOG_THROW(missingAst ? 'AST missing' : 'AST mismatch', code, '', desc, true, false);
-
-      LOG('Actual ast:', formatAst(obj.ast) + ',');
-      LOG(formatTokens(obj.tokens));
-
-      if (missingAst) {
-        LOG('(No expected AST given...)');
-      } else {
-        printComparedAstStrings(expectedJson, actualJson);
-      }
-
-      ++fail;
-    } else if (expectedTokens !== true && obj.tokens.map(t => t.type).join(' ') !== [...expectedTokens, $EOF].join(' ')) {
-      LOG_THROW(BOLD + 'TOKEN' + RESET + ' mismatch', code, '', desc, true, false);
-
-      LOG('Actual tokens:', obj.tokens.map(t => debug_toktype(t.type)).join(' '));
-      LOG('Wanted tokens:', [...expectedTokens, $EOF].map(debug_toktype).join(' '));
-      // the tokenizer is pretty solid by now so I prefer to lazily copy/paste this into the test :)
-      LOG(formatTokens(obj.tokens));
-
-      ++fail;
-    } else if (expectedCallback && expectedCallback(obj.ast, obj.tokens, actualJson) === false) {
-      LOG_THROW('input parsed properly but ' + BOLD + 'CALLBACK' + RESET + ' rejected', code, undefined, desc, false, false);
-      ++fail;
-    } else {
-
-      let babelAst;
-      if (
-        babelParse
-        && ES === undefined // Babel parser simply supports the latest so no point testing older es versions
-        && WEB === undefined // Actually I think Babel implicitly does this by default...? Should check
-        && OPTIONS === undefined // Don't test special cases
-      ) try {
-        // https://babeljs.io/docs/en/babel-parser
-        babelAst = babelParse(code, {
-          sourceType: goalMode === GOAL_MODULE ? 'module' : 'script',
-          strictMode: startInStrictMode ? true : false,
-          plugins: ['estree'],
-        }).program;
-      } catch (e) {
-        // Ignore babel exceptions for now. We should confirm and could then report them upstream later.
-        LOG('Babel crashed on this input:' + e.message);
-      }
-      if (
-        babelAst
-      ) {
-        let banned = {
-          always: [
-            'start',
-            'end',
-            'loc',
-            'directives',
-            'cooked',
-            'raw',
-            'extra',
-            'leadingComments',
-            'innerComments',
-            'trailingComments',
-          ],
-          Program: [
-            'sourceType',
-            'interpreter',
-          ],
-          FunctionDeclaration: ['expression'],
-          FunctionExpression: ['expression'],
-          Literal: [
-            'regex', // on regex literals
-            'value', // TODO: fix literal nodes
-          ],
-          TryStatement: [
-            'guardedHandlers', // dropped from estree spec very early on (some provide it to maintain backwards compat); https://github.com/jquery/esprima/issues/1030
-          ],
-        };
-        let actualJson = serializeAst(obj.ast, banned);
-        let babelJson = serializeAst(babelAst, banned);
-        if (babelJson !== actualJson && ![
-          'let f = async\ng => g', // async arrow newline edge case (TODO: report to babel)
-          'async \n x => x', // async arrow newline edge case (TODO: report to babel)
-          '(x = x) = x;', // Babel thinks the outer assignment is a pattern
-          '{ (x = yield) = {}; }', // same as prev
-          'typeof class{}\n/foo/g', // regex asi case (TODO: report to babel)
-          'typeof async function f(){}\n/foo/g', // typeof async func regex edge case (TODO: report to babel)
-        ].includes(code)) {
-          LOG_THROW('BABEL AST mismatch', code, '', desc, true, false);
-
-          printComparedAstStrings(actualJson, babelJson, 'zePar', 'babel');
-
-          LOG('ZeParser   AST:');
-          console.dir(obj.ast, {depth: null});
-          LOG('BabelParsr AST:');
-          console.dir(orderAst(babelAst, banned), {depth: null});
-
-          ++fail; // I guess...
-        } else {
-          babelAst = null;
-        }
-      }
-      if (!babelAst) {
-        LOG(`${prefix} ${GREEN}PASS${RESET}: \`${toPrint(code)}\`${suffix}`);
-        ++pass;
-      }
-    }
-  }
-
-  if (STOP_AFTER_FAIL && fail) throw BOLD + RED + 'stopped';
-  if (brake) throw BOLD + RED + 'stopped for test';
-
-  function LOG_THROW(errmsg, code, stack = new Error(errmsg).stack, desc, noPartial = false, printCode = true) {
-    if (printCode) {
-      LOG('\n');
-      LOG(tokenizer && tokenizer.getErrorContext(undefined, errmsg));
-    }
-    if (TEST262) LOG('\n============== input ==============' + code + '\n============== /input =============\n');
-    LOG(`${prefix} ${RED}ERROR${RESET}: \`${toPrint(code)}\` :: ` + errmsg + suffix);
-    if (stack) {
-      LOG(
-        'Stack:',
-        (
-          stack.length > 10 && TRUNC_STACK_TRACE
-          ? [...stack.split('\n').slice(0,8), '...trunced by ze tester (use `-S` to prevent)', ...stack.split('\n').slice(-3)].join('\n')
-          : stack
-        )
-        .replace(/Parser error!([^\n]*)/, 'Parser error!' + BOLD + RED + '$1' + RESET)
-        .replace(/\n.* at (THROW|ASSERT\().*?\n/s, '\nExplicit '+BOLD+'$1'+RESET+' at:\n')
-        .replace(/(zeparser.spec.js.*?)\n.*/s, '$1 (trunced remainder of trace)')
-      );
-    }
-    //LOG('Final test options:\n', finalTestOptions);
-    LOG('Description:', desc);
-    LOG('From:', from);
-
-    if (!noPartial) {
-      LOG('Ast so far (path=['+astPath+']):', formatAst(ast));
-      LOG('Tokens so far:[', tokens.map(o => debug_toktype(o.type)).join(', '), ' ...]');
-    }
-
-    if (_debug) LOG('Debug:', _debug);
-  }
+  return {r, e, tok};
 }
-
-function printComparedAstStrings(want, real, n1 = 'want', n2 = 'real') {
-  let max = Math.max(want.length, real.length);
-  let n = 0;
-  let step = 200;
-  let steps = 0;
-  while (n < max) {
-    let x1 = want.slice(Math.min(n, want.length), Math.min(n + step, want.length));
-    let x2 = real.slice(Math.min(n, real.length), Math.min(n + step, real.length));
-    if (x1 === x2) {
-      LOG(n1 + '[' + steps + ']: SAME', x1);
-      LOG(n2 + '[' + steps + ']: SAME', x2);
-    } else {
-      // try to highlight the difference area
-
-      let start = 0;
-      for (; start<x1.length; ++start) {
-        if (x1[start] !== x2[start]) {
-          break;
-        }
-      }
-      if (start > 0 && /[\w\d]/.test(x1[start])) {
-        do --start; while (start > 0 && /[\w\d]/.test(x1[start]));
-      }
-      let stop = x1.length;
-      for (; stop-1 > start; --stop) {
-        if (x1[stop-1] !== x2[stop-1]) {
-          break;
-        }
-      }
-      if (stop < x1.length && /[\w\d]/.test(x1[stop])) {
-        do ++stop; while (stop < x1.length && /[\w\d]/.test(x1[stop]));
-      }
-
-      LOG(n1 + '[' + steps + ']: DIFF', x1.slice(0, start) + BOLD + x1.slice(start, stop) + RESET + x1.slice(stop));
-      LOG(BOLD+n2+RESET+'[' + steps + ']: DIFF', x2.slice(0, start) + BOLD + x2.slice(start, stop) + RESET + x2.slice(stop));
-    }
-
-    n += step;
-    ++steps;
-  }
-}
-
-function orderAst(ast, banned) {
-  let bannedByType = banned[ast.type] || [];
-  let keys = Object.getOwnPropertyNames(ast).filter(key => !banned.always.includes(key) && !bannedByType.includes(key));
-  let newobj = {};
-  keys.sort((a,b) => a === 'type' ? -1 : b === 'type' ? 1 : a < b ? -1 : a > b ? 1 : 0).forEach(key => {
-    if (ast[key] instanceof Array) {
-      newobj[key] = ast[key].map(e => e && orderAst(e, banned));
-    }
-    else if (typeof ast[key] === 'object' && ast[key] !== null) {
-      newobj[key] = orderAst(ast[key], banned);
-    }
+async function postProcessResult({r, e, tok}, testVariant, file) {
+  // This is where by far the most time is spent... roughly 90% of the time is this function.
+  // Most of that is Prettier. If we replace it with JSON.stringify the total runtime goes down 2 minutes to 11 seconds
+  if (e) {
+    if (e.startsWith('Parser error!')) e = e.slice(0, 'Parser error!'.length) + '\n  ' + e.slice('Parser error!'.length + 1);
+    else if (e.startsWith('Tokenizer error!')) e = e.slice(0, 'Tokenizer error!'.length) + '\n    ' + e.slice('Tokenizer error!'.length + 1);
     else {
-      newobj[key] = ast[key];
+      console.error('####\nThe following unexpected error was thrown:\n');
+      console.error(e);
+      console.error(new Error(e).stack);
+      console.error('####');
+      throw new Error('Non-graceful error, fixme. Mode = ' + testVariant + ', file = ' + file + '; ' + e.message);
     }
-  });
-  return newobj;
+
+    if (tok) {
+      let context = tok.getErrorContext();
+      if (context.slice(-1) === '\n') context = context.slice(0, -1);
+      if (INPUT_OVERRIDE) context = '```\n' + context + '\n```\n';
+      e += '\n\n' + context;
+    }
+  }
+
+  return (
+    // throws: Parser error!
+    // throws: Tokenizer error!
+    (e ? 'throws: ' + e : '') +
+    // (r ? 'ast: ' + formatAst(r.ast) + '\n\n' + formatTokens(r.tokens) : '')
+    // (r ? 'ast: ' + JSON.stringify(r.ast) + '\n\n' + formatTokens(r.tokens) : '')
+    // Using util.inspect makes the output formatting highly tightly bound to node's formatting rules
+    // At the same time, the same could be said for Prettier (although we can lock that down by package version,
+    // independent from node version). However, using prettier takes roughly 23 secods, inspect half a second. Meh.
+    (r ? 'ast: ' + util.inspect(r.ast, false, null) + '\n\n' + formatTokens(r.tokens) : '')
+  );
 }
-function serializeAst(ast, banned = []) {
-  ast = orderAst(ast, banned); // remove things we don't care to compare
-  return JSON.stringify(ast);
+async function runTest(list, zeparser, testVariant) {
+  console.log(' - Now testing', INPUT_OVERRIDE ? 'for:' : 'all cases for:', testVariant);
+  console.time('  $$ Batch for ' + testVariant);
+
+
+  let bytes = 0;
+  let ok = 0;
+  let fail = 0;
+  if (!INPUT_OVERRIDE) console.log('   Parsing all inputs');
+  console.time('   $$ Parse time for all tests');
+  let set = await Promise.all(list.map(async obj => {
+    let {input, params} = obj;
+    bytes += input.length;
+    let result = await coreTest(input, zeparser, testVariant === TEST_MODULE ? GOAL_MODULE : GOAL_SCRIPT, {
+      strictMode: testVariant === TEST_STRICT,
+      webCompat: testVariant === TEST_WEB,
+      targetEsVersion: params.es,
+    });
+    if (SEARCH) return;
+    if (result.e) ++fail;
+    else if (result.r) ++ok;
+    else throw new Error('invariant');
+    return {obj, result};
+  }));
+  if (!INPUT_OVERRIDE) console.log('   Have', set.length, 'results, totaling', bytes, 'bytes, ok = ', ok, ', fail =', fail);
+  console.timeEnd('   $$ Parse time for all tests');
+  if (SEARCH) return;
+
+
+  if (!INPUT_OVERRIDE) console.log('   Processing', set.length, 'result for all tests');
+  console.time('   $$ Parse result post processing time');
+  await Promise.all(set.map(async ({obj, result}) => {
+    // Caching it like this takes up more memory but makes deduping other modes so-much-easier
+    obj.newoutput[testVariant] = await postProcessResult(result, testVariant, obj.file);
+  }));
+  console.timeEnd('   $$ Parse result post processing time');
+
+
+  console.timeEnd('  $$ Batch for ' + testVariant);
+}
+async function runTests(list, zeparser) {
+  console.time('$$ Total runtime');
+  if (!INPUT_OVERRIDE) console.log('Now actually running all', list.length, 'test cases... 4x! Single threaded! This may take some time (~2min on my machine)');
+  list.forEach(obj => obj.newoutput = {});
+  if (RUN_SLOPPY) await runTest(list, zeparser, TEST_SLOPPY);
+  if (RUN_STRICT) await runTest(list, zeparser, TEST_STRICT);
+  if (RUN_MODULE) await runTest(list, zeparser, TEST_MODULE);
+  if (RUN_WEB) await runTest(list, zeparser, TEST_WEB);
+  console.timeEnd('$$ Total runtime');
+}
+async function constructNewOutput(list) {
+  console.time('$$ New output construction time');
+  list.forEach(obj => {
+    obj.data = generateOutputBlock(obj.data, obj.newoutput.sloppy, obj.newoutput.strict, obj.newoutput.module, obj.newoutput.web);
+    // TODO: compat table; what do other parsers do with this input?
+  });
+  console.timeEnd('$$ New output construction time');
+}
+async function writeNewOutput(list) {
+  console.time('$$ Write updated test files');
+  let updated = 0;
+  await Promise.all(list.map(obj => {
+    if (updated && STOP_AFTER_FAIL) return;
+    const {data, _data, file} = obj;
+    if (data !== _data) {
+      if (AUTO_UPDATE) {
+        ++updated;
+        let res,rej,p = new Promise((resolve, reject) => (res = resolve, rej = reject));
+        fs.writeFile(file, data, 'utf8', (err, data) => err ? rej(err) : res());
+        return p;
+      } else {
+        console.Error('Output mismatch for', file);
+        return Promise.resolve();
+      }
+    }
+  }));
+  if (updated && STOP_AFTER_FAIL) {
+    console.log('Found error, exiting now...');
+    process.exit();
+  }
+  console.timeEnd('$$ Write updated test files');
+  console.log('Updated', updated, 'files');
+}
+async function loadParserAndPrettier() {
+  let zeparser;
+  console.time('$$ Parser and Prettier load');
+  [
+    {default: zeparser},
+    {default: {format: prettierFormat}}
+  ] = await Promise.all([
+    await import(path.join(dirname, '../src/zeparser.mjs')),
+    await import('prettier'),
+  ]);
+  console.timeEnd('$$ Parser and Prettier load');
+
+  return zeparser;
 }
 
+async function cli() {
+  let zeparser = await loadParserAndPrettier();
+
+  let list = [{file: '<cli>', input: INPUT_OVERRIDE, params: {}}];
+  await runTests(list, zeparser);
+
+  console.log('=============================================');
+  if (RUN_SLOPPY) {
+    console.log('### Sloppy mode:');
+    console.log(list[0].newoutput.sloppy);
+    console.log('=============================================\n');
+  }
+  if (RUN_STRICT) {
+    console.log('### Strict mode:');
+    console.log(list[0].newoutput.strict);
+    console.log('=============================================\n');
+  }
+  if (RUN_MODULE) {
+    console.log('### Module goal:');
+    console.log(list[0].newoutput.module);
+    console.log('=============================================\n');
+  }
+  if (RUN_WEB) {
+    console.log('### Web compat mode:');
+    console.log(list[0].newoutput.web);
+    console.log('=============================================\n');
+  }
+}
+
+async function main() {
+  let zeparser = await loadParserAndPrettier();
+
+  files = files.filter(f => !f.endsWith('autogen.md'));
+
+  let list = await readFiles(files);
+  await extractFiles(list);
+  await runTests(list, zeparser);
+  if (!SEARCH) {
+    await constructNewOutput(list);
+    await writeNewOutput(list);
+  }
+
+  console.timeEnd('$$ Whole test run');
+}
+
+function san(dir) {
+  return dir
+  .trim()
+  .replace(/(?:\s|;|,)+/g, '_')
+  .replace(/[^a-zA-Z0-9_-]/g, (s)=>'x' + (s.charCodeAt(0).toString(16)).padStart(4, '0'));
+}
+
+async function gen() {
+  const CASE_HEAD = '### Cases';
+  const TPL_HEAD = '### Templates';
+  const OUT_HEAD = '## Output';
+
+  files = files.filter(f => f.endsWith('autogen.md'));
+  let list = await readFiles(files);
+  list.forEach(obj => {
+    let genDir = path.join(path.dirname(obj.file), 'gen');
+    if (fs.existsSync(genDir)) {
+      // Drop all files in this dir (this is `gen`, should be fine to fully regenerate anything in here at any time)
+      let oldFiles = [];
+      getTestFiles(genDir, '', oldFiles, true, true);
+      // Note: the folder should only contain generated files and folders which should delete just fine
+      oldFiles.forEach(file => { try { fs.unlinkSync(file); } catch (e) { fs.rmdirSync(file); } });
+    }
+    fs.mkdirSync(genDir, {recursive: true});
+
+    let caseOffset = obj.data.indexOf(CASE_HEAD);
+    let templateOffset = obj.data.indexOf(TPL_HEAD, CASE_HEAD);
+    let outputOffset = obj.data.indexOf(OUT_HEAD, TPL_HEAD);
+    ASSERT(caseOffset >= 0 || templateOffset >= 0 || outputOffset >= 0, 'missing required parts of autogen', obj.file);
+//    ASSERT(obj.data.slice(caseOffset + CASE_HEAD.length, templateOffset).split('> `````js\n').length > 2, 'expecting 2+ cases', obj.file);
+    let cases = obj.data
+      .slice(caseOffset + CASE_HEAD.length, templateOffset)
+      .split('> `````js\n')
+      .slice(1) // first element is the header
+      .map(s => {
+        // Note: code blocks start with > ``js and end with > `` and are (markdown) "quoted" throughout, + single space
+        // So search for the quint -``js and cut up to the next quint-``, then scrub the quoting prefix `> `
+        return s
+          .split('\n> `````')[0] // Only get the code block, don't care about the rest
+          .split('\n')
+          .map(s => {
+            ASSERT(s[0] === '>' && s[1] === ' ', 'cases should be md quoted entirely, with one space', obj.file, s);
+            return s.slice(2);
+          })
+          .join('\n'); // Not likely to be multi line but why not
+      })
+    ;
+
+    let params = obj.data
+      .slice(templateOffset + TPL_HEAD.length, obj.data.indexOf('####', templateOffset + TPL_HEAD.length))
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s[0] === '-')
+      .reduce((obj, s) => {
+        ASSERT(s[1] === ' ' && s[2] === '`' && s[s.length - 1] === '`', 'param composition', obj.file, s);
+        let [k, v] = s.slice(2, -1).split(' = ');
+        if (String(parseInt(v, 10)) === v) v = parseInt(k, 10);
+        else if (v === 'true') v = true;
+        else if (v === 'false') v = false;
+        else if (v === 'null') v = null;
+        obj[k] = v;
+        return obj;
+      }, {});
+
+    // Temlates have a header and also have a ``js codeblock
+    let templates = obj.data
+      .slice(templateOffset + TPL_HEAD.length, outputOffset)
+      .split('\n#### ')
+      .slice(1) // first element is the header
+      .map(s => {
+        // We split on the #### so the title should be at the start of `s` now
+        let title = s.split('\n')[0].trim();
+        // Get everything inside the js code block
+        let code = s.split('`````js\n')[1].split('\n`````')[0];
+        return {title, code};
+      })
+    ;
+
+    // Now generate all cases with each # in the params and templates replaced with each case
+
+    templates.forEach(({title, code}) => {
+      let caseDir = path.join(genDir, san(String(title)));
+      fs.mkdirSync(caseDir, {recursive: true});
+      cases.forEach(c => {
+        let testFile = path.join(caseDir, san(String(c)) + '.md');
+
+        // immediately generate a test case for it, as well
+        fs.writeFileSync(testFile, `# ZeParser parser autogenerated test case
+
+- Regenerated: ${new Date().toISOString().slice(0,10)}
+- From: ${obj.file.slice(obj.file.indexOf('zeparser3'))}
+- Path: ${caseDir.slice(caseDir.indexOf('zeparser3'))}
+
+> :: test: ${title.split('\n').join('\n>          ')}
+> :: case: ${c.split('\n')    .join('\n>          ')}
+
+## Input
+
+${
+Object
+  .getOwnPropertyNames(params)
+  .map(key => '- `' + key + ' = ' + params[key].replace(/#/g, c) + '`\n')
+  .join('')
+}
+\`\`\`\`\`js
+${code.replace(/#/g, c)}
+\`\`\`\`\`
+`);
+
+      });
+    });
+  });
+}
+
+function formatTokens(tokens) {
+  // console.log('tokens:', tokens)
+
+  let s = 'tokens (' + tokens.length + 'x):\n';
+  let line = ' '.repeat(6);
+
+  for (let i=0, l=tokens.length-1; i<l; ++i) {
+    let next = debug_toktype(tokens[i].type);
+    if ((line + ' ' + next).length > 70) {
+      s += line + '\n';
+      line = ' '.repeat(7) + next;
+    } else {
+      line += ' ' + next;
+    }
+  }
+  s += line;
+  return s;
+}
 function formatAst(ast) {
   // If you have no prettier installed then ignore this step. It's not crucial.
   // node_modules/.bin/prettier --no-bracket-spacing  --print-width 180 --single-quote --trailing-comma all --write <dir>
+
+  // Note: inspect is faster than JSON.stringify, though the prettier step itself is dreadfully slow
   return prettierFormat('(' + util.inspect(ast, false, null) + ')', {
+    parser:'babel',
     printWidth: 180,
     tabWidth: 2,
     useTabs: false,
@@ -627,121 +507,100 @@ function formatAst(ast) {
     singleQuote: true,
     trailingComma: 'all',
     bracketSpacing: false,
-    parser: 'babylon',
   }).replace(/(?:^;?\(?)|(?:\)[\s\n]*$)/g, '');
 }
-function formatTokens(tokens) {
-  return 'tokens: [$' +
-    tokens
-    .slice(0, -1)
-    .map(o => debug_toktype(o.type))
-    .join(', $') +
-    '],';
+
+const INPUT_HEADER = '\n## Input\n';
+const INPUT_START = '\n`````js\n';
+const INPUT_END = '\n`````\n';
+function parseTestFile(data, file) {
+  // find the input
+  let inputOffset = data.indexOf(INPUT_HEADER);
+  ASSERT(inputOffset >= 0, 'should have an input header', file);
+  let start = data.indexOf(INPUT_START, inputOffset);
+  ASSERT(start >= 0, 'Should have the start of a test case', file);
+  let end = data.indexOf(INPUT_END, inputOffset);
+  ASSERT(end >= 0, 'Should have the end of a test case', file);
+
+  // Find the parameters between input header and START
+  let options = data
+  .slice(inputOffset + INPUT_HEADER.length, start)
+  .split('\n')
+  .filter(s => s.trim()[0] === '-') // Only dash-lists in this position should be for parameters
+  .reduce((obj, s) => {
+    s = s.trim();
+    // Each line should be ``- `name = value` ``
+    ASSERT(s[0] === '-', 'expecting whitespace and a list of options between input header and start', file, s);
+    ASSERT(s[2] === '`' && s.slice(-1) === '`', 'backtick quote the contents', file, s, s[2], s.slice(-1));
+    let [k, is, ...v] = s.slice(2, -1).split(' ');
+    ASSERT(is === '=', 'key=value', file, s);
+    v = v.join(' ');
+    obj[k] = v;
+    return obj;
+  }, {});
+
+  // Find the test case between START and END
+  let input = data.slice(start + INPUT_START.length, end);
+
+  return {options, input};
 }
 
-if (TEST262) LOG('Running test262 provided tests instead');
-if (SKIP_TO) LOG('Warning: Skipping the first', SKIP_TO, 'tests');
+const OUTPUT_HEADER = '\n## Output\n';
+const OUTPUT_HEADER_SLOPPY = '\n### Sloppy mode\n';
+const OUTPUT_HEADER_STRICT = '\n### Strict mode\n';
+const OUTPUT_HEADER_MODULE = '\n### Module goal\n';
+const OUTPUT_HEADER_WEB = '\n### Web compat mode\n';
+const OUTPUT_CODE = '\n`````\n';
+function generateOutputBlock(currentOutput, sloppyOutput, strictOutput, moduleOutput, webOutput) {
+  // Replace the whole output block with the current results. We then compare the old to the new and write if different.
+  // Note: The file may not have output yet
+  let outputIndex = currentOutput.indexOf(OUTPUT_HEADER);
+  if (outputIndex < 0) outputIndex = currentOutput.length;
 
-let pass = 0;
-let fail = 0;
-let crash = 0;
-let testi = 0;
-let testj = 0;
-let skips = 0;
-let completed = false;
+  return ''+
+    currentOutput.slice(0, outputIndex) +
+    OUTPUT_HEADER + '\n' +
+    '_Note: the whole output block is auto-generated. Manual changes will be overwritten!_\n\n' +
+    'Below follow outputs in four parsing modes: sloppy mode, strict mode script goal, module goal, web compat mode (always sloppy).\n\n' +
+    'Note that the output parts are auto-generated by the test runner to reflect actual result.\n' +
+    OUTPUT_HEADER_SLOPPY + '\n' +
+    'Parsed with script goal and as if the code did not start with strict mode header.\n' +
+    OUTPUT_CODE + sloppyOutput + OUTPUT_CODE +
+    OUTPUT_HEADER_STRICT + '\n' +
+    'Parsed with script goal but as if it was starting with `"use strict"` at the top.\n' +
+    (strictOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_CODE + strictOutput) + OUTPUT_CODE) +
+    '\n' +
+    OUTPUT_HEADER_MODULE + '\n' +
+    'Parsed with the module goal.\n' +
+    (moduleOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : moduleOutput === strictOutput ? '\n_Output same as strict mode._' : (OUTPUT_CODE + moduleOutput + OUTPUT_CODE)) +
+    '\n' +
+    OUTPUT_HEADER_WEB + '\n' +
+    'Parsed in sloppy script mode but with the web compat flag enabled.\n' +
+    (webOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_CODE + webOutput + OUTPUT_CODE)) +
+    '\n' +
+  '';
+}
 
-let parsers = [];
-const start = async () => {
-  let parserPromises = [
-    async () => {
-      let tok = await import(path.join(dirname, '../src/zetokenizer.mjs'));
-      let par = await import(path.join(dirname, '../src/zeparser.mjs'));
-      // Make sure the dev version of the parser is tested first
-      parsers.unshift({
-        parser: {
-          tok,
-          par,
-          parse(...args){ return par.default(...args); }
-        },
-        hasAst: true,
-        desc: 'dev build',
-      });
-    },
-    async () => {
-      // node --experimental-modules cli/build.mjs
-      // TODO: should I just run that by default first?
-      try {
-        let par = await import(path.join(dirname, '../build/build_w_ast.js'));
-        parsers.push({
-          parser: {par, parse(...args){ return par.default.default(...args); }},
-          hasAst: true,
-          desc: 'prod build [ast:yes]'
-        });
-      } catch(e) {
-        LOG('Ignoring prod build test; file could not be loaded');
-      }
-    },
-    async () => {
-      // node --experimental-modules cli/build.mjs
-      // TODO: should I just run that by default first?
-      try {
-        let par = await import(path.join(dirname, '../build/build_no_ast.js'));
-        parsers.push({
-          parser: {par, parse(...args){ return par.default.default(...args); }},
-          hasAst: false,
-          desc: 'prod build [ast:no]'
-        });
-      } catch(e) {
-        LOG('Ignoring prod build test; file could not be loaded');
-      }
-    },
-  ].slice(0, SKIP_BUILDS ? 1 : 3).map(f => f());
+console.time('$$ Whole test run');
 
-  await Promise.all([
-    ...parserPromises,
+let files = [];
+if (INPUT_OVERRIDE) {
+  LOG('Using override input and only testing that...');
+  if (!a && !b && !c && !d) LOG('Sloppy mode implied (override with --strict --module or --web)');
+  LOG('=============================================\n');
+} else {
+  console.time('$$ Test search discovery time');
+  getTestFiles(path.join(dirname, 'testcases/parser'), '', files, true);
+  console.timeEnd('$$ Test search discovery time');
+  console.log('Read all test files, gathered', files.length, 'files');
 
-    (async () => { try { ({format: prettierFormat} = (await import('prettier')).default); } catch(e) {} })(),
-    (async () => process.argv.includes('-b') ? ({parse: babelParse} = (await import('@babel/parser')).default) : {})(),
+  files = files.filter(f => f.indexOf('test262') >= 0 === TEST262);
+}
 
-    ...files.map(async path => {
-      if (INPUT_OVERRIDE) return;
-
-      let moduleExports = (await import(path)).default;
-
-      let before = cases.length;
-      function describe(desc, callback) {
-        descStack.push(desc);
-        callback();
-        descStack.pop();
-      }
-      function test(desc, obj) {
-        return cases.push({odesc: desc, desc: descStack.join(' \u2B9E ') + ' \u2B8A ' + BOLD + desc + RESET + ' \u2B88', from: path, obj});
-      }
-      test.pass = (desc, obj) => test(desc, {ast: true, tokens: true, ...obj});
-      test.fail = (desc, obj) => test(desc, {throws: true, ...obj});
-      test.fail_strict = (desc, obj) => test(desc, {throws: true, SLOPPY_SCRIPT:{ast:true,tokens:true}, ...obj});
-      moduleExports(
-        describe,
-        test,
-      );
-      LOG('Added', cases.length-before,' tests from', path);
-    }),
-  ]);
-
-  try {
-    parsers.forEach(({parser, hasAst, desc}, i) => {
-      // LOG('----->', parser, hasAst, desc);
-      checkAST = hasAst;
-      parserDesc = (parsers.length ? '##' + desc : '') + '## ' + desc;
-      all(parser, cases);
-    });
-    completed = true;
-  } finally {
-    LOG(`
-    #####
-    ${completed?'':RED + 'INCOMPLETE! ' + RESET}passed: ${pass}, ${crash?(STOP_AFTER_FAIL?'':BLINK)+RED:''}crashed: ${crash}${crash?RESET:''}, ${(fail - crash)?RED:''}failed: ${fail - crash}${(fail - crash)?RESET:''}, skipped: ${skips}
-    `);
-  }
-};
-
-start().then(() => LOG('done')).catch(e => LOG('crash:', e));
+if (AUTO_GENERATE) {
+  gen();
+} else if (INPUT_OVERRIDE) {
+  cli();
+} else {
+  main();
+}

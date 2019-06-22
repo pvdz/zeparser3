@@ -1,0 +1,33 @@
+// super properties are "simple assignment type" (https://tc39.github.io/ecma262/#sec-static-semantics-static-semantics-assignmenttargettype)
+// either a property (ident/computed) or a direct call
+// cannot delete on super (but that's a runtime error, I guess to distinguish between `super.foo` and `super.foo.bar`)
+// super() cannot appear in any "method" or function
+// super cannot appear in the args or body of a function expr/decl/gen (https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors)
+// (async/sync) generator methods and functions cannot have super references (https://tc39.github.io/ecma262/#sec-generator-function-definitions-static-semantics-early-errors)
+// arrows; super() can appear inside constructor, super.foo can appear in constructor and class/object methods
+// https://tc39.github.io/ecma262/#sec-scripts-static-semantics-early-errors
+// > It is a Syntax Error if StatementList Contains super unless the source code containing super is eval code that is being processed by a direct eval. Additional early error rules for  super within direct eval are defined in 18.2.1.1.
+// (toplevel statements cannot contains super)
+// https://tc39.github.io/ecma262/#sec-module-semantics-static-semantics-early-errors
+// > It is a Syntax Error if ModuleItemList Contains super.
+// (toplevel statements cannot contain super)
+// `super()` (but no mention about `super.foo`) in a class that does not extend is a syntax error (https://tc39.github.io/ecma262/#sec-class-definitions-static-semantics-early-errors)
+// can never `super()` in non-constructor methods
+// can never `super()` in static methods
+// https://tc39.github.io/ecma262/#sec-object-initializer-static-semantics-early-errors
+// > It is a Syntax Error if HasDirectSuper of MethodDefinition is true.
+// (cannot super() in object literal methods)
+// TODO
+// function f(){super}
+// function super(){}
+// function f(super){}
+//
+// class A { constructor(){ super } }
+// class A { constructor(){ super(); } }
+// class A { constructor(super){ } }
+// class A { constructor(x=super()){ } }
+//
+// class A { f(){ super } }
+// class A { f(){ super(); } }
+// class A { f(super){ } }
+// class A { f(x=super()){ } }

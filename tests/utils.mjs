@@ -11,6 +11,7 @@ let WEB_COMPAT_ALWAYS = 16;
 let WEB_COMPAT_NEVER = 32;
 
 import util from 'util';
+import fs from 'fs';
 
 const BOLD = '\x1b[;1;1m';
 const BLINK = '\x1b[;5;1m';
@@ -78,6 +79,21 @@ function toPrint(s) {
   return s;
 }
 
+function getTestFiles(path, file, files, silent, dirsToo) {
+  let combo = path + file;
+  if (!fs.statSync(combo).isFile()) {
+    if (!silent) LOG('getTestFiles dir:', path + file);
+    fs.readdirSync(combo + '/').forEach(s => getTestFiles(combo + '/', s, files, silent, dirsToo));
+    if (dirsToo) files.push(combo);
+  } else {
+    if (combo.slice(-3) === '.md' && combo.slice(-'README.md'.length) !== 'README.md') {
+      if (!silent) LOG('getTestFiles file:', path + file);
+      files.push(combo);
+    }
+  }
+}
+
+
 //export {
 export {
   PASS,
@@ -93,6 +109,7 @@ export {
   WEB_COMPAT_NEVER,
 
   ASSERT,
+  getTestFiles,
   _LOG,
   LOG,
   toPrint,

@@ -1,0 +1,5 @@
+// duplicate keys = error
+// TODO: can't bind the same var twice in the same scope
+// TODO: can't bind reserved names (etc), both as idents and destructs
+// TODO: mix obj and arr destructurings
+// TODO: rest: destruct {a, ...b}

@@ -21,22 +21,20 @@ It's a burden in some ways and nice in others. A prod build would not have any m
 ## Usage
 
 ```
-# Tokenizer tests (broken at the moment):
-./tests/zetokenizer.spec.mjs
-
-# Tokenizer fuzz testing (broken atm)
-./tests/fuzz_tokens.mjs
-
-# Parser tests (this is the main test runner)
-./tests/zeparser.spec.js
+# Run entire parser test suite and update any changes inline
+./tests/zeparser.spec.js -u
 node --experimental-modules tests/zeparser.spec.mjs
+```
 
+See [`tests/testcases/parser/README.md`](./tests/testcases/parser/README.md) for details on test cases.
+
+```
 # Show help
 ./tests/zeparser.spec.js -?
 node --experimental-modules tests/zeparser.spec.mjs --help
 
-# Run all tests and do NOT stop on failures
-./tests/zeparser.spec.js -F
+# Run all tests and stop on first failure
+./tests/zeparser.spec.js -f
 node --experimental-modules tests/zeparser.spec.mjs -F
 
 # Test a particular input
@@ -44,8 +42,9 @@ node --experimental-modules tests/zeparser.spec.mjs -F
 node --experimental-modules tests/zeparser.spec.mjs -i "some.input()"
 
 # Find out which tests execute a particular code branch in the parser
-# Add `HIT()` to any branch you want to know about and this option
-# will print all the test cases that called it. 
+# Add `HIT()` to any part of the code in src
+# Running the following will print all the test cases that called it
+# Works together with `-i`, too
 ./tests/zeparser.spec.js -s
 node --experimental-modules tests/zeparser.spec.mjs -s
 
@@ -56,9 +55,6 @@ node --experimental-modules tests/zeparser.spec.mjs -q
 # Run test262 tests (needs setup)
 ./tests/zeparser.spec.js -t
 node --experimental-modules tests/zeparser.spec.mjs -t
-
-# Generated combinator non-crash tests (broken)
-./tests/generated.js
 ```
 
 The REPL needs a very new browser due to es module syntax. You can find the REPL in [`tests/web/repl.html`](./tests/web/repl.js), github link: https://pvdz.github.io/zeparser3/tests/web/repl.html
@@ -131,4 +127,3 @@ The parser itself supports ES5-ES9 but is not production ready;
 - Find out what the memory footprint is like, how much can it parse before bailing
 - Automatic test case updating (inline)
 - Improved error messages with proper token locations and good semantics etc
-- At error location in tests with `at: '         ^'` pointing to the code: field above
