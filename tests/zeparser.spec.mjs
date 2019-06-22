@@ -62,6 +62,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
 }
 
 if (AUTO_UPDATE && AUTO_GENERATE) throw new Error('Cannot use auto update and auto generate together');
+if (AUTO_UPDATE && (a || b || c || d)) throw new Error('Cannot use --sloppy (etc) together with -u');
 
 import fs from 'fs';
 import path from 'path';
@@ -174,6 +175,9 @@ async function coreTest(input, zeparser, goal, options) {
     );
   } catch (_e) {
     e = _e.message;
+    if (INPUT_OVERRIDE || TARGET_FILE) {
+      console.log(_e.stack);
+    }
   }
 
   if (SEARCH) {
@@ -218,7 +222,7 @@ async function postProcessResult({r, e, tok}, testVariant, file) {
     if (tok) {
       let context = tok.getErrorContext();
       if (context.slice(-1) === '\n') context = context.slice(0, -1);
-      context = context.split('\n').map(s => s.trimRight()).join('\n');
+      context = context.split('\n').map(s => s.trimRight()).join('\n'); // The error snippet can contain trailing whitespace
       if (INPUT_OVERRIDE) context = '```\n' + context + '\n```\n';
       e += '\n\n' + context;
     }
@@ -278,7 +282,7 @@ async function runTest(list, zeparser, testVariant) {
 }
 async function runTests(list, zeparser) {
   console.time('$$ Total runtime');
-  if (!INPUT_OVERRIDE) console.log('Now actually running all', list.length, 'test cases... 4x! Single threaded! This may take some time (~2min on my machine)');
+  if (!INPUT_OVERRIDE) console.log('Now actually running all', list.length, 'test cases... 4x! Single threaded! This may take some time (~20s on my machine)');
   list.forEach(obj => obj.newoutput = {});
   if (RUN_SLOPPY) await runTest(list, zeparser, TEST_SLOPPY);
   if (RUN_STRICT) await runTest(list, zeparser, TEST_STRICT);
