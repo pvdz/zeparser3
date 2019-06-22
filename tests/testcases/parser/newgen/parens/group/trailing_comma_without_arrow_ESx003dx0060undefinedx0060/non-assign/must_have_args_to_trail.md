@@ -31,7 +31,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Assertion fail: only support v6~9 right now 
+  Expected to parse a value
+
+(,)
+ ^------- error
 `````
 
 ### Strict mode

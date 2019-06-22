@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Tokenizer error: Regex: Encountered unescaped closing curly `}` while not parsing a quantifier
+  Tokenizer error: Regex: Regex had syntax that is only valid with the u-flag and flag was in fact not present
 
 /\p{Hex}\P{Hex}/
 ^------- error

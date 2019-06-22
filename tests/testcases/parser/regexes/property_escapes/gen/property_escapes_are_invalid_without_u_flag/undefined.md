@@ -28,7 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Assertion fail: only support v6~9 right now 
+  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N 1:2 curc=123 `{`#}
+
+p{x}b/
+ ^------- error
 `````
 
 ### Strict mode

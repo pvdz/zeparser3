@@ -556,8 +556,16 @@ function parseTestFile(data, file) {
     ASSERT(s[2] === '`' && s.slice(-1) === '`', 'backtick quote the contents', file, s, s[2], s.slice(-1));
     let [k, is, ...v] = s.slice(3, -1).split(' ');
     ASSERT(is === '=', 'key=value', file, s);
-    v = v.join(' ');
-    obj[k] = v;
+
+    let value = v.join(' ');
+    if (String(parseFloat(value)) === value) value = parseFloat(v);
+    else if (value === 'true') value = true;
+    else if (value === 'false') value = false;
+    else if (value === 'undefined') value = undefined;
+    else if (value === 'null') value = null;
+
+    obj[k] = value;
+
     return obj;
   }, {});
 

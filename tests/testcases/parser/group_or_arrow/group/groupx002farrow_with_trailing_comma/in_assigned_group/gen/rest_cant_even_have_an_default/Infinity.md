@@ -28,7 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Assertion fail: only support v6~9 right now 
+  The rest argument was not destructible as it must be last and can not have a trailing comma
+
+(...a = x,) = x
+         ^------- error
 `````
 
 ### Strict mode

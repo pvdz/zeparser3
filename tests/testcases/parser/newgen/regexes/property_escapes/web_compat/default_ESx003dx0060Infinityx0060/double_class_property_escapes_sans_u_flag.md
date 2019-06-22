@@ -30,7 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Assertion fail: only support v6~9 right now 
+  Tokenizer error: Regex: Regex had syntax that is only valid with the u-flag and flag was in fact not present
+
+/[\p{Hex}\P{Hex}]/
+^------- error
 `````
 
 ### Strict mode
@@ -49,4 +52,34 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+ast: {
+  type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
+  body: [
+    {
+      type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
+      expression: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        value: null,
+        regex: { pattern: '[\\p{Hex}\\P{Hex}]', flags: '' },
+        raw: '/[\\p{Hex}\\P{Hex}]/'
+      }
+    }
+  ]
+}
+
+tokens (3x):
+       REGEX ASI
+`````
+

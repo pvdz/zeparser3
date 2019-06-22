@@ -31,7 +31,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Assertion fail: only support v6~9 right now 
+  Group contained a value that must destruct but this was not an arrow so it is invalid
+
+(a = b,)
+       ^------- error
 `````
 
 ### Strict mode
