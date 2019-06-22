@@ -29,36 +29,132 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 35 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 35 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 34 },
+          source: ''
+        },
         left: {
           type: 'ArrayPattern',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 29 },
+            source: ''
+          },
           elements: [
-            { type: 'Identifier', name: 'foo' },
+            {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 1 },
+                end: { line: 1, col: 4 },
+                source: ''
+              },
+              name: 'foo'
+            },
             {
               type: 'ArrayPattern',
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 18 },
+                source: ''
+              },
               elements: [
-                { type: 'Identifier', name: 'x' },
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 7 },
+                    end: { line: 1, col: 8 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 {
                   type: 'AssignmentPattern',
-                  left: { type: 'Identifier', name: 'y' },
-                  right: { type: 'Literal', value: 20, raw: '20' }
+                  loc: {
+                    start: { line: 1, col: 6 },
+                    end: { line: 1, col: 15 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 9 },
+                      end: { line: 1, col: 11 },
+                      source: ''
+                    },
+                    name: 'y'
+                  },
+                  right: {
+                    type: 'Literal',
+                    loc: {
+                      start: { line: 1, col: 13 },
+                      end: { line: 1, col: 13 },
+                      source: ''
+                    },
+                    value: 20,
+                    raw: '20'
+                  }
                 },
-                { type: 'Identifier', name: 'z' }
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 16 },
+                    end: { line: 1, col: 17 },
+                    source: ''
+                  },
+                  name: 'z'
+                }
               ]
             },
             {
               type: 'AssignmentPattern',
-              left: { type: 'Identifier', name: 'bar' },
-              right: { type: 'Identifier', name: 'B' }
+              loc: {
+                start: { line: 1, col: 0 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 24 },
+                  source: ''
+                },
+                name: 'bar'
+              },
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 26 },
+                  end: { line: 1, col: 27 },
+                  source: ''
+                },
+                name: 'B'
+              }
             }
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'arr' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 31 },
+            end: { line: 1, col: 34 },
+            source: ''
+          },
+          name: 'arr'
+        }
       }
     }
   ]

@@ -29,18 +29,79 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 21 },
+        source: ''
+      },
       expression: {
         type: 'SequenceExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 19 },
+          source: ''
+        },
         expressions: [
-          { type: 'Identifier', name: 'a' },
-          { type: 'Literal', value: 1, raw: '1' },
-          { type: 'Literal', value: 'c', raw: '"c"' },
-          { type: 'Identifier', name: 'd' },
-          { type: 'Identifier', name: 'e' },
-          { type: 'Identifier', name: 'f' }
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 2 },
+              source: ''
+            },
+            name: 'a'
+          },
+          {
+            type: 'Literal',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            value: 1,
+            raw: '1'
+          },
+          {
+            type: 'Literal',
+            loc: {
+              start: { line: 1, col: 7 },
+              end: { line: 1, col: 7 },
+              source: ''
+            },
+            value: 'c',
+            raw: '"c"'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
+            name: 'd'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
+            name: 'e'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 18 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
+            name: 'f'
+          }
         ]
       }
     }

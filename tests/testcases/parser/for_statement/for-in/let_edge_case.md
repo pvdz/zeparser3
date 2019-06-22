@@ -29,14 +29,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
   body: [
     {
       type: 'ForInStatement',
-      left: { type: 'Identifier', name: 'in' },
-      right: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
+      left: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'in'
+      },
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 12 },
+          end: { line: 1, col: 13 },
+          source: ''
+        },
+        name: 'x'
+      },
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'y' }
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 16 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
+          name: 'y'
+        }
       }
     }
   ]

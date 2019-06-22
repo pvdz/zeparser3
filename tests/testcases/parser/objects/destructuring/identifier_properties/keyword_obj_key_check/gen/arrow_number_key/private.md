@@ -29,22 +29,60 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 24 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 24 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
         params: [
           {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 15 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Literal', value: 500, raw: '500' },
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                key: {
+                  type: 'Literal',
+                  loc: {
+                    start: { line: 1, col: 2 },
+                    end: { line: 1, col: 7 },
+                    source: ''
+                  },
+                  value: 500,
+                  raw: '500'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'private' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 7 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'private'
+                },
                 shorthand: false
               }
             ]
@@ -54,7 +92,16 @@ ast: {
         generator: false,
         async: false,
         expression: true,
-        body: { type: 'Literal', value: null, raw: 'null' }
+        body: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 20 },
+            end: { line: 1, col: 24 },
+            source: ''
+          },
+          value: null,
+          raw: 'null'
+        }
       }
     }
   ]

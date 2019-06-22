@@ -30,7 +30,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  body: [ { type: 'DebuggerStatement' }, { type: 'DebuggerStatement' } ]
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 9 } },
+  body: [
+    {
+      type: 'DebuggerStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 0 },
+        source: ''
+      }
+    },
+    {
+      type: 'DebuggerStatement',
+      loc: {
+        start: { line: 2, col: 0 },
+        end: { line: 2, col: 9 },
+        source: ''
+      }
+    }
+  ]
 }
 
 tokens (5x):

@@ -49,17 +49,51 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
   body: [
     {
       type: 'ExportDefaultDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       declaration: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 22 },
+          source: ''
+        },
         left: {
           type: 'ArrayPattern',
-          elements: [ { type: 'Identifier', name: 'x' } ]
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
+          elements: [
+            {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 16 },
+                end: { line: 1, col: 17 },
+                source: ''
+              },
+              name: 'x'
+            }
+          ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'y' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 21 },
+            end: { line: 1, col: 22 },
+            source: ''
+          },
+          name: 'y'
+        }
       }
     }
   ]

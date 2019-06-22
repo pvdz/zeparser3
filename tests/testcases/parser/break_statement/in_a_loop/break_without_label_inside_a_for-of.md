@@ -29,13 +29,43 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ForOfStatement',
-      left: { type: 'Identifier', name: 'x' },
-      right: { type: 'Identifier', name: 'y' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
+      left: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 7 },
+          source: ''
+        },
+        name: 'x'
+      },
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
+        name: 'y'
+      },
       await: false,
-      body: { type: 'BreakStatement', label: null }
+      body: {
+        type: 'BreakStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        label: null
+      }
     }
   ]
 }

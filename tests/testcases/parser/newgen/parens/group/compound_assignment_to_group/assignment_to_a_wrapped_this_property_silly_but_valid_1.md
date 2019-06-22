@@ -29,19 +29,59 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 14 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 14 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 13 },
+          source: ''
+        },
         left: {
           type: 'MemberExpression',
-          object: { type: 'ThisExpression' },
-          property: { type: 'Identifier', name: 'a' },
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 7 },
+            source: ''
+          },
+          object: {
+            type: 'ThisExpression',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 5 },
+              source: ''
+            }
+          },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 6 },
+              source: ''
+            },
+            name: 'a'
+          },
           computed: false
         },
         operator: '+=',
-        right: { type: 'Literal', value: 1, raw: '1' }
+        right: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 12 },
+            source: ''
+          },
+          value: 1,
+          raw: '1'
+        }
       }
     }
   ]

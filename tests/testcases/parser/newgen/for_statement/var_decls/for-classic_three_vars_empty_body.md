@@ -29,33 +29,90 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       init: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 14 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'a' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 10 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'a'
+            },
             init: null
           },
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'b' },
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 11 },
+                source: ''
+              },
+              name: 'b'
+            },
             init: null
           },
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'c' },
+            loc: {
+              start: { line: 1, col: 13 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 13 },
+                end: { line: 1, col: 13 },
+                source: ''
+              },
+              name: 'c'
+            },
             init: null
           }
         ]
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 17 },
+          end: { line: 1, col: 18 },
+          source: ''
+        }
+      }
     }
   ]
 }

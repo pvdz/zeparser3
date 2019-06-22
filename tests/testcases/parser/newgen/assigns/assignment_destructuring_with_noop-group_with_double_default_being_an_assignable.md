@@ -29,31 +29,90 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 17 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 16 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 13 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 11 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 4 },
+                  source: ''
+                },
+                name: 'a'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
                 type: 'AssignmentPattern',
-                left: { type: 'Identifier', name: 'b' },
-                right: { type: 'Identifier', name: 'c' }
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 11 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 5 },
+                    end: { line: 1, col: 6 },
+                    source: ''
+                  },
+                  name: 'b'
+                },
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
+                  name: 'c'
+                }
               },
               shorthand: false
             }
           ]
         },
         operator: '=',
-        right: { type: 'Literal', value: 1, raw: '1' }
+        right: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
+          value: 1,
+          raw: '1'
+        }
       }
     }
   ]

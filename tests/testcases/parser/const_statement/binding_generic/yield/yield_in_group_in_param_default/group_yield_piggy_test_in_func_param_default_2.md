@@ -31,34 +31,108 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 47 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 47 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 47 },
+          source: ''
+        },
         body: [
           {
             type: 'FunctionDeclaration',
+            loc: {
+              start: { line: 1, col: 18 },
+              end: { line: 1, col: 46 },
+              source: ''
+            },
             generator: false,
             async: false,
-            id: { type: 'Identifier', name: 'g' },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 27 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              name: 'g'
+            },
             params: [
               {
                 type: 'AssignmentPattern',
-                left: { type: 'Identifier', name: 'x' },
+                loc: {
+                  start: { line: 1, col: 29 },
+                  end: { line: 1, col: 40 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 29 },
+                    end: { line: 1, col: 29 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 right: {
                   type: 'AssignmentExpression',
-                  left: { type: 'Identifier', name: 'yield' },
+                  loc: {
+                    start: { line: 1, col: 31 },
+                    end: { line: 1, col: 40 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 32 },
+                      end: { line: 1, col: 37 },
+                      source: ''
+                    },
+                    name: 'yield'
+                  },
                   operator: '=',
-                  right: { type: 'Identifier', name: 'y' }
+                  right: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 39 },
+                      end: { line: 1, col: 40 },
+                      source: ''
+                    },
+                    name: 'y'
+                  }
                 }
               }
             ],
-            body: { type: 'BlockStatement', body: [] }
+            body: {
+              type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 41 },
+                end: { line: 1, col: 46 },
+                source: ''
+              },
+              body: []
+            }
           }
         ]
       }

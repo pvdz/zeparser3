@@ -31,18 +31,58 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 15 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 15 },
+        source: ''
+      },
       expression: {
         type: 'ConditionalExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
         test: {
           type: 'NewExpression',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 6 },
+            source: ''
+          },
           arguments: [],
-          callee: { type: 'Identifier', name: 'a' }
+          callee: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 6 },
+              source: ''
+            },
+            name: 'a'
+          }
         },
-        consequent: { type: 'Identifier', name: 'b' },
-        alternate: { type: 'Identifier', name: 'c' }
+        consequent: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 8 },
+            end: { line: 1, col: 10 },
+            source: ''
+          },
+          name: 'b'
+        },
+        alternate: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
+          name: 'c'
+        }
       }
     }
   ]

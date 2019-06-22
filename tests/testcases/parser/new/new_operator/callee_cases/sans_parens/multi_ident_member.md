@@ -29,26 +29,84 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 11 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 11 },
+        source: ''
+      },
       expression: {
         type: 'NewExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         arguments: [],
         callee: {
           type: 'MemberExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 11 },
+            source: ''
+          },
           object: {
             type: 'MemberExpression',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 9 },
+              source: ''
+            },
             object: {
               type: 'MemberExpression',
-              object: { type: 'Identifier', name: 'a' },
-              property: { type: 'Identifier', name: 'b' },
+              loc: {
+                start: { line: 1, col: 4 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              object: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 5 },
+                  source: ''
+                },
+                name: 'a'
+              },
+              property: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 6 },
+                  source: ''
+                },
+                name: 'b'
+              },
               computed: false
             },
-            property: { type: 'Identifier', name: 'c' },
+            property: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 8 },
+                end: { line: 1, col: 8 },
+                source: ''
+              },
+              name: 'c'
+            },
             computed: false
           },
-          property: { type: 'Identifier', name: 'd' },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 10 },
+              source: ''
+            },
+            name: 'd'
+          },
           computed: false
         }
       }

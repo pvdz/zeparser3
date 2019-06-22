@@ -31,14 +31,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 9 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 9 },
+        source: ''
+      },
       expression: {
         type: 'BinaryExpression',
-        left: { type: 'Literal', value: true, raw: 'true' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        left: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 5 },
+            source: ''
+          },
+          value: true,
+          raw: 'true'
+        },
         operator: '**',
-        right: { type: 'Identifier', name: 'a' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 8 },
+            end: { line: 1, col: 9 },
+            source: ''
+          },
+          name: 'a'
+        }
       }
     }
   ]

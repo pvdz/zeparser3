@@ -29,23 +29,68 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 15 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 15 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'x' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 'x'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'arguments' },
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                name: 'arguments'
+              },
               kind: 'init',
               method: false,
               computed: false,
-              value: { type: 'Identifier', name: 'arguments' },
+              value: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                name: 'arguments'
+              },
               shorthand: true
             }
           ]

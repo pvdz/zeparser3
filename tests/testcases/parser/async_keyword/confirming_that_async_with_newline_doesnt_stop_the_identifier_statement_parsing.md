@@ -30,13 +30,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 5 } },
   body: [
     {
       type: 'LabeledStatement',
-      label: { type: 'Identifier', name: 'async' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 5 },
+        source: ''
+      },
+      label: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 2, col: 0 },
+          source: ''
+        },
+        name: 'async'
+      },
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'foo' }
+        loc: {
+          start: { line: 2, col: 2 },
+          end: { line: 2, col: 5 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 2, col: 2 },
+            end: { line: 2, col: 5 },
+            source: ''
+          },
+          name: 'foo'
+        }
       }
     }
   ]

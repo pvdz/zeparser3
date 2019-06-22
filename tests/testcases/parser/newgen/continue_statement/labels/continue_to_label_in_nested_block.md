@@ -29,19 +29,65 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 35 } },
   body: [
     {
       type: 'LabeledStatement',
-      label: { type: 'Identifier', name: 'foo' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 35 },
+        source: ''
+      },
+      label: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 3 },
+          source: ''
+        },
+        name: 'foo'
+      },
       body: {
         type: 'WhileStatement',
-        test: { type: 'Literal', value: true, raw: 'true' },
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 35 },
+          source: ''
+        },
+        test: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
+          value: true,
+          raw: 'true'
+        },
         body: {
           type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 18 },
+            end: { line: 1, col: 35 },
+            source: ''
+          },
           body: [
             {
               type: 'ContinueStatement',
-              label: { type: 'Identifier', name: 'foo' }
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 34 },
+                source: ''
+              },
+              label: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 29 },
+                  end: { line: 1, col: 29 },
+                  source: ''
+                },
+                name: 'foo'
+              }
             }
           ]
         }

@@ -48,32 +48,103 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 42 } },
   body: [
     {
       type: 'TryStatement',
-      block: { type: 'BlockStatement', body: [] },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 42 },
+        source: ''
+      },
+      block: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 7 },
+          source: ''
+        },
+        body: []
+      },
       handler: {
         type: 'CatchClause',
-        param: { type: 'Identifier', name: 'e' },
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 1, col: 42 },
+          source: ''
+        },
+        param: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 14 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          name: 'e'
+        },
         body: {
           type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 17 },
+            end: { line: 1, col: 42 },
+            source: ''
+          },
           body: [
             {
               type: 'ForOfStatement',
+              loc: {
+                start: { line: 1, col: 19 },
+                end: { line: 1, col: 41 },
+                source: ''
+              },
               left: {
                 type: 'VariableDeclaration',
+                loc: {
+                  start: { line: 1, col: 30 },
+                  end: { line: 1, col: 32 },
+                  source: ''
+                },
                 kind: 'const',
                 declarations: [
                   {
                     type: 'VariableDeclarator',
-                    id: { type: 'Identifier', name: 'e' },
+                    loc: {
+                      start: { line: 1, col: 30 },
+                      end: { line: 1, col: 32 },
+                      source: ''
+                    },
+                    id: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 30 },
+                        end: { line: 1, col: 30 },
+                        source: ''
+                      },
+                      name: 'e'
+                    },
                     init: null
                   }
                 ]
               },
-              right: { type: 'Identifier', name: 'y' },
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 35 },
+                  end: { line: 1, col: 36 },
+                  source: ''
+                },
+                name: 'y'
+              },
               await: false,
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 38 },
+                  end: { line: 1, col: 41 },
+                  source: ''
+                },
+                body: []
+              }
             }
           ]
         }

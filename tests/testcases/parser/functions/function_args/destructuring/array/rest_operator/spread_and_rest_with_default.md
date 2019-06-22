@@ -29,41 +29,125 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [
         {
           type: 'AssignmentPattern',
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 34 },
+            source: ''
+          },
           left: {
             type: 'ArrayPattern',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
             elements: [
               {
                 type: 'AssignmentPattern',
-                left: { type: 'Identifier', name: 'a' },
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 21 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 13 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 right: {
                   type: 'ArrayExpression',
+                  loc: {
+                    start: { line: 1, col: 15 },
+                    end: { line: 1, col: 21 },
+                    source: ''
+                  },
                   elements: [
                     {
                       type: 'SpreadElement',
-                      argument: { type: 'Identifier', name: 'b' }
+                      loc: {
+                        start: { line: 1, col: 16 },
+                        end: { line: 1, col: 20 },
+                        source: ''
+                      },
+                      argument: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 19 },
+                          end: { line: 1, col: 20 },
+                          source: ''
+                        },
+                        name: 'b'
+                      }
                     }
                   ]
                 }
               },
               {
                 type: 'RestElement',
-                argument: { type: 'Identifier', name: 'c' }
+                loc: {
+                  start: { line: 1, col: 23 },
+                  end: { line: 1, col: 27 },
+                  source: ''
+                },
+                argument: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 26 },
+                    end: { line: 1, col: 27 },
+                    source: ''
+                  },
+                  name: 'c'
+                }
               }
             ]
           },
-          right: { type: 'Identifier', name: 'obj' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 31 },
+              end: { line: 1, col: 34 },
+              source: ''
+            },
+            name: 'obj'
+          }
         }
       ],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 35 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

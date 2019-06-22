@@ -29,18 +29,47 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 32 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
       superClass: null,
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 32 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 31 },
+              source: ''
+            },
             key: {
               type: 'Literal',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 10 },
+                source: ''
+              },
               value: 'prot\\u006ftype',
               raw: '"prot\\u006ftype"'
             },
@@ -49,11 +78,24 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 28 },
+                  end: { line: 1, col: 31 },
+                  source: ''
+                },
+                body: []
+              }
             }
           }
         ]

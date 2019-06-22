@@ -29,34 +29,102 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 54 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 54 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'a' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'a'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 54 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 24 },
+              end: { line: 1, col: 53 },
+              source: ''
+            },
             expression: {
               type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'async' },
+              loc: {
+                start: { line: 1, col: 24 },
+                end: { line: 1, col: 47 },
+                source: ''
+              },
+              callee: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 24 },
+                  end: { line: 1, col: 47 },
+                  source: ''
+                },
+                name: 'async'
+              },
               arguments: [
                 {
                   type: 'AssignmentExpression',
+                  loc: {
+                    start: { line: 1, col: 31 },
+                    end: { line: 1, col: 46 },
+                    source: ''
+                  },
                   left: {
                     type: 'ObjectPattern',
+                    loc: {
+                      start: { line: 1, col: 31 },
+                      end: { line: 1, col: 35 },
+                      source: ''
+                    },
                     properties: [
                       {
                         type: 'Property',
-                        key: { type: 'Identifier', name: 'r' },
+                        loc: {
+                          start: { line: 1, col: 32 },
+                          end: { line: 1, col: 33 },
+                          source: ''
+                        },
+                        key: {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 32 },
+                            end: { line: 1, col: 33 },
+                            source: ''
+                          },
+                          name: 'r'
+                        },
                         kind: 'init',
                         method: false,
                         computed: false,
-                        value: { type: 'Identifier', name: 'r' },
+                        value: {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 32 },
+                            end: { line: 1, col: 33 },
+                            source: ''
+                          },
+                          name: 'r'
+                        },
                         shorthand: true
                       }
                     ]
@@ -64,7 +132,20 @@ ast: {
                   operator: '=',
                   right: {
                     type: 'AwaitExpression',
-                    argument: { type: 'Identifier', name: 'bar' }
+                    loc: {
+                      start: { line: 1, col: 37 },
+                      end: { line: 1, col: 46 },
+                      source: ''
+                    },
+                    argument: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 43 },
+                        end: { line: 1, col: 46 },
+                        source: ''
+                      },
+                      name: 'bar'
+                    }
                   }
                 }
               ]

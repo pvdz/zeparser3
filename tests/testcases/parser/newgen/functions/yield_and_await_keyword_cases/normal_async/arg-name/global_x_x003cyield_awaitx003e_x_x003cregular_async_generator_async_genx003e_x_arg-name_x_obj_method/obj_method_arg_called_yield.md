@@ -29,38 +29,116 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 40 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 40 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'as' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'as'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 40 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 21 },
+              end: { line: 1, col: 39 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'o' },
+              loc: {
+                start: { line: 1, col: 21 },
+                end: { line: 1, col: 39 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 23 },
+                  source: ''
+                },
+                name: 'o'
+              },
               operator: '=',
               right: {
                 type: 'ObjectExpression',
+                loc: {
+                  start: { line: 1, col: 25 },
+                  end: { line: 1, col: 39 },
+                  source: ''
+                },
                 properties: [
                   {
                     type: 'Property',
-                    key: { type: 'Identifier', name: 'f' },
+                    loc: {
+                      start: { line: 1, col: 26 },
+                      end: { line: 1, col: 37 },
+                      source: ''
+                    },
+                    key: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 26 },
+                        end: { line: 1, col: 27 },
+                        source: ''
+                      },
+                      name: 'f'
+                    },
                     kind: 'init',
                     method: true,
                     computed: false,
                     value: {
                       type: 'FunctionExpression',
+                      loc: {
+                        start: { line: 1, col: 26 },
+                        end: { line: 1, col: 37 },
+                        source: ''
+                      },
                       generator: false,
                       async: false,
                       id: null,
-                      params: [ { type: 'Identifier', name: 'yield' } ],
-                      body: { type: 'BlockStatement', body: [] }
+                      params: [
+                        {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 28 },
+                            end: { line: 1, col: 28 },
+                            source: ''
+                          },
+                          name: 'yield'
+                        }
+                      ],
+                      body: {
+                        type: 'BlockStatement',
+                        loc: {
+                          start: { line: 1, col: 35 },
+                          end: { line: 1, col: 37 },
+                          source: ''
+                        },
+                        body: []
+                      }
                     },
                     shorthand: false
                   }

@@ -29,33 +29,104 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 19 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 19 },
+        source: ''
+      },
       expression: {
         type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'async' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 19 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
+          name: 'async'
+        },
         arguments: [
-          { type: 'Identifier', name: 'x' },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 7 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'x'
+          },
           {
             type: 'ObjectExpression',
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 18 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'a' },
+                loc: {
+                  start: { line: 1, col: 11 },
+                  end: { line: 1, col: 17 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 11 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
                 value: {
                   type: 'ObjectExpression',
+                  loc: {
+                    start: { line: 1, col: 14 },
+                    end: { line: 1, col: 17 },
+                    source: ''
+                  },
                   properties: [
                     {
                       type: 'Property',
-                      key: { type: 'Identifier', name: 'x' },
+                      loc: {
+                        start: { line: 1, col: 15 },
+                        end: { line: 1, col: 16 },
+                        source: ''
+                      },
+                      key: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 15 },
+                          end: { line: 1, col: 16 },
+                          source: ''
+                        },
+                        name: 'x'
+                      },
                       kind: 'init',
                       method: false,
                       computed: false,
-                      value: { type: 'Identifier', name: 'x' },
+                      value: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 15 },
+                          end: { line: 1, col: 16 },
+                          source: ''
+                        },
+                        name: 'x'
+                      },
                       shorthand: true
                     }
                   ]

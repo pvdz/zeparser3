@@ -29,30 +29,98 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 52 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 52 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'as' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'as'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 52 },
+          source: ''
+        },
         body: [
           {
             type: 'VariableDeclaration',
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 51 },
+              source: ''
+            },
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                id: { type: 'Identifier', name: 'f' },
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 51 },
+                  source: ''
+                },
+                id: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 20 },
+                    end: { line: 1, col: 20 },
+                    source: ''
+                  },
+                  name: 'f'
+                },
                 init: {
                   type: 'FunctionExpression',
+                  loc: {
+                    start: { line: 1, col: 30 },
+                    end: { line: 1, col: 51 },
+                    source: ''
+                  },
                   generator: false,
                   async: true,
-                  id: { type: 'Identifier', name: 'f' },
-                  params: [ { type: 'Identifier', name: 'yield' } ],
-                  body: { type: 'BlockStatement', body: [] }
+                  id: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 39 },
+                      end: { line: 1, col: 39 },
+                      source: ''
+                    },
+                    name: 'f'
+                  },
+                  params: [
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 41 },
+                        end: { line: 1, col: 41 },
+                        source: ''
+                      },
+                      name: 'yield'
+                    }
+                  ],
+                  body: {
+                    type: 'BlockStatement',
+                    loc: {
+                      start: { line: 1, col: 48 },
+                      end: { line: 1, col: 51 },
+                      source: ''
+                    },
+                    body: []
+                  }
                 }
               }
             ]

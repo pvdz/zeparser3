@@ -29,47 +29,127 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 61 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 61 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'as' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'as'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 61 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 21 },
+              end: { line: 1, col: 60 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'o' },
+              loc: {
+                start: { line: 1, col: 21 },
+                end: { line: 1, col: 60 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 23 },
+                  source: ''
+                },
+                name: 'o'
+              },
               operator: '=',
               right: {
                 type: 'ObjectExpression',
+                loc: {
+                  start: { line: 1, col: 25 },
+                  end: { line: 1, col: 60 },
+                  source: ''
+                },
                 properties: [
                   {
                     type: 'Property',
-                    key: { type: 'Identifier', name: 'f' },
+                    loc: {
+                      start: { line: 1, col: 26 },
+                      end: { line: 1, col: 58 },
+                      source: ''
+                    },
+                    key: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 33 },
+                        end: { line: 1, col: 33 },
+                        source: ''
+                      },
+                      name: 'f'
+                    },
                     kind: 'init',
                     method: true,
                     computed: false,
                     value: {
                       type: 'FunctionExpression',
+                      loc: {
+                        start: { line: 1, col: 26 },
+                        end: { line: 1, col: 58 },
+                        source: ''
+                      },
                       generator: true,
                       async: true,
                       id: null,
                       params: [],
                       body: {
                         type: 'BlockStatement',
+                        loc: {
+                          start: { line: 1, col: 37 },
+                          end: { line: 1, col: 58 },
+                          source: ''
+                        },
                         body: [
                           {
                             type: 'ReturnStatement',
+                            loc: {
+                              start: { line: 1, col: 39 },
+                              end: { line: 1, col: 57 },
+                              source: ''
+                            },
                             argument: {
                               type: 'YieldExpression',
+                              loc: {
+                                start: { line: 1, col: 46 },
+                                end: { line: 1, col: 55 },
+                                source: ''
+                              },
                               delegate: false,
                               argument: {
                                 type: 'Literal',
+                                loc: {
+                                  start: { line: 1, col: 52 },
+                                  end: { line: 1, col: 52 },
+                                  source: ''
+                                },
                                 value: 100,
                                 raw: '100'
                               }

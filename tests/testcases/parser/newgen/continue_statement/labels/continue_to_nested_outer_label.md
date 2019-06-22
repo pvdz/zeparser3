@@ -29,19 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 36 } },
   body: [
     {
       type: 'LabeledStatement',
-      label: { type: 'Identifier', name: 'foo' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 36 },
+        source: ''
+      },
+      label: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 3 },
+          source: ''
+        },
+        name: 'foo'
+      },
       body: {
         type: 'LabeledStatement',
-        label: { type: 'Identifier', name: 'bar' },
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 36 },
+          source: ''
+        },
+        label: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 8 },
+            source: ''
+          },
+          name: 'bar'
+        },
         body: {
           type: 'WhileStatement',
-          test: { type: 'Literal', value: true, raw: 'true' },
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 36 },
+            source: ''
+          },
+          test: {
+            type: 'Literal',
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 21 },
+              source: ''
+            },
+            value: true,
+            raw: 'true'
+          },
           body: {
             type: 'ContinueStatement',
-            label: { type: 'Identifier', name: 'foo' }
+            loc: {
+              start: { line: 1, col: 23 },
+              end: { line: 1, col: 36 },
+              source: ''
+            },
+            label: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 32 },
+                end: { line: 1, col: 32 },
+                source: ''
+              },
+              name: 'foo'
+            }
           }
         }
       }

@@ -29,41 +29,122 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 44 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
       superClass: null,
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 1, col: 44 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Identifier', name: 'constructor' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 43 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 20 },
+                source: ''
+              },
+              name: 'constructor'
+            },
             static: false,
             computed: false,
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 43 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 22 },
+                  end: { line: 1, col: 43 },
+                  source: ''
+                },
                 body: [
                   {
                     type: 'ExpressionStatement',
+                    loc: {
+                      start: { line: 1, col: 25 },
+                      end: { line: 1, col: 42 },
+                      source: ''
+                    },
                     expression: {
                       type: 'AssignmentExpression',
+                      loc: {
+                        start: { line: 1, col: 25 },
+                        end: { line: 1, col: 39 },
+                        source: ''
+                      },
                       left: {
                         type: 'MemberExpression',
-                        object: { type: 'Super' },
-                        property: { type: 'Identifier', name: 'a' },
+                        loc: {
+                          start: { line: 1, col: 26 },
+                          end: { line: 1, col: 33 },
+                          source: ''
+                        },
+                        object: {
+                          type: 'Super',
+                          loc: {
+                            start: { line: 1, col: 26 },
+                            end: { line: 1, col: 31 },
+                            source: ''
+                          }
+                        },
+                        property: {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 32 },
+                            end: { line: 1, col: 32 },
+                            source: ''
+                          },
+                          name: 'a'
+                        },
                         computed: false
                       },
                       operator: '+=',
-                      right: { type: 'Literal', value: 1, raw: '1' }
+                      right: {
+                        type: 'Literal',
+                        loc: {
+                          start: { line: 1, col: 38 },
+                          end: { line: 1, col: 38 },
+                          source: ''
+                        },
+                        value: 1,
+                        raw: '1'
+                      }
                     }
                   }
                 ]

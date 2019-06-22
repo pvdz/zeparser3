@@ -29,20 +29,65 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 17 },
+        source: ''
+      },
       expression: {
         type: 'CallExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 16 },
+          source: ''
+        },
         callee: {
           type: 'MemberExpression',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
           object: {
             type: 'ClassExpression',
-            id: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 10 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              name: 'x'
+            },
             superClass: null,
-            body: { type: 'ClassBody', body: [] }
+            body: {
+              type: 'ClassBody',
+              loc: {
+                start: { line: 1, col: 8 },
+                end: { line: 1, col: 10 },
+                source: ''
+              },
+              body: []
+            }
           },
-          property: { type: 'Identifier', name: 'foo' },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            name: 'foo'
+          },
           computed: false
         },
         arguments: []

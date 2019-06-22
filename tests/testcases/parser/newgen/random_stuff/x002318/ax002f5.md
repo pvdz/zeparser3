@@ -29,18 +29,50 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 87 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 87 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'foo' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'foo'
+      },
       params: [
         {
           type: 'AssignmentPattern',
-          left: { type: 'Identifier', name: 'a' },
+          loc: {
+            start: { line: 1, col: 19 },
+            end: { line: 1, col: 63 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 19 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
+            name: 'a'
+          },
           right: {
             type: 'ArrowFunctionExpression',
+            loc: {
+              start: { line: 1, col: 23 },
+              end: { line: 1, col: 63 },
+              source: ''
+            },
             params: [],
             id: null,
             generator: false,
@@ -48,11 +80,26 @@ ast: {
             expression: false,
             body: {
               type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 29 },
+                end: { line: 1, col: 63 },
+                source: ''
+              },
               body: [
                 {
                   type: 'ExpressionStatement',
+                  loc: {
+                    start: { line: 1, col: 31 },
+                    end: { line: 1, col: 45 },
+                    source: ''
+                  },
                   expression: {
                     type: 'Literal',
+                    loc: {
+                      start: { line: 1, col: 31 },
+                      end: { line: 1, col: 31 },
+                      source: ''
+                    },
                     value: 'use strict',
                     raw: '"use strict"'
                   },
@@ -60,10 +107,39 @@ ast: {
                 },
                 {
                   type: 'ReturnStatement',
+                  loc: {
+                    start: { line: 1, col: 45 },
+                    end: { line: 1, col: 62 },
+                    source: ''
+                  },
                   argument: {
                     type: 'CallExpression',
-                    callee: { type: 'Identifier', name: 'eval' },
-                    arguments: [ { type: 'Literal', value: 'x', raw: '"x"' } ]
+                    loc: {
+                      start: { line: 1, col: 52 },
+                      end: { line: 1, col: 62 },
+                      source: ''
+                    },
+                    callee: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 52 },
+                        end: { line: 1, col: 56 },
+                        source: ''
+                      },
+                      name: 'eval'
+                    },
+                    arguments: [
+                      {
+                        type: 'Literal',
+                        loc: {
+                          start: { line: 1, col: 57 },
+                          end: { line: 1, col: 57 },
+                          source: ''
+                        },
+                        value: 'x',
+                        raw: '"x"'
+                      }
+                    ]
                   }
                 }
               ]
@@ -73,23 +149,64 @@ ast: {
       ],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 65 },
+          end: { line: 1, col: 87 },
+          source: ''
+        },
         body: [
           {
             type: 'VariableDeclaration',
+            loc: {
+              start: { line: 1, col: 71 },
+              end: { line: 1, col: 72 },
+              source: ''
+            },
             kind: 'var',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                id: { type: 'Identifier', name: 'x' },
+                loc: {
+                  start: { line: 1, col: 71 },
+                  end: { line: 1, col: 72 },
+                  source: ''
+                },
+                id: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 71 },
+                    end: { line: 1, col: 71 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 init: null
               }
             ]
           },
           {
             type: 'ReturnStatement',
+            loc: {
+              start: { line: 1, col: 74 },
+              end: { line: 1, col: 86 },
+              source: ''
+            },
             argument: {
               type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 81 },
+                end: { line: 1, col: 84 },
+                source: ''
+              },
+              callee: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 81 },
+                  end: { line: 1, col: 82 },
+                  source: ''
+                },
+                name: 'a'
+              },
               arguments: []
             }
           }

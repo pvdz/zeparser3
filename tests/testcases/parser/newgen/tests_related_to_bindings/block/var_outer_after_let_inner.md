@@ -29,17 +29,41 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'BlockStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 11 },
+        source: ''
+      },
       body: [
         {
           type: 'VariableDeclaration',
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 1, col: 7 },
+            source: ''
+          },
           kind: 'let',
           declarations: [
             {
               type: 'VariableDeclarator',
-              id: { type: 'Identifier', name: 'x' },
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              id: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 6 },
+                  source: ''
+                },
+                name: 'x'
+              },
               init: null
             }
           ]
@@ -48,11 +72,29 @@ ast: {
     },
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 15 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 15 },
+              source: ''
+            },
+            name: 'x'
+          },
           init: null
         }
       ]

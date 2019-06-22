@@ -31,16 +31,59 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 46 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 46 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 46 },
+          source: ''
+        },
         params: [
-          { type: 'Identifier', name: 'w' },
-          { type: 'Identifier', name: 'o' },
-          { type: 'Identifier', name: 'e' },
-          { type: 'Identifier', name: 'm' }
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 2 },
+              source: ''
+            },
+            name: 'w'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 5 },
+              source: ''
+            },
+            name: 'o'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 7 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'e'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            name: 'm'
+          }
         ],
         id: null,
         generator: false,
@@ -48,11 +91,26 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 16 },
+            end: { line: 1, col: 46 },
+            source: ''
+          },
           body: [
             {
               type: 'ExpressionStatement',
+              loc: {
+                start: { line: 1, col: 18 },
+                end: { line: 1, col: 32 },
+                source: ''
+              },
               expression: {
                 type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 18 },
+                  end: { line: 1, col: 18 },
+                  source: ''
+                },
                 value: 'use strict',
                 raw: '"use strict"'
               },
@@ -60,8 +118,18 @@ ast: {
             },
             {
               type: 'ExpressionStatement',
+              loc: {
+                start: { line: 1, col: 32 },
+                end: { line: 1, col: 45 },
+                source: ''
+              },
               expression: {
                 type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 32 },
+                  end: { line: 1, col: 32 },
+                  source: ''
+                },
                 value: 'use strict',
                 raw: '"use strict"'
               },

@@ -29,27 +29,82 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 36 } },
   body: [
     {
       type: 'IfStatement',
-      test: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 36 },
+        source: ''
+      },
+      test: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 5 },
+          source: ''
+        },
+        name: 'x'
+      },
       consequent: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 1, col: 36 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 23 },
+              source: ''
+            },
             expression: {
               type: 'Literal',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 21 },
+                source: ''
+              },
               value: 'use strict',
               raw: '"use strict"'
             }
           },
           {
             type: 'WithStatement',
-            object: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 23 },
+              end: { line: 1, col: 35 },
+              source: ''
+            },
+            object: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 29 },
+                end: { line: 1, col: 30 },
+                source: ''
+              },
+              name: 'x'
+            },
             body: {
               type: 'ExpressionStatement',
-              expression: { type: 'Identifier', name: 'y' }
+              loc: {
+                start: { line: 1, col: 32 },
+                end: { line: 1, col: 35 },
+                source: ''
+              },
+              expression: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 32 },
+                  end: { line: 1, col: 33 },
+                  source: ''
+                },
+                name: 'y'
+              }
             }
           }
         ]

@@ -29,27 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 24 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'A' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 24 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'A'
+      },
       superClass: null,
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Literal', value: 34, raw: '34' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 23 },
+              source: ''
+            },
+            key: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 17 },
+                end: { line: 1, col: 17 },
+                source: ''
+              },
+              value: 34,
+              raw: '34'
+            },
             static: false,
             computed: false,
             kind: 'method',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
               generator: true,
               async: true,
               id: null,
               params: [],
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 23 },
+                  source: ''
+                },
+                body: []
+              }
             }
           }
         ]

@@ -53,11 +53,22 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 15 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 15 },
+        source: ''
+      },
       expression: {
         type: 'Literal',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
         value: null,
         regex: { pattern: '(?<ab>a)\\k<a>', flags: '' },
         raw: '/(?<ab>a)\\k<a>/'

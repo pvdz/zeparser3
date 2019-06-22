@@ -29,30 +29,91 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 38 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 38 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [
         {
           type: 'AssignmentPattern',
-          left: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 34 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            name: 'x'
+          },
           right: {
             type: 'UnaryExpression',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 34 },
+              source: ''
+            },
             operator: 'delete',
             prefix: true,
             argument: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'foo' },
+              loc: {
+                start: { line: 1, col: 24 },
+                end: { line: 1, col: 33 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 25 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
+                name: 'foo'
+              },
               operator: '=',
-              right: { type: 'Identifier', name: 'f' }
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 32 },
+                  end: { line: 1, col: 33 },
+                  source: ''
+                },
+                name: 'f'
+              }
             }
           }
         }
       ],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 36 },
+          end: { line: 1, col: 38 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

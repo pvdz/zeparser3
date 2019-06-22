@@ -48,36 +48,99 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 38 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 38 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'as' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'as'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 38 },
+          source: ''
+        },
         body: [
           {
             type: 'ClassDeclaration',
-            id: { type: 'Identifier', name: 'A' },
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 37 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 22 },
+                source: ''
+              },
+              name: 'A'
+            },
             superClass: null,
             body: {
               type: 'ClassBody',
+              loc: {
+                start: { line: 1, col: 24 },
+                end: { line: 1, col: 37 },
+                source: ''
+              },
               body: [
                 {
                   type: 'MethodDefinition',
-                  key: { type: 'Identifier', name: 'yield' },
+                  loc: {
+                    start: { line: 1, col: 25 },
+                    end: { line: 1, col: 35 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 25 },
+                      end: { line: 1, col: 30 },
+                      source: ''
+                    },
+                    name: 'yield'
+                  },
                   static: false,
                   computed: false,
                   kind: 'method',
                   value: {
                     type: 'FunctionExpression',
+                    loc: {
+                      start: { line: 1, col: 25 },
+                      end: { line: 1, col: 35 },
+                      source: ''
+                    },
                     generator: false,
                     async: false,
                     id: null,
                     params: [],
-                    body: { type: 'BlockStatement', body: [] }
+                    body: {
+                      type: 'BlockStatement',
+                      loc: {
+                        start: { line: 1, col: 33 },
+                        end: { line: 1, col: 35 },
+                        source: ''
+                      },
+                      body: []
+                    }
                   }
                 }
               ]

@@ -29,18 +29,58 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'DoWhileStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'x' }
+        loc: {
+          start: { line: 1, col: 3 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 3 },
+            end: { line: 1, col: 4 },
+            source: ''
+          },
+          name: 'x'
+        }
       },
       test: {
         type: 'SequenceExpression',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
         expressions: [
-          { type: 'Identifier', name: 'y' },
-          { type: 'Identifier', name: 'z' }
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 13 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            name: 'y'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            name: 'z'
+          }
         ]
       }
     }

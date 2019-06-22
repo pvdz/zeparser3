@@ -29,22 +29,69 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 30 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 30 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
             expression: {
               type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'async' },
-              arguments: [ { type: 'Identifier', name: 'await' } ]
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              callee: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 15 },
+                  end: { line: 1, col: 27 },
+                  source: ''
+                },
+                name: 'async'
+              },
+              arguments: [
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 21 },
+                    end: { line: 1, col: 26 },
+                    source: ''
+                  },
+                  name: 'await'
+                }
+              ]
             }
           }
         ]

@@ -47,44 +47,128 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 28 } },
   body: [
     {
       type: 'ExportNamedDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 28 },
+        source: ''
+      },
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 11 },
+          end: { line: 1, col: 27 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 27 },
+              source: ''
+            },
             id: {
               type: 'ObjectPattern',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 22 },
+                source: ''
+              },
               properties: [
                 {
                   type: 'Property',
-                  key: { type: 'Identifier', name: 'x' },
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 13 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 12 },
+                      end: { line: 1, col: 13 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
                   kind: 'init',
                   method: false,
                   computed: false,
-                  value: { type: 'Identifier', name: 'x' },
+                  value: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 12 },
+                      end: { line: 1, col: 13 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
                   shorthand: true
                 },
                 {
                   type: 'Property',
-                  key: { type: 'Identifier', name: 'y' },
+                  loc: {
+                    start: { line: 1, col: 15 },
+                    end: { line: 1, col: 20 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 15 },
+                      end: { line: 1, col: 17 },
+                      source: ''
+                    },
+                    name: 'y'
+                  },
                   kind: 'init',
                   method: false,
                   computed: false,
                   value: {
                     type: 'AssignmentPattern',
-                    left: { type: 'Identifier', name: 'y' },
-                    right: { type: 'Identifier', name: 'z' }
+                    loc: {
+                      start: { line: 1, col: 15 },
+                      end: { line: 1, col: 20 },
+                      source: ''
+                    },
+                    left: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 15 },
+                        end: { line: 1, col: 17 },
+                        source: ''
+                      },
+                      name: 'y'
+                    },
+                    right: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 19 },
+                        end: { line: 1, col: 20 },
+                        source: ''
+                      },
+                      name: 'z'
+                    }
                   },
                   shorthand: true
                 }
               ]
             },
-            init: { type: 'Identifier', name: 'obj' }
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 24 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              name: 'obj'
+            }
           }
         ]
       },

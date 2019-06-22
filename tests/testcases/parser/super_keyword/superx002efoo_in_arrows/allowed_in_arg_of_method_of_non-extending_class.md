@@ -29,41 +29,126 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 47 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 47 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
       superClass: null,
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 47 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Identifier', name: 'dsda' },
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 46 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              name: 'dsda'
+            },
             static: false,
             computed: false,
             kind: 'method',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 46 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 16 },
+                  end: { line: 1, col: 46 },
+                  source: ''
+                },
                 body: [
                   {
                     type: 'ReturnStatement',
+                    loc: {
+                      start: { line: 1, col: 18 },
+                      end: { line: 1, col: 45 },
+                      source: ''
+                    },
                     argument: {
                       type: 'ArrowFunctionExpression',
+                      loc: {
+                        start: { line: 1, col: 25 },
+                        end: { line: 1, col: 43 },
+                        source: ''
+                      },
                       params: [
                         {
                           type: 'AssignmentPattern',
-                          left: { type: 'Identifier', name: 'a' },
+                          loc: {
+                            start: { line: 1, col: 26 },
+                            end: { line: 1, col: 37 },
+                            source: ''
+                          },
+                          left: {
+                            type: 'Identifier',
+                            loc: {
+                              start: { line: 1, col: 26 },
+                              end: { line: 1, col: 27 },
+                              source: ''
+                            },
+                            name: 'a'
+                          },
                           right: {
                             type: 'MemberExpression',
-                            object: { type: 'Super' },
-                            property: { type: 'Identifier', name: 'foo' },
+                            loc: {
+                              start: { line: 1, col: 28 },
+                              end: { line: 1, col: 37 },
+                              source: ''
+                            },
+                            object: {
+                              type: 'Super',
+                              loc: {
+                                start: { line: 1, col: 28 },
+                                end: { line: 1, col: 33 },
+                                source: ''
+                              }
+                            },
+                            property: {
+                              type: 'Identifier',
+                              loc: {
+                                start: { line: 1, col: 34 },
+                                end: { line: 1, col: 34 },
+                                source: ''
+                              },
+                              name: 'foo'
+                            },
                             computed: false
                           }
                         }
@@ -72,7 +157,15 @@ ast: {
                       generator: false,
                       async: false,
                       expression: true,
-                      body: { type: 'Identifier', name: 'a' }
+                      body: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 42 },
+                          end: { line: 1, col: 43 },
+                          source: ''
+                        },
+                        name: 'a'
+                      }
                     }
                   }
                 ]

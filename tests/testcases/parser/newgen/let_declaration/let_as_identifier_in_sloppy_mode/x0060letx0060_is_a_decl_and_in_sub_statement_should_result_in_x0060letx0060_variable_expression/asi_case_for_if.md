@@ -32,17 +32,52 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 3 } },
   body: [
     {
       type: 'IfStatement',
-      test: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 1 },
+        source: ''
+      },
+      test: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 5 },
+          source: ''
+        },
+        name: 'x'
+      },
       consequent: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'let' }
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 2, col: 1 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 7 },
+            end: { line: 2, col: 1 },
+            source: ''
+          },
+          name: 'let'
+        }
       },
       alternate: null
     },
-    { type: 'BlockStatement', body: [] }
+    {
+      type: 'BlockStatement',
+      loc: {
+        start: { line: 2, col: 1 },
+        end: { line: 2, col: 3 },
+        source: ''
+      },
+      body: []
+    }
   ]
 }
 

@@ -29,27 +29,72 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
   body: [
     {
       type: 'TryStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 30 },
+        source: ''
+      },
       block: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
         body: [
           {
             type: 'VariableDeclaration',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 18 },
+              source: ''
+            },
             kind: 'const',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                id: { type: 'Identifier', name: 'y' },
-                init: { type: 'Identifier', name: 'x' }
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 18 },
+                  source: ''
+                },
+                id: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 12 },
+                    source: ''
+                  },
+                  name: 'y'
+                },
+                init: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 16 },
+                    end: { line: 1, col: 18 },
+                    source: ''
+                  },
+                  name: 'x'
+                }
               }
             ]
           }
         ]
       },
       handler: null,
-      finalizer: { type: 'BlockStatement', body: [] }
+      finalizer: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 28 },
+          end: { line: 1, col: 30 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

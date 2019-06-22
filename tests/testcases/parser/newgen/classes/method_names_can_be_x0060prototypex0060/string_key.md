@@ -29,27 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
       superClass: null,
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 27 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Literal', value: 'prototype', raw: '"prototype"' },
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 26 },
+              source: ''
+            },
+            key: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 10 },
+                source: ''
+              },
+              value: 'prototype',
+              raw: '"prototype"'
+            },
             static: false,
             computed: false,
             kind: 'method',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 26 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 23 },
+                  end: { line: 1, col: 26 },
+                  source: ''
+                },
+                body: []
+              }
             }
           }
         ]

@@ -29,45 +29,123 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 28 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 28 },
+        source: ''
+      },
       init: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 24 },
+              source: ''
+            },
             id: {
               type: 'ObjectPattern',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 21 },
+                source: ''
+              },
               properties: [
                 {
                   type: 'Property',
-                  key: { type: 'Identifier', name: 'a' },
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 10 },
+                      end: { line: 1, col: 11 },
+                      source: ''
+                    },
+                    name: 'a'
+                  },
                   kind: 'init',
                   method: false,
                   computed: false,
-                  value: { type: 'Identifier', name: 'a' },
+                  value: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 10 },
+                      end: { line: 1, col: 11 },
+                      source: ''
+                    },
+                    name: 'a'
+                  },
                   shorthand: true
                 },
                 {
                   type: 'Property',
-                  key: { type: 'Identifier', name: 'x' },
+                  loc: {
+                    start: { line: 1, col: 13 },
+                    end: { line: 1, col: 19 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 14 },
+                      end: { line: 1, col: 15 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
                   kind: 'init',
                   method: false,
                   computed: true,
-                  value: { type: 'Identifier', name: 'y' },
+                  value: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 18 },
+                      end: { line: 1, col: 19 },
+                      source: ''
+                    },
+                    name: 'y'
+                  },
                   shorthand: false
                 }
               ]
             },
-            init: { type: 'Identifier', name: 'a' }
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 24 },
+                source: ''
+              },
+              name: 'a'
+            }
           }
         ]
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 27 },
+          end: { line: 1, col: 28 },
+          source: ''
+        }
+      }
     }
   ]
 }

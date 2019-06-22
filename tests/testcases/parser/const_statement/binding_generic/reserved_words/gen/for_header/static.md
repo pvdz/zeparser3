@@ -29,23 +29,62 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 25 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 25 },
+        source: ''
+      },
       init: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 11 },
+          end: { line: 1, col: 21 },
+          source: ''
+        },
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'static' },
-            init: { type: 'Identifier', name: 'x' }
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 21 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 11 },
+                source: ''
+              },
+              name: 'static'
+            },
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 21 },
+                source: ''
+              },
+              name: 'x'
+            }
           }
         ]
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 24 },
+          end: { line: 1, col: 25 },
+          source: ''
+        }
+      }
     }
   ]
 }

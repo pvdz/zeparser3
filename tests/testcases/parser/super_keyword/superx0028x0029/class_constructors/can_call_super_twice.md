@@ -29,42 +29,126 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 57 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
-      superClass: { type: 'Identifier', name: 'y' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 57 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
+      superClass: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 16 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        name: 'y'
+      },
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 57 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Identifier', name: 'constructor' },
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 56 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
+              name: 'constructor'
+            },
             static: false,
             computed: false,
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 56 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 34 },
+                  end: { line: 1, col: 56 },
+                  source: ''
+                },
                 body: [
                   {
                     type: 'ExpressionStatement',
+                    loc: {
+                      start: { line: 1, col: 36 },
+                      end: { line: 1, col: 45 },
+                      source: ''
+                    },
                     expression: {
                       type: 'CallExpression',
-                      callee: { type: 'Super' },
+                      loc: {
+                        start: { line: 1, col: 36 },
+                        end: { line: 1, col: 43 },
+                        source: ''
+                      },
+                      callee: {
+                        type: 'Super',
+                        loc: {
+                          start: { line: 1, col: 36 },
+                          end: { line: 1, col: 41 },
+                          source: ''
+                        }
+                      },
                       arguments: []
                     }
                   },
                   {
                     type: 'ExpressionStatement',
+                    loc: {
+                      start: { line: 1, col: 45 },
+                      end: { line: 1, col: 54 },
+                      source: ''
+                    },
                     expression: {
                       type: 'CallExpression',
-                      callee: { type: 'Super' },
+                      loc: {
+                        start: { line: 1, col: 45 },
+                        end: { line: 1, col: 52 },
+                        source: ''
+                      },
+                      callee: {
+                        type: 'Super',
+                        loc: {
+                          start: { line: 1, col: 45 },
+                          end: { line: 1, col: 50 },
+                          source: ''
+                        }
+                      },
                       arguments: []
                     }
                   }

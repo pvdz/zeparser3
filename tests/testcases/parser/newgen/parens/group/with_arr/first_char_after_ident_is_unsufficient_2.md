@@ -29,25 +29,59 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 17 },
+        source: ''
+      },
       expression: {
         type: 'ArrayExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
         elements: [
           {
             type: 'UnaryExpression',
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
             operator: 'void',
             prefix: true,
             argument: {
               type: 'MemberExpression',
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
               object: {
                 type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
                 value: null,
                 regex: { pattern: '=g', flags: 'm' },
                 raw: '/=g/m'
               },
-              property: { type: 'Identifier', name: 'x' },
+              property: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 13 },
+                  end: { line: 1, col: 13 },
+                  source: ''
+                },
+                name: 'x'
+              },
               computed: false
             }
           }

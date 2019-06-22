@@ -29,33 +29,98 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 44 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
-        params: [ { type: 'Identifier', name: 'x' } ],
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 44 },
+          source: ''
+        },
+        params: [
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'x'
+          }
+        ],
         id: null,
         generator: false,
         async: true,
         expression: true,
         body: {
           type: 'UnaryExpression',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 44 },
+            source: ''
+          },
           operator: 'delete',
           prefix: true,
           argument: {
             type: 'MemberExpression',
+            loc: {
+              start: { line: 1, col: 18 },
+              end: { line: 1, col: 44 },
+              source: ''
+            },
             object: {
               type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'foo' },
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 35 },
+                source: ''
+              },
+              callee: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 23 },
+                  end: { line: 1, col: 26 },
+                  source: ''
+                },
+                name: 'foo'
+              },
               arguments: [
                 {
                   type: 'AwaitExpression',
-                  argument: { type: 'Identifier', name: 'x' }
+                  loc: {
+                    start: { line: 1, col: 27 },
+                    end: { line: 1, col: 34 },
+                    source: ''
+                  },
+                  argument: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 33 },
+                      end: { line: 1, col: 34 },
+                      source: ''
+                    },
+                    name: 'x'
+                  }
                 }
               ]
             },
-            property: { type: 'Identifier', name: 'bar' },
+            property: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 41 },
+                end: { line: 1, col: 41 },
+                source: ''
+              },
+              name: 'bar'
+            },
             computed: false
           }
         }

@@ -29,24 +29,74 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
         params: [
           {
             type: 'AssignmentPattern',
-            left: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 30 },
+              source: ''
+            },
+            left: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 1 },
+                end: { line: 1, col: 3 },
+                source: ''
+              },
+              name: 'x'
+            },
             right: {
               type: 'UnaryExpression',
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 30 },
+                source: ''
+              },
               operator: 'delete',
               prefix: true,
               argument: {
                 type: 'AssignmentExpression',
-                left: { type: 'Identifier', name: 'implements' },
+                loc: {
+                  start: { line: 1, col: 13 },
+                  end: { line: 1, col: 29 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 14 },
+                    end: { line: 1, col: 24 },
+                    source: ''
+                  },
+                  name: 'implements'
+                },
                 operator: '=',
-                right: { type: 'Identifier', name: 'f' }
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 28 },
+                    end: { line: 1, col: 29 },
+                    source: ''
+                  },
+                  name: 'f'
+                }
               }
             }
           }
@@ -55,7 +105,15 @@ ast: {
         generator: false,
         async: false,
         expression: false,
-        body: { type: 'BlockStatement', body: [] }
+        body: {
+          type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 35 },
+            end: { line: 1, col: 37 },
+            source: ''
+          },
+          body: []
+        }
       }
     }
   ]

@@ -29,45 +29,128 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 60 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 60 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'as' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'as'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 60 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 21 },
+              end: { line: 1, col: 59 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'o' },
+              loc: {
+                start: { line: 1, col: 21 },
+                end: { line: 1, col: 59 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 23 },
+                  source: ''
+                },
+                name: 'o'
+              },
               operator: '=',
               right: {
                 type: 'ObjectExpression',
+                loc: {
+                  start: { line: 1, col: 25 },
+                  end: { line: 1, col: 59 },
+                  source: ''
+                },
                 properties: [
                   {
                     type: 'Property',
-                    key: { type: 'Identifier', name: 'f' },
+                    loc: {
+                      start: { line: 1, col: 26 },
+                      end: { line: 1, col: 57 },
+                      source: ''
+                    },
+                    key: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 32 },
+                        end: { line: 1, col: 32 },
+                        source: ''
+                      },
+                      name: 'f'
+                    },
                     kind: 'init',
                     method: true,
                     computed: false,
                     value: {
                       type: 'FunctionExpression',
+                      loc: {
+                        start: { line: 1, col: 26 },
+                        end: { line: 1, col: 57 },
+                        source: ''
+                      },
                       generator: false,
                       async: true,
                       id: null,
                       params: [],
                       body: {
                         type: 'BlockStatement',
+                        loc: {
+                          start: { line: 1, col: 36 },
+                          end: { line: 1, col: 57 },
+                          source: ''
+                        },
                         body: [
                           {
                             type: 'ReturnStatement',
+                            loc: {
+                              start: { line: 1, col: 38 },
+                              end: { line: 1, col: 56 },
+                              source: ''
+                            },
                             argument: {
                               type: 'AwaitExpression',
-                              argument: { type: 'Identifier', name: 'foo' }
+                              loc: {
+                                start: { line: 1, col: 45 },
+                                end: { line: 1, col: 54 },
+                                source: ''
+                              },
+                              argument: {
+                                type: 'Identifier',
+                                loc: {
+                                  start: { line: 1, col: 51 },
+                                  end: { line: 1, col: 54 },
+                                  source: ''
+                                },
+                                name: 'foo'
+                              }
                             }
                           }
                         ]

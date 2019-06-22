@@ -53,17 +53,52 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 24 } },
   body: [
     {
       type: 'IfStatement',
-      test: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 24 },
+        source: ''
+      },
+      test: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 5 },
+          source: ''
+        },
+        name: 'x'
+      },
       consequent: {
         type: 'FunctionDeclaration',
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
         generator: true,
         async: false,
-        id: { type: 'Identifier', name: 'f' },
+        id: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 18 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
+          name: 'f'
+        },
         params: [],
-        body: { type: 'BlockStatement', body: [] }
+        body: {
+          type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 22 },
+            end: { line: 1, col: 24 },
+            source: ''
+          },
+          body: []
+        }
       },
       alternate: null
     }

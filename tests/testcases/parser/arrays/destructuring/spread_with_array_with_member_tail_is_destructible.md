@@ -29,42 +29,133 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
         left: {
           type: 'ArrayPattern',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 22 },
+            source: ''
+          },
           elements: [
             {
               type: 'RestElement',
+              loc: {
+                start: { line: 1, col: 1 },
+                end: { line: 1, col: 20 },
+                source: ''
+              },
               argument: {
                 type: 'MemberExpression',
+                loc: {
+                  start: { line: 1, col: 1 },
+                  end: { line: 1, col: 20 },
+                  source: ''
+                },
                 object: {
                   type: 'CallExpression',
+                  loc: {
+                    start: { line: 1, col: 1 },
+                    end: { line: 1, col: 17 },
+                    source: ''
+                  },
                   callee: {
                     type: 'MemberExpression',
+                    loc: {
+                      start: { line: 1, col: 1 },
+                      end: { line: 1, col: 11 },
+                      source: ''
+                    },
                     object: {
                       type: 'ArrayExpression',
-                      elements: [ { type: 'Identifier', name: 'x' } ]
+                      loc: {
+                        start: { line: 1, col: 4 },
+                        end: { line: 1, col: 7 },
+                        source: ''
+                      },
+                      elements: [
+                        {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 5 },
+                            end: { line: 1, col: 6 },
+                            source: ''
+                          },
+                          name: 'x'
+                        }
+                      ]
                     },
-                    property: { type: 'Identifier', name: 'map' },
+                    property: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 8 },
+                        end: { line: 1, col: 8 },
+                        source: ''
+                      },
+                      name: 'map'
+                    },
                     computed: false
                   },
                   arguments: [
-                    { type: 'Identifier', name: 'y' },
-                    { type: 'Identifier', name: 'z' }
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 12 },
+                        end: { line: 1, col: 13 },
+                        source: ''
+                      },
+                      name: 'y'
+                    },
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 15 },
+                        end: { line: 1, col: 16 },
+                        source: ''
+                      },
+                      name: 'z'
+                    }
                   ]
                 },
-                property: { type: 'Identifier', name: 'x' },
+                property: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 18 },
+                    end: { line: 1, col: 19 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 computed: true
               }
             }
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'a' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 24 },
+            end: { line: 1, col: 25 },
+            source: ''
+          },
+          name: 'a'
+        }
       }
     }
   ]

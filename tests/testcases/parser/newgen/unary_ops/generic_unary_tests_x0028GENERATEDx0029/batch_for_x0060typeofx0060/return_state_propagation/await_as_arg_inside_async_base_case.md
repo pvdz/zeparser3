@@ -29,25 +29,67 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 41 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 41 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 41 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 22 },
+              end: { line: 1, col: 40 },
+              source: ''
+            },
             expression: {
               type: 'UnaryExpression',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 36 },
+                source: ''
+              },
               operator: 'typeof',
               prefix: true,
               argument: {
                 type: 'AwaitExpression',
-                argument: { type: 'Identifier', name: 'x' }
+                loc: {
+                  start: { line: 1, col: 29 },
+                  end: { line: 1, col: 36 },
+                  source: ''
+                },
+                argument: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 35 },
+                    end: { line: 1, col: 36 },
+                    source: ''
+                  },
+                  name: 'x'
+                }
               }
             }
           }

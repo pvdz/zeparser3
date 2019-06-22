@@ -29,26 +29,70 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
         body: [
           {
             type: 'ForStatement',
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 36 },
+              source: ''
+            },
             init: {
               type: 'YieldExpression',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 29 },
+                source: ''
+              },
               delegate: false,
-              argument: { type: 'Identifier', name: 'x' }
+              argument: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 28 },
+                  end: { line: 1, col: 29 },
+                  source: ''
+                },
+                name: 'x'
+              }
             },
             test: null,
             update: null,
-            body: { type: 'EmptyStatement' }
+            body: {
+              type: 'EmptyStatement',
+              loc: {
+                start: { line: 1, col: 32 },
+                end: { line: 1, col: 36 },
+                source: ''
+              }
+            }
           }
         ]
       }

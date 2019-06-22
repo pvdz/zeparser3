@@ -415,11 +415,14 @@ function ZeTokenizer(
   let len = input.length;
 
   let wasWhite = false;
-  let consumedNewlines = 0; // whitespace newline token or string token that contained newline or multiline comment
+  let consumedNewlinesThisToken = 0; // whitespace newline token or string token that contained newline or multiline comment
   let consumedComment = false; // needed to confirm requirement to parse --> closing html comment
   let finished = false; // generated an $EOF?
   let lastParsedIdent = ''; // updated after parsing an ident. used to canonicalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
   let lastRegexUnicodeEscapeOrd = 0; // need this to validate unicode escapes in named group identifiers :/
+
+  let currentLine = 1; // the number of newlines, crlf sensitive (the pair is considered 1 line)
+  let currentColOffset = 0; // position in the input code of the first character after the last newline
 
   let cache = input.charCodeAt(0);
 
@@ -533,15 +536,17 @@ function ZeTokenizer(
     let token;
     do {
       ++anyTokenCount;
+      let startCol = pointer - currentColOffset;
+      let startRow = currentLine;
       if (neof()) {
         let cstart = cache;
         let start = startForError = pointer; // TODO: see if startForError makes a dent at all
         wasWhite = false;
         let consumedTokenType = next(lexerFlags);
-        token = createToken(consumedTokenType, start, pointer, consumedNewlines, wasWhite, cstart);
+        token = createToken(consumedTokenType, start, pointer, startCol, startRow, consumedNewlinesThisToken, wasWhite, cstart);
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
-        token = createToken($EOF, pointer, pointer, consumedNewlines, WHITESPACE_TOKEN, 0);
+        token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken, WHITESPACE_TOKEN, 0);
         finished = true;
         break;
       }
@@ -549,15 +554,24 @@ function ZeTokenizer(
     ++solidTokenCount;
     if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
     if (!wasWhite) {
-      consumedNewlines = 0;
+      consumedNewlinesThisToken = 0;
       consumedComment = false;
     }
 
     return token;
   }
 
+  function incrementLine() {
+    // Call this function AFTER consuming the newline(s) that triggered it
+    ASSERT(input.charCodeAt(pointer-1) === $$CR_0D || isLfPsLs(input.charCodeAt(pointer-1)), 'should have just consumed a newline');
+
+    ++consumedNewlinesThisToken;
+    ++currentLine;
+    currentColOffset = pointer;
+  }
+
   function addAsi() {
-    let token = createToken($ASI, pointer, pointer, consumedNewlines, SOLID_TOKEN, $$SEMI_3B);
+    let token = createToken($ASI, pointer, pointer, pointer - currentColOffset, currentLine, consumedNewlinesThisToken, SOLID_TOKEN, $$SEMI_3B);
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
     if (collectTokens !== COLLECT_TOKENS_NONE) tokens.push(token, tokens.pop());
@@ -565,10 +579,11 @@ function ZeTokenizer(
     ++solidTokenCount; // eh... i guess.
   }
 
-  function createToken(type, start, stop, nl, ws, c) {
+  function createToken(type, start, stop, col, line, nl, ws, c) {
+    ASSERT(createToken.length === arguments.length);
 //ASSERT(cache === input.charCodeAt(start), 'c should not be skipped yet');
 
-    ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c');
+    ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
 
     let str = slice(start, stop);
     let canon = type === $IDENT ? lastParsedIdent : str;
@@ -581,6 +596,8 @@ function ZeTokenizer(
       nl, // how many newlines between the start of the previous relevant token and the start of this one?
       start,
       stop, // start of next token
+      col, // of first char of token
+      line, // of first char of token
       c,
       str,
       // :'( https://tc39.github.io/ecma262/#prod-EscapeSequence
@@ -654,7 +671,7 @@ function ZeTokenizer(
         // TODO: only support this under the webcompat flag
         // TODO: and properly parse this, not like the duplicate hack it is now
         if (!eofd(1) && moduleGoal === GOAL_SCRIPT && peek() === $$DASH_2D && peekd(1) === $$GT_3E) {
-          if (consumedNewlines > 0 || consumedComment) {
+          if (consumedNewlinesThisToken > 0 || consumedComment) {
             return parseCommentHtmlClose();
           } else {
             // Note that the `-->` is not picked up as a comment since that requires a newline to precede it.
@@ -751,12 +768,13 @@ function ZeTokenizer(
   }
 
   function parseCR() {
-    ++consumedNewlines;
     wasWhite = true;
     if (neof() && peeky($$LF_0A)) {
       ASSERT_skip($$LF_0A);
+      incrementLine();
       return $CRLF;
     }
+    incrementLine();
     return $NL;
   }
 
@@ -1038,17 +1056,25 @@ function ZeTokenizer(
           $warn('Tokenizer $ERROR: unclosed template string');
           return $ERROR;
         }
-
         c = peek();
-        if (c === $$CURLY_L_7B) {
-          ASSERT_skip($$CURLY_L_7B);
-          return (fromTick ? $TICK_HEAD : $TICK_BODY) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
-        }
+      }
+
+      if (c === $$CURLY_L_7B) {
+        ASSERT_skip($$CURLY_L_7B);
+        return (fromTick ? $TICK_HEAD : $TICK_BODY) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
       }
 
       if (c === $$TICK_60) {
         ASSERT_skip($$TICK_60);
         return (fromTick ? $TICK_PURE : $TICK_TAIL) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
+      }
+
+      if (c === $$CR_0D) {
+        // crlf is considered one line for the sake of reporting line-numbers
+        if (peek($$LF_0A)) skip();
+        incrementLine();
+      } else if (isLfPsLs(c)) {
+        incrementLine();
       }
 
       ASSERT_skip(c);
@@ -1443,11 +1469,11 @@ function ZeTokenizer(
       // must be single comment
       ASSERT_skip($$FWDSLASH_2F); // //
       wasWhite = true;
-      return parseSingleComment();
+      return parseCommentSingle();
     } else if (c === $$STAR_2A) {
       // must be multi comment
       ASSERT_skip($$STAR_2A); // /*
-      return parseMultiComment();
+      return parseCommentMulti();
     } else {
       return parseSingleFwdSlash(lexerFlags, c);
     }
@@ -1464,7 +1490,7 @@ function ZeTokenizer(
       return $PUNCTUATOR;
     }
   }
-  function parseSingleComment() {
+  function parseCommentSingle() {
     consumedComment = true;
     while (neof()) {
       let c = peek();
@@ -1476,7 +1502,7 @@ function ZeTokenizer(
     }
     return $COMMENT_SINGLE;
   }
-  function parseMultiComment() {
+  function parseCommentMulti() {
     consumedComment = true;
     let c;
     while (neof()) {
@@ -1492,9 +1518,12 @@ function ZeTokenizer(
           return $COMMENT_MULTI;
         }
       }
-      if (c === $$CR_0D || isLfPsLs(c)) {
-        // if we implement line numbers, make sure to count crlf as one here
-        ++consumedNewlines;
+      if (c === $$CR_0D) {
+        // crlf is considered one line for the sake of reporting line-numbers
+        if (peek($$LF_0A)) skip();
+        incrementLine();
+      } else if (isLfPsLs(c)) {
+        incrementLine();
       }
     }
     $warn('Tokenizer $ERROR: unclosed multi line comment, early eof');
@@ -1506,13 +1535,13 @@ function ZeTokenizer(
     // the spec defines it as the start of a single line JS comment
     // TODO: hide this under the web compat flag
     // TODO: and clean the check up already
-    parseSingleComment();
+    parseCommentSingle();
     wasWhite = true;
     return $COMMENT_HTML;
   }
   function parseCommentHtmlClose() {
     // parseHtmlComment
-    parseSingleComment();
+    parseCommentSingle();
     wasWhite = true;
     return $COMMENT_HTML;
   }
@@ -1574,7 +1603,7 @@ function ZeTokenizer(
   }
 
   function parseNewline() {
-    ++consumedNewlines;
+    incrementLine();
     wasWhite = true;
     return $NL;
   }
@@ -3372,7 +3401,7 @@ function isLfPsLs(c) {
 }
 
 function debug_toktype(type, ignoreUnknown) {
-  ASSERT(typeof type === 'number', 'expecting valid type');
+  ASSERT(typeof type === 'number', 'expecting valid type', type, ignoreUnknown);
   if (type & $TICK_BAD_ESCAPE) return debug_toktype(type ^ $TICK_BAD_ESCAPE, ignoreUnknown) + '+$TICK_BAD_ESCAPE';
   switch (type) {
     case $ASI: return 'ASI';

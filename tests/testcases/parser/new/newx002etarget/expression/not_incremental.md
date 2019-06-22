@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Can only pre-increment or pre-decrement an identifier or member expression
+  AST_open(meta, Identifier, false); bad tree? node[meta] should be `undefined` but wasnt (child=[object Object], prop=meta, type=Identifier, node[prop]=[object Object])
 
 function f(){ ++new.target }
-                           ^------- error
+                   ^------- error
 `````
 
 ### Strict mode

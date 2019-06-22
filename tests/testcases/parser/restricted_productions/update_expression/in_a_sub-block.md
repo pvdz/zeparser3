@@ -30,30 +30,88 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 5 } },
   body: [
     {
       type: 'WhileStatement',
-      test: { type: 'Literal', value: true, raw: 'true' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 4 },
+        source: ''
+      },
+      test: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
+        value: true,
+        raw: 'true'
+      },
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 2, col: 4 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
-            expression: { type: 'Identifier', name: 'b' }
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 2, col: 0 },
+              source: ''
+            },
+            expression: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 2, col: 0 },
+                source: ''
+              },
+              name: 'b'
+            }
           },
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 2, col: 0 },
+              end: { line: 2, col: 3 },
+              source: ''
+            },
             expression: {
               type: 'UpdateExpression',
+              loc: {
+                start: { line: 2, col: 0 },
+                end: { line: 2, col: 3 },
+                source: ''
+              },
               operator: '++',
               prefix: true,
-              argument: { type: 'Identifier', name: 'c' }
+              argument: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 2, col: 2 },
+                  end: { line: 2, col: 3 },
+                  source: ''
+                },
+                name: 'c'
+              }
             }
           }
         ]
       }
     },
-    { type: 'EmptyStatement' }
+    {
+      type: 'EmptyStatement',
+      loc: {
+        start: { line: 2, col: 4 },
+        end: { line: 2, col: 5 },
+        source: ''
+      }
+    }
   ]
 }
 

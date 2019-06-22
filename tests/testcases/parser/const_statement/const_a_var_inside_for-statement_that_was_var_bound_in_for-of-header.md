@@ -35,33 +35,97 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
   body: [
     {
       type: 'ForOfStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 34 },
+        source: ''
+      },
       left: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'x'
+            },
             init: null
           }
         ]
       },
-      right: { type: 'Identifier', name: 'obj' },
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
+        name: 'obj'
+      },
       await: false,
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 34 },
+          source: ''
+        },
         body: [
           {
             type: 'VariableDeclaration',
+            loc: {
+              start: { line: 1, col: 27 },
+              end: { line: 1, col: 33 },
+              source: ''
+            },
             kind: 'const',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                id: { type: 'Identifier', name: 'x' },
-                init: { type: 'Literal', value: 1, raw: '1' }
+                loc: {
+                  start: { line: 1, col: 27 },
+                  end: { line: 1, col: 33 },
+                  source: ''
+                },
+                id: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 27 },
+                    end: { line: 1, col: 27 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
+                init: {
+                  type: 'Literal',
+                  loc: {
+                    start: { line: 1, col: 31 },
+                    end: { line: 1, col: 31 },
+                    source: ''
+                  },
+                  value: 1,
+                  raw: '1'
+                }
               }
             ]
           }

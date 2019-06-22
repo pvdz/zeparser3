@@ -29,28 +29,82 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 17 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Literal', value: 'x', raw: '"x"' },
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            key: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              value: 'x',
+              raw: '"x"'
+            },
             kind: 'init',
             method: false,
             computed: false,
-            value: { type: 'Identifier', name: 'a' },
+            value: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 8 },
+                source: ''
+              },
+              name: 'a'
+            },
             shorthand: false
           },
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'y' },
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 13 },
+                source: ''
+              },
+              name: 'y'
+            },
             kind: 'init',
             method: false,
             computed: false,
-            value: { type: 'Identifier', name: 'a' },
+            value: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 13 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              name: 'a'
+            },
             shorthand: false
           }
         ]

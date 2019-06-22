@@ -33,22 +33,69 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 19 } },
   body: [
     {
       type: 'ForInStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 19 },
+        source: ''
+      },
       left: {
         type: 'ArrayPattern',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         elements: [
           {
             type: 'MemberExpression',
-            object: { type: 'Identifier', name: 'x' },
-            property: { type: 'Identifier', name: 'y' },
+            loc: {
+              start: { line: 1, col: 5 },
+              end: { line: 1, col: 9 },
+              source: ''
+            },
+            object: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              name: 'x'
+            },
+            property: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 8 },
+                end: { line: 1, col: 8 },
+                source: ''
+              },
+              name: 'y'
+            },
             computed: false
           }
         ]
       },
-      right: { type: 'Identifier', name: 'obj' },
-      body: { type: 'EmptyStatement' }
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
+        name: 'obj'
+      },
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 19 },
+          source: ''
+        }
+      }
     }
   ]
 }

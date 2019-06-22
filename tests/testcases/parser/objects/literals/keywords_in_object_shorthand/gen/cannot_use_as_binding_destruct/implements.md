@@ -29,28 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 1, col: 22 },
+            source: ''
+          },
           id: {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'implements' },
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 17 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 7 },
+                    end: { line: 1, col: 17 },
+                    source: ''
+                  },
+                  name: 'implements'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'implements' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 7 },
+                    end: { line: 1, col: 17 },
+                    source: ''
+                  },
+                  name: 'implements'
+                },
                 shorthand: true
               }
             ]
           },
-          init: { type: 'Identifier', name: 'x' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 21 },
+              end: { line: 1, col: 22 },
+              source: ''
+            },
+            name: 'x'
+          }
         }
       ]
     }

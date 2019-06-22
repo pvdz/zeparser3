@@ -29,27 +29,88 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 34 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 34 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'x'
+          },
           init: {
             type: 'FunctionExpression',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 34 },
+              source: ''
+            },
             generator: true,
             async: false,
-            id: { type: 'Identifier', name: 'f' },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 18 },
+                end: { line: 1, col: 18 },
+                source: ''
+              },
+              name: 'f'
+            },
             params: [
               {
                 type: 'AssignmentPattern',
-                left: { type: 'Identifier', name: 'foo' },
-                right: { type: 'Identifier', name: 'await' }
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 31 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 20 },
+                    end: { line: 1, col: 20 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 26 },
+                    end: { line: 1, col: 31 },
+                    source: ''
+                  },
+                  name: 'await'
+                }
               }
             ],
-            body: { type: 'BlockStatement', body: [] }
+            body: {
+              type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 32 },
+                end: { line: 1, col: 34 },
+                source: ''
+              },
+              body: []
+            }
           }
         }
       ]

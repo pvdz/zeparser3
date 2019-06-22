@@ -48,36 +48,101 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'o' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 'o'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 37 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'f' },
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 36 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 11 },
+                  end: { line: 1, col: 11 },
+                  source: ''
+                },
+                name: 'f'
+              },
               kind: 'init',
               method: true,
               computed: false,
               value: {
                 type: 'FunctionExpression',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 36 },
+                  source: ''
+                },
                 generator: false,
                 async: true,
                 id: null,
                 params: [],
                 body: {
                   type: 'BlockStatement',
+                  loc: {
+                    start: { line: 1, col: 15 },
+                    end: { line: 1, col: 36 },
+                    source: ''
+                  },
                   body: [
                     {
                       type: 'ReturnStatement',
+                      loc: {
+                        start: { line: 1, col: 17 },
+                        end: { line: 1, col: 35 },
+                        source: ''
+                      },
                       argument: {
                         type: 'AwaitExpression',
-                        argument: { type: 'Identifier', name: 'foo' }
+                        loc: {
+                          start: { line: 1, col: 24 },
+                          end: { line: 1, col: 33 },
+                          source: ''
+                        },
+                        argument: {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 30 },
+                            end: { line: 1, col: 33 },
+                            source: ''
+                          },
+                          name: 'foo'
+                        }
                       }
                     }
                   ]

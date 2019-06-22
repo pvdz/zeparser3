@@ -29,28 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 19 },
+        source: ''
+      },
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
           id: {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'package' },
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 7 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'package'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'package' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 7 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'package'
+                },
                 shorthand: true
               }
             ]
           },
-          init: { type: 'Identifier', name: 'x' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 18 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
+            name: 'x'
+          }
         }
       ]
     }

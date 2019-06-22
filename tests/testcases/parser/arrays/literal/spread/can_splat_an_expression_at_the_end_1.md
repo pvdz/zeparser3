@@ -29,21 +29,74 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       expression: {
         type: 'ArrayExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
         elements: [
-          { type: 'Identifier', name: 'x' },
-          { type: 'Identifier', name: 'y' },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 2 },
+              source: ''
+            },
+            name: 'x'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 5 },
+              source: ''
+            },
+            name: 'y'
+          },
           {
             type: 'SpreadElement',
+            loc: {
+              start: { line: 1, col: 7 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
             argument: {
               type: 'BinaryExpression',
-              left: { type: 'Identifier', name: 'z' },
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 17 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 10 },
+                  end: { line: 1, col: 12 },
+                  source: ''
+                },
+                name: 'z'
+              },
               operator: '+',
-              right: { type: 'Identifier', name: 'arr' }
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 14 },
+                  end: { line: 1, col: 17 },
+                  source: ''
+                },
+                name: 'arr'
+              }
             }
           }
         ]

@@ -29,27 +29,75 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 38 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 38 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 38 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 37 },
+              source: ''
+            },
             expression: {
               type: 'UnaryExpression',
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 37 },
+                source: ''
+              },
               operator: 'delete',
               prefix: true,
               argument: {
                 type: 'MemberExpression',
-                object: { type: 'Literal', value: 'x', raw: '"x"' },
+                loc: {
+                  start: { line: 1, col: 23 },
+                  end: { line: 1, col: 35 },
+                  source: ''
+                },
+                object: {
+                  type: 'Literal',
+                  loc: {
+                    start: { line: 1, col: 23 },
+                    end: { line: 1, col: 23 },
+                    source: ''
+                  },
+                  value: 'x',
+                  raw: '"x"'
+                },
                 property: {
                   type: 'YieldExpression',
+                  loc: {
+                    start: { line: 1, col: 28 },
+                    end: { line: 1, col: 33 },
+                    source: ''
+                  },
                   delegate: false,
                   argument: null
                 },

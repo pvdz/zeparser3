@@ -47,26 +47,86 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 42 } },
   body: [
     {
       type: 'ExportDefaultDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 29 },
+        source: ''
+      },
       declaration: {
         type: 'FunctionDeclaration',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 29 },
+          source: ''
+        },
         generator: false,
         async: false,
-        id: { type: 'Identifier', name: 'f' },
+        id: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 24 },
+            end: { line: 1, col: 24 },
+            source: ''
+          },
+          name: 'f'
+        },
         params: [],
-        body: { type: 'BlockStatement', body: [] }
+        body: {
+          type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 27 },
+            end: { line: 1, col: 29 },
+            source: ''
+          },
+          body: []
+        }
       }
     },
-    { type: 'EmptyStatement' },
+    {
+      type: 'EmptyStatement',
+      loc: {
+        start: { line: 1, col: 29 },
+        end: { line: 1, col: 31 },
+        source: ''
+      }
+    },
     {
       type: 'ExportNamedDeclaration',
+      loc: {
+        start: { line: 1, col: 31 },
+        end: { line: 1, col: 42 },
+        source: ''
+      },
       specifiers: [
         {
           type: 'ExportSpecifier',
-          local: { type: 'Identifier', name: 'f' },
-          exported: { type: 'Identifier', name: 'f' }
+          loc: {
+            start: { line: 1, col: 39 },
+            end: { line: 1, col: 40 },
+            source: ''
+          },
+          local: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 39 },
+              end: { line: 1, col: 39 },
+              source: ''
+            },
+            name: 'f'
+          },
+          exported: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 39 },
+              end: { line: 1, col: 40 },
+              source: ''
+            },
+            name: 'f'
+          }
         }
       ],
       declaration: null,

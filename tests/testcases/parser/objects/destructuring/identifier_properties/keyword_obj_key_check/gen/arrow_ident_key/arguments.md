@@ -29,22 +29,59 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 26 },
+          source: ''
+        },
         params: [
           {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'key' },
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 16 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 2 },
+                    end: { line: 1, col: 7 },
+                    source: ''
+                  },
+                  name: 'key'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'arguments' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 7 },
+                    end: { line: 1, col: 16 },
+                    source: ''
+                  },
+                  name: 'arguments'
+                },
                 shorthand: false
               }
             ]
@@ -54,7 +91,16 @@ ast: {
         generator: false,
         async: false,
         expression: true,
-        body: { type: 'Literal', value: null, raw: 'null' }
+        body: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 22 },
+            end: { line: 1, col: 26 },
+            source: ''
+          },
+          value: null,
+          raw: 'null'
+        }
       }
     }
   ]

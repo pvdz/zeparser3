@@ -32,28 +32,83 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 6 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 2, col: 0 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'f' },
-          init: { type: 'Identifier', name: 'async' }
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 2, col: 0 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'f'
+          },
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 2, col: 0 },
+              source: ''
+            },
+            name: 'async'
+          }
         }
       ]
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 2, col: 0 },
+        end: { line: 2, col: 6 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
-        params: [ { type: 'Identifier', name: 'g' } ],
+        loc: {
+          start: { line: 2, col: 0 },
+          end: { line: 2, col: 6 },
+          source: ''
+        },
+        params: [
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 2, col: 0 },
+              end: { line: 2, col: 2 },
+              source: ''
+            },
+            name: 'g'
+          }
+        ],
         id: null,
         generator: false,
         async: false,
         expression: true,
-        body: { type: 'Identifier', name: 'g' }
+        body: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 2, col: 5 },
+            end: { line: 2, col: 6 },
+            source: ''
+          },
+          name: 'g'
+        }
       }
     }
   ]

@@ -31,13 +31,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 11 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 11 },
+        source: ''
+      },
       expression: {
         type: 'NewExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         arguments: [],
-        callee: { type: 'Identifier', name: 'await' }
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 9 },
+            source: ''
+          },
+          name: 'await'
+        }
       }
     }
   ]

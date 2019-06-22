@@ -47,22 +47,79 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'ImportDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
       specifiers: [
         {
           type: 'ImportSpecifier',
-          imported: { type: 'Identifier', name: 'x' },
-          local: { type: 'Identifier', name: 'a' }
+          loc: {
+            start: { line: 1, col: 8 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
+          imported: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'x'
+          },
+          local: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 13 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
+            name: 'a'
+          }
         },
         {
           type: 'ImportSpecifier',
-          imported: { type: 'Identifier', name: 'z' },
-          local: { type: 'Identifier', name: 'z' }
+          loc: {
+            start: { line: 1, col: 16 },
+            end: { line: 1, col: 17 },
+            source: ''
+          },
+          imported: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
+            name: 'z'
+          },
+          local: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            name: 'z'
+          }
         }
       ],
-      source: { type: 'Literal', value: 'y', raw: '"y"' }
+      source: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 24 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
+        value: 'y',
+        raw: '"y"'
+      }
     }
   ]
 }

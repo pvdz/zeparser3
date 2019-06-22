@@ -33,25 +33,75 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 14 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 14 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 14 },
+          source: ''
+        },
         params: [
           {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'x' },
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 2 },
+                    end: { line: 1, col: 4 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
                 value: {
                   type: 'AssignmentPattern',
-                  left: { type: 'Identifier', name: 'x' },
-                  right: { type: 'Identifier', name: 'y' }
+                  loc: {
+                    start: { line: 1, col: 2 },
+                    end: { line: 1, col: 7 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 2 },
+                      end: { line: 1, col: 4 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
+                  right: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 6 },
+                      end: { line: 1, col: 7 },
+                      source: ''
+                    },
+                    name: 'y'
+                  }
                 },
                 shorthand: true
               }
@@ -62,7 +112,15 @@ ast: {
         generator: false,
         async: false,
         expression: true,
-        body: { type: 'Identifier', name: 'z' }
+        body: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 13 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          name: 'z'
+        }
       }
     }
   ]

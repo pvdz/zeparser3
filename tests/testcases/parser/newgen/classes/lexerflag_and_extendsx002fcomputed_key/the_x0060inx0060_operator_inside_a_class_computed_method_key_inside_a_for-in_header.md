@@ -31,46 +31,137 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 38 } },
   body: [
     {
       type: 'ForInStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 38 },
+        source: ''
+      },
       left: {
         type: 'MemberExpression',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 32 },
+          source: ''
+        },
         object: {
           type: 'ClassExpression',
-          id: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 29 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            name: 'x'
+          },
           superClass: null,
           body: {
             type: 'ClassBody',
+            loc: {
+              start: { line: 1, col: 13 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
             body: [
               {
                 type: 'MethodDefinition',
+                loc: {
+                  start: { line: 1, col: 15 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
                 key: {
                   type: 'BinaryExpression',
-                  left: { type: 'Identifier', name: 'a' },
+                  loc: {
+                    start: { line: 1, col: 16 },
+                    end: { line: 1, col: 22 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 16 },
+                      end: { line: 1, col: 18 },
+                      source: ''
+                    },
+                    name: 'a'
+                  },
                   operator: 'in',
-                  right: { type: 'Identifier', name: 'b' }
+                  right: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 21 },
+                      end: { line: 1, col: 22 },
+                      source: ''
+                    },
+                    name: 'b'
+                  }
                 },
                 static: false,
                 computed: true,
                 kind: 'method',
                 value: {
                   type: 'FunctionExpression',
+                  loc: {
+                    start: { line: 1, col: 15 },
+                    end: { line: 1, col: 28 },
+                    source: ''
+                  },
                   generator: false,
                   async: false,
                   id: null,
                   params: [],
-                  body: { type: 'BlockStatement', body: [] }
+                  body: {
+                    type: 'BlockStatement',
+                    loc: {
+                      start: { line: 1, col: 25 },
+                      end: { line: 1, col: 28 },
+                      source: ''
+                    },
+                    body: []
+                  }
                 }
               }
             ]
           }
         },
-        property: { type: 'Identifier', name: 'x' },
+        property: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 30 },
+            end: { line: 1, col: 30 },
+            source: ''
+          },
+          name: 'x'
+        },
         computed: false
       },
-      right: { type: 'Identifier', name: 'c' },
-      body: { type: 'EmptyStatement' }
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 35 },
+          end: { line: 1, col: 36 },
+          source: ''
+        },
+        name: 'c'
+      },
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 37 },
+          end: { line: 1, col: 38 },
+          source: ''
+        }
+      }
     }
   ]
 }

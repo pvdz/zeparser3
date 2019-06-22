@@ -29,19 +29,43 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       expression: {
         type: 'NewExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 22 },
+          source: ''
+        },
         arguments: [],
         callee: {
           type: 'FunctionExpression',
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 22 },
+            source: ''
+          },
           generator: false,
           async: true,
           id: null,
           params: [],
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 22 },
+              source: ''
+            },
+            body: []
+          }
         }
       }
     }

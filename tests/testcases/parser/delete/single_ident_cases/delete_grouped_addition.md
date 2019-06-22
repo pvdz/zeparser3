@@ -29,18 +29,52 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       expression: {
         type: 'UnaryExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 22 },
+          source: ''
+        },
         operator: 'delete',
         prefix: true,
         argument: {
           type: 'BinaryExpression',
-          left: { type: 'Literal', value: 'foo', raw: '"foo"' },
+          loc: {
+            start: { line: 1, col: 8 },
+            end: { line: 1, col: 21 },
+            source: ''
+          },
+          left: {
+            type: 'Literal',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            value: 'foo',
+            raw: '"foo"'
+          },
           operator: '+',
-          right: { type: 'Literal', value: 'bar', raw: '"bar"' }
+          right: {
+            type: 'Literal',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
+            value: 'bar',
+            raw: '"bar"'
+          }
         }
       }
     }

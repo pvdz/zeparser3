@@ -31,23 +31,69 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 13 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 13 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 's' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 13 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 's'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 13 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 's' },
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 12 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 8 },
+                  source: ''
+                },
+                name: 's'
+              },
               kind: 'init',
               method: false,
               computed: false,
-              value: { type: 'Literal', value: true, raw: 'true' },
+              value: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 8 },
+                  end: { line: 1, col: 12 },
+                  source: ''
+                },
+                value: true,
+                raw: 'true'
+              },
               shorthand: false
             }
           ]

@@ -59,46 +59,132 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 34 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'o' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 34 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 'o'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 34 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'f' },
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 33 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 6 },
+                  source: ''
+                },
+                name: 'f'
+              },
               kind: 'init',
               method: true,
               computed: false,
               value: {
                 type: 'FunctionExpression',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 33 },
+                  source: ''
+                },
                 generator: false,
                 async: false,
                 id: null,
                 params: [],
                 body: {
                   type: 'BlockStatement',
+                  loc: {
+                    start: { line: 1, col: 8 },
+                    end: { line: 1, col: 33 },
+                    source: ''
+                  },
                   body: [
                     {
                       type: 'FunctionDeclaration',
+                      loc: {
+                        start: { line: 1, col: 10 },
+                        end: { line: 1, col: 25 },
+                        source: ''
+                      },
                       generator: false,
                       async: false,
-                      id: { type: 'Identifier', name: 'x' },
+                      id: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 19 },
+                          end: { line: 1, col: 19 },
+                          source: ''
+                        },
+                        name: 'x'
+                      },
                       params: [],
-                      body: { type: 'BlockStatement', body: [] }
+                      body: {
+                        type: 'BlockStatement',
+                        loc: {
+                          start: { line: 1, col: 22 },
+                          end: { line: 1, col: 25 },
+                          source: ''
+                        },
+                        body: []
+                      }
                     },
                     {
                       type: 'VariableDeclaration',
+                      loc: {
+                        start: { line: 1, col: 29 },
+                        end: { line: 1, col: 30 },
+                        source: ''
+                      },
                       kind: 'let',
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: { type: 'Identifier', name: 'x' },
+                          loc: {
+                            start: { line: 1, col: 29 },
+                            end: { line: 1, col: 30 },
+                            source: ''
+                          },
+                          id: {
+                            type: 'Identifier',
+                            loc: {
+                              start: { line: 1, col: 29 },
+                              end: { line: 1, col: 29 },
+                              source: ''
+                            },
+                            name: 'x'
+                          },
                           init: null
                         }
                       ]

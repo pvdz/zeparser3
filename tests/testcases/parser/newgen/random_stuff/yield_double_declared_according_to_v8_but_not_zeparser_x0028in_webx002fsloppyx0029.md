@@ -60,44 +60,148 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 76 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'yield' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'yield'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 16 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: { type: 'Identifier', name: 'e' },
-            cases: [ { type: 'SwitchCase', test: null, consequent: [] } ]
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 36 },
+              source: ''
+            },
+            discriminant: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 24 },
+                end: { line: 1, col: 25 },
+                source: ''
+              },
+              name: 'e'
+            },
+            cases: [
+              {
+                type: 'SwitchCase',
+                loc: {
+                  start: { line: 1, col: 27 },
+                  end: { line: 1, col: 35 },
+                  source: ''
+                },
+                test: null,
+                consequent: []
+              }
+            ]
           }
         ]
       }
     },
     {
       type: 'SwitchStatement',
-      discriminant: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 37 },
+        end: { line: 1, col: 63 },
+        source: ''
+      },
+      discriminant: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 44 },
+          end: { line: 1, col: 45 },
+          source: ''
+        },
+        name: 'x'
+      },
       cases: [
-        { type: 'SwitchCase', test: null, consequent: [] },
         {
           type: 'SwitchCase',
-          test: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 47 },
+            end: { line: 1, col: 55 },
+            source: ''
+          },
+          test: null,
+          consequent: []
+        },
+        {
+          type: 'SwitchCase',
+          loc: {
+            start: { line: 1, col: 55 },
+            end: { line: 1, col: 62 },
+            source: ''
+          },
+          test: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 60 },
+              end: { line: 1, col: 61 },
+              source: ''
+            },
+            name: 'x'
+          },
           consequent: []
         }
       ]
     },
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 69 },
+        end: { line: 1, col: 76 },
+        source: ''
+      },
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'yield' },
-          init: { type: 'Identifier', name: 'x' }
+          loc: {
+            start: { line: 1, col: 69 },
+            end: { line: 1, col: 76 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 69 },
+              end: { line: 1, col: 69 },
+              source: ''
+            },
+            name: 'yield'
+          },
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 75 },
+              end: { line: 1, col: 76 },
+              source: ''
+            },
+            name: 'x'
+          }
         }
       ]
     }

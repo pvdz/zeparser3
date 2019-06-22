@@ -29,61 +29,192 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 59 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 59 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 57 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 54 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
-              kind: 'init',
-              method: false,
-              computed: false,
-              value: { type: 'Identifier', name: 'a' },
-              shorthand: true
-            },
-            {
-              type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
-              kind: 'init',
-              method: false,
-              computed: false,
-              value: { type: 'Identifier', name: 'a' },
-              shorthand: false
-            },
-            {
-              type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 3 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 3 },
+                  source: ''
+                },
+                name: 'a'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
-                type: 'AssignmentPattern',
-                left: { type: 'Identifier', name: 'a' },
-                right: { type: 'Identifier', name: 'a' }
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 3 },
+                  source: ''
+                },
+                name: 'a'
+              },
+              shorthand: true
+            },
+            {
+              type: 'Property',
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 8 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                name: 'a'
+              },
+              kind: 'init',
+              method: false,
+              computed: false,
+              value: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 8 },
+                  source: ''
+                },
+                name: 'a'
               },
               shorthand: false
             },
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 15 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 10 },
+                  end: { line: 1, col: 12 },
+                  source: ''
+                },
+                name: 'a'
+              },
+              kind: 'init',
+              method: false,
+              computed: false,
+              value: {
+                type: 'AssignmentPattern',
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 15 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 13 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 14 },
+                    end: { line: 1, col: 15 },
+                    source: ''
+                  },
+                  name: 'a'
+                }
+              },
+              shorthand: false
+            },
+            {
+              type: 'Property',
+              loc: {
+                start: { line: 1, col: 17 },
+                end: { line: 1, col: 24 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 18 },
+                  end: { line: 1, col: 19 },
+                  source: ''
+                },
+                name: 'a'
+              },
               kind: 'init',
               method: false,
               computed: true,
               value: {
                 type: 'ObjectPattern',
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 24 },
+                  source: ''
+                },
                 properties: [
                   {
                     type: 'Property',
-                    key: { type: 'Identifier', name: 'a' },
+                    loc: {
+                      start: { line: 1, col: 22 },
+                      end: { line: 1, col: 23 },
+                      source: ''
+                    },
+                    key: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 22 },
+                        end: { line: 1, col: 23 },
+                        source: ''
+                      },
+                      name: 'a'
+                    },
                     kind: 'init',
                     method: false,
                     computed: false,
-                    value: { type: 'Identifier', name: 'a' },
+                    value: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 22 },
+                        end: { line: 1, col: 23 },
+                        source: ''
+                      },
+                      name: 'a'
+                    },
                     shorthand: true
                   }
                 ]
@@ -92,32 +223,104 @@ ast: {
             },
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 26 },
+                end: { line: 1, col: 42 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 26 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
+                name: 'a'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
                 type: 'MemberExpression',
+                loc: {
+                  start: { line: 1, col: 28 },
+                  end: { line: 1, col: 42 },
+                  source: ''
+                },
                 object: {
                   type: 'CallExpression',
-                  callee: { type: 'Identifier', name: 'some_call' },
+                  loc: {
+                    start: { line: 1, col: 28 },
+                    end: { line: 1, col: 39 },
+                    source: ''
+                  },
+                  callee: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 28 },
+                      end: { line: 1, col: 37 },
+                      source: ''
+                    },
+                    name: 'some_call'
+                  },
                   arguments: []
                 },
-                property: { type: 'Identifier', name: 'a' },
+                property: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 40 },
+                    end: { line: 1, col: 41 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 computed: true
               },
               shorthand: false
             },
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 44 },
+                end: { line: 1, col: 52 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 44 },
+                  end: { line: 1, col: 46 },
+                  source: ''
+                },
+                name: 'a'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
                 type: 'MemberExpression',
-                object: { type: 'ThisExpression' },
-                property: { type: 'Identifier', name: 'a' },
+                loc: {
+                  start: { line: 1, col: 46 },
+                  end: { line: 1, col: 52 },
+                  source: ''
+                },
+                object: {
+                  type: 'ThisExpression',
+                  loc: {
+                    start: { line: 1, col: 46 },
+                    end: { line: 1, col: 50 },
+                    source: ''
+                  }
+                },
+                property: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 51 },
+                    end: { line: 1, col: 51 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 computed: false
               },
               shorthand: false
@@ -125,7 +328,16 @@ ast: {
           ]
         },
         operator: '=',
-        right: { type: 'Literal', value: 0, raw: '0' }
+        right: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 56 },
+            end: { line: 1, col: 56 },
+            source: ''
+          },
+          value: 0,
+          raw: '0'
+        }
       }
     }
   ]

@@ -29,37 +29,103 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 19 },
+        source: ''
+      },
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
           id: {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'foo' },
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 10 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 5 },
+                    end: { line: 1, col: 9 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'a' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 9 },
+                    end: { line: 1, col: 10 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 shorthand: false
               },
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'bar' },
+                loc: {
+                  start: { line: 1, col: 11 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 11 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'bar'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'bar' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 11 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'bar'
+                },
                 shorthand: true
               }
             ]
           },
-          init: { type: 'Identifier', name: 'x' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 18 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
+            name: 'x'
+          }
         }
       ]
     }

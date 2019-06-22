@@ -29,23 +29,68 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 19 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 19 },
+        source: ''
+      },
       init: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'a' },
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'a'
+            },
             kind: 'init',
             method: false,
             computed: false,
             value: {
               type: 'BinaryExpression',
-              left: { type: 'Identifier', name: 'x' },
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 9 },
+                  end: { line: 1, col: 11 },
+                  source: ''
+                },
+                name: 'x'
+              },
               operator: '+',
-              right: { type: 'Identifier', name: 'y' }
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 13 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                name: 'y'
+              }
             },
             shorthand: false
           }
@@ -53,7 +98,14 @@ ast: {
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 19 },
+          source: ''
+        }
+      }
     }
   ]
 }

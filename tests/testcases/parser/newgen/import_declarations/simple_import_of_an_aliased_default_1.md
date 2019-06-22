@@ -47,16 +47,44 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
   body: [
     {
       type: 'ImportDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       specifiers: [
         {
           type: 'ImportNamespaceSpecifier',
-          local: { type: 'Identifier', name: 'a' }
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          local: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            name: 'a'
+          }
         }
       ],
-      source: { type: 'Literal', value: 'y', raw: '"y"' }
+      source: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 19 },
+          source: ''
+        },
+        value: 'y',
+        raw: '"y"'
+      }
     }
   ]
 }

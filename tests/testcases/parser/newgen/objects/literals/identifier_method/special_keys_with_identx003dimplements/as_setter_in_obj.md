@@ -29,25 +29,72 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 24 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 24 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 22 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'implements' },
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 21 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 6 },
+                source: ''
+              },
+              name: 'implements'
+            },
             kind: 'set',
             method: false,
             computed: false,
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 21 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
-              params: [ { type: 'Identifier', name: 'x' } ],
-              body: { type: 'BlockStatement', body: [] }
+              params: [
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 17 },
+                    end: { line: 1, col: 17 },
+                    source: ''
+                  },
+                  name: 'x'
+                }
+              ],
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 19 },
+                  end: { line: 1, col: 21 },
+                  source: ''
+                },
+                body: []
+              }
             },
             shorthand: false
           }

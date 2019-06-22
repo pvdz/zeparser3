@@ -29,11 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 33 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 33 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 33 },
+          source: ''
+        },
         params: [],
         id: null,
         generator: false,
@@ -41,14 +52,45 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 33 },
+            source: ''
+          },
           body: [
             {
               type: 'ExpressionStatement',
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 32 },
+                source: ''
+              },
               expression: {
                 type: 'AssignmentExpression',
-                left: { type: 'Identifier', name: 'public' },
+                loc: {
+                  start: { line: 1, col: 15 },
+                  end: { line: 1, col: 32 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 15 },
+                    end: { line: 1, col: 27 },
+                    source: ''
+                  },
+                  name: 'public'
+                },
                 operator: '=',
-                right: { type: 'Identifier', name: 'x' }
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 29 },
+                    end: { line: 1, col: 32 },
+                    source: ''
+                  },
+                  name: 'x'
+                }
               }
             }
           ]

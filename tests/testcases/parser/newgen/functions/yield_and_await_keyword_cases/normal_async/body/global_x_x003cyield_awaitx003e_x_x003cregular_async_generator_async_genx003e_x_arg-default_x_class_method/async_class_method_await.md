@@ -29,43 +29,121 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 64 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 64 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'as' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'as'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 64 },
+          source: ''
+        },
         body: [
           {
             type: 'ClassDeclaration',
-            id: { type: 'Identifier', name: 'A' },
+            loc: {
+              start: { line: 1, col: 21 },
+              end: { line: 1, col: 63 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 27 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              name: 'A'
+            },
             superClass: null,
             body: {
               type: 'ClassBody',
+              loc: {
+                start: { line: 1, col: 29 },
+                end: { line: 1, col: 63 },
+                source: ''
+              },
               body: [
                 {
                   type: 'MethodDefinition',
-                  key: { type: 'Identifier', name: 'f' },
+                  loc: {
+                    start: { line: 1, col: 30 },
+                    end: { line: 1, col: 61 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 36 },
+                      end: { line: 1, col: 37 },
+                      source: ''
+                    },
+                    name: 'f'
+                  },
                   static: false,
                   computed: false,
                   kind: 'method',
                   value: {
                     type: 'FunctionExpression',
+                    loc: {
+                      start: { line: 1, col: 30 },
+                      end: { line: 1, col: 61 },
+                      source: ''
+                    },
                     generator: false,
                     async: true,
                     id: null,
                     params: [],
                     body: {
                       type: 'BlockStatement',
+                      loc: {
+                        start: { line: 1, col: 40 },
+                        end: { line: 1, col: 61 },
+                        source: ''
+                      },
                       body: [
                         {
                           type: 'ReturnStatement',
+                          loc: {
+                            start: { line: 1, col: 42 },
+                            end: { line: 1, col: 60 },
+                            source: ''
+                          },
                           argument: {
                             type: 'AwaitExpression',
-                            argument: { type: 'Identifier', name: 'foo' }
+                            loc: {
+                              start: { line: 1, col: 49 },
+                              end: { line: 1, col: 58 },
+                              source: ''
+                            },
+                            argument: {
+                              type: 'Identifier',
+                              loc: {
+                                start: { line: 1, col: 55 },
+                                end: { line: 1, col: 58 },
+                                source: ''
+                              },
+                              name: 'foo'
+                            }
                           }
                         }
                       ]

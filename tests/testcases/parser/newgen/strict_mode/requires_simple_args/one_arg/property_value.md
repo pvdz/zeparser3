@@ -29,31 +29,85 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 32 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 31 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 30 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 4 },
+                source: ''
+              },
+              name: 'x'
+            },
             kind: 'init',
             method: false,
             computed: false,
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 4 },
+                end: { line: 1, col: 30 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
-              params: [ { type: 'Identifier', name: 'x' } ],
+              params: [
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 13 },
+                    end: { line: 1, col: 13 },
+                    source: ''
+                  },
+                  name: 'x'
+                }
+              ],
               body: {
                 type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 15 },
+                  end: { line: 1, col: 30 },
+                  source: ''
+                },
                 body: [
                   {
                     type: 'ExpressionStatement',
+                    loc: {
+                      start: { line: 1, col: 16 },
+                      end: { line: 1, col: 29 },
+                      source: ''
+                    },
                     expression: {
                       type: 'Literal',
+                      loc: {
+                        start: { line: 1, col: 16 },
+                        end: { line: 1, col: 16 },
+                        source: ''
+                      },
                       value: 'use strict',
                       raw: '"use strict"'
                     },

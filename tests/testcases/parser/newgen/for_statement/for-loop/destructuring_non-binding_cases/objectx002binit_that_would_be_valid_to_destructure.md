@@ -29,31 +29,83 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
       init: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 12 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 9 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'x' },
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                name: 'x'
+              },
               kind: 'init',
               method: false,
               computed: false,
-              value: { type: 'Identifier', name: 'x' },
+              value: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                name: 'x'
+              },
               shorthand: true
             }
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'z' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 12 },
+            source: ''
+          },
+          name: 'z'
+        }
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 16 },
+          source: ''
+        }
+      }
     }
   ]
 }

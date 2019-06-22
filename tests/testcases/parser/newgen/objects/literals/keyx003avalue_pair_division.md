@@ -29,23 +29,70 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'foo' },
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              name: 'foo'
+            },
             kind: 'init',
             method: false,
             computed: false,
             value: {
               type: 'BinaryExpression',
-              left: { type: 'Literal', value: true, raw: 'true' },
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 19 },
+                source: ''
+              },
+              left: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 12 },
+                  source: ''
+                },
+                value: true,
+                raw: 'true'
+              },
               operator: '/',
-              right: { type: 'Literal', value: false, raw: 'false' }
+              right: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 14 },
+                  end: { line: 1, col: 19 },
+                  source: ''
+                },
+                value: false,
+                raw: 'false'
+              }
             },
             shorthand: false
           }

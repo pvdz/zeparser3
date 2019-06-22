@@ -29,42 +29,113 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 49 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 49 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
       superClass: null,
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 49 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Identifier', name: 'constructor' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 31 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 16 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              name: 'constructor'
+            },
             static: true,
             computed: false,
             kind: 'method',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 29 },
+                  end: { line: 1, col: 31 },
+                  source: ''
+                },
+                body: []
+              }
             }
           },
           {
             type: 'MethodDefinition',
-            key: { type: 'Identifier', name: 'constructor' },
+            loc: {
+              start: { line: 1, col: 33 },
+              end: { line: 1, col: 48 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 33 },
+                end: { line: 1, col: 44 },
+                source: ''
+              },
+              name: 'constructor'
+            },
             static: false,
             computed: false,
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 33 },
+                end: { line: 1, col: 48 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 46 },
+                  end: { line: 1, col: 48 },
+                  source: ''
+                },
+                body: []
+              }
             }
           }
         ]

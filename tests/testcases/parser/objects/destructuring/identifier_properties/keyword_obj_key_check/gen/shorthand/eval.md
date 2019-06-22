@@ -29,19 +29,51 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 8 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 8 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 7 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'eval' },
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 6 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 6 },
+                source: ''
+              },
+              name: 'eval'
+            },
             kind: 'init',
             method: false,
             computed: false,
-            value: { type: 'Identifier', name: 'eval' },
+            value: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 6 },
+                source: ''
+              },
+              name: 'eval'
+            },
             shorthand: true
           }
         ]

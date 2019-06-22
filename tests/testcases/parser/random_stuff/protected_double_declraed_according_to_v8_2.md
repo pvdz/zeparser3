@@ -60,32 +60,117 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 58 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'arguments' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'arguments'
+      },
       params: [],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 20 },
+          end: { line: 1, col: 22 },
+          source: ''
+        },
+        body: []
+      }
     },
     {
       type: 'LabeledStatement',
-      label: { type: 'Identifier', name: 'v' },
+      loc: {
+        start: { line: 1, col: 22 },
+        end: { line: 1, col: 43 },
+        source: ''
+      },
+      label: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 22 },
+          end: { line: 1, col: 23 },
+          source: ''
+        },
+        name: 'v'
+      },
       body: {
         type: 'SwitchStatement',
-        discriminant: { type: 'Identifier', name: 'x' },
-        cases: [ { type: 'SwitchCase', test: null, consequent: [] } ]
+        loc: {
+          start: { line: 1, col: 24 },
+          end: { line: 1, col: 43 },
+          source: ''
+        },
+        discriminant: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 31 },
+            end: { line: 1, col: 32 },
+            source: ''
+          },
+          name: 'x'
+        },
+        cases: [
+          {
+            type: 'SwitchCase',
+            loc: {
+              start: { line: 1, col: 34 },
+              end: { line: 1, col: 42 },
+              source: ''
+            },
+            test: null,
+            consequent: []
+          }
+        ]
       }
     },
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 47 },
+        end: { line: 1, col: 58 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'arguments' },
-          init: { type: 'Identifier', name: 'l' }
+          loc: {
+            start: { line: 1, col: 47 },
+            end: { line: 1, col: 58 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 47 },
+              end: { line: 1, col: 47 },
+              source: ''
+            },
+            name: 'arguments'
+          },
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 57 },
+              end: { line: 1, col: 58 },
+              source: ''
+            },
+            name: 'l'
+          }
         }
       ]
     }

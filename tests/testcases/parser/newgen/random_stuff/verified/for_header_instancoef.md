@@ -31,18 +31,54 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 44 },
+        source: ''
+      },
       init: {
         type: 'BinaryExpression',
-        left: { type: 'Literal', value: 2935, raw: '2935' },
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 32 },
+          source: ''
+        },
+        left: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 1, col: 6 },
+            source: ''
+          },
+          value: 2935,
+          raw: '2935'
+        },
         operator: 'instanceof',
-        right: { type: 'Literal', value: Infinity, raw: '2e308' }
+        right: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 25 },
+            end: { line: 1, col: 25 },
+            source: ''
+          },
+          value: Infinity,
+          raw: '2e308'
+        }
       },
       test: null,
       update: null,
-      body: { type: 'DebuggerStatement' }
+      body: {
+        type: 'DebuggerStatement',
+        loc: {
+          start: { line: 1, col: 36 },
+          end: { line: 1, col: 44 },
+          source: ''
+        }
+      }
     }
   ]
 }

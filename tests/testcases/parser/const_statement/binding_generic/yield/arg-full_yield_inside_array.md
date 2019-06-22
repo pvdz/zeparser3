@@ -29,36 +29,94 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 26 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'g1' },
+            loc: {
+              start: { line: 1, col: 3 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 4 },
+                end: { line: 1, col: 6 },
+                source: ''
+              },
+              name: 'g1'
+            },
             kind: 'init',
             method: true,
             computed: false,
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 3 },
+                end: { line: 1, col: 25 },
+                source: ''
+              },
               generator: true,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 9 },
+                  end: { line: 1, col: 25 },
+                  source: ''
+                },
                 body: [
                   {
                     type: 'ExpressionStatement',
+                    loc: {
+                      start: { line: 1, col: 13 },
+                      end: { line: 1, col: 24 },
+                      source: ''
+                    },
                     expression: {
                       type: 'ArrayExpression',
+                      loc: {
+                        start: { line: 1, col: 13 },
+                        end: { line: 1, col: 24 },
+                        source: ''
+                      },
                       elements: [
                         {
                           type: 'YieldExpression',
+                          loc: {
+                            start: { line: 1, col: 14 },
+                            end: { line: 1, col: 21 },
+                            source: ''
+                          },
                           delegate: false,
-                          argument: { type: 'Literal', value: 1, raw: '1' }
+                          argument: {
+                            type: 'Literal',
+                            loc: {
+                              start: { line: 1, col: 20 },
+                              end: { line: 1, col: 20 },
+                              source: ''
+                            },
+                            value: 1,
+                            raw: '1'
+                          }
                         }
                       ]
                     }

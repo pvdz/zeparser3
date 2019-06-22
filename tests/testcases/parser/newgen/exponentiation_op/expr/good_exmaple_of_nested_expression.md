@@ -31,27 +31,86 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       expression: {
         type: 'BinaryExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
         left: {
           type: 'UnaryExpression',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 4 },
+            source: ''
+          },
           operator: '+',
           prefix: true,
-          argument: { type: 'Identifier', name: 'c' }
+          argument: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'c'
+          }
         },
         operator: '*',
         right: {
           type: 'BinaryExpression',
-          left: { type: 'Identifier', name: 'b' },
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 17 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'b'
+          },
           operator: '**',
           right: {
             type: 'BinaryExpression',
-            left: { type: 'Identifier', name: 'a' },
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            left: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 13 },
+                source: ''
+              },
+              name: 'a'
+            },
             operator: '**',
-            right: { type: 'Literal', value: 3, raw: '3' }
+            right: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 16 },
+                end: { line: 1, col: 16 },
+                source: ''
+              },
+              value: 3,
+              raw: '3'
+            }
           }
         }
       }

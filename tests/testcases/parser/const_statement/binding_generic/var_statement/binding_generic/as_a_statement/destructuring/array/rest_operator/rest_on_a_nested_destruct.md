@@ -29,29 +29,79 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 25 },
+        source: ''
+      },
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 25 },
+            source: ''
+          },
           id: {
             type: 'ArrayPattern',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 20 },
+              source: ''
+            },
             elements: [
               {
                 type: 'RestElement',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 18 },
+                  source: ''
+                },
                 argument: {
                   type: 'ArrayPattern',
+                  loc: {
+                    start: { line: 1, col: 8 },
+                    end: { line: 1, col: 18 },
+                    source: ''
+                  },
                   elements: [
-                    { type: 'Identifier', name: 'foo' },
-                    { type: 'Identifier', name: 'bar' }
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 9 },
+                        end: { line: 1, col: 12 },
+                        source: ''
+                      },
+                      name: 'foo'
+                    },
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 14 },
+                        end: { line: 1, col: 17 },
+                        source: ''
+                      },
+                      name: 'bar'
+                    }
                   ]
                 }
               }
             ]
           },
-          init: { type: 'Identifier', name: 'obj' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 22 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
+            name: 'obj'
+          }
         }
       ]
     }

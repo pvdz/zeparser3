@@ -31,15 +31,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 9 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 9 },
+        source: ''
+      },
       expression: {
         type: 'ArrayExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
         elements: [
           {
             type: 'SpreadElement',
-            argument: { type: 'Literal', value: true, raw: 'true' }
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            argument: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 4 },
+                end: { line: 1, col: 8 },
+                source: ''
+              },
+              value: true,
+              raw: 'true'
+            }
           }
         ]
       }

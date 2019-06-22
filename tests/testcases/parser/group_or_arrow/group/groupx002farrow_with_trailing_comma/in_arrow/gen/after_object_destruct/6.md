@@ -30,22 +30,59 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 11 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 11 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         params: [
           {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'a' },
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 3 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 2 },
+                    end: { line: 1, col: 3 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'a' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 2 },
+                    end: { line: 1, col: 3 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 shorthand: true
               }
             ]
@@ -55,7 +92,15 @@ ast: {
         generator: false,
         async: false,
         expression: true,
-        body: { type: 'Identifier', name: 'x' }
+        body: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 11 },
+            source: ''
+          },
+          name: 'x'
+        }
       }
     }
   ]

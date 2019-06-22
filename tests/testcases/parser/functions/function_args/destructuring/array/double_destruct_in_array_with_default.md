@@ -29,31 +29,109 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 34 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [
         {
           type: 'AssignmentPattern',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 20 },
+            source: ''
+          },
           left: {
             type: 'ArrayPattern',
-            elements: [ { type: 'Identifier', name: 'foo' } ]
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            elements: [
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 15 },
+                  source: ''
+                },
+                name: 'foo'
+              }
+            ]
           },
-          right: { type: 'Identifier', name: 'x' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 19 },
+              end: { line: 1, col: 20 },
+              source: ''
+            },
+            name: 'x'
+          }
         },
         {
           type: 'AssignmentPattern',
+          loc: {
+            start: { line: 1, col: 22 },
+            end: { line: 1, col: 31 },
+            source: ''
+          },
           left: {
             type: 'ArrayPattern',
-            elements: [ { type: 'Identifier', name: 'bar' } ]
+            loc: {
+              start: { line: 1, col: 22 },
+              end: { line: 1, col: 28 },
+              source: ''
+            },
+            elements: [
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 23 },
+                  end: { line: 1, col: 26 },
+                  source: ''
+                },
+                name: 'bar'
+              }
+            ]
           },
-          right: { type: 'Identifier', name: 'y' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 30 },
+              end: { line: 1, col: 31 },
+              source: ''
+            },
+            name: 'y'
+          }
         }
       ],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 32 },
+          end: { line: 1, col: 34 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

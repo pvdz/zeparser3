@@ -29,29 +29,84 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 23 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'x' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 23 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 1 },
+            source: ''
+          },
+          name: 'x'
+        },
         operator: '=',
         right: {
           type: 'FunctionExpression',
+          loc: {
+            start: { line: 1, col: 2 },
+            end: { line: 1, col: 23 },
+            source: ''
+          },
           generator: false,
           async: false,
-          id: { type: 'Identifier', name: 'f' },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            name: 'f'
+          },
           params: [],
           body: {
             type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 23 },
+              source: ''
+            },
             body: [
               {
                 type: 'VariableDeclaration',
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 22 },
+                  source: ''
+                },
                 kind: 'let',
                 declarations: [
                   {
                     type: 'VariableDeclarator',
-                    id: { type: 'Identifier', name: 'f' },
+                    loc: {
+                      start: { line: 1, col: 20 },
+                      end: { line: 1, col: 22 },
+                      source: ''
+                    },
+                    id: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 20 },
+                        end: { line: 1, col: 20 },
+                        source: ''
+                      },
+                      name: 'f'
+                    },
                     init: null
                   }
                 ]

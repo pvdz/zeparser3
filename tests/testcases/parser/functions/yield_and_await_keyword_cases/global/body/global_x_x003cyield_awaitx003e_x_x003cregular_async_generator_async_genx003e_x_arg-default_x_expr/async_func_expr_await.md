@@ -48,28 +48,83 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 48 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 48 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'f' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 48 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'f'
+          },
           init: {
             type: 'FunctionExpression',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 48 },
+              source: ''
+            },
             generator: false,
             async: true,
-            id: { type: 'Identifier', name: 'f' },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
+              name: 'f'
+            },
             params: [],
             body: {
               type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 27 },
+                end: { line: 1, col: 48 },
+                source: ''
+              },
               body: [
                 {
                   type: 'ReturnStatement',
+                  loc: {
+                    start: { line: 1, col: 29 },
+                    end: { line: 1, col: 47 },
+                    source: ''
+                  },
                   argument: {
                     type: 'AwaitExpression',
-                    argument: { type: 'Identifier', name: 'foo' }
+                    loc: {
+                      start: { line: 1, col: 36 },
+                      end: { line: 1, col: 45 },
+                      source: ''
+                    },
+                    argument: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 42 },
+                        end: { line: 1, col: 45 },
+                        source: ''
+                      },
+                      name: 'foo'
+                    }
                   }
                 }
               ]

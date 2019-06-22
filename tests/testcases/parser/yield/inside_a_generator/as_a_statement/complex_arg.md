@@ -29,26 +29,76 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 29 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 29 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 29 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 28 },
+              source: ''
+            },
             expression: {
               type: 'YieldExpression',
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 26 },
+                source: ''
+              },
               delegate: false,
               argument: {
                 type: 'BinaryExpression',
-                left: { type: 'Identifier', name: 'x' },
+                loc: {
+                  start: { line: 1, col: 15 },
+                  end: { line: 1, col: 26 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 21 },
+                    end: { line: 1, col: 23 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 operator: '+',
-                right: { type: 'Identifier', name: 'y' }
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 25 },
+                    end: { line: 1, col: 26 },
+                    source: ''
+                  },
+                  name: 'y'
+                }
               }
             }
           }

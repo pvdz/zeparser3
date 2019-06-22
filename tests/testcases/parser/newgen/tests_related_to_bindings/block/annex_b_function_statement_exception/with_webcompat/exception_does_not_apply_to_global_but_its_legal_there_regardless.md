@@ -29,23 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 33 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 16 },
+          source: ''
+        },
+        body: []
+      }
     },
-    { type: 'EmptyStatement' },
+    {
+      type: 'EmptyStatement',
+      loc: {
+        start: { line: 1, col: 16 },
+        end: { line: 1, col: 18 },
+        source: ''
+      }
+    },
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 18 },
+        end: { line: 1, col: 33 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 27 },
+          end: { line: 1, col: 27 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 31 },
+          end: { line: 1, col: 33 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

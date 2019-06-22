@@ -48,21 +48,61 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 33 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 33 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'f' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 33 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'f'
+          },
           init: {
             type: 'FunctionExpression',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 33 },
+              source: ''
+            },
             generator: false,
             async: true,
-            id: { type: 'Identifier', name: 'yield' },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
+              name: 'yield'
+            },
             params: [],
-            body: { type: 'BlockStatement', body: [] }
+            body: {
+              type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 31 },
+                end: { line: 1, col: 33 },
+                source: ''
+              },
+              body: []
+            }
           }
         }
       ]

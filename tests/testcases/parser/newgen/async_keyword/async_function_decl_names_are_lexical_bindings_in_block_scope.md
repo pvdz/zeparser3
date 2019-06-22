@@ -53,25 +53,70 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
   body: [
     {
       type: 'BlockStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 32 },
+        source: ''
+      },
       body: [
         {
           type: 'FunctionDeclaration',
+          loc: {
+            start: { line: 1, col: 8 },
+            end: { line: 1, col: 24 },
+            source: ''
+          },
           generator: false,
           async: true,
-          id: { type: 'Identifier', name: 'f' },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            name: 'f'
+          },
           params: [],
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 21 },
+              end: { line: 1, col: 24 },
+              source: ''
+            },
+            body: []
+          }
         },
         {
           type: 'VariableDeclaration',
+          loc: {
+            start: { line: 1, col: 28 },
+            end: { line: 1, col: 29 },
+            source: ''
+          },
           kind: 'var',
           declarations: [
             {
               type: 'VariableDeclarator',
-              id: { type: 'Identifier', name: 'f' },
+              loc: {
+                start: { line: 1, col: 28 },
+                end: { line: 1, col: 29 },
+                source: ''
+              },
+              id: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 28 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
+                name: 'f'
+              },
               init: null
             }
           ]

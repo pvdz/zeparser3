@@ -29,24 +29,75 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 20 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 19 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 's' },
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 5 },
+                  source: ''
+                },
+                name: 's'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
                 type: 'MemberExpression',
-                object: { type: 'Literal', value: 'foo', raw: '"foo"' },
-                property: { type: 'Identifier', name: 'foo' },
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                object: {
+                  type: 'Literal',
+                  loc: {
+                    start: { line: 1, col: 5 },
+                    end: { line: 1, col: 5 },
+                    source: ''
+                  },
+                  value: 'foo',
+                  raw: '"foo"'
+                },
+                property: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 11 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
                 computed: false
               },
               shorthand: false
@@ -54,7 +105,15 @@ ast: {
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'x' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 18 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
+          name: 'x'
+        }
       }
     }
   ]

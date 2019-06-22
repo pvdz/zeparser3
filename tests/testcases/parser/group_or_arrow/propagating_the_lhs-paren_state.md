@@ -29,24 +29,77 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
       expression: {
         type: 'BinaryExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
         left: {
           type: 'BinaryExpression',
-          left: { type: 'Identifier', name: 'foo' },
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 5 },
+              source: ''
+            },
+            name: 'foo'
+          },
           operator: '+',
           right: {
             type: 'BinaryExpression',
-            left: { type: 'Identifier', name: 'bar' },
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            left: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 8 },
+                end: { line: 1, col: 12 },
+                source: ''
+              },
+              name: 'bar'
+            },
             operator: '+',
-            right: { type: 'Identifier', name: 'boo' }
+            right: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 1, col: 17 },
+                source: ''
+              },
+              name: 'boo'
+            }
           }
         },
         operator: '+',
-        right: { type: 'Identifier', name: 'ding' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 21 },
+            end: { line: 1, col: 25 },
+            source: ''
+          },
+          name: 'ding'
+        }
       }
     }
   ]

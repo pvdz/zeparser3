@@ -29,36 +29,109 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 45 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 45 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 45 },
+          source: ''
+        },
         body: [
           {
             type: 'ClassDeclaration',
-            id: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 44 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
+              name: 'x'
+            },
             superClass: null,
             body: {
               type: 'ClassBody',
+              loc: {
+                start: { line: 1, col: 25 },
+                end: { line: 1, col: 44 },
+                source: ''
+              },
               body: [
                 {
                   type: 'MethodDefinition',
-                  key: { type: 'Identifier', name: 'foo' },
+                  loc: {
+                    start: { line: 1, col: 27 },
+                    end: { line: 1, col: 40 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 27 },
+                      end: { line: 1, col: 30 },
+                      source: ''
+                    },
+                    name: 'foo'
+                  },
                   static: false,
                   computed: false,
                   kind: 'method',
                   value: {
                     type: 'FunctionExpression',
+                    loc: {
+                      start: { line: 1, col: 27 },
+                      end: { line: 1, col: 40 },
+                      source: ''
+                    },
                     generator: false,
                     async: false,
                     id: null,
-                    params: [ { type: 'Identifier', name: 'await' } ],
-                    body: { type: 'BlockStatement', body: [] }
+                    params: [
+                      {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 31 },
+                          end: { line: 1, col: 31 },
+                          source: ''
+                        },
+                        name: 'await'
+                      }
+                    ],
+                    body: {
+                      type: 'BlockStatement',
+                      loc: {
+                        start: { line: 1, col: 37 },
+                        end: { line: 1, col: 40 },
+                        source: ''
+                      },
+                      body: []
+                    }
                   }
                 }
               ]

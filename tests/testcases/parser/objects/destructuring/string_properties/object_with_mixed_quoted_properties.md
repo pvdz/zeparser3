@@ -29,40 +29,120 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 23 },
+        source: ''
+      },
       expression: {
         type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'wrap' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 22 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 4 },
+            source: ''
+          },
+          name: 'wrap'
+        },
         arguments: [
           {
             type: 'AssignmentExpression',
+            loc: {
+              start: { line: 1, col: 5 },
+              end: { line: 1, col: 21 },
+              source: ''
+            },
             left: {
               type: 'ObjectPattern',
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 17 },
+                source: ''
+              },
               properties: [
                 {
                   type: 'Property',
-                  key: { type: 'Literal', value: 'a', raw: "'a'" },
+                  loc: {
+                    start: { line: 1, col: 6 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Literal',
+                    loc: {
+                      start: { line: 1, col: 6 },
+                      end: { line: 1, col: 10 },
+                      source: ''
+                    },
+                    value: 'a',
+                    raw: "'a'"
+                  },
                   kind: 'init',
                   method: false,
                   computed: false,
-                  value: { type: 'Identifier', name: 'b' },
+                  value: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 10 },
+                      end: { line: 1, col: 11 },
+                      source: ''
+                    },
+                    name: 'b'
+                  },
                   shorthand: false
                 },
                 {
                   type: 'Property',
-                  key: { type: 'Identifier', name: 'c' },
+                  loc: {
+                    start: { line: 1, col: 13 },
+                    end: { line: 1, col: 16 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 13 },
+                      end: { line: 1, col: 15 },
+                      source: ''
+                    },
+                    name: 'c'
+                  },
                   kind: 'init',
                   method: false,
                   computed: false,
-                  value: { type: 'Identifier', name: 'd' },
+                  value: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 15 },
+                      end: { line: 1, col: 16 },
+                      source: ''
+                    },
+                    name: 'd'
+                  },
                   shorthand: false
                 }
               ]
             },
             operator: '=',
-            right: { type: 'Identifier', name: 'obj' }
+            right: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 18 },
+                end: { line: 1, col: 21 },
+                source: ''
+              },
+              name: 'obj'
+            }
           }
         ]
       }

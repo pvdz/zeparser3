@@ -31,27 +31,85 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
       expression: {
         type: 'BinaryExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 16 },
+          source: ''
+        },
         left: {
           type: 'UnaryExpression',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 11 },
+            source: ''
+          },
           operator: 'void',
           prefix: true,
           argument: {
             type: 'MemberExpression',
-            object: { type: 'Identifier', name: 'x' },
-            property: { type: 'Identifier', name: 'abc' },
+            loc: {
+              start: { line: 1, col: 5 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            object: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 6 },
+                source: ''
+              },
+              name: 'x'
+            },
+            property: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              name: 'abc'
+            },
             computed: false
           }
         },
         operator: '+',
         right: {
           type: 'MemberExpression',
-          object: { type: 'Identifier', name: 'y' },
-          property: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 13 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
+          object: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 13 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            name: 'y'
+          },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 15 },
+              source: ''
+            },
+            name: 'x'
+          },
           computed: false
         }
       }

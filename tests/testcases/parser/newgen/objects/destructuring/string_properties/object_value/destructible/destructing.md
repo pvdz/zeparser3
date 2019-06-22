@@ -29,30 +29,86 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 19 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 19 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Literal', value: 'x', raw: '"x"' },
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 13 },
+                source: ''
+              },
+              key: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                value: 'x',
+                raw: '"x"'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
                 type: 'ObjectPattern',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 13 },
+                  source: ''
+                },
                 properties: [
                   {
                     type: 'Property',
-                    key: { type: 'Identifier', name: 'y' },
+                    loc: {
+                      start: { line: 1, col: 8 },
+                      end: { line: 1, col: 12 },
+                      source: ''
+                    },
+                    key: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 8 },
+                        end: { line: 1, col: 11 },
+                        source: ''
+                      },
+                      name: 'y'
+                    },
                     kind: 'init',
                     method: false,
                     computed: false,
-                    value: { type: 'Identifier', name: 'z' },
+                    value: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 11 },
+                        end: { line: 1, col: 12 },
+                        source: ''
+                      },
+                      name: 'z'
+                    },
                     shorthand: false
                   }
                 ]
@@ -62,7 +118,15 @@ ast: {
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'x' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 17 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
+          name: 'x'
+        }
       }
     }
   ]

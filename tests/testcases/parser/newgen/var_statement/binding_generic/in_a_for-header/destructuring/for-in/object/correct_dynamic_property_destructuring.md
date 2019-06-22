@@ -29,25 +29,67 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ForInStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
       left: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 18 },
+              source: ''
+            },
             id: {
               type: 'ObjectPattern',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 18 },
+                source: ''
+              },
               properties: [
                 {
                   type: 'Property',
-                  key: { type: 'Identifier', name: 'x' },
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 16 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 11 },
+                      end: { line: 1, col: 12 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
                   kind: 'init',
                   method: false,
                   computed: true,
-                  value: { type: 'Identifier', name: 'y' },
+                  value: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 15 },
+                      end: { line: 1, col: 16 },
+                      source: ''
+                    },
+                    name: 'y'
+                  },
                   shorthand: false
                 }
               ]
@@ -56,8 +98,23 @@ ast: {
           }
         ]
       },
-      right: { type: 'Identifier', name: 'obj' },
-      body: { type: 'EmptyStatement' }
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 21 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
+        name: 'obj'
+      },
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 25 },
+          end: { line: 1, col: 26 },
+          source: ''
+        }
+      }
     }
   ]
 }

@@ -29,27 +29,82 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 24 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 24 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
       superClass: null,
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Identifier', name: 'break' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 23 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 13 },
+                end: { line: 1, col: 18 },
+                source: ''
+              },
+              name: 'break'
+            },
             static: false,
             computed: false,
             kind: 'set',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
-              params: [ { type: 'Identifier', name: 'x' } ],
-              body: { type: 'BlockStatement', body: [] }
+              params: [
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 19 },
+                    end: { line: 1, col: 19 },
+                    source: ''
+                  },
+                  name: 'x'
+                }
+              ],
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 23 },
+                  source: ''
+                },
+                body: []
+              }
             }
           }
         ]

@@ -29,17 +29,65 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
   body: [
     {
       type: 'LabeledStatement',
-      label: { type: 'Identifier', name: 'foo' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 30 },
+        source: ''
+      },
+      label: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 3 },
+          source: ''
+        },
+        name: 'foo'
+      },
       body: {
         type: 'ForInStatement',
-        left: { type: 'Identifier', name: 'x' },
-        right: { type: 'Identifier', name: 'y' },
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 30 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 12 },
+            source: ''
+          },
+          name: 'x'
+        },
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
+          name: 'y'
+        },
         body: {
           type: 'ContinueStatement',
-          label: { type: 'Identifier', name: 'foo' }
+          loc: {
+            start: { line: 1, col: 18 },
+            end: { line: 1, col: 30 },
+            source: ''
+          },
+          label: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 27 },
+              end: { line: 1, col: 27 },
+              source: ''
+            },
+            name: 'foo'
+          }
         }
       }
     }

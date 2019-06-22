@@ -29,45 +29,121 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 31 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 31 },
+        source: ''
+      },
       expression: {
         type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'wrap' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 30 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 4 },
+            source: ''
+          },
+          name: 'wrap'
+        },
         arguments: [
           {
             type: 'ObjectExpression',
+            loc: {
+              start: { line: 1, col: 5 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'foo' },
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 19 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 12 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
                 kind: 'init',
                 method: true,
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
+                  loc: {
+                    start: { line: 1, col: 6 },
+                    end: { line: 1, col: 19 },
+                    source: ''
+                  },
                   generator: false,
                   async: true,
                   id: null,
                   params: [],
-                  body: { type: 'BlockStatement', body: [] }
+                  body: {
+                    type: 'BlockStatement',
+                    loc: {
+                      start: { line: 1, col: 17 },
+                      end: { line: 1, col: 19 },
+                      source: ''
+                    },
+                    body: []
+                  }
                 },
                 shorthand: false
               },
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'bar' },
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 21 },
+                    end: { line: 1, col: 24 },
+                    source: ''
+                  },
+                  name: 'bar'
+                },
                 kind: 'init',
                 method: true,
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
+                  loc: {
+                    start: { line: 1, col: 21 },
+                    end: { line: 1, col: 28 },
+                    source: ''
+                  },
                   generator: false,
                   async: false,
                   id: null,
                   params: [],
-                  body: { type: 'BlockStatement', body: [] }
+                  body: {
+                    type: 'BlockStatement',
+                    loc: {
+                      start: { line: 1, col: 26 },
+                      end: { line: 1, col: 28 },
+                      source: ''
+                    },
+                    body: []
+                  }
                 },
                 shorthand: false
               }

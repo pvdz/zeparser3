@@ -29,20 +29,60 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 20 },
+        source: ''
+      },
       expression: {
         type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'foo' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 3 },
+            source: ''
+          },
+          name: 'foo'
+        },
         arguments: [
           {
             type: 'FunctionExpression',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
             generator: true,
             async: false,
-            id: { type: 'Identifier', name: 'f' },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              name: 'f'
+            },
             params: [],
-            body: { type: 'BlockStatement', body: [] }
+            body: {
+              type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 17 },
+                end: { line: 1, col: 19 },
+                source: ''
+              },
+              body: []
+            }
           }
         ]
       }

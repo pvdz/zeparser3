@@ -29,25 +29,82 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
   body: [
     {
       type: 'ForInStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 23 },
+        source: ''
+      },
       left: {
         type: 'MemberExpression',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
         object: {
           type: 'ArrowFunctionExpression',
-          params: [ { type: 'Identifier', name: 'x' } ],
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 1, col: 13 },
+            source: ''
+          },
+          params: [
+            {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 8 },
+                source: ''
+              },
+              name: 'x'
+            }
+          ],
           id: null,
           generator: false,
           async: false,
           expression: false,
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
+            body: []
+          }
         },
-        property: { type: 'Identifier', name: 'x' },
+        property: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
+          name: 'x'
+        },
         computed: false
       },
-      right: { type: 'Identifier', name: 'y' },
-      body: { type: 'EmptyStatement' }
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 20 },
+          end: { line: 1, col: 21 },
+          source: ''
+        },
+        name: 'y'
+      },
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 22 },
+          end: { line: 1, col: 23 },
+          source: ''
+        }
+      }
     }
   ]
 }

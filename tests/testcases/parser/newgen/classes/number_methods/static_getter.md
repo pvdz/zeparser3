@@ -29,27 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'A' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'A'
+      },
       superClass: null,
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 26 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Literal', value: 6, raw: '6' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
+            key: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 20 },
+                source: ''
+              },
+              value: 6,
+              raw: '6'
+            },
             static: true,
             computed: false,
             kind: 'get',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 25 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 23 },
+                  end: { line: 1, col: 25 },
+                  source: ''
+                },
+                body: []
+              }
             }
           }
         ]

@@ -31,29 +31,77 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [
         {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 12 },
+                end: { line: 1, col: 13 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 13 },
+                  source: ''
+                },
+                name: 'a'
+              },
               kind: 'init',
               method: false,
               computed: false,
-              value: { type: 'Identifier', name: 'a' },
+              value: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 13 },
+                  source: ''
+                },
+                name: 'a'
+              },
               shorthand: true
             }
           ]
         }
       ],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 16 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

@@ -29,32 +29,89 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 32 },
+        source: ''
+      },
       init: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 28 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 28 },
+              source: ''
+            },
             id: {
               type: 'ArrayPattern',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
               elements: [
-                { type: 'Identifier', name: 'foo' },
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 13 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
                 {
                   type: 'RestElement',
-                  argument: { type: 'Identifier', name: 'bar' }
+                  loc: {
+                    start: { line: 1, col: 15 },
+                    end: { line: 1, col: 21 },
+                    source: ''
+                  },
+                  argument: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 18 },
+                      end: { line: 1, col: 21 },
+                      source: ''
+                    },
+                    name: 'bar'
+                  }
                 }
               ]
             },
-            init: { type: 'Identifier', name: 'obj' }
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 25 },
+                end: { line: 1, col: 28 },
+                source: ''
+              },
+              name: 'obj'
+            }
           }
         ]
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 31 },
+          end: { line: 1, col: 32 },
+          source: ''
+        }
+      }
     }
   ]
 }

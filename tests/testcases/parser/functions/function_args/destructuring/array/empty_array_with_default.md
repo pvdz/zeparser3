@@ -29,20 +29,63 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 20 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [
         {
           type: 'AssignmentPattern',
-          left: { type: 'ArrayPattern', elements: [] },
-          right: { type: 'Identifier', name: 'x' }
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 17 },
+            source: ''
+          },
+          left: {
+            type: 'ArrayPattern',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            elements: []
+          },
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            name: 'x'
+          }
         }
       ],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

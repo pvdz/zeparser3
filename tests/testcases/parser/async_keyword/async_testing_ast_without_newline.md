@@ -31,33 +31,104 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'f' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 27 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'f'
+          },
           init: {
             type: 'BinaryExpression',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 27 },
+              source: ''
+            },
             left: {
               type: 'BinaryExpression',
+              loc: {
+                start: { line: 1, col: 8 },
+                end: { line: 1, col: 24 },
+                source: ''
+              },
               left: {
                 type: 'BinaryExpression',
-                left: { type: 'Identifier', name: 'a' },
+                loc: {
+                  start: { line: 1, col: 8 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 8 },
+                    end: { line: 1, col: 10 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 operator: '+',
-                right: { type: 'Identifier', name: 'b' }
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'b'
+                }
               },
               operator: '+',
               right: {
                 type: 'CallExpression',
-                callee: { type: 'Identifier', name: 'async' },
+                loc: {
+                  start: { line: 1, col: 16 },
+                  end: { line: 1, col: 24 },
+                  source: ''
+                },
+                callee: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 16 },
+                    end: { line: 1, col: 24 },
+                    source: ''
+                  },
+                  name: 'async'
+                },
                 arguments: []
               }
             },
             operator: '+',
-            right: { type: 'Identifier', name: 'd' }
+            right: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 26 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              name: 'd'
+            }
           }
         }
       ]

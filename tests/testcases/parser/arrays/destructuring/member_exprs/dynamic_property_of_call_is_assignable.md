@@ -29,28 +29,78 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 12 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 12 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 12 },
+          source: ''
+        },
         left: {
           type: 'ArrayPattern',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 9 },
+            source: ''
+          },
           elements: [
             {
               type: 'MemberExpression',
+              loc: {
+                start: { line: 1, col: 0 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
               object: {
                 type: 'CallExpression',
-                callee: { type: 'Identifier', name: 'x' },
+                loc: {
+                  start: { line: 1, col: 0 },
+                  end: { line: 1, col: 4 },
+                  source: ''
+                },
+                callee: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 1 },
+                    end: { line: 1, col: 2 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 arguments: []
               },
-              property: { type: 'Identifier', name: 'y' },
+              property: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 6 },
+                  source: ''
+                },
+                name: 'y'
+              },
               computed: true
             }
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'z' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 12 },
+            source: ''
+          },
+          name: 'z'
+        }
       }
     }
   ]

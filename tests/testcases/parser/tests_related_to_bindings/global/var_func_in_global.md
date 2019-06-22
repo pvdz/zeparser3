@@ -37,27 +37,82 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 9 },
+        source: ''
+      },
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'x' },
-          init: { type: 'Identifier', name: 'a' }
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 9 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'x'
+          },
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 9 },
+              source: ''
+            },
+            name: 'a'
+          }
         }
       ]
     },
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 11 },
+        end: { line: 1, col: 25 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'x' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 20 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
+        name: 'x'
+      },
       params: [],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 23 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
+        body: []
+      }
     },
-    { type: 'EmptyStatement' }
+    {
+      type: 'EmptyStatement',
+      loc: {
+        start: { line: 1, col: 25 },
+        end: { line: 1, col: 26 },
+        source: ''
+      }
+    }
   ]
 }
 

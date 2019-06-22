@@ -47,23 +47,76 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
   body: [
     {
       type: 'ExportNamedDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 32 },
+        source: ''
+      },
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 11 },
+          end: { line: 1, col: 31 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'foo' },
-            init: { type: 'Identifier', name: 'bar' }
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 20 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 11 },
+                source: ''
+              },
+              name: 'foo'
+            },
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 17 },
+                end: { line: 1, col: 20 },
+                source: ''
+              },
+              name: 'bar'
+            }
           },
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'zoo' },
-            init: { type: 'Identifier', name: 'boo' }
+            loc: {
+              start: { line: 1, col: 22 },
+              end: { line: 1, col: 31 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 22 },
+                source: ''
+              },
+              name: 'zoo'
+            },
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 28 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
+              name: 'boo'
+            }
           }
         ]
       },

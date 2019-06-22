@@ -47,32 +47,87 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 33 } },
   body: [
     {
       type: 'ExportNamedDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 33 },
+        source: ''
+      },
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 11 },
+          end: { line: 1, col: 32 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 32 },
+              source: ''
+            },
             id: {
               type: 'ArrayPattern',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
               elements: [
                 {
                   type: 'RestElement',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 25 },
+                    source: ''
+                  },
                   argument: {
                     type: 'ArrayPattern',
+                    loc: {
+                      start: { line: 1, col: 15 },
+                      end: { line: 1, col: 25 },
+                      source: ''
+                    },
                     elements: [
-                      { type: 'Identifier', name: 'foo' },
-                      { type: 'Identifier', name: 'bar' }
+                      {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 16 },
+                          end: { line: 1, col: 19 },
+                          source: ''
+                        },
+                        name: 'foo'
+                      },
+                      {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 21 },
+                          end: { line: 1, col: 24 },
+                          source: ''
+                        },
+                        name: 'bar'
+                      }
                     ]
                   }
                 }
               ]
             },
-            init: { type: 'Identifier', name: 'obj' }
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 29 },
+                end: { line: 1, col: 32 },
+                source: ''
+              },
+              name: 'obj'
+            }
           }
         ]
       },

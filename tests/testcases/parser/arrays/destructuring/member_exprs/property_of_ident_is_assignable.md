@@ -29,24 +29,69 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 9 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 9 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
         left: {
           type: 'ArrayPattern',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 6 },
+            source: ''
+          },
           elements: [
             {
               type: 'MemberExpression',
-              object: { type: 'Identifier', name: 'x' },
-              property: { type: 'Identifier', name: 'y' },
+              loc: {
+                start: { line: 1, col: 0 },
+                end: { line: 1, col: 4 },
+                source: ''
+              },
+              object: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 1 },
+                  end: { line: 1, col: 2 },
+                  source: ''
+                },
+                name: 'x'
+              },
+              property: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 3 },
+                  end: { line: 1, col: 3 },
+                  source: ''
+                },
+                name: 'y'
+              },
               computed: false
             }
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'z' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 8 },
+            end: { line: 1, col: 9 },
+            source: ''
+          },
+          name: 'z'
+        }
       }
     }
   ]

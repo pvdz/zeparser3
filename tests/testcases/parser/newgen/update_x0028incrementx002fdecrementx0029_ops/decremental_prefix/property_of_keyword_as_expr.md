@@ -29,17 +29,48 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 10 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 10 },
+        source: ''
+      },
       expression: {
         type: 'UpdateExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
         operator: '--',
         prefix: true,
         argument: {
           type: 'MemberExpression',
-          object: { type: 'ThisExpression' },
-          property: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 3 },
+            end: { line: 1, col: 9 },
+            source: ''
+          },
+          object: {
+            type: 'ThisExpression',
+            loc: {
+              start: { line: 1, col: 3 },
+              end: { line: 1, col: 7 },
+              source: ''
+            }
+          },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'x'
+          },
           computed: false
         }
       }

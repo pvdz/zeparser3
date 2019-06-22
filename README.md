@@ -93,6 +93,16 @@ The no-AST build is almost as perfect as the regular build except for certain va
 - Regular expression on new line after arrow with block body (`()=>{} \n /foo/g`, prohibited by ASI rules and can't be a division)
 - Update operator anything that's writable but not a valid var or member expression (`++[]`)
 
+# Testing
+
+Each test is individually encapsulated in an `.md` file in `tests/testcases/parser/**`. This file will contain the input code and the output as expected for sloppy mode, strict mode (script goal), module goal, and web compat mode (only works in sloppy mode, script goal).
+
+If a run passes then the AST and types of tokens are printed in the output. Otherwise the error message and a pointer to where the error occurred are listed.
+
+The files can be auto-updated with the `-n` flag of the test runner. This makes it easy to update something in the parser and use SCM to confirm whether anything changed, and if so what.
+
+There are also autogen.md files, which generate a bunch of combinatory tests, similar to the other tests.
+
 # Perf testing
 
 _(This is broken at the moment)_
@@ -112,7 +122,6 @@ See above for configuring the build script. In the perf script you can adjust th
 The parser itself supports ES5-ES9 but is not production ready;
 
 - Harden the parser and find and fix more edge cases that currently pester the parser
-- Add location to AST nodes
 - Setup a test running that confirms AST nodes against other engines (Babel/Flow/etc)
 - Wire up the fuzzer
 - Tighter integration between parser and tokenizer of pre-known tokens

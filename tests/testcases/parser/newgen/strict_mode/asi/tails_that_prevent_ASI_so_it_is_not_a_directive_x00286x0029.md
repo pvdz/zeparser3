@@ -30,41 +30,123 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 33 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 33 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 12 },
+          end: { line: 2, col: 33 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 2, col: 22 },
+              source: ''
+            },
             expression: {
               type: 'BinaryExpression',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 2, col: 20 },
+                source: ''
+              },
               left: {
                 type: 'BinaryExpression',
+                loc: {
+                  start: { line: 1, col: 14 },
+                  end: { line: 2, col: 18 },
+                  source: ''
+                },
                 left: {
                   type: 'Literal',
+                  loc: {
+                    start: { line: 1, col: 14 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
                   value: 'use strict',
                   raw: '"use strict"'
                 },
                 operator: '/',
-                right: { type: 'Identifier', name: 'f' }
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 2, col: 17 },
+                    end: { line: 2, col: 18 },
+                    source: ''
+                  },
+                  name: 'f'
+                }
               },
               operator: '/',
-              right: { type: 'Identifier', name: 'g' }
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 2, col: 19 },
+                  end: { line: 2, col: 20 },
+                  source: ''
+                },
+                name: 'g'
+              }
             }
           },
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 2, col: 22 },
+              end: { line: 2, col: 32 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'eval' },
+              loc: {
+                start: { line: 2, col: 22 },
+                end: { line: 2, col: 30 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 2, col: 22 },
+                  end: { line: 2, col: 27 },
+                  source: ''
+                },
+                name: 'eval'
+              },
               operator: '=',
-              right: { type: 'Literal', value: 1, raw: '1' }
+              right: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 2, col: 29 },
+                  end: { line: 2, col: 29 },
+                  source: ''
+                },
+                value: 1,
+                raw: '1'
+              }
             }
           }
         ]

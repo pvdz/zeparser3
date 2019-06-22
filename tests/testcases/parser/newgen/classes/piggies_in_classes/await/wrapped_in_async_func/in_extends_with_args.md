@@ -29,24 +29,77 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 54 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 54 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 54 },
+          source: ''
+        },
         body: [
           {
             type: 'ClassDeclaration',
-            id: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 23 },
+              end: { line: 1, col: 53 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 29 },
+                end: { line: 1, col: 29 },
+                source: ''
+              },
+              name: 'x'
+            },
             superClass: {
               type: 'AwaitExpression',
-              argument: { type: 'Identifier', name: 'y' }
+              loc: {
+                start: { line: 1, col: 39 },
+                end: { line: 1, col: 47 },
+                source: ''
+              },
+              argument: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 45 },
+                  end: { line: 1, col: 47 },
+                  source: ''
+                },
+                name: 'y'
+              }
             },
-            body: { type: 'ClassBody', body: [] }
+            body: {
+              type: 'ClassBody',
+              loc: {
+                start: { line: 1, col: 47 },
+                end: { line: 1, col: 53 },
+                source: ''
+              },
+              body: []
+            }
           }
         ]
       }

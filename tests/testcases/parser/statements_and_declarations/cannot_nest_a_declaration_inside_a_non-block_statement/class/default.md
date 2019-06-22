@@ -29,20 +29,60 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
   body: [
     {
       type: 'SwitchStatement',
-      discriminant: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 34 },
+        source: ''
+      },
+      discriminant: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'x'
+      },
       cases: [
         {
           type: 'SwitchCase',
+          loc: {
+            start: { line: 1, col: 13 },
+            end: { line: 1, col: 33 },
+            source: ''
+          },
           test: null,
           consequent: [
             {
               type: 'ClassDeclaration',
-              id: { type: 'Identifier', name: 'X' },
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 33 },
+                source: ''
+              },
+              id: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 28 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
+                name: 'X'
+              },
               superClass: null,
-              body: { type: 'ClassBody', body: [] }
+              body: {
+                type: 'ClassBody',
+                loc: {
+                  start: { line: 1, col: 30 },
+                  end: { line: 1, col: 33 },
+                  source: ''
+                },
+                body: []
+              }
             }
           ]
         }

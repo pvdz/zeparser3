@@ -31,8 +31,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 3, col: 1 } },
   body: [
-    { type: 'BlockStatement', body: [ { type: 'DebuggerStatement' } ] }
+    {
+      type: 'BlockStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 3, col: 1 },
+        source: ''
+      },
+      body: [
+        {
+          type: 'DebuggerStatement',
+          loc: {
+            start: { line: 2, col: 2 },
+            end: { line: 3, col: 0 },
+            source: ''
+          }
+        }
+      ]
+    }
   ]
 }
 

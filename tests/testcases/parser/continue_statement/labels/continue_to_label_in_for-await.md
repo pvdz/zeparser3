@@ -29,27 +29,93 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 59 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 59 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 59 },
+          source: ''
+        },
         body: [
           {
             type: 'LabeledStatement',
-            label: { type: 'Identifier', name: 'foo' },
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 58 },
+              source: ''
+            },
+            label: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
+              name: 'foo'
+            },
             body: {
               type: 'ForOfStatement',
-              left: { type: 'Identifier', name: 'x' },
-              right: { type: 'Identifier', name: 'y' },
+              loc: {
+                start: { line: 1, col: 25 },
+                end: { line: 1, col: 58 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 36 },
+                  end: { line: 1, col: 38 },
+                  source: ''
+                },
+                name: 'x'
+              },
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 41 },
+                  end: { line: 1, col: 42 },
+                  source: ''
+                },
+                name: 'y'
+              },
               await: true,
               body: {
                 type: 'ContinueStatement',
-                label: { type: 'Identifier', name: 'foo' }
+                loc: {
+                  start: { line: 1, col: 44 },
+                  end: { line: 1, col: 58 },
+                  source: ''
+                },
+                label: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 53 },
+                    end: { line: 1, col: 53 },
+                    source: ''
+                  },
+                  name: 'foo'
+                }
               }
             }
           }

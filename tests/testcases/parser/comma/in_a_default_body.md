@@ -29,22 +29,67 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 25 } },
   body: [
     {
       type: 'SwitchStatement',
-      discriminant: { type: 'Identifier', name: 'a' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 25 },
+        source: ''
+      },
+      discriminant: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'a'
+      },
       cases: [
         {
           type: 'SwitchCase',
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 24 },
+            source: ''
+          },
           test: null,
           consequent: [
             {
               type: 'ExpressionStatement',
+              loc: {
+                start: { line: 1, col: 21 },
+                end: { line: 1, col: 24 },
+                source: ''
+              },
               expression: {
                 type: 'SequenceExpression',
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 24 },
+                  source: ''
+                },
                 expressions: [
-                  { type: 'Identifier', name: 'c' },
-                  { type: 'Identifier', name: 'd' }
+                  {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 21 },
+                      end: { line: 1, col: 22 },
+                      source: ''
+                    },
+                    name: 'c'
+                  },
+                  {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 23 },
+                      end: { line: 1, col: 24 },
+                      source: ''
+                    },
+                    name: 'd'
+                  }
                 ]
               }
             }

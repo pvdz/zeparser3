@@ -29,20 +29,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 60 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 60 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 60 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
             expression: {
               type: 'Literal',
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 15 },
+                source: ''
+              },
               value: 'use strict',
               raw: '"use strict"'
             },
@@ -50,12 +79,35 @@ ast: {
           },
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 29 },
+              end: { line: 1, col: 59 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'await' },
+              loc: {
+                start: { line: 1, col: 30 },
+                end: { line: 1, col: 56 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 30 },
+                  end: { line: 1, col: 36 },
+                  source: ''
+                },
+                name: 'await'
+              },
               operator: '=',
               right: {
                 type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 38 },
+                  end: { line: 1, col: 38 },
+                  source: ''
+                },
                 value: 'sentinal 7533336',
                 raw: '"sentinal 7533336"'
               }

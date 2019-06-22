@@ -31,40 +31,125 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 3, col: 1 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 3, col: 1 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'f' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 3, col: 1 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 'f'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 3, col: 1 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'e' },
+              loc: {
+                start: { line: 2, col: 2 },
+                end: { line: 3, col: 0 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 2, col: 2 },
+                  end: { line: 2, col: 3 },
+                  source: ''
+                },
+                name: 'e'
+              },
               kind: 'init',
               method: true,
               computed: false,
               value: {
                 type: 'FunctionExpression',
+                loc: {
+                  start: { line: 2, col: 2 },
+                  end: { line: 3, col: 0 },
+                  source: ''
+                },
                 generator: false,
                 async: false,
                 id: null,
                 params: [
                   {
                     type: 'AssignmentPattern',
-                    left: { type: 'Identifier', name: 'x' },
+                    loc: {
+                      start: { line: 2, col: 4 },
+                      end: { line: 2, col: 18 },
+                      source: ''
+                    },
+                    left: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 2, col: 4 },
+                        end: { line: 2, col: 4 },
+                        source: ''
+                      },
+                      name: 'x'
+                    },
                     right: {
                       type: 'AssignmentExpression',
-                      left: { type: 'Identifier', name: 'protected' },
+                      loc: {
+                        start: { line: 2, col: 6 },
+                        end: { line: 2, col: 18 },
+                        source: ''
+                      },
+                      left: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 2, col: 6 },
+                          end: { line: 2, col: 15 },
+                          source: ''
+                        },
+                        name: 'protected'
+                      },
                       operator: '=',
-                      right: { type: 'Literal', value: 10, raw: '10' }
+                      right: {
+                        type: 'Literal',
+                        loc: {
+                          start: { line: 2, col: 16 },
+                          end: { line: 2, col: 16 },
+                          source: ''
+                        },
+                        value: 10,
+                        raw: '10'
+                      }
                     }
                   }
                 ],
-                body: { type: 'BlockStatement', body: [] }
+                body: {
+                  type: 'BlockStatement',
+                  loc: {
+                    start: { line: 2, col: 19 },
+                    end: { line: 3, col: 0 },
+                    source: ''
+                  },
+                  body: []
+                }
               },
               shorthand: false
             }

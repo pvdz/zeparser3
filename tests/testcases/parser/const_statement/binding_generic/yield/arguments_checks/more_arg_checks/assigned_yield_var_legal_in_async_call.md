@@ -29,22 +29,75 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 21 },
+        source: ''
+      },
       expression: {
         type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'async' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 21 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 21 },
+            source: ''
+          },
+          name: 'async'
+        },
         arguments: [
           {
             type: 'AssignmentExpression',
-            left: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 7 },
+              end: { line: 1, col: 20 },
+              source: ''
+            },
+            left: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'x'
+            },
             operator: '=',
             right: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'z' },
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 20 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 11 },
+                  end: { line: 1, col: 13 },
+                  source: ''
+                },
+                name: 'z'
+              },
               operator: '=',
-              right: { type: 'Identifier', name: 'yield' }
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 15 },
+                  end: { line: 1, col: 20 },
+                  source: ''
+                },
+                name: 'yield'
+              }
             }
           }
         ]

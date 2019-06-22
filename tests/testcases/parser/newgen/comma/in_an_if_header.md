@@ -29,19 +29,59 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 11 } },
   body: [
     {
       type: 'IfStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 11 },
+        source: ''
+      },
       test: {
         type: 'SequenceExpression',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 7 },
+          source: ''
+        },
         expressions: [
-          { type: 'Identifier', name: 'a' },
-          { type: 'Identifier', name: 'b' }
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 5 },
+              source: ''
+            },
+            name: 'a'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 7 },
+              source: ''
+            },
+            name: 'b'
+          }
         ]
       },
       consequent: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'c' }
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 9 },
+            end: { line: 1, col: 10 },
+            source: ''
+          },
+          name: 'c'
+        }
       },
       alternate: null
     }

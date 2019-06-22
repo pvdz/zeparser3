@@ -53,26 +53,81 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
   body: [
     {
       type: 'BlockStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       body: [
         {
           type: 'FunctionDeclaration',
+          loc: {
+            start: { line: 1, col: 2 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
           generator: false,
           async: false,
-          id: { type: 'Identifier', name: 'f' },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            name: 'f'
+          },
           params: [],
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 18 },
+              source: ''
+            },
+            body: []
+          }
         },
-        { type: 'EmptyStatement' },
+        {
+          type: 'EmptyStatement',
+          loc: {
+            start: { line: 1, col: 18 },
+            end: { line: 1, col: 20 },
+            source: ''
+          }
+        },
         {
           type: 'FunctionDeclaration',
+          loc: {
+            start: { line: 1, col: 20 },
+            end: { line: 1, col: 36 },
+            source: ''
+          },
           generator: false,
           async: false,
-          id: { type: 'Identifier', name: 'f' },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 29 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
+            name: 'f'
+          },
           params: [],
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 33 },
+              end: { line: 1, col: 36 },
+              source: ''
+            },
+            body: []
+          }
         }
       ]
     }

@@ -29,17 +29,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
       expression: {
         type: 'BinaryExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 14 },
+          source: ''
+        },
         left: {
           type: 'UnaryExpression',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 10 },
+            source: ''
+          },
           operator: 'void',
           prefix: true,
           argument: {
             type: 'Literal',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 6 },
+              source: ''
+            },
             value: null,
             regex: { pattern: '=', flags: 'g' },
             raw: '/=/g'
@@ -48,8 +69,29 @@ ast: {
         operator: '/',
         right: {
           type: 'MemberExpression',
-          object: { type: 'Identifier', name: 'm' },
-          property: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          object: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            name: 'm'
+          },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 13 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
+            name: 'x'
+          },
           computed: false
         }
       }

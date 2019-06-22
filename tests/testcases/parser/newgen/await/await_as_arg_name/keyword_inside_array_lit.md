@@ -29,26 +29,78 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
-        params: [ { type: 'Identifier', name: 'g' } ],
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 26 },
+          source: ''
+        },
+        params: [
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'g'
+          }
+        ],
         id: null,
         generator: false,
         async: true,
         expression: true,
         body: {
           type: 'AssignmentExpression',
-          left: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 25 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            name: 'x'
+          },
           operator: '=',
           right: {
             type: 'ArrayExpression',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
             elements: [
               {
                 type: 'AwaitExpression',
-                argument: { type: 'Identifier', name: 'y' }
+                loc: {
+                  start: { line: 1, col: 17 },
+                  end: { line: 1, col: 24 },
+                  source: ''
+                },
+                argument: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 23 },
+                    end: { line: 1, col: 24 },
+                    source: ''
+                  },
+                  name: 'y'
+                }
               }
             ]
           }

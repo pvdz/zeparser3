@@ -29,11 +29,34 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
   body: [
     {
       type: 'DoWhileStatement',
-      body: { type: 'ContinueStatement', label: null },
-      test: { type: 'Literal', value: true, raw: 'true' }
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 32 },
+        source: ''
+      },
+      body: {
+        type: 'ContinueStatement',
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
+        label: null
+      },
+      test: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 26 },
+          end: { line: 1, col: 30 },
+          source: ''
+        },
+        value: true,
+        raw: 'true'
+      }
     }
   ]
 }

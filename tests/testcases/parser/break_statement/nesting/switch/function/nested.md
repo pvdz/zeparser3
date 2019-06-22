@@ -29,28 +29,94 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 57 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 57 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 12 },
+          end: { line: 1, col: 57 },
+          source: ''
+        },
         body: [
           {
             type: 'SwitchStatement',
-            discriminant: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 56 },
+              source: ''
+            },
+            discriminant: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
+              name: 'x'
+            },
             cases: [
               {
                 type: 'SwitchCase',
-                test: { type: 'Identifier', name: 'z' },
+                loc: {
+                  start: { line: 1, col: 26 },
+                  end: { line: 1, col: 55 },
+                  source: ''
+                },
+                test: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 31 },
+                    end: { line: 1, col: 32 },
+                    source: ''
+                  },
+                  name: 'z'
+                },
                 consequent: [
                   {
                     type: 'IfStatement',
-                    test: { type: 'Identifier', name: 'x' },
-                    consequent: { type: 'BreakStatement', label: null },
+                    loc: {
+                      start: { line: 1, col: 40 },
+                      end: { line: 1, col: 55 },
+                      source: ''
+                    },
+                    test: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 44 },
+                        end: { line: 1, col: 45 },
+                        source: ''
+                      },
+                      name: 'x'
+                    },
+                    consequent: {
+                      type: 'BreakStatement',
+                      loc: {
+                        start: { line: 1, col: 47 },
+                        end: { line: 1, col: 55 },
+                        source: ''
+                      },
+                      label: null
+                    },
                     alternate: null
                   }
                 ]

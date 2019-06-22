@@ -31,11 +31,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 6 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 6 },
+        source: ''
+      },
       expression: {
         type: 'Literal',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
         value: null,
         regex: { pattern: '[\\d]', flags: '' },
         raw: '/[\\d]/'

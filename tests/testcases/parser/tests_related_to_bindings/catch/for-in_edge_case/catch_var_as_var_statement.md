@@ -70,24 +70,82 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 31 } },
   body: [
     {
       type: 'TryStatement',
-      block: { type: 'BlockStatement', body: [] },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 31 },
+        source: ''
+      },
+      block: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 7 },
+          source: ''
+        },
+        body: []
+      },
       handler: {
         type: 'CatchClause',
-        param: { type: 'Identifier', name: 'e' },
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 1, col: 31 },
+          source: ''
+        },
+        param: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 14 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          name: 'e'
+        },
         body: {
           type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 17 },
+            end: { line: 1, col: 31 },
+            source: ''
+          },
           body: [
             {
               type: 'VariableDeclaration',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 28 },
+                source: ''
+              },
               kind: 'var',
               declarations: [
                 {
                   type: 'VariableDeclarator',
-                  id: { type: 'Identifier', name: 'e' },
-                  init: { type: 'Identifier', name: 'x' }
+                  loc: {
+                    start: { line: 1, col: 23 },
+                    end: { line: 1, col: 28 },
+                    source: ''
+                  },
+                  id: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 23 },
+                      end: { line: 1, col: 23 },
+                      source: ''
+                    },
+                    name: 'e'
+                  },
+                  init: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 27 },
+                      end: { line: 1, col: 28 },
+                      source: ''
+                    },
+                    name: 'x'
+                  }
                 }
               ]
             }

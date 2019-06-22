@@ -53,31 +53,99 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
   body: [
     {
       type: 'BlockStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 44 },
+        source: ''
+      },
       body: [
         {
           type: 'IfStatement',
-          test: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 2 },
+            end: { line: 1, col: 25 },
+            source: ''
+          },
+          test: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 7 },
+              source: ''
+            },
+            name: 'x'
+          },
           consequent: {
             type: 'FunctionDeclaration',
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
             generator: false,
             async: false,
-            id: { type: 'Identifier', name: 'f' },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 18 },
+                end: { line: 1, col: 18 },
+                source: ''
+              },
+              name: 'f'
+            },
             params: [],
-            body: { type: 'BlockStatement', body: [] }
+            body: {
+              type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 25 },
+                source: ''
+              },
+              body: []
+            }
           },
           alternate: null
         },
-        { type: 'EmptyStatement' },
+        {
+          type: 'EmptyStatement',
+          loc: {
+            start: { line: 1, col: 25 },
+            end: { line: 1, col: 27 },
+            source: ''
+          }
+        },
         {
           type: 'FunctionDeclaration',
+          loc: {
+            start: { line: 1, col: 27 },
+            end: { line: 1, col: 43 },
+            source: ''
+          },
           generator: false,
           async: false,
-          id: { type: 'Identifier', name: 'f' },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 36 },
+              end: { line: 1, col: 36 },
+              source: ''
+            },
+            name: 'f'
+          },
           params: [],
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 40 },
+              end: { line: 1, col: 43 },
+              source: ''
+            },
+            body: []
+          }
         }
       ]
     }

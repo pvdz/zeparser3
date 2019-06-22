@@ -29,27 +29,74 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 25 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 25 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Literal', value: 500, raw: '500' },
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 16 },
+                source: ''
+              },
+              key: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                value: 500,
+                raw: '500'
+              },
               kind: 'init',
               method: false,
               computed: false,
-              value: { type: 'Identifier', name: 'protected' },
+              value: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 16 },
+                  source: ''
+                },
+                name: 'protected'
+              },
               shorthand: false
             }
           ]
         },
         operator: '=',
-        right: { type: 'Literal', value: null, raw: 'null' }
+        right: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 20 },
+            end: { line: 1, col: 24 },
+            source: ''
+          },
+          value: null,
+          raw: 'null'
+        }
       }
     }
   ]

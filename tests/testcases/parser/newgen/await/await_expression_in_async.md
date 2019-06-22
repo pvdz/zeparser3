@@ -29,25 +29,75 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 36 },
+              source: ''
+            },
             expression: {
               type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'async' },
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 34 },
+                source: ''
+              },
+              callee: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 34 },
+                  source: ''
+                },
+                name: 'async'
+              },
               arguments: [
                 {
                   type: 'AwaitExpression',
-                  argument: { type: 'Identifier', name: 'x' }
+                  loc: {
+                    start: { line: 1, col: 26 },
+                    end: { line: 1, col: 33 },
+                    source: ''
+                  },
+                  argument: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 32 },
+                      end: { line: 1, col: 33 },
+                      source: ''
+                    },
+                    name: 'x'
+                  }
                 }
               ]
             }

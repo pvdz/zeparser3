@@ -29,36 +29,102 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 34 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 33 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 30 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: '__proto__' },
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 13 },
+                  source: ''
+                },
+                name: '__proto__'
+              },
               kind: 'init',
               method: false,
               computed: false,
-              value: { type: 'Identifier', name: 'a' },
+              value: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 13 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                name: 'a'
+              },
               shorthand: false
             },
             {
               type: 'Property',
-              key: { type: 'Identifier', name: '__proto__' },
+              loc: {
+                start: { line: 1, col: 16 },
+                end: { line: 1, col: 28 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 16 },
+                  end: { line: 1, col: 27 },
+                  source: ''
+                },
+                name: '__proto__'
+              },
               kind: 'init',
               method: false,
               computed: false,
-              value: { type: 'Identifier', name: 'b' },
+              value: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 27 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
+                name: 'b'
+              },
               shorthand: false
             }
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'x' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 32 },
+            end: { line: 1, col: 33 },
+            source: ''
+          },
+          name: 'x'
+        }
       }
     }
   ]

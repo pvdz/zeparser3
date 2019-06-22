@@ -31,37 +31,115 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 54 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 54 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 52 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: '__proto__' },
+            loc: {
+              start: { line: 1, col: 3 },
+              end: { line: 1, col: 18 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 3 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              name: '__proto__'
+            },
             kind: 'init',
             method: false,
             computed: false,
-            value: { type: 'Literal', value: null, raw: 'null' },
+            value: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 1, col: 18 },
+                source: ''
+              },
+              value: null,
+              raw: 'null'
+            },
             shorthand: false
           },
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'other' },
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 31 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              name: 'other'
+            },
             kind: 'init',
             method: false,
             computed: false,
-            value: { type: 'Literal', value: null, raw: 'null' },
+            value: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 27 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
+              value: null,
+              raw: 'null'
+            },
             shorthand: false
           },
           {
             type: 'Property',
-            key: { type: 'Literal', value: '__proto__', raw: '"__proto__"' },
+            loc: {
+              start: { line: 1, col: 33 },
+              end: { line: 1, col: 51 },
+              source: ''
+            },
+            key: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 33 },
+                end: { line: 1, col: 46 },
+                source: ''
+              },
+              value: '__proto__',
+              raw: '"__proto__"'
+            },
             kind: 'init',
             method: false,
             computed: false,
-            value: { type: 'Literal', value: null, raw: 'null' },
+            value: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 46 },
+                end: { line: 1, col: 51 },
+                source: ''
+              },
+              value: null,
+              raw: 'null'
+            },
             shorthand: false
           }
         ]

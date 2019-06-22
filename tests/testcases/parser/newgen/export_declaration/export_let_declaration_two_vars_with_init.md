@@ -47,23 +47,78 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 25 } },
   body: [
     {
       type: 'ExportNamedDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 25 },
+        source: ''
+      },
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 11 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'x' },
-            init: { type: 'Literal', value: 10, raw: '10' }
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 11 },
+                source: ''
+              },
+              name: 'x'
+            },
+            init: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 15 },
+                source: ''
+              },
+              value: 10,
+              raw: '10'
+            }
           },
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'y' },
-            init: { type: 'Literal', value: 20, raw: '20' }
+            loc: {
+              start: { line: 1, col: 19 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 19 },
+                end: { line: 1, col: 19 },
+                source: ''
+              },
+              name: 'y'
+            },
+            init: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
+              value: 20,
+              raw: '20'
+            }
           }
         ]
       },

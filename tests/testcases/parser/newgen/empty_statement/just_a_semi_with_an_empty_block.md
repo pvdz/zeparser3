@@ -29,7 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  body: [ { type: 'BlockStatement', body: [] }, { type: 'EmptyStatement' } ]
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 3 } },
+  body: [
+    {
+      type: 'BlockStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 2 },
+        source: ''
+      },
+      body: []
+    },
+    {
+      type: 'EmptyStatement',
+      loc: {
+        start: { line: 1, col: 2 },
+        end: { line: 1, col: 3 },
+        source: ''
+      }
+    }
+  ]
 }
 
 tokens (4x):

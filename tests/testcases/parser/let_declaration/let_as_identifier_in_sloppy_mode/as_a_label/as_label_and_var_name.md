@@ -41,13 +41,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 9 } },
   body: [
     {
       type: 'LabeledStatement',
-      label: { type: 'Identifier', name: 'let' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 9 },
+        source: ''
+      },
+      label: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 3 },
+          source: ''
+        },
+        name: 'let'
+      },
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'let' }
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 8 },
+            source: ''
+          },
+          name: 'let'
+        }
       }
     }
   ]

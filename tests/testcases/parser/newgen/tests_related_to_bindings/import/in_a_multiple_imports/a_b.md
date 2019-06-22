@@ -47,28 +47,99 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 40 } },
   body: [
     {
       type: 'ImportDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 21 },
+        source: ''
+      },
       specifiers: [
         {
           type: 'ImportSpecifier',
-          imported: { type: 'Identifier', name: 'a' },
-          local: { type: 'Identifier', name: 'a' }
+          loc: {
+            start: { line: 1, col: 8 },
+            end: { line: 1, col: 9 },
+            source: ''
+          },
+          imported: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'a'
+          },
+          local: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 9 },
+              source: ''
+            },
+            name: 'a'
+          }
         }
       ],
-      source: { type: 'Literal', value: 'c', raw: '"c"' }
+      source: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 16 },
+          end: { line: 1, col: 16 },
+          source: ''
+        },
+        value: 'c',
+        raw: '"c"'
+      }
     },
     {
       type: 'ImportDeclaration',
+      loc: {
+        start: { line: 1, col: 21 },
+        end: { line: 1, col: 40 },
+        source: ''
+      },
       specifiers: [
         {
           type: 'ImportSpecifier',
-          imported: { type: 'Identifier', name: 'b' },
-          local: { type: 'Identifier', name: 'b' }
+          loc: {
+            start: { line: 1, col: 29 },
+            end: { line: 1, col: 30 },
+            source: ''
+          },
+          imported: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 29 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
+            name: 'b'
+          },
+          local: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 29 },
+              end: { line: 1, col: 30 },
+              source: ''
+            },
+            name: 'b'
+          }
         }
       ],
-      source: { type: 'Literal', value: 'c', raw: '"c"' }
+      source: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 37 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
+        value: 'c',
+        raw: '"c"'
+      }
     }
   ]
 }

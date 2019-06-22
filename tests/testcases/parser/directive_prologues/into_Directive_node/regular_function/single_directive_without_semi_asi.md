@@ -32,24 +32,70 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 4, col: 1 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 4, col: 1 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 12 },
+          end: { line: 4, col: 1 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
-            expression: { type: 'Literal', value: 'foo', raw: '"foo"' },
+            loc: {
+              start: { line: 2, col: 0 },
+              end: { line: 3, col: 0 },
+              source: ''
+            },
+            expression: {
+              type: 'Literal',
+              loc: {
+                start: { line: 2, col: 0 },
+                end: { line: 2, col: 0 },
+                source: ''
+              },
+              value: 'foo',
+              raw: '"foo"'
+            },
             directive: 'foo'
           },
           {
             type: 'ExpressionStatement',
-            expression: { type: 'Identifier', name: 'x' }
+            loc: {
+              start: { line: 3, col: 0 },
+              end: { line: 4, col: 0 },
+              source: ''
+            },
+            expression: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 3, col: 0 },
+                end: { line: 4, col: 0 },
+                source: ''
+              },
+              name: 'x'
+            }
           }
         ]
       }

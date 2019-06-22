@@ -29,43 +29,133 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 41 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 41 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'x' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 41 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 1 },
+            source: ''
+          },
+          name: 'x'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 2 },
+            end: { line: 1, col: 41 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'dsda' },
+              loc: {
+                start: { line: 1, col: 4 },
+                end: { line: 1, col: 40 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 8 },
+                  source: ''
+                },
+                name: 'dsda'
+              },
               kind: 'init',
               method: true,
               computed: false,
               value: {
                 type: 'FunctionExpression',
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 40 },
+                  source: ''
+                },
                 generator: false,
                 async: false,
                 id: null,
                 params: [],
                 body: {
                   type: 'BlockStatement',
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 40 },
+                    source: ''
+                  },
                   body: [
                     {
                       type: 'ReturnStatement',
+                      loc: {
+                        start: { line: 1, col: 12 },
+                        end: { line: 1, col: 39 },
+                        source: ''
+                      },
                       argument: {
                         type: 'ArrowFunctionExpression',
+                        loc: {
+                          start: { line: 1, col: 19 },
+                          end: { line: 1, col: 37 },
+                          source: ''
+                        },
                         params: [
                           {
                             type: 'AssignmentPattern',
-                            left: { type: 'Identifier', name: 'a' },
+                            loc: {
+                              start: { line: 1, col: 20 },
+                              end: { line: 1, col: 31 },
+                              source: ''
+                            },
+                            left: {
+                              type: 'Identifier',
+                              loc: {
+                                start: { line: 1, col: 20 },
+                                end: { line: 1, col: 21 },
+                                source: ''
+                              },
+                              name: 'a'
+                            },
                             right: {
                               type: 'MemberExpression',
-                              object: { type: 'Super' },
-                              property: { type: 'Identifier', name: 'foo' },
+                              loc: {
+                                start: { line: 1, col: 22 },
+                                end: { line: 1, col: 31 },
+                                source: ''
+                              },
+                              object: {
+                                type: 'Super',
+                                loc: {
+                                  start: { line: 1, col: 22 },
+                                  end: { line: 1, col: 27 },
+                                  source: ''
+                                }
+                              },
+                              property: {
+                                type: 'Identifier',
+                                loc: {
+                                  start: { line: 1, col: 28 },
+                                  end: { line: 1, col: 28 },
+                                  source: ''
+                                },
+                                name: 'foo'
+                              },
                               computed: false
                             }
                           }
@@ -74,7 +164,15 @@ ast: {
                         generator: false,
                         async: false,
                         expression: true,
-                        body: { type: 'Identifier', name: 'a' }
+                        body: {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 36 },
+                            end: { line: 1, col: 37 },
+                            source: ''
+                          },
+                          name: 'a'
+                        }
                       }
                     }
                   ]

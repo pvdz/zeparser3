@@ -29,30 +29,99 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 29 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 29 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [
         {
           type: 'AssignmentPattern',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 26 },
+            source: ''
+          },
           left: {
             type: 'ArrayPattern',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 23 },
+              source: ''
+            },
             elements: [
               {
                 type: 'AssignmentPattern',
-                left: { type: 'Identifier', name: 'foo' },
-                right: { type: 'Identifier', name: 'a' }
+                loc: {
+                  start: { line: 1, col: 11 },
+                  end: { line: 1, col: 17 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 15 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 16 },
+                    end: { line: 1, col: 17 },
+                    source: ''
+                  },
+                  name: 'a'
+                }
               },
-              { type: 'Identifier', name: 'bar' }
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 18 },
+                  end: { line: 1, col: 21 },
+                  source: ''
+                },
+                name: 'bar'
+              }
             ]
           },
-          right: { type: 'Identifier', name: 'x' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 25 },
+              end: { line: 1, col: 26 },
+              source: ''
+            },
+            name: 'x'
+          }
         }
       ],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 27 },
+          end: { line: 1, col: 29 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

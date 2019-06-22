@@ -29,50 +29,156 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 64 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
-      superClass: { type: 'Identifier', name: 'y' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 64 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
+      superClass: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 16 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        name: 'y'
+      },
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 64 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Identifier', name: 'constructor' },
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 63 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
+              name: 'constructor'
+            },
             static: false,
             computed: false,
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 63 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 34 },
+                  end: { line: 1, col: 63 },
+                  source: ''
+                },
                 body: [
                   {
                     type: 'VariableDeclaration',
+                    loc: {
+                      start: { line: 1, col: 40 },
+                      end: { line: 1, col: 50 },
+                      source: ''
+                    },
                     kind: 'let',
                     declarations: [
                       {
                         type: 'VariableDeclarator',
-                        id: { type: 'Identifier', name: 'xx' },
+                        loc: {
+                          start: { line: 1, col: 40 },
+                          end: { line: 1, col: 50 },
+                          source: ''
+                        },
+                        id: {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 40 },
+                            end: { line: 1, col: 40 },
+                            source: ''
+                          },
+                          name: 'xx'
+                        },
                         init: {
                           type: 'BinaryExpression',
-                          left: { type: 'Identifier', name: 'x' },
+                          loc: {
+                            start: { line: 1, col: 45 },
+                            end: { line: 1, col: 50 },
+                            source: ''
+                          },
+                          left: {
+                            type: 'Identifier',
+                            loc: {
+                              start: { line: 1, col: 45 },
+                              end: { line: 1, col: 47 },
+                              source: ''
+                            },
+                            name: 'x'
+                          },
                           operator: '+',
-                          right: { type: 'Identifier', name: 'x' }
+                          right: {
+                            type: 'Identifier',
+                            loc: {
+                              start: { line: 1, col: 49 },
+                              end: { line: 1, col: 50 },
+                              source: ''
+                            },
+                            name: 'x'
+                          }
                         }
                       }
                     ]
                   },
                   {
                     type: 'ExpressionStatement',
+                    loc: {
+                      start: { line: 1, col: 52 },
+                      end: { line: 1, col: 61 },
+                      source: ''
+                    },
                     expression: {
                       type: 'CallExpression',
-                      callee: { type: 'Super' },
+                      loc: {
+                        start: { line: 1, col: 52 },
+                        end: { line: 1, col: 59 },
+                        source: ''
+                      },
+                      callee: {
+                        type: 'Super',
+                        loc: {
+                          start: { line: 1, col: 52 },
+                          end: { line: 1, col: 57 },
+                          source: ''
+                        }
+                      },
                       arguments: []
                     }
                   }

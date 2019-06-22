@@ -29,36 +29,96 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 48 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 48 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 48 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 47 },
+              source: ''
+            },
             expression: {
               type: 'UnaryExpression',
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 47 },
+                source: ''
+              },
               operator: 'delete',
               prefix: true,
               argument: {
                 type: 'MemberExpression',
+                loc: {
+                  start: { line: 1, col: 22 },
+                  end: { line: 1, col: 47 },
+                  source: ''
+                },
                 object: {
                   type: 'CallExpression',
-                  callee: { type: 'Identifier', name: 'foo' },
+                  loc: {
+                    start: { line: 1, col: 27 },
+                    end: { line: 1, col: 37 },
+                    source: ''
+                  },
+                  callee: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 27 },
+                      end: { line: 1, col: 30 },
+                      source: ''
+                    },
+                    name: 'foo'
+                  },
                   arguments: [
                     {
                       type: 'YieldExpression',
+                      loc: {
+                        start: { line: 1, col: 31 },
+                        end: { line: 1, col: 36 },
+                        source: ''
+                      },
                       delegate: false,
                       argument: null
                     }
                   ]
                 },
-                property: { type: 'Identifier', name: 'bar' },
+                property: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 43 },
+                    end: { line: 1, col: 43 },
+                    source: ''
+                  },
+                  name: 'bar'
+                },
                 computed: false
               }
             }

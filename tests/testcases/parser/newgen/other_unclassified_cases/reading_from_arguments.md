@@ -29,63 +29,235 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 100 } },
   body: [
     {
       type: 'ExpressionStatement',
-      expression: { type: 'Identifier', name: 'arguments' }
-    },
-    {
-      type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 11 },
+        source: ''
+      },
       expression: {
-        type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'log' },
-        arguments: [ { type: 'Identifier', name: 'arguments' } ]
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'arguments'
       }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 11 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
+      expression: {
+        type: 'CallExpression',
+        loc: {
+          start: { line: 1, col: 11 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          name: 'log'
+        },
+        arguments: [
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 24 },
+              source: ''
+            },
+            name: 'arguments'
+          }
+        ]
+      }
+    },
+    {
+      type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 27 },
+        end: { line: 1, col: 42 },
+        source: ''
+      },
       expression: {
         type: 'MemberExpression',
-        object: { type: 'Identifier', name: 'arguments' },
-        property: { type: 'Identifier', name: 'foo' },
+        loc: {
+          start: { line: 1, col: 27 },
+          end: { line: 1, col: 40 },
+          source: ''
+        },
+        object: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 27 },
+            end: { line: 1, col: 36 },
+            source: ''
+          },
+          name: 'arguments'
+        },
+        property: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 37 },
+            end: { line: 1, col: 37 },
+            source: ''
+          },
+          name: 'foo'
+        },
         computed: false
       }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 42 },
+        end: { line: 1, col: 58 },
+        source: ''
+      },
       expression: {
         type: 'MemberExpression',
-        object: { type: 'Identifier', name: 'arguments' },
-        property: { type: 'Identifier', name: 'foo' },
+        loc: {
+          start: { line: 1, col: 42 },
+          end: { line: 1, col: 56 },
+          source: ''
+        },
+        object: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 42 },
+            end: { line: 1, col: 51 },
+            source: ''
+          },
+          name: 'arguments'
+        },
+        property: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 52 },
+            end: { line: 1, col: 55 },
+            source: ''
+          },
+          name: 'foo'
+        },
         computed: true
       }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 58 },
+        end: { line: 1, col: 79 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 58 },
+          end: { line: 1, col: 77 },
+          source: ''
+        },
         left: {
           type: 'MemberExpression',
-          object: { type: 'Identifier', name: 'arguments' },
-          property: { type: 'Identifier', name: 'foo' },
+          loc: {
+            start: { line: 1, col: 58 },
+            end: { line: 1, col: 72 },
+            source: ''
+          },
+          object: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 58 },
+              end: { line: 1, col: 67 },
+              source: ''
+            },
+            name: 'arguments'
+          },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 68 },
+              end: { line: 1, col: 68 },
+              source: ''
+            },
+            name: 'foo'
+          },
           computed: false
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'bar' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 74 },
+            end: { line: 1, col: 77 },
+            source: ''
+          },
+          name: 'bar'
+        }
       }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 79 },
+        end: { line: 1, col: 100 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 79 },
+          end: { line: 1, col: 99 },
+          source: ''
+        },
         left: {
           type: 'MemberExpression',
-          object: { type: 'Identifier', name: 'arguments' },
-          property: { type: 'Identifier', name: 'foo' },
+          loc: {
+            start: { line: 1, col: 79 },
+            end: { line: 1, col: 94 },
+            source: ''
+          },
+          object: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 79 },
+              end: { line: 1, col: 88 },
+              source: ''
+            },
+            name: 'arguments'
+          },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 89 },
+              end: { line: 1, col: 92 },
+              source: ''
+            },
+            name: 'foo'
+          },
           computed: true
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'bar' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 96 },
+            end: { line: 1, col: 99 },
+            source: ''
+          },
+          name: 'bar'
+        }
       }
     }
   ]

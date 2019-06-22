@@ -31,20 +31,60 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 13 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 13 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         left: {
           type: 'ArrayPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 8 },
+            source: ''
+          },
           elements: [
-            { type: 'Identifier', name: 'x' },
-            { type: 'Identifier', name: 'y' }
+            {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 3 },
+                source: ''
+              },
+              name: 'x'
+            },
+            {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 6 },
+                source: ''
+              },
+              name: 'y'
+            }
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'z' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 11 },
+            source: ''
+          },
+          name: 'z'
+        }
       }
     }
   ]

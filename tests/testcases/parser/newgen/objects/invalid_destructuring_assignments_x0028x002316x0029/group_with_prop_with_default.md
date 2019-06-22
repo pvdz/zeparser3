@@ -29,29 +29,92 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 21 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 5 },
+                  source: ''
+                },
+                name: 'a'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
                 type: 'AssignmentPattern',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
                 left: {
                   type: 'MemberExpression',
-                  object: { type: 'Identifier', name: 'b' },
-                  property: { type: 'Identifier', name: 'c' },
+                  loc: {
+                    start: { line: 1, col: 5 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
+                  object: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 6 },
+                      end: { line: 1, col: 7 },
+                      source: ''
+                    },
+                    name: 'b'
+                  },
+                  property: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 9 },
+                      end: { line: 1, col: 9 },
+                      source: ''
+                    },
+                    name: 'c'
+                  },
                   computed: false
                 },
-                right: { type: 'Identifier', name: 'd' }
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 13 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'd'
+                }
               },
               shorthand: false
             }
@@ -60,7 +123,23 @@ ast: {
         operator: '=',
         right: {
           type: 'ArrayExpression',
-          elements: [ { type: 'Literal', value: 2, raw: '2' } ]
+          loc: {
+            start: { line: 1, col: 18 },
+            end: { line: 1, col: 21 },
+            source: ''
+          },
+          elements: [
+            {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 19 },
+                end: { line: 1, col: 19 },
+                source: ''
+              },
+              value: 2,
+              raw: '2'
+            }
+          ]
         }
       }
     }

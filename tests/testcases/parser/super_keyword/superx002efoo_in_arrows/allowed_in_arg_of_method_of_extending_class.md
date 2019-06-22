@@ -29,41 +29,134 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 57 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
-      superClass: { type: 'Identifier', name: 'y' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 57 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
+      superClass: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 16 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        name: 'y'
+      },
       body: {
         type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 57 },
+          source: ''
+        },
         body: [
           {
             type: 'MethodDefinition',
-            key: { type: 'Identifier', name: 'dsda' },
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 56 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 24 },
+                source: ''
+              },
+              name: 'dsda'
+            },
             static: false,
             computed: false,
             kind: 'method',
             value: {
               type: 'FunctionExpression',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 56 },
+                source: ''
+              },
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 26 },
+                  end: { line: 1, col: 56 },
+                  source: ''
+                },
                 body: [
                   {
                     type: 'ReturnStatement',
+                    loc: {
+                      start: { line: 1, col: 28 },
+                      end: { line: 1, col: 55 },
+                      source: ''
+                    },
                     argument: {
                       type: 'ArrowFunctionExpression',
+                      loc: {
+                        start: { line: 1, col: 35 },
+                        end: { line: 1, col: 53 },
+                        source: ''
+                      },
                       params: [
                         {
                           type: 'AssignmentPattern',
-                          left: { type: 'Identifier', name: 'a' },
+                          loc: {
+                            start: { line: 1, col: 36 },
+                            end: { line: 1, col: 47 },
+                            source: ''
+                          },
+                          left: {
+                            type: 'Identifier',
+                            loc: {
+                              start: { line: 1, col: 36 },
+                              end: { line: 1, col: 37 },
+                              source: ''
+                            },
+                            name: 'a'
+                          },
                           right: {
                             type: 'MemberExpression',
-                            object: { type: 'Super' },
-                            property: { type: 'Identifier', name: 'foo' },
+                            loc: {
+                              start: { line: 1, col: 38 },
+                              end: { line: 1, col: 47 },
+                              source: ''
+                            },
+                            object: {
+                              type: 'Super',
+                              loc: {
+                                start: { line: 1, col: 38 },
+                                end: { line: 1, col: 43 },
+                                source: ''
+                              }
+                            },
+                            property: {
+                              type: 'Identifier',
+                              loc: {
+                                start: { line: 1, col: 44 },
+                                end: { line: 1, col: 44 },
+                                source: ''
+                              },
+                              name: 'foo'
+                            },
                             computed: false
                           }
                         }
@@ -72,7 +165,15 @@ ast: {
                       generator: false,
                       async: false,
                       expression: true,
-                      body: { type: 'Identifier', name: 'a' }
+                      body: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 52 },
+                          end: { line: 1, col: 53 },
+                          source: ''
+                        },
+                        name: 'a'
+                      }
                     }
                   }
                 ]

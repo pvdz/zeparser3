@@ -29,22 +29,67 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 29 } },
   body: [
     {
       type: 'TryStatement',
-      block: { type: 'BlockStatement', body: [] },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 29 },
+        source: ''
+      },
+      block: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 8 },
+          source: ''
+        },
+        body: []
+      },
       handler: null,
       finalizer: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 16 },
+          end: { line: 1, col: 29 },
+          source: ''
+        },
         body: [
           {
             type: 'VariableDeclaration',
+            loc: {
+              start: { line: 1, col: 22 },
+              end: { line: 1, col: 28 },
+              source: ''
+            },
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                id: { type: 'Identifier', name: 'y' },
-                init: { type: 'Identifier', name: 'x' }
+                loc: {
+                  start: { line: 1, col: 22 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
+                id: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 22 },
+                    end: { line: 1, col: 22 },
+                    source: ''
+                  },
+                  name: 'y'
+                },
+                init: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 26 },
+                    end: { line: 1, col: 28 },
+                    source: ''
+                  },
+                  name: 'x'
+                }
               }
             ]
           }

@@ -29,23 +29,88 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 35 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 35 },
+        source: ''
+      },
       init: {
         type: 'ConditionalExpression',
-        test: { type: 'Literal', value: true, raw: 'true' },
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 23 },
+          source: ''
+        },
+        test: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 10 },
+            source: ''
+          },
+          value: true,
+          raw: 'true'
+        },
         consequent: {
           type: 'BinaryExpression',
-          left: { type: 'Identifier', name: 'a' },
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            name: 'a'
+          },
           operator: 'in',
-          right: { type: 'Identifier', name: 'b' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
+            name: 'b'
+          }
         },
-        alternate: { type: 'ObjectExpression', properties: [] }
+        alternate: {
+          type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 21 },
+            end: { line: 1, col: 23 },
+            source: ''
+          },
+          properties: []
+        }
       },
-      test: { type: 'Literal', value: false, raw: 'false' },
+      test: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 25 },
+          end: { line: 1, col: 30 },
+          source: ''
+        },
+        value: false,
+        raw: 'false'
+      },
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 34 },
+          end: { line: 1, col: 35 },
+          source: ''
+        }
+      }
     }
   ]
 }

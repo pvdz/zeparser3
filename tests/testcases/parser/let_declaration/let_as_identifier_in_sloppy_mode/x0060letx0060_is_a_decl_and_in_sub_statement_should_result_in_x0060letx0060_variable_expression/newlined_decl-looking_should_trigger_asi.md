@@ -44,24 +44,70 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 6 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 1 },
+        source: ''
+      },
       init: null,
       test: null,
       update: null,
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'let' }
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 2, col: 1 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 9 },
+            end: { line: 2, col: 1 },
+            source: ''
+          },
+          name: 'let'
+        }
       }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 2, col: 1 },
+        end: { line: 2, col: 6 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'x' },
+        loc: {
+          start: { line: 2, col: 1 },
+          end: { line: 2, col: 6 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 2, col: 1 },
+            end: { line: 2, col: 3 },
+            source: ''
+          },
+          name: 'x'
+        },
         operator: '=',
-        right: { type: 'Literal', value: 1, raw: '1' }
+        right: {
+          type: 'Literal',
+          loc: {
+            start: { line: 2, col: 5 },
+            end: { line: 2, col: 5 },
+            source: ''
+          },
+          value: 1,
+          raw: '1'
+        }
       }
     }
   ]

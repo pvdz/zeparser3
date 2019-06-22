@@ -47,19 +47,51 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'ExportDefaultDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 24 },
+        source: ''
+      },
       declaration: {
         type: 'ClassDeclaration',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
         id: null,
         superClass: null,
-        body: { type: 'ClassBody', body: [] }
+        body: {
+          type: 'ClassBody',
+          loc: {
+            start: { line: 1, col: 21 },
+            end: { line: 1, col: 24 },
+            source: ''
+          },
+          body: []
+        }
       }
     },
     {
       type: 'ExpressionStatement',
-      expression: { type: 'Identifier', name: 'foo' }
+      loc: {
+        start: { line: 1, col: 24 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
+      expression: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 24 },
+          end: { line: 1, col: 27 },
+          source: ''
+        },
+        name: 'foo'
+      }
     }
   ]
 }

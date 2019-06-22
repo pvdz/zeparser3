@@ -29,15 +29,39 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 28 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 28 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'public' },
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 27 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 8 },
+            source: ''
+          },
+          name: 'public'
+        },
         operator: '=',
         right: {
           type: 'Literal',
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 10 },
+            source: ''
+          },
           value: 'sentinal 543665',
           raw: '"sentinal 543665"'
         }

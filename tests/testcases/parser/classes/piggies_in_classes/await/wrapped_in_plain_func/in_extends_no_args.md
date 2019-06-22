@@ -29,21 +29,69 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 46 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 46 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 46 },
+          source: ''
+        },
         body: [
           {
             type: 'ClassDeclaration',
-            id: { type: 'Identifier', name: 'x' },
-            superClass: { type: 'Identifier', name: 'await' },
-            body: { type: 'ClassBody', body: [] }
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 45 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
+              name: 'x'
+            },
+            superClass: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 33 },
+                end: { line: 1, col: 39 },
+                source: ''
+              },
+              name: 'await'
+            },
+            body: {
+              type: 'ClassBody',
+              loc: {
+                start: { line: 1, col: 39 },
+                end: { line: 1, col: 45 },
+                source: ''
+              },
+              body: []
+            }
           }
         ]
       }

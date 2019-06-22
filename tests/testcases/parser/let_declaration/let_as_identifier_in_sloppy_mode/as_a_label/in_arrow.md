@@ -41,25 +41,77 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
-        params: [ { type: 'Identifier', name: '_' } ],
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        params: [
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 0 },
+              end: { line: 1, col: 2 },
+              source: ''
+            },
+            name: '_'
+          }
+        ],
         id: null,
         generator: false,
         async: false,
         expression: false,
         body: {
           type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
           body: [
             {
               type: 'LabeledStatement',
-              label: { type: 'Identifier', name: 'let' },
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 17 },
+                source: ''
+              },
+              label: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 10 },
+                  source: ''
+                },
+                name: 'let'
+              },
               body: {
                 type: 'ExpressionStatement',
-                expression: { type: 'Identifier', name: 'foo' }
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 17 },
+                  source: ''
+                },
+                expression: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 15 },
+                    source: ''
+                  },
+                  name: 'foo'
+                }
               }
             }
           ]

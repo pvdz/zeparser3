@@ -29,20 +29,66 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 21 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 21 },
+          source: ''
+        },
         params: [
           {
             type: 'AssignmentPattern',
-            left: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
+            left: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 1 },
+                end: { line: 1, col: 2 },
+                source: ''
+              },
+              name: 'x'
+            },
             right: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'package' },
+              loc: {
+                start: { line: 1, col: 3 },
+                end: { line: 1, col: 13 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 3 },
+                  end: { line: 1, col: 10 },
+                  source: ''
+                },
+                name: 'package'
+              },
               operator: '=',
-              right: { type: 'Literal', value: 10, raw: '10' }
+              right: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 11 },
+                  end: { line: 1, col: 11 },
+                  source: ''
+                },
+                value: 10,
+                raw: '10'
+              }
             }
           }
         ],
@@ -50,7 +96,15 @@ ast: {
         generator: false,
         async: false,
         expression: false,
-        body: { type: 'BlockStatement', body: [] }
+        body: {
+          type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 18 },
+            end: { line: 1, col: 21 },
+            source: ''
+          },
+          body: []
+        }
       }
     }
   ]

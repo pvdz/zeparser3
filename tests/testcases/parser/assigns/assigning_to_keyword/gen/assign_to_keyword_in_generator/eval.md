@@ -31,23 +31,69 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 3, col: 1 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 3, col: 1 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 3, col: 1 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 2, col: 2 },
+              end: { line: 3, col: 0 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'eval' },
+              loc: {
+                start: { line: 2, col: 2 },
+                end: { line: 2, col: 10 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 2, col: 2 },
+                  end: { line: 2, col: 7 },
+                  source: ''
+                },
+                name: 'eval'
+              },
               operator: '=',
-              right: { type: 'Literal', value: 1, raw: '1' }
+              right: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 2, col: 9 },
+                  end: { line: 2, col: 9 },
+                  source: ''
+                },
+                value: 1,
+                raw: '1'
+              }
             }
           }
         ]

@@ -29,29 +29,95 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 23 },
+        source: ''
+      },
       expression: {
         type: 'BinaryExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 23 },
+          source: ''
+        },
         left: {
           type: 'BinaryExpression',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
           left: {
             type: 'BinaryExpression',
+            loc: {
+              start: { line: 1, col: 0 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
             left: {
               type: 'BinaryExpression',
-              left: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 0 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 0 },
+                  end: { line: 1, col: 2 },
+                  source: ''
+                },
+                name: 'a'
+              },
               operator: '==',
-              right: { type: 'Identifier', name: 'b' }
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                name: 'b'
+              }
             },
             operator: '!=',
-            right: { type: 'Identifier', name: 'c' }
+            right: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 12 },
+                source: ''
+              },
+              name: 'c'
+            }
           },
           operator: '===',
-          right: { type: 'Identifier', name: 'd' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 18 },
+              source: ''
+            },
+            name: 'd'
+          }
         },
         operator: '!==',
-        right: { type: 'Identifier', name: 'e' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 22 },
+            end: { line: 1, col: 23 },
+            source: ''
+          },
+          name: 'e'
+        }
       }
     }
   ]

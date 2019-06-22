@@ -29,36 +29,101 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 42 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 42 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 42 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 41 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 's' },
+              loc: {
+                start: { line: 1, col: 17 },
+                end: { line: 1, col: 41 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 17 },
+                  end: { line: 1, col: 19 },
+                  source: ''
+                },
+                name: 's'
+              },
               operator: '=',
               right: {
                 type: 'ObjectExpression',
+                loc: {
+                  start: { line: 1, col: 21 },
+                  end: { line: 1, col: 41 },
+                  source: ''
+                },
                 properties: [
                   {
                     type: 'Property',
-                    key: { type: 'Identifier', name: 'foo' },
+                    loc: {
+                      start: { line: 1, col: 22 },
+                      end: { line: 1, col: 37 },
+                      source: ''
+                    },
+                    key: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 22 },
+                        end: { line: 1, col: 27 },
+                        source: ''
+                      },
+                      name: 'foo'
+                    },
                     kind: 'init',
                     method: false,
                     computed: false,
                     value: {
                       type: 'YieldExpression',
+                      loc: {
+                        start: { line: 1, col: 27 },
+                        end: { line: 1, col: 37 },
+                        source: ''
+                      },
                       delegate: false,
                       argument: {
                         type: 'Literal',
+                        loc: {
+                          start: { line: 1, col: 33 },
+                          end: { line: 1, col: 33 },
+                          source: ''
+                        },
                         value: null,
                         regex: { pattern: 'x', flags: 'g' },
                         raw: '/x/g'

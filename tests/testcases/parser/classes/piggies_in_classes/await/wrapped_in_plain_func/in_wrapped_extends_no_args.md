@@ -29,25 +29,88 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 51 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 51 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 51 },
+          source: ''
+        },
         body: [
           {
             type: 'ClassDeclaration',
-            id: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 50 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 23 },
+                source: ''
+              },
+              name: 'x'
+            },
             superClass: {
               type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'feh' },
-              arguments: [ { type: 'Identifier', name: 'await' } ]
+              loc: {
+                start: { line: 1, col: 33 },
+                end: { line: 1, col: 44 },
+                source: ''
+              },
+              callee: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 33 },
+                  end: { line: 1, col: 36 },
+                  source: ''
+                },
+                name: 'feh'
+              },
+              arguments: [
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 37 },
+                    end: { line: 1, col: 42 },
+                    source: ''
+                  },
+                  name: 'await'
+                }
+              ]
             },
-            body: { type: 'ClassBody', body: [] }
+            body: {
+              type: 'ClassBody',
+              loc: {
+                start: { line: 1, col: 44 },
+                end: { line: 1, col: 50 },
+                source: ''
+              },
+              body: []
+            }
           }
         ]
       }

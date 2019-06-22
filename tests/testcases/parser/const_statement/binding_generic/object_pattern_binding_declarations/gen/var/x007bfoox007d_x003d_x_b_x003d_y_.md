@@ -29,33 +29,99 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 20 },
+        source: ''
+      },
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 13 },
+            source: ''
+          },
           id: {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 10 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'foo' },
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 8 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 5 },
+                    end: { line: 1, col: 8 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'foo' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 5 },
+                    end: { line: 1, col: 8 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
                 shorthand: true
               }
             ]
           },
-          init: { type: 'Identifier', name: 'x' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
+            name: 'x'
+          }
         },
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'b' },
-          init: { type: 'Identifier', name: 'y' }
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 20 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 15 },
+              source: ''
+            },
+            name: 'b'
+          },
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 19 },
+              end: { line: 1, col: 20 },
+              source: ''
+            },
+            name: 'y'
+          }
         }
       ]
     }

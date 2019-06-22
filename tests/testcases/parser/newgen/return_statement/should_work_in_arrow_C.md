@@ -29,14 +29,41 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
         params: [
-          { type: 'Identifier', name: 'a' },
-          { type: 'Identifier', name: 'b' }
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 2 },
+              source: ''
+            },
+            name: 'a'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 5 },
+              source: ''
+            },
+            name: 'b'
+          }
         ],
         id: null,
         generator: false,
@@ -44,7 +71,22 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          body: [ { type: 'ReturnStatement', argument: null } ]
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
+          body: [
+            {
+              type: 'ReturnStatement',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 17 },
+                source: ''
+              },
+              argument: null
+            }
+          ]
         }
       }
     }

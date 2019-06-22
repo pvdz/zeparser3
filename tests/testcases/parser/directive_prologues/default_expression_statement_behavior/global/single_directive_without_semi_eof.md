@@ -29,10 +29,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 5 } },
   body: [
     {
       type: 'ExpressionStatement',
-      expression: { type: 'Literal', value: 'foo', raw: '"foo"' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 5 },
+        source: ''
+      },
+      expression: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 0 },
+          source: ''
+        },
+        value: 'foo',
+        raw: '"foo"'
+      },
       directive: 'foo'
     }
   ]

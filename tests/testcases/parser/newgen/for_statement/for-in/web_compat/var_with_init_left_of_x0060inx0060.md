@@ -53,22 +53,69 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
   body: [
     {
       type: 'ForInStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 21 },
+        source: ''
+      },
       left: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'a' },
-            init: { type: 'Identifier', name: 'b' }
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 15 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'a'
+            },
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 13 },
+                end: { line: 1, col: 15 },
+                source: ''
+              },
+              name: 'b'
+            }
           }
         ]
       },
-      right: { type: 'Identifier', name: 'c' },
-      body: { type: 'EmptyStatement' }
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 19 },
+          source: ''
+        },
+        name: 'c'
+      },
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 20 },
+          end: { line: 1, col: 21 },
+          source: ''
+        }
+      }
     }
   ]
 }

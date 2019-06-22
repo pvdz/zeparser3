@@ -29,30 +29,93 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 39 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 39 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'g' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'g'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 39 },
+          source: ''
+        },
         body: [
           {
             type: 'ReturnStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 38 },
+              source: ''
+            },
             argument: {
               type: 'BinaryExpression',
-              left: { type: 'Identifier', name: 'x' },
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 36 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 22 },
+                  end: { line: 1, col: 24 },
+                  source: ''
+                },
+                name: 'x'
+              },
               operator: '+',
               right: {
                 type: 'CallExpression',
-                callee: { type: 'Identifier', name: 'f' },
+                loc: {
+                  start: { line: 1, col: 26 },
+                  end: { line: 1, col: 36 },
+                  source: ''
+                },
+                callee: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 26 },
+                    end: { line: 1, col: 27 },
+                    source: ''
+                  },
+                  name: 'f'
+                },
                 arguments: [
                   {
                     type: 'YieldExpression',
+                    loc: {
+                      start: { line: 1, col: 28 },
+                      end: { line: 1, col: 35 },
+                      source: ''
+                    },
                     delegate: false,
-                    argument: { type: 'Identifier', name: 'f' }
+                    argument: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 34 },
+                        end: { line: 1, col: 35 },
+                        source: ''
+                      },
+                      name: 'f'
+                    }
                   }
                 ]
               }

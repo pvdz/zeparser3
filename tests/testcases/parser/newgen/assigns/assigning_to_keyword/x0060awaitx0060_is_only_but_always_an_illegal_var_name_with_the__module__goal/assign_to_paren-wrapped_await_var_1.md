@@ -29,14 +29,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 11 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 11 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'await' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 6 },
+            source: ''
+          },
+          name: 'await'
+        },
         operator: '=',
-        right: { type: 'Literal', value: 1, raw: '1' }
+        right: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 10 },
+            source: ''
+          },
+          value: 1,
+          raw: '1'
+        }
       }
     }
   ]

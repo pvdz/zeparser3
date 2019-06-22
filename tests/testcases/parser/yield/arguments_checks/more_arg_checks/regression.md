@@ -35,16 +35,48 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 15 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 15 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'iter' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 14 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 5 },
+            source: ''
+          },
+          name: 'iter'
+        },
         operator: '=',
         right: {
           type: 'CallExpression',
-          callee: { type: 'Identifier', name: 'yield' },
+          loc: {
+            start: { line: 1, col: 7 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          callee: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 7 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            name: 'yield'
+          },
           arguments: []
         }
       }

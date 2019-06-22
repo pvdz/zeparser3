@@ -29,28 +29,70 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 10 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 10 },
+        source: ''
+      },
       expression: {
         type: 'TemplateLiteral',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
         expressions: [
           {
             type: 'SequenceExpression',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 7 },
+              source: ''
+            },
             expressions: [
-              { type: 'Identifier', name: 'a' },
-              { type: 'Identifier', name: 'b' }
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 5 },
+                  source: ''
+                },
+                name: 'a'
+              },
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                name: 'b'
+              }
             ]
           }
         ],
         quasis: [
           {
             type: 'TemplateElement',
+            loc: {
+              start: { line: 1, col: 0 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
             tail: false,
             value: { raw: '`x${', cooked: '<TODO>' }
           },
           {
             type: 'TemplateElement',
+            loc: {
+              start: { line: 1, col: 7 },
+              end: { line: 1, col: 7 },
+              source: ''
+            },
             tail: true,
             value: { raw: '}y`', cooked: '<TODO>' }
           }

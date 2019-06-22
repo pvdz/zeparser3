@@ -29,31 +29,106 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 31 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 31 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'f' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 31 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 'f'
+        },
         operator: '=',
         right: {
           type: 'FunctionExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 31 },
+            source: ''
+          },
           generator: false,
           async: false,
-          id: { type: 'Identifier', name: 'e' },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 13 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
+            name: 'e'
+          },
           params: [
             {
               type: 'AssignmentPattern',
-              left: { type: 'Identifier', name: 'x' },
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 15 },
+                  end: { line: 1, col: 15 },
+                  source: ''
+                },
+                name: 'x'
+              },
               right: {
                 type: 'AssignmentExpression',
-                left: { type: 'Identifier', name: 'private' },
+                loc: {
+                  start: { line: 1, col: 17 },
+                  end: { line: 1, col: 27 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 17 },
+                    end: { line: 1, col: 24 },
+                    source: ''
+                  },
+                  name: 'private'
+                },
                 operator: '=',
-                right: { type: 'Literal', value: 10, raw: '10' }
+                right: {
+                  type: 'Literal',
+                  loc: {
+                    start: { line: 1, col: 25 },
+                    end: { line: 1, col: 25 },
+                    source: ''
+                  },
+                  value: 10,
+                  raw: '10'
+                }
               }
             }
           ],
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 28 },
+              end: { line: 1, col: 31 },
+              source: ''
+            },
+            body: []
+          }
         }
       }
     }

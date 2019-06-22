@@ -29,38 +29,103 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 17 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'x' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 1 },
+            source: ''
+          },
+          name: 'x'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 2 },
+            end: { line: 1, col: 17 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'f' },
+              loc: {
+                start: { line: 1, col: 3 },
+                end: { line: 1, col: 16 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 5 },
+                  source: ''
+                },
+                name: 'f'
+              },
               kind: 'init',
               method: true,
               computed: false,
               value: {
                 type: 'FunctionExpression',
+                loc: {
+                  start: { line: 1, col: 3 },
+                  end: { line: 1, col: 16 },
+                  source: ''
+                },
                 generator: true,
                 async: false,
                 id: null,
                 params: [],
                 body: {
                   type: 'BlockStatement',
+                  loc: {
+                    start: { line: 1, col: 7 },
+                    end: { line: 1, col: 16 },
+                    source: ''
+                  },
                   body: [
                     {
                       type: 'VariableDeclaration',
+                      loc: {
+                        start: { line: 1, col: 13 },
+                        end: { line: 1, col: 15 },
+                        source: ''
+                      },
                       kind: 'var',
                       declarations: [
                         {
                           type: 'VariableDeclarator',
-                          id: { type: 'Identifier', name: 'f' },
+                          loc: {
+                            start: { line: 1, col: 13 },
+                            end: { line: 1, col: 15 },
+                            source: ''
+                          },
+                          id: {
+                            type: 'Identifier',
+                            loc: {
+                              start: { line: 1, col: 13 },
+                              end: { line: 1, col: 13 },
+                              source: ''
+                            },
+                            name: 'f'
+                          },
                           init: null
                         }
                       ]

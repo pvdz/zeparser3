@@ -29,18 +29,53 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 15 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
           id: {
             type: 'ArrayPattern',
-            elements: [ { type: 'Identifier', name: 'foo' }, null ]
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            elements: [
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 8 },
+                  source: ''
+                },
+                name: 'foo'
+              },
+              null
+            ]
           },
-          init: { type: 'Identifier', name: 'x' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 15 },
+              source: ''
+            },
+            name: 'x'
+          }
         }
       ]
     }

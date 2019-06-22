@@ -29,18 +29,53 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 14 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 14 },
+        source: ''
+      },
       init: {
         type: 'BinaryExpression',
-        left: { type: 'Literal', value: 2, raw: '2' },
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        left: {
+          type: 'Literal',
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 5 },
+            source: ''
+          },
+          value: 2,
+          raw: '2'
+        },
         operator: '+',
-        right: { type: 'Identifier', name: 'b' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 9 },
+            end: { line: 1, col: 10 },
+            source: ''
+          },
+          name: 'b'
+        }
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 14 },
+          source: ''
+        }
+      }
     }
   ]
 }

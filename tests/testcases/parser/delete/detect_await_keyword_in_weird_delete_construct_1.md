@@ -29,26 +29,79 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 34 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
-        params: [ { type: 'Identifier', name: 'x' } ],
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 34 },
+          source: ''
+        },
+        params: [
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'x'
+          }
+        ],
         id: null,
         generator: false,
         async: true,
         expression: true,
         body: {
           type: 'UnaryExpression',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 34 },
+            source: ''
+          },
           operator: 'delete',
           prefix: true,
           argument: {
             type: 'MemberExpression',
-            object: { type: 'Literal', value: 'x', raw: '"x"' },
+            loc: {
+              start: { line: 1, col: 19 },
+              end: { line: 1, col: 33 },
+              source: ''
+            },
+            object: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 19 },
+                end: { line: 1, col: 19 },
+                source: ''
+              },
+              value: 'x',
+              raw: '"x"'
+            },
             property: {
               type: 'AwaitExpression',
-              argument: { type: 'Identifier', name: 'x' }
+              loc: {
+                start: { line: 1, col: 24 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
+              argument: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 30 },
+                  end: { line: 1, col: 31 },
+                  source: ''
+                },
+                name: 'x'
+              }
             },
             computed: true
           }

@@ -31,14 +31,41 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
   body: [
     {
       type: 'DoWhileStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 20 },
+        source: ''
+      },
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'foo' }
+        loc: {
+          start: { line: 1, col: 3 },
+          end: { line: 1, col: 8 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 3 },
+            end: { line: 1, col: 6 },
+            source: ''
+          },
+          name: 'foo'
+        }
       },
-      test: { type: 'Identifier', name: 'bar' }
+      test: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        name: 'bar'
+      }
     }
   ]
 }

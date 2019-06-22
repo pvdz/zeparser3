@@ -29,28 +29,104 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
       init: {
         type: 'BinaryExpression',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
         left: {
           type: 'BinaryExpression',
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
           left: {
             type: 'BinaryExpression',
-            left: { type: 'Identifier', name: 'a' },
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            left: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 8 },
+                source: ''
+              },
+              name: 'a'
+            },
             operator: '*',
-            right: { type: 'Identifier', name: 'b' }
+            right: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 12 },
+                source: ''
+              },
+              name: 'b'
+            }
           },
           operator: '+',
-          right: { type: 'Identifier', name: 'c' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 15 },
+              source: ''
+            },
+            name: 'c'
+          }
         },
         operator: '*',
-        right: { type: 'Identifier', name: 'd' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 19 },
+            end: { line: 1, col: 20 },
+            source: ''
+          },
+          name: 'd'
+        }
       },
-      test: { type: 'Identifier', name: 'b' },
-      update: { type: 'Identifier', name: 'c' },
-      body: { type: 'EmptyStatement' }
+      test: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 21 },
+          end: { line: 1, col: 22 },
+          source: ''
+        },
+        name: 'b'
+      },
+      update: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 23 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
+        name: 'c'
+      },
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 25 },
+          end: { line: 1, col: 26 },
+          source: ''
+        }
+      }
     }
   ]
 }

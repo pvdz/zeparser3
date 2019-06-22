@@ -47,26 +47,68 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ExportNamedDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 11 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
             id: {
               type: 'ArrayPattern',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 20 },
+                source: ''
+              },
               elements: [
                 {
                   type: 'RestElement',
-                  argument: { type: 'Identifier', name: 'foo' }
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 18 },
+                    source: ''
+                  },
+                  argument: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 15 },
+                      end: { line: 1, col: 18 },
+                      source: ''
+                    },
+                    name: 'foo'
+                  }
                 }
               ]
             },
-            init: { type: 'Identifier', name: 'obj' }
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 25 },
+                source: ''
+              },
+              name: 'obj'
+            }
           }
         ]
       },

@@ -29,20 +29,68 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'ForInStatement',
-      left: { type: 'Identifier', name: 'a' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 17 },
+        source: ''
+      },
+      left: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 7 },
+          source: ''
+        },
+        name: 'a'
+      },
       right: {
         type: 'SequenceExpression',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 13 },
+          source: ''
+        },
         expressions: [
-          { type: 'Identifier', name: 'b' },
-          { type: 'Identifier', name: 'c' }
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            name: 'b'
+          },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
+            name: 'c'
+          }
         ]
       },
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'd' }
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
+          name: 'd'
+        }
       }
     }
   ]

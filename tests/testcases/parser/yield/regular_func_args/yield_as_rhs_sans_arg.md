@@ -31,36 +31,117 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 47 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 47 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'g' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'g'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 47 },
+          source: ''
+        },
         body: [
           {
             type: 'FunctionDeclaration',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 44 },
+              source: ''
+            },
             generator: false,
             async: false,
-            id: { type: 'Identifier', name: 'f' },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 25 },
+                end: { line: 1, col: 25 },
+                source: ''
+              },
+              name: 'f'
+            },
             params: [
               {
                 type: 'AssignmentPattern',
-                left: { type: 'Identifier', name: 'x' },
+                loc: {
+                  start: { line: 1, col: 27 },
+                  end: { line: 1, col: 40 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 27 },
+                    end: { line: 1, col: 27 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 right: {
                   type: 'BinaryExpression',
-                  left: { type: 'Identifier', name: 'x' },
+                  loc: {
+                    start: { line: 1, col: 31 },
+                    end: { line: 1, col: 40 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 31 },
+                      end: { line: 1, col: 33 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
                   operator: '+',
-                  right: { type: 'Identifier', name: 'yield' }
+                  right: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 35 },
+                      end: { line: 1, col: 40 },
+                      source: ''
+                    },
+                    name: 'yield'
+                  }
                 }
               }
             ],
-            body: { type: 'BlockStatement', body: [] }
+            body: {
+              type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 42 },
+                end: { line: 1, col: 44 },
+                source: ''
+              },
+              body: []
+            }
           },
-          { type: 'EmptyStatement' }
+          {
+            type: 'EmptyStatement',
+            loc: {
+              start: { line: 1, col: 44 },
+              end: { line: 1, col: 46 },
+              source: ''
+            }
+          }
         ]
       }
     }

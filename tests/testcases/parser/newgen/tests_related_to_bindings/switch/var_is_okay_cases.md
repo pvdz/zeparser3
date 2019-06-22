@@ -29,45 +29,137 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 62 } },
   body: [
     {
       type: 'SwitchStatement',
-      discriminant: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 62 },
+        source: ''
+      },
+      discriminant: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'x'
+      },
       cases: [
         {
           type: 'SwitchCase',
-          test: { type: 'Identifier', name: 'a' },
+          loc: {
+            start: { line: 1, col: 13 },
+            end: { line: 1, col: 37 },
+            source: ''
+          },
+          test: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 18 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
+            name: 'a'
+          },
           consequent: [
             {
               type: 'VariableDeclaration',
+              loc: {
+                start: { line: 1, col: 25 },
+                end: { line: 1, col: 28 },
+                source: ''
+              },
               kind: 'var',
               declarations: [
                 {
                   type: 'VariableDeclarator',
-                  id: { type: 'Identifier', name: 'foo' },
+                  loc: {
+                    start: { line: 1, col: 25 },
+                    end: { line: 1, col: 28 },
+                    source: ''
+                  },
+                  id: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 25 },
+                      end: { line: 1, col: 25 },
+                      source: ''
+                    },
+                    name: 'foo'
+                  },
                   init: null
                 }
               ]
             },
-            { type: 'BreakStatement', label: null }
+            {
+              type: 'BreakStatement',
+              loc: {
+                start: { line: 1, col: 30 },
+                end: { line: 1, col: 37 },
+                source: ''
+              },
+              label: null
+            }
           ]
         },
         {
           type: 'SwitchCase',
-          test: { type: 'Identifier', name: 'b' },
+          loc: {
+            start: { line: 1, col: 37 },
+            end: { line: 1, col: 61 },
+            source: ''
+          },
+          test: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 42 },
+              end: { line: 1, col: 43 },
+              source: ''
+            },
+            name: 'b'
+          },
           consequent: [
             {
               type: 'VariableDeclaration',
+              loc: {
+                start: { line: 1, col: 49 },
+                end: { line: 1, col: 52 },
+                source: ''
+              },
               kind: 'var',
               declarations: [
                 {
                   type: 'VariableDeclarator',
-                  id: { type: 'Identifier', name: 'foo' },
+                  loc: {
+                    start: { line: 1, col: 49 },
+                    end: { line: 1, col: 52 },
+                    source: ''
+                  },
+                  id: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 49 },
+                      end: { line: 1, col: 49 },
+                      source: ''
+                    },
+                    name: 'foo'
+                  },
                   init: null
                 }
               ]
             },
-            { type: 'BreakStatement', label: null }
+            {
+              type: 'BreakStatement',
+              loc: {
+                start: { line: 1, col: 54 },
+                end: { line: 1, col: 61 },
+                source: ''
+              },
+              label: null
+            }
           ]
         }
       ]

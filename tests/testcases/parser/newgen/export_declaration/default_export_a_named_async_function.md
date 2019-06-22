@@ -47,16 +47,43 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 35 } },
   body: [
     {
       type: 'ExportDefaultDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 35 },
+        source: ''
+      },
       declaration: {
         type: 'FunctionDeclaration',
+        loc: {
+          start: { line: 1, col: 21 },
+          end: { line: 1, col: 35 },
+          source: ''
+        },
         generator: false,
         async: true,
-        id: { type: 'Identifier', name: 'f' },
+        id: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 30 },
+            end: { line: 1, col: 30 },
+            source: ''
+          },
+          name: 'f'
+        },
         params: [],
-        body: { type: 'BlockStatement', body: [] }
+        body: {
+          type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 33 },
+            end: { line: 1, col: 35 },
+            source: ''
+          },
+          body: []
+        }
       }
     }
   ]

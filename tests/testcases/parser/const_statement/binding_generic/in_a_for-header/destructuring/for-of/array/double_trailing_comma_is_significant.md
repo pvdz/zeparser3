@@ -29,26 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'ForOfStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
       left: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 11 },
+          end: { line: 1, col: 19 },
+          source: ''
+        },
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
             id: {
               type: 'ArrayPattern',
-              elements: [ { type: 'Identifier', name: 'foo' }, null ]
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 19 },
+                source: ''
+              },
+              elements: [
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 15 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
+                null
+              ]
             },
             init: null
           }
         ]
       },
-      right: { type: 'Identifier', name: 'arr' },
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 22 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
+        name: 'arr'
+      },
       await: false,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 26 },
+          end: { line: 1, col: 27 },
+          source: ''
+        }
+      }
     }
   ]
 }

@@ -29,11 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
         params: [],
         id: null,
         generator: false,
@@ -41,13 +52,47 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 37 },
+            source: ''
+          },
           body: [
             {
               type: 'ForOfStatement',
-              left: { type: 'Identifier', name: 'x' },
-              right: { type: 'Identifier', name: 'y' },
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 1, col: 36 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 25 },
+                  end: { line: 1, col: 27 },
+                  source: ''
+                },
+                name: 'x'
+              },
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 30 },
+                  end: { line: 1, col: 31 },
+                  source: ''
+                },
+                name: 'y'
+              },
               await: true,
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 33 },
+                  end: { line: 1, col: 36 },
+                  source: ''
+                },
+                body: []
+              }
             }
           ]
         }

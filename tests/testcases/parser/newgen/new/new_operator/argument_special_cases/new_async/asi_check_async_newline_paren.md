@@ -30,18 +30,60 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 4 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 2, col: 4 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 2, col: 4 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'x'
+          },
           init: {
             type: 'NewExpression',
-            arguments: [ { type: 'Identifier', name: 'x' } ],
-            callee: { type: 'Identifier', name: 'async' }
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 2, col: 4 },
+              source: ''
+            },
+            arguments: [
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 2, col: 2 },
+                  end: { line: 2, col: 3 },
+                  source: ''
+                },
+                name: 'x'
+              }
+            ],
+            callee: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 12 },
+                end: { line: 2, col: 1 },
+                source: ''
+              },
+              name: 'async'
+            }
           }
         }
       ]

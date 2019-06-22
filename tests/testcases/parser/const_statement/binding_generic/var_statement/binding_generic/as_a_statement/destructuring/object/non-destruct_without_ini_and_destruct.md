@@ -29,33 +29,91 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'x' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 5 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'x'
+          },
           init: null
         },
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 7 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
           id: {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 7 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'y' },
+                loc: {
+                  start: { line: 1, col: 8 },
+                  end: { line: 1, col: 9 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 8 },
+                    end: { line: 1, col: 9 },
+                    source: ''
+                  },
+                  name: 'y'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'y' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 8 },
+                    end: { line: 1, col: 9 },
+                    source: ''
+                  },
+                  name: 'y'
+                },
                 shorthand: true
               }
             ]
           },
-          init: { type: 'Identifier', name: 'obj' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 13 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
+            name: 'obj'
+          }
         }
       ]
     }

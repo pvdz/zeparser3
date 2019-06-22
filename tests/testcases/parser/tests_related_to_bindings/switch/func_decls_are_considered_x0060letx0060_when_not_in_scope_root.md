@@ -65,41 +65,153 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 75 } },
   body: [
     {
       type: 'SwitchStatement',
-      discriminant: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 75 },
+        source: ''
+      },
+      discriminant: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 8 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'x'
+      },
       cases: [
         {
           type: 'SwitchCase',
-          test: { type: 'Identifier', name: 'a' },
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 43 },
+            source: ''
+          },
+          test: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 18 },
+              source: ''
+            },
+            name: 'a'
+          },
           consequent: [
             {
               type: 'FunctionDeclaration',
+              loc: {
+                start: { line: 1, col: 20 },
+                end: { line: 1, col: 34 },
+                source: ''
+              },
               generator: false,
               async: false,
-              id: { type: 'Identifier', name: 'f' },
+              id: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 29 },
+                  end: { line: 1, col: 29 },
+                  source: ''
+                },
+                name: 'f'
+              },
               params: [],
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 32 },
+                  end: { line: 1, col: 34 },
+                  source: ''
+                },
+                body: []
+              }
             },
-            { type: 'EmptyStatement' },
-            { type: 'BreakStatement', label: null }
+            {
+              type: 'EmptyStatement',
+              loc: {
+                start: { line: 1, col: 34 },
+                end: { line: 1, col: 36 },
+                source: ''
+              }
+            },
+            {
+              type: 'BreakStatement',
+              loc: {
+                start: { line: 1, col: 36 },
+                end: { line: 1, col: 43 },
+                source: ''
+              },
+              label: null
+            }
           ]
         },
         {
           type: 'SwitchCase',
-          test: { type: 'Identifier', name: 'b' },
+          loc: {
+            start: { line: 1, col: 43 },
+            end: { line: 1, col: 74 },
+            source: ''
+          },
+          test: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 48 },
+              end: { line: 1, col: 49 },
+              source: ''
+            },
+            name: 'b'
+          },
           consequent: [
             {
               type: 'FunctionDeclaration',
+              loc: {
+                start: { line: 1, col: 51 },
+                end: { line: 1, col: 65 },
+                source: ''
+              },
               generator: false,
               async: false,
-              id: { type: 'Identifier', name: 'f' },
+              id: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 60 },
+                  end: { line: 1, col: 60 },
+                  source: ''
+                },
+                name: 'f'
+              },
               params: [],
-              body: { type: 'BlockStatement', body: [] }
+              body: {
+                type: 'BlockStatement',
+                loc: {
+                  start: { line: 1, col: 63 },
+                  end: { line: 1, col: 65 },
+                  source: ''
+                },
+                body: []
+              }
             },
-            { type: 'EmptyStatement' },
-            { type: 'BreakStatement', label: null }
+            {
+              type: 'EmptyStatement',
+              loc: {
+                start: { line: 1, col: 65 },
+                end: { line: 1, col: 67 },
+                source: ''
+              }
+            },
+            {
+              type: 'BreakStatement',
+              loc: {
+                start: { line: 1, col: 67 },
+                end: { line: 1, col: 74 },
+                source: ''
+              },
+              label: null
+            }
           ]
         }
       ]

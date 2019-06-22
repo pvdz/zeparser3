@@ -29,18 +29,58 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 15 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 15 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'x' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 14 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 'x'
+        },
         operator: '=',
         right: {
           type: 'ClassExpression',
-          id: { type: 'Identifier', name: 'A' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 10 },
+              end: { line: 1, col: 10 },
+              source: ''
+            },
+            name: 'A'
+          },
           superClass: null,
-          body: { type: 'ClassBody', body: [] }
+          body: {
+            type: 'ClassBody',
+            loc: {
+              start: { line: 1, col: 12 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            body: []
+          }
         }
       }
     }

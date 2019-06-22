@@ -31,23 +31,78 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
   body: [
     {
       type: 'ForOfStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 23 },
+        source: ''
+      },
       left: {
         type: 'MemberExpression',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 16 },
+          source: ''
+        },
         object: {
           type: 'BinaryExpression',
-          left: { type: 'Identifier', name: 'a' },
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 1, col: 12 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'a'
+          },
           operator: 'in',
-          right: { type: 'Identifier', name: 'b' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            name: 'b'
+          }
         },
-        property: { type: 'Identifier', name: 'x' },
+        property: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 14 },
+            end: { line: 1, col: 14 },
+            source: ''
+          },
+          name: 'x'
+        },
         computed: false
       },
-      right: { type: 'ObjectExpression', properties: [] },
+      right: {
+        type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 21 },
+          source: ''
+        },
+        properties: []
+      },
       await: false,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 22 },
+          end: { line: 1, col: 23 },
+          source: ''
+        }
+      }
     }
   ]
 }

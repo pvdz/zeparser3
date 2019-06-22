@@ -29,33 +29,107 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 30 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 29 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'ident' },
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 28 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'ident'
+            },
             kind: 'init',
             method: false,
             computed: false,
             value: {
               type: 'CallExpression',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 28 },
+                source: ''
+              },
               callee: {
                 type: 'MemberExpression',
+                loc: {
+                  start: { line: 1, col: 9 },
+                  end: { line: 1, col: 24 },
+                  source: ''
+                },
                 object: {
                   type: 'ArrayExpression',
+                  loc: {
+                    start: { line: 1, col: 9 },
+                    end: { line: 1, col: 19 },
+                    source: ''
+                  },
                   elements: [
-                    { type: 'Identifier', name: 'foo' },
-                    { type: 'Identifier', name: 'bar' }
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 10 },
+                        end: { line: 1, col: 13 },
+                        source: ''
+                      },
+                      name: 'foo'
+                    },
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 15 },
+                        end: { line: 1, col: 18 },
+                        source: ''
+                      },
+                      name: 'bar'
+                    }
                   ]
                 },
-                property: { type: 'Identifier', name: 'join' },
+                property: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 20 },
+                    end: { line: 1, col: 20 },
+                    source: ''
+                  },
+                  name: 'join'
+                },
                 computed: false
               },
-              arguments: [ { type: 'Literal', value: '', raw: '""' } ]
+              arguments: [
+                {
+                  type: 'Literal',
+                  loc: {
+                    start: { line: 1, col: 25 },
+                    end: { line: 1, col: 25 },
+                    source: ''
+                  },
+                  value: '',
+                  raw: '""'
+                }
+              ]
             },
             shorthand: false
           }

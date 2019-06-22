@@ -48,37 +48,103 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 32 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'o' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 32 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 'o'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 32 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'f' },
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                name: 'f'
+              },
               kind: 'init',
               method: true,
               computed: false,
               value: {
                 type: 'FunctionExpression',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 31 },
+                  source: ''
+                },
                 generator: true,
                 async: false,
                 id: null,
                 params: [],
                 body: {
                   type: 'BlockStatement',
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 31 },
+                    source: ''
+                  },
                   body: [
                     {
                       type: 'ReturnStatement',
+                      loc: {
+                        start: { line: 1, col: 12 },
+                        end: { line: 1, col: 30 },
+                        source: ''
+                      },
                       argument: {
                         type: 'YieldExpression',
+                        loc: {
+                          start: { line: 1, col: 19 },
+                          end: { line: 1, col: 28 },
+                          source: ''
+                        },
                         delegate: false,
-                        argument: { type: 'Literal', value: 100, raw: '100' }
+                        argument: {
+                          type: 'Literal',
+                          loc: {
+                            start: { line: 1, col: 25 },
+                            end: { line: 1, col: 25 },
+                            source: ''
+                          },
+                          value: 100,
+                          raw: '100'
+                        }
                       }
                     }
                   ]

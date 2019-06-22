@@ -29,16 +29,61 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
   body: [
     {
       type: 'ClassDeclaration',
-      id: { type: 'Identifier', name: 'x' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 30 },
+        source: ''
+      },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 6 },
+          end: { line: 1, col: 6 },
+          source: ''
+        },
+        name: 'x'
+      },
       superClass: {
         type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'feh' },
-        arguments: [ { type: 'Identifier', name: 'await' } ]
+        loc: {
+          start: { line: 1, col: 16 },
+          end: { line: 1, col: 27 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 16 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
+          name: 'feh'
+        },
+        arguments: [
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
+            name: 'await'
+          }
+        ]
       },
-      body: { type: 'ClassBody', body: [] }
+      body: {
+        type: 'ClassBody',
+        loc: {
+          start: { line: 1, col: 27 },
+          end: { line: 1, col: 30 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

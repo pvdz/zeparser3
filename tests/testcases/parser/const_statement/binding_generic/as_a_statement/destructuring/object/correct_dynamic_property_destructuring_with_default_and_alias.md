@@ -29,32 +29,90 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 1, col: 22 },
+            source: ''
+          },
           id: {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'x' },
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 17 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 8 },
+                    end: { line: 1, col: 9 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 kind: 'init',
                 method: false,
                 computed: true,
                 value: {
                   type: 'AssignmentPattern',
-                  left: { type: 'Identifier', name: 'y' },
-                  right: { type: 'Identifier', name: 'z' }
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 17 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 12 },
+                      end: { line: 1, col: 14 },
+                      source: ''
+                    },
+                    name: 'y'
+                  },
+                  right: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 16 },
+                      end: { line: 1, col: 17 },
+                      source: ''
+                    },
+                    name: 'z'
+                  }
                 },
                 shorthand: false
               }
             ]
           },
-          init: { type: 'Identifier', name: 'a' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 21 },
+              end: { line: 1, col: 22 },
+              source: ''
+            },
+            name: 'a'
+          }
         }
       ]
     }

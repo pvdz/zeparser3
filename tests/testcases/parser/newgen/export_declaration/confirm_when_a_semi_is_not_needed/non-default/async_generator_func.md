@@ -49,23 +49,63 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
   body: [
     {
       type: 'ExportNamedDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 29 },
+        source: ''
+      },
       specifiers: [],
       declaration: {
         type: 'FunctionDeclaration',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 29 },
+          source: ''
+        },
         generator: true,
         async: true,
-        id: { type: 'Identifier', name: 'f' },
+        id: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 23 },
+            end: { line: 1, col: 23 },
+            source: ''
+          },
+          name: 'f'
+        },
         params: [],
-        body: { type: 'BlockStatement', body: [] }
+        body: {
+          type: 'BlockStatement',
+          loc: {
+            start: { line: 1, col: 26 },
+            end: { line: 1, col: 29 },
+            source: ''
+          },
+          body: []
+        }
       },
       source: null
     },
     {
       type: 'ExpressionStatement',
-      expression: { type: 'Identifier', name: 'foo' }
+      loc: {
+        start: { line: 1, col: 29 },
+        end: { line: 1, col: 32 },
+        source: ''
+      },
+      expression: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 29 },
+          end: { line: 1, col: 32 },
+          source: ''
+        },
+        name: 'foo'
+      }
     }
   ]
 }

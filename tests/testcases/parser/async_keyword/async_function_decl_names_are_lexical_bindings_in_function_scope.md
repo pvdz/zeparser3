@@ -29,31 +29,89 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 49 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 49 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'g' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'g'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 49 },
+          source: ''
+        },
         body: [
           {
             type: 'FunctionDeclaration',
+            loc: {
+              start: { line: 1, col: 23 },
+              end: { line: 1, col: 39 },
+              source: ''
+            },
             generator: false,
             async: true,
-            id: { type: 'Identifier', name: 'f' },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 32 },
+                end: { line: 1, col: 32 },
+                source: ''
+              },
+              name: 'f'
+            },
             params: [],
-            body: { type: 'BlockStatement', body: [] }
+            body: {
+              type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 36 },
+                end: { line: 1, col: 39 },
+                source: ''
+              },
+              body: []
+            }
           },
           {
             type: 'VariableDeclaration',
+            loc: {
+              start: { line: 1, col: 43 },
+              end: { line: 1, col: 44 },
+              source: ''
+            },
             kind: 'var',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                id: { type: 'Identifier', name: 'f' },
+                loc: {
+                  start: { line: 1, col: 43 },
+                  end: { line: 1, col: 44 },
+                  source: ''
+                },
+                id: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 43 },
+                    end: { line: 1, col: 43 },
+                    source: ''
+                  },
+                  name: 'f'
+                },
                 init: null
               }
             ]

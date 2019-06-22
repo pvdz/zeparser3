@@ -29,23 +29,84 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 20 },
+        source: ''
+      },
       expression: {
         type: 'ConditionalExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 19 },
+          source: ''
+        },
         test: {
           type: 'BinaryExpression',
-          left: { type: 'Identifier', name: 'a' },
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 8 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 0 },
+              end: { line: 1, col: 2 },
+              source: ''
+            },
+            name: 'a'
+          },
           operator: '===',
-          right: { type: 'Identifier', name: 'b' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            name: 'b'
+          }
         },
-        consequent: { type: 'Identifier', name: 'c' },
+        consequent: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 10 },
+            end: { line: 1, col: 12 },
+            source: ''
+          },
+          name: 'c'
+        },
         alternate: {
           type: 'BinaryExpression',
-          left: { type: 'Identifier', name: 'd' },
+          loc: {
+            start: { line: 1, col: 14 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
+          left: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
+            name: 'd'
+          },
           operator: '%',
-          right: { type: 'Identifier', name: 'e' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 18 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
+            name: 'e'
+          }
         }
       }
     }

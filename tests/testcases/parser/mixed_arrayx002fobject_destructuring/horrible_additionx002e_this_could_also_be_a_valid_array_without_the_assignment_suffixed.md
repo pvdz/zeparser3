@@ -29,34 +29,100 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 42 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 42 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 42 },
+          source: ''
+        },
         left: {
           type: 'ArrayPattern',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 29 },
+            source: ''
+          },
           elements: [
-            { type: 'Identifier', name: 'please' },
+            {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 1 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              name: 'please'
+            },
             {
               type: 'ObjectPattern',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 21 },
+                source: ''
+              },
               properties: [
                 {
                   type: 'Property',
-                  key: { type: 'Identifier', name: 'make' },
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 20 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 11 },
+                      end: { line: 1, col: 15 },
+                      source: ''
+                    },
+                    name: 'make'
+                  },
                   kind: 'init',
                   method: false,
                   computed: true,
-                  value: { type: 'Identifier', name: 'it' },
+                  value: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 18 },
+                      end: { line: 1, col: 20 },
+                      source: ''
+                    },
+                    name: 'it'
+                  },
                   shorthand: false
                 }
               ]
             },
-            { type: 'Identifier', name: 'stop' }
+            {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 23 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
+              name: 'stop'
+            }
           ]
         },
         operator: '=',
-        right: { type: 'Identifier', name: 'bwahahahaha' }
+        right: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 31 },
+            end: { line: 1, col: 42 },
+            source: ''
+          },
+          name: 'bwahahahaha'
+        }
       }
     }
   ]

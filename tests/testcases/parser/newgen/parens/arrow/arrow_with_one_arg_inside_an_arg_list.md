@@ -29,35 +29,122 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
       expression: {
         type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'f' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 26 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 1 },
+            source: ''
+          },
+          name: 'f'
+        },
         arguments: [
           {
             type: 'CallExpression',
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 22 },
+              source: ''
+            },
             callee: {
               type: 'ArrowFunctionExpression',
-              params: [ { type: 'Identifier', name: 'a' } ],
+              loc: {
+                start: { line: 1, col: 3 },
+                end: { line: 1, col: 15 },
+                source: ''
+              },
+              params: [
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 4 },
+                    end: { line: 1, col: 5 },
+                    source: ''
+                  },
+                  name: 'a'
+                }
+              ],
               id: null,
               generator: false,
               async: false,
               expression: true,
               body: {
                 type: 'BinaryExpression',
-                left: { type: 'Identifier', name: 'a' },
+                loc: {
+                  start: { line: 1, col: 10 },
+                  end: { line: 1, col: 15 },
+                  source: ''
+                },
+                left: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 12 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 operator: '+',
-                right: { type: 'Identifier', name: 'b' }
+                right: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 14 },
+                    end: { line: 1, col: 15 },
+                    source: ''
+                  },
+                  name: 'b'
+                }
               }
             },
             arguments: [
-              { type: 'Literal', value: 1, raw: '1' },
-              { type: 'Literal', value: 4, raw: '4' }
+              {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 17 },
+                  end: { line: 1, col: 17 },
+                  source: ''
+                },
+                value: 1,
+                raw: '1'
+              },
+              {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 20 },
+                  source: ''
+                },
+                value: 4,
+                raw: '4'
+              }
             ]
           },
-          { type: 'Literal', value: 5, raw: '5' }
+          {
+            type: 'Literal',
+            loc: {
+              start: { line: 1, col: 24 },
+              end: { line: 1, col: 24 },
+              source: ''
+            },
+            value: 5,
+            raw: '5'
+          }
         ]
       }
     }

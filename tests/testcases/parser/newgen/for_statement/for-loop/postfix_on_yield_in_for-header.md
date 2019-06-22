@@ -29,15 +29,47 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 19 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 19 },
+        source: ''
+      },
       init: {
         type: 'UpdateExpression',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
         argument: {
           type: 'MemberExpression',
-          object: { type: 'Identifier', name: 'yield' },
-          property: { type: 'Identifier', name: 'g' },
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 13 },
+            source: ''
+          },
+          object: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 5 },
+              end: { line: 1, col: 10 },
+              source: ''
+            },
+            name: 'yield'
+          },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            name: 'g'
+          },
           computed: true
         },
         operator: '--',
@@ -45,7 +77,14 @@ ast: {
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 18 },
+          end: { line: 1, col: 19 },
+          source: ''
+        }
+      }
     }
   ]
 }

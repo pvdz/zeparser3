@@ -29,40 +29,109 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 21 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 19 },
+          source: ''
+        },
         left: {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 1 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
           properties: [
             {
               type: 'RestElement',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 13 },
+                source: ''
+              },
               argument: {
                 type: 'MemberExpression',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 13 },
+                  source: ''
+                },
                 object: {
                   type: 'ObjectExpression',
+                  loc: {
+                    start: { line: 1, col: 5 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
                   properties: [
                     {
                       type: 'Property',
-                      key: { type: 'Identifier', name: 'b' },
+                      loc: {
+                        start: { line: 1, col: 6 },
+                        end: { line: 1, col: 10 },
+                        source: ''
+                      },
+                      key: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 6 },
+                          end: { line: 1, col: 9 },
+                          source: ''
+                        },
+                        name: 'b'
+                      },
                       kind: 'init',
                       method: false,
                       computed: false,
-                      value: { type: 'Literal', value: 0, raw: '0' },
+                      value: {
+                        type: 'Literal',
+                        loc: {
+                          start: { line: 1, col: 9 },
+                          end: { line: 1, col: 9 },
+                          source: ''
+                        },
+                        value: 0,
+                        raw: '0'
+                      },
                       shorthand: false
                     }
                   ]
                 },
-                property: { type: 'Identifier', name: 'x' },
+                property: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 12 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 computed: false
               }
             }
           ]
         },
         operator: '=',
-        right: { type: 'ObjectExpression', properties: [] }
+        right: {
+          type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 17 },
+            end: { line: 1, col: 19 },
+            source: ''
+          },
+          properties: []
+        }
       }
     }
   ]

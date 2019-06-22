@@ -59,25 +59,73 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 33 } },
   body: [
     {
       type: 'BlockStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 33 },
+        source: ''
+      },
       body: [
         {
           type: 'FunctionDeclaration',
+          loc: {
+            start: { line: 1, col: 2 },
+            end: { line: 1, col: 17 },
+            source: ''
+          },
           generator: false,
           async: false,
-          id: { type: 'Identifier', name: 'f' },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 11 },
+              end: { line: 1, col: 11 },
+              source: ''
+            },
+            name: 'f'
+          },
           params: [],
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            body: []
+          }
         },
         {
           type: 'FunctionDeclaration',
+          loc: {
+            start: { line: 1, col: 17 },
+            end: { line: 1, col: 32 },
+            source: ''
+          },
           generator: false,
           async: false,
-          id: { type: 'Identifier', name: 'f' },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 26 },
+              end: { line: 1, col: 26 },
+              source: ''
+            },
+            name: 'f'
+          },
           params: [],
-          body: { type: 'BlockStatement', body: [] }
+          body: {
+            type: 'BlockStatement',
+            loc: {
+              start: { line: 1, col: 29 },
+              end: { line: 1, col: 32 },
+              source: ''
+            },
+            body: []
+          }
         }
       ]
     }

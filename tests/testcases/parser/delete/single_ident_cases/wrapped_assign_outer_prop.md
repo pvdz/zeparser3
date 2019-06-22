@@ -29,22 +29,67 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       expression: {
         type: 'UnaryExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
         operator: 'delete',
         prefix: true,
         argument: {
           type: 'MemberExpression',
+          loc: {
+            start: { line: 1, col: 8 },
+            end: { line: 1, col: 17 },
+            source: ''
+          },
           object: {
             type: 'AssignmentExpression',
-            left: { type: 'Identifier', name: 'a' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            left: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 10 },
+                end: { line: 1, col: 11 },
+                source: ''
+              },
+              name: 'a'
+            },
             operator: '=',
-            right: { type: 'Identifier', name: 'b' }
+            right: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 13 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              name: 'b'
+            }
           },
-          property: { type: 'Identifier', name: 'x' },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
+            name: 'x'
+          },
           computed: false
         }
       }

@@ -29,31 +29,98 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 36 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 36 },
+        source: ''
+      },
       init: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 32 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 20 },
+              source: ''
+            },
             id: {
               type: 'ArrayPattern',
-              elements: [ { type: 'Identifier', name: 'foo' } ]
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 15 },
+                source: ''
+              },
+              elements: [
+                {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 13 },
+                    source: ''
+                  },
+                  name: 'foo'
+                }
+              ]
             },
-            init: { type: 'Identifier', name: 'arr' }
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 17 },
+                end: { line: 1, col: 20 },
+                source: ''
+              },
+              name: 'arr'
+            }
           },
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'bar' },
-            init: { type: 'Identifier', name: 'arr2' }
+            loc: {
+              start: { line: 1, col: 22 },
+              end: { line: 1, col: 32 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 22 },
+                source: ''
+              },
+              name: 'bar'
+            },
+            init: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 28 },
+                end: { line: 1, col: 32 },
+                source: ''
+              },
+              name: 'arr2'
+            }
           }
         ]
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 35 },
+          end: { line: 1, col: 36 },
+          source: ''
+        }
+      }
     }
   ]
 }

@@ -29,32 +29,90 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 40 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 40 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 12 },
+          end: { line: 1, col: 40 },
+          source: ''
+        },
         body: [
           {
             type: 'ReturnStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 39 },
+              source: ''
+            },
             argument: {
               type: 'ArrowFunctionExpression',
+              loc: {
+                start: { line: 1, col: 22 },
+                end: { line: 1, col: 36 },
+                source: ''
+              },
               params: [
                 {
                   type: 'AssignmentPattern',
-                  left: { type: 'Identifier', name: 'x' },
-                  right: { type: 'Identifier', name: 'yield' }
+                  loc: {
+                    start: { line: 1, col: 23 },
+                    end: { line: 1, col: 30 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 23 },
+                      end: { line: 1, col: 24 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
+                  right: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 25 },
+                      end: { line: 1, col: 30 },
+                      source: ''
+                    },
+                    name: 'yield'
+                  }
                 }
               ],
               id: null,
               generator: false,
               async: false,
               expression: true,
-              body: { type: 'Identifier', name: 'x' }
+              body: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 35 },
+                  end: { line: 1, col: 36 },
+                  source: ''
+                },
+                name: 'x'
+              }
             }
           }
         ]

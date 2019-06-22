@@ -29,28 +29,90 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
   body: [
     {
       type: 'ForStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 21 },
+        source: ''
+      },
       init: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'a' },
-            init: { type: 'Literal', value: 1, raw: '1' }
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'a'
+            },
+            init: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 11 },
+                end: { line: 1, col: 11 },
+                source: ''
+              },
+              value: 1,
+              raw: '1'
+            }
           },
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'b' },
-            init: { type: 'Literal', value: 2, raw: '2' }
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              name: 'b'
+            },
+            init: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 16 },
+                end: { line: 1, col: 16 },
+                source: ''
+              },
+              value: 2,
+              raw: '2'
+            }
           }
         ]
       },
       test: null,
       update: null,
-      body: { type: 'EmptyStatement' }
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 20 },
+          end: { line: 1, col: 21 },
+          source: ''
+        }
+      }
     }
   ]
 }

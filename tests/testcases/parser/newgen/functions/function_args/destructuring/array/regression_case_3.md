@@ -29,27 +29,80 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [
         {
           type: 'ArrayPattern',
+          loc: {
+            start: { line: 1, col: 11 },
+            end: { line: 1, col: 23 },
+            source: ''
+          },
           elements: [
-            { type: 'Identifier', name: 'a' },
+            {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 12 },
+                end: { line: 1, col: 13 },
+                source: ''
+              },
+              name: 'a'
+            },
             {
               type: 'ObjectPattern',
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 22 },
+                source: ''
+              },
               properties: [
                 {
                   type: 'Property',
-                  key: { type: 'Identifier', name: 'b' },
+                  loc: {
+                    start: { line: 1, col: 16 },
+                    end: { line: 1, col: 21 },
+                    source: ''
+                  },
+                  key: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 16 },
+                      end: { line: 1, col: 19 },
+                      source: ''
+                    },
+                    name: 'b'
+                  },
                   kind: 'init',
                   method: false,
                   computed: false,
-                  value: { type: 'ArrayPattern', elements: [] },
+                  value: {
+                    type: 'ArrayPattern',
+                    loc: {
+                      start: { line: 1, col: 19 },
+                      end: { line: 1, col: 21 },
+                      source: ''
+                    },
+                    elements: []
+                  },
                   shorthand: false
                 }
               ]
@@ -57,7 +110,15 @@ ast: {
           ]
         }
       ],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 25 },
+          end: { line: 1, col: 27 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

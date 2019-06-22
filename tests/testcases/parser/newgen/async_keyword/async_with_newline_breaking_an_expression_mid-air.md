@@ -32,43 +32,135 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 18 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 2, col: 0 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'f' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 2, col: 0 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'f'
+          },
           init: {
             type: 'BinaryExpression',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 2, col: 0 },
+              source: ''
+            },
             left: {
               type: 'BinaryExpression',
-              left: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 8 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 8 },
+                  end: { line: 1, col: 10 },
+                  source: ''
+                },
+                name: 'a'
+              },
               operator: '+',
-              right: { type: 'Identifier', name: 'b' }
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                name: 'b'
+              }
             },
             operator: '+',
-            right: { type: 'Identifier', name: 'async' }
+            right: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 16 },
+                end: { line: 2, col: 0 },
+                source: ''
+              },
+              name: 'async'
+            }
           }
         }
       ]
     },
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 2, col: 0 },
+        end: { line: 2, col: 15 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'g' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 2, col: 9 },
+          end: { line: 2, col: 9 },
+          source: ''
+        },
+        name: 'g'
+      },
       params: [],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 2, col: 12 },
+          end: { line: 2, col: 15 },
+          source: ''
+        },
+        body: []
+      }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 2, col: 15 },
+        end: { line: 2, col: 18 },
+        source: ''
+      },
       expression: {
         type: 'UnaryExpression',
+        loc: {
+          start: { line: 2, col: 15 },
+          end: { line: 2, col: 18 },
+          source: ''
+        },
         operator: '+',
         prefix: true,
-        argument: { type: 'Identifier', name: 'd' }
+        argument: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 2, col: 17 },
+            end: { line: 2, col: 18 },
+            source: ''
+          },
+          name: 'd'
+        }
       }
     }
   ]

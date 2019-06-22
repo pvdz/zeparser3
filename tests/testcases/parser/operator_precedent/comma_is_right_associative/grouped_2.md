@@ -33,18 +33,58 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 9 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 9 },
+        source: ''
+      },
       expression: {
         type: 'SequenceExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
         expressions: [
-          { type: 'Identifier', name: 'a' },
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 0 },
+              end: { line: 1, col: 1 },
+              source: ''
+            },
+            name: 'a'
+          },
           {
             type: 'SequenceExpression',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
             expressions: [
-              { type: 'Identifier', name: 'b' },
-              { type: 'Identifier', name: 'c' }
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 5 },
+                  source: ''
+                },
+                name: 'b'
+              },
+              {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 8 },
+                  source: ''
+                },
+                name: 'c'
+              }
             ]
           }
         ]

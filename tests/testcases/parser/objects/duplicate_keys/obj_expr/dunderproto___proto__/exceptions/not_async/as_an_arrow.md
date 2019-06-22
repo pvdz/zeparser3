@@ -35,31 +35,89 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 36 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 36 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 35 },
+          source: ''
+        },
         params: [
           {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 1 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: '__proto__' },
+                loc: {
+                  start: { line: 1, col: 2 },
+                  end: { line: 1, col: 14 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 2 },
+                    end: { line: 1, col: 13 },
+                    source: ''
+                  },
+                  name: '__proto__'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'a' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 13 },
+                    end: { line: 1, col: 14 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 shorthand: false
               },
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: '__proto__' },
+                loc: {
+                  start: { line: 1, col: 16 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 16 },
+                    end: { line: 1, col: 27 },
+                    source: ''
+                  },
+                  name: '__proto__'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
-                value: { type: 'Identifier', name: 'b' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 27 },
+                    end: { line: 1, col: 28 },
+                    source: ''
+                  },
+                  name: 'b'
+                },
                 shorthand: false
               }
             ]
@@ -69,7 +127,15 @@ ast: {
         generator: false,
         async: false,
         expression: true,
-        body: { type: 'Identifier', name: 'x' }
+        body: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 34 },
+            end: { line: 1, col: 35 },
+            source: ''
+          },
+          name: 'x'
+        }
       }
     }
   ]

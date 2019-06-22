@@ -29,29 +29,79 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'x' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 27 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 1 },
+            source: ''
+          },
+          name: 'x'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 3 },
+            end: { line: 1, col: 27 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'prototype' },
+              loc: {
+                start: { line: 1, col: 5 },
+                end: { line: 1, col: 26 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 12 },
+                  source: ''
+                },
+                name: 'prototype'
+              },
               kind: 'init',
               method: true,
               computed: false,
               value: {
                 type: 'FunctionExpression',
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 26 },
+                  source: ''
+                },
                 generator: true,
                 async: true,
                 id: null,
                 params: [],
-                body: { type: 'BlockStatement', body: [] }
+                body: {
+                  type: 'BlockStatement',
+                  loc: {
+                    start: { line: 1, col: 23 },
+                    end: { line: 1, col: 26 },
+                    source: ''
+                  },
+                  body: []
+                }
               },
               shorthand: false
             }

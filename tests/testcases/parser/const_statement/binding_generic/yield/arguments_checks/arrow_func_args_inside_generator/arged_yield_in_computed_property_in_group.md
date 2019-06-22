@@ -29,36 +29,105 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 37 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'g' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'g'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 37 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 36 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'x' },
+              loc: {
+                start: { line: 1, col: 16 },
+                end: { line: 1, col: 34 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 16 },
+                  end: { line: 1, col: 18 },
+                  source: ''
+                },
+                name: 'x'
+              },
               operator: '=',
               right: {
                 type: 'ObjectExpression',
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 34 },
+                  source: ''
+                },
                 properties: [
                   {
                     type: 'Property',
+                    loc: {
+                      start: { line: 1, col: 21 },
+                      end: { line: 1, col: 33 },
+                      source: ''
+                    },
                     key: {
                       type: 'YieldExpression',
+                      loc: {
+                        start: { line: 1, col: 22 },
+                        end: { line: 1, col: 29 },
+                        source: ''
+                      },
                       delegate: false,
-                      argument: { type: 'Identifier', name: 'y' }
+                      argument: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 28 },
+                          end: { line: 1, col: 29 },
+                          source: ''
+                        },
+                        name: 'y'
+                      }
                     },
                     kind: 'init',
                     method: false,
                     computed: true,
-                    value: { type: 'Literal', value: 1, raw: '1' },
+                    value: {
+                      type: 'Literal',
+                      loc: {
+                        start: { line: 1, col: 32 },
+                        end: { line: 1, col: 32 },
+                        source: ''
+                      },
+                      value: 1,
+                      raw: '1'
+                    },
                     shorthand: false
                   }
                 ]

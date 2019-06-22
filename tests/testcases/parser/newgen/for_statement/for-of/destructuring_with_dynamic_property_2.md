@@ -29,38 +29,117 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 24 } },
   body: [
     {
       type: 'ForOfStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 24 },
+        source: ''
+      },
       left: {
         type: 'MemberExpression',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
         object: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 5 },
+            end: { line: 1, col: 13 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'a' },
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 12 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 9 },
+                  source: ''
+                },
+                name: 'a'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
                 type: 'MemberExpression',
-                object: { type: 'Identifier', name: 'b' },
-                property: { type: 'Identifier', name: 'c' },
+                loc: {
+                  start: { line: 1, col: 9 },
+                  end: { line: 1, col: 12 },
+                  source: ''
+                },
+                object: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 9 },
+                    end: { line: 1, col: 10 },
+                    source: ''
+                  },
+                  name: 'b'
+                },
+                property: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 11 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
+                  name: 'c'
+                },
                 computed: false
               },
               shorthand: false
             }
           ]
         },
-        property: { type: 'Identifier', name: 'x' },
+        property: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 14 },
+            end: { line: 1, col: 15 },
+            source: ''
+          },
+          name: 'x'
+        },
         computed: true
       },
-      right: { type: 'Identifier', name: 'd' },
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 20 },
+          end: { line: 1, col: 21 },
+          source: ''
+        },
+        name: 'd'
+      },
       await: false,
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'e' }
+        loc: {
+          start: { line: 1, col: 23 },
+          end: { line: 1, col: 24 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 23 },
+            end: { line: 1, col: 24 },
+            source: ''
+          },
+          name: 'e'
+        }
       }
     }
   ]

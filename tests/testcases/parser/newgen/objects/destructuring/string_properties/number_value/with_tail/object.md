@@ -29,22 +29,69 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 17 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 16 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Literal', value: 'x', raw: '"x"' },
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 15 },
+              source: ''
+            },
+            key: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              value: 'x',
+              raw: '"x"'
+            },
             kind: 'init',
             method: false,
             computed: false,
             value: {
               type: 'MemberExpression',
-              object: { type: 'Literal', value: 600, raw: '600.' },
-              property: { type: 'Identifier', name: 'xyz' },
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 15 },
+                source: ''
+              },
+              object: {
+                type: 'Literal',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                value: 600,
+                raw: '600.'
+              },
+              property: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 12 },
+                  end: { line: 1, col: 12 },
+                  source: ''
+                },
+                name: 'xyz'
+              },
               computed: false
             },
             shorthand: false

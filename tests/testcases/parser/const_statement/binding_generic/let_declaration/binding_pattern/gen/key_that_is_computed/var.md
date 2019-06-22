@@ -29,28 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
           id: {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 13 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'a' },
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 11 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 6 },
+                    end: { line: 1, col: 7 },
+                    source: ''
+                  },
+                  name: 'a'
+                },
                 kind: 'init',
                 method: false,
                 computed: true,
-                value: { type: 'Identifier', name: 'c' },
+                value: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
+                  name: 'c'
+                },
                 shorthand: false
               }
             ]
           },
-          init: { type: 'Identifier', name: 'v' }
+          init: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 16 },
+              source: ''
+            },
+            name: 'v'
+          }
         }
       ]
     }

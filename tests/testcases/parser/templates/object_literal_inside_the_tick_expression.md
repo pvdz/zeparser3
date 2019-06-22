@@ -29,20 +29,51 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 13 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 13 },
+        source: ''
+      },
       expression: {
         type: 'TemplateLiteral',
-        expressions: [ { type: 'ObjectExpression', properties: [] } ],
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 13 },
+          source: ''
+        },
+        expressions: [
+          {
+            type: 'ObjectExpression',
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
+            properties: []
+          }
+        ],
         quasis: [
           {
             type: 'TemplateElement',
+            loc: {
+              start: { line: 1, col: 0 },
+              end: { line: 1, col: 6 },
+              source: ''
+            },
             tail: false,
             value: { raw: '`foo${', cooked: '<TODO>' }
           },
           {
             type: 'TemplateElement',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 8 },
+              source: ''
+            },
             tail: true,
             value: { raw: '}baz`', cooked: '<TODO>' }
           }

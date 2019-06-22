@@ -29,24 +29,69 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       expression: {
         type: 'SequenceExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 17 },
+          source: ''
+        },
         expressions: [
           {
             type: 'UnaryExpression',
+            loc: {
+              start: { line: 1, col: 0 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
             operator: 'delete',
             prefix: true,
             argument: {
               type: 'MemberExpression',
-              object: { type: 'Identifier', name: 'foo' },
-              property: { type: 'Identifier', name: 'bar' },
+              loc: {
+                start: { line: 1, col: 7 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              object: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 7 },
+                  end: { line: 1, col: 10 },
+                  source: ''
+                },
+                name: 'foo'
+              },
+              property: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 11 },
+                  end: { line: 1, col: 11 },
+                  source: ''
+                },
+                name: 'bar'
+              },
               computed: false
             }
           },
-          { type: 'Identifier', name: 'z' }
+          {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 16 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            name: 'z'
+          }
         ]
       }
     }

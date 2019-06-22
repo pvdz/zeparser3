@@ -29,24 +29,58 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 41 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 41 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 12 },
+          end: { line: 1, col: 41 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 28 },
+              source: ''
+            },
             expression: {
               type: 'TemplateLiteral',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 1, col: 26 },
+                source: ''
+              },
               expressions: [],
               quasis: [
                 {
                   type: 'TemplateElement',
+                  loc: {
+                    start: { line: 1, col: 14 },
+                    end: { line: 1, col: 26 },
+                    source: ''
+                  },
                   tail: true,
                   value: { raw: '`use strict`', cooked: '<TODO>' }
                 }
@@ -55,10 +89,36 @@ ast: {
           },
           {
             type: 'WithStatement',
-            object: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 28 },
+              end: { line: 1, col: 40 },
+              source: ''
+            },
+            object: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 34 },
+                end: { line: 1, col: 35 },
+                source: ''
+              },
+              name: 'x'
+            },
             body: {
               type: 'ExpressionStatement',
-              expression: { type: 'Identifier', name: 'y' }
+              loc: {
+                start: { line: 1, col: 37 },
+                end: { line: 1, col: 40 },
+                source: ''
+              },
+              expression: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 37 },
+                  end: { line: 1, col: 38 },
+                  source: ''
+                },
+                name: 'y'
+              }
             }
           }
         ]

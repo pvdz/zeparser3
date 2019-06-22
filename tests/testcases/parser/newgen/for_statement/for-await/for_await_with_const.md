@@ -29,32 +29,90 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 50 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 6 },
+        end: { line: 1, col: 50 },
+        source: ''
+      },
       generator: false,
       async: true,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 19 },
+          end: { line: 1, col: 50 },
+          source: ''
+        },
         body: [
           {
             type: 'ForOfStatement',
+            loc: {
+              start: { line: 1, col: 21 },
+              end: { line: 1, col: 49 },
+              source: ''
+            },
             left: {
               type: 'VariableDeclaration',
+              loc: {
+                start: { line: 1, col: 38 },
+                end: { line: 1, col: 40 },
+                source: ''
+              },
               kind: 'const',
               declarations: [
                 {
                   type: 'VariableDeclarator',
-                  id: { type: 'Identifier', name: 'x' },
+                  loc: {
+                    start: { line: 1, col: 38 },
+                    end: { line: 1, col: 40 },
+                    source: ''
+                  },
+                  id: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 38 },
+                      end: { line: 1, col: 38 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
                   init: null
                 }
               ]
             },
-            right: { type: 'Identifier', name: 'y' },
+            right: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 43 },
+                end: { line: 1, col: 44 },
+                source: ''
+              },
+              name: 'y'
+            },
             await: true,
-            body: { type: 'BlockStatement', body: [] }
+            body: {
+              type: 'BlockStatement',
+              loc: {
+                start: { line: 1, col: 46 },
+                end: { line: 1, col: 49 },
+                source: ''
+              },
+              body: []
+            }
           }
         ]
       }

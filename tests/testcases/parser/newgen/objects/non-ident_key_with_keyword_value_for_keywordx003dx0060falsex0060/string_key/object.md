@@ -29,19 +29,53 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 16 },
+        source: ''
+      },
       expression: {
         type: 'ObjectExpression',
+        loc: {
+          start: { line: 1, col: 1 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Literal', value: 'foo', raw: '"foo"' },
+            loc: {
+              start: { line: 1, col: 2 },
+              end: { line: 1, col: 14 },
+              source: ''
+            },
+            key: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 2 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              value: 'foo',
+              raw: '"foo"'
+            },
             kind: 'init',
             method: false,
             computed: false,
-            value: { type: 'Literal', value: false, raw: 'false' },
+            value: {
+              type: 'Literal',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
+              value: false,
+              raw: 'false'
+            },
             shorthand: false
           }
         ]

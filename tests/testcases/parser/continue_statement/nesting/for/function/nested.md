@@ -29,25 +29,70 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 48 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 48 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 12 },
+          end: { line: 1, col: 48 },
+          source: ''
+        },
         body: [
           {
             type: 'ForStatement',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 47 },
+              source: ''
+            },
             init: null,
             test: null,
             update: null,
             body: {
               type: 'IfStatement',
-              test: { type: 'Identifier', name: 'x' },
-              consequent: { type: 'ContinueStatement', label: null },
+              loc: {
+                start: { line: 1, col: 29 },
+                end: { line: 1, col: 47 },
+                source: ''
+              },
+              test: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 33 },
+                  end: { line: 1, col: 34 },
+                  source: ''
+                },
+                name: 'x'
+              },
+              consequent: {
+                type: 'ContinueStatement',
+                loc: {
+                  start: { line: 1, col: 36 },
+                  end: { line: 1, col: 47 },
+                  source: ''
+                },
+                label: null
+              },
               alternate: null
             }
           }

@@ -29,33 +29,107 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 21 },
+        source: ''
+      },
       expression: {
         type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'wrap' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
+        callee: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 4 },
+            source: ''
+          },
+          name: 'wrap'
+        },
         arguments: [
           {
             type: 'ObjectExpression',
+            loc: {
+              start: { line: 1, col: 5 },
+              end: { line: 1, col: 19 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'foo' },
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 18 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 6 },
+                    end: { line: 1, col: 9 },
+                    source: ''
+                  },
+                  name: 'foo'
+                },
                 kind: 'init',
                 method: true,
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
+                  loc: {
+                    start: { line: 1, col: 6 },
+                    end: { line: 1, col: 18 },
+                    source: ''
+                  },
                   generator: false,
                   async: false,
                   id: null,
                   params: [
-                    { type: 'Identifier', name: 'a' },
-                    { type: 'Identifier', name: 'b' },
-                    { type: 'Identifier', name: 'c' }
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 10 },
+                        end: { line: 1, col: 10 },
+                        source: ''
+                      },
+                      name: 'a'
+                    },
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 12 },
+                        end: { line: 1, col: 12 },
+                        source: ''
+                      },
+                      name: 'b'
+                    },
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 14 },
+                        end: { line: 1, col: 14 },
+                        source: ''
+                      },
+                      name: 'c'
+                    }
                   ],
-                  body: { type: 'BlockStatement', body: [] }
+                  body: {
+                    type: 'BlockStatement',
+                    loc: {
+                      start: { line: 1, col: 16 },
+                      end: { line: 1, col: 18 },
+                      source: ''
+                    },
+                    body: []
+                  }
                 },
                 shorthand: false
               }

@@ -32,20 +32,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 4, col: 1 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 4, col: 1 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 4, col: 1 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 2, col: 2 },
+              end: { line: 3, col: 2 },
+              source: ''
+            },
             expression: {
               type: 'Literal',
+              loc: {
+                start: { line: 2, col: 2 },
+                end: { line: 2, col: 2 },
+                source: ''
+              },
               value: 'use strict',
               raw: '"use strict"'
             },
@@ -53,11 +82,37 @@ ast: {
           },
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 3, col: 2 },
+              end: { line: 4, col: 0 },
+              source: ''
+            },
             expression: {
               type: 'AssignmentExpression',
-              left: { type: 'Identifier', name: 'await' },
+              loc: {
+                start: { line: 3, col: 3 },
+                end: { line: 3, col: 12 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 3, col: 3 },
+                  end: { line: 3, col: 9 },
+                  source: ''
+                },
+                name: 'await'
+              },
               operator: '=',
-              right: { type: 'Identifier', name: 'x' }
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 3, col: 11 },
+                  end: { line: 3, col: 12 },
+                  source: ''
+                },
+                name: 'x'
+              }
             }
           }
         ]

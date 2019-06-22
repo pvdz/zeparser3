@@ -33,14 +33,46 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 25 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 25 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'foo' },
-      params: [ { type: 'Identifier', name: 'package' } ],
-      body: { type: 'BlockStatement', body: [] }
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'foo'
+      },
+      params: [
+        {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 13 },
+            end: { line: 1, col: 13 },
+            source: ''
+          },
+          name: 'package'
+        }
+      ],
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 22 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

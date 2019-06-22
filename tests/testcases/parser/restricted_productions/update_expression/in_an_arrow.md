@@ -30,26 +30,63 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 4 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 0 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 2, col: 0 },
+          source: ''
+        },
         params: [],
         id: null,
         generator: false,
         async: false,
         expression: true,
-        body: { type: 'Identifier', name: 'b' }
+        body: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 6 },
+            end: { line: 2, col: 0 },
+            source: ''
+          },
+          name: 'b'
+        }
       }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 2, col: 0 },
+        end: { line: 2, col: 4 },
+        source: ''
+      },
       expression: {
         type: 'UpdateExpression',
+        loc: {
+          start: { line: 2, col: 0 },
+          end: { line: 2, col: 3 },
+          source: ''
+        },
         operator: '++',
         prefix: true,
-        argument: { type: 'Identifier', name: 'c' }
+        argument: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 2, col: 2 },
+            end: { line: 2, col: 3 },
+            source: ''
+          },
+          name: 'c'
+        }
       }
     }
   ]

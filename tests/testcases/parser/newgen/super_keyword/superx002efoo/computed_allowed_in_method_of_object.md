@@ -29,37 +29,109 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 25 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 25 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'x' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 25 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 1 },
+            source: ''
+          },
+          name: 'x'
+        },
         operator: '=',
         right: {
           type: 'ObjectExpression',
+          loc: {
+            start: { line: 1, col: 2 },
+            end: { line: 1, col: 25 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'foo' },
+              loc: {
+                start: { line: 1, col: 4 },
+                end: { line: 1, col: 24 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                name: 'foo'
+              },
               kind: 'init',
               method: true,
               computed: false,
               value: {
                 type: 'FunctionExpression',
+                loc: {
+                  start: { line: 1, col: 4 },
+                  end: { line: 1, col: 24 },
+                  source: ''
+                },
                 generator: false,
                 async: false,
                 id: null,
                 params: [],
                 body: {
                   type: 'BlockStatement',
+                  loc: {
+                    start: { line: 1, col: 9 },
+                    end: { line: 1, col: 24 },
+                    source: ''
+                  },
                   body: [
                     {
                       type: 'ExpressionStatement',
+                      loc: {
+                        start: { line: 1, col: 11 },
+                        end: { line: 1, col: 23 },
+                        source: ''
+                      },
                       expression: {
                         type: 'MemberExpression',
-                        object: { type: 'Super' },
-                        property: { type: 'Identifier', name: 'foo' },
+                        loc: {
+                          start: { line: 1, col: 11 },
+                          end: { line: 1, col: 21 },
+                          source: ''
+                        },
+                        object: {
+                          type: 'Super',
+                          loc: {
+                            start: { line: 1, col: 11 },
+                            end: { line: 1, col: 16 },
+                            source: ''
+                          }
+                        },
+                        property: {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 17 },
+                            end: { line: 1, col: 20 },
+                            source: ''
+                          },
+                          name: 'foo'
+                        },
                         computed: true
                       }
                     }

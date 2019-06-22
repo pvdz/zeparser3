@@ -29,36 +29,107 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 27 },
+        source: ''
+      },
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'o' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 27 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'o'
+          },
           init: {
             type: 'ObjectExpression',
+            loc: {
+              start: { line: 1, col: 8 },
+              end: { line: 1, col: 27 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Identifier', name: 'f' },
+                loc: {
+                  start: { line: 1, col: 9 },
+                  end: { line: 1, col: 26 },
+                  source: ''
+                },
+                key: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 10 },
+                    end: { line: 1, col: 11 },
+                    source: ''
+                  },
+                  name: 'f'
+                },
                 kind: 'init',
                 method: true,
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
+                  loc: {
+                    start: { line: 1, col: 9 },
+                    end: { line: 1, col: 26 },
+                    source: ''
+                  },
                   generator: true,
                   async: false,
                   id: null,
                   params: [
                     {
                       type: 'AssignmentPattern',
-                      left: { type: 'Identifier', name: 'foo' },
-                      right: { type: 'Identifier', name: 'await' }
+                      loc: {
+                        start: { line: 1, col: 12 },
+                        end: { line: 1, col: 23 },
+                        source: ''
+                      },
+                      left: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 12 },
+                          end: { line: 1, col: 12 },
+                          source: ''
+                        },
+                        name: 'foo'
+                      },
+                      right: {
+                        type: 'Identifier',
+                        loc: {
+                          start: { line: 1, col: 18 },
+                          end: { line: 1, col: 23 },
+                          source: ''
+                        },
+                        name: 'await'
+                      }
                     }
                   ],
-                  body: { type: 'BlockStatement', body: [] }
+                  body: {
+                    type: 'BlockStatement',
+                    loc: {
+                      start: { line: 1, col: 24 },
+                      end: { line: 1, col: 26 },
+                      source: ''
+                    },
+                    body: []
+                  }
                 },
                 shorthand: false
               }

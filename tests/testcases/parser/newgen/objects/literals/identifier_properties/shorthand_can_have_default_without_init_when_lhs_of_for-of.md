@@ -29,32 +29,98 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ForOfStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       left: {
         type: 'ObjectPattern',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 9 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              name: 'x'
+            },
             kind: 'init',
             method: false,
             computed: false,
             value: {
               type: 'AssignmentPattern',
-              left: { type: 'Identifier', name: 'x' },
-              right: { type: 'Identifier', name: 'y' }
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              left: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 6 },
+                  end: { line: 1, col: 7 },
+                  source: ''
+                },
+                name: 'x'
+              },
+              right: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 8 },
+                  end: { line: 1, col: 9 },
+                  source: ''
+                },
+                name: 'y'
+              }
             },
             shorthand: true
           }
         ]
       },
-      right: { type: 'Identifier', name: 'a' },
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'a'
+      },
       await: false,
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'b' }
+        loc: {
+          start: { line: 1, col: 17 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 17 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
+          name: 'b'
+        }
       }
     }
   ]

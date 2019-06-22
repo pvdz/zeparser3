@@ -29,20 +29,58 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 42 } },
   body: [
     {
       type: 'ExpressionStatement',
-      expression: { type: 'Literal', value: 'use strict', raw: '"use strict"' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 14 },
+        source: ''
+      },
+      expression: {
+        type: 'Literal',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 0 },
+          source: ''
+        },
+        value: 'use strict',
+        raw: '"use strict"'
+      },
       directive: 'use strict'
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 14 },
+        end: { line: 1, col: 42 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'await' },
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 1, col: 40 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 15 },
+            end: { line: 1, col: 21 },
+            source: ''
+          },
+          name: 'await'
+        },
         operator: '=',
         right: {
           type: 'Literal',
+          loc: {
+            start: { line: 1, col: 23 },
+            end: { line: 1, col: 23 },
+            source: ''
+          },
           value: 'sentinal 535426',
           raw: '"sentinal 535426"'
         }

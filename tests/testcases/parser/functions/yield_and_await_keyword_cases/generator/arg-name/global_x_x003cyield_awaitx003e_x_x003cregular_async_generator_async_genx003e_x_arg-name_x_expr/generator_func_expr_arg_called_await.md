@@ -48,30 +48,98 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 47 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 47 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'as' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'as'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 47 },
+          source: ''
+        },
         body: [
           {
             type: 'VariableDeclaration',
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 46 },
+              source: ''
+            },
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                id: { type: 'Identifier', name: 'f' },
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 46 },
+                  source: ''
+                },
+                id: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 20 },
+                    end: { line: 1, col: 20 },
+                    source: ''
+                  },
+                  name: 'f'
+                },
                 init: {
                   type: 'FunctionExpression',
+                  loc: {
+                    start: { line: 1, col: 24 },
+                    end: { line: 1, col: 46 },
+                    source: ''
+                  },
                   generator: true,
                   async: false,
-                  id: { type: 'Identifier', name: 'f' },
-                  params: [ { type: 'Identifier', name: 'await' } ],
-                  body: { type: 'BlockStatement', body: [] }
+                  id: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 34 },
+                      end: { line: 1, col: 34 },
+                      source: ''
+                    },
+                    name: 'f'
+                  },
+                  params: [
+                    {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 36 },
+                        end: { line: 1, col: 36 },
+                        source: ''
+                      },
+                      name: 'await'
+                    }
+                  ],
+                  body: {
+                    type: 'BlockStatement',
+                    loc: {
+                      start: { line: 1, col: 43 },
+                      end: { line: 1, col: 46 },
+                      source: ''
+                    },
+                    body: []
+                  }
                 }
               }
             ]

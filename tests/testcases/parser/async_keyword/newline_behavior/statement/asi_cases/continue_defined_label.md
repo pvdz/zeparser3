@@ -30,31 +30,81 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 8 } },
   body: [
     {
       type: 'LabeledStatement',
-      label: { type: 'Identifier', name: 'async' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 1 },
+        source: ''
+      },
+      label: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 5 },
+          source: ''
+        },
+        name: 'async'
+      },
       body: {
         type: 'ForStatement',
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 2, col: 1 },
+          source: ''
+        },
         init: null,
         test: null,
         update: null,
         body: {
           type: 'ContinueStatement',
-          label: { type: 'Identifier', name: 'async' }
+          loc: {
+            start: { line: 1, col: 16 },
+            end: { line: 2, col: 1 },
+            source: ''
+          },
+          label: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 25 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
+            name: 'async'
+          }
         }
       }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 2, col: 1 },
+        end: { line: 2, col: 8 },
+        source: ''
+      },
       expression: {
         type: 'ArrowFunctionExpression',
+        loc: {
+          start: { line: 2, col: 1 },
+          end: { line: 2, col: 8 },
+          source: ''
+        },
         params: [],
         id: null,
         generator: false,
         async: false,
         expression: true,
-        body: { type: 'Identifier', name: 'x' }
+        body: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 2, col: 7 },
+            end: { line: 2, col: 8 },
+            source: ''
+          },
+          name: 'x'
+        }
       }
     }
   ]

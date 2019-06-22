@@ -55,22 +55,59 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 29 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 29 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 'middleDashMatch' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 29 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 16 },
+            source: ''
+          },
+          name: 'middleDashMatch'
+        },
         operator: '=',
         right: {
           type: 'MemberExpression',
+          loc: {
+            start: { line: 1, col: 18 },
+            end: { line: 1, col: 29 },
+            source: ''
+          },
           object: {
             type: 'Literal',
+            loc: {
+              start: { line: 1, col: 18 },
+              end: { line: 1, col: 18 },
+              source: ''
+            },
             value: null,
             regex: { pattern: '[\\-]', flags: '' },
             raw: '/[\\-]/'
           },
-          property: { type: 'Identifier', name: 'exec' },
+          property: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 25 },
+              end: { line: 1, col: 25 },
+              source: ''
+            },
+            name: 'exec'
+          },
           computed: false
         }
       }

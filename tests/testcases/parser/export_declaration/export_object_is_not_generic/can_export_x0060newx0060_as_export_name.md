@@ -47,25 +47,70 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 28 } },
   body: [
     {
       type: 'VariableDeclaration',
+      loc: {
+        start: { line: 1, col: 4 },
+        end: { line: 1, col: 7 },
+        source: ''
+      },
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          id: { type: 'Identifier', name: 'foo' },
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 7 },
+            source: ''
+          },
+          id: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 4 },
+              source: ''
+            },
+            name: 'foo'
+          },
           init: null
         }
       ]
     },
     {
       type: 'ExportNamedDeclaration',
+      loc: {
+        start: { line: 1, col: 9 },
+        end: { line: 1, col: 28 },
+        source: ''
+      },
       specifiers: [
         {
           type: 'ExportSpecifier',
-          local: { type: 'Identifier', name: 'foo' },
-          exported: { type: 'Identifier', name: 'new' }
+          loc: {
+            start: { line: 1, col: 17 },
+            end: { line: 1, col: 27 },
+            source: ''
+          },
+          local: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 17 },
+              end: { line: 1, col: 17 },
+              source: ''
+            },
+            name: 'foo'
+          },
+          exported: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 24 },
+              end: { line: 1, col: 24 },
+              source: ''
+            },
+            name: 'new'
+          }
         }
       ],
       declaration: null,

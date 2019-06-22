@@ -31,27 +31,78 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 34 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'g' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'g'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 34 },
+          source: ''
+        },
         body: [
           {
             type: 'VariableDeclaration',
+            loc: {
+              start: { line: 1, col: 20 },
+              end: { line: 1, col: 31 },
+              source: ''
+            },
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                id: { type: 'Identifier', name: 'x' },
+                loc: {
+                  start: { line: 1, col: 20 },
+                  end: { line: 1, col: 31 },
+                  source: ''
+                },
+                id: {
+                  type: 'Identifier',
+                  loc: {
+                    start: { line: 1, col: 20 },
+                    end: { line: 1, col: 20 },
+                    source: ''
+                  },
+                  name: 'x'
+                },
                 init: {
                   type: 'YieldExpression',
+                  loc: {
+                    start: { line: 1, col: 24 },
+                    end: { line: 1, col: 31 },
+                    source: ''
+                  },
                   delegate: false,
-                  argument: { type: 'Literal', value: 3, raw: '3' }
+                  argument: {
+                    type: 'Literal',
+                    loc: {
+                      start: { line: 1, col: 30 },
+                      end: { line: 1, col: 30 },
+                      source: ''
+                    },
+                    value: 3,
+                    raw: '3'
+                  }
                 }
               }
             ]

@@ -31,24 +31,77 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
   body: [
     {
       type: 'ForInStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 18 },
+        source: ''
+      },
       left: {
         type: 'ArrayPattern',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         elements: [
           {
             type: 'MemberExpression',
-            object: { type: 'Identifier', name: 'a' },
-            property: { type: 'Identifier', name: 'b' },
+            loc: {
+              start: { line: 1, col: 5 },
+              end: { line: 1, col: 9 },
+              source: ''
+            },
+            object: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 7 },
+                source: ''
+              },
+              name: 'a'
+            },
+            property: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 8 },
+                end: { line: 1, col: 8 },
+                source: ''
+              },
+              name: 'b'
+            },
             computed: false
           }
         ]
       },
-      right: { type: 'Identifier', name: 'c' },
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 14 },
+          end: { line: 1, col: 15 },
+          source: ''
+        },
+        name: 'c'
+      },
       body: {
         type: 'ExpressionStatement',
-        expression: { type: 'Identifier', name: 'd' }
+        loc: {
+          start: { line: 1, col: 17 },
+          end: { line: 1, col: 18 },
+          source: ''
+        },
+        expression: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 17 },
+            end: { line: 1, col: 18 },
+            source: ''
+          },
+          name: 'd'
+        }
       }
     }
   ]

@@ -68,38 +68,109 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 35 } },
   body: [
     {
       type: 'ForInStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 35 },
+        source: ''
+      },
       left: {
         type: 'VariableDeclaration',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 29 },
+          source: ''
+        },
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            id: { type: 'Identifier', name: 'a' },
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 29 },
+              source: ''
+            },
+            id: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'a'
+            },
             init: {
               type: 'SequenceExpression',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 1, col: 27 },
+                source: ''
+              },
               expressions: [
                 {
                   type: 'UpdateExpression',
+                  loc: {
+                    start: { line: 1, col: 14 },
+                    end: { line: 1, col: 23 },
+                    source: ''
+                  },
                   operator: '++',
                   prefix: true,
-                  argument: { type: 'Identifier', name: 'effects' }
+                  argument: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 16 },
+                      end: { line: 1, col: 23 },
+                      source: ''
+                    },
+                    name: 'effects'
+                  }
                 },
                 {
                   type: 'UnaryExpression',
+                  loc: {
+                    start: { line: 1, col: 25 },
+                    end: { line: 1, col: 27 },
+                    source: ''
+                  },
                   operator: '-',
                   prefix: true,
-                  argument: { type: 'Literal', value: 1, raw: '1' }
+                  argument: {
+                    type: 'Literal',
+                    loc: {
+                      start: { line: 1, col: 26 },
+                      end: { line: 1, col: 26 },
+                      source: ''
+                    },
+                    value: 1,
+                    raw: '1'
+                  }
                 }
               ]
             }
           }
         ]
       },
-      right: { type: 'Identifier', name: 'x' },
-      body: { type: 'EmptyStatement' }
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 32 },
+          end: { line: 1, col: 33 },
+          source: ''
+        },
+        name: 'x'
+      },
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 34 },
+          end: { line: 1, col: 35 },
+          source: ''
+        }
+      }
     }
   ]
 }

@@ -29,20 +29,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 63 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 35 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 12 },
+          end: { line: 1, col: 35 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 14 },
+              end: { line: 1, col: 28 },
+              source: ''
+            },
             expression: {
               type: 'Literal',
+              loc: {
+                start: { line: 1, col: 14 },
+                end: { line: 1, col: 14 },
+                source: ''
+              },
               value: 'use strict',
               raw: '"use strict"'
             },
@@ -50,26 +79,83 @@ ast: {
           },
           {
             type: 'ExpressionStatement',
-            expression: { type: 'Identifier', name: 'foo' }
+            loc: {
+              start: { line: 1, col: 28 },
+              end: { line: 1, col: 33 },
+              source: ''
+            },
+            expression: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 28 },
+                end: { line: 1, col: 31 },
+                source: ''
+              },
+              name: 'foo'
+            }
           }
         ]
       }
     },
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 35 },
+        end: { line: 1, col: 63 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'g' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 44 },
+          end: { line: 1, col: 44 },
+          source: ''
+        },
+        name: 'g'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 48 },
+          end: { line: 1, col: 63 },
+          source: ''
+        },
         body: [
           {
             type: 'WithStatement',
-            object: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 50 },
+              end: { line: 1, col: 62 },
+              source: ''
+            },
+            object: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 56 },
+                end: { line: 1, col: 57 },
+                source: ''
+              },
+              name: 'x'
+            },
             body: {
               type: 'ExpressionStatement',
-              expression: { type: 'Identifier', name: 'y' }
+              loc: {
+                start: { line: 1, col: 59 },
+                end: { line: 1, col: 62 },
+                source: ''
+              },
+              expression: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 59 },
+                  end: { line: 1, col: 60 },
+                  source: ''
+                },
+                name: 'y'
+              }
             }
           }
         ]

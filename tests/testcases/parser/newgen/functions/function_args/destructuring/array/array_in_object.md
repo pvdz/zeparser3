@@ -29,36 +29,107 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 33 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 33 },
+        source: ''
+      },
       generator: false,
       async: false,
-      id: { type: 'Identifier', name: 'fk' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 9 },
+          end: { line: 1, col: 9 },
+          source: ''
+        },
+        name: 'fk'
+      },
       params: [
         {
           type: 'ObjectPattern',
+          loc: {
+            start: { line: 1, col: 12 },
+            end: { line: 1, col: 29 },
+            source: ''
+          },
           properties: [
             {
               type: 'Property',
-              key: { type: 'Identifier', name: 'x' },
+              loc: {
+                start: { line: 1, col: 13 },
+                end: { line: 1, col: 28 },
+                source: ''
+              },
+              key: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 13 },
+                  end: { line: 1, col: 16 },
+                  source: ''
+                },
+                name: 'x'
+              },
               kind: 'init',
               method: false,
               computed: false,
               value: {
                 type: 'ArrayPattern',
+                loc: {
+                  start: { line: 1, col: 16 },
+                  end: { line: 1, col: 28 },
+                  source: ''
+                },
                 elements: [
-                  { type: 'Identifier', name: 'a' },
+                  {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 17 },
+                      end: { line: 1, col: 18 },
+                      source: ''
+                    },
+                    name: 'a'
+                  },
                   {
                     type: 'ObjectPattern',
+                    loc: {
+                      start: { line: 1, col: 20 },
+                      end: { line: 1, col: 27 },
+                      source: ''
+                    },
                     properties: [
                       {
                         type: 'Property',
-                        key: { type: 'Identifier', name: 'b' },
+                        loc: {
+                          start: { line: 1, col: 21 },
+                          end: { line: 1, col: 26 },
+                          source: ''
+                        },
+                        key: {
+                          type: 'Identifier',
+                          loc: {
+                            start: { line: 1, col: 21 },
+                            end: { line: 1, col: 24 },
+                            source: ''
+                          },
+                          name: 'b'
+                        },
                         kind: 'init',
                         method: false,
                         computed: false,
-                        value: { type: 'ArrayPattern', elements: [] },
+                        value: {
+                          type: 'ArrayPattern',
+                          loc: {
+                            start: { line: 1, col: 24 },
+                            end: { line: 1, col: 26 },
+                            source: ''
+                          },
+                          elements: []
+                        },
                         shorthand: false
                       }
                     ]
@@ -70,7 +141,15 @@ ast: {
           ]
         }
       ],
-      body: { type: 'BlockStatement', body: [] }
+      body: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 31 },
+          end: { line: 1, col: 33 },
+          source: ''
+        },
+        body: []
+      }
     }
   ]
 }

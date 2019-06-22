@@ -29,35 +29,107 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
   body: [
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 26 },
+        source: ''
+      },
       expression: {
         type: 'AssignmentExpression',
-        left: { type: 'Identifier', name: 's' },
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 1, col: 26 },
+          source: ''
+        },
+        left: {
+          type: 'Identifier',
+          loc: {
+            start: { line: 1, col: 0 },
+            end: { line: 1, col: 2 },
+            source: ''
+          },
+          name: 's'
+        },
         operator: '=',
         right: {
           type: 'AssignmentExpression',
+          loc: {
+            start: { line: 1, col: 4 },
+            end: { line: 1, col: 26 },
+            source: ''
+          },
           left: {
             type: 'ObjectPattern',
+            loc: {
+              start: { line: 1, col: 4 },
+              end: { line: 1, col: 23 },
+              source: ''
+            },
             properties: [
               {
                 type: 'Property',
-                key: { type: 'Literal', value: 'foo', raw: '"foo"' },
+                loc: {
+                  start: { line: 1, col: 5 },
+                  end: { line: 1, col: 21 },
+                  source: ''
+                },
+                key: {
+                  type: 'Literal',
+                  loc: {
+                    start: { line: 1, col: 5 },
+                    end: { line: 1, col: 12 },
+                    source: ''
+                  },
+                  value: 'foo',
+                  raw: '"foo"'
+                },
                 kind: 'init',
                 method: false,
                 computed: false,
                 value: {
                   type: 'AssignmentPattern',
-                  left: { type: 'Identifier', name: 'await' },
-                  right: { type: 'Identifier', name: 'x' }
+                  loc: {
+                    start: { line: 1, col: 12 },
+                    end: { line: 1, col: 21 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 12 },
+                      end: { line: 1, col: 18 },
+                      source: ''
+                    },
+                    name: 'await'
+                  },
+                  right: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 20 },
+                      end: { line: 1, col: 21 },
+                      source: ''
+                    },
+                    name: 'x'
+                  }
                 },
                 shorthand: false
               }
             ]
           },
           operator: '=',
-          right: { type: 'Identifier', name: 'x' }
+          right: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 25 },
+              end: { line: 1, col: 26 },
+              source: ''
+            },
+            name: 'x'
+          }
         }
       }
     }

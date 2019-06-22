@@ -29,17 +29,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 11 } },
   body: [
     {
       type: 'IfStatement',
-      test: { type: 'Identifier', name: 'a' },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 11 },
+        source: ''
+      },
+      test: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 5 },
+          source: ''
+        },
+        name: 'a'
+      },
       consequent: {
         type: 'ExpressionStatement',
+        loc: {
+          start: { line: 1, col: 7 },
+          end: { line: 1, col: 11 },
+          source: ''
+        },
         expression: {
           type: 'UpdateExpression',
+          loc: {
+            start: { line: 1, col: 7 },
+            end: { line: 1, col: 10 },
+            source: ''
+          },
           operator: '++',
           prefix: true,
-          argument: { type: 'Identifier', name: 'a' }
+          argument: {
+            type: 'Identifier',
+            loc: {
+              start: { line: 1, col: 9 },
+              end: { line: 1, col: 10 },
+              source: ''
+            },
+            name: 'a'
+          }
         }
       },
       alternate: null

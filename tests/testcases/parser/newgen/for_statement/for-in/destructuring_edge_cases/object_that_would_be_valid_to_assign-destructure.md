@@ -29,30 +29,90 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
   body: [
     {
       type: 'ForInStatement',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 22 },
+        source: ''
+      },
       left: {
         type: 'ObjectPattern',
+        loc: {
+          start: { line: 1, col: 5 },
+          end: { line: 1, col: 14 },
+          source: ''
+        },
         properties: [
           {
             type: 'Property',
-            key: { type: 'Identifier', name: 'x' },
+            loc: {
+              start: { line: 1, col: 6 },
+              end: { line: 1, col: 12 },
+              source: ''
+            },
+            key: {
+              type: 'Identifier',
+              loc: {
+                start: { line: 1, col: 6 },
+                end: { line: 1, col: 9 },
+                source: ''
+              },
+              name: 'x'
+            },
             kind: 'init',
             method: false,
             computed: false,
             value: {
               type: 'MemberExpression',
-              object: { type: 'Identifier', name: 'a' },
-              property: { type: 'Identifier', name: 'b' },
+              loc: {
+                start: { line: 1, col: 9 },
+                end: { line: 1, col: 12 },
+                source: ''
+              },
+              object: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 9 },
+                  end: { line: 1, col: 10 },
+                  source: ''
+                },
+                name: 'a'
+              },
+              property: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 11 },
+                  end: { line: 1, col: 11 },
+                  source: ''
+                },
+                name: 'b'
+              },
               computed: false
             },
             shorthand: false
           }
         ]
       },
-      right: { type: 'Identifier', name: 'obj' },
-      body: { type: 'EmptyStatement' }
+      right: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 17 },
+          end: { line: 1, col: 20 },
+          source: ''
+        },
+        name: 'obj'
+      },
+      body: {
+        type: 'EmptyStatement',
+        loc: {
+          start: { line: 1, col: 21 },
+          end: { line: 1, col: 22 },
+          source: ''
+        }
+      }
     }
   ]
 }

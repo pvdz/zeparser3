@@ -35,30 +35,93 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 36 } },
   body: [
     {
       type: 'FunctionDeclaration',
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 1, col: 36 },
+        source: ''
+      },
       generator: true,
       async: false,
-      id: { type: 'Identifier', name: 'f' },
+      id: {
+        type: 'Identifier',
+        loc: {
+          start: { line: 1, col: 10 },
+          end: { line: 1, col: 10 },
+          source: ''
+        },
+        name: 'f'
+      },
       params: [],
       body: {
         type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 13 },
+          end: { line: 1, col: 36 },
+          source: ''
+        },
         body: [
           {
             type: 'ExpressionStatement',
+            loc: {
+              start: { line: 1, col: 15 },
+              end: { line: 1, col: 35 },
+              source: ''
+            },
             expression: {
               type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'async' },
+              loc: {
+                start: { line: 1, col: 15 },
+                end: { line: 1, col: 35 },
+                source: ''
+              },
+              callee: {
+                type: 'Identifier',
+                loc: {
+                  start: { line: 1, col: 15 },
+                  end: { line: 1, col: 35 },
+                  source: ''
+                },
+                name: 'async'
+              },
               arguments: [
                 {
                   type: 'AssignmentExpression',
-                  left: { type: 'Identifier', name: 'x' },
+                  loc: {
+                    start: { line: 1, col: 22 },
+                    end: { line: 1, col: 33 },
+                    source: ''
+                  },
+                  left: {
+                    type: 'Identifier',
+                    loc: {
+                      start: { line: 1, col: 22 },
+                      end: { line: 1, col: 24 },
+                      source: ''
+                    },
+                    name: 'x'
+                  },
                   operator: '=',
                   right: {
                     type: 'YieldExpression',
+                    loc: {
+                      start: { line: 1, col: 26 },
+                      end: { line: 1, col: 33 },
+                      source: ''
+                    },
                     delegate: false,
-                    argument: { type: 'Identifier', name: 'y' }
+                    argument: {
+                      type: 'Identifier',
+                      loc: {
+                        start: { line: 1, col: 32 },
+                        end: { line: 1, col: 33 },
+                        source: ''
+                      },
+                      name: 'y'
+                    }
                   }
                 }
               ]

@@ -32,17 +32,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
+  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 5 } },
   body: [
     {
       type: 'TryStatement',
-      block: { type: 'BlockStatement', body: [] },
+      loc: {
+        start: { line: 1, col: 0 },
+        end: { line: 2, col: 0 },
+        source: ''
+      },
+      block: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 4 },
+          end: { line: 1, col: 7 },
+          source: ''
+        },
+        body: []
+      },
       handler: null,
-      finalizer: { type: 'BlockStatement', body: [] }
+      finalizer: {
+        type: 'BlockStatement',
+        loc: {
+          start: { line: 1, col: 15 },
+          end: { line: 2, col: 0 },
+          source: ''
+        },
+        body: []
+      }
     },
     {
       type: 'ExpressionStatement',
+      loc: {
+        start: { line: 2, col: 0 },
+        end: { line: 2, col: 5 },
+        source: ''
+      },
       expression: {
         type: 'Literal',
+        loc: {
+          start: { line: 2, col: 0 },
+          end: { line: 2, col: 5 },
+          source: ''
+        },
         value: null,
         regex: { pattern: 'foo', flags: '' },
         raw: '/foo/'
