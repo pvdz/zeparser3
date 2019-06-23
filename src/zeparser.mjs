@@ -1128,7 +1128,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     SCOPE_addBinding(lexerFlags, scoop, name, bindingType, CHECK_DUPE_BINDS, originIsVarDecl);
     if (scoop === DO_NOT_BIND) return; // example: class expr. TODO: should this be checked at call sites instead?
     if (options_webCompat === WEB_COMPAT_ON) {
-      scoop.lex.funcs['#' + name] = false; // mark var name as "not only func decls"
+      // Mark var name as "not only used as a func decl"
+      // This is relevant for dupe bindings. The only exception to that error is In sloppy+webcompat when the dupe is funcs only
+      // (Only do this with web compat because it's a heavy op)
+      scoop.lex.funcs['#' + name] = false;
     }
   }
   function SCOPE_addFuncDeclName(lexerFlags, scoop, name, bindingType, originIsVarDecl) {
@@ -1136,7 +1139,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     SCOPE_addBinding(lexerFlags, scoop, name, bindingType, CHECK_DUPE_BINDS, originIsVarDecl);
     ASSERT(scoop !== DO_NOT_BIND, 'find me a case first');
     if (options_webCompat === WEB_COMPAT_ON) {
-      if (!scoop.lex.funcs['#' + name]) scoop.lex.funcs['#' + name] = true;
+      // Mark var name as "only used as a func decl"
+      // This is relevant for dupe bindings. The only exception to that error is In sloppy+webcompat when the dupe is funcs only
+      // (Only do this with web compat because it's a heavy op)
+      if (!scoop.lex.funcs['#' + name]) {
+        ASSERT(scoop.lex.funcs['#' + name] === undefined, 'make sure not not clobber a false');
+        scoop.lex.funcs['#' + name] = true;
+      }
     }
   }
   function SCOPE_addBinding(lexerFlags, scoop, name, bindingType, dupeChecks, originIsVarDecl) {
@@ -1155,6 +1164,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // All block, or block-esque (like switch), statements have a restriction that a `var` can not be defined if the
       // current lexical scope or any of its parents already contain a lexical (`let`/`const`) binding for that name.
+      // The exception is that in web compat mode, two function decls in the same block can have the same name
       let lex = scoop.lex;
       do {
         let type = lex.type;
@@ -1361,9 +1371,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function SCOPE_isDupeLexBindingError(scoop, hashed, lexerFlags) {
     if (options_webCompat === WEB_COMPAT_OFF) return true;
-    if (SCOPE_isFuncDeclOnly(scoop, hashed) === false) return true;
     if (hasAnyFlag(lexerFlags, LF_STRICT_MODE)) return true;
-    return false;
+    // In sloppy+webcompat, it is not an error if this dupe is for two funcs. Otherwise still an error.
+    return !SCOPE_isFuncDeclOnly(scoop, hashed)
   }
   function SCOPE_isFuncDeclOnly(scoop, hashed) {
     ASSERT(options_webCompat === WEB_COMPAT_ON, 'this is only for webcompat');
@@ -2032,12 +2042,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case 'function':
-        // TODO: only ES5 explicitly disallowed function statements, we may want to look into detecting them
-        // TODO: consider it a declaration in if/else and statement (requiring semi) in all other statement places
         let isFunctionStatement = false;
         if (includeDeclarations === EXC_DECL) {
           isFunctionStatement = true;
           // in web compat mode func statements are only allowed inside `if` and `else` statements in sloppy mode
+          // TODO: this error needs to be caught elsewhere/differently because `async` decls wouldn't be caught by this.
           if (options_webCompat === WEB_COMPAT_OFF || hasNoFlag(lexerFlags, LF_CAN_FUNC_STMT) || hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
             THROW('Cannot parse a function declaration here, only expecting statements here');
           }
