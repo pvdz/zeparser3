@@ -44,7 +44,7 @@ function LOG(...args) {
 
 function THROW(str, ...rest) {
   _LOG('error args:', rest.length ? util.inspect(rest, false, null) : '<none>');
-  throw new Error(`Toktest error! ${str} ${rest.length ? util.inspect(rest, false, null) : ''}`);
+  throw new Error(`Test env error! ${str} ${rest.length ? util.inspect(rest, false, null) : ''}`);
 }
 function ASSERT(b, ...args) {
   if (!b) THROW('test env ASSERT error:', ...args);
