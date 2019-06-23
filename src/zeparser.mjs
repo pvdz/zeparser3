@@ -544,7 +544,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     _path[_path.length - 1][prop] = value;
   }
   function AST_setIdent(astProp, token, overwrite = false) {
-    ASSERT(typeof astProp === 'string', 'prop should be an string');
+    ASSERT(typeof astProp === 'string', 'prop should be a string',astProp);
     ASSERT(typeof token === 'object', 'token should be an obj');
     ASSERT(_path.length > 0, 'path shouldnt be empty');
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
@@ -5191,6 +5191,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseYieldValueMaybe(lexerFlags, allowAssignment, astProp) {
     ASSERT(parseYieldValueMaybe.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string', 'astprop string', astProp);
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     let argStartToken = curtok;
@@ -5204,6 +5205,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseValueHeadBody(lexerFlags, maybe, isNewArg, allowAssignment, astProp) {
     ASSERT(arguments.length === parseValueHeadBody.length, 'argcount');
+    ASSERT(typeof astProp === 'string', 'astprop string', astProp);
     ASSERT_ASSIGN_EXPR(allowAssignment);
     // - ident (a var, true, false, null, super, new <value>, new.target, this, class, function, async func, generator func)
     // - literal (number, string, regex, object, array, template)
@@ -5309,6 +5311,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseValueHeadBodyIdent(lexerFlags, isNewArg, bindingType, allowAssignment, astProp) {
     ASSERT(arguments.length === parseValueHeadBodyIdent.length, 'arg count');
     ASSERT(curtype === $IDENT, 'token should not yet have been consumed because the next token depends on its value and so you cant consume this ahead of time...');
+    ASSERT(typeof astProp === 'string', 'astprop string', astProp);
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     let identToken = curtok;
@@ -5320,6 +5323,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(parseValueHeadBodyAfterIdent.length === arguments.length, 'expecting args');
     ASSERT(identToken.type === $IDENT, 'should have consumed token. make sure you checked whether the token after can be div or regex...');
     ASSERT(identToken !== curtok, 'should have consumed this');
+    ASSERT(typeof astProp === 'string', 'astprop string', astProp);
     ASSERT_ASSIGN_EXPR(allowAssignment);
     ASSERT(isNewArg === NOT_NEW_ARG || allowAssignment === ASSIGN_EXPR_IS_ERROR, 'new arg does not allow assignments');
     // for `new` only a subset is accepted;
@@ -5773,15 +5777,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'YieldExpression', yieldToken);
     if (curc === $$STAR_2A) {
-      // This is a "delegate"
+      // This is a "delegate". The argument is _required_ now. There is no further newline check, though.
       // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/yield*
       // [v] `yield * x`
+      // [x] `yield \n * x`
+      // [x] `yield *;`
+
       AST_set('delegate', true);
       ASSERT_skipRex('*', lexerFlags); // next is any value
+      parseValue(lexerFlags, allowAssignment, NOT_NEW_ARG, 'argument'); // arg required, no newline restrictions
     } else {
       AST_set('delegate', false);
+      parseYieldArgument(lexerFlags, yieldToken, 'argument'); // optional, takes care of newline check
     }
-    parseYieldArgument(lexerFlags, yieldToken, 'argument'); // takes care of newline check
     AST_close('YieldExpression');
 
     if (curc === $$QMARK_3F) {
@@ -5805,6 +5813,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return IS_ASSIGNABLE | PIGGY_BACK_SAW_YIELD_VARNAME;
   }
   function parseYieldArgument(lexerFlags, yieldToken, astProp) {
+    ASSERT(parseYieldArgument.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string', 'astprop string', astProp);
+
     // there can be no newline between keyword `yield` and its argument (restricted production)
     let hadValue = curtok.nl > 0 ? false : parseYieldValueMaybe(lexerFlags, ASSIGN_EXPR_IS_OK, astProp);
     if (hadValue === YIELD_WITHOUT_VALUE) {
@@ -5818,6 +5829,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseIdentOrParenlessArrow(lexerFlags, identToken, assignable, allowAssignment, astProp) {
     ASSERT(parseIdentOrParenlessArrow.length === arguments.length, 'arg count');
+    ASSERT(typeof astProp === 'string', 'astprop string', astProp);
     ASSERT_ASSIGN_EXPR(allowAssignment);
 
     // assume an identifier has just been parsed and that it should be considered a regular var name

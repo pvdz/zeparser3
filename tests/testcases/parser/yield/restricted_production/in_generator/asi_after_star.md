@@ -1,18 +1,23 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/yield/yield_x002a/yield_can_be_followed_by_star.md
+- Path: zeparser3/tests/testcases/parser/yield/restricted_production/in_generator/asi_after_star.md
 
-> :: yield : yield *
+> :: yield : restricted production : in generator
 >
-> ::> yield can be followed by star
+> ::> asi after star
+>
+> `yield * x` not have a newline before the star, but is fine after the star
+
 
 ## Input
 
 `````js
-function* f() { yield* x; }
+function *f() {
+  yield *
+    x
+}
 `````
+
 
 ## Output
 
@@ -29,11 +34,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
       generator: true,
       async: false,
       id: {
@@ -44,18 +49,18 @@ ast: {
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:14},end:{line:1,col:27},source:''},
+        loc:{start:{line:1,col:14},end:{line:4,col:1},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc:{start:{line:1,col:16},end:{line:1,col:26},source:''},
+            loc:{start:{line:2,col:2},end:{line:4,col:0},source:''},
             expression: {
               type: 'YieldExpression',
-              loc:{start:{line:1,col:16},end:{line:1,col:24},source:''},
+              loc:{start:{line:2,col:2},end:{line:4,col:0},source:''},
               delegate: true,
               argument: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+                loc:{start:{line:3,col:4},end:{line:4,col:0},source:''},
                 name: 'x'
               }
             }
@@ -68,7 +73,7 @@ ast: {
 
 tokens (12x):
        IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR IDENT
-       PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
+       PUNCTUATOR IDENT ASI PUNCTUATOR
 `````
 
 ### Strict mode
