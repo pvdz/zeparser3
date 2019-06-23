@@ -374,7 +374,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     strictMode: options_strictMode = false,
     astRoot: options_astRoot = null,
     tokenStorage: options_tokenStorage = [],
-    getTokenizer,
+    getTokenizer = null,
     allowGlobalReturn = false, // you may need this to parse arbitrary code or eval code for example
     targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, Infinity
     exposeScopes = false, // put scopes in the AST under `$scope` property?
@@ -385,6 +385,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     $log = console.log,
     $warn = console.warn,
     $error = console.error,
+
+    sourceField = '', // This value is used to set the `source` field of the `loc` object of each AST node
 
     // ast compatibility stuff?
 
@@ -455,7 +457,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         col: 0,
       },
       // The spec says to add the whole source of the range but that just sounds a little redundant to me :/
-      // source: '',
+      source: sourceField,
     },
   };
   let _path = [_tree];
@@ -490,7 +492,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           line: 1,
           col: 0,
         },
-        source: '', // TODO: what to do with this one?
+        source: sourceField, // File containing the code being parsed. Source maps may use this.
       },
     };
     if (astUids) newnode.$uid = uid_counter++;
@@ -9861,14 +9863,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   // </SCRUB AST>
 
   return {
-    ast:
     // <SCRUB AST>
-    _tree
+    ast: _tree,
     // </SCRUB AST>
-    ,
     tokens: tok.tokens,
-    tokenCountSolid: tok.getTokenCountAny(),
-    tokenCountAny: tok.getTokenCountSolid(),
+    tokenCountSolid: tok.getTokenCountSolid(),
+    tokenCountAny: tok.getTokenCountAny(),
   }
 }
 
