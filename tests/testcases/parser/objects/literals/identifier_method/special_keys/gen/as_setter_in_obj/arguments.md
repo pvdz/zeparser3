@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/literals/identifier_method/special_keys/gen/as_setter_in_obj
 
 > :: test: as setter in obj
+>
 > :: case: arguments
 
 ## Input

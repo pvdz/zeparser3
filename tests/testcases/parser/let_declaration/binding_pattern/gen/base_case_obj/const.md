@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/let_declaration/binding_pattern/gen/base_case_obj
 
 > :: test: base case obj
+>
 > :: case: const
 
 ## Input

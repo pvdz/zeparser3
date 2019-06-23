@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/classes/special_keys/gen/as_getter_in_class
 
 > :: test: as getter in class
+>
 > :: case: void
 
 ## Input

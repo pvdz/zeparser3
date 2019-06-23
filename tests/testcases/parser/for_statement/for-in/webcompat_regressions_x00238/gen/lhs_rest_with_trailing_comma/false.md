@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/lhs_rest_with_trailing_comma
 
 > :: test: lhs rest with trailing comma
+>
 > :: case: false
 
 ## Input

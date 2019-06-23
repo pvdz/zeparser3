@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/literals/identifier_method/special_keys/gen/as_regular_property_in_object
 
 > :: test: as regular property in object
+>
 > :: case: protected
 
 ## Input

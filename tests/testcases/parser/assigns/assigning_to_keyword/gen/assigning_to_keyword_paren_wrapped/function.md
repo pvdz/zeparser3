@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/assigning_to_keyword/gen/assigning_to_keyword_paren_wrapped
 
 > :: test: assigning to keyword paren wrapped
+>
 > :: case: function
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/labels/keywords/gen/can_not_use_keywords_as_label_name
 
 > :: test: can not use keywords as label name
+>
 > :: case: this
 
 ## Input

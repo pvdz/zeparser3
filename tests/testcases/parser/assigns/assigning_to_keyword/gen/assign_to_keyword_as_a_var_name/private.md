@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/assigning_to_keyword/gen/assign_to_keyword_as_a_var_name
 
 > :: test: assign to keyword as a var name
+>
 > :: case: private
 
 ## Input

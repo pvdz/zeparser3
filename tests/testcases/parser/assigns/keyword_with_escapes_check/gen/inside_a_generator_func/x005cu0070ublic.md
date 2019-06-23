@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/keyword_with_escapes_check/gen/inside_a_generator_func
 
 > :: test: inside a generator func
+>
 > :: case: \u0070ublic
 
 ## Input

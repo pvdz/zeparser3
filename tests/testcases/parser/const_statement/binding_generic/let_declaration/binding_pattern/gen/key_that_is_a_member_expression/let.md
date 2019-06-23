@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/const_statement/binding_generic/let_declaration/binding_pattern/gen/key_that_is_a_member_expression
 
 > :: test: key that is a member expression
+>
 > :: case: let
 
 ## Input

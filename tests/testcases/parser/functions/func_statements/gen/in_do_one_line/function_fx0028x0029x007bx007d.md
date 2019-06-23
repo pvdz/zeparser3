@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/functions/func_statements/gen/in_do_one_line
 
 > :: test: in do one line
+>
 > :: case: function f(){}
 
 ## Input

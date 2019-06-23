@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/regexes/property_escapes/gen/class_property_escapes_are_valid_with_u_flag
 
 > :: test: class property escapes are valid with u flag
+>
 > :: case: undefined
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/group_or_arrow/group/groupx002farrow_with_trailing_comma/in_assigned_group/gen/after_array_destruct
 
 > :: test: after array destruct
+>
 > :: case: undefined
 
 ## Input

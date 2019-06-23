@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/functions/func_statements/gen/in_block
 
 > :: test: in block
+>
 > :: case: function f(){}
 
 ## Input

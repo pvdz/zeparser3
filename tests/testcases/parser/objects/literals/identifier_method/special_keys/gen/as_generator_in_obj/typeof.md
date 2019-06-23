@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/literals/identifier_method/special_keys/gen/as_generator_in_obj
 
 > :: test: as generator in obj
+>
 > :: case: typeof
 
 ## Input

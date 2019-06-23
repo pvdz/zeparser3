@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/strict_mode/header_requirements_for_directive_in_body/func_decl/gen/class_constructor_assigned_to_in_param_default_wx002fo_directive
 
 > :: test: class constructor; assigned to in param default w/o directive
+>
 > :: case: public
 
 ## Input

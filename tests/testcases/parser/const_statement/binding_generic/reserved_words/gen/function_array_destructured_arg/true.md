@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/const_statement/binding_generic/reserved_words/gen/function_array_destructured_arg
 
 > :: test: function array destructured arg
+>
 > :: case: true
 
 ## Input

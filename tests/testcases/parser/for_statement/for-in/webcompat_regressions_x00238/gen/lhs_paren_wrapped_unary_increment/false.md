@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/lhs_paren_wrapped_unary_increment
 
 > :: test: lhs paren wrapped unary increment
+>
 > :: case: false
 
 ## Input

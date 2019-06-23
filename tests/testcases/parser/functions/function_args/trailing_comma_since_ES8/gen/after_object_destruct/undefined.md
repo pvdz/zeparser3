@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/functions/function_args/trailing_comma_since_ES8/gen/after_object_destruct
 
 > :: test: after object destruct
+>
 > :: case: undefined
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/group_or_arrow/arrow/invalid_arrow_header_things/gen/case
 
 > :: test: case
+>
 > :: case: void x
 
 ## Input

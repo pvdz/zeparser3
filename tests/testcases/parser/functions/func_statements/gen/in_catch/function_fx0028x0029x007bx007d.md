@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/functions/func_statements/gen/in_catch
 
 > :: test: in catch
+>
 > :: case: function f(){}
 
 ## Input

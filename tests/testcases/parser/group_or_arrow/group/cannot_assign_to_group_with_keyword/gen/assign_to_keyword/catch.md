@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/group_or_arrow/group/cannot_assign_to_group_with_keyword/gen/assign_to_keyword
 
 > :: test: assign to keyword
+>
 > :: case: catch
 
 ## Input

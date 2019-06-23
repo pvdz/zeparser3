@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/const_statement/binding_generic/reserved_words/gen/function_object_alias_destructured_arg
 
 > :: test: function object alias destructured arg
+>
 > :: case: interface
 
 ## Input

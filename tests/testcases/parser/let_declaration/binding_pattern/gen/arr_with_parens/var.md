@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/let_declaration/binding_pattern/gen/arr_with_parens
 
 > :: test: arr with parens
+>
 > :: case: var
 
 ## Input

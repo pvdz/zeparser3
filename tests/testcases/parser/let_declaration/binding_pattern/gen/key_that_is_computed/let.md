@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/let_declaration/binding_pattern/gen/key_that_is_computed
 
 > :: test: key that is computed
+>
 > :: case: let
 
 ## Input

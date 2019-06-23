@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/group_or_arrow/arrow/keywords_ok_in_group_not_allowed_in_arrow_header/gen/assignment
 
 > :: test: assignment
+>
 > :: case: true
 
 ## Input

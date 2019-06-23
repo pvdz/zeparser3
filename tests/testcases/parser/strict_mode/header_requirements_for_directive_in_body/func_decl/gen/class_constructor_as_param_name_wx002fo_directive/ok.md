@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/strict_mode/header_requirements_for_directive_in_body/func_decl/gen/class_constructor_as_param_name_wx002fo_directive
 
 > :: test: class constructor; as param name w/o directive
+>
 > :: case: ok
 
 ## Input

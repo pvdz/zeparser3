@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/var_statement/binding_generic/reserved_words/gen/function_object_destructured_arg
 
 > :: test: function object destructured arg
+>
 > :: case: export
 
 ## Input

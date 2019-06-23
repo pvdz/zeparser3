@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/assign_ident_key
 
 > :: test: assign ident key
+>
 > :: case: catch
 
 ## Input

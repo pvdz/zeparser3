@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/classes/special_keys/gen/as_static_setter_in_class
 
 > :: test: as static setter in class
+>
 > :: case: in
 
 ## Input

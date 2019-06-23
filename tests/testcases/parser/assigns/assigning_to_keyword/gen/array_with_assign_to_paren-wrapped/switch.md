@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/assigning_to_keyword/gen/array_with_assign_to_paren-wrapped
 
 > :: test: array with assign to paren-wrapped
+>
 > :: case: switch
 
 ## Input

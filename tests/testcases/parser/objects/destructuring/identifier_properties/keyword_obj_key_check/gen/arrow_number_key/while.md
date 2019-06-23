@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/arrow_number_key
 
 > :: test: arrow number key
+>
 > :: case: while
 
 ## Input

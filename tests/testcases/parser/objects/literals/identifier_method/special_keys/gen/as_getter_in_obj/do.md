@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/literals/identifier_method/special_keys/gen/as_getter_in_obj
 
 > :: test: as getter in obj
+>
 > :: case: do
 
 ## Input

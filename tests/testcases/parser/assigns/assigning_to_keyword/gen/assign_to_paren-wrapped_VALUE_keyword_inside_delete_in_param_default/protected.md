@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/assigning_to_keyword/gen/assign_to_paren-wrapped_VALUE_keyword_inside_delete_in_param_default
 
 > :: test: assign to paren-wrapped VALUE keyword inside delete in param default
+>
 > :: case: protected
 
 ## Input

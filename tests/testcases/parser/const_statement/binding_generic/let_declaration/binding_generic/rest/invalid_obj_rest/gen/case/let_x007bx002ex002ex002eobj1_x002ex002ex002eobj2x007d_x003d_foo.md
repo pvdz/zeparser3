@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/const_statement/binding_generic/let_declaration/binding_generic/rest/invalid_obj_rest/gen/case
 
 > :: test: case
+>
 > :: case: let {...obj1,...obj2} = foo
 
 ## Input

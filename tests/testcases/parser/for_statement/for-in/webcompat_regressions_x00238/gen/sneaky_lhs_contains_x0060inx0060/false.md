@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/sneaky_lhs_contains_x0060inx0060
 
 > :: test: sneaky lhs contains `in`
+>
 > :: case: false
 
 ## Input

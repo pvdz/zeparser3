@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/functions/function_args/trailing_comma_since_ES8/gen/must_have_args_to_trail
 
 > :: test: must have args to trail
+>
 > :: case: undefined
 
 ## Input

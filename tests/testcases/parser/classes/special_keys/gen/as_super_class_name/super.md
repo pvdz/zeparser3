@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/classes/special_keys/gen/as_super_class_name
 
 > :: test: as super class name
+>
 > :: case: super
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/keyword_with_escapes_check/gen/inside_an_async_func
 
 > :: test: inside an async func
+>
 > :: case: \u0064elete
 
 ## Input

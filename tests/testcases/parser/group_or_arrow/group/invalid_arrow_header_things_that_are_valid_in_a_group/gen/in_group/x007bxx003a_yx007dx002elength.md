@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/group_or_arrow/group/invalid_arrow_header_things_that_are_valid_in_a_group/gen/in_group
 
 > :: test: in group
+>
 > :: case: {x: y}.length
 
 ## Input

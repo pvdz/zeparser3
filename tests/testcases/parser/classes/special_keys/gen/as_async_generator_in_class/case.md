@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/classes/special_keys/gen/as_async_generator_in_class
 
 > :: test: as async generator in class
+>
 > :: case: case
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/for_await_with_const
 
 > :: test: for await with const
+>
 > :: case: false
 
 ## Input

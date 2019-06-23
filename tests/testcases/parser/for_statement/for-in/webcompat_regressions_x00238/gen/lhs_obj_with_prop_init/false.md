@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/lhs_obj_with_prop_init
 
 > :: test: lhs obj with prop init
+>
 > :: case: false
 
 ## Input

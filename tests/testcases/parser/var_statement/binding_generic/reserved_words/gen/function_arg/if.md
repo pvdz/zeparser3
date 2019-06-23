@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/var_statement/binding_generic/reserved_words/gen/function_arg
 
 > :: test: function arg
+>
 > :: case: if
 
 ## Input

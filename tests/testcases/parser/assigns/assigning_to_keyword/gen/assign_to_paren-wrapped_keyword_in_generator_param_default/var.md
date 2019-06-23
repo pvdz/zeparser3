@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/assigning_to_keyword/gen/assign_to_paren-wrapped_keyword_in_generator_param_default
 
 > :: test: assign to paren-wrapped keyword in generator param default
+>
 > :: case: var
 
 ## Input

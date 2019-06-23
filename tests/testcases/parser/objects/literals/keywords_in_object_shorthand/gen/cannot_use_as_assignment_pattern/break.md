@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/literals/keywords_in_object_shorthand/gen/cannot_use_as_assignment_pattern
 
 > :: test: cannot use as assignment pattern
+>
 > :: case: break
 
 ## Input

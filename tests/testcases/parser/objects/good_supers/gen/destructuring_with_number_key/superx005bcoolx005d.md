@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/good_supers/gen/destructuring_with_number_key
 
 > :: test: destructuring with number key
+>
 > :: case: super[cool]
 
 ## Input

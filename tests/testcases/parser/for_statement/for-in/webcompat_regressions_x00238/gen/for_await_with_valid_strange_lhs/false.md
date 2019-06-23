@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/for_await_with_valid_strange_lhs
 
 > :: test: for await with valid strange lhs
+>
 > :: case: false
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/good_supers/gen/object_with_string_key
 
 > :: test: object with string key
+>
 > :: case: super[cool]
 
 ## Input

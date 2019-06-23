@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/strict_mode/header_requirements_for_directive_in_body/func_decl/gen/arrow_as_param_name_w_directive
 
 > :: test: arrow; as param name w directive
+>
 > :: case: private
 
 ## Input

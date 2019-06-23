@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/strict_mode/header_requirements_for_directive_in_body/func_decl/gen/class_method_assigned_to_in_param_default_w_directive
 
 > :: test: class method; assigned to in param default w directive
+>
 > :: case: yield
 
 ## Input

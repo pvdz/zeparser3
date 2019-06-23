@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/strict_mode/header_requirements_for_directive_in_body/func_decl/gen/function_decl_as_func_name_w_directive
 
 > :: test: function decl; as func name w directive
+>
 > :: case: interface
 
 ## Input

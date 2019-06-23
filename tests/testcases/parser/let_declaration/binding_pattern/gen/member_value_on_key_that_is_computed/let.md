@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/let_declaration/binding_pattern/gen/member_value_on_key_that_is_computed
 
 > :: test: member value on key that is computed
+>
 > :: case: let
 
 ## Input

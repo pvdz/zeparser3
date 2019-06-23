@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/keywords_should_not_parse_as_regular_idents_in_awkward_places/gen/destructuring_assignment_as_shorthand
 
 > :: test: destructuring assignment as shorthand
+>
 > :: case: false
 
 ## Input

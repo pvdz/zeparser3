@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/arrays/keywords_should_not_parse_as_regular_idents_in_awkward_places/gen/in_array
 
 > :: test: in array
+>
 > :: case: delete x.y
 
 ## Input

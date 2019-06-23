@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/good_supers/gen/object_with_number_key
 
 > :: test: object with number key
+>
 > :: case: super
 
 ## Input

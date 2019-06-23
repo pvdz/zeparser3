@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/functions/func_statements/gen/in_for-of-loop
 
 > :: test: in for-of-loop
+>
 > :: case: function f(){}
 
 ## Input

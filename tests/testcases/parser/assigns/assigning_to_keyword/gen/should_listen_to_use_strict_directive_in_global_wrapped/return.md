@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/assigning_to_keyword/gen/should_listen_to_use_strict_directive_in_global_wrapped
 
 > :: test: should listen to use strict directive in global wrapped
+>
 > :: case: return
 
 ## Input

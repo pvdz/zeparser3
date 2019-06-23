@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/classes/special_keys/gen/as_method_in_class
 
 > :: test: as method in class
+>
 > :: case: implements
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/var_statement/binding_generic/reserved_words/gen/for-of_header
 
 > :: test: for-of header
+>
 > :: case: private
 
 ## Input

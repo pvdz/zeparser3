@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/assign_string_key
 
 > :: test: assign string key
+>
 > :: case: debugger
 
 ## Input

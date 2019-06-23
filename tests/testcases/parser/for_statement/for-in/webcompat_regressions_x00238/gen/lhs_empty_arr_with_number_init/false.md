@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/lhs_empty_arr_with_number_init
 
 > :: test: lhs empty arr with number init
+>
 > :: case: false
 
 ## Input

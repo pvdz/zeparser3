@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/keywords_should_not_parse_as_regular_idents_in_awkward_places/gen/in_object_as_value
 
 > :: test: in object as value
+>
 > :: case: [].length
 
 ## Input

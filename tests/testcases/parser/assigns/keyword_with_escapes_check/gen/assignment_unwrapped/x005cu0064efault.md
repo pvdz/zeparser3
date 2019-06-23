@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/assigns/keyword_with_escapes_check/gen/assignment_unwrapped
 
 > :: test: assignment unwrapped
+>
 > :: case: \u0064efault
 
 ## Input

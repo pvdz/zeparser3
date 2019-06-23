@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/keywords_should_not_parse_as_regular_idents_in_awkward_places/gen/destructuring_assignment_as_property_value
 
 > :: test: destructuring assignment as property value
+>
 > :: case: x + y
 
 ## Input

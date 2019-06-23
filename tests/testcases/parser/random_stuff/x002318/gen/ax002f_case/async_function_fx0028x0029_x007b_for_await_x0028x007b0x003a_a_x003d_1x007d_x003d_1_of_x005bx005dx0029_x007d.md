@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/random_stuff/x002318/gen/ax002f_case
 
 > :: test: a/ case
+>
 > :: case: async function f() { for await ({0: a = 1} = 1 of []) ; }
 
 ## Input

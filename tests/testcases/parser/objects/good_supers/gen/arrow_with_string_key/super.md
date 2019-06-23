@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/good_supers/gen/arrow_with_string_key
 
 > :: test: arrow with string key
+>
 > :: case: super
 
 ## Input

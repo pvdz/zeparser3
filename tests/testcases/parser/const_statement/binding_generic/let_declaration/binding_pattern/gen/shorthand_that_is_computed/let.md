@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/const_statement/binding_generic/let_declaration/binding_pattern/gen/shorthand_that_is_computed
 
 > :: test: shorthand that is computed
+>
 > :: case: let
 
 ## Input

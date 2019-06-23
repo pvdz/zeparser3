@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/literals/keywords_in_object_shorthand/gen/cannot_use_as_arrow_header
 
 > :: test: cannot use as arrow header
+>
 > :: case: static
 
 ## Input

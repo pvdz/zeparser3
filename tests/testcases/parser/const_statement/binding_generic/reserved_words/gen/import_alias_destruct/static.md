@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/const_statement/binding_generic/reserved_words/gen/import_alias_destruct
 
 > :: test: import alias destruct
+>
 > :: case: static
 
 ## Input

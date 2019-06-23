@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/classes/special_keys/gen/as_regular_property_in_class
 
 > :: test: as regular property in class
+>
 > :: case: else
 
 ## Input

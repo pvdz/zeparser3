@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/random_stuff/x002318/gen/ax002f_case
 
 > :: test: a/ case
+>
 > :: case: async function foo(a = (eval) => { "use strict"; funeval("x"); }) {}
 
 ## Input

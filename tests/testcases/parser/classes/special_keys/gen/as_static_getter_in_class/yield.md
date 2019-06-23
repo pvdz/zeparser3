@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/classes/special_keys/gen/as_static_getter_in_class
 
 > :: test: as static getter in class
+>
 > :: case: yield
 
 ## Input

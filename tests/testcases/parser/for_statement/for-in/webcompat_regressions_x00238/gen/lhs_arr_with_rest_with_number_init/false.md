@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/lhs_arr_with_rest_with_number_init
 
 > :: test: lhs arr with rest with number init
+>
 > :: case: false
 
 ## Input

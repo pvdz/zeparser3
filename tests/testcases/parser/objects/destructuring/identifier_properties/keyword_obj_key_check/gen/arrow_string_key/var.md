@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/arrow_string_key
 
 > :: test: arrow string key
+>
 > :: case: var
 
 ## Input

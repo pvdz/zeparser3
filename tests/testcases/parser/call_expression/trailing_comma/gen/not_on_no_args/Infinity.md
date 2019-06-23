@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/call_expression/trailing_comma/gen/not_on_no_args
 
 > :: test: not on no args
+>
 > :: case: Infinity
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/strict_mode/tails_relevant_to_ASI_which_affects_directive_status/gen/case
 
 > :: test: case
+>
 > :: case: eval = 1;
 
 ## Input

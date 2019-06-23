@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/try_statement/catch_arg/optional_catch_binding_supported_from_ES9_upward/gen/tryx002fcatch_parenless_array
 
 > :: test: try/catch parenless array
+>
 > :: case: undefined
 
 ## Input

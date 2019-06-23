@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/group_or_arrow/group/groupx002farrow_with_trailing_comma/in_non-assigned_group/gen/not_allowed_after_rest
 
 > :: test: not allowed after rest
+>
 > :: case: Infinity
 
 ## Input

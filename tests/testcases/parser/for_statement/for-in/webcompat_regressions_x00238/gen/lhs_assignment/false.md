@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/lhs_assignment
 
 > :: test: lhs assignment
+>
 > :: case: false
 
 ## Input

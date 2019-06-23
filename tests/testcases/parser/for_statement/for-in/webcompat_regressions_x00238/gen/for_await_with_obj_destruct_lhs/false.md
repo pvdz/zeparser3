@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/for_await_with_obj_destruct_lhs
 
 > :: test: for await with obj destruct lhs
+>
 > :: case: false
 
 ## Input

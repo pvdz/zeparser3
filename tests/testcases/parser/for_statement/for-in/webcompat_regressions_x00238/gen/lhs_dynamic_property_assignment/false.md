@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/for_statement/for-in/webcompat_regressions_x00238/gen/lhs_dynamic_property_assignment
 
 > :: test: lhs dynamic property assignment
+>
 > :: case: false
 
 ## Input

@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/let_declaration/binding_pattern/gen/shorthand_that_is_a_member_expression
 
 > :: test: shorthand that is a member expression
+>
 > :: case: var
 
 ## Input

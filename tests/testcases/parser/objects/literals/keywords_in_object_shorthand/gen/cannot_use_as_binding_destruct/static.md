@@ -4,6 +4,7 @@
 - Path: zeparser3/tests/testcases/parser/objects/literals/keywords_in_object_shorthand/gen/cannot_use_as_binding_destruct
 
 > :: test: cannot use as binding destruct
+>
 > :: case: static
 
 ## Input
