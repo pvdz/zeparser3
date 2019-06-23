@@ -136,6 +136,31 @@ throws: Parser error!
 `````
 ````````
 
+## Adding a new test case
+
+Instead of copy pasta, a new test case can be added with a fairly simple syntax:
+
+`````
+@ information here
+is put under the description at the top
+###
+rest is test case
+`````
+
+If a test case file starts with `@` then it is assumed to be a new test file that it needs to generate.
+
+The file will be split on `###`. 
+- The first part (sans the leading `@`) is used as extra information, which will appear at the top of the generated test file.
+- The remaining part after the first `###` is entirely the test case.
+
+Both parts will be trimmed from trailing whitespace on every line. 
+
+When running test cases, these wip files are processed as if they are regular test cases. If you use the `-u` flag the file is automatically updated with a regular test case and its output.
+
+Once generated it can't really be undone, so use source control if this is relevant for you.
+
+TODO: include a way to specify parser options (you could always manually update the file afterwards and run `-u` again)
+
 ## Auto generated cases
 
 Sometimes a test needs to be tested with a variety of inputs. Two common cases are confirming some test works with all keywords and whether some test passes or fails properly with all ECMAScript version settings. 

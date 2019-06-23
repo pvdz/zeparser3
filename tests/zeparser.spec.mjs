@@ -150,7 +150,7 @@ async function extractFiles(list) {
   let bytes = 0;
   list.forEach(obj => {
     const {file, data} = obj;
-    ({options: obj.params, input: obj.input} = parseTestFile(data, file));
+    ({options: obj.params, input: obj.input} = parseTestFile(data, file, obj));
     bytes += obj.input.length;
   });
   console.timeEnd('$$ Test file extraction time');
@@ -550,7 +550,53 @@ function formatAst(ast) {
 const INPUT_HEADER = '\n## Input\n';
 const INPUT_START = '\n`````js\n';
 const INPUT_END = '\n`````\n';
-function parseTestFile(data, file) {
+function parseTestFile(data, file, obj) {
+
+  if (data[0] === '@') {
+    // This should be a new test that still has to be generated
+    // Its format basically starts with an @ for easy parsing here
+    //
+    // ```
+    // @ some more information here, optional because the file name / path forms the description
+    // ###
+    // the rest is the test case, as is. only trailing whitespace (if any) is trimmed from each line and the start/end
+    // ```
+    ASSERT(data.includes('\n###\n'), 'expected format');
+
+    console.log('Generating test case from', file);
+
+    let [comment, ...code] = data.slice(1).split('###\n');
+    code = code.join('###'); // unlikely
+    code = code.split('\n').map(s => s.trim()).join('\n').trim();
+
+    let relfile = file.slice(file.indexOf('zeparser3'));
+
+    let descPath = path
+      .dirname(relfile.slice(relfile.indexOf('tests/testcases/parser/') + 'tests/testcases/parser/'.length))
+      .split('/')
+      .map(s =>
+        s
+        .replace(/_/g, ' ')
+        .replace(/x([a-z\d]{4})/g, (_, s) => String.fromCharCode(parseInt(s, 16)))
+      )
+      .join(' : ');
+    let descFile = path.basename(relfile)
+      .slice(0, -3)
+      .replace(/_/g, ' ')
+      .replace(/x([a-z\d]{4})/g, (_, s) => String.fromCharCode(parseInt(s, 16)));
+
+    obj.data = data = `# ZeParser parser test case
+
+- Path: ${relfile}
+
+> :: ${descPath}
+>
+> ::> ${descFile}${comment ? '\n>\n>' + comment : ''}
+${INPUT_HEADER}${INPUT_START}${code}${INPUT_END}
+`;
+    fs.writeFileSync(file, data);
+  }
+
   // find the input
   let inputOffset = data.indexOf(INPUT_HEADER);
   ASSERT(inputOffset >= 0, 'should have an input header', file);
