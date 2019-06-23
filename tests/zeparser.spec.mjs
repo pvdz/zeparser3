@@ -174,7 +174,7 @@ async function coreTest(input, zeparser, goal, options) {
       },
     );
   } catch (_e) {
-    e = _e.message;
+    e = _e;
     if (INPUT_OVERRIDE || TARGET_FILE) {
       console.log(_e.stack);
     }
@@ -198,25 +198,28 @@ async function coreTest(input, zeparser, goal, options) {
 async function postProcessResult({r, e, tok}, testVariant, file) {
   // This is where by far the most time is spent... roughly 90% of the time is this function.
   // Most of that is Prettier. If we replace it with JSON.stringify the total runtime goes down 2 minutes to 11 seconds
+  let errorMessage = '';
   if (e) {
-    if (e.includes('Assertion fail')) {
+    errorMessage = e.message;
+    if (errorMessage.includes('Assertion fail')) {
       console.error('####\nThe following assertion error was thrown:\n');
-      console.error(e);
+      console.error(errorMessage);
       console.error('####');
-      throw new Error('Assertion error. Mode = ' + testVariant + ', file = ' + file + '; ' + e.message);
+      console.error(e.stack);
+      throw new Error('Assertion error. Mode = ' + testVariant + ', file = ' + file + '; ' + errorMessage.message);
     }
-    if (e.startsWith('Parser error!')) {
-      e = e.slice(0, 'Parser error!'.length) + '\n  ' + e.slice('Parser error!'.length + 1);
+    if (errorMessage.startsWith('Parser error!')) {
+      errorMessage = errorMessage.slice(0, 'Parser error!'.length) + '\n  ' + errorMessage.slice('Parser error!'.length + 1);
     }
-    else if (e.startsWith('Tokenizer error!')) {
-      e = e.slice(0, 'Tokenizer error!'.length) + '\n    ' + e.slice('Tokenizer error!'.length + 1);
+    else if (errorMessage.startsWith('Tokenizer error!')) {
+      errorMessage = errorMessage.slice(0, 'Tokenizer error!'.length) + '\n    ' + errorMessage.slice('Tokenizer error!'.length + 1);
     }
     else {
       console.error('####\nThe following unexpected error was thrown:\n');
-      console.error(e);
-      console.error(new Error(e).stack);
+      console.error(errorMessage);
+      console.error(e.stack);
       console.error('####');
-      throw new Error('Non-graceful error, fixme. Mode = ' + testVariant + ', file = ' + file + '; ' + e.message);
+      throw new Error('Non-graceful error, fixme. Mode = ' + testVariant + ', file = ' + file + '; ' + errorMessage.message);
     }
 
     if (tok) {
@@ -224,14 +227,14 @@ async function postProcessResult({r, e, tok}, testVariant, file) {
       if (context.slice(-1) === '\n') context = context.slice(0, -1);
       context = context.split('\n').map(s => s.trimRight()).join('\n'); // The error snippet can contain trailing whitespace
       if (INPUT_OVERRIDE) context = '```\n' + context + '\n```\n';
-      e += '\n\n' + context;
+      errorMessage += '\n\n' + context;
     }
   }
 
   return (
     // throws: Parser error!
     // throws: Tokenizer error!
-    (e ? 'throws: ' + e : '') +
+    (errorMessage ? 'throws: ' + errorMessage : '') +
     // (r ? 'ast: ' + formatAst(r.ast) + '\n\n' + formatTokens(r.tokens) : '')
     // (r ? 'ast: ' + JSON.stringify(r.ast) + '\n\n' + formatTokens(r.tokens) : '')
     // Using util.inspect makes the output formatting highly tightly bound to node's formatting rules
