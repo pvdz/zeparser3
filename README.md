@@ -21,6 +21,49 @@ It's a burden in some ways and nice in others. A prod build would not have any m
 ## Usage
 
 ```
+import ZeParser from 'src/zeparser.mjs';
+const {
+  ast,                 // estree compatible AST
+  tokens,              // array of numbers (see ZeTokenier)
+  tokenCountSolid,     // number of non-whitespace tokens
+  tokenCountAny,       // number of tokens of any kind
+} = ZeParser.parse(
+  inputCode,           // string
+  goal,                // true=module, false=script
+  collectTokens,       // 0=no,1=non-whitespace,2=all
+  {
+    // Apply Annex B rules? (Only works in sloppy mode)
+    webCompat = true,
+    // Start parsing as if in strict mode? (Works with script goal)
+    strictMode = false,
+    // Pass on a reference that will be used as the AST root
+    astRoot = null,
+    // Pass on a reference to store the tokens
+    tokenStorage = [],
+    // Callback to receive the tokenizer instance once its created
+    getTokenizer = null,
+    // You use this to parse `eval` code
+    allowGlobalReturn = false,
+    // Target a very specific ecmascript version (like, reject async)
+    targetEsVersion = lastVersion, // (currently es10)
+    // Leave built up scope information in the ASTs (good luck)
+    exposeScopes = false,
+    // Assign each node a unique incremental id
+    astUids = false,
+    // When false and input is over 100 bytes, it will trunc the input
+    fullErrorContext = false,
+    // You can override the logging functions to catch or squash all output
+    $log = console.log,
+    $warn = console.warn,
+    $error = console.error,
+    // Value ot use for the `source` field of each `loc` object
+    sourceField = '',
+  }
+);
+```
+
+## Testing
+```
 # Run entire parser test suite and update any changes inline
 ./tests/zeparser.spec.js -u
 node --experimental-modules tests/zeparser.spec.mjs
@@ -57,7 +100,9 @@ node --experimental-modules tests/zeparser.spec.mjs -q
 node --experimental-modules tests/zeparser.spec.mjs -t
 ```
 
-The REPL needs a very new browser due to es module syntax. You can find the REPL in [`tests/web/repl.html`](./tests/web/repl.js), github link: https://pvdz.github.io/zeparser3/tests/web/repl.html
+You can find the REPL in [`tests/web/repl.html`](./tests/web/repl.js), github link: https://pvdz.github.io/zeparser3/tests/web/repl.html
+
+_The REPL needs a very new browser due to es module syntax._
 
 # Building
 
