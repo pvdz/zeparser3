@@ -47,48 +47,28 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 23 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 13 },
-          end: { line: 1, col: 22 },
-          source: ''
-        },
+        loc:{start:{line:1,col:13},end:{line:1,col:22},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 13 },
-              end: { line: 1, col: 22 },
-              source: ''
-            },
+            loc:{start:{line:1,col:13},end:{line:1,col:22},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 13 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
               name: 'foo'
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 19 },
-                end: { line: 1, col: 22 },
-                source: ''
-              },
+              loc:{start:{line:1,col:19},end:{line:1,col:22},source:''},
               name: 'bar'
             }
           }

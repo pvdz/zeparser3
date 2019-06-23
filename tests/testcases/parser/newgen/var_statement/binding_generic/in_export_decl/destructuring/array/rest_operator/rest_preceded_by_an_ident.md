@@ -47,63 +47,35 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 31 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 31 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 11 },
-          end: { line: 1, col: 30 },
-          source: ''
-        },
+        loc:{start:{line:1,col:11},end:{line:1,col:30},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 11 },
-              end: { line: 1, col: 30 },
-              source: ''
-            },
+            loc:{start:{line:1,col:11},end:{line:1,col:30},source:''},
             id: {
               type: 'ArrayPattern',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 25 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:25},source:''},
               elements: [
                 {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 12 },
-                    end: { line: 1, col: 15 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
                   name: 'foo'
                 },
                 {
                   type: 'RestElement',
-                  loc: {
-                    start: { line: 1, col: 17 },
-                    end: { line: 1, col: 23 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:17},end:{line:1,col:23},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 20 },
-                      end: { line: 1, col: 23 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:20},end:{line:1,col:23},source:''},
                     name: 'bar'
                   }
                 }
@@ -111,11 +83,7 @@ ast: {
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 27 },
-                end: { line: 1, col: 30 },
-                source: ''
-              },
+              loc:{start:{line:1,col:27},end:{line:1,col:30},source:''},
               name: 'obj'
             }
           }

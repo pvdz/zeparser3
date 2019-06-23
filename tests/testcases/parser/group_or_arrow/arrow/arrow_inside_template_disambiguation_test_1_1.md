@@ -29,38 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 13 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 13 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
       expression: {
         type: 'TemplateLiteral',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 13 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
         expressions: [
           {
             type: 'ArrowFunctionExpression',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 10 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:10},source:''},
             params: [
               {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 4 },
-                  end: { line: 1, col: 6 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:4},end:{line:1,col:6},source:''},
                 name: 'a'
               }
             ],
@@ -70,11 +54,7 @@ ast: {
             expression: true,
             body: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 10 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:10},source:''},
               name: 'b'
             }
           }
@@ -82,21 +62,13 @@ ast: {
         quasis: [
           {
             type: 'TemplateElement',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 1, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
             tail: false,
             value: { raw: '`X${', cooked: '<TODO>' }
           },
           {
             type: 'TemplateElement',
-            loc: {
-              start: { line: 1, col: 10 },
-              end: { line: 1, col: 10 },
-              source: ''
-            },
+            loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
             tail: true,
             value: { raw: '}Y`', cooked: '<TODO>' }
           }

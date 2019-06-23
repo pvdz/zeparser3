@@ -29,58 +29,34 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 27 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 12 },
-          end: { line: 1, col: 27 },
-          source: ''
-        },
+        loc:{start:{line:1,col:12},end:{line:1,col:27},source:''},
         body: [
           {
             type: 'ReturnStatement',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 26 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:26},source:''},
             argument: {
               type: 'UpdateExpression',
-              loc: {
-                start: { line: 1, col: 21 },
-                end: { line: 1, col: 24 },
-                source: ''
-              },
+              loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
               operator: '++',
               prefix: true,
               argument: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 23 },
-                  end: { line: 1, col: 24 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
                 name: 'a'
               }
             }

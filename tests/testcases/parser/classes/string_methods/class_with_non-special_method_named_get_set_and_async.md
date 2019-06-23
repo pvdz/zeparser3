@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 41 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 41 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'A'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 41 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:41},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 19 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:19},source:''},
             key: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 9 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
               value: 'set',
               raw: '"set"'
             },
@@ -78,40 +58,24 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 19 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:19},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 16 },
-                  end: { line: 1, col: 19 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:16},end:{line:1,col:19},source:''},
                 body: []
               }
             }
           },
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 19 },
-              end: { line: 1, col: 29 },
-              source: ''
-            },
+            loc:{start:{line:1,col:19},end:{line:1,col:29},source:''},
             key: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 19 },
-                end: { line: 1, col: 19 },
-                source: ''
-              },
+              loc:{start:{line:1,col:19},end:{line:1,col:19},source:''},
               value: 'get',
               raw: '"get"'
             },
@@ -120,40 +84,24 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 19 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:19},end:{line:1,col:29},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 26 },
-                  end: { line: 1, col: 29 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:26},end:{line:1,col:29},source:''},
                 body: []
               }
             }
           },
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 29 },
-              end: { line: 1, col: 40 },
-              source: ''
-            },
+            loc:{start:{line:1,col:29},end:{line:1,col:40},source:''},
             key: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 29 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:29},end:{line:1,col:29},source:''},
               value: 'async',
               raw: '"async"'
             },
@@ -162,22 +110,14 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 29 },
-                end: { line: 1, col: 40 },
-                source: ''
-              },
+              loc:{start:{line:1,col:29},end:{line:1,col:40},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 38 },
-                  end: { line: 1, col: 40 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:38},end:{line:1,col:40},source:''},
                 body: []
               }
             }

@@ -29,55 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 52 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:52},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 52 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:52},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'x'
       },
       superClass: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 16 },
-          end: { line: 1, col: 18 },
-          source: ''
-        },
+        loc:{start:{line:1,col:16},end:{line:1,col:18},source:''},
         name: 'y'
       },
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 1, col: 52 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:1,col:52},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 20 },
-              end: { line: 1, col: 51 },
-              source: ''
-            },
+            loc:{start:{line:1,col:20},end:{line:1,col:51},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:31},source:''},
               name: 'constructor'
             },
             static: false,
@@ -85,53 +61,29 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 51 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:51},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 34 },
-                  end: { line: 1, col: 51 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:34},end:{line:1,col:51},source:''},
                 body: [
                   {
                     type: 'ExpressionStatement',
-                    loc: {
-                      start: { line: 1, col: 36 },
-                      end: { line: 1, col: 49 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:36},end:{line:1,col:49},source:''},
                     expression: {
                       type: 'CallExpression',
-                      loc: {
-                        start: { line: 1, col: 36 },
-                        end: { line: 1, col: 47 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:36},end:{line:1,col:47},source:''},
                       callee: {
                         type: 'Super',
-                        loc: {
-                          start: { line: 1, col: 36 },
-                          end: { line: 1, col: 41 },
-                          source: ''
-                        }
+                        loc:{start:{line:1,col:36},end:{line:1,col:41},source:''}
                       },
                       arguments: [
                         {
                           type: 'ThisExpression',
-                          loc: {
-                            start: { line: 1, col: 42 },
-                            end: { line: 1, col: 46 },
-                            source: ''
-                          }
+                          loc:{start:{line:1,col:42},end:{line:1,col:46},source:''}
                         }
                       ]
                     }

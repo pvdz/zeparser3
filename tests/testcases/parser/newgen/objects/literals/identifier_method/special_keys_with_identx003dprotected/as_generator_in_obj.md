@@ -29,37 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 20 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc: {
-          start: { line: 1, col: 1 },
-          end: { line: 1, col: 18 },
-          source: ''
-        },
+        loc:{start:{line:1,col:1},end:{line:1,col:18},source:''},
         properties: [
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 2 },
-              end: { line: 1, col: 17 },
-              source: ''
-            },
+            loc:{start:{line:1,col:2},end:{line:1,col:17},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 4 },
-                end: { line: 1, col: 13 },
-                source: ''
-              },
+              loc:{start:{line:1,col:4},end:{line:1,col:13},source:''},
               name: 'protected'
             },
             kind: 'init',
@@ -67,22 +51,14 @@ ast: {
             computed: false,
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 2 },
-                end: { line: 1, col: 17 },
-                source: ''
-              },
+              loc:{start:{line:1,col:2},end:{line:1,col:17},source:''},
               generator: true,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 15 },
-                  end: { line: 1, col: 17 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:15},end:{line:1,col:17},source:''},
                 body: []
               }
             },

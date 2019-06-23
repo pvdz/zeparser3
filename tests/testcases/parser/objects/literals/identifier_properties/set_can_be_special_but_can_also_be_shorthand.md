@@ -29,54 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 12 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 12 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
       expression: {
         type: 'CallExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 11 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
         callee: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
           name: 'wrap'
         },
         arguments: [
           {
             type: 'ObjectExpression',
-            loc: {
-              start: { line: 1, col: 5 },
-              end: { line: 1, col: 10 },
-              source: ''
-            },
+            loc:{start:{line:1,col:5},end:{line:1,col:10},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 6 },
-                  end: { line: 1, col: 9 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 6 },
-                    end: { line: 1, col: 9 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
                   name: 'set'
                 },
                 kind: 'init',
@@ -84,11 +60,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 6 },
-                    end: { line: 1, col: 9 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
                   name: 'set'
                 },
                 shorthand: true

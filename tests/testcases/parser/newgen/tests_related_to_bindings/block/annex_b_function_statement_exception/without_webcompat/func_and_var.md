@@ -53,67 +53,39 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 53 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:53},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 53 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:53},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 12 },
-          end: { line: 1, col: 53 },
-          source: ''
-        },
+        loc:{start:{line:1,col:12},end:{line:1,col:53},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc: {
-              start: { line: 1, col: 18 },
-              end: { line: 1, col: 25 },
-              source: ''
-            },
+            loc:{start:{line:1,col:18},end:{line:1,col:25},source:''},
             kind: 'var',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc: {
-                  start: { line: 1, col: 18 },
-                  end: { line: 1, col: 25 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:18},end:{line:1,col:25},source:''},
                 id: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 18 },
-                    end: { line: 1, col: 18 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
                   name: 'f'
                 },
                 init: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 22 },
-                    end: { line: 1, col: 22 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
                   value: 123,
                   raw: '123'
                 }
@@ -122,47 +94,27 @@ ast: {
           },
           {
             type: 'IfStatement',
-            loc: {
-              start: { line: 1, col: 27 },
-              end: { line: 1, col: 52 },
-              source: ''
-            },
+            loc:{start:{line:1,col:27},end:{line:1,col:52},source:''},
             test: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 31 },
-                end: { line: 1, col: 35 },
-                source: ''
-              },
+              loc:{start:{line:1,col:31},end:{line:1,col:35},source:''},
               value: true,
               raw: 'true'
             },
             consequent: {
               type: 'FunctionDeclaration',
-              loc: {
-                start: { line: 1, col: 37 },
-                end: { line: 1, col: 52 },
-                source: ''
-              },
+              loc:{start:{line:1,col:37},end:{line:1,col:52},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 46 },
-                  end: { line: 1, col: 46 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:46},end:{line:1,col:46},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 49 },
-                  end: { line: 1, col: 52 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:49},end:{line:1,col:52},source:''},
                 body: []
               }
             },

@@ -29,30 +29,18 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 44 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 44 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
         params: [
           {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 8 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
             name: 'x'
           }
         ],
@@ -62,51 +50,27 @@ ast: {
         expression: true,
         body: {
           type: 'UnaryExpression',
-          loc: {
-            start: { line: 1, col: 11 },
-            end: { line: 1, col: 44 },
-            source: ''
-          },
+          loc:{start:{line:1,col:11},end:{line:1,col:44},source:''},
           operator: 'delete',
           prefix: true,
           argument: {
             type: 'MemberExpression',
-            loc: {
-              start: { line: 1, col: 18 },
-              end: { line: 1, col: 44 },
-              source: ''
-            },
+            loc:{start:{line:1,col:18},end:{line:1,col:44},source:''},
             object: {
               type: 'CallExpression',
-              loc: {
-                start: { line: 1, col: 23 },
-                end: { line: 1, col: 35 },
-                source: ''
-              },
+              loc:{start:{line:1,col:23},end:{line:1,col:35},source:''},
               callee: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 23 },
-                  end: { line: 1, col: 26 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:23},end:{line:1,col:26},source:''},
                 name: 'foo'
               },
               arguments: [
                 {
                   type: 'AwaitExpression',
-                  loc: {
-                    start: { line: 1, col: 27 },
-                    end: { line: 1, col: 34 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:27},end:{line:1,col:34},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 33 },
-                      end: { line: 1, col: 34 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:33},end:{line:1,col:34},source:''},
                     name: 'x'
                   }
                 }
@@ -114,11 +78,7 @@ ast: {
             },
             property: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 41 },
-                end: { line: 1, col: 41 },
-                source: ''
-              },
+              loc:{start:{line:1,col:41},end:{line:1,col:41},source:''},
               name: 'bar'
             },
             computed: false

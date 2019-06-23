@@ -47,48 +47,28 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 22 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 11 },
-          end: { line: 1, col: 21 },
-          source: ''
-        },
+        loc:{start:{line:1,col:11},end:{line:1,col:21},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 11 },
-              end: { line: 1, col: 21 },
-              source: ''
-            },
+            loc:{start:{line:1,col:11},end:{line:1,col:21},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 11 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
               name: 'async'
             },
             init: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 19 },
-                end: { line: 1, col: 19 },
-                source: ''
-              },
+              loc:{start:{line:1,col:19},end:{line:1,col:19},source:''},
               value: 10,
               raw: '10'
             }

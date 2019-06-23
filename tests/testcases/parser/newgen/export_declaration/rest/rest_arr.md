@@ -47,54 +47,30 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 21 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 11 },
-          end: { line: 1, col: 21 },
-          source: ''
-        },
+        loc:{start:{line:1,col:11},end:{line:1,col:21},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 11 },
-              end: { line: 1, col: 21 },
-              source: ''
-            },
+            loc:{start:{line:1,col:11},end:{line:1,col:21},source:''},
             id: {
               type: 'ArrayPattern',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 18 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:18},source:''},
               elements: [
                 {
                   type: 'RestElement',
-                  loc: {
-                    start: { line: 1, col: 12 },
-                    end: { line: 1, col: 16 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:12},end:{line:1,col:16},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 15 },
-                      end: { line: 1, col: 16 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
                     name: 'x'
                   }
                 }
@@ -102,11 +78,7 @@ ast: {
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 21 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
               name: 'y'
             }
           }

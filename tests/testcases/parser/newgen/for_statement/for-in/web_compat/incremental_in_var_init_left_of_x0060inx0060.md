@@ -53,56 +53,32 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 23 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 17 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:17},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 17 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:17},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 9 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
               name: 'a'
             },
             init: {
               type: 'UpdateExpression',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 17 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:17},source:''},
               operator: '++',
               prefix: true,
               argument: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 15 },
-                  end: { line: 1, col: 17 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:15},end:{line:1,col:17},source:''},
                 name: 'b'
               }
             }
@@ -111,20 +87,12 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 20 },
-          end: { line: 1, col: 21 },
-          source: ''
-        },
+        loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
         name: 'c'
       },
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 22 },
-          end: { line: 1, col: 23 },
-          source: ''
-        }
+        loc:{start:{line:1,col:22},end:{line:1,col:23},source:''}
       }
     }
   ]

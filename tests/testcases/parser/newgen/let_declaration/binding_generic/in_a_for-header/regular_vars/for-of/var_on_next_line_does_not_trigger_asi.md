@@ -30,38 +30,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 10 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:10},source:''},
   body: [
     {
       type: 'ForOfStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 2, col: 10 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:2,col:10},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 2, col: 0 },
-          end: { line: 2, col: 4 },
-          source: ''
-        },
+        loc:{start:{line:2,col:0},end:{line:2,col:4},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 2, col: 0 },
-              end: { line: 2, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:2,col:0},end:{line:2,col:4},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 2, col: 0 },
-                end: { line: 2, col: 0 },
-                source: ''
-              },
+              loc:{start:{line:2,col:0},end:{line:2,col:0},source:''},
               name: 'foo'
             },
             init: null
@@ -70,21 +54,13 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc: {
-          start: { line: 2, col: 7 },
-          end: { line: 2, col: 8 },
-          source: ''
-        },
+        loc:{start:{line:2,col:7},end:{line:2,col:8},source:''},
         name: 'x'
       },
       await: false,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 2, col: 9 },
-          end: { line: 2, col: 10 },
-          source: ''
-        }
+        loc:{start:{line:2,col:9},end:{line:2,col:10},source:''}
       }
     }
   ]

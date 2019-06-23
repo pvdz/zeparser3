@@ -29,48 +29,28 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 15 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 15 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
       body: [
         {
           type: 'VariableDeclaration',
-          loc: {
-            start: { line: 1, col: 8 },
-            end: { line: 1, col: 14 },
-            source: ''
-          },
+          loc:{start:{line:1,col:8},end:{line:1,col:14},source:''},
           kind: 'const',
           declarations: [
             {
               type: 'VariableDeclarator',
-              loc: {
-                start: { line: 1, col: 8 },
-                end: { line: 1, col: 14 },
-                source: ''
-              },
+              loc:{start:{line:1,col:8},end:{line:1,col:14},source:''},
               id: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 8 },
-                  end: { line: 1, col: 8 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:8},end:{line:1,col:8},source:''},
                 name: 'y'
               },
               init: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 12 },
-                  end: { line: 1, col: 14 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:12},end:{line:1,col:14},source:''},
                 name: 'x'
               }
             }

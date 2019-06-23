@@ -53,48 +53,28 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 41 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 41 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
       body: [
         {
           type: 'VariableDeclaration',
-          loc: {
-            start: { line: 1, col: 6 },
-            end: { line: 1, col: 13 },
-            source: ''
-          },
+          loc:{start:{line:1,col:6},end:{line:1,col:13},source:''},
           kind: 'var',
           declarations: [
             {
               type: 'VariableDeclarator',
-              loc: {
-                start: { line: 1, col: 6 },
-                end: { line: 1, col: 13 },
-                source: ''
-              },
+              loc:{start:{line:1,col:6},end:{line:1,col:13},source:''},
               id: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 6 },
-                  end: { line: 1, col: 6 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
                 name: 'f'
               },
               init: {
                 type: 'Literal',
-                loc: {
-                  start: { line: 1, col: 10 },
-                  end: { line: 1, col: 10 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
                 value: 123,
                 raw: '123'
               }
@@ -103,47 +83,27 @@ ast: {
         },
         {
           type: 'IfStatement',
-          loc: {
-            start: { line: 1, col: 15 },
-            end: { line: 1, col: 40 },
-            source: ''
-          },
+          loc:{start:{line:1,col:15},end:{line:1,col:40},source:''},
           test: {
             type: 'Literal',
-            loc: {
-              start: { line: 1, col: 19 },
-              end: { line: 1, col: 23 },
-              source: ''
-            },
+            loc:{start:{line:1,col:19},end:{line:1,col:23},source:''},
             value: true,
             raw: 'true'
           },
           consequent: {
             type: 'FunctionDeclaration',
-            loc: {
-              start: { line: 1, col: 25 },
-              end: { line: 1, col: 40 },
-              source: ''
-            },
+            loc:{start:{line:1,col:25},end:{line:1,col:40},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 34 },
-                end: { line: 1, col: 34 },
-                source: ''
-              },
+              loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
               name: 'f'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc: {
-                start: { line: 1, col: 37 },
-                end: { line: 1, col: 40 },
-                source: ''
-              },
+              loc:{start:{line:1,col:37},end:{line:1,col:40},source:''},
               body: []
             }
           },

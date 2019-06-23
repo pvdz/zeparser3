@@ -29,66 +29,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 31 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 31 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
       expression: {
         type: 'UnaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 31 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
         operator: 'delete',
         prefix: true,
         argument: {
           type: 'MemberExpression',
-          loc: {
-            start: { line: 1, col: 7 },
-            end: { line: 1, col: 31 },
-            source: ''
-          },
+          loc:{start:{line:1,col:7},end:{line:1,col:31},source:''},
           object: {
             type: 'CallExpression',
-            loc: {
-              start: { line: 1, col: 12 },
-              end: { line: 1, col: 22 },
-              source: ''
-            },
+            loc:{start:{line:1,col:12},end:{line:1,col:22},source:''},
             callee: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 12 },
-                end: { line: 1, col: 15 },
-                source: ''
-              },
+              loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
               name: 'foo'
             },
             arguments: [
               {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 16 },
-                  end: { line: 1, col: 21 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:16},end:{line:1,col:21},source:''},
                 name: 'yield'
               }
             ]
           },
           property: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 28 },
-              end: { line: 1, col: 28 },
-              source: ''
-            },
+            loc:{start:{line:1,col:28},end:{line:1,col:28},source:''},
             name: 'bar'
           },
           computed: false

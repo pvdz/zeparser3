@@ -31,55 +31,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 78 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:78},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 78 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:78},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'a'
       },
       superClass: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 16 },
-          end: { line: 1, col: 18 },
-          source: ''
-        },
+        loc:{start:{line:1,col:16},end:{line:1,col:18},source:''},
         name: 'b'
       },
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 1, col: 78 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:1,col:78},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 20 },
-              end: { line: 1, col: 77 },
-              source: ''
-            },
+            loc:{start:{line:1,col:20},end:{line:1,col:77},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:31},source:''},
               name: 'constructor'
             },
             static: false,
@@ -87,77 +63,41 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 77 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:77},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 33 },
-                  end: { line: 1, col: 77 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:33},end:{line:1,col:77},source:''},
                 body: [
                   {
                     type: 'ClassDeclaration',
-                    loc: {
-                      start: { line: 1, col: 37 },
-                      end: { line: 1, col: 76 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:37},end:{line:1,col:76},source:''},
                     id: {
                       type: 'Identifier',
-                      loc: {
-                        start: { line: 1, col: 43 },
-                        end: { line: 1, col: 43 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:43},end:{line:1,col:43},source:''},
                       name: 'x'
                     },
                     superClass: {
                       type: 'Identifier',
-                      loc: {
-                        start: { line: 1, col: 53 },
-                        end: { line: 1, col: 55 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:53},end:{line:1,col:55},source:''},
                       name: 'y'
                     },
                     body: {
                       type: 'ClassBody',
-                      loc: {
-                        start: { line: 1, col: 55 },
-                        end: { line: 1, col: 76 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:55},end:{line:1,col:76},source:''},
                       body: [
                         {
                           type: 'MethodDefinition',
-                          loc: {
-                            start: { line: 1, col: 57 },
-                            end: { line: 1, col: 71 },
-                            source: ''
-                          },
+                          loc:{start:{line:1,col:57},end:{line:1,col:71},source:''},
                           key: {
                             type: 'CallExpression',
-                            loc: {
-                              start: { line: 1, col: 58 },
-                              end: { line: 1, col: 65 },
-                              source: ''
-                            },
+                            loc:{start:{line:1,col:58},end:{line:1,col:65},source:''},
                             callee: {
                               type: 'Super',
-                              loc: {
-                                start: { line: 1, col: 58 },
-                                end: { line: 1, col: 63 },
-                                source: ''
-                              }
+                              loc:{start:{line:1,col:58},end:{line:1,col:63},source:''}
                             },
                             arguments: []
                           },
@@ -166,22 +106,14 @@ ast: {
                           kind: 'method',
                           value: {
                             type: 'FunctionExpression',
-                            loc: {
-                              start: { line: 1, col: 57 },
-                              end: { line: 1, col: 71 },
-                              source: ''
-                            },
+                            loc:{start:{line:1,col:57},end:{line:1,col:71},source:''},
                             generator: false,
                             async: false,
                             id: null,
                             params: [],
                             body: {
                               type: 'BlockStatement',
-                              loc: {
-                                start: { line: 1, col: 68 },
-                                end: { line: 1, col: 71 },
-                                source: ''
-                              },
+                              loc:{start:{line:1,col:68},end:{line:1,col:71},source:''},
                               body: []
                             }
                           }

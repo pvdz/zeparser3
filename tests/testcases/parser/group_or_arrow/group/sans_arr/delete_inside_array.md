@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 17 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
       expression: {
         type: 'UnaryExpression',
-        loc: {
-          start: { line: 1, col: 1 },
-          end: { line: 1, col: 15 },
-          source: ''
-        },
+        loc:{start:{line:1,col:1},end:{line:1,col:15},source:''},
         operator: 'delete',
         prefix: true,
         argument: {
           type: 'MemberExpression',
-          loc: {
-            start: { line: 1, col: 8 },
-            end: { line: 1, col: 15 },
-            source: ''
-          },
+          loc:{start:{line:1,col:8},end:{line:1,col:15},source:''},
           object: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 11 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:11},source:''},
             name: 'foo'
           },
           property: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 12 },
-              end: { line: 1, col: 12 },
-              source: ''
-            },
+            loc:{start:{line:1,col:12},end:{line:1,col:12},source:''},
             name: 'bar'
           },
           computed: false

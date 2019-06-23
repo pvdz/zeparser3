@@ -29,34 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 20 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'yield'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 1, col: 20 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
         body: []
       }
     }

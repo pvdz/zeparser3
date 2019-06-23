@@ -33,54 +33,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 6, col: 1 } },
+  loc:{start:{line:1,col:0},end:{line:6,col:1},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 6, col: 1 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:6,col:1},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 6, col: 1 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:6,col:1},source:''},
         left: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
           name: 'foo'
         },
         operator: '=',
         right: {
           type: 'ObjectExpression',
-          loc: {
-            start: { line: 1, col: 6 },
-            end: { line: 6, col: 1 },
-            source: ''
-          },
+          loc:{start:{line:1,col:6},end:{line:6,col:1},source:''},
           properties: [
             {
               type: 'Property',
-              loc: {
-                start: { line: 2, col: 2 },
-                end: { line: 6, col: 0 },
-                source: ''
-              },
+              loc:{start:{line:2,col:2},end:{line:6,col:0},source:''},
               key: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 2, col: 6 },
-                  end: { line: 2, col: 6 },
-                  source: ''
-                },
+                loc:{start:{line:2,col:6},end:{line:2,col:6},source:''},
                 name: 'x'
               },
               kind: 'get',
@@ -88,37 +64,21 @@ ast: {
               computed: false,
               value: {
                 type: 'FunctionExpression',
-                loc: {
-                  start: { line: 2, col: 2 },
-                  end: { line: 6, col: 0 },
-                  source: ''
-                },
+                loc:{start:{line:2,col:2},end:{line:6,col:0},source:''},
                 generator: false,
                 async: false,
                 id: null,
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  loc: {
-                    start: { line: 2, col: 9 },
-                    end: { line: 6, col: 0 },
-                    source: ''
-                  },
+                  loc:{start:{line:2,col:9},end:{line:6,col:0},source:''},
                   body: [
                     {
                       type: 'ExpressionStatement',
-                      loc: {
-                        start: { line: 3, col: 4 },
-                        end: { line: 4, col: 4 },
-                        source: ''
-                      },
+                      loc:{start:{line:3,col:4},end:{line:4,col:4},source:''},
                       expression: {
                         type: 'Literal',
-                        loc: {
-                          start: { line: 3, col: 4 },
-                          end: { line: 3, col: 4 },
-                          source: ''
-                        },
+                        loc:{start:{line:3,col:4},end:{line:3,col:4},source:''},
                         value: 'use strict',
                         raw: '"use strict"'
                       },
@@ -126,35 +86,19 @@ ast: {
                     },
                     {
                       type: 'ExpressionStatement',
-                      loc: {
-                        start: { line: 4, col: 4 },
-                        end: { line: 5, col: 2 },
-                        source: ''
-                      },
+                      loc:{start:{line:4,col:4},end:{line:5,col:2},source:''},
                       expression: {
                         type: 'AssignmentExpression',
-                        loc: {
-                          start: { line: 4, col: 4 },
-                          end: { line: 5, col: 2 },
-                          source: ''
-                        },
+                        loc:{start:{line:4,col:4},end:{line:5,col:2},source:''},
                         left: {
                           type: 'Identifier',
-                          loc: {
-                            start: { line: 4, col: 4 },
-                            end: { line: 4, col: 10 },
-                            source: ''
-                          },
+                          loc:{start:{line:4,col:4},end:{line:4,col:10},source:''},
                           name: 'await'
                         },
                         operator: '=',
                         right: {
                           type: 'Identifier',
-                          loc: {
-                            start: { line: 4, col: 12 },
-                            end: { line: 5, col: 2 },
-                            source: ''
-                          },
+                          loc:{start:{line:4,col:12},end:{line:5,col:2},source:''},
                           name: 'x'
                         }
                       }

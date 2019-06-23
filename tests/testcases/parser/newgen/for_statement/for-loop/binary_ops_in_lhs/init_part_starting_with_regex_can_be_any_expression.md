@@ -29,29 +29,17 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 17 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
       init: {
         type: 'BinaryExpression',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 13 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:13},source:''},
         left: {
           type: 'Literal',
-          loc: {
-            start: { line: 1, col: 5 },
-            end: { line: 1, col: 5 },
-            source: ''
-          },
+          loc:{start:{line:1,col:5},end:{line:1,col:5},source:''},
           value: null,
           regex: { pattern: 'x', flags: 'g' },
           raw: '/x/g'
@@ -59,11 +47,7 @@ ast: {
         operator: '+',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 12 },
-            end: { line: 1, col: 13 },
-            source: ''
-          },
+          loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
           name: 'b'
         }
       },
@@ -71,11 +55,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 16 },
-          end: { line: 1, col: 17 },
-          source: ''
-        }
+        loc:{start:{line:1,col:16},end:{line:1,col:17},source:''}
       }
     }
   ]

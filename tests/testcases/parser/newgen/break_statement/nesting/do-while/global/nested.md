@@ -29,49 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 36 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
   body: [
     {
       type: 'DoWhileStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 36 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
       body: {
         type: 'IfStatement',
-        loc: {
-          start: { line: 1, col: 7 },
-          end: { line: 1, col: 24 },
-          source: ''
-        },
+        loc:{start:{line:1,col:7},end:{line:1,col:24},source:''},
         test: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 11 },
-            end: { line: 1, col: 12 },
-            source: ''
-          },
+          loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
           name: 'x'
         },
         consequent: {
           type: 'BreakStatement',
-          loc: {
-            start: { line: 1, col: 14 },
-            end: { line: 1, col: 24 },
-            source: ''
-          },
+          loc:{start:{line:1,col:14},end:{line:1,col:24},source:''},
           label: null
         },
         alternate: null
       },
       test: {
         type: 'Literal',
-        loc: {
-          start: { line: 1, col: 30 },
-          end: { line: 1, col: 34 },
-          source: ''
-        },
+        loc:{start:{line:1,col:30},end:{line:1,col:34},source:''},
         value: true,
         raw: 'true'
       }

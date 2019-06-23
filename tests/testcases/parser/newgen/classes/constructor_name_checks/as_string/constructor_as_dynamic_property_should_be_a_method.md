@@ -31,47 +31,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 31 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 31 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'x'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 31 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:31},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 10 },
-              end: { line: 1, col: 30 },
-              source: ''
-            },
+            loc:{start:{line:1,col:10},end:{line:1,col:30},source:''},
             key: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 11 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
               value: 'constructor',
               raw: '"constructor"'
             },
@@ -80,22 +60,14 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 10 },
-                end: { line: 1, col: 30 },
-                source: ''
-              },
+              loc:{start:{line:1,col:10},end:{line:1,col:30},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 27 },
-                  end: { line: 1, col: 30 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:27},end:{line:1,col:30},source:''},
                 body: []
               }
             }

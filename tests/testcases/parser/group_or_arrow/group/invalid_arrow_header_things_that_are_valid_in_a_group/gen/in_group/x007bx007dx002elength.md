@@ -28,38 +28,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 13 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 13 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
       expression: {
         type: 'MemberExpression',
-        loc: {
-          start: { line: 1, col: 2 },
-          end: { line: 1, col: 12 },
-          source: ''
-        },
+        loc:{start:{line:1,col:2},end:{line:1,col:12},source:''},
         object: {
           type: 'ObjectExpression',
-          loc: {
-            start: { line: 1, col: 2 },
-            end: { line: 1, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:2},end:{line:1,col:4},source:''},
           properties: []
         },
         property: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 5 },
-            end: { line: 1, col: 5 },
-            source: ''
-          },
+          loc:{start:{line:1,col:5},end:{line:1,col:5},source:''},
           name: 'length'
         },
         computed: false

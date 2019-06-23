@@ -28,22 +28,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 37 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 37 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
         params: [],
         id: null,
         generator: false,
@@ -51,43 +43,23 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 12 },
-            end: { line: 1, col: 37 },
-            source: ''
-          },
+          loc:{start:{line:1,col:12},end:{line:1,col:37},source:''},
           body: [
             {
               type: 'ExpressionStatement',
-              loc: {
-                start: { line: 1, col: 15 },
-                end: { line: 1, col: 36 },
-                source: ''
-              },
+              loc:{start:{line:1,col:15},end:{line:1,col:36},source:''},
               expression: {
                 type: 'AssignmentExpression',
-                loc: {
-                  start: { line: 1, col: 15 },
-                  end: { line: 1, col: 36 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:15},end:{line:1,col:36},source:''},
                 left: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 15 },
-                    end: { line: 1, col: 31 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:15},end:{line:1,col:31},source:''},
                   name: 'implements'
                 },
                 operator: '=',
                 right: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 33 },
-                    end: { line: 1, col: 36 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:33},end:{line:1,col:36},source:''},
                   name: 'x'
                 }
               }

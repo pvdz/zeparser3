@@ -29,55 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 4 },
-        end: { line: 1, col: 17 },
-        source: ''
-      },
+      loc:{start:{line:1,col:4},end:{line:1,col:17},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 17 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:17},source:''},
           id: {
             type: 'ArrayPattern',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 12 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:12},source:''},
             elements: [
               {
                 type: 'AssignmentPattern',
-                loc: {
-                  start: { line: 1, col: 4 },
-                  end: { line: 1, col: 10 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:4},end:{line:1,col:10},source:''},
                 left: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 5 },
-                    end: { line: 1, col: 8 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
                   name: 'foo'
                 },
                 right: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 9 },
-                    end: { line: 1, col: 10 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:9},end:{line:1,col:10},source:''},
                   name: 'a'
                 }
               }
@@ -85,11 +61,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 17 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:17},source:''},
             name: 'arr'
           }
         }

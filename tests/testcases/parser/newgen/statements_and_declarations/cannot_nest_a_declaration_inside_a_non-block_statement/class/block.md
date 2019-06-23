@@ -29,40 +29,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 14 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 14 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
       body: [
         {
           type: 'ClassDeclaration',
-          loc: {
-            start: { line: 1, col: 2 },
-            end: { line: 1, col: 13 },
-            source: ''
-          },
+          loc:{start:{line:1,col:2},end:{line:1,col:13},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 8 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:8},source:''},
             name: 'X'
           },
           superClass: null,
           body: {
             type: 'ClassBody',
-            loc: {
-              start: { line: 1, col: 10 },
-              end: { line: 1, col: 13 },
-              source: ''
-            },
+            loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
             body: []
           }
         }

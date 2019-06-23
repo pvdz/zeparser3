@@ -29,56 +29,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 16 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
       expression: {
         type: 'UnaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 16 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
         operator: 'typeof',
         prefix: true,
         argument: {
           type: 'MemberExpression',
-          loc: {
-            start: { line: 1, col: 7 },
-            end: { line: 1, col: 16 },
-            source: ''
-          },
+          loc:{start:{line:1,col:7},end:{line:1,col:16},source:''},
           object: {
             type: 'NewExpression',
-            loc: {
-              start: { line: 1, col: 7 },
-              end: { line: 1, col: 14 },
-              source: ''
-            },
+            loc:{start:{line:1,col:7},end:{line:1,col:14},source:''},
             arguments: [],
             callee: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 12 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
               name: 'x'
             }
           },
           property: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 15 },
-              end: { line: 1, col: 15 },
-              source: ''
-            },
+            loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
             name: 'y'
           },
           computed: false

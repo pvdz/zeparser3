@@ -29,89 +29,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 44 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'g'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 14 },
-          end: { line: 1, col: 44 },
-          source: ''
-        },
+        loc:{start:{line:1,col:14},end:{line:1,col:44},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc: {
-              start: { line: 1, col: 15 },
-              end: { line: 1, col: 43 },
-              source: ''
-            },
+            loc:{start:{line:1,col:15},end:{line:1,col:43},source:''},
             expression: {
               type: 'AssignmentExpression',
-              loc: {
-                start: { line: 1, col: 15 },
-                end: { line: 1, col: 42 },
-                source: ''
-              },
+              loc:{start:{line:1,col:15},end:{line:1,col:42},source:''},
               left: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 15 },
-                  end: { line: 1, col: 16 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
                 name: 'x'
               },
               operator: '=',
               right: {
                 type: 'ObjectExpression',
-                loc: {
-                  start: { line: 1, col: 17 },
-                  end: { line: 1, col: 42 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:17},end:{line:1,col:42},source:''},
                 properties: [
                   {
                     type: 'SpreadElement',
-                    loc: {
-                      start: { line: 1, col: 23 },
-                      end: { line: 1, col: 41 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:23},end:{line:1,col:41},source:''},
                     argument: {
                       type: 'YieldExpression',
-                      loc: {
-                        start: { line: 1, col: 26 },
-                        end: { line: 1, col: 41 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:26},end:{line:1,col:41},source:''},
                       delegate: false,
                       argument: {
                         type: 'YieldExpression',
-                        loc: {
-                          start: { line: 1, col: 32 },
-                          end: { line: 1, col: 41 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:32},end:{line:1,col:41},source:''},
                         delegate: false,
                         argument: null
                       }

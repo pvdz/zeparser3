@@ -29,42 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 20 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [
         {
           type: 'ArrayPattern',
-          loc: {
-            start: { line: 1, col: 11 },
-            end: { line: 1, col: 17 },
-            source: ''
-          },
+          loc:{start:{line:1,col:11},end:{line:1,col:17},source:''},
           elements: [
             {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 12 },
-                end: { line: 1, col: 15 },
-                source: ''
-              },
+              loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
               name: 'foo'
             }
           ]
@@ -72,11 +56,7 @@ ast: {
       ],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 1, col: 20 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
         body: []
       }
     }

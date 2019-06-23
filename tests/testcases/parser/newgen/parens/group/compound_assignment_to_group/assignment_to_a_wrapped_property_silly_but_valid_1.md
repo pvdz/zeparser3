@@ -29,45 +29,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 11 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 11 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:10},source:''},
         left: {
           type: 'MemberExpression',
-          loc: {
-            start: { line: 1, col: 1 },
-            end: { line: 1, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:1},end:{line:1,col:4},source:''},
           object: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 1 },
-              end: { line: 1, col: 2 },
-              source: ''
-            },
+            loc:{start:{line:1,col:1},end:{line:1,col:2},source:''},
             name: 'a'
           },
           property: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 3 },
-              end: { line: 1, col: 3 },
-              source: ''
-            },
+            loc:{start:{line:1,col:3},end:{line:1,col:3},source:''},
             name: 'b'
           },
           computed: false
@@ -75,11 +55,7 @@ ast: {
         operator: '+=',
         right: {
           type: 'Literal',
-          loc: {
-            start: { line: 1, col: 9 },
-            end: { line: 1, col: 9 },
-            source: ''
-          },
+          loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
           value: 1,
           raw: '1'
         }

@@ -29,74 +29,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 6 },
-        end: { line: 1, col: 44 },
-        source: ''
-      },
+      loc:{start:{line:1,col:6},end:{line:1,col:44},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 15 },
-          end: { line: 1, col: 15 },
-          source: ''
-        },
+        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 19 },
-          end: { line: 1, col: 44 },
-          source: ''
-        },
+        loc:{start:{line:1,col:19},end:{line:1,col:44},source:''},
         body: [
           {
             type: 'ClassDeclaration',
-            loc: {
-              start: { line: 1, col: 21 },
-              end: { line: 1, col: 43 },
-              source: ''
-            },
+            loc:{start:{line:1,col:21},end:{line:1,col:43},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 27 },
-                end: { line: 1, col: 27 },
-                source: ''
-              },
+              loc:{start:{line:1,col:27},end:{line:1,col:27},source:''},
               name: 'A'
             },
             superClass: null,
             body: {
               type: 'ClassBody',
-              loc: {
-                start: { line: 1, col: 29 },
-                end: { line: 1, col: 43 },
-                source: ''
-              },
+              loc:{start:{line:1,col:29},end:{line:1,col:43},source:''},
               body: [
                 {
                   type: 'MethodDefinition',
-                  loc: {
-                    start: { line: 1, col: 30 },
-                    end: { line: 1, col: 41 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:30},end:{line:1,col:41},source:''},
                   key: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 30 },
-                      end: { line: 1, col: 31 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:30},end:{line:1,col:31},source:''},
                     name: 'f'
                   },
                   static: false,
@@ -104,32 +72,20 @@ ast: {
                   kind: 'method',
                   value: {
                     type: 'FunctionExpression',
-                    loc: {
-                      start: { line: 1, col: 30 },
-                      end: { line: 1, col: 41 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:30},end:{line:1,col:41},source:''},
                     generator: false,
                     async: false,
                     id: null,
                     params: [
                       {
                         type: 'Identifier',
-                        loc: {
-                          start: { line: 1, col: 32 },
-                          end: { line: 1, col: 32 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
                         name: 'await'
                       }
                     ],
                     body: {
                       type: 'BlockStatement',
-                      loc: {
-                        start: { line: 1, col: 39 },
-                        end: { line: 1, col: 41 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:39},end:{line:1,col:41},source:''},
                       body: []
                     }
                   }

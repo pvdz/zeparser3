@@ -29,61 +29,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 26 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'call'
       },
       params: [
         {
           type: 'AssignmentPattern',
-          loc: {
-            start: { line: 1, col: 14 },
-            end: { line: 1, col: 23 },
-            source: ''
-          },
+          loc:{start:{line:1,col:14},end:{line:1,col:23},source:''},
           left: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 14 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
             name: 'foo'
           },
           right: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 18 },
-              end: { line: 1, col: 23 },
-              source: ''
-            },
+            loc:{start:{line:1,col:18},end:{line:1,col:23},source:''},
             name: 'await'
           }
         }
       ],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 24 },
-          end: { line: 1, col: 26 },
-          source: ''
-        },
+        loc:{start:{line:1,col:24},end:{line:1,col:26},source:''},
         body: []
       }
     }

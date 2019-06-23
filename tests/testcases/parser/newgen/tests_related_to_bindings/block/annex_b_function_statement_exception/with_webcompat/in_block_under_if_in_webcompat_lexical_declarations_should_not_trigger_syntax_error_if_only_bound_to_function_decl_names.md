@@ -53,58 +53,34 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 44 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
       body: [
         {
           type: 'IfStatement',
-          loc: {
-            start: { line: 1, col: 2 },
-            end: { line: 1, col: 25 },
-            source: ''
-          },
+          loc:{start:{line:1,col:2},end:{line:1,col:25},source:''},
           test: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 7 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
             name: 'x'
           },
           consequent: {
             type: 'FunctionDeclaration',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 25 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:25},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 18 },
-                end: { line: 1, col: 18 },
-                source: ''
-              },
+              loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
               name: 'f'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc: {
-                start: { line: 1, col: 22 },
-                end: { line: 1, col: 25 },
-                source: ''
-              },
+              loc:{start:{line:1,col:22},end:{line:1,col:25},source:''},
               body: []
             }
           },
@@ -112,38 +88,22 @@ ast: {
         },
         {
           type: 'EmptyStatement',
-          loc: {
-            start: { line: 1, col: 25 },
-            end: { line: 1, col: 27 },
-            source: ''
-          }
+          loc:{start:{line:1,col:25},end:{line:1,col:27},source:''}
         },
         {
           type: 'FunctionDeclaration',
-          loc: {
-            start: { line: 1, col: 27 },
-            end: { line: 1, col: 43 },
-            source: ''
-          },
+          loc:{start:{line:1,col:27},end:{line:1,col:43},source:''},
           generator: false,
           async: false,
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 36 },
-              end: { line: 1, col: 36 },
-              source: ''
-            },
+            loc:{start:{line:1,col:36},end:{line:1,col:36},source:''},
             name: 'f'
           },
           params: [],
           body: {
             type: 'BlockStatement',
-            loc: {
-              start: { line: 1, col: 40 },
-              end: { line: 1, col: 43 },
-              source: ''
-            },
+            loc:{start:{line:1,col:40},end:{line:1,col:43},source:''},
             body: []
           }
         }

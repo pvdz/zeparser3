@@ -79,22 +79,14 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 11 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 11 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
       expression: {
         type: 'Literal',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 11 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
         value: null,
         regex: { pattern: '[\\12-\\14]', flags: '' },
         raw: '/[\\12-\\14]/'

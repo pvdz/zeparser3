@@ -31,49 +31,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 49 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:49},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 49 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:49},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'f'
       },
       params: [
         {
           type: 'ObjectPattern',
-          loc: {
-            start: { line: 1, col: 12 },
-            end: { line: 1, col: 18 },
-            source: ''
-          },
+          loc:{start:{line:1,col:12},end:{line:1,col:18},source:''},
           properties: [
             {
               type: 'Property',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 17 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:17},source:''},
               key: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 13 },
-                  end: { line: 1, col: 16 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
                 name: 'x'
               },
               kind: 'init',
@@ -81,11 +61,7 @@ ast: {
               computed: false,
               value: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 16 },
-                  end: { line: 1, col: 17 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
                 name: 'x'
               },
               shorthand: false
@@ -95,53 +71,29 @@ ast: {
       ],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 20 },
-          end: { line: 1, col: 49 },
-          source: ''
-        },
+        loc:{start:{line:1,col:20},end:{line:1,col:49},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc: {
-              start: { line: 1, col: 22 },
-              end: { line: 1, col: 48 },
-              source: ''
-            },
+            loc:{start:{line:1,col:22},end:{line:1,col:48},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 31 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:31},end:{line:1,col:31},source:''},
               name: 'f'
             },
             params: [
               {
                 type: 'ObjectPattern',
-                loc: {
-                  start: { line: 1, col: 33 },
-                  end: { line: 1, col: 43 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:33},end:{line:1,col:43},source:''},
                 properties: [
                   {
                     type: 'Property',
-                    loc: {
-                      start: { line: 1, col: 34 },
-                      end: { line: 1, col: 42 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:34},end:{line:1,col:42},source:''},
                     key: {
                       type: 'Identifier',
-                      loc: {
-                        start: { line: 1, col: 34 },
-                        end: { line: 1, col: 37 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:34},end:{line:1,col:37},source:''},
                       name: 'x'
                     },
                     kind: 'init',
@@ -149,11 +101,7 @@ ast: {
                     computed: false,
                     value: {
                       type: 'Identifier',
-                      loc: {
-                        start: { line: 1, col: 37 },
-                        end: { line: 1, col: 42 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:37},end:{line:1,col:42},source:''},
                       name: 'yield'
                     },
                     shorthand: false
@@ -163,11 +111,7 @@ ast: {
             ],
             body: {
               type: 'BlockStatement',
-              loc: {
-                start: { line: 1, col: 45 },
-                end: { line: 1, col: 48 },
-                source: ''
-              },
+              loc:{start:{line:1,col:45},end:{line:1,col:48},source:''},
               body: []
             }
           }

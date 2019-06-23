@@ -29,74 +29,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 43 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 43 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
       block: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 4 },
-          end: { line: 1, col: 8 },
-          source: ''
-        },
+        loc:{start:{line:1,col:4},end:{line:1,col:8},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 43 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:43},source:''},
         param: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 15 },
-            end: { line: 1, col: 15 },
-            source: ''
-          },
+          loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
           name: 'e'
         },
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 18 },
-            end: { line: 1, col: 43 },
-            source: ''
-          },
+          loc:{start:{line:1,col:18},end:{line:1,col:43},source:''},
           body: [
             {
               type: 'FunctionDeclaration',
-              loc: {
-                start: { line: 1, col: 26 },
-                end: { line: 1, col: 42 },
-                source: ''
-              },
+              loc:{start:{line:1,col:26},end:{line:1,col:42},source:''},
               generator: false,
               async: true,
               id: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 35 },
-                  end: { line: 1, col: 35 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:35},end:{line:1,col:35},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 39 },
-                  end: { line: 1, col: 42 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:39},end:{line:1,col:42},source:''},
                 body: []
               }
             }

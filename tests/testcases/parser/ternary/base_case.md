@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 5 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:5},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 5 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:5},source:''},
       expression: {
         type: 'ConditionalExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 5 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:5},source:''},
         test: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 1 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:1},source:''},
           name: 'a'
         },
         consequent: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 2 },
-            end: { line: 1, col: 3 },
-            source: ''
-          },
+          loc:{start:{line:1,col:2},end:{line:1,col:3},source:''},
           name: 'b'
         },
         alternate: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 5 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
           name: 'c'
         }
       }

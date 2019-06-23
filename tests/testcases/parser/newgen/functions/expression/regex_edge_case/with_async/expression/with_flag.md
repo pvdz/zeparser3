@@ -32,64 +32,36 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 6 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 2, col: 6 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 2, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
         left: {
           type: 'BinaryExpression',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 2, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:2,col:4},source:''},
           left: {
             type: 'UnaryExpression',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 2, col: 0 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
             operator: 'typeof',
             prefix: true,
             argument: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 2, col: 0 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:2,col:0},source:''},
               generator: false,
               async: true,
               id: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 22 },
-                  end: { line: 1, col: 22 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 25 },
-                  end: { line: 2, col: 0 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:25},end:{line:2,col:0},source:''},
                 body: []
               }
             }
@@ -97,22 +69,14 @@ ast: {
           operator: '/',
           right: {
             type: 'Identifier',
-            loc: {
-              start: { line: 2, col: 1 },
-              end: { line: 2, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:2,col:1},end:{line:2,col:4},source:''},
             name: 'foo'
           }
         },
         operator: '/',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 2, col: 5 },
-            end: { line: 2, col: 6 },
-            source: ''
-          },
+          loc:{start:{line:2,col:5},end:{line:2,col:6},source:''},
           name: 'g'
         }
       }

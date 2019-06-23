@@ -29,81 +29,45 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 68 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:68},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 6 },
-        end: { line: 1, col: 68 },
-        source: ''
-      },
+      loc:{start:{line:1,col:6},end:{line:1,col:68},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 15 },
-          end: { line: 1, col: 15 },
-          source: ''
-        },
+        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
         name: 'a'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 1, col: 68 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:1,col:68},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc: {
-              start: { line: 1, col: 24 },
-              end: { line: 1, col: 67 },
-              source: ''
-            },
+            loc:{start:{line:1,col:24},end:{line:1,col:67},source:''},
             expression: {
               type: 'CallExpression',
-              loc: {
-                start: { line: 1, col: 24 },
-                end: { line: 1, col: 61 },
-                source: ''
-              },
+              loc:{start:{line:1,col:24},end:{line:1,col:61},source:''},
               callee: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 24 },
-                  end: { line: 1, col: 61 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:24},end:{line:1,col:61},source:''},
                 name: 'async'
               },
               arguments: [
                 {
                   type: 'AssignmentExpression',
-                  loc: {
-                    start: { line: 1, col: 31 },
-                    end: { line: 1, col: 60 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:31},end:{line:1,col:60},source:''},
                   left: {
                     type: 'ArrayPattern',
-                    loc: {
-                      start: { line: 1, col: 31 },
-                      end: { line: 1, col: 35 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:31},end:{line:1,col:35},source:''},
                     elements: [
                       {
                         type: 'Identifier',
-                        loc: {
-                          start: { line: 1, col: 32 },
-                          end: { line: 1, col: 33 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:32},end:{line:1,col:33},source:''},
                         name: 'y'
                       }
                     ]
@@ -111,34 +75,18 @@ ast: {
                   operator: '=',
                   right: {
                     type: 'ArrayExpression',
-                    loc: {
-                      start: { line: 1, col: 37 },
-                      end: { line: 1, col: 60 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:37},end:{line:1,col:60},source:''},
                     elements: [
                       {
                         type: 'ObjectExpression',
-                        loc: {
-                          start: { line: 1, col: 38 },
-                          end: { line: 1, col: 59 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:38},end:{line:1,col:59},source:''},
                         properties: [
                           {
                             type: 'Property',
-                            loc: {
-                              start: { line: 1, col: 39 },
-                              end: { line: 1, col: 58 },
-                              source: ''
-                            },
+                            loc:{start:{line:1,col:39},end:{line:1,col:58},source:''},
                             key: {
                               type: 'Identifier',
-                              loc: {
-                                start: { line: 1, col: 39 },
-                                end: { line: 1, col: 42 },
-                                source: ''
-                              },
+                              loc:{start:{line:1,col:39},end:{line:1,col:42},source:''},
                               name: 'm'
                             },
                             kind: 'init',
@@ -146,53 +94,29 @@ ast: {
                             computed: false,
                             value: {
                               type: 'BinaryExpression',
-                              loc: {
-                                start: { line: 1, col: 42 },
-                                end: { line: 1, col: 58 },
-                                source: ''
-                              },
+                              loc:{start:{line:1,col:42},end:{line:1,col:58},source:''},
                               left: {
                                 type: 'Literal',
-                                loc: {
-                                  start: { line: 1, col: 42 },
-                                  end: { line: 1, col: 42 },
-                                  source: ''
-                                },
+                                loc:{start:{line:1,col:42},end:{line:1,col:42},source:''},
                                 value: 5,
                                 raw: '5'
                               },
                               operator: '+',
                               right: {
                                 type: 'CallExpression',
-                                loc: {
-                                  start: { line: 1, col: 46 },
-                                  end: { line: 1, col: 58 },
-                                  source: ''
-                                },
+                                loc:{start:{line:1,col:46},end:{line:1,col:58},source:''},
                                 callee: {
                                   type: 'Identifier',
-                                  loc: {
-                                    start: { line: 1, col: 46 },
-                                    end: { line: 1, col: 47 },
-                                    source: ''
-                                  },
+                                  loc:{start:{line:1,col:46},end:{line:1,col:47},source:''},
                                   name: 't'
                                 },
                                 arguments: [
                                   {
                                     type: 'AwaitExpression',
-                                    loc: {
-                                      start: { line: 1, col: 48 },
-                                      end: { line: 1, col: 57 },
-                                      source: ''
-                                    },
+                                    loc:{start:{line:1,col:48},end:{line:1,col:57},source:''},
                                     argument: {
                                       type: 'Identifier',
-                                      loc: {
-                                        start: { line: 1, col: 54 },
-                                        end: { line: 1, col: 57 },
-                                        source: ''
-                                      },
+                                      loc:{start:{line:1,col:54},end:{line:1,col:57},source:''},
                                       name: 'bar'
                                     }
                                   }

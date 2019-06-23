@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 31 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 31 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'x'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 31 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:31},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 10 },
-              end: { line: 1, col: 30 },
-              source: ''
-            },
+            loc:{start:{line:1,col:10},end:{line:1,col:30},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 10 },
-                end: { line: 1, col: 13 },
-                source: ''
-              },
+              loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
               name: 'foo'
             },
             static: false,
@@ -77,52 +57,28 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 10 },
-                end: { line: 1, col: 30 },
-                source: ''
-              },
+              loc:{start:{line:1,col:10},end:{line:1,col:30},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 15 },
-                  end: { line: 1, col: 30 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:15},end:{line:1,col:30},source:''},
                 body: [
                   {
                     type: 'ExpressionStatement',
-                    loc: {
-                      start: { line: 1, col: 17 },
-                      end: { line: 1, col: 29 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:17},end:{line:1,col:29},source:''},
                     expression: {
                       type: 'MemberExpression',
-                      loc: {
-                        start: { line: 1, col: 17 },
-                        end: { line: 1, col: 27 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:17},end:{line:1,col:27},source:''},
                       object: {
                         type: 'Super',
-                        loc: {
-                          start: { line: 1, col: 17 },
-                          end: { line: 1, col: 22 },
-                          source: ''
-                        }
+                        loc:{start:{line:1,col:17},end:{line:1,col:22},source:''}
                       },
                       property: {
                         type: 'Identifier',
-                        loc: {
-                          start: { line: 1, col: 23 },
-                          end: { line: 1, col: 26 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:23},end:{line:1,col:26},source:''},
                         name: 'foo'
                       },
                       computed: true

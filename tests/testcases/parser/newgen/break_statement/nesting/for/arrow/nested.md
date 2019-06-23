@@ -29,22 +29,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 39 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 39 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 39 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
         params: [],
         id: null,
         generator: false,
@@ -52,45 +44,25 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 6 },
-            end: { line: 1, col: 39 },
-            source: ''
-          },
+          loc:{start:{line:1,col:6},end:{line:1,col:39},source:''},
           body: [
             {
               type: 'ForStatement',
-              loc: {
-                start: { line: 1, col: 8 },
-                end: { line: 1, col: 38 },
-                source: ''
-              },
+              loc:{start:{line:1,col:8},end:{line:1,col:38},source:''},
               init: null,
               test: null,
               update: null,
               body: {
                 type: 'IfStatement',
-                loc: {
-                  start: { line: 1, col: 23 },
-                  end: { line: 1, col: 38 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:23},end:{line:1,col:38},source:''},
                 test: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 27 },
-                    end: { line: 1, col: 28 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:27},end:{line:1,col:28},source:''},
                   name: 'x'
                 },
                 consequent: {
                   type: 'BreakStatement',
-                  loc: {
-                    start: { line: 1, col: 30 },
-                    end: { line: 1, col: 38 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:30},end:{line:1,col:38},source:''},
                   label: null
                 },
                 alternate: null

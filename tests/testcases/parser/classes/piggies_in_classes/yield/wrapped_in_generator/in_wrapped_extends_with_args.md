@@ -29,83 +29,47 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 51 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:51},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 51 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:51},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 13 },
-          end: { line: 1, col: 51 },
-          source: ''
-        },
+        loc:{start:{line:1,col:13},end:{line:1,col:51},source:''},
         body: [
           {
             type: 'ClassDeclaration',
-            loc: {
-              start: { line: 1, col: 16 },
-              end: { line: 1, col: 50 },
-              source: ''
-            },
+            loc:{start:{line:1,col:16},end:{line:1,col:50},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 22 },
-                end: { line: 1, col: 22 },
-                source: ''
-              },
+              loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
               name: 'x'
             },
             superClass: {
               type: 'CallExpression',
-              loc: {
-                start: { line: 1, col: 32 },
-                end: { line: 1, col: 45 },
-                source: ''
-              },
+              loc:{start:{line:1,col:32},end:{line:1,col:45},source:''},
               callee: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 32 },
-                  end: { line: 1, col: 35 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:32},end:{line:1,col:35},source:''},
                 name: 'feh'
               },
               arguments: [
                 {
                   type: 'YieldExpression',
-                  loc: {
-                    start: { line: 1, col: 36 },
-                    end: { line: 1, col: 43 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:36},end:{line:1,col:43},source:''},
                   delegate: false,
                   argument: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 42 },
-                      end: { line: 1, col: 43 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:42},end:{line:1,col:43},source:''},
                     name: 'y'
                   }
                 }
@@ -113,11 +77,7 @@ ast: {
             },
             body: {
               type: 'ClassBody',
-              loc: {
-                start: { line: 1, col: 45 },
-                end: { line: 1, col: 50 },
-                source: ''
-              },
+              loc:{start:{line:1,col:45},end:{line:1,col:50},source:''},
               body: []
             }
           }

@@ -29,54 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 14 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 14 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 14 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
         left: {
           type: 'MemberExpression',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 11 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
           object: {
             type: 'NewExpression',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 1, col: 7 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:1,col:7},source:''},
             arguments: [],
             callee: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 4 },
-                end: { line: 1, col: 5 },
-                source: ''
-              },
+              loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
               name: 'x'
             }
           },
           property: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 9 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
             name: 'y'
           },
           computed: true
@@ -84,11 +60,7 @@ ast: {
         operator: '+',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 13 },
-            end: { line: 1, col: 14 },
-            source: ''
-          },
+          loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
           name: 'z'
         }
       }

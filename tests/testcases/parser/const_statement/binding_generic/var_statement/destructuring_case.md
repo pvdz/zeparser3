@@ -29,46 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 24 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 4 },
-        end: { line: 1, col: 24 },
-        source: ''
-      },
+      loc:{start:{line:1,col:4},end:{line:1,col:24},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 24 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:24},source:''},
           id: {
             type: 'ObjectPattern',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 17 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:17},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 5 },
-                  end: { line: 1, col: 15 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:5},end:{line:1,col:15},source:''},
                 key: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 6 },
-                    end: { line: 1, col: 6 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
                   value: 2,
                   raw: '2'
                 },
@@ -77,27 +57,15 @@ ast: {
                 computed: true,
                 value: {
                   type: 'AssignmentPattern',
-                  loc: {
-                    start: { line: 1, col: 10 },
-                    end: { line: 1, col: 15 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:10},end:{line:1,col:15},source:''},
                   left: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 10 },
-                      end: { line: 1, col: 12 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:10},end:{line:1,col:12},source:''},
                     name: 'y'
                   },
                   right: {
                     type: 'Literal',
-                    loc: {
-                      start: { line: 1, col: 14 },
-                      end: { line: 1, col: 14 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
                     value: 1,
                     raw: '1'
                   }
@@ -108,26 +76,14 @@ ast: {
           },
           init: {
             type: 'ObjectExpression',
-            loc: {
-              start: { line: 1, col: 19 },
-              end: { line: 1, col: 24 },
-              source: ''
-            },
+            loc:{start:{line:1,col:19},end:{line:1,col:24},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 20 },
-                  end: { line: 1, col: 23 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:20},end:{line:1,col:23},source:''},
                 key: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 20 },
-                    end: { line: 1, col: 22 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:20},end:{line:1,col:22},source:''},
                   value: 2,
                   raw: '2'
                 },
@@ -136,11 +92,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 22 },
-                    end: { line: 1, col: 22 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
                   value: 3,
                   raw: '3'
                 },

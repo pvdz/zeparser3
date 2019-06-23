@@ -29,44 +29,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 13 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 13 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 1 },
-          end: { line: 1, col: 12 },
-          source: ''
-        },
+        loc:{start:{line:1,col:1},end:{line:1,col:12},source:''},
         left: {
           type: 'ObjectPattern',
-          loc: {
-            start: { line: 1, col: 1 },
-            end: { line: 1, col: 9 },
-            source: ''
-          },
+          loc:{start:{line:1,col:1},end:{line:1,col:9},source:''},
           properties: [
             {
               type: 'Property',
-              loc: {
-                start: { line: 1, col: 2 },
-                end: { line: 1, col: 7 },
-                source: ''
-              },
+              loc:{start:{line:1,col:2},end:{line:1,col:7},source:''},
               key: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 2 },
-                  end: { line: 1, col: 4 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:2},end:{line:1,col:4},source:''},
                 name: 'x'
               },
               kind: 'init',
@@ -74,27 +54,15 @@ ast: {
               computed: false,
               value: {
                 type: 'AssignmentPattern',
-                loc: {
-                  start: { line: 1, col: 2 },
-                  end: { line: 1, col: 7 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:2},end:{line:1,col:7},source:''},
                 left: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 2 },
-                    end: { line: 1, col: 4 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:2},end:{line:1,col:4},source:''},
                   name: 'x'
                 },
                 right: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 6 },
-                    end: { line: 1, col: 7 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
                   name: 'y'
                 }
               },
@@ -105,11 +73,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 11 },
-            end: { line: 1, col: 12 },
-            source: ''
-          },
+          loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
           name: 'z'
         }
       }

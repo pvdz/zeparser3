@@ -237,7 +237,25 @@ async function postProcessResult({r, e, tok}, testVariant, file) {
     // Using util.inspect makes the output formatting highly tightly bound to node's formatting rules
     // At the same time, the same could be said for Prettier (although we can lock that down by package version,
     // independent from node version). However, using prettier takes roughly 23 secods, inspect half a second. Meh.
-    (r ? 'ast: ' + util.inspect(r.ast, false, null) + '\n\n' + formatTokens(r.tokens) : '')
+    (r ? 'ast: ' +
+      util
+        .inspect(r.ast, false, null)
+        // Flatten location tracking objects to a single line
+        /*
+        loc: {
+          start: { line: 1, col: 0 },
+          end: { line: 2, col: 2 },
+          source: ''
+        },
+        ->
+        loc:{start:{line:1,col:0},end:{line:2,col:2},source:''},
+        */
+        // (Test cases won't contain this as string-content so the regex should be safe)
+        .replace(
+          /loc:\s*\{\s*start:\s*\{\s*line:\s*\d+,\s*col:\s*\d+\s*}\s*,\s*end:\s*\{\s*line:\s*\d+,\s*col:\s*\d+\s*\},\s*source:\s*'[^']*'\s*}/g,
+            s => s.replace(/\s+/g, '')
+        )
+      + '\n\n' + formatTokens(r.tokens) : '')
   );
 }
 async function runTest(list, zeparser, testVariant) {
@@ -567,7 +585,7 @@ function parseTestFile(data, file, obj) {
 
     let [comment, ...code] = data.slice(1).split('###\n');
     code = code.join('###'); // unlikely
-    code = code.split('\n').map(s => s.trim()).join('\n').trim();
+    code = code.split('\n').map(s => s.trimRight()).join('\n').trim();
 
     let relfile = file.slice(file.indexOf('zeparser3'));
 

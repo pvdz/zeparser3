@@ -48,46 +48,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 8 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 2, col: 0 },
-        end: { line: 2, col: 7 },
-        source: ''
-      },
+      loc:{start:{line:2,col:0},end:{line:2,col:7},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 2, col: 0 },
-            end: { line: 2, col: 7 },
-            source: ''
-          },
+          loc:{start:{line:2,col:0},end:{line:2,col:7},source:''},
           id: {
             type: 'ObjectPattern',
-            loc: {
-              start: { line: 2, col: 0 },
-              end: { line: 2, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:2,col:0},end:{line:2,col:4},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 2, col: 1 },
-                  end: { line: 2, col: 2 },
-                  source: ''
-                },
+                loc:{start:{line:2,col:1},end:{line:2,col:2},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 2, col: 1 },
-                    end: { line: 2, col: 2 },
-                    source: ''
-                  },
+                  loc:{start:{line:2,col:1},end:{line:2,col:2},source:''},
                   name: 'x'
                 },
                 kind: 'init',
@@ -95,11 +75,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 2, col: 1 },
-                    end: { line: 2, col: 2 },
-                    source: ''
-                  },
+                  loc:{start:{line:2,col:1},end:{line:2,col:2},source:''},
                   name: 'x'
                 },
                 shorthand: true
@@ -108,11 +84,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 2, col: 6 },
-              end: { line: 2, col: 7 },
-              source: ''
-            },
+            loc:{start:{line:2,col:6},end:{line:2,col:7},source:''},
             name: 'x'
           }
         }

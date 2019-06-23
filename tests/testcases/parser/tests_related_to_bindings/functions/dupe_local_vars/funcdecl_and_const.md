@@ -59,96 +59,56 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 43 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 43 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 12 },
-          end: { line: 1, col: 43 },
-          source: ''
-        },
+        loc:{start:{line:1,col:12},end:{line:1,col:43},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 29 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:29},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 23 },
-                end: { line: 1, col: 23 },
-                source: ''
-              },
+              loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
               name: 'x'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc: {
-                start: { line: 1, col: 26 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:26},end:{line:1,col:29},source:''},
               body: []
             }
           },
           {
             type: 'VariableDeclaration',
-            loc: {
-              start: { line: 1, col: 35 },
-              end: { line: 1, col: 40 },
-              source: ''
-            },
+            loc:{start:{line:1,col:35},end:{line:1,col:40},source:''},
             kind: 'const',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc: {
-                  start: { line: 1, col: 35 },
-                  end: { line: 1, col: 40 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:35},end:{line:1,col:40},source:''},
                 id: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 35 },
-                    end: { line: 1, col: 35 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:35},end:{line:1,col:35},source:''},
                   name: 'x'
                 },
                 init: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 39 },
-                    end: { line: 1, col: 40 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:39},end:{line:1,col:40},source:''},
                   name: 'y'
                 }
               }

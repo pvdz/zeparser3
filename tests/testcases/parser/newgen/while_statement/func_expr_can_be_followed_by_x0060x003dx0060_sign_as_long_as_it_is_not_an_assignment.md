@@ -31,61 +31,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
   body: [
     {
       type: 'WhileStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 30 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
       test: {
         type: 'BinaryExpression',
-        loc: {
-          start: { line: 1, col: 7 },
-          end: { line: 1, col: 28 },
-          source: ''
-        },
+        loc:{start:{line:1,col:7},end:{line:1,col:28},source:''},
         left: {
           type: 'FunctionExpression',
-          loc: {
-            start: { line: 1, col: 7 },
-            end: { line: 1, col: 23 },
-            source: ''
-          },
+          loc:{start:{line:1,col:7},end:{line:1,col:23},source:''},
           generator: true,
           async: false,
           id: null,
           params: [],
           body: {
             type: 'BlockStatement',
-            loc: {
-              start: { line: 1, col: 20 },
-              end: { line: 1, col: 23 },
-              source: ''
-            },
+            loc:{start:{line:1,col:20},end:{line:1,col:23},source:''},
             body: []
           }
         },
         operator: '===',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 27 },
-            end: { line: 1, col: 28 },
-            source: ''
-          },
+          loc:{start:{line:1,col:27},end:{line:1,col:28},source:''},
           name: 'x'
         }
       },
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 29 },
-          end: { line: 1, col: 30 },
-          source: ''
-        }
+        loc:{start:{line:1,col:29},end:{line:1,col:30},source:''}
       }
     }
   ]

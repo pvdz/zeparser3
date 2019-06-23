@@ -29,88 +29,48 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 17 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 17 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
         left: {
           type: 'ArrayPattern',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 14 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
           elements: [
             {
               type: 'AssignmentPattern',
-              loc: {
-                start: { line: 1, col: 0 },
-                end: { line: 1, col: 12 },
-                source: ''
-              },
+              loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
               left: {
                 type: 'MemberExpression',
-                loc: {
-                  start: { line: 1, col: 0 },
-                  end: { line: 1, col: 5 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:0},end:{line:1,col:5},source:''},
                 object: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 1 },
-                    end: { line: 1, col: 2 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:1},end:{line:1,col:2},source:''},
                   name: 'x'
                 },
                 property: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 3 },
-                    end: { line: 1, col: 3 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:3},end:{line:1,col:3},source:''},
                   name: 'y'
                 },
                 computed: false
               },
               right: {
                 type: 'BinaryExpression',
-                loc: {
-                  start: { line: 1, col: 7 },
-                  end: { line: 1, col: 12 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:7},end:{line:1,col:12},source:''},
                 left: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 7 },
-                    end: { line: 1, col: 9 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:7},end:{line:1,col:9},source:''},
                   name: 'a'
                 },
                 operator: '+',
                 right: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 11 },
-                    end: { line: 1, col: 12 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
                   name: 'b'
                 }
               }
@@ -120,11 +80,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 16 },
-            end: { line: 1, col: 17 },
-            source: ''
-          },
+          loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
           name: 'z'
         }
       }

@@ -29,64 +29,36 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 28 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 28 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
       label: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 3 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
         name: 'foo'
       },
       body: {
         type: 'ForOfStatement',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 28 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:28},source:''},
         left: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 10 },
-            end: { line: 1, col: 12 },
-            source: ''
-          },
+          loc:{start:{line:1,col:10},end:{line:1,col:12},source:''},
           name: 'x'
         },
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 15 },
-            end: { line: 1, col: 16 },
-            source: ''
-          },
+          loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
           name: 'y'
         },
         await: false,
         body: {
           type: 'BreakStatement',
-          loc: {
-            start: { line: 1, col: 18 },
-            end: { line: 1, col: 28 },
-            source: ''
-          },
+          loc:{start:{line:1,col:18},end:{line:1,col:28},source:''},
           label: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 24 },
-              end: { line: 1, col: 24 },
-              source: ''
-            },
+            loc:{start:{line:1,col:24},end:{line:1,col:24},source:''},
             name: 'foo'
           }
         }

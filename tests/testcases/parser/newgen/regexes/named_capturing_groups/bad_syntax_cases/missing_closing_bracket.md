@@ -55,22 +55,14 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 8 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 8 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
       expression: {
         type: 'Literal',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 8 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
         value: null,
         regex: { pattern: '(?<aa)', flags: '' },
         raw: '/(?<aa)/'

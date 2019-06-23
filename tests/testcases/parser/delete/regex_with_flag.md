@@ -29,49 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 18 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
       expression: {
         type: 'UnaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 17 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
         operator: 'delete',
         prefix: true,
         argument: {
           type: 'MemberExpression',
-          loc: {
-            start: { line: 1, col: 7 },
-            end: { line: 1, col: 17 },
-            source: ''
-          },
+          loc:{start:{line:1,col:7},end:{line:1,col:17},source:''},
           object: {
             type: 'Literal',
-            loc: {
-              start: { line: 1, col: 7 },
-              end: { line: 1, col: 7 },
-              source: ''
-            },
+            loc:{start:{line:1,col:7},end:{line:1,col:7},source:''},
             value: null,
             regex: { pattern: 'foo', flags: 'g' },
             raw: '/foo/g'
           },
           property: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 14 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
             name: 'bar'
           },
           computed: false

@@ -28,72 +28,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 36 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 36 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 36 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
         params: [
           {
             type: 'AssignmentPattern',
-            loc: {
-              start: { line: 1, col: 1 },
-              end: { line: 1, col: 29 },
-              source: ''
-            },
+            loc:{start:{line:1,col:1},end:{line:1,col:29},source:''},
             left: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 1 },
-                end: { line: 1, col: 3 },
-                source: ''
-              },
+              loc:{start:{line:1,col:1},end:{line:1,col:3},source:''},
               name: 'x'
             },
             right: {
               type: 'UnaryExpression',
-              loc: {
-                start: { line: 1, col: 5 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:5},end:{line:1,col:29},source:''},
               operator: 'delete',
               prefix: true,
               argument: {
                 type: 'AssignmentExpression',
-                loc: {
-                  start: { line: 1, col: 13 },
-                  end: { line: 1, col: 28 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:13},end:{line:1,col:28},source:''},
                 left: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 14 },
-                    end: { line: 1, col: 23 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:14},end:{line:1,col:23},source:''},
                   name: 'protected'
                 },
                 operator: '=',
                 right: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 27 },
-                    end: { line: 1, col: 28 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:27},end:{line:1,col:28},source:''},
                   name: 'f'
                 }
               }
@@ -106,11 +74,7 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 34 },
-            end: { line: 1, col: 36 },
-            source: ''
-          },
+          loc:{start:{line:1,col:34},end:{line:1,col:36},source:''},
           body: []
         }
       }

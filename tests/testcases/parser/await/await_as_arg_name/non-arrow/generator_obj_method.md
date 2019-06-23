@@ -29,55 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 4 },
-        end: { line: 1, col: 21 },
-        source: ''
-      },
+      loc:{start:{line:1,col:4},end:{line:1,col:21},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 21 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:21},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
             name: 'o'
           },
           init: {
             type: 'ObjectExpression',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 21 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:21},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 9 },
-                  end: { line: 1, col: 20 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:9},end:{line:1,col:20},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 10 },
-                    end: { line: 1, col: 11 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
                   name: 'f'
                 },
                 kind: 'init',
@@ -85,32 +61,20 @@ ast: {
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 9 },
-                    end: { line: 1, col: 20 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:9},end:{line:1,col:20},source:''},
                   generator: true,
                   async: false,
                   id: null,
                   params: [
                     {
                       type: 'Identifier',
-                      loc: {
-                        start: { line: 1, col: 12 },
-                        end: { line: 1, col: 12 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:12},end:{line:1,col:12},source:''},
                       name: 'await'
                     }
                   ],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 18 },
-                      end: { line: 1, col: 20 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
                     body: []
                   }
                 },

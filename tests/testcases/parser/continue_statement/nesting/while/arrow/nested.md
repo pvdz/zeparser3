@@ -29,22 +29,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 46 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:46},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 46 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:46},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 46 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:46},source:''},
         params: [],
         id: null,
         generator: false,
@@ -52,52 +44,28 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 6 },
-            end: { line: 1, col: 46 },
-            source: ''
-          },
+          loc:{start:{line:1,col:6},end:{line:1,col:46},source:''},
           body: [
             {
               type: 'WhileStatement',
-              loc: {
-                start: { line: 1, col: 8 },
-                end: { line: 1, col: 45 },
-                source: ''
-              },
+              loc:{start:{line:1,col:8},end:{line:1,col:45},source:''},
               test: {
                 type: 'Literal',
-                loc: {
-                  start: { line: 1, col: 15 },
-                  end: { line: 1, col: 19 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:15},end:{line:1,col:19},source:''},
                 value: true,
                 raw: 'true'
               },
               body: {
                 type: 'IfStatement',
-                loc: {
-                  start: { line: 1, col: 27 },
-                  end: { line: 1, col: 45 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:27},end:{line:1,col:45},source:''},
                 test: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 31 },
-                    end: { line: 1, col: 32 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:31},end:{line:1,col:32},source:''},
                   name: 'x'
                 },
                 consequent: {
                   type: 'ContinueStatement',
-                  loc: {
-                    start: { line: 1, col: 34 },
-                    end: { line: 1, col: 45 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:34},end:{line:1,col:45},source:''},
                   label: null
                 },
                 alternate: null

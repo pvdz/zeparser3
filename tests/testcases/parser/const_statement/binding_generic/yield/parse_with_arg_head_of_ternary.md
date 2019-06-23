@@ -29,85 +29,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 34 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 14 },
-          end: { line: 1, col: 34 },
-          source: ''
-        },
+        loc:{start:{line:1,col:14},end:{line:1,col:34},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc: {
-              start: { line: 1, col: 16 },
-              end: { line: 1, col: 33 },
-              source: ''
-            },
+            loc:{start:{line:1,col:16},end:{line:1,col:33},source:''},
             expression: {
               type: 'ConditionalExpression',
-              loc: {
-                start: { line: 1, col: 16 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:16},end:{line:1,col:31},source:''},
               test: {
                 type: 'Literal',
-                loc: {
-                  start: { line: 1, col: 16 },
-                  end: { line: 1, col: 18 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:16},end:{line:1,col:18},source:''},
                 value: 1,
                 raw: '1'
               },
               consequent: {
                 type: 'YieldExpression',
-                loc: {
-                  start: { line: 1, col: 20 },
-                  end: { line: 1, col: 28 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:20},end:{line:1,col:28},source:''},
                 delegate: false,
                 argument: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 26 },
-                    end: { line: 1, col: 26 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:26},end:{line:1,col:26},source:''},
                   value: 2,
                   raw: '2'
                 }
               },
               alternate: {
                 type: 'Literal',
-                loc: {
-                  start: { line: 1, col: 30 },
-                  end: { line: 1, col: 30 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:30},end:{line:1,col:30},source:''},
                 value: 3,
                 raw: '3'
               }

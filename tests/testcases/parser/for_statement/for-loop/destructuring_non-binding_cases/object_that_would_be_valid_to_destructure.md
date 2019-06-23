@@ -29,37 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 12 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 12 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
       init: {
         type: 'ObjectExpression',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 8 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
         properties: [
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 7 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 6 },
-                end: { line: 1, col: 7 },
-                source: ''
-              },
+              loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
               name: 'x'
             },
             kind: 'init',
@@ -67,11 +51,7 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 6 },
-                end: { line: 1, col: 7 },
-                source: ''
-              },
+              loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
               name: 'x'
             },
             shorthand: true
@@ -82,11 +62,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 11 },
-          end: { line: 1, col: 12 },
-          source: ''
-        }
+        loc:{start:{line:1,col:11},end:{line:1,col:12},source:''}
       }
     }
   ]

@@ -29,66 +29,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 30 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'g'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 14 },
-          end: { line: 1, col: 30 },
-          source: ''
-        },
+        loc:{start:{line:1,col:14},end:{line:1,col:30},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc: {
-              start: { line: 1, col: 16 },
-              end: { line: 1, col: 29 },
-              source: ''
-            },
+            loc:{start:{line:1,col:16},end:{line:1,col:29},source:''},
             expression: {
               type: 'AssignmentExpression',
-              loc: {
-                start: { line: 1, col: 17 },
-                end: { line: 1, col: 26 },
-                source: ''
-              },
+              loc:{start:{line:1,col:17},end:{line:1,col:26},source:''},
               left: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 17 },
-                  end: { line: 1, col: 19 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
                 name: 'x'
               },
               operator: '=',
               right: {
                 type: 'YieldExpression',
-                loc: {
-                  start: { line: 1, col: 21 },
-                  end: { line: 1, col: 26 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:21},end:{line:1,col:26},source:''},
                 delegate: false,
                 argument: null
               }

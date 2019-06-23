@@ -29,46 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 6 },
-        end: { line: 1, col: 22 },
-        source: ''
-      },
+      loc:{start:{line:1,col:6},end:{line:1,col:22},source:''},
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 6 },
-            end: { line: 1, col: 22 },
-            source: ''
-          },
+          loc:{start:{line:1,col:6},end:{line:1,col:22},source:''},
           id: {
             type: 'ObjectPattern',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 19 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:19},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 7 },
-                  end: { line: 1, col: 17 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:7},end:{line:1,col:17},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 8 },
-                    end: { line: 1, col: 9 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
                   name: 'x'
                 },
                 kind: 'init',
@@ -76,27 +56,15 @@ ast: {
                 computed: true,
                 value: {
                   type: 'AssignmentPattern',
-                  loc: {
-                    start: { line: 1, col: 12 },
-                    end: { line: 1, col: 17 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:12},end:{line:1,col:17},source:''},
                   left: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 12 },
-                      end: { line: 1, col: 14 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:12},end:{line:1,col:14},source:''},
                     name: 'y'
                   },
                   right: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 16 },
-                      end: { line: 1, col: 17 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
                     name: 'z'
                   }
                 },
@@ -106,11 +74,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 21 },
-              end: { line: 1, col: 22 },
-              source: ''
-            },
+            loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
             name: 'a'
           }
         }

@@ -28,63 +28,35 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 16 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 16 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
         params: [
           {
             type: 'AssignmentPattern',
-            loc: {
-              start: { line: 1, col: 1 },
-              end: { line: 1, col: 8 },
-              source: ''
-            },
+            loc:{start:{line:1,col:1},end:{line:1,col:8},source:''},
             left: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 1 },
-                end: { line: 1, col: 2 },
-                source: ''
-              },
+              loc:{start:{line:1,col:1},end:{line:1,col:2},source:''},
               name: 'x'
             },
             right: {
               type: 'AssignmentExpression',
-              loc: {
-                start: { line: 1, col: 3 },
-                end: { line: 1, col: 8 },
-                source: ''
-              },
+              loc:{start:{line:1,col:3},end:{line:1,col:8},source:''},
               left: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 3 },
-                  end: { line: 1, col: 5 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:3},end:{line:1,col:5},source:''},
                 name: 'ok'
               },
               operator: '=',
               right: {
                 type: 'Literal',
-                loc: {
-                  start: { line: 1, col: 6 },
-                  end: { line: 1, col: 6 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
                 value: 10,
                 raw: '10'
               }
@@ -97,11 +69,7 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 13 },
-            end: { line: 1, col: 16 },
-            source: ''
-          },
+          loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
           body: []
         }
       }

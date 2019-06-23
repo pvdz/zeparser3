@@ -29,37 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 19 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 19 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc: {
-          start: { line: 1, col: 1 },
-          end: { line: 1, col: 18 },
-          source: ''
-        },
+        loc:{start:{line:1,col:1},end:{line:1,col:18},source:''},
         properties: [
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 2 },
-              end: { line: 1, col: 17 },
-              source: ''
-            },
+            loc:{start:{line:1,col:2},end:{line:1,col:17},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 2 },
-                end: { line: 1, col: 5 },
-                source: ''
-              },
+              loc:{start:{line:1,col:2},end:{line:1,col:5},source:''},
               name: 'foo'
             },
             kind: 'init',
@@ -67,30 +51,18 @@ ast: {
             computed: false,
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 2 },
-                end: { line: 1, col: 17 },
-                source: ''
-              },
+              loc:{start:{line:1,col:2},end:{line:1,col:17},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 7 },
-                  end: { line: 1, col: 17 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:7},end:{line:1,col:17},source:''},
                 body: [
                   {
                     type: 'ReturnStatement',
-                    loc: {
-                      start: { line: 1, col: 9 },
-                      end: { line: 1, col: 16 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:9},end:{line:1,col:16},source:''},
                     argument: null
                   }
                 ]

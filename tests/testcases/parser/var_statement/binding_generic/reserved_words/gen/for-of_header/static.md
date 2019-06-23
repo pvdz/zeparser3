@@ -28,38 +28,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
   body: [
     {
       type: 'ForOfStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 22 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 16 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:16},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 16 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:16},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 9 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
               name: 'static'
             },
             init: null
@@ -68,21 +52,13 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 19 },
-          end: { line: 1, col: 20 },
-          source: ''
-        },
+        loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
         name: 'y'
       },
       await: false,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 21 },
-          end: { line: 1, col: 22 },
-          source: ''
-        }
+        loc:{start:{line:1,col:21},end:{line:1,col:22},source:''}
       }
     }
   ]

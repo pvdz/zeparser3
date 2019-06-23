@@ -60,69 +60,41 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 65 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:65},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 48 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'protected'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 20 },
-          end: { line: 1, col: 48 },
-          source: ''
-        },
+        loc:{start:{line:1,col:20},end:{line:1,col:48},source:''},
         body: [
           {
             type: 'ForStatement',
-            loc: {
-              start: { line: 1, col: 21 },
-              end: { line: 1, col: 47 },
-              source: ''
-            },
+            loc:{start:{line:1,col:21},end:{line:1,col:47},source:''},
             init: null,
             test: null,
             update: null,
             body: {
               type: 'SwitchStatement',
-              loc: {
-                start: { line: 1, col: 28 },
-                end: { line: 1, col: 47 },
-                source: ''
-              },
+              loc:{start:{line:1,col:28},end:{line:1,col:47},source:''},
               discriminant: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 35 },
-                  end: { line: 1, col: 36 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:35},end:{line:1,col:36},source:''},
                 name: 'x'
               },
               cases: [
                 {
                   type: 'SwitchCase',
-                  loc: {
-                    start: { line: 1, col: 38 },
-                    end: { line: 1, col: 46 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:38},end:{line:1,col:46},source:''},
                   test: null,
                   consequent: []
                 }
@@ -134,36 +106,20 @@ ast: {
     },
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 54 },
-        end: { line: 1, col: 65 },
-        source: ''
-      },
+      loc:{start:{line:1,col:54},end:{line:1,col:65},source:''},
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 54 },
-            end: { line: 1, col: 65 },
-            source: ''
-          },
+          loc:{start:{line:1,col:54},end:{line:1,col:65},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 54 },
-              end: { line: 1, col: 54 },
-              source: ''
-            },
+            loc:{start:{line:1,col:54},end:{line:1,col:54},source:''},
             name: 'protected'
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 64 },
-              end: { line: 1, col: 65 },
-              source: ''
-            },
+            loc:{start:{line:1,col:64},end:{line:1,col:65},source:''},
             name: 'x'
           }
         }

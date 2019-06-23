@@ -32,50 +32,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 8 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 2, col: 1 },
-        end: { line: 2, col: 8 },
-        source: ''
-      },
+      loc:{start:{line:2,col:1},end:{line:2,col:8},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 2, col: 1 },
-            end: { line: 2, col: 8 },
-            source: ''
-          },
+          loc:{start:{line:2,col:1},end:{line:2,col:8},source:''},
           id: {
             type: 'ArrayPattern',
-            loc: {
-              start: { line: 2, col: 1 },
-              end: { line: 2, col: 5 },
-              source: ''
-            },
+            loc:{start:{line:2,col:1},end:{line:2,col:5},source:''},
             elements: [
               {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 2, col: 2 },
-                  end: { line: 2, col: 3 },
-                  source: ''
-                },
+                loc:{start:{line:2,col:2},end:{line:2,col:3},source:''},
                 name: 'x'
               }
             ]
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 2, col: 7 },
-              end: { line: 2, col: 8 },
-              source: ''
-            },
+            loc:{start:{line:2,col:7},end:{line:2,col:8},source:''},
             name: 'y'
           }
         }

@@ -29,94 +29,54 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 52 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:52},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 6 },
-        end: { line: 1, col: 52 },
-        source: ''
-      },
+      loc:{start:{line:1,col:6},end:{line:1,col:52},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 15 },
-          end: { line: 1, col: 15 },
-          source: ''
-        },
+        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 1, col: 52 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:1,col:52},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc: {
-              start: { line: 1, col: 23 },
-              end: { line: 1, col: 51 },
-              source: ''
-            },
+            loc:{start:{line:1,col:23},end:{line:1,col:51},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 32 },
-                end: { line: 1, col: 32 },
-                source: ''
-              },
+              loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
               name: 'g'
             },
             params: [
               {
                 type: 'AssignmentPattern',
-                loc: {
-                  start: { line: 1, col: 34 },
-                  end: { line: 1, col: 45 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:34},end:{line:1,col:45},source:''},
                 left: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 34 },
-                    end: { line: 1, col: 34 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
                   name: 'x'
                 },
                 right: {
                   type: 'AssignmentExpression',
-                  loc: {
-                    start: { line: 1, col: 36 },
-                    end: { line: 1, col: 45 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:36},end:{line:1,col:45},source:''},
                   left: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 37 },
-                      end: { line: 1, col: 42 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:37},end:{line:1,col:42},source:''},
                     name: 'await'
                   },
                   operator: '=',
                   right: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 44 },
-                      end: { line: 1, col: 45 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:44},end:{line:1,col:45},source:''},
                     name: 'y'
                   }
                 }
@@ -124,11 +84,7 @@ ast: {
             ],
             body: {
               type: 'BlockStatement',
-              loc: {
-                start: { line: 1, col: 46 },
-                end: { line: 1, col: 51 },
-                source: ''
-              },
+              loc:{start:{line:1,col:46},end:{line:1,col:51},source:''},
               body: []
             }
           }

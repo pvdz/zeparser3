@@ -31,37 +31,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 21 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
       left: {
         type: 'ObjectPattern',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 14 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:14},source:''},
         properties: [
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 12 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:12},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 6 },
-                end: { line: 1, col: 9 },
-                source: ''
-              },
+              loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
               name: 'a'
             },
             kind: 'init',
@@ -69,27 +53,15 @@ ast: {
             computed: false,
             value: {
               type: 'MemberExpression',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 12 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:12},source:''},
               object: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 9 },
-                  end: { line: 1, col: 10 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:9},end:{line:1,col:10},source:''},
                 name: 'b'
               },
               property: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 11 },
-                  end: { line: 1, col: 11 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
                 name: 'c'
               },
               computed: false
@@ -100,27 +72,15 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 17 },
-          end: { line: 1, col: 18 },
-          source: ''
-        },
+        loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
         name: 'd'
       },
       body: {
         type: 'ExpressionStatement',
-        loc: {
-          start: { line: 1, col: 20 },
-          end: { line: 1, col: 21 },
-          source: ''
-        },
+        loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
         expression: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 20 },
-            end: { line: 1, col: 21 },
-            source: ''
-          },
+          loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
           name: 'e'
         }
       }

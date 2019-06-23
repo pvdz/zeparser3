@@ -47,94 +47,54 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 39 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 39 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 13 },
-          end: { line: 1, col: 38 },
-          source: ''
-        },
+        loc:{start:{line:1,col:13},end:{line:1,col:38},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 13 },
-              end: { line: 1, col: 24 },
-              source: ''
-            },
+            loc:{start:{line:1,col:13},end:{line:1,col:24},source:''},
             id: {
               type: 'ArrayPattern',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 19 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:19},source:''},
               elements: [
                 {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 14 },
-                    end: { line: 1, col: 17 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:14},end:{line:1,col:17},source:''},
                   name: 'foo'
                 }
               ]
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 21 },
-                end: { line: 1, col: 24 },
-                source: ''
-              },
+              loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
               name: 'arr'
             }
           },
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 26 },
-              end: { line: 1, col: 38 },
-              source: ''
-            },
+            loc:{start:{line:1,col:26},end:{line:1,col:38},source:''},
             id: {
               type: 'ArrayPattern',
-              loc: {
-                start: { line: 1, col: 26 },
-                end: { line: 1, col: 32 },
-                source: ''
-              },
+              loc:{start:{line:1,col:26},end:{line:1,col:32},source:''},
               elements: [
                 {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 27 },
-                    end: { line: 1, col: 30 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:27},end:{line:1,col:30},source:''},
                   name: 'bar'
                 }
               ]
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 34 },
-                end: { line: 1, col: 38 },
-                source: ''
-              },
+              loc:{start:{line:1,col:34},end:{line:1,col:38},source:''},
               name: 'arr2'
             }
           }

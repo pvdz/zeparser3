@@ -28,67 +28,39 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 22 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'e'
       },
       params: [
         {
           type: 'AssignmentPattern',
-          loc: {
-            start: { line: 1, col: 11 },
-            end: { line: 1, col: 18 },
-            source: ''
-          },
+          loc:{start:{line:1,col:11},end:{line:1,col:18},source:''},
           left: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 11 },
-              end: { line: 1, col: 11 },
-              source: ''
-            },
+            loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
             name: 'x'
           },
           right: {
             type: 'AssignmentExpression',
-            loc: {
-              start: { line: 1, col: 13 },
-              end: { line: 1, col: 18 },
-              source: ''
-            },
+            loc:{start:{line:1,col:13},end:{line:1,col:18},source:''},
             left: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 15 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:15},source:''},
               name: 'ok'
             },
             operator: '=',
             right: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 16 },
-                end: { line: 1, col: 16 },
-                source: ''
-              },
+              loc:{start:{line:1,col:16},end:{line:1,col:16},source:''},
               value: 10,
               raw: '10'
             }
@@ -97,11 +69,7 @@ ast: {
       ],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 19 },
-          end: { line: 1, col: 22 },
-          source: ''
-        },
+        loc:{start:{line:1,col:19},end:{line:1,col:22},source:''},
         body: []
       }
     }

@@ -47,39 +47,23 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 22 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
       specifiers: [
         {
           type: 'ExportSpecifier',
-          loc: {
-            start: { line: 1, col: 8 },
-            end: { line: 1, col: 10 },
-            source: ''
-          },
+          loc:{start:{line:1,col:8},end:{line:1,col:10},source:''},
           local: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 8 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:8},source:''},
             name: 'x'
           },
           exported: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 9 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
             name: 'x'
           }
         }
@@ -87,11 +71,7 @@ ast: {
       declaration: null,
       source: {
         type: 'Literal',
-        loc: {
-          start: { line: 1, col: 17 },
-          end: { line: 1, col: 17 },
-          source: ''
-        },
+        loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
         value: 'foo',
         raw: '"foo"'
       }

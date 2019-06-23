@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 14 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 14 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
       expression: {
         type: 'CallExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 14 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
         callee: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
           name: 'func'
         },
         arguments: [
           {
             type: 'ArrowFunctionExpression',
-            loc: {
-              start: { line: 1, col: 5 },
-              end: { line: 1, col: 11 },
-              source: ''
-            },
+            loc:{start:{line:1,col:5},end:{line:1,col:11},source:''},
             params: [
               {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 5 },
-                  end: { line: 1, col: 7 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:5},end:{line:1,col:7},source:''},
                 name: '_'
               }
             ],
@@ -79,21 +59,13 @@ ast: {
             expression: true,
             body: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 10 },
-                end: { line: 1, col: 11 },
-                source: ''
-              },
+              loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
               name: 'a'
             }
           },
           {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 12 },
-              end: { line: 1, col: 13 },
-              source: ''
-            },
+            loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
             name: 'b'
           }
         ]

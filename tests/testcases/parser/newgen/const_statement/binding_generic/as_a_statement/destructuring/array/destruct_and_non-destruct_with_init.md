@@ -29,76 +29,44 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 6 },
-        end: { line: 1, col: 29 },
-        source: ''
-      },
+      loc:{start:{line:1,col:6},end:{line:1,col:29},source:''},
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 6 },
-            end: { line: 1, col: 17 },
-            source: ''
-          },
+          loc:{start:{line:1,col:6},end:{line:1,col:17},source:''},
           id: {
             type: 'ArrayPattern',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 12 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:12},source:''},
             elements: [
               {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 7 },
-                  end: { line: 1, col: 10 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:7},end:{line:1,col:10},source:''},
                 name: 'foo'
               }
             ]
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 17 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:17},source:''},
             name: 'arr'
           }
         },
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 19 },
-            end: { line: 1, col: 29 },
-            source: ''
-          },
+          loc:{start:{line:1,col:19},end:{line:1,col:29},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 19 },
-              end: { line: 1, col: 19 },
-              source: ''
-            },
+            loc:{start:{line:1,col:19},end:{line:1,col:19},source:''},
             name: 'bar'
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 25 },
-              end: { line: 1, col: 29 },
-              source: ''
-            },
+            loc:{start:{line:1,col:25},end:{line:1,col:29},source:''},
             name: 'arr2'
           }
         }

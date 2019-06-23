@@ -29,38 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 20 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 12 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:12},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 12 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:12},source:''},
             id: {
               type: 'ObjectPattern',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 12 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:12},source:''},
               properties: []
             },
             init: null
@@ -69,20 +53,12 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 15 },
-          end: { line: 1, col: 18 },
-          source: ''
-        },
+        loc:{start:{line:1,col:15},end:{line:1,col:18},source:''},
         name: 'obj'
       },
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 19 },
-          end: { line: 1, col: 20 },
-          source: ''
-        }
+        loc:{start:{line:1,col:19},end:{line:1,col:20},source:''}
       }
     }
   ]

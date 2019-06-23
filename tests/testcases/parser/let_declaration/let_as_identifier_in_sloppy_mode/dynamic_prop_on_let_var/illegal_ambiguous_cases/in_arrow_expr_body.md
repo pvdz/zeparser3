@@ -47,30 +47,18 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 14 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 14 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 13 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
         params: [
           {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 1, col: 2 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
             name: '_'
           }
         ],
@@ -80,27 +68,15 @@ ast: {
         expression: true,
         body: {
           type: 'MemberExpression',
-          loc: {
-            start: { line: 1, col: 5 },
-            end: { line: 1, col: 13 },
-            source: ''
-          },
+          loc:{start:{line:1,col:5},end:{line:1,col:13},source:''},
           object: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 5 },
-              end: { line: 1, col: 8 },
-              source: ''
-            },
+            loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
             name: 'let'
           },
           property: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 12 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:12},source:''},
             name: 'foo'
           },
           computed: true

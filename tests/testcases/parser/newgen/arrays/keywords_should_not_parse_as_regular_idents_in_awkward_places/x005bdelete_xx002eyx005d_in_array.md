@@ -29,55 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 12 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 12 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
       expression: {
         type: 'ArrayExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 12 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
         elements: [
           {
             type: 'UnaryExpression',
-            loc: {
-              start: { line: 1, col: 1 },
-              end: { line: 1, col: 11 },
-              source: ''
-            },
+            loc:{start:{line:1,col:1},end:{line:1,col:11},source:''},
             operator: 'delete',
             prefix: true,
             argument: {
               type: 'MemberExpression',
-              loc: {
-                start: { line: 1, col: 8 },
-                end: { line: 1, col: 11 },
-                source: ''
-              },
+              loc:{start:{line:1,col:8},end:{line:1,col:11},source:''},
               object: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 8 },
-                  end: { line: 1, col: 9 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
                 name: 'x'
               },
               property: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 10 },
-                  end: { line: 1, col: 10 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
                 name: 'y'
               },
               computed: false

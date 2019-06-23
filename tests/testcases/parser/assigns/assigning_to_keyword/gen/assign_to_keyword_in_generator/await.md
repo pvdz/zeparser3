@@ -30,66 +30,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 3, col: 1 } },
+  loc:{start:{line:1,col:0},end:{line:3,col:1},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 3, col: 1 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:3,col:1},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 13 },
-          end: { line: 3, col: 1 },
-          source: ''
-        },
+        loc:{start:{line:1,col:13},end:{line:3,col:1},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc: {
-              start: { line: 2, col: 2 },
-              end: { line: 3, col: 0 },
-              source: ''
-            },
+            loc:{start:{line:2,col:2},end:{line:3,col:0},source:''},
             expression: {
               type: 'AssignmentExpression',
-              loc: {
-                start: { line: 2, col: 2 },
-                end: { line: 2, col: 11 },
-                source: ''
-              },
+              loc:{start:{line:2,col:2},end:{line:2,col:11},source:''},
               left: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 2, col: 2 },
-                  end: { line: 2, col: 8 },
-                  source: ''
-                },
+                loc:{start:{line:2,col:2},end:{line:2,col:8},source:''},
                 name: 'await'
               },
               operator: '=',
               right: {
                 type: 'Literal',
-                loc: {
-                  start: { line: 2, col: 10 },
-                  end: { line: 2, col: 10 },
-                  source: ''
-                },
+                loc:{start:{line:2,col:10},end:{line:2,col:10},source:''},
                 value: 1,
                 raw: '1'
               }

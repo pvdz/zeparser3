@@ -47,39 +47,23 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 12 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
       specifiers: [
         {
           type: 'ExportSpecifier',
-          loc: {
-            start: { line: 1, col: 8 },
-            end: { line: 1, col: 9 },
-            source: ''
-          },
+          loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
           local: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 8 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:8},source:''},
             name: 'x'
           },
           exported: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 9 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
             name: 'x'
           }
         }
@@ -89,27 +73,15 @@ ast: {
     },
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 16 },
-        end: { line: 1, col: 17 },
-        source: ''
-      },
+      loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 16 },
-            end: { line: 1, col: 17 },
-            source: ''
-          },
+          loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 16 },
-              end: { line: 1, col: 16 },
-              source: ''
-            },
+            loc:{start:{line:1,col:16},end:{line:1,col:16},source:''},
             name: 'x'
           },
           init: null

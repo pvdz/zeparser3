@@ -30,48 +30,28 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 8 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 2, col: 1 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:2,col:1},source:''},
       label: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 5 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:5},source:''},
         name: 'async'
       },
       body: {
         type: 'ForStatement',
-        loc: {
-          start: { line: 1, col: 7 },
-          end: { line: 2, col: 1 },
-          source: ''
-        },
+        loc:{start:{line:1,col:7},end:{line:2,col:1},source:''},
         init: null,
         test: null,
         update: null,
         body: {
           type: 'ContinueStatement',
-          loc: {
-            start: { line: 1, col: 16 },
-            end: { line: 2, col: 1 },
-            source: ''
-          },
+          loc:{start:{line:1,col:16},end:{line:2,col:1},source:''},
           label: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 25 },
-              end: { line: 1, col: 25 },
-              source: ''
-            },
+            loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
             name: 'async'
           }
         }
@@ -79,18 +59,10 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 2, col: 1 },
-        end: { line: 2, col: 8 },
-        source: ''
-      },
+      loc:{start:{line:2,col:1},end:{line:2,col:8},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 2, col: 1 },
-          end: { line: 2, col: 8 },
-          source: ''
-        },
+        loc:{start:{line:2,col:1},end:{line:2,col:8},source:''},
         params: [],
         id: null,
         generator: false,
@@ -98,11 +70,7 @@ ast: {
         expression: true,
         body: {
           type: 'Identifier',
-          loc: {
-            start: { line: 2, col: 7 },
-            end: { line: 2, col: 8 },
-            source: ''
-          },
+          loc:{start:{line:2,col:7},end:{line:2,col:8},source:''},
           name: 'x'
         }
       }

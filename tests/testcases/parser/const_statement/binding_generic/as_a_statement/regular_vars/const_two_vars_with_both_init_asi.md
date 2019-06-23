@@ -29,66 +29,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 26 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 6 },
-        end: { line: 1, col: 26 },
-        source: ''
-      },
+      loc:{start:{line:1,col:6},end:{line:1,col:26},source:''},
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 6 },
-            end: { line: 1, col: 15 },
-            source: ''
-          },
+          loc:{start:{line:1,col:6},end:{line:1,col:15},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 6 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
             name: 'foo'
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 12 },
-              end: { line: 1, col: 15 },
-              source: ''
-            },
+            loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
             name: 'bar'
           }
         },
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 17 },
-            end: { line: 1, col: 26 },
-            source: ''
-          },
+          loc:{start:{line:1,col:17},end:{line:1,col:26},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 17 },
-              end: { line: 1, col: 17 },
-              source: ''
-            },
+            loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
             name: 'zoo'
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 23 },
-              end: { line: 1, col: 26 },
-              source: ''
-            },
+            loc:{start:{line:1,col:23},end:{line:1,col:26},source:''},
             name: 'boo'
           }
         }

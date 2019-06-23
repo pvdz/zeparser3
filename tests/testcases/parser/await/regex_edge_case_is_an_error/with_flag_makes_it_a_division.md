@@ -30,92 +30,52 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 8 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 6 },
-        end: { line: 2, col: 8 },
-        source: ''
-      },
+      loc:{start:{line:1,col:6},end:{line:2,col:8},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 15 },
-          end: { line: 1, col: 15 },
-          source: ''
-        },
+        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 2, col: 8 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:2,col:8},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc: {
-              start: { line: 1, col: 20 },
-              end: { line: 2, col: 7 },
-              source: ''
-            },
+            loc:{start:{line:1,col:20},end:{line:2,col:7},source:''},
             expression: {
               type: 'BinaryExpression',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 2, col: 7 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:2,col:7},source:''},
               left: {
                 type: 'BinaryExpression',
-                loc: {
-                  start: { line: 1, col: 20 },
-                  end: { line: 2, col: 4 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:20},end:{line:2,col:4},source:''},
                 left: {
                   type: 'AwaitExpression',
-                  loc: {
-                    start: { line: 1, col: 20 },
-                    end: { line: 2, col: 0 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:20},end:{line:2,col:0},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 26 },
-                      end: { line: 2, col: 0 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:26},end:{line:2,col:0},source:''},
                     name: 'foo'
                   }
                 },
                 operator: '/',
                 right: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 2, col: 1 },
-                    end: { line: 2, col: 4 },
-                    source: ''
-                  },
+                  loc:{start:{line:2,col:1},end:{line:2,col:4},source:''},
                   name: 'foo'
                 }
               },
               operator: '/',
               right: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 2, col: 5 },
-                  end: { line: 2, col: 7 },
-                  source: ''
-                },
+                loc:{start:{line:2,col:5},end:{line:2,col:7},source:''},
                 name: 'g'
               }
             }

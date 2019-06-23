@@ -31,45 +31,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 43 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 43 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 42 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:42},source:''},
         params: [
           {
             type: 'ObjectPattern',
-            loc: {
-              start: { line: 1, col: 7 },
-              end: { line: 1, col: 36 },
-              source: ''
-            },
+            loc:{start:{line:1,col:7},end:{line:1,col:36},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 9 },
-                  end: { line: 1, col: 21 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:9},end:{line:1,col:21},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 9 },
-                    end: { line: 1, col: 20 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:9},end:{line:1,col:20},source:''},
                   name: '__proto__'
                 },
                 kind: 'init',
@@ -77,29 +57,17 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 20 },
-                    end: { line: 1, col: 21 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
                   name: 'x'
                 },
                 shorthand: false
               },
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 23 },
-                  end: { line: 1, col: 35 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:23},end:{line:1,col:35},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 23 },
-                    end: { line: 1, col: 34 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:23},end:{line:1,col:34},source:''},
                   name: '__proto__'
                 },
                 kind: 'init',
@@ -107,11 +75,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 34 },
-                    end: { line: 1, col: 35 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:34},end:{line:1,col:35},source:''},
                   name: 'y'
                 },
                 shorthand: false
@@ -125,11 +89,7 @@ ast: {
         expression: true,
         body: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 41 },
-            end: { line: 1, col: 42 },
-            source: ''
-          },
+          loc:{start:{line:1,col:41},end:{line:1,col:42},source:''},
           name: 'x'
         }
       }

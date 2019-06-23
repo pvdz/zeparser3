@@ -50,39 +50,23 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 3 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:3},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 2, col: 3 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:2,col:3},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 2, col: 0 },
-          end: { line: 2, col: 3 },
-          source: ''
-        },
+        loc:{start:{line:2,col:0},end:{line:2,col:3},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 2, col: 0 },
-              end: { line: 2, col: 3 },
-              source: ''
-            },
+            loc:{start:{line:2,col:0},end:{line:2,col:3},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 2, col: 0 },
-                end: { line: 2, col: 0 },
-                source: ''
-              },
+              loc:{start:{line:2,col:0},end:{line:2,col:0},source:''},
               name: 'foo'
             },
             init: null

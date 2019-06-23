@@ -28,47 +28,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 35 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 35 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'x'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 35 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:35},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 34 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:34},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:29},source:''},
               name: 'protected'
             },
             static: true,
@@ -76,32 +56,20 @@ ast: {
             kind: 'set',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 34 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:34},source:''},
               generator: false,
               async: false,
               id: null,
               params: [
                 {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 30 },
-                    end: { line: 1, col: 30 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:30},end:{line:1,col:30},source:''},
                   name: 'x'
                 }
               ],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 32 },
-                  end: { line: 1, col: 34 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:32},end:{line:1,col:34},source:''},
                 body: []
               }
             }

@@ -29,54 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 27 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
       label: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 3 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
         name: 'foo'
       },
       body: {
         type: 'WhileStatement',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 27 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:27},source:''},
         test: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 12 },
-            end: { line: 1, col: 13 },
-            source: ''
-          },
+          loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
           name: 'x'
         },
         body: {
           type: 'ContinueStatement',
-          loc: {
-            start: { line: 1, col: 15 },
-            end: { line: 1, col: 27 },
-            source: ''
-          },
+          loc:{start:{line:1,col:15},end:{line:1,col:27},source:''},
           label: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 24 },
-              end: { line: 1, col: 24 },
-              source: ''
-            },
+            loc:{start:{line:1,col:24},end:{line:1,col:24},source:''},
             name: 'foo'
           }
         }

@@ -33,31 +33,19 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 4 },
-        end: { line: 1, col: 5 },
-        source: ''
-      },
+      loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 5 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
             name: 'x'
           },
           init: null
@@ -66,35 +54,19 @@ ast: {
     },
     {
       type: 'BlockStatement',
-      loc: {
-        start: { line: 1, col: 7 },
-        end: { line: 1, col: 17 },
-        source: ''
-      },
+      loc:{start:{line:1,col:7},end:{line:1,col:17},source:''},
       body: [
         {
           type: 'VariableDeclaration',
-          loc: {
-            start: { line: 1, col: 13 },
-            end: { line: 1, col: 14 },
-            source: ''
-          },
+          loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
           kind: 'let',
           declarations: [
             {
               type: 'VariableDeclarator',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 14 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
               id: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 13 },
-                  end: { line: 1, col: 13 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
                 name: 'x'
               },
               init: null

@@ -29,30 +29,18 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 16 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
       init: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 12 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:12},source:''},
         params: [
           {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 7 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
             name: 'x'
           }
         ],
@@ -62,11 +50,7 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 10 },
-            end: { line: 1, col: 12 },
-            source: ''
-          },
+          loc:{start:{line:1,col:10},end:{line:1,col:12},source:''},
           body: []
         }
       },
@@ -74,11 +58,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 15 },
-          end: { line: 1, col: 16 },
-          source: ''
-        }
+        loc:{start:{line:1,col:15},end:{line:1,col:16},source:''}
       }
     }
   ]

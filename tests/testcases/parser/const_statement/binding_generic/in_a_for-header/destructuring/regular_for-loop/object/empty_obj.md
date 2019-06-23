@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 23 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 23 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 11 },
-          end: { line: 1, col: 19 },
-          source: ''
-        },
+        loc:{start:{line:1,col:11},end:{line:1,col:19},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 11 },
-              end: { line: 1, col: 19 },
-              source: ''
-            },
+            loc:{start:{line:1,col:11},end:{line:1,col:19},source:''},
             id: {
               type: 'ObjectPattern',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 14 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
               properties: []
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 16 },
-                end: { line: 1, col: 19 },
-                source: ''
-              },
+              loc:{start:{line:1,col:16},end:{line:1,col:19},source:''},
               name: 'obj'
             }
           }
@@ -79,11 +59,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 22 },
-          end: { line: 1, col: 23 },
-          source: ''
-        }
+        loc:{start:{line:1,col:22},end:{line:1,col:23},source:''}
       }
     }
   ]

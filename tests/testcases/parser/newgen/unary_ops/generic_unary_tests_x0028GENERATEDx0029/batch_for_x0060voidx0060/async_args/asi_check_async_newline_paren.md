@@ -30,66 +30,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 4 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:4},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 4 },
-        end: { line: 2, col: 4 },
-        source: ''
-      },
+      loc:{start:{line:1,col:4},end:{line:2,col:4},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 2, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:2,col:4},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
             name: 'x'
           },
           init: {
             type: 'UnaryExpression',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 2, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:2,col:4},source:''},
             operator: 'void',
             prefix: true,
             argument: {
               type: 'CallExpression',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 2, col: 4 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:2,col:4},source:''},
               callee: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 13 },
-                  end: { line: 2, col: 4 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:13},end:{line:2,col:4},source:''},
                 name: 'async'
               },
               arguments: [
                 {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 2, col: 2 },
-                    end: { line: 2, col: 3 },
-                    source: ''
-                  },
+                  loc:{start:{line:2,col:2},end:{line:2,col:3},source:''},
                   name: 'x'
                 }
               ]

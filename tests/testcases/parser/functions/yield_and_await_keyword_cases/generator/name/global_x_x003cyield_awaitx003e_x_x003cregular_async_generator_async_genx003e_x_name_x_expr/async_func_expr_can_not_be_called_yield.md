@@ -48,86 +48,50 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 51 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:51},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 51 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:51},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 14 },
-          end: { line: 1, col: 51 },
-          source: ''
-        },
+        loc:{start:{line:1,col:14},end:{line:1,col:51},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc: {
-              start: { line: 1, col: 20 },
-              end: { line: 1, col: 50 },
-              source: ''
-            },
+            loc:{start:{line:1,col:20},end:{line:1,col:50},source:''},
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc: {
-                  start: { line: 1, col: 20 },
-                  end: { line: 1, col: 50 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:20},end:{line:1,col:50},source:''},
                 id: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 20 },
-                    end: { line: 1, col: 20 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
                   name: 'f'
                 },
                 init: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 30 },
-                    end: { line: 1, col: 50 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:30},end:{line:1,col:50},source:''},
                   generator: false,
                   async: true,
                   id: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 39 },
-                      end: { line: 1, col: 39 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:39},end:{line:1,col:39},source:''},
                     name: 'yield'
                   },
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 47 },
-                      end: { line: 1, col: 50 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:47},end:{line:1,col:50},source:''},
                     body: []
                   }
                 }

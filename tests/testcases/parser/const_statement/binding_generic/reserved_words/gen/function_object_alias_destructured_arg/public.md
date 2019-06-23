@@ -28,49 +28,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 28 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 28 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [
         {
           type: 'ObjectPattern',
-          loc: {
-            start: { line: 1, col: 11 },
-            end: { line: 1, col: 24 },
-            source: ''
-          },
+          loc:{start:{line:1,col:11},end:{line:1,col:24},source:''},
           properties: [
             {
               type: 'Property',
-              loc: {
-                start: { line: 1, col: 12 },
-                end: { line: 1, col: 23 },
-                source: ''
-              },
+              loc:{start:{line:1,col:12},end:{line:1,col:23},source:''},
               key: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 12 },
-                  end: { line: 1, col: 17 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:12},end:{line:1,col:17},source:''},
                 name: 'abc'
               },
               kind: 'init',
@@ -78,11 +58,7 @@ ast: {
               computed: false,
               value: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 17 },
-                  end: { line: 1, col: 23 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:17},end:{line:1,col:23},source:''},
                 name: 'public'
               },
               shorthand: false
@@ -92,11 +68,7 @@ ast: {
       ],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 26 },
-          end: { line: 1, col: 28 },
-          source: ''
-        },
+        loc:{start:{line:1,col:26},end:{line:1,col:28},source:''},
         body: []
       }
     }

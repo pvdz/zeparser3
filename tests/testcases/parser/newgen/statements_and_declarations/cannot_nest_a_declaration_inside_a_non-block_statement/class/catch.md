@@ -29,72 +29,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:32},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 32 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:32},source:''},
       block: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 4 },
-          end: { line: 1, col: 8 },
-          source: ''
-        },
+        loc:{start:{line:1,col:4},end:{line:1,col:8},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 32 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:32},source:''},
         param: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 15 },
-            end: { line: 1, col: 15 },
-            source: ''
-          },
+          loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
           name: 'e'
         },
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 18 },
-            end: { line: 1, col: 32 },
-            source: ''
-          },
+          loc:{start:{line:1,col:18},end:{line:1,col:32},source:''},
           body: [
             {
               type: 'ClassDeclaration',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:31},source:''},
               id: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 26 },
-                  end: { line: 1, col: 26 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:26},end:{line:1,col:26},source:''},
                 name: 'X'
               },
               superClass: null,
               body: {
                 type: 'ClassBody',
-                loc: {
-                  start: { line: 1, col: 28 },
-                  end: { line: 1, col: 31 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:28},end:{line:1,col:31},source:''},
                 body: []
               }
             }

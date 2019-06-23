@@ -28,22 +28,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 24 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 14 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
       expression: {
         type: 'Literal',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 0 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:0},source:''},
         value: 'use strict',
         raw: '"use strict"'
       },
@@ -51,35 +43,19 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 14 },
-        end: { line: 1, col: 24 },
-        source: ''
-      },
+      loc:{start:{line:1,col:14},end:{line:1,col:24},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 14 },
-          end: { line: 1, col: 23 },
-          source: ''
-        },
+        loc:{start:{line:1,col:14},end:{line:1,col:23},source:''},
         left: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 14 },
-            end: { line: 1, col: 20 },
-            source: ''
-          },
+          loc:{start:{line:1,col:14},end:{line:1,col:20},source:''},
           name: 'await'
         },
         operator: '=',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 22 },
-            end: { line: 1, col: 23 },
-            source: ''
-          },
+          loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
           name: 'x'
         }
       }

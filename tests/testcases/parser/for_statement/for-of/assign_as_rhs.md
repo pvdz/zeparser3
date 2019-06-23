@@ -29,59 +29,35 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 15 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
   body: [
     {
       type: 'ForOfStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 15 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
       left: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 7 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:7},source:''},
         name: 'a'
       },
       right: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 13 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
         left: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 10 },
-            end: { line: 1, col: 11 },
-            source: ''
-          },
+          loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
           name: 'b'
         },
         operator: '=',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 12 },
-            end: { line: 1, col: 13 },
-            source: ''
-          },
+          loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
           name: 'c'
         }
       },
       await: false,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 14 },
-          end: { line: 1, col: 15 },
-          source: ''
-        }
+        loc:{start:{line:1,col:14},end:{line:1,col:15},source:''}
       }
     }
   ]

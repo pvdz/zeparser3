@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 30 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'x'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 30 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:30},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 10 },
-              end: { line: 1, col: 29 },
-              source: ''
-            },
+            loc:{start:{line:1,col:10},end:{line:1,col:29},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 10 },
-                end: { line: 1, col: 13 },
-                source: ''
-              },
+              loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
               name: 'foo'
             },
             static: false,
@@ -77,53 +57,29 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 10 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:10},end:{line:1,col:29},source:''},
               generator: false,
               async: false,
               id: null,
               params: [
                 {
                   type: 'AssignmentPattern',
-                  loc: {
-                    start: { line: 1, col: 14 },
-                    end: { line: 1, col: 25 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:14},end:{line:1,col:25},source:''},
                   left: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 14 },
-                      end: { line: 1, col: 14 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
                     name: 'x'
                   },
                   right: {
                     type: 'MemberExpression',
-                    loc: {
-                      start: { line: 1, col: 16 },
-                      end: { line: 1, col: 25 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:16},end:{line:1,col:25},source:''},
                     object: {
                       type: 'Super',
-                      loc: {
-                        start: { line: 1, col: 16 },
-                        end: { line: 1, col: 21 },
-                        source: ''
-                      }
+                      loc:{start:{line:1,col:16},end:{line:1,col:21},source:''}
                     },
                     property: {
                       type: 'Identifier',
-                      loc: {
-                        start: { line: 1, col: 22 },
-                        end: { line: 1, col: 22 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
                       name: 'foo'
                     },
                     computed: false
@@ -132,11 +88,7 @@ ast: {
               ],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 26 },
-                  end: { line: 1, col: 29 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:26},end:{line:1,col:29},source:''},
                 body: []
               }
             }

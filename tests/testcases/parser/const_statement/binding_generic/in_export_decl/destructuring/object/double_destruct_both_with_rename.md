@@ -47,54 +47,30 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 34 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 13 },
-          end: { line: 1, col: 33 },
-          source: ''
-        },
+        loc:{start:{line:1,col:13},end:{line:1,col:33},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 13 },
-              end: { line: 1, col: 33 },
-              source: ''
-            },
+            loc:{start:{line:1,col:13},end:{line:1,col:33},source:''},
             id: {
               type: 'ObjectPattern',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 28 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:28},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc: {
-                    start: { line: 1, col: 14 },
-                    end: { line: 1, col: 19 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:14},end:{line:1,col:19},source:''},
                   key: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 14 },
-                      end: { line: 1, col: 18 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:14},end:{line:1,col:18},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -102,29 +78,17 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 18 },
-                      end: { line: 1, col: 19 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
                     name: 'y'
                   },
                   shorthand: false
                 },
                 {
                   type: 'Property',
-                  loc: {
-                    start: { line: 1, col: 21 },
-                    end: { line: 1, col: 26 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:21},end:{line:1,col:26},source:''},
                   key: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 21 },
-                      end: { line: 1, col: 25 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:21},end:{line:1,col:25},source:''},
                     name: 'z'
                   },
                   kind: 'init',
@@ -132,11 +96,7 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 25 },
-                      end: { line: 1, col: 26 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:25},end:{line:1,col:26},source:''},
                     name: 'a'
                   },
                   shorthand: false
@@ -145,11 +105,7 @@ ast: {
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 30 },
-                end: { line: 1, col: 33 },
-                source: ''
-              },
+              loc:{start:{line:1,col:30},end:{line:1,col:33},source:''},
               name: 'obj'
             }
           }

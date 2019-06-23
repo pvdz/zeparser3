@@ -49,59 +49,35 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 40 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:40},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 37 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
       declaration: {
         type: 'FunctionDeclaration',
-        loc: {
-          start: { line: 1, col: 21 },
-          end: { line: 1, col: 37 },
-          source: ''
-        },
+        loc:{start:{line:1,col:21},end:{line:1,col:37},source:''},
         generator: true,
         async: true,
         id: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 31 },
-            end: { line: 1, col: 31 },
-            source: ''
-          },
+          loc:{start:{line:1,col:31},end:{line:1,col:31},source:''},
           name: 'f'
         },
         params: [],
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 34 },
-            end: { line: 1, col: 37 },
-            source: ''
-          },
+          loc:{start:{line:1,col:34},end:{line:1,col:37},source:''},
           body: []
         }
       }
     },
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 37 },
-        end: { line: 1, col: 40 },
-        source: ''
-      },
+      loc:{start:{line:1,col:37},end:{line:1,col:40},source:''},
       expression: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 37 },
-          end: { line: 1, col: 40 },
-          source: ''
-        },
+        loc:{start:{line:1,col:37},end:{line:1,col:40},source:''},
         name: 'foo'
       }
     }

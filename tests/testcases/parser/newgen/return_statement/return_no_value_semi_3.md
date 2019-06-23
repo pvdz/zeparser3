@@ -29,49 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 31 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 31 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 12 },
-          end: { line: 1, col: 31 },
-          source: ''
-        },
+        loc:{start:{line:1,col:12},end:{line:1,col:31},source:''},
         body: [
           {
             type: 'ReturnStatement',
-            loc: {
-              start: { line: 1, col: 16 },
-              end: { line: 1, col: 30 },
-              source: ''
-            },
+            loc:{start:{line:1,col:16},end:{line:1,col:30},source:''},
             argument: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 23 },
-                end: { line: 1, col: 23 },
-                source: ''
-              },
+              loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
               value: 15,
               raw: '15'
             }

@@ -28,37 +28,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 17 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc: {
-          start: { line: 1, col: 1 },
-          end: { line: 1, col: 15 },
-          source: ''
-        },
+        loc:{start:{line:1,col:1},end:{line:1,col:15},source:''},
         properties: [
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 2 },
-              end: { line: 1, col: 14 },
-              source: ''
-            },
+            loc:{start:{line:1,col:2},end:{line:1,col:14},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 2 },
-                end: { line: 1, col: 13 },
-                source: ''
-              },
+              loc:{start:{line:1,col:2},end:{line:1,col:13},source:''},
               name: 'arguments'
             },
             kind: 'init',
@@ -66,11 +50,7 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 14 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
               name: 'x'
             },
             shorthand: false

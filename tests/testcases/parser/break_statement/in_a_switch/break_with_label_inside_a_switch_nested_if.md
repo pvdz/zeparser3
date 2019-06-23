@@ -29,88 +29,48 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 47 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 47 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
       label: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 3 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
         name: 'foo'
       },
       body: {
         type: 'SwitchStatement',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 47 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:47},source:''},
         discriminant: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 13 },
-            end: { line: 1, col: 14 },
-            source: ''
-          },
+          loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
           name: 'x'
         },
         cases: [
           {
             type: 'SwitchCase',
-            loc: {
-              start: { line: 1, col: 18 },
-              end: { line: 1, col: 46 },
-              source: ''
-            },
+            loc:{start:{line:1,col:18},end:{line:1,col:46},source:''},
             test: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 23 },
-                end: { line: 1, col: 24 },
-                source: ''
-              },
+              loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
               name: 'x'
             },
             consequent: [
               {
                 type: 'IfStatement',
-                loc: {
-                  start: { line: 1, col: 26 },
-                  end: { line: 1, col: 46 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:26},end:{line:1,col:46},source:''},
                 test: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 30 },
-                    end: { line: 1, col: 33 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:30},end:{line:1,col:33},source:''},
                   name: 'foo'
                 },
                 consequent: {
                   type: 'BreakStatement',
-                  loc: {
-                    start: { line: 1, col: 35 },
-                    end: { line: 1, col: 46 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:35},end:{line:1,col:46},source:''},
                   label: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 41 },
-                      end: { line: 1, col: 41 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:41},end:{line:1,col:41},source:''},
                     name: 'foo'
                   }
                 },

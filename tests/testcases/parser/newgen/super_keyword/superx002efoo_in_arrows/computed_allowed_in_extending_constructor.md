@@ -29,55 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 62 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:62},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 62 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:62},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'x'
       },
       superClass: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 16 },
-          end: { line: 1, col: 18 },
-          source: ''
-        },
+        loc:{start:{line:1,col:16},end:{line:1,col:18},source:''},
         name: 'y'
       },
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 1, col: 62 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:1,col:62},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 20 },
-              end: { line: 1, col: 61 },
-              source: ''
-            },
+            loc:{start:{line:1,col:20},end:{line:1,col:61},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:31},source:''},
               name: 'constructor'
             },
             static: false,
@@ -85,37 +61,21 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 61 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:61},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 33 },
-                  end: { line: 1, col: 61 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:33},end:{line:1,col:61},source:''},
                 body: [
                   {
                     type: 'ReturnStatement',
-                    loc: {
-                      start: { line: 1, col: 35 },
-                      end: { line: 1, col: 60 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:35},end:{line:1,col:60},source:''},
                     argument: {
                       type: 'ArrowFunctionExpression',
-                      loc: {
-                        start: { line: 1, col: 42 },
-                        end: { line: 1, col: 58 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:42},end:{line:1,col:58},source:''},
                       params: [],
                       id: null,
                       generator: false,
@@ -123,26 +83,14 @@ ast: {
                       expression: true,
                       body: {
                         type: 'MemberExpression',
-                        loc: {
-                          start: { line: 1, col: 48 },
-                          end: { line: 1, col: 58 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:48},end:{line:1,col:58},source:''},
                         object: {
                           type: 'Super',
-                          loc: {
-                            start: { line: 1, col: 48 },
-                            end: { line: 1, col: 53 },
-                            source: ''
-                          }
+                          loc:{start:{line:1,col:48},end:{line:1,col:53},source:''}
                         },
                         property: {
                           type: 'Identifier',
-                          loc: {
-                            start: { line: 1, col: 54 },
-                            end: { line: 1, col: 57 },
-                            source: ''
-                          },
+                          loc:{start:{line:1,col:54},end:{line:1,col:57},source:''},
                           name: 'foo'
                         },
                         computed: true

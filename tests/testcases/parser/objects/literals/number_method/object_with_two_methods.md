@@ -29,54 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 55 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:55},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 55 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:55},source:''},
       expression: {
         type: 'CallExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 54 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:54},source:''},
         callee: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
           name: 'wrap'
         },
         arguments: [
           {
             type: 'ObjectExpression',
-            loc: {
-              start: { line: 1, col: 5 },
-              end: { line: 1, col: 53 },
-              source: ''
-            },
+            loc:{start:{line:1,col:5},end:{line:1,col:53},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 6 },
-                  end: { line: 1, col: 12 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:6},end:{line:1,col:12},source:''},
                 key: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 6 },
-                    end: { line: 1, col: 8 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
                   value: 0.9,
                   raw: '.9'
                 },
@@ -85,22 +61,14 @@ ast: {
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 6 },
-                    end: { line: 1, col: 12 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:6},end:{line:1,col:12},source:''},
                   generator: false,
                   async: false,
                   id: null,
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 10 },
-                      end: { line: 1, col: 12 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:10},end:{line:1,col:12},source:''},
                     body: []
                   }
                 },
@@ -108,18 +76,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 14 },
-                  end: { line: 1, col: 22 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:14},end:{line:1,col:22},source:''},
                 key: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 14 },
-                    end: { line: 1, col: 18 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:14},end:{line:1,col:18},source:''},
                   value: 0,
                   raw: '0x84'
                 },
@@ -128,22 +88,14 @@ ast: {
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 14 },
-                    end: { line: 1, col: 22 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:14},end:{line:1,col:22},source:''},
                   generator: false,
                   async: false,
                   id: null,
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 20 },
-                      end: { line: 1, col: 22 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:20},end:{line:1,col:22},source:''},
                     body: []
                   }
                 },
@@ -151,18 +103,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 24 },
-                  end: { line: 1, col: 31 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:24},end:{line:1,col:31},source:''},
                 key: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 24 },
-                    end: { line: 1, col: 27 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:24},end:{line:1,col:27},source:''},
                   value: 0,
                   raw: '0b1'
                 },
@@ -171,22 +115,14 @@ ast: {
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 24 },
-                    end: { line: 1, col: 31 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:24},end:{line:1,col:31},source:''},
                   generator: false,
                   async: false,
                   id: null,
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 29 },
-                      end: { line: 1, col: 31 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:29},end:{line:1,col:31},source:''},
                     body: []
                   }
                 },
@@ -194,18 +130,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 33 },
-                  end: { line: 1, col: 41 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:33},end:{line:1,col:41},source:''},
                 key: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 33 },
-                    end: { line: 1, col: 37 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:33},end:{line:1,col:37},source:''},
                   value: 0,
                   raw: '0o27'
                 },
@@ -214,22 +142,14 @@ ast: {
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 33 },
-                    end: { line: 1, col: 41 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:33},end:{line:1,col:41},source:''},
                   generator: false,
                   async: false,
                   id: null,
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 39 },
-                      end: { line: 1, col: 41 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:39},end:{line:1,col:41},source:''},
                     body: []
                   }
                 },
@@ -237,18 +157,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 43 },
-                  end: { line: 1, col: 52 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:43},end:{line:1,col:52},source:''},
                 key: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 43 },
-                    end: { line: 1, col: 48 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:43},end:{line:1,col:48},source:''},
                   value: 1e+234,
                   raw: '1e234'
                 },
@@ -257,22 +169,14 @@ ast: {
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 43 },
-                    end: { line: 1, col: 52 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:43},end:{line:1,col:52},source:''},
                   generator: false,
                   async: false,
                   id: null,
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 50 },
-                      end: { line: 1, col: 52 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:50},end:{line:1,col:52},source:''},
                     body: []
                   }
                 },

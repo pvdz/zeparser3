@@ -29,57 +29,33 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 19 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 19 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
       block: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 4 },
-          end: { line: 1, col: 7 },
-          source: ''
-        },
+        loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc: {
-          start: { line: 1, col: 7 },
-          end: { line: 1, col: 19 },
-          source: ''
-        },
+        loc:{start:{line:1,col:7},end:{line:1,col:19},source:''},
         param: {
           type: 'ArrayPattern',
-          loc: {
-            start: { line: 1, col: 13 },
-            end: { line: 1, col: 16 },
-            source: ''
-          },
+          loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
           elements: [
             {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 14 },
-                end: { line: 1, col: 15 },
-                source: ''
-              },
+              loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
               name: 'e'
             }
           ]
         },
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 17 },
-            end: { line: 1, col: 19 },
-            source: ''
-          },
+          loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
           body: []
         }
       },

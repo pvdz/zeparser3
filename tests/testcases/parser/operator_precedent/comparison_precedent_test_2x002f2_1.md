@@ -29,129 +29,73 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 37 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 37 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
         left: {
           type: 'BinaryExpression',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 34 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
           left: {
             type: 'BinaryExpression',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 1, col: 29 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
             left: {
               type: 'BinaryExpression',
-              loc: {
-                start: { line: 1, col: 0 },
-                end: { line: 1, col: 25 },
-                source: ''
-              },
+              loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
               left: {
                 type: 'BinaryExpression',
-                loc: {
-                  start: { line: 1, col: 0 },
-                  end: { line: 1, col: 20 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
                 left: {
                   type: 'BinaryExpression',
-                  loc: {
-                    start: { line: 1, col: 0 },
-                    end: { line: 1, col: 15 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
                   left: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 0 },
-                      end: { line: 1, col: 2 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
                     name: 'a'
                   },
                   operator: 'instanceof',
                   right: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 13 },
-                      end: { line: 1, col: 15 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:13},end:{line:1,col:15},source:''},
                     name: 'b'
                   }
                 },
                 operator: 'in',
                 right: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 18 },
-                    end: { line: 1, col: 20 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
                   name: 'c'
                 }
               },
               operator: '>=',
               right: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 23 },
-                  end: { line: 1, col: 25 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:23},end:{line:1,col:25},source:''},
                 name: 'd'
               }
             },
             operator: '>',
             right: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 27 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:27},end:{line:1,col:29},source:''},
               name: 'e'
             }
           },
           operator: '<=',
           right: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 32 },
-              end: { line: 1, col: 34 },
-              source: ''
-            },
+            loc:{start:{line:1,col:32},end:{line:1,col:34},source:''},
             name: 'f'
           }
         },
         operator: '<',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 36 },
-            end: { line: 1, col: 37 },
-            source: ''
-          },
+          loc:{start:{line:1,col:36},end:{line:1,col:37},source:''},
           name: 'g'
         }
       }

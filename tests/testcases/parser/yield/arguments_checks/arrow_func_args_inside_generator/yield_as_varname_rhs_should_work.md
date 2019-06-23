@@ -29,56 +29,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 16 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 16 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 1 },
-          end: { line: 1, col: 14 },
-          source: ''
-        },
+        loc:{start:{line:1,col:1},end:{line:1,col:14},source:''},
         left: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 1 },
-            end: { line: 1, col: 3 },
-            source: ''
-          },
+          loc:{start:{line:1,col:1},end:{line:1,col:3},source:''},
           name: 'x'
         },
         operator: '=',
         right: {
           type: 'BinaryExpression',
-          loc: {
-            start: { line: 1, col: 5 },
-            end: { line: 1, col: 14 },
-            source: ''
-          },
+          loc:{start:{line:1,col:5},end:{line:1,col:14},source:''},
           left: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 5 },
-              end: { line: 1, col: 7 },
-              source: ''
-            },
+            loc:{start:{line:1,col:5},end:{line:1,col:7},source:''},
             name: 'x'
           },
           operator: '+',
           right: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 14 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:14},source:''},
             name: 'yield'
           }
         }

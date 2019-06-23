@@ -35,47 +35,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 33 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 33 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 14 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:14},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 14 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:14},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 9 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
               name: 'x'
             },
             init: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 13 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
               value: 3,
               raw: '3'
             }
@@ -86,44 +66,24 @@ ast: {
       update: null,
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 18 },
-          end: { line: 1, col: 33 },
-          source: ''
-        },
+        loc:{start:{line:1,col:18},end:{line:1,col:33},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc: {
-              start: { line: 1, col: 26 },
-              end: { line: 1, col: 32 },
-              source: ''
-            },
+            loc:{start:{line:1,col:26},end:{line:1,col:32},source:''},
             kind: 'const',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc: {
-                  start: { line: 1, col: 26 },
-                  end: { line: 1, col: 32 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:26},end:{line:1,col:32},source:''},
                 id: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 26 },
-                    end: { line: 1, col: 26 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:26},end:{line:1,col:26},source:''},
                   name: 'x'
                 },
                 init: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 30 },
-                    end: { line: 1, col: 30 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:30},end:{line:1,col:30},source:''},
                   value: 1,
                   raw: '1'
                 }

@@ -29,76 +29,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:32},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 32 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:32},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 31 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
         left: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 7 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:7},source:''},
           name: 'result'
         },
         operator: '=',
         right: {
           type: 'AssignmentExpression',
-          loc: {
-            start: { line: 1, col: 9 },
-            end: { line: 1, col: 31 },
-            source: ''
-          },
+          loc:{start:{line:1,col:9},end:{line:1,col:31},source:''},
           left: {
             type: 'ArrayPattern',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 28 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:28},source:''},
             elements: [
               {
                 type: 'RestElement',
-                loc: {
-                  start: { line: 1, col: 10 },
-                  end: { line: 1, col: 26 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:10},end:{line:1,col:26},source:''},
                 argument: {
                   type: 'ObjectPattern',
-                  loc: {
-                    start: { line: 1, col: 13 },
-                    end: { line: 1, col: 26 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:13},end:{line:1,col:26},source:''},
                   properties: [
                     {
                       type: 'Property',
-                      loc: {
-                        start: { line: 1, col: 15 },
-                        end: { line: 1, col: 25 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:15},end:{line:1,col:25},source:''},
                       key: {
                         type: 'Identifier',
-                        loc: {
-                          start: { line: 1, col: 15 },
-                          end: { line: 1, col: 17 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:15},end:{line:1,col:17},source:''},
                         name: 'x'
                       },
                       kind: 'init',
@@ -106,27 +70,15 @@ ast: {
                       computed: false,
                       value: {
                         type: 'AssignmentPattern',
-                        loc: {
-                          start: { line: 1, col: 15 },
-                          end: { line: 1, col: 25 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:15},end:{line:1,col:25},source:''},
                         left: {
                           type: 'Identifier',
-                          loc: {
-                            start: { line: 1, col: 15 },
-                            end: { line: 1, col: 17 },
-                            source: ''
-                          },
+                          loc:{start:{line:1,col:15},end:{line:1,col:17},source:''},
                           name: 'x'
                         },
                         right: {
                           type: 'Identifier',
-                          loc: {
-                            start: { line: 1, col: 19 },
-                            end: { line: 1, col: 25 },
-                            source: ''
-                          },
+                          loc:{start:{line:1,col:19},end:{line:1,col:25},source:''},
                           name: 'yield'
                         }
                       },
@@ -140,11 +92,7 @@ ast: {
           operator: '=',
           right: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 30 },
-              end: { line: 1, col: 31 },
-              source: ''
-            },
+            loc:{start:{line:1,col:30},end:{line:1,col:31},source:''},
             name: 'y'
           }
         }

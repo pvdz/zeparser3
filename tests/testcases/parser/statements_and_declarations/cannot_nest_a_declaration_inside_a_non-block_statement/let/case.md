@@ -29,74 +29,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 32 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:32},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 32 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:32},source:''},
       discriminant: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
         name: 'x'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc: {
-            start: { line: 1, col: 13 },
-            end: { line: 1, col: 31 },
-            source: ''
-          },
+          loc:{start:{line:1,col:13},end:{line:1,col:31},source:''},
           test: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 18 },
-              end: { line: 1, col: 19 },
-              source: ''
-            },
+            loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
             name: 'x'
           },
           consequent: [
             {
               type: 'VariableDeclaration',
-              loc: {
-                start: { line: 1, col: 25 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:25},end:{line:1,col:31},source:''},
               kind: 'let',
               declarations: [
                 {
                   type: 'VariableDeclarator',
-                  loc: {
-                    start: { line: 1, col: 25 },
-                    end: { line: 1, col: 31 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:25},end:{line:1,col:31},source:''},
                   id: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 25 },
-                      end: { line: 1, col: 25 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
                     name: 'y'
                   },
                   init: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 29 },
-                      end: { line: 1, col: 31 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:29},end:{line:1,col:31},source:''},
                     name: 'x'
                   }
                 }

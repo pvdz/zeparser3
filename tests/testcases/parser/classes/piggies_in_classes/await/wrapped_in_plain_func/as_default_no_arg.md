@@ -29,74 +29,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 47 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 47 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 13 },
-          end: { line: 1, col: 47 },
-          source: ''
-        },
+        loc:{start:{line:1,col:13},end:{line:1,col:47},source:''},
         body: [
           {
             type: 'ClassDeclaration',
-            loc: {
-              start: { line: 1, col: 17 },
-              end: { line: 1, col: 46 },
-              source: ''
-            },
+            loc:{start:{line:1,col:17},end:{line:1,col:46},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 23 },
-                end: { line: 1, col: 23 },
-                source: ''
-              },
+              loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
               name: 'x'
             },
             superClass: null,
             body: {
               type: 'ClassBody',
-              loc: {
-                start: { line: 1, col: 25 },
-                end: { line: 1, col: 46 },
-                source: ''
-              },
+              loc:{start:{line:1,col:25},end:{line:1,col:46},source:''},
               body: [
                 {
                   type: 'MethodDefinition',
-                  loc: {
-                    start: { line: 1, col: 27 },
-                    end: { line: 1, col: 42 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:27},end:{line:1,col:42},source:''},
                   key: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 27 },
-                      end: { line: 1, col: 30 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:27},end:{line:1,col:30},source:''},
                     name: 'foo'
                   },
                   static: false,
@@ -104,49 +72,29 @@ ast: {
                   kind: 'method',
                   value: {
                     type: 'FunctionExpression',
-                    loc: {
-                      start: { line: 1, col: 27 },
-                      end: { line: 1, col: 42 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:27},end:{line:1,col:42},source:''},
                     generator: false,
                     async: false,
                     id: null,
                     params: [
                       {
                         type: 'AssignmentPattern',
-                        loc: {
-                          start: { line: 1, col: 31 },
-                          end: { line: 1, col: 38 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:31},end:{line:1,col:38},source:''},
                         left: {
                           type: 'Identifier',
-                          loc: {
-                            start: { line: 1, col: 31 },
-                            end: { line: 1, col: 31 },
-                            source: ''
-                          },
+                          loc:{start:{line:1,col:31},end:{line:1,col:31},source:''},
                           name: 'x'
                         },
                         right: {
                           type: 'Identifier',
-                          loc: {
-                            start: { line: 1, col: 33 },
-                            end: { line: 1, col: 38 },
-                            source: ''
-                          },
+                          loc:{start:{line:1,col:33},end:{line:1,col:38},source:''},
                           name: 'await'
                         }
                       }
                     ],
                     body: {
                       type: 'BlockStatement',
-                      loc: {
-                        start: { line: 1, col: 39 },
-                        end: { line: 1, col: 42 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:39},end:{line:1,col:42},source:''},
                       body: []
                     }
                   }

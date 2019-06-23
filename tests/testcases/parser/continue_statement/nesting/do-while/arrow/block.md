@@ -29,22 +29,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 48 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 48 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 48 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
         params: [],
         id: null,
         generator: false,
@@ -52,45 +44,25 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 6 },
-            end: { line: 1, col: 48 },
-            source: ''
-          },
+          loc:{start:{line:1,col:6},end:{line:1,col:48},source:''},
           body: [
             {
               type: 'DoWhileStatement',
-              loc: {
-                start: { line: 1, col: 8 },
-                end: { line: 1, col: 47 },
-                source: ''
-              },
+              loc:{start:{line:1,col:8},end:{line:1,col:47},source:''},
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 18 },
-                  end: { line: 1, col: 35 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:18},end:{line:1,col:35},source:''},
                 body: [
                   {
                     type: 'ContinueStatement',
-                    loc: {
-                      start: { line: 1, col: 20 },
-                      end: { line: 1, col: 29 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:20},end:{line:1,col:29},source:''},
                     label: null
                   }
                 ]
               },
               test: {
                 type: 'Literal',
-                loc: {
-                  start: { line: 1, col: 41 },
-                  end: { line: 1, col: 45 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:41},end:{line:1,col:45},source:''},
                 value: true,
                 raw: 'true'
               }

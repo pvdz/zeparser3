@@ -47,22 +47,14 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 22 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 22 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
       declaration: {
         type: 'ArrowFunctionExpression',
-        loc: {
-          start: { line: 1, col: 15 },
-          end: { line: 1, col: 22 },
-          source: ''
-        },
+        loc:{start:{line:1,col:15},end:{line:1,col:22},source:''},
         params: [],
         id: null,
         generator: false,
@@ -70,11 +62,7 @@ ast: {
         expression: true,
         body: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 21 },
-            end: { line: 1, col: 22 },
-            source: ''
-          },
+          loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
           name: 'x'
         }
       }

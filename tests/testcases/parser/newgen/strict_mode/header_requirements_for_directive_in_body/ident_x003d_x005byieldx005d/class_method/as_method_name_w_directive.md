@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 34 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 34 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'c'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 34 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:34},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 33 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:33},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 14 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:14},source:''},
               name: 'yield'
             },
             static: false,
@@ -77,37 +57,21 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 33 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:33},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 16 },
-                  end: { line: 1, col: 33 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:16},end:{line:1,col:33},source:''},
                 body: [
                   {
                     type: 'ExpressionStatement',
-                    loc: {
-                      start: { line: 1, col: 18 },
-                      end: { line: 1, col: 32 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:18},end:{line:1,col:32},source:''},
                     expression: {
                       type: 'Literal',
-                      loc: {
-                        start: { line: 1, col: 18 },
-                        end: { line: 1, col: 18 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
                       value: 'use strict',
                       raw: '"use strict"'
                     },

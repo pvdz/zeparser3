@@ -35,67 +35,39 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 41 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 41 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 12 },
-          end: { line: 1, col: 41 },
-          source: ''
-        },
+        loc:{start:{line:1,col:12},end:{line:1,col:41},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc: {
-              start: { line: 1, col: 18 },
-              end: { line: 1, col: 23 },
-              source: ''
-            },
+            loc:{start:{line:1,col:18},end:{line:1,col:23},source:''},
             kind: 'var',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc: {
-                  start: { line: 1, col: 18 },
-                  end: { line: 1, col: 23 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:18},end:{line:1,col:23},source:''},
                 id: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 18 },
-                    end: { line: 1, col: 18 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
                   name: 'x'
                 },
                 init: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 22 },
-                    end: { line: 1, col: 23 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
                   name: 'y'
                 }
               }
@@ -103,30 +75,18 @@ ast: {
           },
           {
             type: 'FunctionDeclaration',
-            loc: {
-              start: { line: 1, col: 25 },
-              end: { line: 1, col: 40 },
-              source: ''
-            },
+            loc:{start:{line:1,col:25},end:{line:1,col:40},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 34 },
-                end: { line: 1, col: 34 },
-                source: ''
-              },
+              loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
               name: 'x'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc: {
-                start: { line: 1, col: 37 },
-                end: { line: 1, col: 40 },
-                source: ''
-              },
+              loc:{start:{line:1,col:37},end:{line:1,col:40},source:''},
               body: []
             }
           }

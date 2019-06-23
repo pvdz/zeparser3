@@ -29,54 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 20 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 20 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
       expression: {
         type: 'CallExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 19 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
         callee: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
           name: 'wrap'
         },
         arguments: [
           {
             type: 'ObjectExpression',
-            loc: {
-              start: { line: 1, col: 5 },
-              end: { line: 1, col: 18 },
-              source: ''
-            },
+            loc:{start:{line:1,col:5},end:{line:1,col:18},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 6 },
-                  end: { line: 1, col: 17 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:6},end:{line:1,col:17},source:''},
                 key: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 10 },
-                    end: { line: 1, col: 13 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
                   value: 123,
                   raw: '123'
                 },
@@ -85,22 +61,14 @@ ast: {
                 computed: false,
                 value: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 6 },
-                    end: { line: 1, col: 17 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:6},end:{line:1,col:17},source:''},
                   generator: false,
                   async: false,
                   id: null,
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 15 },
-                      end: { line: 1, col: 17 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:15},end:{line:1,col:17},source:''},
                     body: []
                   }
                 },

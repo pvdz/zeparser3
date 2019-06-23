@@ -29,68 +29,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 54 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:54},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 54 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:54},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 12 },
-          end: { line: 1, col: 54 },
-          source: ''
-        },
+        loc:{start:{line:1,col:12},end:{line:1,col:54},source:''},
         body: [
           {
             type: 'DoWhileStatement',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 53 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:53},source:''},
             body: {
               type: 'BlockStatement',
-              loc: {
-                start: { line: 1, col: 24 },
-                end: { line: 1, col: 41 },
-                source: ''
-              },
+              loc:{start:{line:1,col:24},end:{line:1,col:41},source:''},
               body: [
                 {
                   type: 'ContinueStatement',
-                  loc: {
-                    start: { line: 1, col: 26 },
-                    end: { line: 1, col: 35 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:26},end:{line:1,col:35},source:''},
                   label: null
                 }
               ]
             },
             test: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 47 },
-                end: { line: 1, col: 51 },
-                source: ''
-              },
+              loc:{start:{line:1,col:47},end:{line:1,col:51},source:''},
               value: true,
               raw: 'true'
             }

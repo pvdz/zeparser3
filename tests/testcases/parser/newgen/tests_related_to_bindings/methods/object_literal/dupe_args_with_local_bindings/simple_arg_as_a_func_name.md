@@ -29,54 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 30 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 30 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
         left: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 2 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
           name: 'o'
         },
         operator: '=',
         right: {
           type: 'ObjectExpression',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 30 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:30},source:''},
           properties: [
             {
               type: 'Property',
-              loc: {
-                start: { line: 1, col: 5 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:5},end:{line:1,col:29},source:''},
               key: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 5 },
-                  end: { line: 1, col: 6 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:5},end:{line:1,col:6},source:''},
                 name: 'f'
               },
               kind: 'init',
@@ -84,59 +60,35 @@ ast: {
               computed: false,
               value: {
                 type: 'FunctionExpression',
-                loc: {
-                  start: { line: 1, col: 5 },
-                  end: { line: 1, col: 29 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:5},end:{line:1,col:29},source:''},
                 generator: false,
                 async: false,
                 id: null,
                 params: [
                   {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 7 },
-                      end: { line: 1, col: 7 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:7},end:{line:1,col:7},source:''},
                     name: 'x'
                   }
                 ],
                 body: {
                   type: 'BlockStatement',
-                  loc: {
-                    start: { line: 1, col: 10 },
-                    end: { line: 1, col: 29 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:10},end:{line:1,col:29},source:''},
                   body: [
                     {
                       type: 'FunctionDeclaration',
-                      loc: {
-                        start: { line: 1, col: 12 },
-                        end: { line: 1, col: 28 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:12},end:{line:1,col:28},source:''},
                       generator: false,
                       async: false,
                       id: {
                         type: 'Identifier',
-                        loc: {
-                          start: { line: 1, col: 21 },
-                          end: { line: 1, col: 21 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:21},end:{line:1,col:21},source:''},
                         name: 'x'
                       },
                       params: [],
                       body: {
                         type: 'BlockStatement',
-                        loc: {
-                          start: { line: 1, col: 25 },
-                          end: { line: 1, col: 28 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
                         body: []
                       }
                     }

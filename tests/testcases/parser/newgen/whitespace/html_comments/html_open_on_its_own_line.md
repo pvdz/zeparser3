@@ -31,29 +31,17 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 3, col: 7 } },
+  loc:{start:{line:1,col:0},end:{line:3,col:7},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 3, col: 0 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:3,col:0},source:''},
       expression: {
         type: 'CallExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 3, col: 0 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:3,col:0},source:''},
         callee: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
           name: 'call'
         },
         arguments: []
@@ -61,25 +49,13 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 3, col: 0 },
-        end: { line: 3, col: 7 },
-        source: ''
-      },
+      loc:{start:{line:3,col:0},end:{line:3,col:7},source:''},
       expression: {
         type: 'CallExpression',
-        loc: {
-          start: { line: 3, col: 0 },
-          end: { line: 3, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:3,col:0},end:{line:3,col:6},source:''},
         callee: {
           type: 'Identifier',
-          loc: {
-            start: { line: 3, col: 0 },
-            end: { line: 3, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:3,col:0},end:{line:3,col:4},source:''},
           name: 'more'
         },
         arguments: []
@@ -106,36 +82,20 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 3, col: 7 } },
+  loc:{start:{line:1,col:0},end:{line:3,col:7},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 3, col: 0 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:3,col:0},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 3, col: 0 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:3,col:0},source:''},
         left: {
           type: 'CallExpression',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 2, col: 0 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
           callee: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 1, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
             name: 'call'
           },
           arguments: []
@@ -143,29 +103,17 @@ ast: {
         operator: '<',
         right: {
           type: 'UnaryExpression',
-          loc: {
-            start: { line: 2, col: 1 },
-            end: { line: 3, col: 0 },
-            source: ''
-          },
+          loc:{start:{line:2,col:1},end:{line:3,col:0},source:''},
           operator: '!',
           prefix: true,
           argument: {
             type: 'UpdateExpression',
-            loc: {
-              start: { line: 2, col: 2 },
-              end: { line: 3, col: 0 },
-              source: ''
-            },
+            loc:{start:{line:2,col:2},end:{line:3,col:0},source:''},
             operator: '--',
             prefix: true,
             argument: {
               type: 'Identifier',
-              loc: {
-                start: { line: 2, col: 5 },
-                end: { line: 3, col: 0 },
-                source: ''
-              },
+              loc:{start:{line:2,col:5},end:{line:3,col:0},source:''},
               name: 'foo'
             }
           }
@@ -174,25 +122,13 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 3, col: 0 },
-        end: { line: 3, col: 7 },
-        source: ''
-      },
+      loc:{start:{line:3,col:0},end:{line:3,col:7},source:''},
       expression: {
         type: 'CallExpression',
-        loc: {
-          start: { line: 3, col: 0 },
-          end: { line: 3, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:3,col:0},end:{line:3,col:6},source:''},
         callee: {
           type: 'Identifier',
-          loc: {
-            start: { line: 3, col: 0 },
-            end: { line: 3, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:3,col:0},end:{line:3,col:4},source:''},
           name: 'more'
         },
         arguments: []

@@ -29,65 +29,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 29 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 29 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
       expression: {
         type: 'NewExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 29 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
         arguments: [],
         callee: {
           type: 'MemberExpression',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 29 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:29},source:''},
           object: {
             type: 'MemberExpression',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 17 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:17},source:''},
             object: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 4 },
-                end: { line: 1, col: 4 },
-                source: ''
-              },
+              loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
               value: 0,
               raw: '0x2'
             },
             property: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 8 },
-                end: { line: 1, col: 8 },
-                source: ''
-              },
+              loc:{start:{line:1,col:8},end:{line:1,col:8},source:''},
               name: '__proto__'
             },
             computed: false
           },
           property: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 18 },
-              end: { line: 1, col: 18 },
-              source: ''
-            },
+            loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
             name: 'constructor'
           },
           computed: false

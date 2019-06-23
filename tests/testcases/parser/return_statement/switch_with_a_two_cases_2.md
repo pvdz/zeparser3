@@ -29,111 +29,63 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 48 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 48 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
       discriminant: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
         name: 'A'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc: {
-            start: { line: 1, col: 12 },
-            end: { line: 1, col: 30 },
-            source: ''
-          },
+          loc:{start:{line:1,col:12},end:{line:1,col:30},source:''},
           test: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 17 },
-              end: { line: 1, col: 18 },
-              source: ''
-            },
+            loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
             name: 'B'
           },
           consequent: [
             {
               type: 'ExpressionStatement',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 23 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:23},source:''},
               expression: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 20 },
-                  end: { line: 1, col: 21 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
                 name: 'C'
               }
             },
             {
               type: 'BreakStatement',
-              loc: {
-                start: { line: 1, col: 23 },
-                end: { line: 1, col: 30 },
-                source: ''
-              },
+              loc:{start:{line:1,col:23},end:{line:1,col:30},source:''},
               label: null
             }
           ]
         },
         {
           type: 'SwitchCase',
-          loc: {
-            start: { line: 1, col: 30 },
-            end: { line: 1, col: 47 },
-            source: ''
-          },
+          loc:{start:{line:1,col:30},end:{line:1,col:47},source:''},
           test: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 35 },
-              end: { line: 1, col: 36 },
-              source: ''
-            },
+            loc:{start:{line:1,col:35},end:{line:1,col:36},source:''},
             name: 'D'
           },
           consequent: [
             {
               type: 'ExpressionStatement',
-              loc: {
-                start: { line: 1, col: 38 },
-                end: { line: 1, col: 41 },
-                source: ''
-              },
+              loc:{start:{line:1,col:38},end:{line:1,col:41},source:''},
               expression: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 38 },
-                  end: { line: 1, col: 39 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:38},end:{line:1,col:39},source:''},
                 name: 'E'
               }
             },
             {
               type: 'BreakStatement',
-              loc: {
-                start: { line: 1, col: 41 },
-                end: { line: 1, col: 47 },
-                source: ''
-              },
+              loc:{start:{line:1,col:41},end:{line:1,col:47},source:''},
               label: null
             }
           ]

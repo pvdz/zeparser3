@@ -33,44 +33,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 18 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc: {
-          start: { line: 1, col: 1 },
-          end: { line: 1, col: 16 },
-          source: ''
-        },
+        loc:{start:{line:1,col:1},end:{line:1,col:16},source:''},
         properties: [
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 2 },
-              end: { line: 1, col: 12 },
-              source: ''
-            },
+            loc:{start:{line:1,col:2},end:{line:1,col:12},source:''},
             key: {
               type: 'CallExpression',
-              loc: {
-                start: { line: 1, col: 3 },
-                end: { line: 1, col: 8 },
-                source: ''
-              },
+              loc:{start:{line:1,col:3},end:{line:1,col:8},source:''},
               callee: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 3 },
-                  end: { line: 1, col: 6 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:3},end:{line:1,col:6},source:''},
                 name: 'foo'
               },
               arguments: []
@@ -80,29 +60,17 @@ ast: {
             computed: true,
             value: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 12 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
               name: 'a'
             },
             shorthand: false
           },
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 15 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 14 },
-                end: { line: 1, col: 15 },
-                source: ''
-              },
+              loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
               name: 'a'
             },
             kind: 'init',
@@ -110,11 +78,7 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 14 },
-                end: { line: 1, col: 15 },
-                source: ''
-              },
+              loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
               name: 'a'
             },
             shorthand: true

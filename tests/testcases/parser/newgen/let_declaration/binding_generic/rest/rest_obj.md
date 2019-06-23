@@ -29,46 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 14 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 4 },
-        end: { line: 1, col: 14 },
-        source: ''
-      },
+      loc:{start:{line:1,col:4},end:{line:1,col:14},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 14 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:14},source:''},
           id: {
             type: 'ObjectPattern',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 11 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:11},source:''},
             properties: [
               {
                 type: 'RestElement',
-                loc: {
-                  start: { line: 1, col: 5 },
-                  end: { line: 1, col: 9 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:5},end:{line:1,col:9},source:''},
                 argument: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 8 },
-                    end: { line: 1, col: 9 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
                   name: 'x'
                 }
               }
@@ -76,11 +56,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 13 },
-              end: { line: 1, col: 14 },
-              source: ''
-            },
+            loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
             name: 'y'
           }
         }

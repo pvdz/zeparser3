@@ -29,38 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 18 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 18 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
       expression: {
         type: 'TemplateLiteral',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 18 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
         expressions: [
           {
             type: 'ArrowFunctionExpression',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 15 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:15},source:''},
             params: [
               {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 4 },
-                  end: { line: 1, col: 6 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:4},end:{line:1,col:6},source:''},
                 name: 'a'
               }
             ],
@@ -70,28 +54,16 @@ ast: {
             expression: true,
             body: {
               type: 'BinaryExpression',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 15 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:15},source:''},
               left: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 9 },
-                  end: { line: 1, col: 11 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:9},end:{line:1,col:11},source:''},
                 name: 'b'
               },
               operator: '+',
               right: {
                 type: 'ObjectExpression',
-                loc: {
-                  start: { line: 1, col: 13 },
-                  end: { line: 1, col: 15 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:13},end:{line:1,col:15},source:''},
                 properties: []
               }
             }
@@ -100,21 +72,13 @@ ast: {
         quasis: [
           {
             type: 'TemplateElement',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 1, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
             tail: false,
             value: { raw: '`X${', cooked: '<TODO>' }
           },
           {
             type: 'TemplateElement',
-            loc: {
-              start: { line: 1, col: 15 },
-              end: { line: 1, col: 15 },
-              source: ''
-            },
+            loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
             tail: true,
             value: { raw: '}Y`', cooked: '<TODO>' }
           }

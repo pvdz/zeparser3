@@ -29,45 +29,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 45 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 45 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
       expression: {
         type: 'ArrayExpression',
-        loc: {
-          start: { line: 1, col: 1 },
-          end: { line: 1, col: 43 },
-          source: ''
-        },
+        loc:{start:{line:1,col:1},end:{line:1,col:43},source:''},
         elements: [
           {
             type: 'ObjectExpression',
-            loc: {
-              start: { line: 1, col: 2 },
-              end: { line: 1, col: 42 },
-              source: ''
-            },
+            loc:{start:{line:1,col:2},end:{line:1,col:42},source:''},
             properties: [
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 3 },
-                  end: { line: 1, col: 13 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:3},end:{line:1,col:13},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 3 },
-                    end: { line: 1, col: 8 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:3},end:{line:1,col:8},source:''},
                   name: 'web'
                 },
                 kind: 'init',
@@ -75,11 +55,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Literal',
-                  loc: {
-                    start: { line: 1, col: 8 },
-                    end: { line: 1, col: 13 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:8},end:{line:1,col:13},source:''},
                   value: false,
                   raw: 'false'
                 },
@@ -87,18 +63,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 15 },
-                  end: { line: 1, col: 27 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:15},end:{line:1,col:27},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 15 },
-                    end: { line: 1, col: 26 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:15},end:{line:1,col:26},source:''},
                   name: '__proto__'
                 },
                 kind: 'init',
@@ -106,29 +74,17 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 26 },
-                    end: { line: 1, col: 27 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:26},end:{line:1,col:27},source:''},
                   name: 'a'
                 },
                 shorthand: false
               },
               {
                 type: 'Property',
-                loc: {
-                  start: { line: 1, col: 29 },
-                  end: { line: 1, col: 41 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:29},end:{line:1,col:41},source:''},
                 key: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 29 },
-                    end: { line: 1, col: 40 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:29},end:{line:1,col:40},source:''},
                   name: '__proto__'
                 },
                 kind: 'init',
@@ -136,11 +92,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 40 },
-                    end: { line: 1, col: 41 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:40},end:{line:1,col:41},source:''},
                   name: 'b'
                 },
                 shorthand: false

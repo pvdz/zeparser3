@@ -47,39 +47,23 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 33 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 33 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
       declaration: {
         type: 'ClassDeclaration',
-        loc: {
-          start: { line: 1, col: 15 },
-          end: { line: 1, col: 33 },
-          source: ''
-        },
+        loc:{start:{line:1,col:15},end:{line:1,col:33},source:''},
         id: null,
         superClass: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 29 },
-            end: { line: 1, col: 31 },
-            source: ''
-          },
+          loc:{start:{line:1,col:29},end:{line:1,col:31},source:''},
           name: 'F'
         },
         body: {
           type: 'ClassBody',
-          loc: {
-            start: { line: 1, col: 31 },
-            end: { line: 1, col: 33 },
-            source: ''
-          },
+          loc:{start:{line:1,col:31},end:{line:1,col:33},source:''},
           body: []
         }
       }

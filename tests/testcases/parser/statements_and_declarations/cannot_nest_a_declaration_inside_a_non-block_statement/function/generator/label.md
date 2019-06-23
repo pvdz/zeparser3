@@ -53,50 +53,30 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 21 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
       label: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 3 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
         name: 'foo'
       },
       body: {
         type: 'FunctionDeclaration',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 21 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:21},source:''},
         generator: true,
         async: false,
         id: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 15 },
-            end: { line: 1, col: 15 },
-            source: ''
-          },
+          loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
           name: 'f'
         },
         params: [],
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 19 },
-            end: { line: 1, col: 21 },
-            source: ''
-          },
+          loc:{start:{line:1,col:19},end:{line:1,col:21},source:''},
           body: []
         }
       }

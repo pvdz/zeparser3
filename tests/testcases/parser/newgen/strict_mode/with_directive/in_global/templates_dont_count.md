@@ -29,31 +29,19 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 25 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 14 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
       expression: {
         type: 'TemplateLiteral',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 12 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
         expressions: [],
         quasis: [
           {
             type: 'TemplateElement',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 1, col: 12 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
             tail: true,
             value: { raw: '`use strict`', cooked: '<TODO>' }
           }
@@ -62,34 +50,18 @@ ast: {
     },
     {
       type: 'WithStatement',
-      loc: {
-        start: { line: 1, col: 14 },
-        end: { line: 1, col: 25 },
-        source: ''
-      },
+      loc:{start:{line:1,col:14},end:{line:1,col:25},source:''},
       object: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 20 },
-          end: { line: 1, col: 21 },
-          source: ''
-        },
+        loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
         name: 'x'
       },
       body: {
         type: 'ExpressionStatement',
-        loc: {
-          start: { line: 1, col: 23 },
-          end: { line: 1, col: 25 },
-          source: ''
-        },
+        loc:{start:{line:1,col:23},end:{line:1,col:25},source:''},
         expression: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 23 },
-            end: { line: 1, col: 24 },
-            source: ''
-          },
+          loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
           name: 'y'
         }
       }

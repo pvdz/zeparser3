@@ -29,70 +29,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 27 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 27 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 26 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
         left: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 7 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:7},source:''},
           name: 'result'
         },
         operator: '=',
         right: {
           type: 'AssignmentExpression',
-          loc: {
-            start: { line: 1, col: 9 },
-            end: { line: 1, col: 26 },
-            source: ''
-          },
+          loc:{start:{line:1,col:9},end:{line:1,col:26},source:''},
           left: {
             type: 'ArrayPattern',
-            loc: {
-              start: { line: 1, col: 9 },
-              end: { line: 1, col: 20 },
-              source: ''
-            },
+            loc:{start:{line:1,col:9},end:{line:1,col:20},source:''},
             elements: [
               {
                 type: 'MemberExpression',
-                loc: {
-                  start: { line: 1, col: 9 },
-                  end: { line: 1, col: 18 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:9},end:{line:1,col:18},source:''},
                 object: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 10 },
-                    end: { line: 1, col: 11 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
                   name: 'x'
                 },
                 property: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 12 },
-                    end: { line: 1, col: 17 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:12},end:{line:1,col:17},source:''},
                   name: 'yield'
                 },
                 computed: true
@@ -102,11 +70,7 @@ ast: {
           operator: '=',
           right: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 22 },
-              end: { line: 1, col: 26 },
-              source: ''
-            },
+            loc:{start:{line:1,col:22},end:{line:1,col:26},source:''},
             name: 'vals'
           }
         }

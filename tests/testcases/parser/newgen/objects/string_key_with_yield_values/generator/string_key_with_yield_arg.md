@@ -29,81 +29,45 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 43 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 43 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 13 },
-          end: { line: 1, col: 43 },
-          source: ''
-        },
+        loc:{start:{line:1,col:13},end:{line:1,col:43},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc: {
-              start: { line: 1, col: 17 },
-              end: { line: 1, col: 42 },
-              source: ''
-            },
+            loc:{start:{line:1,col:17},end:{line:1,col:42},source:''},
             expression: {
               type: 'AssignmentExpression',
-              loc: {
-                start: { line: 1, col: 17 },
-                end: { line: 1, col: 42 },
-                source: ''
-              },
+              loc:{start:{line:1,col:17},end:{line:1,col:42},source:''},
               left: {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 17 },
-                  end: { line: 1, col: 19 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
                 name: 's'
               },
               operator: '=',
               right: {
                 type: 'ObjectExpression',
-                loc: {
-                  start: { line: 1, col: 21 },
-                  end: { line: 1, col: 42 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:21},end:{line:1,col:42},source:''},
                 properties: [
                   {
                     type: 'Property',
-                    loc: {
-                      start: { line: 1, col: 22 },
-                      end: { line: 1, col: 38 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:22},end:{line:1,col:38},source:''},
                     key: {
                       type: 'Literal',
-                      loc: {
-                        start: { line: 1, col: 22 },
-                        end: { line: 1, col: 29 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:22},end:{line:1,col:29},source:''},
                       value: 'foo',
                       raw: '"foo"'
                     },
@@ -112,19 +76,11 @@ ast: {
                     computed: false,
                     value: {
                       type: 'YieldExpression',
-                      loc: {
-                        start: { line: 1, col: 29 },
-                        end: { line: 1, col: 38 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:29},end:{line:1,col:38},source:''},
                       delegate: false,
                       argument: {
                         type: 'Literal',
-                        loc: {
-                          start: { line: 1, col: 35 },
-                          end: { line: 1, col: 35 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:35},end:{line:1,col:35},source:''},
                         value: null,
                         regex: { pattern: 'x', flags: '' },
                         raw: '/x/'

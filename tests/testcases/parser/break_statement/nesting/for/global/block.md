@@ -29,33 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 21 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 21 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
       init: null,
       test: null,
       update: null,
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 12 },
-          end: { line: 1, col: 21 },
-          source: ''
-        },
+        loc:{start:{line:1,col:12},end:{line:1,col:21},source:''},
         body: [
           {
             type: 'BreakStatement',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 20 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:20},source:''},
             label: null
           }
         ]

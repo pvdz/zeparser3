@@ -53,78 +53,42 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 37 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
       block: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 4 },
-          end: { line: 1, col: 7 },
-          source: ''
-        },
+        loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc: {
-          start: { line: 1, col: 7 },
-          end: { line: 1, col: 37 },
-          source: ''
-        },
+        loc:{start:{line:1,col:7},end:{line:1,col:37},source:''},
         param: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 14 },
-            end: { line: 1, col: 14 },
-            source: ''
-          },
+          loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
           name: 'e'
         },
         body: {
           type: 'BlockStatement',
-          loc: {
-            start: { line: 1, col: 17 },
-            end: { line: 1, col: 37 },
-            source: ''
-          },
+          loc:{start:{line:1,col:17},end:{line:1,col:37},source:''},
           body: [
             {
               type: 'ForStatement',
-              loc: {
-                start: { line: 1, col: 19 },
-                end: { line: 1, col: 36 },
-                source: ''
-              },
+              loc:{start:{line:1,col:19},end:{line:1,col:36},source:''},
               init: {
                 type: 'VariableDeclaration',
-                loc: {
-                  start: { line: 1, col: 28 },
-                  end: { line: 1, col: 29 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:28},end:{line:1,col:29},source:''},
                 kind: 'var',
                 declarations: [
                   {
                     type: 'VariableDeclarator',
-                    loc: {
-                      start: { line: 1, col: 28 },
-                      end: { line: 1, col: 29 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:28},end:{line:1,col:29},source:''},
                     id: {
                       type: 'Identifier',
-                      loc: {
-                        start: { line: 1, col: 28 },
-                        end: { line: 1, col: 28 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:28},end:{line:1,col:28},source:''},
                       name: 'e'
                     },
                     init: null
@@ -135,11 +99,7 @@ ast: {
               update: null,
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 33 },
-                  end: { line: 1, col: 36 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:33},end:{line:1,col:36},source:''},
                 body: []
               }
             }

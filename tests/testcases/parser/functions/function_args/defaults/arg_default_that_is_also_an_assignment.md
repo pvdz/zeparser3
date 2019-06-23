@@ -29,67 +29,39 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 19 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 19 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 9 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
         name: 'f'
       },
       params: [
         {
           type: 'AssignmentPattern',
-          loc: {
-            start: { line: 1, col: 11 },
-            end: { line: 1, col: 16 },
-            source: ''
-          },
+          loc:{start:{line:1,col:11},end:{line:1,col:16},source:''},
           left: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 11 },
-              end: { line: 1, col: 11 },
-              source: ''
-            },
+            loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
             name: 'a'
           },
           right: {
             type: 'AssignmentExpression',
-            loc: {
-              start: { line: 1, col: 13 },
-              end: { line: 1, col: 16 },
-              source: ''
-            },
+            loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
             left: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 13 },
-                end: { line: 1, col: 14 },
-                source: ''
-              },
+              loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
               name: 'b'
             },
             operator: '=',
             right: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 15 },
-                end: { line: 1, col: 16 },
-                source: ''
-              },
+              loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
               name: 'c'
             }
           }
@@ -97,11 +69,7 @@ ast: {
       ],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 17 },
-          end: { line: 1, col: 19 },
-          source: ''
-        },
+        loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
         body: []
       }
     }

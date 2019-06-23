@@ -47,84 +47,48 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 30 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 11 },
-          end: { line: 1, col: 29 },
-          source: ''
-        },
+        loc:{start:{line:1,col:11},end:{line:1,col:29},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 11 },
-              end: { line: 1, col: 29 },
-              source: ''
-            },
+            loc:{start:{line:1,col:11},end:{line:1,col:29},source:''},
             id: {
               type: 'ArrayPattern',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 24 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:24},source:''},
               elements: [
                 {
                   type: 'AssignmentPattern',
-                  loc: {
-                    start: { line: 1, col: 11 },
-                    end: { line: 1, col: 17 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:11},end:{line:1,col:17},source:''},
                   left: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 12 },
-                      end: { line: 1, col: 15 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
                     name: 'foo'
                   },
                   right: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 16 },
-                      end: { line: 1, col: 17 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
                     name: 'a'
                   }
                 },
                 {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 19 },
-                    end: { line: 1, col: 22 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:19},end:{line:1,col:22},source:''},
                   name: 'bar'
                 }
               ]
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 26 },
-                end: { line: 1, col: 29 },
-                source: ''
-              },
+              loc:{start:{line:1,col:26},end:{line:1,col:29},source:''},
               name: 'arr'
             }
           }

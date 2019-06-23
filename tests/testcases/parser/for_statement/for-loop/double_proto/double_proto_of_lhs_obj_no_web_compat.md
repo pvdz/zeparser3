@@ -29,37 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 37 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 37 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
       init: {
         type: 'ObjectExpression',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 33 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:33},source:''},
         properties: [
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 6 },
-              end: { line: 1, col: 18 },
-              source: ''
-            },
+            loc:{start:{line:1,col:6},end:{line:1,col:18},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 6 },
-                end: { line: 1, col: 17 },
-                source: ''
-              },
+              loc:{start:{line:1,col:6},end:{line:1,col:17},source:''},
               name: '__proto__'
             },
             kind: 'init',
@@ -67,11 +51,7 @@ ast: {
             computed: false,
             value: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 17 },
-                end: { line: 1, col: 17 },
-                source: ''
-              },
+              loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
               value: 1,
               raw: '1'
             },
@@ -79,18 +59,10 @@ ast: {
           },
           {
             type: 'Property',
-            loc: {
-              start: { line: 1, col: 20 },
-              end: { line: 1, col: 32 },
-              source: ''
-            },
+            loc:{start:{line:1,col:20},end:{line:1,col:32},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 20 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:20},end:{line:1,col:31},source:''},
               name: '__proto__'
             },
             kind: 'init',
@@ -98,11 +70,7 @@ ast: {
             computed: false,
             value: {
               type: 'Literal',
-              loc: {
-                start: { line: 1, col: 31 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:31},end:{line:1,col:31},source:''},
               value: 2,
               raw: '2'
             },
@@ -114,11 +82,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 36 },
-          end: { line: 1, col: 37 },
-          source: ''
-        }
+        loc:{start:{line:1,col:36},end:{line:1,col:37},source:''}
       }
     }
   ]

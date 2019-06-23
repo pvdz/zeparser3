@@ -30,40 +30,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 14 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:14},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 4 },
-        end: { line: 2, col: 0 },
-        source: ''
-      },
+      loc:{start:{line:1,col:4},end:{line:2,col:0},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 2, col: 0 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:2,col:0},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
             name: 'f'
           },
           init: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 2, col: 0 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:2,col:0},source:''},
             name: 'async'
           }
         }
@@ -71,30 +55,18 @@ ast: {
     },
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 2, col: 0 },
-        end: { line: 2, col: 14 },
-        source: ''
-      },
+      loc:{start:{line:2,col:0},end:{line:2,col:14},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 2, col: 9 },
-          end: { line: 2, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:2,col:9},end:{line:2,col:9},source:''},
         name: 'g'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 2, col: 12 },
-          end: { line: 2, col: 14 },
-          source: ''
-        },
+        loc:{start:{line:2,col:12},end:{line:2,col:14},source:''},
         body: []
       }
     }

@@ -29,55 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 30 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 30 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
       label: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 3 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
         name: 'foo'
       },
       body: {
         type: 'DoWhileStatement',
-        loc: {
-          start: { line: 1, col: 5 },
-          end: { line: 1, col: 30 },
-          source: ''
-        },
+        loc:{start:{line:1,col:5},end:{line:1,col:30},source:''},
         body: {
           type: 'BreakStatement',
-          loc: {
-            start: { line: 1, col: 8 },
-            end: { line: 1, col: 19 },
-            source: ''
-          },
+          loc:{start:{line:1,col:8},end:{line:1,col:19},source:''},
           label: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 14 },
-              end: { line: 1, col: 14 },
-              source: ''
-            },
+            loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
             name: 'foo'
           }
         },
         test: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 25 },
-            end: { line: 1, col: 28 },
-            source: ''
-          },
+          loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
           name: 'foo'
         }
       }

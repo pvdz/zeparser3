@@ -29,96 +29,56 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 46 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:46},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 46 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:46},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 14 },
-          end: { line: 1, col: 46 },
-          source: ''
-        },
+        loc:{start:{line:1,col:14},end:{line:1,col:46},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc: {
-              start: { line: 1, col: 20 },
-              end: { line: 1, col: 45 },
-              source: ''
-            },
+            loc:{start:{line:1,col:20},end:{line:1,col:45},source:''},
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc: {
-                  start: { line: 1, col: 20 },
-                  end: { line: 1, col: 45 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:20},end:{line:1,col:45},source:''},
                 id: {
                   type: 'Identifier',
-                  loc: {
-                    start: { line: 1, col: 20 },
-                    end: { line: 1, col: 20 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
                   name: 'f'
                 },
                 init: {
                   type: 'FunctionExpression',
-                  loc: {
-                    start: { line: 1, col: 24 },
-                    end: { line: 1, col: 45 },
-                    source: ''
-                  },
+                  loc:{start:{line:1,col:24},end:{line:1,col:45},source:''},
                   generator: false,
                   async: false,
                   id: {
                     type: 'Identifier',
-                    loc: {
-                      start: { line: 1, col: 33 },
-                      end: { line: 1, col: 33 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:33},end:{line:1,col:33},source:''},
                     name: 'f'
                   },
                   params: [
                     {
                       type: 'Identifier',
-                      loc: {
-                        start: { line: 1, col: 35 },
-                        end: { line: 1, col: 35 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:35},end:{line:1,col:35},source:''},
                       name: 'await'
                     }
                   ],
                   body: {
                     type: 'BlockStatement',
-                    loc: {
-                      start: { line: 1, col: 42 },
-                      end: { line: 1, col: 45 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:42},end:{line:1,col:45},source:''},
                     body: []
                   }
                 }

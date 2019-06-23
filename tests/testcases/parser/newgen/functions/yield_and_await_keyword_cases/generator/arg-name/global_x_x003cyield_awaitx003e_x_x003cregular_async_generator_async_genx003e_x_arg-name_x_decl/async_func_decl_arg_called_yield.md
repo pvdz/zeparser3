@@ -29,71 +29,43 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 44 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 44 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 10 },
-          end: { line: 1, col: 10 },
-          source: ''
-        },
+        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc: {
-          start: { line: 1, col: 14 },
-          end: { line: 1, col: 44 },
-          source: ''
-        },
+        loc:{start:{line:1,col:14},end:{line:1,col:44},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc: {
-              start: { line: 1, col: 22 },
-              end: { line: 1, col: 43 },
-              source: ''
-            },
+            loc:{start:{line:1,col:22},end:{line:1,col:43},source:''},
             generator: false,
             async: true,
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 31 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:31},end:{line:1,col:31},source:''},
               name: 'f'
             },
             params: [
               {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 33 },
-                  end: { line: 1, col: 33 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:33},end:{line:1,col:33},source:''},
                 name: 'yield'
               }
             ],
             body: {
               type: 'BlockStatement',
-              loc: {
-                start: { line: 1, col: 40 },
-                end: { line: 1, col: 43 },
-                source: ''
-              },
+              loc:{start:{line:1,col:40},end:{line:1,col:43},source:''},
               body: []
             }
           }

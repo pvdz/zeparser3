@@ -29,47 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 47 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 47 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
       id: {
         type: 'Identifier',
-        loc: {
-          start: { line: 1, col: 6 },
-          end: { line: 1, col: 6 },
-          source: ''
-        },
+        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
         name: 'x'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc: {
-          start: { line: 1, col: 8 },
-          end: { line: 1, col: 47 },
-          source: ''
-        },
+        loc:{start:{line:1,col:8},end:{line:1,col:47},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc: {
-              start: { line: 1, col: 10 },
-              end: { line: 1, col: 46 },
-              source: ''
-            },
+            loc:{start:{line:1,col:10},end:{line:1,col:46},source:''},
             key: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 10 },
-                end: { line: 1, col: 14 },
-                source: ''
-              },
+              loc:{start:{line:1,col:10},end:{line:1,col:14},source:''},
               name: 'dsda'
             },
             static: false,
@@ -77,76 +57,40 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc: {
-                start: { line: 1, col: 10 },
-                end: { line: 1, col: 46 },
-                source: ''
-              },
+              loc:{start:{line:1,col:10},end:{line:1,col:46},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc: {
-                  start: { line: 1, col: 16 },
-                  end: { line: 1, col: 46 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:16},end:{line:1,col:46},source:''},
                 body: [
                   {
                     type: 'ReturnStatement',
-                    loc: {
-                      start: { line: 1, col: 18 },
-                      end: { line: 1, col: 45 },
-                      source: ''
-                    },
+                    loc:{start:{line:1,col:18},end:{line:1,col:45},source:''},
                     argument: {
                       type: 'ArrowFunctionExpression',
-                      loc: {
-                        start: { line: 1, col: 25 },
-                        end: { line: 1, col: 43 },
-                        source: ''
-                      },
+                      loc:{start:{line:1,col:25},end:{line:1,col:43},source:''},
                       params: [
                         {
                           type: 'AssignmentPattern',
-                          loc: {
-                            start: { line: 1, col: 26 },
-                            end: { line: 1, col: 37 },
-                            source: ''
-                          },
+                          loc:{start:{line:1,col:26},end:{line:1,col:37},source:''},
                           left: {
                             type: 'Identifier',
-                            loc: {
-                              start: { line: 1, col: 26 },
-                              end: { line: 1, col: 27 },
-                              source: ''
-                            },
+                            loc:{start:{line:1,col:26},end:{line:1,col:27},source:''},
                             name: 'a'
                           },
                           right: {
                             type: 'MemberExpression',
-                            loc: {
-                              start: { line: 1, col: 28 },
-                              end: { line: 1, col: 37 },
-                              source: ''
-                            },
+                            loc:{start:{line:1,col:28},end:{line:1,col:37},source:''},
                             object: {
                               type: 'Super',
-                              loc: {
-                                start: { line: 1, col: 28 },
-                                end: { line: 1, col: 33 },
-                                source: ''
-                              }
+                              loc:{start:{line:1,col:28},end:{line:1,col:33},source:''}
                             },
                             property: {
                               type: 'Identifier',
-                              loc: {
-                                start: { line: 1, col: 34 },
-                                end: { line: 1, col: 34 },
-                                source: ''
-                              },
+                              loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
                               name: 'foo'
                             },
                             computed: false
@@ -159,11 +103,7 @@ ast: {
                       expression: true,
                       body: {
                         type: 'Identifier',
-                        loc: {
-                          start: { line: 1, col: 42 },
-                          end: { line: 1, col: 43 },
-                          source: ''
-                        },
+                        loc:{start:{line:1,col:42},end:{line:1,col:43},source:''},
                         name: 'a'
                       }
                     }

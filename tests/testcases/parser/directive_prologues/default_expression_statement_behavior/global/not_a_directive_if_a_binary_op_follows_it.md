@@ -29,40 +29,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 15 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 15 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 15 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
         left: {
           type: 'Literal',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 1, col: 0 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:1,col:0},source:''},
           value: 'ignore me',
           raw: '"ignore me"'
         },
         operator: '+',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 1, col: 14 },
-            end: { line: 1, col: 15 },
-            source: ''
-          },
+          loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
           name: 'x'
         }
       }

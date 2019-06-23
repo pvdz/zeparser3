@@ -32,54 +32,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 2, col: 4 } },
+  loc:{start:{line:1,col:0},end:{line:2,col:4},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 2, col: 4 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:2,col:4},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 2, col: 4 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:2,col:4},source:''},
         left: {
           type: 'UnaryExpression',
-          loc: {
-            start: { line: 1, col: 0 },
-            end: { line: 2, col: 0 },
-            source: ''
-          },
+          loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
           operator: 'delete',
           prefix: true,
           argument: {
             type: 'MemberExpression',
-            loc: {
-              start: { line: 1, col: 7 },
-              end: { line: 2, col: 0 },
-              source: ''
-            },
+            loc:{start:{line:1,col:7},end:{line:2,col:0},source:''},
             object: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 7 },
-                end: { line: 1, col: 8 },
-                source: ''
-              },
+              loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
               name: 'a'
             },
             property: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 9 },
-                end: { line: 1, col: 9 },
-                source: ''
-              },
+              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
               name: 'b'
             },
             computed: false
@@ -88,11 +64,7 @@ ast: {
         operator: '/',
         right: {
           type: 'Identifier',
-          loc: {
-            start: { line: 2, col: 1 },
-            end: { line: 2, col: 4 },
-            source: ''
-          },
+          loc:{start:{line:2,col:1},end:{line:2,col:4},source:''},
           name: 'foo'
         }
       }

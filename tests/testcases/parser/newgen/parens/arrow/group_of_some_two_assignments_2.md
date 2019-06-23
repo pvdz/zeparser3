@@ -29,48 +29,28 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 17 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc: {
-        start: { line: 1, col: 4 },
-        end: { line: 1, col: 16 },
-        source: ''
-      },
+      loc:{start:{line:1,col:4},end:{line:1,col:16},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc: {
-            start: { line: 1, col: 4 },
-            end: { line: 1, col: 16 },
-            source: ''
-          },
+          loc:{start:{line:1,col:4},end:{line:1,col:16},source:''},
           id: {
             type: 'Identifier',
-            loc: {
-              start: { line: 1, col: 4 },
-              end: { line: 1, col: 4 },
-              source: ''
-            },
+            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
             name: 'a'
           },
           init: {
             type: 'ArrowFunctionExpression',
-            loc: {
-              start: { line: 1, col: 8 },
-              end: { line: 1, col: 16 },
-              source: ''
-            },
+            loc:{start:{line:1,col:8},end:{line:1,col:16},source:''},
             params: [
               {
                 type: 'Identifier',
-                loc: {
-                  start: { line: 1, col: 9 },
-                  end: { line: 1, col: 10 },
-                  source: ''
-                },
+                loc:{start:{line:1,col:9},end:{line:1,col:10},source:''},
                 name: 'b'
               }
             ],
@@ -80,11 +60,7 @@ ast: {
             expression: true,
             body: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 15 },
-                end: { line: 1, col: 16 },
-                source: ''
-              },
+              loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
               name: 'c'
             }
           }

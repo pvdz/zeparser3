@@ -28,47 +28,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 9 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:9},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 9 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:9},source:''},
       expression: {
         type: 'ArrayExpression',
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 1, col: 9 },
-          source: ''
-        },
+        loc:{start:{line:1,col:0},end:{line:1,col:9},source:''},
         elements: [
           {
             type: 'BinaryExpression',
-            loc: {
-              start: { line: 1, col: 0 },
-              end: { line: 1, col: 8 },
-              source: ''
-            },
+            loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
             left: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 2 },
-                end: { line: 1, col: 4 },
-                source: ''
-              },
+              loc:{start:{line:1,col:2},end:{line:1,col:4},source:''},
               name: 'x'
             },
             operator: '+',
             right: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 6 },
-                end: { line: 1, col: 8 },
-                source: ''
-              },
+              loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
               name: 'y'
             }
           }

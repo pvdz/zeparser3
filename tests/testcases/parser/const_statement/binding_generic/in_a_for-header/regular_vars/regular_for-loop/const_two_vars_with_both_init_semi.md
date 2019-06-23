@@ -29,73 +29,41 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc: { start: { line: 1, col: 0 }, end: { line: 1, col: 35 } },
+  loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc: {
-        start: { line: 1, col: 0 },
-        end: { line: 1, col: 35 },
-        source: ''
-      },
+      loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc: {
-          start: { line: 1, col: 11 },
-          end: { line: 1, col: 31 },
-          source: ''
-        },
+        loc:{start:{line:1,col:11},end:{line:1,col:31},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 11 },
-              end: { line: 1, col: 20 },
-              source: ''
-            },
+            loc:{start:{line:1,col:11},end:{line:1,col:20},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 11 },
-                end: { line: 1, col: 11 },
-                source: ''
-              },
+              loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
               name: 'foo'
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 17 },
-                end: { line: 1, col: 20 },
-                source: ''
-              },
+              loc:{start:{line:1,col:17},end:{line:1,col:20},source:''},
               name: 'bar'
             }
           },
           {
             type: 'VariableDeclarator',
-            loc: {
-              start: { line: 1, col: 22 },
-              end: { line: 1, col: 31 },
-              source: ''
-            },
+            loc:{start:{line:1,col:22},end:{line:1,col:31},source:''},
             id: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 22 },
-                end: { line: 1, col: 22 },
-                source: ''
-              },
+              loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
               name: 'zoo'
             },
             init: {
               type: 'Identifier',
-              loc: {
-                start: { line: 1, col: 28 },
-                end: { line: 1, col: 31 },
-                source: ''
-              },
+              loc:{start:{line:1,col:28},end:{line:1,col:31},source:''},
               name: 'boo'
             }
           }
@@ -105,11 +73,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc: {
-          start: { line: 1, col: 34 },
-          end: { line: 1, col: 35 },
-          source: ''
-        }
+        loc:{start:{line:1,col:34},end:{line:1,col:35},source:''}
       }
     }
   ]
