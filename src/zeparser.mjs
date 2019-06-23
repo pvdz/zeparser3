@@ -2002,12 +2002,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case 'class':
-        if (includeDeclarations === EXC_DECL) THROW('Cannot parse a class declaration here, only excpecting statements here');
+        if (includeDeclarations === EXC_DECL) THROW('Cannot parse a class declaration here, only expecting statements here');
         parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, astProp);
         return;
 
       case 'const':
-        if (includeDeclarations === EXC_DECL) THROW('Cannot parse a const declaration here, only excpecting statements here');
+        if (includeDeclarations === EXC_DECL) THROW('Cannot parse a const declaration here, only expecting statements here');
         parseConstStatement(lexerFlags, scoop, astProp);
         return;
 
@@ -2039,7 +2039,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           isFunctionStatement = true;
           // in web compat mode func statements are only allowed inside `if` and `else` statements in sloppy mode
           if (options_webCompat === WEB_COMPAT_OFF || hasNoFlag(lexerFlags, LF_CAN_FUNC_STMT) || hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-            THROW('Cannot parse a function declaration here, only excpecting statements here');
+            THROW('Cannot parse a function declaration here, only expecting statements here');
           }
         }
         ASSERT(scoop, 'should have a scoop at this point');

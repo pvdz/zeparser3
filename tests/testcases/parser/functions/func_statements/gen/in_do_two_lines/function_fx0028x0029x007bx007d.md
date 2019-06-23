@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse a function declaration here, only excpecting statements here
+  Cannot parse a function declaration here, only expecting statements here
 
 do function f(){}
    ^------- error

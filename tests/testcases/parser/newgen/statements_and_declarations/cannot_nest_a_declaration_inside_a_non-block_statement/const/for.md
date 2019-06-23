@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse a const declaration here, only excpecting statements here
+  Cannot parse a const declaration here, only expecting statements here
 
 for (;;) const y = x
          ^------- error
