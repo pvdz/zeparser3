@@ -183,10 +183,10 @@ async function coreTest(input, zeparser, goal, options) {
   if (SEARCH) {
     // If you use -q -i then you just want to know whether or not some codepath hits some code
     if (INPUT_OVERRIDE) {
-      PRINT_HIT(`[${(e.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+      PRINT_HIT(`[${(e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
     } else if (wasHit) {
       if (!foundCache.has(input)) {
-        PRINT_HIT(`// [${(e.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(input)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+        PRINT_HIT(`// [${(e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(input)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
         foundCache.add(input);
       }
     }
@@ -270,6 +270,7 @@ async function runTest(list, zeparser, testVariant) {
   let ok = 0;
   let fail = 0;
   if (!INPUT_OVERRIDE) console.log('   Parsing all inputs');
+  else console.log('\n');
   console.time('   $$ Parse time for all tests');
   let set = await Promise.all(list.map(async obj => {
     let {input, params} = obj;
@@ -286,6 +287,7 @@ async function runTest(list, zeparser, testVariant) {
     return {obj, result};
   }));
   if (!INPUT_OVERRIDE) console.log('   Have', set.length, 'results, totaling', bytes, 'bytes, ok = ', ok, ', fail =', fail);
+  else console.log('\n');
   console.timeEnd('   $$ Parse time for all tests');
   if (SEARCH) return;
 
