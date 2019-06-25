@@ -35,7 +35,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Tried to define a var which was already bound as a let/const inside a for-header, which is explicitly illegal
+  Tried to define a var `x` which was already bound as a let/const inside a for-header, which is explicitly illegal
 
 for (let x;;) { var x; }
                     ^------- error

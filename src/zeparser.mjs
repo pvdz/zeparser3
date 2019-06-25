@@ -1177,18 +1177,31 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             if (originIsVarDecl && options_webCompat === WEB_COMPAT_ON) {
               catchforofhack = true;
             } else {
-              THROW('Can not redefine the catch-var as same binding');
+              THROW('Can not redefine the catch-var `' + name + '` as same binding');
             }
           }
           else if (type === FOR_SCOPE) {
-            THROW('Tried to define a var which was already bound as a let/const inside a for-header, which is explicitly illegal');
+            THROW('Tried to define a var `' + name + '` which was already bound as a let/const inside a for-header, which is explicitly illegal');
           }
           else if (type !== ARG_SCOPE) {
-            // Args are really just kind of vars.
             THROW('Tried to define a var `' + name + '` which was already bound as a lexical binding');
           }
           else {
-            // can get here for `try {} catch(e) { var e; }` with webcompat mode on, and for `function f(a){ var a }` etc
+            HIT()
+            // can get here for `try {} catch(e) { var e; }` with webcompat mode on
+            // [v]: `([a,b,c]) => { var c }`
+            // [v]: `(x) => { function x() {} }`
+            // [v]: `(x) => { var x; }`
+            // [v]: `x => { function x() {} }`
+            // [v]: `x => { var x; }`
+            // [v]: `function f(x) {{var x}}`
+            // [v]: `function f(x) {var x}`
+            // [v]: `function f(x) { function x() {} }`
+            // [v]: `function f(x) { var x; }`
+            // [v]: `class o {f(x) { function x() {} }}`
+            // [v]: `class o {f(x) { var x; }}`
+            // [v]: `o = {f(x) { function x() {} }}`
+            // [v]: `o = {f(x) { var x; }}`
           }
         }
         lex = lex['#'];

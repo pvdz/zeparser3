@@ -47,7 +47,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Can not redefine the catch-var as same binding
+  Can not redefine the catch-var `e` as same binding
 
 try {} catch (e) { for (var e of y) {} }
                             ^------- error
