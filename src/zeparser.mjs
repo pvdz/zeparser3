@@ -1181,14 +1181,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             }
           }
           else if (type === FOR_SCOPE) {
-            // if (SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) === true) {
             THROW('Tried to define a var which was already bound as a let/const inside a for-header, which is explicitly illegal');
-            // }
           }
-          else if (type !== ARG_SCOPE) { // args are really just kind of vars
-            if (SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) === true) {
-              THROW('Tried to define a var `' + name + '` which was already bound as a lexical binding');
-            }
+          else if (type !== ARG_SCOPE) {
+            // Args are really just kind of vars.
+            THROW('Tried to define a var `' + name + '` which was already bound as a lexical binding');
           }
           else {
             // can get here for `try {} catch(e) { var e; }` with webcompat mode on, and for `function f(a){ var a }` etc
