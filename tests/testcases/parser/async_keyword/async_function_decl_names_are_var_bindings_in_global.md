@@ -87,7 +87,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Tried to define a var which was already bound as a lexical binding
+  Tried to define a var `f` which was already bound as a lexical binding
 
 async function f() {} var f;
                           ^------- error

@@ -1097,7 +1097,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // TODO: optimize creating this obj conditionally under webcompat flag
         // Every name added to the lexical scope is marked here as being a function decl name or not
         // Then when a dupe clash happens, check this list to assert that the name was only used by func names
-        funcs: {},
+        funcs: {
+          '@funcs': 'funcs test',
+        },
       },
     };
     ASSERT(scoop._ = 'scope', 'just debugging');
@@ -1115,7 +1117,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       lex: {
         '#': scoop.lex,
         type: scopeType,
-        funcs: [],
+        funcs: {
+          '@funcs': 'funcs test 2',
+        },
       },
     };
     ASSERT(scoop2._ = desc + '.scope');
@@ -1175,16 +1179,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             } else {
               THROW('Can not redefine the catch-var as same binding');
             }
-          } else if (type === FOR_SCOPE) {
-            // if (SCOPE_isDupeLexBindingError(scoop, hashed, lexerFlags) === true) {
+          }
+          else if (type === FOR_SCOPE) {
+            // if (SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) === true) {
             THROW('Tried to define a var which was already bound as a let/const inside a for-header, which is explicitly illegal');
             // }
-          } else if (type !== ARG_SCOPE) { // args are really just kind of vars
-            if (SCOPE_isDupeLexBindingError(scoop, hashed, lexerFlags) === true) {
-              THROW('Tried to define a var which was already bound as a lexical binding');
+          }
+          else if (type !== ARG_SCOPE) { // args are really just kind of vars
+            if (SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) === true) {
+              THROW('Tried to define a var `' + name + '` which was already bound as a lexical binding');
             }
           }
-          // can get here for `try {} catch(e) { var e; }` with webcompat mode on, and for `function f(a){ var a }` etc
+          else {
+            // can get here for `try {} catch(e) { var e; }` with webcompat mode on, and for `function f(a){ var a }` etc
+          }
         }
         lex = lex['#'];
       } while (lex);
@@ -1212,7 +1220,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         SCOPE_lexParentDupeCheck(lexerFlags, scoop, hashed);
 
         if (lex[hashed] !== undefined) {
-          if (SCOPE_isDupeLexBindingError(scoop, hashed, lexerFlags) === true) {
+          if (SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) === true) {
             THROW('Cannot create lexical binding when the name was already bound');
           }
         }
@@ -1222,7 +1230,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (x === undefined) x = 1;
       else if (dupeChecks === CHECK_DUPE_BINDS) {
         ASSERT(x >= 1, 'x is undefined or at least 1');
-        if (SCOPE_isDupeLexBindingError(scoop, hashed, lexerFlags) === true) {
+        if (SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) === true) {
           THROW('Encountered lexical binding `' + hashed.slice(1) + '` that was bound multiple times (let/const/class/etc)');
         }
       }
@@ -1348,7 +1356,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // only check inner scopes. var recording also has to check upper lex scopes (`let x; {var x}`)
     if (scoop.lexvar[hashed] !== undefined) {
-      if (SCOPE_isDupeLexBindingError(scoop, hashed, lexerFlags) === true) {
+      if (SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) === true) {
         THROW('Cannot create lexical binding when the name was already `var` bound');
       }
     }
@@ -1369,17 +1377,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
   }
-  function SCOPE_isDupeLexBindingError(scoop, hashed, lexerFlags) {
+  function SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) {
     if (options_webCompat === WEB_COMPAT_OFF) return true;
     if (hasAnyFlag(lexerFlags, LF_STRICT_MODE)) return true;
-    // In sloppy+webcompat, it is not an error if this dupe is for two funcs. Otherwise still an error.
-    return !SCOPE_isFuncDeclOnly(scoop, hashed)
-  }
-  function SCOPE_isFuncDeclOnly(scoop, hashed) {
     ASSERT(options_webCompat === WEB_COMPAT_ON, 'this is only for webcompat');
     ASSERT(scoop.lex && scoop.lex.funcs, 'obj should be there');
     ASSERT(hashed[0] === '#' && hashed !== '#', 'name should be hashed');
-    return scoop.lex.funcs[hashed] === true;
+    // In sloppy+webcompat, it is not an error if this dupe is for two funcs. Otherwise still an error.
+    return scoop.lex.funcs[hashed] !== true;
   }
 
   function parseDirectivePrologues(lexerFlags, astProp) {
@@ -1807,7 +1812,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else if (isFuncDecl === IS_FUNC_EXPR && isRealFuncExpr) {
         // FIXME: this approach may work but means the exposed scope cannot be used to find func expr names (probably same for other similar cases like class exprs)
         TODO
-        // ik probeerde uit te zoeken of en waarom deze branch niet gehit werd/
         SCOPE_addBindingAndDedupe(lexerFlags, innerScoop, name, nameBindingType, ORIGIN_IS_VAR_DECL); // TODO: fix origin
       }
       // create new lexical binding to "hide" the function name.
