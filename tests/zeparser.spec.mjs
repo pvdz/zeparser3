@@ -183,10 +183,10 @@ async function coreTest(input, zeparser, goal, options) {
   if (SEARCH) {
     // If you use -q -i then you just want to know whether or not some codepath hits some code
     if (INPUT_OVERRIDE) {
-      PRINT_HIT(`[${(e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+      PRINT_HIT(`[${(e&&e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
     } else if (wasHit) {
       if (!foundCache.has(input)) {
-        PRINT_HIT(`// [${(e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(input)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+        PRINT_HIT(`// [${(e&&e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(input)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
         foundCache.add(input);
       }
     }
