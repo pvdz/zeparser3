@@ -36,10 +36,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Const binding attempted to get at least one name bound more than once
+  Cannot create lexical binding when the name was already bound
 
 let x = a; const x = b;
-                      ^------- error
+                 ^------- error
 `````
 
 ### Strict mode

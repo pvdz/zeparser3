@@ -1241,12 +1241,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       let x = lex[hashed];
+      ASSERT(x === undefined || x >= 1, 'x is undefined or at least 1', x);
       if (x === undefined) x = 1;
       else if (dupeChecks === CHECK_DUPE_BINDS) {
-        ASSERT(x >= 1, 'x is undefined or at least 1');
         if (SCOPE_isNotNameFunctionBound(scoop, hashed, lexerFlags) === true) {
           THROW('Encountered lexical binding `' + hashed.slice(1) + '` that was bound multiple times (let/const/class/etc)');
         }
+        ++x;
       }
       else ++x;
 
@@ -1994,6 +1995,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('Getters can not have any parameters');
     }
     else {
+      // Skip dupe checks because dupe param names are allowed in sloppy mode if the params are all "simple"
       wasSimple = parseBindings(lexerFlags, scoop, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, setToken, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'params');
       AST_destruct('params');
       ASSERT(curc !== $$COMMA_2C, 'the trailing func comma case should already be caught by now');
@@ -2596,7 +2598,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseConstStatement(lexerFlags, scoop, astProp) {
     let constToken = curtok;
     ASSERT_skipAny('const', lexerFlags); // next is ident, [, or {
-    parseAnyVarDecls(lexerFlags, curtok, scoop, BINDING_TYPE_CONST, FROM_STATEMENT_START, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+    parseAnyVarDecls(lexerFlags, curtok, scoop, BINDING_TYPE_CONST, FROM_STATEMENT_START, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
     if (SCOPE_verifyLexical(lexerFlags, scoop)) THROW('Const binding attempted to get at least one name bound more than once');
     parseSemiOrAsi(lexerFlags);
   }

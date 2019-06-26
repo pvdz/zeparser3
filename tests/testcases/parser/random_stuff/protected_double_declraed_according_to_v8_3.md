@@ -31,7 +31,7 @@ throws: Parser error!
   Cannot create lexical binding when the name was already `var` bound
 
 function protected(){for(;;)switch(x){default:}}const protected=x
-                                                                ^------- error
+                                                      ^------- error
 `````
 
 ### Strict mode

@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot use this name (function) as a variable name because: Cannot never use this reserved word as a variable name
+  Cannot create lexical binding when the name was already `var` bound
 
 function protected(){for(;;)switch(x){default:}}const protected=x,function arguments(){}v:switch(x){default:}let arguments=l,function package(){}let package=a,function v(){}const v=x
-                                                                  ^------- error
+                                                      ^------- error
 `````
 
 ### Strict mode
@@ -59,4 +59,11 @@ _Output same as strict mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Cannot use this name (function) as a variable name because: Cannot never use this reserved word as a variable name
+
+function protected(){for(;;)switch(x){default:}}const protected=x,function arguments(){}v:switch(x){default:}let arguments=l,function package(){}let package=a,function v(){}const v=x
+                                                                  ^------- error
+`````
+

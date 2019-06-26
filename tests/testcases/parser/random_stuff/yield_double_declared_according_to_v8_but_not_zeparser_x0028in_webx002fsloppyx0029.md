@@ -31,7 +31,7 @@ throws: Parser error!
   Cannot create lexical binding when the name was already `var` bound
 
 function yield(){switch(e){default:}}switch(x){default:case x:}const yield=x
-                                                                           ^------- error
+                                                                     ^------- error
 `````
 
 ### Strict mode

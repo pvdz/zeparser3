@@ -39,7 +39,7 @@ throws: Parser error!
   Cannot create lexical binding when the name was already `var` bound
 
 var x = a; const x = b;
-                      ^------- error
+                 ^------- error
 `````
 
 ### Strict mode

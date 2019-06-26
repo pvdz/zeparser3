@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Const binding attempted to get at least one name bound more than once
+  Cannot create lexical binding when the name was already bound
 
 { async function f(){} const f = x }
-                                   ^------- error
+                             ^------- error
 `````
 
 ### Strict mode
@@ -50,4 +50,11 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Const binding attempted to get at least one name bound more than once
+
+{ async function f(){} const f = x }
+                                   ^------- error
+`````
+

@@ -37,7 +37,7 @@ throws: Parser error!
   Cannot create lexical binding when the name was already `var` bound
 
 function f(){ function x(){} const x = y; }
-                                        ^------- error
+                                   ^------- error
 `````
 
 ### Strict mode

@@ -37,7 +37,7 @@ throws: Parser error!
   Cannot create lexical binding when the name was already `var` bound
 
 switch (x) { case a: var foo = x; break; case b: const foo = x; break; }
-                                                              ^------- error
+                                                       ^------- error
 `````
 
 ### Strict mode

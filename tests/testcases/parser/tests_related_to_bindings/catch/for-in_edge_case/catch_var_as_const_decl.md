@@ -48,7 +48,7 @@ throws: Parser error!
   Double declaration of the same binding name in a `catch` var
 
 try {} catch (e) { const e = x; }
-                              ^------- error
+                         ^------- error
 `````
 
 ### Strict mode

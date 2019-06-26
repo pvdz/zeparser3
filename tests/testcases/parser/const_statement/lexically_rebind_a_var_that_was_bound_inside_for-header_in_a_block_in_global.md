@@ -57,7 +57,7 @@ throws: Parser error!
   Cannot create lexical binding when the name was already `var` bound
 
 { for (var x;;); const x = 1 }
-                             ^------- error
+                       ^------- error
 `````
 
 ### Strict mode
