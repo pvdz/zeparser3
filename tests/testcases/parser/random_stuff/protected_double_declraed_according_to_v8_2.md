@@ -31,7 +31,7 @@ throws: Parser error!
   Cannot create lexical binding when the name was already `var` bound
 
 function arguments(){}v:switch(x){default:}let arguments=l
-                                                         ^------- error
+                                               ^------- error
 `````
 
 ### Strict mode

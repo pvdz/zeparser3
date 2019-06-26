@@ -33,7 +33,7 @@ throws: Parser error!
   Cannot create lexical binding when the name was already `var` bound
 
 for (var a;;) { var b; let b; }
-                            ^------- error
+                           ^------- error
 `````
 
 ### Strict mode

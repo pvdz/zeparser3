@@ -56,7 +56,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Tried to export the name `x` twice
+  Cannot create lexical binding when the name was already bound
 
 export let [x, x] = y;
                 ^------- error

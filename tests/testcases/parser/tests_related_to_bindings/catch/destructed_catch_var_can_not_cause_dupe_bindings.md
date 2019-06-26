@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Catch binding had at least one duplicate name bound
+  Cannot create lexical binding when the name was already bound
 
 try {} catch ([a,a]) { }
-                   ^------- error
+                  ^------- error
 `````
 
 ### Strict mode

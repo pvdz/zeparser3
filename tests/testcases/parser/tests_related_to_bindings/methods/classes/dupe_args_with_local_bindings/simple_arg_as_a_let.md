@@ -39,7 +39,7 @@ throws: Parser error!
   Cannot use `let` or `const` with the same name as bound to a parameter
 
 class o {f(x) { let x }}
-                      ^------- error
+                    ^------- error
 `````
 
 ### Strict mode

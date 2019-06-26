@@ -33,7 +33,7 @@ throws: Parser error!
   Double declaration of the same binding name in a `catch` var
 
 try {} catch (e) { let e = x; }
-                            ^------- error
+                       ^------- error
 `````
 
 ### Strict mode
