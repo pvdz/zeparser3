@@ -1141,6 +1141,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function SCOPE_addFuncDeclName(lexerFlags, scoop, name, bindingType, originIsVarDecl) {
     ASSERT(SCOPE_addFuncDeclName.length === arguments.length, 'arg count');
 
+    // Function decls are lexical bound, except
+    // - in script-goal (!) global root, and
+    // - in any-goal function scope root
+
+    // https://tc39.github.io/ecma262/#sec-block-static-semantics-toplevellexicallydeclarednames
+    // > At the top level of a function, or script, function declarations are treated like var declarations
+    //   rather than like lexical declarations.
+
+    // https://tc39.github.io/ecma262/#sec-module-semantics-static-semantics-lexicallydeclarednames
+    // > At the top level of a Module, function declarations are treated like lexical declarations rather than like var declarations.
+
+    // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-lexicallydeclarednames
+    // this shows how func decls dont end up in the lex scope (TopLevelLexicallyDeclaredNames...)
+
+    // The above comes down to the following; a func decl is a `var` if it's directly in a scope and if that is
+    // either a function scope or the goal is script. Otherwise it is to be considered a lexical (let) binding.
+
     // https://tc39.es/ecma262/#sec-scripts-static-semantics-lexicallydeclarednames
     // > At the top level of a `Script`, function declarations are treated like var declarations rather than like lexical declarations
 
@@ -1159,7 +1176,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function SCOPE_addBinding(lexerFlags, scoop, name, bindingType, dupeChecks, originIsVarDecl) {
     ASSERT(SCOPE_addBinding.length === arguments.length, 'arg count');
 
-    if (scoop === DO_NOT_BIND) return; // for example: toplevel array, function expression, class expression
+    if (scoop === DO_NOT_BIND) {
+      // for example: toplevel array, function expression, class expression
+      // [v]: `[x = true] = y`
+      // [v]: `foo([a, b] = arr);`
+      // [v]: `x = class A {};`
+      return;
+    }
 
     let hashed = '#' + name; // prevent special keys like __proto__ from causing problems
     if (bindingType === BINDING_TYPE_VAR) {
@@ -1794,20 +1817,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         getFuncIdentAsyncGenState(isRealFuncExpr, lexerFlags, starToken, asyncToken)
       );
 
-      // functions decls are lexical bound, except in script-goal (!) global root and in any function scope root;
-      // https://tc39.github.io/ecma262/#sec-block-static-semantics-toplevellexicallydeclarednames
-      // > At the top level of a function, or script, function declarations are treated like var declarations
-      //   rather than like lexical declarations.
-      // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-lexicallydeclarednames
-      // this shows how func decls dont end up in the lex scope (TopLevelLexicallyDeclaredNames...)
-      // explicitly expressed in https://tc39.github.io/ecma262/#sec-block-static-semantics-toplevellexicallydeclarednames
-      // > At the top level of a function, or script, function declarations are treated like var declarations rather than like lexical declarations.
-      // However, in module goal this is not entirely the case: https://tc39.github.io/ecma262/#sec-module-semantics-static-semantics-lexicallydeclarednames
-      // > At the top level of a Module, function declarations are treated like lexical declarations rather than like var declarations.
-
-      // The above comes down to the following; a func decl is a `var` if it's directly in a scope and if that is
-      // either a function scope or the goal is script. Otherwise it is to be considered a lexical (let) binding.
-      let nameBindingType = (isFuncDecl === IS_FUNC_DECL && ((hasNoFlag(lexerFlags, LF_IN_GLOBAL) || goalMode === GOAL_SCRIPT) && hasAllFlags(lexerFlags, LF_IN_SCOPE_ROOT))) ? BINDING_TYPE_VAR : BINDING_TYPE_LET;
+      // A function name is bound lexically, except when directly in script-goal global scope or any-goal function scope
+      let nameBindingType = (
+        isFuncDecl === IS_FUNC_DECL &&
+        (hasNoFlag(lexerFlags, LF_IN_GLOBAL) || goalMode === GOAL_SCRIPT) &&
+        hasAllFlags(lexerFlags, LF_IN_SCOPE_ROOT)
+      ) ? BINDING_TYPE_VAR : BINDING_TYPE_LET;
       functionNameTokenToVerify = curtok; // if not strict mode yet but this func has a directive, check it again
 
       // Note: must verify id here and not after asserting the existence of the directive because by then the lexer flag
