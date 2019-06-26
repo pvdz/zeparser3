@@ -4278,17 +4278,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtype === $IDENT) {
       // normal
       let bindingTok = curtok;
+      let bindingName = curtok.str;
       fatalBindingIdentCheck(bindingTok, bindingType, lexerFlags);
       SCOPE_addBinding(
         lexerFlags,
         scoop,
-        curtok.str,
+        bindingName,
         bindingType,
         dupeChecks,
         (bindingOrigin === FROM_STATEMENT_START || bindingOrigin === FROM_FOR_HEADER || bindingOrigin === FROM_EXPORT_DECL) && bindingType === BINDING_TYPE_VAR ? ORIGIN_IS_VAR_DECL : ORIGIN_NOT_VAR_DECL
       );
-      addNameToExports(exportedNames, curtok.str);
-      addBindingToExports(exportedBindings, curtok.str);
+      addNameToExports(exportedNames, bindingName);
+      addBindingToExports(exportedBindings, bindingName);
       let identToken = curtok;
       AST_setIdent(astProp, curtok);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
