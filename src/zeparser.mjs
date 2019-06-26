@@ -1202,6 +1202,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (lex[hashed] !== undefined) {
           if (type === CATCH_SCOPE) {
             if (originIsVarDecl && options_webCompat === WEB_COMPAT_ON) {
+              // [v]: `try {} catch (e) { var e = x; }`
+              // [v]: `try {} catch (e) { for (var e;;) {} }`
+              // [v]: `try {} catch (e) { for (var e in y) {} }`
+              // [x]: `try {} catch (e) { for (var e of y) {} }`
               catchforofhack = true;
             } else {
               THROW('Can not redefine the catch-var `' + name + '` as same binding');
@@ -3331,7 +3335,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curtype === $IDENT) {
       if (curtok.str === 'of') {
-        if (catchforofhack) THROW('Encountered `var` declaration for a name used in catch binding which in web compat mode is still not allowed in a `for-of`');
+        if (catchforofhack) {
+          // [x]: `try {} catch (e) { for (var e of y) {} }`
+          THROW('Encountered `var` declaration for a name used in catch binding which in web compat mode is still not allowed in a `for-of`');
+        }
         if (hadAssign) THROW('The lhs of a `for-of` cannot have an assignment');
         if (mustBePlainLoop) THROW('The lhs contained something that is not allowed with `for-of` loops');
         AST_wrapClosed(astProp, 'ForOfStatement', 'left', forToken);
