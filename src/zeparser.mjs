@@ -6483,7 +6483,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // if the group is just an identifier then it can be assigned to: `(a) = b`. There's a test. Or two.
           // If the group is not assignable then it can't become an arrow and we can skip a few related cases
           // If the arg name is eval or arguments and sloppy mode, then its assignable but not "simple"
-          // SCOPE_addBinding(lexerFlags, paramScoop, identToken.str, BINDING_TYPE_ARG, SKIP_DUPE_CHECKS, ORIGIN_NOT_VAR_DECL);
           if (notAssignable(assignable)) {
             // [x]: `(true) => {}`
             // [x]: `(eval) => {}`
