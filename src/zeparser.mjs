@@ -1139,7 +1139,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
   function SCOPE_addFuncDeclName(lexerFlags, scoop, name, bindingType, originIsVarDecl) {
-    ASSERT(SCOPE_addBindingAndDedupe.length === arguments.length, 'arg count');
+    ASSERT(SCOPE_addFuncDeclName.length === arguments.length, 'arg count');
+
+    // https://tc39.es/ecma262/#sec-scripts-static-semantics-lexicallydeclarednames
+    // > At the top level of a `Script`, function declarations are treated like var declarations rather than like lexical declarations
+
     SCOPE_addBinding(lexerFlags, scoop, name, bindingType, CHECK_DUPE_BINDS, originIsVarDecl);
     ASSERT(scoop !== DO_NOT_BIND, 'find me a case first');
     if (options_webCompat === WEB_COMPAT_ON) {
