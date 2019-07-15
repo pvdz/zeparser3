@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Arrow had at least one duplicate parameter name bound
+  Arrow had duplicate params
 
 async ({[a]: x, [b]: x}) => {}
-                         ^------- error
+                            ^------- error
 `````
 
 ### Strict mode

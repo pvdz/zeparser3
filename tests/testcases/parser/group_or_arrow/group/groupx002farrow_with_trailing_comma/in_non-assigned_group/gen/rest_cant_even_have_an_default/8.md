@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The rest argument was not destructible as it must be last and can not have a trailing comma
+  The ... argument must be destructible in an arrow header, found something that was not destructible
 
 (...a = x,)
          ^------- error

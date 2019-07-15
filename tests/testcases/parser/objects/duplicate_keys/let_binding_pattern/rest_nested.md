@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The rest argument of an object binding pattern must always be a simple ident and not an array pattern
+  Found a lexical binding that is duplicate of a lexical binding on the same statement level
 
 let {a: x, ...{x}} = obj
-                 ^------- error
+                ^------- error
 `````
 
 ### Strict mode

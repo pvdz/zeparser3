@@ -48,7 +48,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  The rest arg was not destructible as it can only apply to an identifier or array/object pattern arg
+  Expected to parse a value
 
 export var [...,] = obj;
                ^------- error

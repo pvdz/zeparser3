@@ -8,7 +8,11 @@
 >
 > ::> assignment inside pattern
 >
-> THIS IS IMPORTANT! Not a pattern
+> THIS IS IMPORTANT! The inner `targetKey(a=b)` part is NOT a pattern in the AST
+>
+> The whole thing is an assignment pattern because `target()[...]` is a member expression...
+>
+> This test should PASS
 
 ## Input
 

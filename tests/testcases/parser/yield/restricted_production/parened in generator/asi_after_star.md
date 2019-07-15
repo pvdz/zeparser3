@@ -20,7 +20,6 @@ function *f() {
 }
 `````
 
-
 ## Output
 
 _Note: the whole output block is auto-generated. Manual changes will be overwritten!_

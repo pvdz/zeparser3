@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already bound
+  Attempted to create a lexical binding for `a` but another binding already existed on the same level
 
 const a = 1, a = 2
              ^------- error

@@ -89,7 +89,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already bound
+  Attempted to create a lexical binding for `f` but another binding already existed on the same level
 
 function f(){} function f(){}
                         ^------- error

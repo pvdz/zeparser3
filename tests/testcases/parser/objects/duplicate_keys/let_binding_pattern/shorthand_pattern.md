@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Let binding attempted to get at least one name bound more than once
+  Found a lexical binding that is duplicate of a lexical binding on the same statement level
 
 let x, {x} = obj
-             ^------- error
+         ^------- error
 `````
 
 ### Strict mode

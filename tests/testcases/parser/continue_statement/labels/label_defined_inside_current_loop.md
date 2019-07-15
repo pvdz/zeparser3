@@ -11,7 +11,9 @@
 ## Input
 
 `````js
-while (true) x: continue x;
+while (true) {
+  x: continue x;
+}
 `````
 
 ## Output
@@ -30,8 +32,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Cannot `continue` to this label because it was defined inside the current inner-most loop
 
-while (true) x: continue x;
-                         ^------- error
+while (true) {
+  x: continue x;
+              ^------- error
+
+}
 `````
 
 ### Strict mode

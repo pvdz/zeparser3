@@ -33,7 +33,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Same param name `a` was bound twice, this is not allowed in strict mode
+  Function had duplicate params
 
 function f(b, a, a) {"use strict"}
                                  ^------- error
@@ -43,20 +43,13 @@ function f(b, a, a) {"use strict"}
 
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
-`````
-throws: Parser error!
-  Same param name `a` was bound twice, this is not allowed in strict mode
-
-function f(b, a, a) {"use strict"}
-                    ^------- error
-`````
-
+_Output same as sloppy mode._
 
 ### Module goal
 
 Parsed with the module goal.
 
-_Output same as strict mode._
+_Output same as sloppy mode._
 
 ### Web compat mode
 

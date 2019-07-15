@@ -33,10 +33,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Same param name was bound twice and the args are not simple, this is not allowed
+  Can only declare use strict if func params are "simple"
 
 function f(b, a, b, ...a) {"use strict"}
-                          ^------- error
+                                       ^------- error
 `````
 
 ### Strict mode

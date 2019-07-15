@@ -7,6 +7,8 @@
 > :: statements and declarations : cannot nest a declaration inside a non-block statement : function : generator
 >
 > ::> label
+>
+> Labelled functions must be plain functions so this is always an error
 
 ## Input
 
@@ -28,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse a function declaration here, only expecting statements here
+  Function declaration is only allowed as direct child of a label with web compat mode enabled in sloppy mode
 
 foo: function *f() {}
      ^------- error
@@ -51,41 +53,10 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
-  body: [
-    {
-      type: 'LabeledStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
-      label: {
-        type: 'Identifier',
-        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
-        name: 'foo'
-      },
-      body: {
-        type: 'FunctionDeclaration',
-        loc:{start:{line:1,col:5},end:{line:1,col:21},source:''},
-        generator: true,
-        async: false,
-        id: {
-          type: 'Identifier',
-          loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
-          name: 'f'
-        },
-        params: [],
-        body: {
-          type: 'BlockStatement',
-          loc:{start:{line:1,col:19},end:{line:1,col:21},source:''},
-          body: []
-        }
-      }
-    }
-  ]
-}
+throws: Parser error!
+  Labelled function statements must be plain functions, not generators
 
-tokens (10x):
-       IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
-       PUNCTUATOR PUNCTUATOR
+foo: function *f() {}
+              ^------- error
 `````
 

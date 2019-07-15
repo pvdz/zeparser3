@@ -11,7 +11,9 @@
 ## Input
 
 `````js
-while (true) x: while (true) continue x;
+while (true) { 
+  x: while (true) continue x; 
+}
 `````
 
 ## Output
@@ -29,11 +31,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:40},source:''},
+  loc:{start:{line:1,col:0},end:{line:3,col:1},source:''},
   body: [
     {
       type: 'WhileStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:40},source:''},
+      loc:{start:{line:1,col:0},end:{line:3,col:1},source:''},
       test: {
         type: 'Literal',
         loc:{start:{line:1,col:7},end:{line:1,col:11},source:''},
@@ -41,40 +43,47 @@ ast: {
         raw: 'true'
       },
       body: {
-        type: 'LabeledStatement',
-        loc:{start:{line:1,col:13},end:{line:1,col:40},source:''},
-        label: {
-          type: 'Identifier',
-          loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
-          name: 'x'
-        },
-        body: {
-          type: 'WhileStatement',
-          loc:{start:{line:1,col:16},end:{line:1,col:40},source:''},
-          test: {
-            type: 'Literal',
-            loc:{start:{line:1,col:23},end:{line:1,col:27},source:''},
-            value: true,
-            raw: 'true'
-          },
-          body: {
-            type: 'ContinueStatement',
-            loc:{start:{line:1,col:29},end:{line:1,col:40},source:''},
+        type: 'BlockStatement',
+        loc:{start:{line:1,col:13},end:{line:3,col:1},source:''},
+        body: [
+          {
+            type: 'LabeledStatement',
+            loc:{start:{line:2,col:2},end:{line:3,col:0},source:''},
             label: {
               type: 'Identifier',
-              loc:{start:{line:1,col:38},end:{line:1,col:38},source:''},
+              loc:{start:{line:2,col:2},end:{line:2,col:3},source:''},
               name: 'x'
+            },
+            body: {
+              type: 'WhileStatement',
+              loc:{start:{line:2,col:5},end:{line:3,col:0},source:''},
+              test: {
+                type: 'Literal',
+                loc:{start:{line:2,col:12},end:{line:2,col:16},source:''},
+                value: true,
+                raw: 'true'
+              },
+              body: {
+                type: 'ContinueStatement',
+                loc:{start:{line:2,col:18},end:{line:3,col:0},source:''},
+                label: {
+                  type: 'Identifier',
+                  loc:{start:{line:2,col:27},end:{line:2,col:27},source:''},
+                  name: 'x'
+                }
+              }
             }
           }
-        }
+        ]
       }
     }
   ]
 }
 
-tokens (14x):
-       IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT
-       PUNCTUATOR IDENT PUNCTUATOR IDENT IDENT PUNCTUATOR
+tokens (16x):
+       IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR
+       IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT IDENT PUNCTUATOR
+       PUNCTUATOR
 `````
 
 ### Strict mode

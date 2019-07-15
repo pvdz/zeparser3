@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Tried to define a var `f` which was already bound as a lexical binding
+  Found a var binding that is duplicate of a lexical binding on the same or lower statement level
 
 let f = 1; function f() {}
                     ^------- error
@@ -46,7 +46,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already bound
+  Attempted to create a lexical binding for `f` but another binding already existed on the same level
 
 let f = 1; function f() {}
                     ^------- error

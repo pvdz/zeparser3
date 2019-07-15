@@ -17,20 +17,24 @@ const SEARCH = process.argv.includes('-s');
 const SKIP_BUILDS = process.argv.includes('-b') || SEARCH;
 const TEST262 = process.argv.includes('-t');
 const SKIP_TO = TEST262 ? 0 : 0; // skips the first n tests (saves me time)
-const STOP_AFTER_FAIL = process.argv.includes('-q');
+const STOP_AFTER_TEST_FAIL = process.argv.includes('-q');
+const STOP_AFTER_FILE_FAIL = process.argv.includes('-Q');
 const TRUNC_STACK_TRACE = !process.argv.includes('-S');
-const AUTO_UPDATE = process.argv.includes('-u');
+const AUTO_UPDATE = process.argv.includes('-u') || process.argv.includes('-U');
+const CONFIRMED_UPDATE = process.argv.includes('-U');
 const AUTO_GENERATE = process.argv.includes('-g');
+const ALL_VARIANTS = process.argv.includes('--all');
 let [a,b,c,d] = [process.argv.includes('--sloppy'), process.argv.includes('--strict'), process.argv.includes('--module'), process.argv.includes('--web')];
-const RUN_SLOPPY = (a || (!b && !c && !d)) || (INPUT_OVERRIDE && !(b || c || d));
-const RUN_STRICT = b || (!a && !c && !d && !INPUT_OVERRIDE);
-const RUN_MODULE = c || (!a && !b && !d && !INPUT_OVERRIDE);
-const RUN_WEB = d || (!a && !b && !c && !INPUT_OVERRIDE);
+const RUN_SLOPPY = ALL_VARIANTS || (a || (!b && !c && !d)) || (INPUT_OVERRIDE && !(b || c || d));
+const RUN_STRICT = ALL_VARIANTS || b || (!a && !c && !d && !INPUT_OVERRIDE);
+const RUN_MODULE = ALL_VARIANTS || c || (!a && !b && !d && !INPUT_OVERRIDE);
+const RUN_WEB = ALL_VARIANTS || d || (!a && !b && !c && !INPUT_OVERRIDE);
 const TARGET_ES6 = process.argv.includes('--es6');
 const TARGET_ES7 = process.argv.includes('--es7');
 const TARGET_ES8 = process.argv.includes('--es8');
 const TARGET_ES9 = process.argv.includes('--es9');
 const TARGET_ES10 = process.argv.includes('--es10');
+const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || INPUT_OVERRIDE || TARGET_FILE || SKIP_BUILDS || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL;
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -44,19 +48,24 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     \`node --experimental-modules cli/build.mjs; node --experimental-modules tests/zeparser.spec.mjs\` [options]
 
   Options:
-    -b            Quick: don't run builds as well (implied if they don't exist)
+    -b            Quick: don't run builds as well (implied if the files don't exist)
     -f "path"     Only test this file / dir
     -i "input"    Test input only (sloppy, strict, module), implies --sloppy unless at least one mode explicitly given
     -g            Regenerate computed test case blocks (process all autogen.md files)
     -q            Stop after first fail
+    -Q            Stop after first fail, but test all four modes (sloppy/strict/module/web) regardless
     -s            Use HIT() in code and only print tests that execute at least one HIT(), implies -q
     -t            Run test262 suite
-    -u            Auto-update tests with the results (tests silently updated inline, use source control to diff)
+    -u            Unconditionally auto-update tests with the results (tests silently updated inline, use source control to diff)
+    -U            Auto-update but confirm before each test case is updated inline (use with -q for controlled updating)
     --sloppy      Only run tests in sloppy mode (can be combined with other modes like --strict)
     --strict      Only run tests in strict mode (can be combined with other modes like --module)
     --module      Only run tests with module goal (can be combined with other modes like --strict)
     --web         Only run tests in sloppy mode with web compat mode on (can be combined with other modes like --strict)
+    --all         Force to run all four modes (on input)
     --esX         Where X is one of 6 through 10, like --es6. For -i only, forces the code to run in that version
+    --serial      Test all targeted files in serial, verbosely, instead of using parallel phases (which is faster)
+                  (Note: -q, -i, -b, and -f implicitly enable --serial)
 `);
   process.exit();
 }
@@ -67,20 +76,29 @@ if (AUTO_UPDATE && (a || b || c || d)) throw new Error('Cannot use --sloppy (etc
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-
-let babelCore;
-let babelTypes;
-let babelGenerate;
-let babelTemplate;
+import {execSync} from 'child_process';
 
 let prettierFormat = () => { return 'prettier not loaded'; }; // if available, loaded through import() below
-let babelParse = undefined; // if available, loaded through import() below
 
 import {
   ASSERT,
   getTestFiles,
+  parseTestFile,
+  promiseToWriteFile,
+  readFiles,
+  Tob,
   toPrint,
   _LOG,
+  yn,
+
+  INPUT_HEADER,
+  OUTPUT_HEADER,
+  OUTPUT_HEADER_SLOPPY,
+  OUTPUT_HEADER_STRICT,
+  OUTPUT_HEADER_MODULE,
+  OUTPUT_HEADER_WEB,
+  OUTPUT_QUINTICK,
+  OUTPUT_QUINTICKJS,
 } from './utils.mjs';
 let LOG = _LOG; // I want to be able to override this and imports are constants
 
@@ -98,15 +116,16 @@ import {
 
   debug_toktype,
 } from '../src/zetokenizer.mjs';
+import {
+  generateTestFile,
+} from './generate_test_file.mjs';
 
 // node does not expose __dirname under module mode, but we can use import.meta to get it
 let filePath = import.meta.url.replace(/^file:\/\//,'');
 let dirname = path.dirname(filePath);
 
-const RUN_MODE_MODULE = {};
-const RUN_MODE_SCRIPT = {};
-
 const BOLD = '\x1b[;1;1m';
+const DIM = '\x1b[30;1m';
 const BLINK = '\x1b[;5;1m';
 const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
@@ -116,6 +135,8 @@ const TEST_SLOPPY = 'sloppy';
 const TEST_STRICT = 'strict';
 const TEST_MODULE = 'module';
 const TEST_WEB = 'web';
+
+let stopAsap = false;
 
 // use -s and call HIT in some part of the code to log all test cases that visit that particular branch(es)
 let wasHit = false;
@@ -134,104 +155,91 @@ if (SEARCH) {
   global.HIT = ()=>{};
 }
 
-async function readFiles(files) {
-  console.time('$$ Test file read time');
-  let list = await Promise.all(files.map(file => {
-    let res,rej,p = new Promise((resolve, reject) => (res = resolve, rej = reject));
-    fs.readFile(file, 'utf8', (err, data) => err ? rej(err) : res({file, _data: data, data}));
-    return p;
-  }));
-  console.timeEnd('$$ Test file read time');
-  console.log('Read', list.length, 'files');
-  return list;
-}
 async function extractFiles(list) {
-  console.time('$$ Test file extraction time');
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Test file extraction time');
   let bytes = 0;
-  list.forEach(obj => {
-    const {file, data} = obj;
-    ({options: obj.params, input: obj.input} = parseTestFile(data, file, obj));
-    bytes += obj.input.length;
+  list.forEach((tob/*: Tob */) => {
+    if (tob.oldData[0] === '@') generateTestFile(tob);
+    parseTestFile(tob);
+    bytes += tob.inputCode.length;
   });
-  console.timeEnd('$$ Test file extraction time');
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Test file extraction time');
   console.log('Total input size:', bytes, 'bytes');
 }
-async function coreTest(input, zeparser, goal, options) {
+async function coreTest(tob, zeparser, testVariant) {
   wasHit = false;
   let tok;
   let r, e = '';
+  let stdout = [];
   try {
     r = zeparser(
-      input,
-      goal,
+      tob.inputCode,
+      testVariant === TEST_MODULE ? GOAL_MODULE : GOAL_SCRIPT,
       COLLECT_TOKENS_SOLID,
       {
-        ...options,
+        strictMode: testVariant === TEST_STRICT,
+        webCompat: testVariant === TEST_WEB,
+        targetEsVersion: tob.inputOptions.es,
+
         getTokenizer: tokenizer => tok = tokenizer,
-        $log: INPUT_OVERRIDE ? undefined : () => {},
-        $warn: INPUT_OVERRIDE ? undefined : () => {},
-        $error: INPUT_OVERRIDE ? undefined : () => {},
+        $log: INPUT_OVERRIDE ? undefined : (...a) => stdout.push(a),
+        $warn: INPUT_OVERRIDE ? undefined : (...a) => stdout.push(a),
+        $error: INPUT_OVERRIDE ? undefined : (...a) => stdout.push(a),
       },
     );
   } catch (_e) {
     e = _e;
-    if (INPUT_OVERRIDE || TARGET_FILE) {
-      console.log(_e.stack);
-    }
   }
 
-  if (SEARCH) {
-    // If you use -q -i then you just want to know whether or not some codepath hits some code
-    if (INPUT_OVERRIDE) {
-      PRINT_HIT(`[${(e&&e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
-    } else if (wasHit) {
-      if (!foundCache.has(input)) {
-        PRINT_HIT(`// [${(e&&e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(input)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
-        foundCache.add(input);
-      }
-    }
-    return; // dont care about further result
-  }
-
-  return {r, e, tok};
+  // This is quite memory expensive but much easier to work with
+  tob.parserRawOutput[testVariant] = {r, e, tok, stdout};
 }
-async function postProcessResult({r, e, tok}, testVariant, file) {
-  // This is where by far the most time is spent... roughly 90% of the time is this function.
-  // Most of that is Prettier. If we replace it with JSON.stringify the total runtime goes down 2 minutes to 11 seconds
+async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "strict" | "module" | "web" */) {
+  let {parserRawOutput: {[testVariant]: {r, e, tok, stdout}}, file} = tob;
+  if (!r && !e) return; // no output for this variant
+
   let errorMessage = '';
   if (e) {
     errorMessage = e.message;
     if (errorMessage.includes('Assertion fail')) {
-      console.error('####\nThe following assertion error was thrown:\n');
+      stdout.forEach(a => console.log.apply(console, a));
+
+      console.error('####\nAn ' + BLINK + 'assertion' + RESET + ' error was thrown in ' + testVariant + ' mode\n');
+      console.error(BOLD + 'Input:' + RESET + '\n\n`````\n' + tob.inputCode + '\n`````\n\n' + BOLD + 'Error message:' + RESET + '\n');
       console.error(errorMessage);
       console.error('####');
       console.error(e.stack);
+      hardExit(tob, 'postProcessResult assertion error');
       throw new Error('Assertion error. Mode = ' + testVariant + ', file = ' + file + '; ' + errorMessage.message);
     }
-    if (errorMessage.startsWith('Parser error!')) {
+    else if (errorMessage.startsWith('Parser error!')) {
       errorMessage = errorMessage.slice(0, 'Parser error!'.length) + '\n  ' + errorMessage.slice('Parser error!'.length + 1);
     }
     else if (errorMessage.startsWith('Tokenizer error!')) {
       errorMessage = errorMessage.slice(0, 'Tokenizer error!'.length) + '\n    ' + errorMessage.slice('Tokenizer error!'.length + 1);
     }
     else {
-      console.error('####\nThe following unexpected error was thrown:\n');
+      stdout.forEach(a => console.log.apply(console, a));
+
+      // errorMessage = 'TEMP SKIPPED UNKNOWN ERROR';
+      console.error('####\nThe following ' + BLINK + 'unexpected' + RESET + ' error was thrown in ' + testVariant + ' mode:\n');
       console.error(errorMessage);
       console.error(e.stack);
       console.error('####');
+      hardExit(tob, 'postProcessResult unknown error');
       throw new Error('Non-graceful error, fixme. Mode = ' + testVariant + ', file = ' + file + '; ' + errorMessage.message);
     }
 
     if (tok) {
       let context = tok.getErrorContext();
       if (context.slice(-1) === '\n') context = context.slice(0, -1);
-      context = context.split('\n').map(s => s.trimRight()).join('\n'); // The error snippet can contain trailing whitespace
+      context = context.split('\n').map(s => s.trimRight()).join('\n'); // The error snippet can contain trailing whitespace but we want to keep indentations
       if (INPUT_OVERRIDE) context = '```\n' + context + '\n```\n';
       errorMessage += '\n\n' + context;
     }
   }
 
-  return (
+  let outputTestString = (
     // throws: Parser error!
     // throws: Tokenizer error!
     (errorMessage ? 'throws: ' + errorMessage : '') +
@@ -260,95 +268,182 @@ async function postProcessResult({r, e, tok}, testVariant, file) {
         )
       + '\n\n' + formatTokens(r.tokens) : '')
   );
+
+  // Caching it like this takes up more memory but makes deduping other modes so-much-easier
+  switch (testVariant) {
+    case TEST_SLOPPY:
+      tob.newOutputSloppy = outputTestString;
+      break;
+    case TEST_STRICT:
+      tob.newOutputStrict = outputTestString;
+      break;
+    case TEST_MODULE:
+      tob.newOutputModule = outputTestString;
+      break;
+    case TEST_WEB:
+      tob.newOutputWeb = outputTestString;
+      break;
+    default: FIXME;
+  }
 }
-async function runTest(list, zeparser, testVariant) {
-  console.log(' - Now testing', INPUT_OVERRIDE ? 'for:' : 'all cases for:', testVariant);
-  console.time('  $$ Batch for ' + testVariant);
+async function runTest(list, zeparser, testVariant/*: "sloppy" | "strict" | "module" | "web" */) {
+  if (!RUN_VERBOSE_IN_SERIAL) console.log(' - Now testing', INPUT_OVERRIDE ? 'for:' : 'all cases for:', testVariant);
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('  $$ Batch for ' + testVariant);
 
 
   let bytes = 0;
   let ok = 0;
   let fail = 0;
-  if (!INPUT_OVERRIDE) console.log('   Parsing all inputs');
-  else console.log('\n');
-  console.time('   $$ Parse time for all tests');
-  let set = await Promise.all(list.map(async obj => {
-    let {input, params} = obj;
-    bytes += input.length;
-    let result = await coreTest(input, zeparser, testVariant === TEST_MODULE ? GOAL_MODULE : GOAL_SCRIPT, {
-      strictMode: testVariant === TEST_STRICT,
-      webCompat: testVariant === TEST_WEB,
-      targetEsVersion: params.es,
-    });
-    if (SEARCH) return;
-    if (result.e) ++fail;
-    else if (result.r) ++ok;
+  if (!RUN_VERBOSE_IN_SERIAL) console.log('   Parsing all inputs');
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('   $$ Parse time for all tests');
+  await Promise.all(list.map(async (tob/*: Tob */) => {
+    let {inputCode, inputOptions} = tob;
+    bytes += inputCode.length;
+    await coreTest(tob, zeparser, testVariant);
+    let rawOutput = tob.parserRawOutput[testVariant];
+    if (SEARCH) {
+      let e = rawOutput.e;
+      // If you use -q -i then you just want to know whether or not some codepath hits some code
+      if (INPUT_OVERRIDE) {
+        PRINT_HIT(`[${(e&&e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+      } else if (wasHit) {
+        if (!foundCache.has(input)) {
+          PRINT_HIT(`// [${(e && e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(inputCode)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+          foundCache.add(tob.inputCode);
+        }
+      }
+      return;
+    }
+    if (rawOutput.e) ++fail;
+    else if (rawOutput.r) ++ok;
     else throw new Error('invariant');
-    return {obj, result};
   }));
-  if (!INPUT_OVERRIDE) console.log('   Have', set.length, 'results, totaling', bytes, 'bytes, ok = ', ok, ', fail =', fail);
-  else console.log('\n');
-  console.timeEnd('   $$ Parse time for all tests');
+  if (!RUN_VERBOSE_IN_SERIAL) console.log('   Have', list.length, 'results, totaling', bytes, 'bytes, ok = ', ok, ', fail =', fail);
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('   $$ Parse time for all tests');
   if (SEARCH) return;
 
+  if (!RUN_VERBOSE_IN_SERIAL) console.log('   Processing', list.length, 'result for all tests');
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('   $$ Parse result post processing time');
+  await Promise.all(list.map(async (tob/*: Tob*/) => await postProcessResult(tob, testVariant)));
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('   $$ Parse result post processing time');
 
-  if (!INPUT_OVERRIDE) console.log('   Processing', set.length, 'result for all tests');
-  console.time('   $$ Parse result post processing time');
-  await Promise.all(set.map(async ({obj, result}) => {
-    // Caching it like this takes up more memory but makes deduping other modes so-much-easier
-    obj.newoutput[testVariant] = await postProcessResult(result, testVariant, obj.file);
-  }));
-  console.timeEnd('   $$ Parse result post processing time');
-
-
-  console.timeEnd('  $$ Batch for ' + testVariant);
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('  $$ Batch for ' + testVariant);
 }
+function showDiff(tob) {
+  console.log(
+    '\n' +
+    BOLD + '######' + RESET + '\n' +
+    BOLD + '## ' + RESET + 'Now showing diff' + '\n' +
+    BOLD + '## ' + RESET + 'File:', tob.file, '\n' +
+    BOLD + '######' + RESET + '\n'
+  );
+  execSync(
+    // Use base64 to prevent shell interpretation of input. Final `cat` is to suppress `diff`'s exit code when diff.
+    `echo '${Buffer.from(tob.newData).toString('base64')}' | base64 -d - | colordiff -y -w -W200 "${tob.file}" - | cat`,
+    {stdio: 'inherit'}
+  );
+}
+function hardExit(tob, msg) {
+  stopAsap = true;
+  if (!msg) FIXME
+  if (tob) console.log(RED + 'FAIL' + RESET + ' ' + DIM + tob.fileShort + RESET);
+  console.log('Hard exit() node now because: ' + msg);
+  process.exit();
+}
+
 async function runTests(list, zeparser) {
-  console.time('$$ Total runtime');
-  if (!INPUT_OVERRIDE) console.log('Now actually running all', list.length, 'test cases... 4x! Single threaded! This may take some time (~20s on my machine)');
-  list.forEach(obj => obj.newoutput = {});
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Total runtime');
+  if (!RUN_VERBOSE_IN_SERIAL) console.log('Now actually running all', list.length, 'test cases... 4x! Single threaded! This may take some time (~20s on my machine)');
   if (RUN_SLOPPY) await runTest(list, zeparser, TEST_SLOPPY);
   if (RUN_STRICT) await runTest(list, zeparser, TEST_STRICT);
   if (RUN_MODULE) await runTest(list, zeparser, TEST_MODULE);
   if (RUN_WEB) await runTest(list, zeparser, TEST_WEB);
-  console.timeEnd('$$ Total runtime');
-}
-async function constructNewOutput(list) {
-  console.time('$$ New output construction time');
-  list.forEach(obj => {
-    obj.data = generateOutputBlock(obj.data, obj.newoutput.sloppy, obj.newoutput.strict, obj.newoutput.module, obj.newoutput.web);
-    // TODO: compat table; what do other parsers do with this input?
-  });
-  console.timeEnd('$$ New output construction time');
-}
-async function writeNewOutput(list) {
-  console.time('$$ Write updated test files');
-  let updated = 0;
-  await Promise.all(list.map(obj => {
-    if (updated && STOP_AFTER_FAIL) return;
-    const {data, _data, file} = obj;
-    if (data !== _data) {
-      if (AUTO_UPDATE) {
-        ++updated;
-        let res,rej,p = new Promise((resolve, reject) => (res = resolve, rej = reject));
-        fs.writeFile(file, data, 'utf8', (err, data) => err ? rej(err) : res());
-        return p;
-      } else {
-        console.error('Output mismatch for', file);
-        return Promise.resolve();
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Total runtime');
+
+  if (RUN_VERBOSE_IN_SERIAL && !AUTO_UPDATE && !INPUT_OVERRIDE) {
+    for (let i=0; i<list.length; ++i) {
+      let tob = list[i];
+      if (generateOutputBlock(tob) !== tob.oldData) {
+        console.log('\nTest output change detected!\n');
+        // dump outputs
+        if (RUN_SLOPPY) {
+          console.log(BOLD + '### Terminal output for sloppy run:' + RESET);
+          tob.parserRawOutput.sloppy.stdout.forEach((a) => console.log(...a));
+        }
+        if (RUN_STRICT) {
+          console.log(BOLD + '### Terminal output for strict run:' + RESET);
+          tob.parserRawOutput.strict.stdout.forEach((a) => console.log(...a));
+        }
+        if (RUN_MODULE) {
+          console.log(BOLD + '### Terminal output for module run:' + RESET);
+          tob.parserRawOutput.module.stdout.forEach((a) => console.log(...a));
+        }
+        if (RUN_WEB) {
+          console.log(BOLD + '### Terminal output for web run:' + RESET);
+          tob.parserRawOutput.web.stdout.forEach((a) => console.log(...a));
+        }
+
+        showDiff(tob);
+
+        console.log(BOLD + '\nnode --experimental-modules tests/zeparser.spec.mjs  -q -u -f "' + tob.file + '"\n');
+
+        let cont = await yn('Continue?');
+        if (!cont) hardExit(tob, 'Test output change detected. Aborting early.');
       }
     }
-  }));
-  if (updated && STOP_AFTER_FAIL) {
-    console.log('Found error, exiting now...');
-    process.exit();
   }
-  console.timeEnd('$$ Write updated test files');
-  console.log('Updated', updated, 'files');
+}
+function constructNewOutput(list) {
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ New output construction time');
+  list.forEach((tob/*: Tob */) => {
+    generateOutputBlock(tob);
+    // TODO: create a compat table; "what do other parsers do with this input?"
+  });
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ New output construction time');
+}
+async function writeNewOutput(list) {
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Write updated test files');
+  let updated = 0;
+
+  if (CONFIRMED_UPDATE) {
+    // This is slower but must process files in serial...
+    for (let i=0; i<list.length; ++i) {
+      let tob = list[i];
+      const {newData, oldData, file} = tob;
+      if (newData !== oldData) {
+        let cont = await yn('Continue to overwrite test output?');
+        if (!cont) hardExit(tob, 'manually aborted before replacing a test file');
+        ++updated;
+        await promiseToWriteFile(file, newData);
+      }
+    }
+  } else {
+    await Promise.all(list.map((tob/*: Tob */) => {
+      const {newData, oldData, file} = tob;
+      if (newData !== oldData) {
+        if (AUTO_UPDATE) {
+          if (STOP_AFTER_TEST_FAIL) stopAsap = true;
+          ++updated;
+          return promiseToWriteFile(file, newData);
+        } else {
+          console.error('Output mismatch for', file);
+          return Promise.resolve();
+        }
+      }
+    }));
+
+    if (updated && (STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL)) {
+      stopAsap = true;
+      hardExit(undefined, 'updated at least one file in writeNewOutput()');
+    }
+  }
+
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Write updated test files');
+  if (!RUN_VERBOSE_IN_SERIAL) console.log('Updated', updated, 'files');
 }
 async function loadParserAndPrettier() {
   let zeparser;
-  console.time('$$ Parser and Prettier load');
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Parser and Prettier load');
   [
     {default: zeparser},
     {default: {format: prettierFormat}}
@@ -356,9 +451,17 @@ async function loadParserAndPrettier() {
     await import(path.join(dirname, '../src/zeparser.mjs')),
     await import('prettier'),
   ]);
-  console.timeEnd('$$ Parser and Prettier load');
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Parser and Prettier load');
 
   return zeparser;
+}
+async function runAndRegenerateList(list, zeparser) {
+  await runTests(list, zeparser);
+  if (!SEARCH) {
+    constructNewOutput(list);
+    if (RUN_VERBOSE_IN_SERIAL && list[0].oldData !== list[0].newData) showDiff(list[0]);
+    await writeNewOutput(list);
+  }
 }
 
 async function cli() {
@@ -367,34 +470,39 @@ async function cli() {
   let forcedTarget = TARGET_ES6 ? 6 : TARGET_ES7 ? 7 : TARGET_ES8 ? 8 : TARGET_ES9 ? 9 : TARGET_ES10 ? 10 : undefined;
   if (forcedTarget) console.log('Forcing target version: ES' + forcedTarget);
 
-  let list = [{
-    file: '<cli>',
-    input: INPUT_OVERRIDE,
-    params: {
-      es: TARGET_ES6 ? 6 : TARGET_ES7 ? 7 : TARGET_ES8 ? 8 : TARGET_ES9 ? 9 : TARGET_ES10 ? 10 : undefined,
-    }
-  }];
+  let tob = new Tob('<cli>', INPUT_OVERRIDE);
+  tob.inputCode = INPUT_OVERRIDE;
+  tob.inputOptions.es = forcedTarget;
+  let list = [tob];
   await runTests(list, zeparser);
 
   console.log('=============================================');
   if (RUN_SLOPPY) {
+    ASSERT(list[0].newOutputSloppy !== false, 'should update');
     console.log('### Sloppy mode:');
-    console.log(list[0].newoutput.sloppy);
+    console.log(list[0].newOutputSloppy);
     console.log('=============================================\n');
   }
   if (RUN_STRICT) {
+    ASSERT(list[0].newOutputStrict !== false, 'should update');
     console.log('### Strict mode:');
-    console.log(list[0].newoutput.strict);
+    if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputStrict) console.log('Same as sloppy');
+    else console.log(list[0].newOutputStrict);
     console.log('=============================================\n');
   }
   if (RUN_MODULE) {
+    ASSERT(list[0].newOutputModule !== false, 'should update');
     console.log('### Module goal:');
-    console.log(list[0].newoutput.module);
+    if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputModule) console.log('Same as sloppy');
+    else if (RUN_STRICT && list[0].newOutputStrict === list[0].newOutputModule) console.log('Same as strict');
+    else console.log(list[0].newOutputModule);
     console.log('=============================================\n');
   }
   if (RUN_WEB) {
+    ASSERT(list[0].newOutputWeb !== false, 'should update');
     console.log('### Web compat mode:');
-    console.log(list[0].newoutput.web);
+    if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputWeb) console.log('Same as sloppy');
+    else console.log(list[0].newOutputWeb);
     console.log('=============================================\n');
   }
 }
@@ -409,18 +517,29 @@ async function main() {
     files = files.filter(f => !f.endsWith('autogen.md'));
   }
 
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Test file read time');
   let list = await readFiles(files);
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Test file read time');
+  console.log('Read', list.length, 'files');
+
   await extractFiles(list);
-  await runTests(list, zeparser);
-  if (!SEARCH) {
-    await constructNewOutput(list);
-    await writeNewOutput(list);
+
+  if (RUN_VERBOSE_IN_SERIAL) {
+    for (let i=0; i<list.length && !stopAsap; ++i) {
+      let tob = list[i];
+      await runAndRegenerateList([tob], zeparser);
+      let count = String(i+1).padStart(String(list.length).length, ' ') + ' / ' + list.length;
+      if (tob.oldData === tob.newData) console.log(BOLD + GREEN + 'PASS' + RESET + ' ' + count + ' ' + DIM + tob.fileShort + RESET);
+      else console.log(RED + 'FAIL' + RESET + ' ' + count + ' ' + DIM + tob.fileShort + RESET);
+    }
+  } else {
+    await runAndRegenerateList(list, zeparser);
   }
 
   console.timeEnd('$$ Whole test run');
 }
 
-function san(dir) {
+function sanitize(dir) {
   return dir
   .trim()
   .replace(/(?:\s|;|,)+/g, '_')
@@ -434,8 +553,8 @@ async function gen() {
 
   files = files.filter(f => f.endsWith('autogen.md'));
   let list = await readFiles(files);
-  list.forEach(obj => {
-    let genDir = path.join(path.dirname(obj.file), 'gen');
+  list.forEach((tob/*: Tob */) => {
+    let genDir = path.join(path.dirname(tob.file), 'gen');
     if (fs.existsSync(genDir)) {
       // Drop all files in this dir (this is `gen`, should be fine to fully regenerate anything in here at any time)
       let oldFiles = [];
@@ -445,12 +564,11 @@ async function gen() {
     }
     fs.mkdirSync(genDir, {recursive: true});
 
-    let caseOffset = obj.data.indexOf(CASE_HEAD);
-    let templateOffset = obj.data.indexOf(TPL_HEAD, CASE_HEAD);
-    let outputOffset = obj.data.indexOf(OUT_HEAD, TPL_HEAD);
-    ASSERT(caseOffset >= 0 || templateOffset >= 0 || outputOffset >= 0, 'missing required parts of autogen', obj.file);
-//    ASSERT(obj.data.slice(caseOffset + CASE_HEAD.length, templateOffset).split('> `````js\n').length > 2, 'expecting 2+ cases', obj.file);
-    let cases = obj.data
+    let caseOffset = tob.oldData.indexOf(CASE_HEAD);
+    let templateOffset = tob.oldData.indexOf(TPL_HEAD, CASE_HEAD);
+    let outputOffset = tob.oldData.indexOf(OUT_HEAD, TPL_HEAD);
+    ASSERT(caseOffset >= 0 || templateOffset >= 0 || outputOffset >= 0, 'missing required parts of autogen', tob.file);
+    let cases = tob.oldData
       .slice(caseOffset + CASE_HEAD.length, templateOffset)
       .split('> `````js\n')
       .slice(1) // first element is the header
@@ -461,15 +579,15 @@ async function gen() {
           .split('\n> `````')[0] // Only get the code block, don't care about the rest
           .split('\n')
           .map(s => {
-            ASSERT(s[0] === '>' && s[1] === ' ', 'cases should be md quoted entirely, with one space', obj.file, s);
+            ASSERT(s[0] === '>' && s[1] === ' ', 'cases should be md quoted entirely, with one space', tob.file, s);
             return s.slice(2);
           })
           .join('\n'); // Not likely to be multi line but why not
       })
     ;
 
-    let params = obj.data
-      .slice(templateOffset + TPL_HEAD.length, obj.data.indexOf('####', templateOffset + TPL_HEAD.length))
+    let params = tob.oldData
+      .slice(templateOffset + TPL_HEAD.length, tob.oldData.indexOf('####', templateOffset + TPL_HEAD.length))
       .split('\n')
       .map(s => s.trim())
       .filter(s => s[0] === '-')
@@ -485,7 +603,7 @@ async function gen() {
       }, {});
 
     // Temlates have a header and also have a ``js codeblock
-    let templates = obj.data
+    let templates = tob.oldData
       .slice(templateOffset + TPL_HEAD.length, outputOffset)
       .split('\n#### ')
       .slice(1) // first element is the header
@@ -501,21 +619,21 @@ async function gen() {
     // Now generate all cases with each # in the params and templates replaced with each case
 
     templates.forEach(({title, code}) => {
-      let caseDir = path.join(genDir, san(String(title)));
+      let caseDir = path.join(genDir, sanitize(String(title)));
       fs.mkdirSync(caseDir, {recursive: true});
       cases.forEach(c => {
-        let testFile = path.join(caseDir, san(String(c)) + '.md');
+        let testFile = path.join(caseDir, sanitize(String(c)) + '.md');
 
         // immediately generate a test case for it, as well
-        fs.writeFileSync(testFile, createAutoGeneratedTestFileContents(obj, caseDir, title, c, params, code));
+        fs.writeFileSync(testFile, createAutoGeneratedTestFileContents(tob, caseDir, title, c, params, code));
       });
     });
   });
 }
-function createAutoGeneratedTestFileContents(obj, caseDir, title, c, params, code) {
+function createAutoGeneratedTestFileContents(tob/*: Tob */, caseDir, title, c, params, code) {
   return `# ZeParser parser autogenerated test case
 
-- From: ${obj.file.slice(obj.file.indexOf('zeparser3'))}
+- From: ${tob.fileShort}
 - Path: ${caseDir.slice(caseDir.indexOf('zeparser3'))}
 
 > :: test: ${title.split('\n').join('\n>          ')}
@@ -525,15 +643,17 @@ function createAutoGeneratedTestFileContents(obj, caseDir, title, c, params, cod
 ## Input
 
 ${
-    Object
+  Object
     .getOwnPropertyNames(params)
     .map(key => '- `' + key + ' = ' + params[key].replace(/#/g, c) + '`\n')
     .join('')
-    }
-\`\`\`\`\`js
-${code.replace(/#/g, c)}
-\`\`\`\`\`
-`;
+  }${
+    OUTPUT_QUINTICKJS
+  }${
+    code.replace(/#/g, c)
+  }${
+    OUTPUT_QUINTICK
+  }`;
 }
 
 function formatTokens(tokens) {
@@ -571,132 +691,68 @@ function formatAst(ast) {
   }).replace(/(?:^;?\(?)|(?:\)[\s\n]*$)/g, '');
 }
 
-const INPUT_HEADER = '\n## Input\n';
-const INPUT_START = '\n`````js\n';
-const INPUT_END = '\n`````\n';
-function parseTestFile(data, file, obj) {
 
-  if (data[0] === '@') {
-    // This should be a new test that still has to be generated
-    // Its format basically starts with an @ for easy parsing here
-    //
-    // ```
-    // @ some more information here, optional because the file name / path forms the description
-    // ###
-    // the rest is the test case, as is. only trailing whitespace (if any) is trimmed from each line and the start/end
-    // ```
-    ASSERT(data.includes('\n###\n'), 'expected format');
-
-    console.log('Generating test case from', file);
-
-    let [comment, ...code] = data.slice(1).split('###\n');
-    code = code.join('###'); // unlikely
-    code = code.split('\n').map(s => s.trimRight()).join('\n').trim();
-
-    let relfile = file.slice(file.indexOf('zeparser3'));
-
-    let descPath = path
-      .dirname(relfile.slice(relfile.indexOf('tests/testcases/parser/') + 'tests/testcases/parser/'.length))
-      .split('/')
-      .map(s =>
-        s
-        .replace(/_/g, ' ')
-        .replace(/x([a-z\d]{4})/g, (_, s) => String.fromCharCode(parseInt(s, 16)))
-      )
-      .join(' : ');
-    let descFile = path.basename(relfile)
-      .slice(0, -3)
-      .replace(/_/g, ' ')
-      .replace(/x([a-z\d]{4})/g, (_, s) => String.fromCharCode(parseInt(s, 16)));
-
-    obj.data = data = `# ZeParser parser test case
-
-- Path: ${relfile}
-
-> :: ${descPath}
->
-> ::> ${descFile}${comment ? '\n>\n>' + comment : ''}
-${INPUT_HEADER}${INPUT_START}${code}${INPUT_END}
-`;
-    fs.writeFileSync(file, data);
-  }
-
-  // find the input
-  let inputOffset = data.indexOf(INPUT_HEADER);
-  ASSERT(inputOffset >= 0, 'should have an input header', file);
-  let start = data.indexOf(INPUT_START, inputOffset);
-  ASSERT(start >= 0, 'Should have the start of a test case', file);
-  let end = data.indexOf(INPUT_END, inputOffset);
-  ASSERT(end >= 0, 'Should have the end of a test case', file);
-
-  // Find the parameters between input header and START
-  let options = data
-  .slice(inputOffset + INPUT_HEADER.length, start)
-  .split('\n')
-  .filter(s => s.trim()[0] === '-') // Only dash-lists in this position should be for parameters
-  .reduce((obj, s) => {
-    s = s.trim();
-    // Each line should be ``- `name = value` ``
-    ASSERT(s[0] === '-', 'expecting whitespace and a list of options between input header and start', file, s);
-    ASSERT(s[2] === '`' && s.slice(-1) === '`', 'backtick quote the contents', file, s, s[2], s.slice(-1));
-    let [k, is, ...v] = s.slice(3, -1).split(' ');
-    ASSERT(is === '=', 'key=value', file, s);
-
-    let value = v.join(' ');
-    if (String(parseFloat(value)) === value) value = parseFloat(v);
-    else if (value === 'true') value = true;
-    else if (value === 'false') value = false;
-    else if (value === 'undefined') value = undefined;
-    else if (value === 'null') value = null;
-
-    obj[k] = value;
-
-    return obj;
-  }, {});
-
-  // Find the test case between START and END
-  let input = data.slice(start + INPUT_START.length, end);
-
-  return {options, input};
-}
-
-const OUTPUT_HEADER = '\n## Output\n';
-const OUTPUT_HEADER_SLOPPY = '\n### Sloppy mode\n';
-const OUTPUT_HEADER_STRICT = '\n### Strict mode\n';
-const OUTPUT_HEADER_MODULE = '\n### Module goal\n';
-const OUTPUT_HEADER_WEB = '\n### Web compat mode\n';
-const OUTPUT_CODE = '\n`````\n';
-function generateOutputBlock(currentOutput, sloppyOutput, strictOutput, moduleOutput, webOutput) {
+function generateOutputBlock(tob) {
   // Replace the whole output block with the current results. We then compare the old to the new and write if different.
-  // Note: The file may not have output yet
-  let outputIndex = currentOutput.indexOf(OUTPUT_HEADER);
-  if (outputIndex < 0) outputIndex = currentOutput.length;
+  // Some may not have been generated (yet) and will default to the old value
 
-  return ''+
-    currentOutput.slice(0, outputIndex) +
-    OUTPUT_HEADER + '\n' +
+  let sloppy = ifNotFalse(tob.newOutputSloppy, tob.oldOutputSloppy);
+  let strict = ifNotFalse(tob.newOutputStrict, tob.oldOutputStrict);
+  let module = ifNotFalse(tob.newOutputModule, tob.oldOutputModule);
+  let web = ifNotFalse(tob.newOutputWeb, tob.oldOutputWeb);
+
+  return tob.newData =
+    tob.aboveTheFold +
+    generateInput(tob) +
+    generateOutputHeader() +
+    generateOutputSloppy(sloppy) +
+    generateOutputStrict(strict, sloppy) +
+    generateOutputModule(module, strict, sloppy) +
+    generateOutputWeb(web, sloppy) +
+  '';
+}
+function ifNotFalse(a, b) {
+  if (a === false) return b;
+  return a;
+}
+function generateInput(tob) {
+  return INPUT_HEADER + tob.inputHead + OUTPUT_QUINTICKJS + tob.inputCode + OUTPUT_QUINTICK;
+}
+function generateOutputHeader() {
+  return OUTPUT_HEADER + '\n' +
     '_Note: the whole output block is auto-generated. Manual changes will be overwritten!_\n\n' +
     'Below follow outputs in four parsing modes: sloppy mode, strict mode script goal, module goal, web compat mode (always sloppy).\n\n' +
     'Note that the output parts are auto-generated by the test runner to reflect actual result.\n' +
-    OUTPUT_HEADER_SLOPPY + '\n' +
+    '';
+}
+function generateOutputSloppy(sloppyOutput) {
+  return OUTPUT_HEADER_SLOPPY + '\n' +
     'Parsed with script goal and as if the code did not start with strict mode header.\n' +
-    OUTPUT_CODE + sloppyOutput + OUTPUT_CODE +
-    OUTPUT_HEADER_STRICT + '\n' +
+    OUTPUT_QUINTICK + sloppyOutput + OUTPUT_QUINTICK +
+    '';
+}
+function generateOutputStrict(strictOutput, sloppyOutput) {
+  return OUTPUT_HEADER_STRICT + '\n' +
     'Parsed with script goal but as if it was starting with `"use strict"` at the top.\n' +
-    (strictOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_CODE + strictOutput) + OUTPUT_CODE) +
-    '\n' +
-    OUTPUT_HEADER_MODULE + '\n' +
+    (strictOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_QUINTICK + strictOutput + OUTPUT_QUINTICK)) + '\n' +
+    '';
+}
+function generateOutputModule(moduleOutput, strictOutput, sloppyOutput) {
+  return OUTPUT_HEADER_MODULE + '\n' +
     'Parsed with the module goal.\n' +
-    (moduleOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : moduleOutput === strictOutput ? '\n_Output same as strict mode._' : (OUTPUT_CODE + moduleOutput + OUTPUT_CODE)) +
+    (moduleOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : moduleOutput === strictOutput ? '\n_Output same as strict mode._' : (OUTPUT_QUINTICK + moduleOutput + OUTPUT_QUINTICK)) +
     '\n' +
-    OUTPUT_HEADER_WEB + '\n' +
+    '';
+}
+function generateOutputWeb(webOutput, sloppyOutput) {
+  return OUTPUT_HEADER_WEB + '\n' +
     'Parsed in sloppy script mode but with the web compat flag enabled.\n' +
-    (webOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_CODE + webOutput + OUTPUT_CODE)) +
-    '\n' +
-  '';
+    (webOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_QUINTICK + webOutput + OUTPUT_QUINTICK)) + '\n' +
+    '';
 }
 
 console.time('$$ Whole test run');
+
 
 let files = [];
 if (INPUT_OVERRIDE) {
@@ -704,9 +760,9 @@ if (INPUT_OVERRIDE) {
   if (!a && !b && !c && !d) LOG('Sloppy mode implied (override with --strict --module or --web)');
   LOG('=============================================\n');
 } else {
-  console.time('$$ Test search discovery time');
+  if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Test search discovery time');
   getTestFiles(path.join(dirname, 'testcases/parser'), '', files, true);
-  console.timeEnd('$$ Test search discovery time');
+  if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Test search discovery time');
   console.log('Read all test files, gathered', files.length, 'files');
 
   files = files.filter(f => f.indexOf('test262') >= 0 === TEST262);

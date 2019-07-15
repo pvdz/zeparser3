@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `package` but another binding already existed on the same level
 
 function package(){}let package=a,function v(){}const v=x
                         ^------- error
@@ -59,11 +59,4 @@ _Output same as strict mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Parser error!
-  Cannot use this name (function) as a variable name because: Cannot never use this reserved word as a variable name
-
-function package(){}let package=a,function v(){}const v=x
-                                  ^------- error
-`````
-
+_Output same as sloppy mode._

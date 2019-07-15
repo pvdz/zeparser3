@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `arguments` but another binding already existed on the same level
 
 function arguments(){}v:switch(x){default:}let arguments=l
                                                ^------- error
@@ -57,81 +57,4 @@ _Output same as strict mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:58},source:''},
-  body: [
-    {
-      type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
-      generator: false,
-      async: false,
-      id: {
-        type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
-        name: 'arguments'
-      },
-      params: [],
-      body: {
-        type: 'BlockStatement',
-        loc:{start:{line:1,col:20},end:{line:1,col:22},source:''},
-        body: []
-      }
-    },
-    {
-      type: 'LabeledStatement',
-      loc:{start:{line:1,col:22},end:{line:1,col:43},source:''},
-      label: {
-        type: 'Identifier',
-        loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
-        name: 'v'
-      },
-      body: {
-        type: 'SwitchStatement',
-        loc:{start:{line:1,col:24},end:{line:1,col:43},source:''},
-        discriminant: {
-          type: 'Identifier',
-          loc:{start:{line:1,col:31},end:{line:1,col:32},source:''},
-          name: 'x'
-        },
-        cases: [
-          {
-            type: 'SwitchCase',
-            loc:{start:{line:1,col:34},end:{line:1,col:42},source:''},
-            test: null,
-            consequent: []
-          }
-        ]
-      }
-    },
-    {
-      type: 'VariableDeclaration',
-      loc:{start:{line:1,col:47},end:{line:1,col:58},source:''},
-      kind: 'let',
-      declarations: [
-        {
-          type: 'VariableDeclarator',
-          loc:{start:{line:1,col:47},end:{line:1,col:58},source:''},
-          id: {
-            type: 'Identifier',
-            loc:{start:{line:1,col:47},end:{line:1,col:47},source:''},
-            name: 'arguments'
-          },
-          init: {
-            type: 'Identifier',
-            loc:{start:{line:1,col:57},end:{line:1,col:58},source:''},
-            name: 'l'
-          }
-        }
-      ]
-    }
-  ]
-}
-
-tokens (22x):
-       IDENT IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR IDENT
-       PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR IDENT
-       PUNCTUATOR PUNCTUATOR IDENT IDENT PUNCTUATOR IDENT ASI
-`````
-
+_Output same as sloppy mode._

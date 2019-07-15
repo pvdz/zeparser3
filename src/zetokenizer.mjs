@@ -218,7 +218,6 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 
 $flag = 0;
 const LF_NO_FLAGS = 0;
-const LF_CAN_FUNC_STMT = 1 << ++$flag; // currently nesting inside at least one statement that is not a block/body
 const LF_CAN_NEW_DOT_TARGET = 1 << ++$flag; // current scope is inside at least one regular (non-arrow) function
 const LF_DO_WHILE_ASI = 1 << ++$flag; // for do-while, can only asi sub-statement if there was a newline before `while`
 const LF_FOR_REGEX = 1 << ++$flag;
@@ -229,7 +228,6 @@ const LF_IN_FUNC_ARGS = 1 << ++$flag; // throws for await expression
 const LF_IN_GENERATOR = 1 << ++$flag;
 const LF_IN_GLOBAL = 1 << ++$flag; // unset whenever you go into any kind of function (for return)
 const LF_IN_ITERATION = 1 << ++$flag; // inside a loop (tells you whether break/continue is valid)
-const LF_IN_SCOPE_ROOT = 1 << ++$flag; // unset when parsing any thing inside a global/func scope (right now for import/export inside statement)
 const LF_IN_SWITCH = 1 << ++$flag; // inside a switch (tells you whether break is valid)
 const LF_IN_TEMPLATE = 1 << ++$flag;
 const LF_NO_ASI = 1 << ++$flag; // can you asi if you must? used for async. LF_IN_TEMPLATE also implies this flag!
@@ -241,7 +239,7 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 // - div means regular expression
 // - closing curly means closing curly (not template body/tail)
 // - sloppy mode until proven otherwise
-const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL | LF_IN_SCOPE_ROOT; // not sure about global, that may change depending on options{$?
+const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about global, that may change depending on options{$?
 
 function LF_DEBUG(flags) {
   let bak = flags;
@@ -276,14 +274,6 @@ function LF_DEBUG(flags) {
   if (flags & LF_IN_FUNC_ARGS) {
     flags ^= LF_IN_FUNC_ARGS;
     s.push('LF_IN_FUNC_ARGS');
-  }
-  if (flags & LF_CAN_FUNC_STMT) {
-    flags ^= LF_CAN_FUNC_STMT;
-    s.push('LF_CAN_FUNC_STMT');
-  }
-  if (flags & LF_IN_SCOPE_ROOT) {
-    flags ^= LF_IN_SCOPE_ROOT;
-    s.push('LF_IN_SCOPE_ROOT');
   }
   if (flags & LF_IN_GLOBAL) {
     flags ^= LF_IN_GLOBAL;
@@ -3489,7 +3479,6 @@ export {
   GOAL_MODULE,
   GOAL_SCRIPT,
 
-  LF_CAN_FUNC_STMT,
   LF_CAN_NEW_DOT_TARGET,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
@@ -3499,7 +3488,6 @@ export {
   LF_IN_GENERATOR,
   LF_IN_GLOBAL,
   LF_IN_ITERATION,
-  LF_IN_SCOPE_ROOT,
   LF_IN_SWITCH,
   LF_IN_TEMPLATE,
   LF_NO_ASI,

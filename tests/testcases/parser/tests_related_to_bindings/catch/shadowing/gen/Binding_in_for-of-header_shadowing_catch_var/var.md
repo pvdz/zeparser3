@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Can not redefine the catch-var `e` as same binding
+  Can not create a binding for `e` because was already bound as a catch clause binding
 
 try {} catch (e) { for (var e of y) {} }
                             ^------- error
@@ -51,10 +51,73 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
-throws: Parser error!
-  Encountered `var` declaration for a name used in catch binding which in web compat mode is still not allowed in a `for-of`
+ast: {
+  type: 'Program',
+  loc:{start:{line:1,col:0},end:{line:1,col:40},source:''},
+  body: [
+    {
+      type: 'TryStatement',
+      loc:{start:{line:1,col:0},end:{line:1,col:40},source:''},
+      block: {
+        type: 'BlockStatement',
+        loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+        body: []
+      },
+      handler: {
+        type: 'CatchClause',
+        loc:{start:{line:1,col:7},end:{line:1,col:40},source:''},
+        param: {
+          type: 'Identifier',
+          loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+          name: 'e'
+        },
+        body: {
+          type: 'BlockStatement',
+          loc:{start:{line:1,col:17},end:{line:1,col:40},source:''},
+          body: [
+            {
+              type: 'ForOfStatement',
+              loc:{start:{line:1,col:19},end:{line:1,col:39},source:''},
+              left: {
+                type: 'VariableDeclaration',
+                loc:{start:{line:1,col:28},end:{line:1,col:30},source:''},
+                kind: 'var',
+                declarations: [
+                  {
+                    type: 'VariableDeclarator',
+                    loc:{start:{line:1,col:28},end:{line:1,col:30},source:''},
+                    id: {
+                      type: 'Identifier',
+                      loc:{start:{line:1,col:28},end:{line:1,col:28},source:''},
+                      name: 'e'
+                    },
+                    init: null
+                  }
+                ]
+              },
+              right: {
+                type: 'Identifier',
+                loc:{start:{line:1,col:33},end:{line:1,col:34},source:''},
+                name: 'y'
+              },
+              await: false,
+              body: {
+                type: 'BlockStatement',
+                loc:{start:{line:1,col:36},end:{line:1,col:39},source:''},
+                body: []
+              }
+            }
+          ]
+        }
+      },
+      finalizer: null
+    }
+  ]
+}
 
-try {} catch (e) { for (var e of y) {} }
-                              ^------- error
+tokens (19x):
+       IDENT PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR
+       PUNCTUATOR IDENT PUNCTUATOR IDENT IDENT IDENT IDENT PUNCTUATOR
+       PUNCTUATOR PUNCTUATOR PUNCTUATOR
 `````
 

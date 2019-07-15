@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Tried to define a var `f` which was already bound as a lexical binding
+  Found a var binding that is duplicate of a lexical binding on the same or lower statement level
 
 { async function f(){} var f }
                            ^------- error

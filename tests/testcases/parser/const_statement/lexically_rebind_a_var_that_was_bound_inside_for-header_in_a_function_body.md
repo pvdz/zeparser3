@@ -14,30 +14,15 @@
 >
 > > It is a Syntax Error if any element of the LexicallyDeclaredNames of StatementList also occurs in the VarDeclaredNames of StatementList.
 >
-> https://tc39.github.io/ecma262/#sec-try-statement-static-semantics-early-errors
->
-> > It is a Syntax Error if any element of the BoundNames of CatchParameter also occurs in the VarDeclaredNames of Block.
->
-> But I don't see this rule for the toplevel...
->
-> https://tc39.github.io/ecma262/#sec-for-statement-static-semantics-vardeclarednames
->
-> propagates the list of var decl
->
-> https://tc39.github.io/ecma262/#sec-block-static-semantics-toplevelvardeclarednames
->
-> collects it on the toplevel
->
-> So the toplevel VarDeclaredNames contains "x" now
->
-> The "const x" definitely adds "x" to the LexicallyDeclaredNames
->
-> So this is an error
+> And basically, the var names of a for-header with `var` decl contribute to the func scope list so this should be an error.
 
 ## Input
 
 `````js
-function f(){  for (var x;;); const x = 1  }
+function f(){
+  for (var x;;);
+  const x = 1
+}
 `````
 
 ## Output
@@ -54,10 +39,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `x` but another binding already existed on the same level
 
-function f(){  for (var x;;); const x = 1  }
-                                    ^------- error
+function f(){
+  for (var x;;);
+  const x = 1
+        ^------- error
+
+}
 `````
 
 ### Strict mode

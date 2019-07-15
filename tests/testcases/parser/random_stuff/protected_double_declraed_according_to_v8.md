@@ -13,7 +13,14 @@
 
 
 `````js
-function protected(){for(;;)switch(x){default:}}const protected=x,function arguments(){}v:switch(x){default:}let arguments=l,function package(){}let package=a,function v(){}const v=x
+function protected(){
+  for(;;) 
+    switch(x){
+      default:
+    }
+}
+
+const protected = x, function arguments(){}
 `````
 
 ## Output
@@ -30,10 +37,17 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `protected` but another binding already existed on the same level
 
-function protected(){for(;;)switch(x){default:}}const protected=x,function arguments(){}v:switch(x){default:}let arguments=l,function package(){}let package=a,function v(){}const v=x
-                                                      ^------- error
+function protected(){
+  for(;;)
+    switch(x){
+      default:
+    }
+}
+
+const protected = x, function arguments(){}
+      ^------- error
 `````
 
 ### Strict mode
@@ -44,8 +58,16 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 throws: Parser error!
   Cannot use this name (protected) as a variable name because: Cannot use this reserved word as a variable name in strict mode
 
-function protected(){for(;;)switch(x){default:}}const protected=x,function arguments(){}v:switch(x){default:}let arguments=l,function package(){}let package=a,function v(){}const v=x
+function protected(){
          ^------- error
+
+  for(;;)
+    switch(x){
+      default:
+    }
+}
+
+const protected = x, function arguments(){}
 `````
 
 
@@ -59,11 +81,4 @@ _Output same as strict mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Parser error!
-  Cannot use this name (function) as a variable name because: Cannot never use this reserved word as a variable name
-
-function protected(){for(;;)switch(x){default:}}const protected=x,function arguments(){}v:switch(x){default:}let arguments=l,function package(){}let package=a,function v(){}const v=x
-                                                                  ^------- error
-`````
-
+_Output same as sloppy mode._

@@ -101,7 +101,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `x` but another binding already existed on the same level
 
 var x = a; function x(){};
                     ^------- error

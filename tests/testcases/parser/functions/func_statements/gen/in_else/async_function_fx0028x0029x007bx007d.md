@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse a async function declaration here, only expecting statements here
+  Cannot parse an async function declaration here, only expecting statements here
 
 if (x) x;
 else async function f(){}
@@ -52,4 +52,12 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Only plain function declarations can be a child of `if` or `else` in web compat mode
+
+if (x) x;
+else async function f(){}
+           ^------- error
+`````
+

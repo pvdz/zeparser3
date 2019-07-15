@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The rest argument of an object binding pattern must always be a simple ident
+  This binding can not be used in function parameters because it is not destructible
 
 function f({...a.b}){}
-                ^------- error
+                   ^------- error
 `````
 
 ### Strict mode

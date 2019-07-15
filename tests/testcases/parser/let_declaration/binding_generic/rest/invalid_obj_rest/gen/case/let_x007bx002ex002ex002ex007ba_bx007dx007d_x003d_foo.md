@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The rest argument of an object binding pattern must always be a simple ident and not an array pattern
+  The binding pattern is not destructible
 
 let {...{a,b}} = foo
-             ^------- error
+               ^------- error
 `````
 
 ### Strict mode

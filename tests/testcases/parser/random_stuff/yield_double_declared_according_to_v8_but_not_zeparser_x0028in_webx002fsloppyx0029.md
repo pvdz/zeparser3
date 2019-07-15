@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `yield` but another binding already existed on the same level
 
 function yield(){switch(e){default:}}switch(x){default:case x:}const yield=x
                                                                      ^------- error
@@ -57,102 +57,4 @@ _Output same as strict mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:76},source:''},
-  body: [
-    {
-      type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
-      generator: false,
-      async: false,
-      id: {
-        type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
-        name: 'yield'
-      },
-      params: [],
-      body: {
-        type: 'BlockStatement',
-        loc:{start:{line:1,col:16},end:{line:1,col:37},source:''},
-        body: [
-          {
-            type: 'SwitchStatement',
-            loc:{start:{line:1,col:17},end:{line:1,col:36},source:''},
-            discriminant: {
-              type: 'Identifier',
-              loc:{start:{line:1,col:24},end:{line:1,col:25},source:''},
-              name: 'e'
-            },
-            cases: [
-              {
-                type: 'SwitchCase',
-                loc:{start:{line:1,col:27},end:{line:1,col:35},source:''},
-                test: null,
-                consequent: []
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      type: 'SwitchStatement',
-      loc:{start:{line:1,col:37},end:{line:1,col:63},source:''},
-      discriminant: {
-        type: 'Identifier',
-        loc:{start:{line:1,col:44},end:{line:1,col:45},source:''},
-        name: 'x'
-      },
-      cases: [
-        {
-          type: 'SwitchCase',
-          loc:{start:{line:1,col:47},end:{line:1,col:55},source:''},
-          test: null,
-          consequent: []
-        },
-        {
-          type: 'SwitchCase',
-          loc:{start:{line:1,col:55},end:{line:1,col:62},source:''},
-          test: {
-            type: 'Identifier',
-            loc:{start:{line:1,col:60},end:{line:1,col:61},source:''},
-            name: 'x'
-          },
-          consequent: []
-        }
-      ]
-    },
-    {
-      type: 'VariableDeclaration',
-      loc:{start:{line:1,col:69},end:{line:1,col:76},source:''},
-      kind: 'const',
-      declarations: [
-        {
-          type: 'VariableDeclarator',
-          loc:{start:{line:1,col:69},end:{line:1,col:76},source:''},
-          id: {
-            type: 'Identifier',
-            loc:{start:{line:1,col:69},end:{line:1,col:69},source:''},
-            name: 'yield'
-          },
-          init: {
-            type: 'Identifier',
-            loc:{start:{line:1,col:75},end:{line:1,col:76},source:''},
-            name: 'x'
-          }
-        }
-      ]
-    }
-  ]
-}
-
-tokens (31x):
-       IDENT IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR
-       IDENT PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
-       PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR IDENT
-       PUNCTUATOR IDENT IDENT PUNCTUATOR PUNCTUATOR IDENT IDENT
-       PUNCTUATOR IDENT ASI
-`````
-
+_Output same as sloppy mode._

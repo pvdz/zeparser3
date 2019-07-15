@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The rest arg was not destructible as it can only apply to an identifier or array/object pattern arg
+  This binding can not be used in function parameters because it is not destructible
 
 let {...(obj)} = foo
-        ^------- error
+               ^------- error
 `````
 
 ### Strict mode

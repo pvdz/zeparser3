@@ -42,12 +42,69 @@ Each case is applied to each test by simply replacing `#` with the actual case.
 
 #### func func
 
-This should be okay as it is explicitly allowed
+It is explicitly allowed for function statements to be shadowed by function declarations.
 
 https://tc39.es/ecma262/#sec-block-duplicates-allowed-static-semantics
 
+This exception does not apply to two function statements.
+
 `````js
 { # # }
+`````
+
+#### before and in block
+
+Only okay for function decl vs function statement
+
+`````js
+# { # }
+`````
+
+#### in and after block
+
+Only okay for function decl vs function statement
+
+`````js
+{ # } #
+`````
+
+#### try block
+
+Try block is same as regular block in this context
+
+`````js
+try { # var f } catch (e) {}
+`````
+
+#### catch block
+
+Catch block is same as regular block in this context
+
+`````js
+try { } catch (e) { # # }
+`````
+#### finally block
+
+Finally block is same as regular block in this context
+
+`````js
+try { } finally { # # }
+`````
+
+#### switch case block
+
+Switch block is same as regular block in this context
+
+`````js
+switch (x) { case c: # # }
+`````
+
+#### switch default block
+
+Switch block is same as regular block in this context
+
+`````js
+switch (x) { default: # # }
 `````
 
 #### var func

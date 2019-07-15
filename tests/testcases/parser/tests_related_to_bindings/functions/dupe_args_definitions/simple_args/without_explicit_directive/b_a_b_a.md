@@ -88,10 +88,10 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Parser error!
-  Same param name `b` was bound twice, this is not allowed in strict mode
+  Function had duplicate params
 
 function f(b, a, b, a) {}
-                       ^------- error
+                        ^------- error
 `````
 
 

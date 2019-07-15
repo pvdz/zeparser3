@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already bound
+  Function had duplicate params
 
 function f([a, b, a]) {}
-                   ^------- error
+                       ^------- error
 `````
 
 ### Strict mode

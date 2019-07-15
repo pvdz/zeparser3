@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already bound
+  Found a lexical binding that is duplicate of a lexical binding on the same statement level
 
 const [foo] = x, [foo] = y;
                      ^------- error

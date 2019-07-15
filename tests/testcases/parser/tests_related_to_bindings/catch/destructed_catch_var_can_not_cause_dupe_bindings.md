@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already bound
+  Can not create a binding for `a` because was already bound as a catch clause binding
 
 try {} catch ([a,a]) { }
                   ^------- error

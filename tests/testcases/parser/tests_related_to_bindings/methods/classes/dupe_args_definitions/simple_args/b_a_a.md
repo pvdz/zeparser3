@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Same param name `a` was bound twice, this is not allowed in strict mode
+  Method had duplicate params
 
 class o {f(b, a, a) {}}
                     ^------- error

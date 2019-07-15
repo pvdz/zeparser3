@@ -8,20 +8,22 @@
 >
 > ::> in global, lex rebind a var declared in for-header in sibling statement
 >
-> IterationStatement: for(LexicalDeclarationExpression;Expression)Statement
+> https://tc39.es/ecma262/#sec-scripts-static-semantics-early-errors
 >
-> > It is a Syntax Error if any element of the BoundNames of LexicalDeclaration also occurs in the
+> > It is a Syntax Error if any element of the LexicallyDeclaredNames of ScriptBody also occurs in the VarDeclaredNames of ScriptBody.
 >
-> VarDeclaredNames of Statement.
+> https://tc39.es/ecma262/#sec-module-semantics-static-semantics-early-errors
 >
-> Note that the for-var ends up in global, and so is the const. So the statement is global and the lexical names
+> > It is a Syntax Error if any element of the LexicallyDeclaredNames of ModuleItemList also occurs in the VarDeclaredNames of ModuleItemList.
 >
-> contains an element that also appears in its variable list. So it fails.
+> And basically, the var names of a for-header with `var` decl contribute to the global list so this should be an error.
+
 
 ## Input
 
 `````js
-for (var x;;); const x = 1
+for (var x;;); 
+const x = 1
 `````
 
 ## Output
@@ -38,10 +40,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `x` but another binding already existed on the same level
 
-for (var x;;); const x = 1
-                     ^------- error
+for (var x;;);
+const x = 1
+      ^------- error
 `````
 
 ### Strict mode

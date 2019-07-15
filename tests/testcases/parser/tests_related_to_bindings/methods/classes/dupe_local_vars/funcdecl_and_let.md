@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `x` but another binding already existed on the same level
 
 class o {f(){ function x(){} let x; }}
                                  ^------- error

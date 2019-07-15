@@ -7,6 +7,16 @@
 > :: objects : ellipsis
 >
 > ::> can be addition
+>
+> https://tc39.es/ecma262/#prod-DestructuringAssignmentTarget
+>
+> https://tc39.es/ecma262/#prod-BindingRestProperty
+>
+> The arg of object rest must at best be a valid lhs. Addition is neither so addition is not destructible, either way.
+>
+> https://tc39.es/ecma262/#prod-PropertyDefinition
+>
+> The arg of object spread must be an assignment expression. Addition falls in that category so it should be valid as object spread arg.
 
 ## Input
 

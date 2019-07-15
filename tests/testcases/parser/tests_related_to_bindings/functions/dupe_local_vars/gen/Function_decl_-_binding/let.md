@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `f` but another binding already existed on the same level
 
 function g(){ function f() {} let f = 1; }
                                   ^------- error
@@ -50,74 +50,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:42},source:''},
-  body: [
-    {
-      type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:42},source:''},
-      generator: false,
-      async: false,
-      id: {
-        type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
-        name: 'g'
-      },
-      params: [],
-      body: {
-        type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:1,col:42},source:''},
-        body: [
-          {
-            type: 'FunctionDeclaration',
-            loc:{start:{line:1,col:14},end:{line:1,col:30},source:''},
-            generator: false,
-            async: false,
-            id: {
-              type: 'Identifier',
-              loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
-              name: 'f'
-            },
-            params: [],
-            body: {
-              type: 'BlockStatement',
-              loc:{start:{line:1,col:27},end:{line:1,col:30},source:''},
-              body: []
-            }
-          },
-          {
-            type: 'VariableDeclaration',
-            loc:{start:{line:1,col:34},end:{line:1,col:39},source:''},
-            kind: 'let',
-            declarations: [
-              {
-                type: 'VariableDeclarator',
-                loc:{start:{line:1,col:34},end:{line:1,col:39},source:''},
-                id: {
-                  type: 'Identifier',
-                  loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
-                  name: 'f'
-                },
-                init: {
-                  type: 'Literal',
-                  loc:{start:{line:1,col:38},end:{line:1,col:38},source:''},
-                  value: 1,
-                  raw: '1'
-                }
-              }
-            ]
-          }
-        ]
-      }
-    }
-  ]
-}
-
-tokens (18x):
-       IDENT IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR IDENT IDENT
-       PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR IDENT IDENT
-       PUNCTUATOR NUMBER_DEC PUNCTUATOR PUNCTUATOR
-`````
-
+_Output same as sloppy mode._

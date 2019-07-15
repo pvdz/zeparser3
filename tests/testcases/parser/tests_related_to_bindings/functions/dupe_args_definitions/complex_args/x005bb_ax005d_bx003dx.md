@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Same param name was bound twice and the args are not simple, this is not allowed
+  Function had duplicate params
 
 function f([b, a], b=x) {}
-                        ^------- error
+                         ^------- error
 `````
 
 ### Strict mode

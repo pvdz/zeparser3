@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Double declaration of the same binding name in a `catch` var
+  Can not create a lexical binding for `e` because it shadows a catch clause binding
 
 try {} catch (e) { const e = x; }
                          ^------- error

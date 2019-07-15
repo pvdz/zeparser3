@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already `var` bound
+  Attempted to create a lexical binding for `f` but another binding already existed on the same level
 
 function f() {} let f = 1;
                     ^------- error
@@ -44,68 +44,10 @@ _Output same as sloppy mode._
 
 Parsed with the module goal.
 
-`````
-throws: Parser error!
-  Cannot create lexical binding when the name was already bound
-
-function f() {} let f = 1;
-                    ^------- error
-`````
-
+_Output same as sloppy mode._
 
 ### Web compat mode
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
-  body: [
-    {
-      type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
-      generator: false,
-      async: false,
-      id: {
-        type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
-        name: 'f'
-      },
-      params: [],
-      body: {
-        type: 'BlockStatement',
-        loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
-        body: []
-      }
-    },
-    {
-      type: 'VariableDeclaration',
-      loc:{start:{line:1,col:20},end:{line:1,col:25},source:''},
-      kind: 'let',
-      declarations: [
-        {
-          type: 'VariableDeclarator',
-          loc:{start:{line:1,col:20},end:{line:1,col:25},source:''},
-          id: {
-            type: 'Identifier',
-            loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
-            name: 'f'
-          },
-          init: {
-            type: 'Literal',
-            loc:{start:{line:1,col:24},end:{line:1,col:24},source:''},
-            value: 1,
-            raw: '1'
-          }
-        }
-      ]
-    }
-  ]
-}
-
-tokens (12x):
-       IDENT IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR IDENT
-       IDENT PUNCTUATOR NUMBER_DEC PUNCTUATOR
-`````
-
+_Output same as sloppy mode._

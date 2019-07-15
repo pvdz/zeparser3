@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot create lexical binding when the name was already bound
+  Attempted to create a lexical binding for `f` but another binding already existed on the same level
 
 { class f {} async function f(){} }
                             ^------- error

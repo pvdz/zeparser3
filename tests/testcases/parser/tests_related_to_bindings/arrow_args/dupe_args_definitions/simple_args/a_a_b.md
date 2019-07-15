@@ -42,10 +42,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Arrow had at least one duplicate parameter name bound
+  Arrow had duplicate params
 
 (a, a, b) => {}
-          ^------- error
+             ^------- error
 `````
 
 ### Strict mode
