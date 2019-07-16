@@ -50,7 +50,7 @@ export function generateTestFile(tob) {
 
 > :: ${descPath}
 >
-> ::> ${descFile}${comment ? '\n>\n>' + comment : ''}
+> ::> ${descFile}${comment ? '\n>\n> ' + comment : ''}
 ${INPUT_HEADER}${OUTPUT_QUINTICKJS}${code}${OUTPUT_QUINTICK}
 `;
   fs.writeFileSync(file, newData);
