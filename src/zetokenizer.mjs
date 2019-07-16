@@ -1051,11 +1051,11 @@ function ZeTokenizer(
           return $ERROR;
         }
         c = peek();
-      }
 
-      if (c === $$CURLY_L_7B) {
-        ASSERT_skip($$CURLY_L_7B);
-        return (fromTick ? $TICK_HEAD : $TICK_BODY) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
+        if (c === $$CURLY_L_7B) {
+          ASSERT_skip($$CURLY_L_7B);
+          return (fromTick ? $TICK_HEAD : $TICK_BODY) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
+        }
       }
 
       if (c === $$TICK_60) {
