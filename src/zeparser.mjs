@@ -933,6 +933,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     curtok = token;
     curtype = curtok.type;
     curc = curtok.c;
+
+    if (curtype === $ERROR) {
+      tok.lexError();
+    }
   }
   function skipAny(lexerFlags) {
     skipRex(lexerFlags); // TODO: optimize; in this case the next token is very restricted but at least no slash
@@ -9023,7 +9027,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       staticToken = curtok;
       // = `class x { static / foo(){} }`
-      ASSERT_skipRex('static', lexerFlags); // this is `class x {static` and if the next char is a slash it will be an error (there's a test)
+      ASSERT_skipAny('static', lexerFlags); // this is `class x {static` and if the next char is a slash it will be an error (there's a test)
 
       if (curc === $$PAREN_L_28) {
         // The `static` ident here is the name of a method, not a modifier

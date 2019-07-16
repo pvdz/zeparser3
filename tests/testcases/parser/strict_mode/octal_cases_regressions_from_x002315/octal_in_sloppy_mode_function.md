@@ -72,8 +72,8 @@ tokens (9x):
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
 `````
-throws: Parser error!
-  Tokenizer error: (not regex?)
+throws: Tokenizer error!
+    "Illegal" octal escape in strict mode
 
 function foo() { 00004; }
                  ^------- error
