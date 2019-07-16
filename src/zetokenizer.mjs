@@ -1064,18 +1064,19 @@ function ZeTokenizer(
       }
 
       if (c === $$CR_0D) {
+        ASSERT_skip($$CR_0D);
         // crlf is considered one line for the sake of reporting line-numbers
-        if (peek($$LF_0A)) skip();
+        if (peek($$LF_0A)) ASSERT_skip($$LF_0A);
         incrementLine();
       } else if (isLfPsLs(c)) {
+        ASSERT_skip(c);
         incrementLine();
-      }
-
-      ASSERT_skip(c);
-
-      if (c === $$BACKSLASH_5C) {
+      } else if (c === $$BACKSLASH_5C) {
         // TODO: isnt a string escape in a template always considered a strict mode escape?
+        ASSERT_skip($$BACKSLASH_5C);
         badEscapes = parseStringEscape(lexerFlags, FOR_TEMPLATE) || badEscapes;
+      } else {
+        ASSERT_skip(c);
       }
     }
 
