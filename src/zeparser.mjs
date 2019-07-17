@@ -3215,7 +3215,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipAny('await', lexerFlags); // TODO: optimize; next must be `(`
     }
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
-    parseForHeader(lexerFlags | LF_NO_ASI, forToken, scoop, awaitable, astProp);
+    parseForHeader(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI), forToken, scoop, awaitable, astProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
     if (curtype === $EOF) THROW('Missing `for` child statement');
     parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, scoop, {'##': 'for', '#': labelSet}, FROM_OTHER_STMT, 'body');
