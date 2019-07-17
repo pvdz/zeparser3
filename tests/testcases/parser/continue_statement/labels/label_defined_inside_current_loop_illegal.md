@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Can not nest labels as the child of an if/else/while/for/do/with statement
+  Cannot `continue` to this label because it was defined inside the current inner-most loop
 
 while (true) x: continue x;
-              ^------- error
+                         ^------- error
 `````
 
 ### Strict mode

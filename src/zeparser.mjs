@@ -4352,7 +4352,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp) {
     ASSERT(arguments.length === parseLabeledStatementInstead.length, 'arg count');
 
-    if (fromStmt === FROM_OTHER_STMT) THROW('Can not nest labels as the child of an if/else/while/for/do/with statement');
+    // TODO: this restriction only applies to "labelled function decls"
+    // if (fromStmt === FROM_OTHER_STMT) THROW('Can not nest labels as the child of an if/else/while/for/do/with statement');
 
     // This is an exception to the general case where eval and arguments are okay to use as label name. Thanks, spec.
     if (identToken.str !== 'eval' && identToken.str !== 'arguments') {
