@@ -6559,8 +6559,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // this function assumes you've just skipped the paren and are now in the first token of a group/arrow/async-call
     // this is either the arg of a delete, or any other group opener that may or may not have been prefixed with async
-    let lexerFlags = sansFlag(lexerFlagsBeforeParen | LF_NO_ASI, LF_IN_FOR_LHS);
-
+    let lexerFlags = sansFlag(lexerFlagsBeforeParen | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI);
     // parse the group as if it were a group (also for the sake of AST)
     // while doing so keep track of the next three states. At the end
     // act accordingly.

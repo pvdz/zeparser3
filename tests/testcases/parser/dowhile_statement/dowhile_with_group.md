@@ -6,16 +6,15 @@
 >
 > ::> 
 >
-> By fuzzer
-Somehow relates to function in a for-header
+> Function wrapped in parenthesis case
 
 
 ## Input
 
 `````js
 do
-  for((function(){});;)x
-while(x);
+  (function(){})
+while(y)
 `````
 
 ## Output
@@ -33,53 +32,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:3,col:9},source:''},
+  loc:{start:{line:1,col:0},end:{line:3,col:8},source:''},
   body: [
     {
       type: 'DoWhileStatement',
-      loc:{start:{line:1,col:0},end:{line:3,col:9},source:''},
+      loc:{start:{line:1,col:0},end:{line:3,col:8},source:''},
       body: {
-        type: 'ForStatement',
+        type: 'ExpressionStatement',
         loc:{start:{line:2,col:2},end:{line:3,col:0},source:''},
-        init: {
+        expression: {
           type: 'FunctionExpression',
-          loc:{start:{line:2,col:7},end:{line:2,col:19},source:''},
+          loc:{start:{line:2,col:3},end:{line:2,col:15},source:''},
           generator: false,
           async: false,
           id: null,
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:2,col:17},end:{line:2,col:19},source:''},
+            loc:{start:{line:2,col:13},end:{line:2,col:15},source:''},
             body: []
-          }
-        },
-        test: null,
-        update: null,
-        body: {
-          type: 'ExpressionStatement',
-          loc:{start:{line:2,col:23},end:{line:3,col:0},source:''},
-          expression: {
-            type: 'Identifier',
-            loc:{start:{line:2,col:23},end:{line:3,col:0},source:''},
-            name: 'x'
           }
         }
       },
       test: {
         type: 'Identifier',
         loc:{start:{line:3,col:6},end:{line:3,col:7},source:''},
-        name: 'x'
+        name: 'y'
       }
     }
   ]
 }
 
-tokens (21x):
-       IDENT IDENT PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
-       PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR
-       PUNCTUATOR IDENT ASI IDENT PUNCTUATOR IDENT PUNCTUATOR
-       PUNCTUATOR
+tokens (15x):
+       IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR
+       PUNCTUATOR PUNCTUATOR ASI IDENT PUNCTUATOR IDENT PUNCTUATOR ASI
 `````
 
 ### Strict mode
