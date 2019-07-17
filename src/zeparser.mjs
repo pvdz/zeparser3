@@ -8932,11 +8932,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let hasConstructor = false; // must throw if more than one plain constructor was found
     while (curc !== $$CURLY_R_7D) {
       // note: generator and async state is not reset because computed method names still use the outer class state
-      destructibleForPiggies |= parseClassMethod(lexerFlags, outerLexerFlags, scoop, bindingType, exportedNames, exportedBindings, astProp);
-      if (hasAnyFlag(destructibleForPiggies, PIGGY_BACK_WAS_CONSTRUCTOR)) {
+      let destructNow = parseClassMethod(lexerFlags, outerLexerFlags, scoop, bindingType, exportedNames, exportedBindings, astProp);
+      if (hasAnyFlag(destructNow, PIGGY_BACK_WAS_CONSTRUCTOR)) {
         if (hasConstructor) THROW('Classes may only have one constructor');
         hasConstructor = true;
+        destructNow = sansFlag(destructNow, PIGGY_BACK_WAS_CONSTRUCTOR); // not sure if this is important at all
       }
+      destructibleForPiggies |= destructNow;
 
       while (curc === $$SEMI_3B) {
         ASSERT_skipAny(';', lexerFlags); // TODO: next must be method key, modifier, or end (ident, string, number, `[`, `}`, `;`, or `*`)
