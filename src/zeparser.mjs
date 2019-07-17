@@ -1656,8 +1656,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseStatementHeader(lexerFlags, headProp) {
     ASSERT(typeof lexerFlags === 'number', 'lexerflags number');
+    ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE), 'I think template resets itself');
+
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
-    parseExpressions(lexerFlags | LF_NO_ASI, ASSIGN_EXPR_IS_OK, headProp);
+    parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI), ASSIGN_EXPR_IS_OK, headProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
   }
 
