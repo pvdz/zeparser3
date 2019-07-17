@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  AST_open(meta, Identifier, false); bad tree? node[meta] should be `undefined` but wasnt (child=[object Object], prop=meta, type=Identifier, node[prop]=[object Object])
+  Cannot inc/dec a non-assignable value as postfix
 
 function f(){ new.target-- }
-                 ^------- error
+                        ^------- error
 `````
 
 ### Strict mode

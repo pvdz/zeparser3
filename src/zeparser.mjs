@@ -5854,19 +5854,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - TODO: `function f(x=() => new.target) {}`
       THROW('Must be inside/nested a regular function to use `new.target`');
     }
-
     AST_open(astProp, 'MetaProperty', newToken);
     AST_setIdent('meta', newToken);
-    AST_open('meta', 'Identifier', newToken);
-    AST_set('name', 'new');
-    AST_close('Identifier');
-
     ASSERT_skipAny('.', lexerFlags); // already asserted the dot, next token must be `target`
     if (curtok.str !== 'target') THROW('Can only read `new.target`, no other "properties" from `new`');
-
-    AST_open('property', 'Identifier', curtok);
-    AST_set('name', 'target');
-    AST_close('Identifier');
+    AST_setIdent('property', curtok);
     ASSERT_skipDiv('target', lexerFlags); // new.target / foo
     AST_close('MetaProperty');
 

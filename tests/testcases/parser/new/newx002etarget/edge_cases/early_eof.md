@@ -1,19 +1,18 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/new/newx002etarget/basic_tests/bad_prop.md
+- Path: zeparser3/tests/testcases/parser/new/newx002etarget/edge_cases/early_eof.md
 
-> :: new : new.target : basic tests
+> :: new : new.target : edge cases
 >
-> ::> bad prop
+> ::> early eof
 >
-> only new.target is syntactic sequence, not an arbitrary property
+> Found by fuzzer
+
 
 ## Input
 
 `````js
-function f(){ new.foo }
+function d(){new.
 `````
 
 ## Output
@@ -32,8 +31,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Can only read `new.target`, no other "properties" from `new`
 
-function f(){ new.foo }
-                  ^------- error
+function d(){new.
+                ^------- error
 `````
 
 ### Strict mode
