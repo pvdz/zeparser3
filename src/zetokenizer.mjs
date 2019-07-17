@@ -432,7 +432,7 @@ function ZeTokenizer(
 
   function peek() {
     ASSERT(neof(), 'pointer not oob');
-    ASSERT(!arguments.length, 'no args');
+    ASSERT(!arguments.length, 'peek is not expecting args');
     ASSERT(cache === input.charCodeAt(pointer), 'cache should be up to date');
 
     return cache;
@@ -933,7 +933,7 @@ function ZeTokenizer(
     ASSERT_skip(f);
     // we've parsed 6 hexdigits now. the biggest number allowed is 0x10ffff but first we _must_ find a curly next
     if (eof()) return BAD_ESCAPE;
-    if (peek() !== $$CURLY_R_7D) return BAD_ESCAPE;
+    if (!peeky($$CURLY_R_7D)) return BAD_ESCAPE;
     ASSERT_skip($$CURLY_R_7D);
 
     // the total may not exceed 0x10ffff which means that at six digits we only have to validate the first two
@@ -1066,7 +1066,7 @@ function ZeTokenizer(
       if (c === $$CR_0D) {
         ASSERT_skip($$CR_0D);
         // crlf is considered one line for the sake of reporting line-numbers
-        if (peek($$LF_0A)) ASSERT_skip($$LF_0A);
+        if (peeky($$LF_0A)) ASSERT_skip($$LF_0A);
         incrementLine();
       } else if (isLfPsLs(c)) {
         ASSERT_skip(c);
@@ -1515,7 +1515,7 @@ function ZeTokenizer(
       }
       if (c === $$CR_0D) {
         // crlf is considered one line for the sake of reporting line-numbers
-        if (peek($$LF_0A)) skip();
+        if (peeky($$LF_0A)) skip();
         incrementLine();
       } else if (isLfPsLs(c)) {
         incrementLine();
@@ -2010,7 +2010,7 @@ function ZeTokenizer(
     // pointer should be up to date
     // the first char of the group name should have been confirmed and parsed
 
-    if (peek() === $$GT_3E) {
+    if (peeky($$GT_3E)) {
       // name is one character
       lastParsedIdent = String.fromCodePoint(firstCharOrd);
     } else {
@@ -2203,7 +2203,7 @@ function ZeTokenizer(
           }
         }
 
-        if (peek() === $$GT_3E) {
+        if (peeky($$GT_3E)) {
           // name is one character
           if (wider === VALID_DOUBLE_CHAR) {
             lastParsedIdent = input.slice(pointer - 2, pointer);
@@ -2499,7 +2499,7 @@ function ZeTokenizer(
     // the total may not exceed 0x10ffff
     if (codePoint > 0x10ffff) return BAD_ESCAPE;
     if (eof()) return BAD_ESCAPE;
-    if (peek() !== $$CURLY_R_7D) return BAD_ESCAPE;
+    if (!peeky($$CURLY_R_7D)) return BAD_ESCAPE;
     lastRegexUnicodeEscapeOrd = codePoint;
     return GOOD_ESCAPE;
   }
