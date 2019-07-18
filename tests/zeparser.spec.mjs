@@ -412,9 +412,10 @@ async function writeNewOutput(list) {
       const {newData, oldData, file} = tob;
       if (newData !== oldData) {
         let cont = await yn('Continue to overwrite test output?');
-        if (!cont) hardExit(tob, 'manually aborted before replacing a test file');
-        ++updated;
-        await promiseToWriteFile(file, newData);
+        if (cont) {
+          ++updated;
+          await promiseToWriteFile(file, newData);
+        }
       }
     }
   } else {
