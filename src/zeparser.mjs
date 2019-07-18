@@ -6179,7 +6179,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('quasis', []);
 
     let awaitYieldFlagsFromAssignable = 0;
-
     if (hasAllFlags(curtype, $TICK_PURE)) {
       parseQuasiPart(lexerFlags, IS_QUASI_TAIL);
     } else if (hasAllFlags(curtype, $TICK_HEAD)) {
@@ -6187,7 +6186,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // keep parsing expression+tick until tick-tail
       do {
-        awaitYieldFlagsFromAssignable |= parseExpressions(lexerFlags | LF_IN_TEMPLATE, ASSIGN_EXPR_IS_OK, 'expressions');
+        let tmpLexerFlags = sansFlag(lexerFlags | LF_IN_TEMPLATE | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
+        awaitYieldFlagsFromAssignable |= parseExpressions(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'expressions');
 
         AST_open('quasis', 'TemplateElement', curtok);
         AST_set('tail', hasAllFlags(curtype, $TICK_TAIL));
