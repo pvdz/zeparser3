@@ -4038,7 +4038,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ThrowStatement', curtok);
     ASSERT_skipRex('throw', lexerFlags);
     if (curtok.nl > 0) THROW('Premature newline');
-    parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'argument'); // mandatory1
+    let tmpLexerFlags = sansFlag(lexerFlags, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
+    parseExpressions(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'argument'); // mandatory1
     parseSemiOrAsi(lexerFlags);
     AST_close('ThrowStatement');
   }
@@ -6169,10 +6170,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
   function parseTickExpression(lexerFlags, tickToken, astProp) {
-    // basically; parse tick. if head, keep parsing body until parsing tail
+    // parseTemplate
     ASSERT(parseTickExpression.length === arguments.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE) || isTemplateStart(curtype), 'if in template this function can only be called by the head of a nested template', debug_toktype(curtype));
+
+    // basically; parse tick. if head, keep parsing body until parsing tail
 
     AST_open(astProp, 'TemplateLiteral', tickToken);
     AST_set('expressions', []);
@@ -6184,9 +6187,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (hasAllFlags(curtype, $TICK_HEAD)) {
       parseQuasiPart(lexerFlags | LF_IN_TEMPLATE, NOT_QUASI_TAIL);
 
+      let tmpLexerFlags = sansFlag(lexerFlags | LF_IN_TEMPLATE | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
       // keep parsing expression+tick until tick-tail
       do {
-        let tmpLexerFlags = sansFlag(lexerFlags | LF_IN_TEMPLATE | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
         awaitYieldFlagsFromAssignable |= parseExpressions(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'expressions');
 
         AST_open('quasis', 'TemplateElement', curtok);
@@ -6200,16 +6203,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('The first token after the template expression should be a continuation of the template');
         }
         if (hasAllFlags(curtype, $TICK_BODY)) {
-          ASSERT_skipRex(curtok.str, lexerFlags | LF_IN_TEMPLATE); // first token in template expression can be regex
+          ASSERT_skipRex(curtok.str, tmpLexerFlags | LF_IN_TEMPLATE); // first token in template expression can be regex
         }
         else if (hasAllFlags(curtype, $TICK_TAIL)) {
-          ASSERT_skipDiv(curtok.str, lexerFlags); // first token after template expression can be div
           break;
         }
         else {
           THROW('Unclosed template');
         }
       } while (true);
+      ASSERT_skipRex(curtok.str, lexerFlags);
     } else {
       if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) THROW('Template containd bad escape');
       THROW('Template should start as head or pure');
@@ -6312,13 +6315,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       if (hasAllFlags(curtype, $TICK_HEAD)) {
-        let lfbak = lexerFlags;
-        lexerFlags = lexerFlags | LF_IN_TEMPLATE; // tell tokenizer to interpret `}` as template
+        let tmpLexerFlags = sansFlag(lexerFlags | LF_IN_TEMPLATE | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
         do {
           ASSERT_skipRex($TICK, lexerFlags); // f`x${/foo/}y`
           // - `a${b=c}d`           is valid
           // - `a${await foo}d`     should propagate await/yield state
-          let nowAssignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'expressions');
+          let nowAssignable = parseExpression(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'expressions');
           assignable = mergeAssignable(nowAssignable, assignable);
 
           if ((targetEsVersion >= 6 && targetEsVersion < 9) && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
@@ -6332,7 +6334,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           AST_set('value', {raw: curtok.str.slice(1, hasAllFlags(curtype, $TICK_TAIL) ? -1 : -2), cooked: '<TODO>'});
           AST_set('tail', hasAllFlags(curtype, $TICK_TAIL));
           AST_close('TemplateElement');
-          if (hasAllFlags(curtype, $TICK_TAIL)) lexerFlags = lfbak; // should happen only once and always
         } while (!hasAllFlags(curtype, $TICK_TAIL)); // also fixes $EOF check so no infi loop
       } else {
         ASSERT(hasAllFlags(curtype, $TICK_PURE), 'isTemplateStart should have asserted that the type was either tick pure or head');

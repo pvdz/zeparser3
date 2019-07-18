@@ -1,20 +1,21 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/restricted_productions/update_expression/in_a_template.md
+- Path: zeparser3/tests/testcases/parser/throw_statement/throw_fail_in_do_while.md
 
-> :: restricted productions : update expression
+> :: throw statement
 >
-> ::> in a template
+> ::> throw fail in do while
+>
+> Newline is not allowed after `throw` and this test just ensures this is not a fatal error in the parser inside a `do-while`
 
 
 ## Input
 
-
 `````js
-`x${b
-++c}y`;
+function f() {
+  do throw
+  pass while(x);
+}
 `````
 
 ## Output
@@ -31,11 +32,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The postfix ++/-- is a restricted production so ASI must apply but that is not valid in this context
+  Premature newline
 
-`x${b
-++c}y`;
-^------- error
+function f() {
+  do throw
+  pass while(x);
+  ^------- error
+
+}
 `````
 
 ### Strict mode
