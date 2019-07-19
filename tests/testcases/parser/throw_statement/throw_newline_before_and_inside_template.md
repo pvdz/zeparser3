@@ -1,21 +1,21 @@
 # ZeParser parser test case
 
-- Path: zeparser3/tests/testcases/parser/throw_statement/throw_fail_in_do_while.md
+- Path: zeparser3/tests/testcases/parser/throw_tpl_with_newline.md
 
-> :: throw statement
+> :: .
 >
-> ::> throw fail in do while
+> ::> throw tpl with newline
 >
-> Newline is not allowed after `throw` and this test just ensures this is not a fatal error in the parser inside a `do-while`
-
+> By fuzzer, zeparser only
+>
+> Sanity test. Should still fail.
 
 ## Input
 
 `````js
-function f() {
-  do throw
-  pass while(x);
-}
+throw
+`
+`
 `````
 
 ## Output
@@ -34,12 +34,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Found a newline between `throw` and its argument but that is not allowed
 
-function f() {
-  do throw
-  pass while(x);
-  ^------- error
+throw
+`
+^------- error
 
-}
+`
 `````
 
 ### Strict mode

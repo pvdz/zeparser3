@@ -536,8 +536,9 @@ function ZeTokenizer(
         let cstart = cache;
         let start = startForError = pointer; // TODO: see if startForError makes a dent at all
         wasWhite = false;
+        let nlwas = consumedNewlinesThisToken; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
         let consumedTokenType = next(lexerFlags);
-        token = createToken(consumedTokenType, start, pointer, startCol, startRow, consumedNewlinesThisToken, wasWhite, cstart);
+        token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
         token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken, WHITESPACE_TOKEN, 0);

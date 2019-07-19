@@ -4061,7 +4061,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseThrowStatement(lexerFlags, astProp) {
     AST_open(astProp, 'ThrowStatement', curtok);
     ASSERT_skipRex('throw', lexerFlags);
-    if (curtok.nl > 0) THROW('Premature newline');
+    if (curtok.nl > 0) THROW('Found a newline between `throw` and its argument but that is not allowed');
     let tmpLexerFlags = sansFlag(lexerFlags, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
     parseExpressions(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'argument'); // mandatory1
     parseSemiOrAsi(lexerFlags);
