@@ -1484,6 +1484,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [x]: ((x,x) = x)
         // [x]: ((x,x) => x)
         scoop.dupeParamErrorToken = curtok; // TODO: use correct token
+      } else if (bindingType === BINDING_TYPE_CATCH_IDENT || bindingType === BINDING_TYPE_CATCH_OTHER) {
+        // I guess we ignore this case...
+        // [v]: `e => { try {} catch (e) {} }`
+        // [v]: `e => { try {} catch ([e]) {} }`
       } else {
         THROW('Can not create a lexical binding for `' + name +'` because an arrow param already has that name');
       }
@@ -1498,7 +1502,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (value === BINDING_TYPE_CATCH_IDENT || value === BINDING_TYPE_CATCH_OTHER) {
         THROW('Can not create a lexical binding for `' + name + '` because it shadows a catch clause binding');
       }
-    } else if (scoop.type === SCOPE_LAYER_CATCH_BODY) {
+    }
+    else if (scoop.type === SCOPE_LAYER_CATCH_BODY) {
       // A lexical binding (or any var) in the catch block cannot be shadowing a catch clause binding
       ASSERT(scoop.parent && scoop.parent.type === SCOPE_LAYER_CATCH_HEAD, 'scoop body must have head as parent', scoop);
       if (scoop.parent[hashed] === BINDING_TYPE_CATCH_IDENT || scoop.parent[hashed] === BINDING_TYPE_CATCH_OTHER) {
@@ -1509,15 +1514,23 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let s = scoop.parent;
     while (s && s.type !== SCOPE_LAYER_FUNC_ROOT) {
       let value = s[hashed];
-      if (s.type === SCOPE_LAYER_ARROW_PARAMS && value !== BINDING_TYPE_NONE) {
-        // TODO: this one does not need a loop. `(a) => {{let a}}` is not a problem.
-        if (bindingType === BINDING_TYPE_ARG) {
-          // [v]: ((x,x))
-          // [x]: ((x,x) = x)
-          // [x]: ((x,x) => x)
-          scoop.dupeParamErrorToken = curtok; // TODO: use correct token
-        } else {
+      if (s.type === SCOPE_LAYER_ARROW_PARAMS) {
+        if (bindingType === BINDING_TYPE_CATCH_IDENT || bindingType === BINDING_TYPE_CATCH_OTHER) {
+          // I guess we ignore this case...
+          // [v]: `e => { try {} catch (e) {} }`
+          // [v]: `e => { try {} catch ([e]) {} }`
+        }
+        else if (value === BINDING_TYPE_NONE) {
           THROW('Can not create a lexical binding for `' + name +'` because an arrow param already has that name');
+        }
+        else {
+          // TODO: this one does not need a loop. `(a) => {{let a}}` is not a problem.
+          if (bindingType === BINDING_TYPE_ARG) {
+            // [v]: ((x,x))
+            // [x]: ((x,x) = x)
+            // [x]: ((x,x) => x)
+            scoop.dupeParamErrorToken = curtok; // TODO: use correct token
+          }
         }
       }
       s = s.parent;
