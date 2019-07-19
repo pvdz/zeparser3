@@ -6345,7 +6345,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           ASSERT_skipRex($TICK, lexerFlags); // f`x${/foo/}y`
           // - `a${b=c}d`           is valid
           // - `a${await foo}d`     should propagate await/yield state
-          let nowAssignable = parseExpression(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'expressions');
+          let nowAssignable = parseExpressions(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'expressions');
           assignable = mergeAssignable(nowAssignable, assignable);
 
           if ((targetEsVersion >= 6 && targetEsVersion < 9) && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
