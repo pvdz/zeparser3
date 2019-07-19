@@ -1772,6 +1772,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // TODO: double label also propagate the name to the parent. add test case
 
+      // I think the do-if-func case is okay because there's no need for an ASI... wow.
+      // [v]: `do x: function s(){}while(y)`
+      lexerFlags = sansFlag(lexerFlags, LF_DO_WHILE_ASI);
+
       if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
         if (fromStmt === FROM_LABEL_SCOPE) {
           // Labelled func decls do not leak their name into global space (but they do for a label in a block!)
@@ -1784,7 +1788,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // TLDR: labelled functions are always statements and use same binding propagation rules as non-labelled functions
       // This rule ONLY applies to plain functions. Async / generators or other types of declarations are illegal here!
-    } else if (fromStmt === FROM_IFELSE_STMT) {
+    }
+    else if (fromStmt === FROM_IFELSE_STMT) {
+      // I think the do-if-func case is okay because there's no need for an ASI... wow.
+      // [v]: `do if(8)function s(){}while(y)`
+      lexerFlags = sansFlag(lexerFlags, LF_DO_WHILE_ASI);
+
       // in web compat mode func statements are only allowed inside `if` and `else` and label statements in sloppy mode
       if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
         // This is (only) relevant for webcompat function statements that are direct sub-statement of `if` and `else`.
@@ -1795,9 +1804,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else {
         THROW('Function declaration is only allowed as direct child of an `if` or `else` with web compat mode enabled in sloppy mode');
       }
-    } else if (isFuncDecl === IS_FUNC_DECL && fromStmt !== FROM_BLOCK_STMT && fromStmt !== FROM_SCOPE_ROOT) {
+    }
+    else if (isFuncDecl === IS_FUNC_DECL && fromStmt !== FROM_BLOCK_STMT && fromStmt !== FROM_SCOPE_ROOT) {
       THROW('Cannot parse a function declaration here, only expecting statements here');
-    } else {
+    }
+    else {
       // This is always fine in es6+
     }
 
