@@ -11,7 +11,7 @@
 
 
 `````js
-async x => while = 1',
+async x => while = 1
 `````
 
 ## Output
@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Illegal keyword encountered; is not a value [while]
 
-async x => while = 1',
+async x => while = 1
                  ^------- error
 `````
 

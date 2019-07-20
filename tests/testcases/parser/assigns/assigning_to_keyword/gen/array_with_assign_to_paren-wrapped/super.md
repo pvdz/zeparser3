@@ -11,7 +11,7 @@
 
 
 `````js
-async x => (super) = 1',
+async x => (super) = 1
 `````
 
 ## Output
@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The `super` keyword can only be used as call or member expression
 
-async x => (super) = 1',
+async x => (super) = 1
                  ^------- error
 `````
 

@@ -11,7 +11,7 @@
 
 
 `````js
-async x => (instanceof) = 1',
+async x => (instanceof) = 1
 `````
 
 ## Output
@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Illegal keyword encountered; is not a value [instanceof]
 
-async x => (instanceof) = 1',
+async x => (instanceof) = 1
                       ^------- error
 `````
 

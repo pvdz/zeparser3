@@ -280,13 +280,13 @@ foo = {
 #### array with assign to unwrapped
 
 `````js
-async x => # = 1',
+async x => # = 1
 `````
 
 #### array with assign to paren-wrapped
 
 `````js
-async x => (#) = 1',
+async x => (#) = 1
 `````
 
 #### assign to paren-wrapped keyword var in param default

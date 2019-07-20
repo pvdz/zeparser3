@@ -11,7 +11,7 @@
 
 
 `````js
-async x => true = 1',
+async x => true = 1
 `````
 
 ## Output
@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Cannot assign to lhs because it is not a valid assignment target
 
-async x => true = 1',
+async x => true = 1
                 ^------- error
 `````
 
