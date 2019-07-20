@@ -329,8 +329,6 @@ const SCOPE_LAYER_FUNC_BODY = 10;
 const SCOPE_LAYER_ARROW_PARAMS = 11;
 const SCOPE_LAYER_FAKE_BLOCK = 12;
 const DO_NOT_BIND = null;
-const SKIP_DUPE_CHECKS = true;
-const CHECK_DUPE_BINDS = false;
 const UNDEF_EXPORTS = undefined;
 const CHECK_TO_READ = true;
 const CHECK_TO_BIND = false;
@@ -2208,7 +2206,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else {
       // Skip dupe checks because dupe param names are allowed in sloppy mode if the params are all "simple"
-      wasSimple = parseBindings(lexerFlags, scoop, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, setToken, SKIP_DUPE_CHECKS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'params');
+      wasSimple = parseBindings(lexerFlags, scoop, BINDING_TYPE_ARG, bindingFrom, ASSIGNMENT_IS_DEFAULT, setToken, UNDEF_EXPORTS, UNDEF_EXPORTS, 'params');
       AST_destruct('params');
       ASSERT(curc !== $$COMMA_2C, 'the trailing func comma case should already be caught by now');
       skipAnyOrDieSingleChar($$PAREN_R_29, lexerFlags);
@@ -2818,7 +2816,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseConstStatement(lexerFlags, scoop, astProp) {
     ASSERT_skipAny('const', lexerFlags); // next is ident, [, or {
-    parseAnyVarDecls(lexerFlags, curtok, scoop, BINDING_TYPE_CONST, FROM_STATEMENT_START, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+    parseAnyVarDecls(lexerFlags, curtok, scoop, BINDING_TYPE_CONST, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
     parseSemiOrAsi(lexerFlags);
   }
 
@@ -3064,14 +3062,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // export var <bindings>
         let varToken = curtok;
         ASSERT_skipAny('var' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{ (even when keyword=let)
-        parseAnyVarDecls(lexerFlags, varToken, scoop, BINDING_TYPE_VAR, FROM_EXPORT_DECL, CHECK_DUPE_BINDS, exportedNames, exportedBindings, 'declaration');
+        parseAnyVarDecls(lexerFlags, varToken, scoop, BINDING_TYPE_VAR, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
         AST_set('source', null);
       }
       else if (curc === $$L_6C && curtok.str === 'let') {
         // export let <bindings>
         let letToken = curtok;
         ASSERT_skipAny('let' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{ (even when keyword=let)
-        parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_EXPORT_DECL, CHECK_DUPE_BINDS, exportedNames, exportedBindings, 'declaration');
+        parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
         AST_set('source', null);
       }
       else if (curc === $$C_63) {
@@ -3079,7 +3077,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // export const <bindings>
           let constToken = curtok;
           ASSERT_skipAny('const' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{ (even when keyword=let)
-          parseAnyVarDecls(lexerFlags, constToken, scoop, BINDING_TYPE_CONST, FROM_EXPORT_DECL, CHECK_DUPE_BINDS, exportedNames, exportedBindings, 'declaration');
+          parseAnyVarDecls(lexerFlags, constToken, scoop, BINDING_TYPE_CONST, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
         } else if (curtok.str === 'class') {
           // export class ...
           let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, 'declaration');
@@ -3279,7 +3277,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `for (var x;;);`
           let varToken = curtok;
           ASSERT_skipAny('var' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{
-          parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, varToken, scoop, BINDING_TYPE_VAR, FROM_FOR_HEADER, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+          parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, varToken, scoop, BINDING_TYPE_VAR, FROM_FOR_HEADER, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
           // No need to dupe-check scope here
           assignable = initAssignable(assignable); // var decls are assignable
           break;
@@ -3319,7 +3317,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             } else {
               // [v]: `for (let x of y);`
               //                ^
-              parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, letIdentToken, scoop, BINDING_TYPE_LET, FROM_FOR_HEADER, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+              parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, letIdentToken, scoop, BINDING_TYPE_LET, FROM_FOR_HEADER, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
             }
             assignable = initAssignable(assignable); // decls are assignable (`let` as a var name should be as well)
           } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
@@ -3403,7 +3401,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `for (const x;;);`
           let constToken = curtok;
           ASSERT_skipAny('const' , lexerFlags); // TODO: optimize; next must be ident or destructuring [{
-          parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, constToken, scoop, BINDING_TYPE_CONST, FROM_FOR_HEADER, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+          parseAnyVarDecls(lexerFlags | LF_IN_FOR_LHS, constToken, scoop, BINDING_TYPE_CONST, FROM_FOR_HEADER, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
           assignable = initAssignable(assignable); // const decl is assignable
           break;
 
@@ -3940,7 +3938,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // parsing `let` as a declaration if the next token is an ident, `[`, or `{`
     if (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
       // let declaration
-      parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_STATEMENT_START, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
       parseSemiOrAsi(lexerFlags);
     } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       THROW('Let declaration missing binding names and `let` cannot be a regular var name in strict mode');
@@ -4129,7 +4127,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // > such `var` declarations will assign to the corresponding catch parameter rather than the `var` binding.
         // This part was dropped:
         // > The relaxation of the normal static semantic rule does not apply to names only bound by for-of statements.
-        parseBinding(lexerFlags | LF_NO_ASI, curtok, catchHeadScoop, BINDING_TYPE_CATCH_OTHER, FROM_CATCH, ASSIGNMENT_IS_DEFAULT, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, 'param');
+        parseBinding(lexerFlags | LF_NO_ASI, curtok, catchHeadScoop, BINDING_TYPE_CATCH_OTHER, FROM_CATCH, ASSIGNMENT_IS_DEFAULT, UNDEF_EXPORTS, UNDEF_EXPORTS, 'param');
 
         if (curc === $$COMMA_2C) THROW('Catch clause requires exactly one parameter, not more (and no trailing comma)');
         if (curc === $$IS_3D && curtok.str === '=') THROW('Catch clause parameter does not support default values');
@@ -4164,7 +4162,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseVarStatement(lexerFlags, scoop, astProp) {
     let varToken = curtok;
     ASSERT_skipAny('var', lexerFlags); // next is ident, [, or {
-    parseAnyVarDecls(lexerFlags, varToken, scoop, BINDING_TYPE_VAR, FROM_STATEMENT_START, CHECK_DUPE_BINDS, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+    parseAnyVarDecls(lexerFlags, varToken, scoop, BINDING_TYPE_VAR, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
     parseSemiOrAsi(lexerFlags);
   }
 
@@ -4442,7 +4440,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('WithStatement');
   }
 
-  function parseAnyVarDecls(lexerFlags, bindingToken, scoop, bindingType, bindingOrigin, doDupeBindingCheck, exportedNames, exportedBindings, astProp) {
+  function parseAnyVarDecls(lexerFlags, bindingToken, scoop, bindingType, bindingOrigin, exportedNames, exportedBindings, astProp) {
     ASSERT(parseAnyVarDecls.length === arguments.length, 'arg count');
     if (curtype !== $IDENT && curc !== $$SQUARE_L_5B && curc !== $$CURLY_L_7B) THROW('Expected identifier, or array/object destructuring, next token is: ' + curtok);
     ASSERT(bindingType === BINDING_TYPE_VAR || bindingType === BINDING_TYPE_LET || bindingType === BINDING_TYPE_CONST, 'only three kinds here');
@@ -4452,11 +4450,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('kind', keyword);
     AST_set('declarations', []);
 
-    parseBindings(lexerFlags, scoop, bindingType, bindingOrigin, ASSIGNMENT_IS_INIT, UNDEF_SET, doDupeBindingCheck, exportedNames, exportedBindings, 'declarations');
+    parseBindings(lexerFlags, scoop, bindingType, bindingOrigin, ASSIGNMENT_IS_INIT, UNDEF_SET, exportedNames, exportedBindings, 'declarations');
     AST_close(['VariableDeclaration', 'ExpressionStatement']); //  expr in case of `let` in sloppy
   }
 
-  function parseBindings(lexerFlags, scoop, bindingType, bindingOrigin, defaultOptions, setToken, skipDoubleBindCheck, exportedNames, exportedBindings, astProp) {
+  function parseBindings(lexerFlags, scoop, bindingType, bindingOrigin, defaultOptions, setToken, exportedNames, exportedBindings, astProp) {
     ASSERT(parseBindings.length === arguments.length, 'expecting all args');
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(typeof bindingOrigin === 'number', 'bindingOrigin should be enum');
@@ -4470,7 +4468,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ++many;
       let wasRest = curc === $$DOT_2E && curtok.str === '...';
       // ident or destructuring of object/array or rest arg
-      let bindingMeta = parseBinding(lexerFlags, curtok, scoop, bindingType, bindingOrigin, defaultOptions, skipDoubleBindCheck, exportedNames, exportedBindings, astProp);
+      let bindingMeta = parseBinding(lexerFlags, curtok, scoop, bindingType, bindingOrigin, defaultOptions, exportedNames, exportedBindings, astProp);
       if (bindingMeta === ARG_HAD_INIT) inited = true;
       if (bindingMeta !== ARG_WAS_SIMPLE) {
         ASSERT(typeof bindingMeta === 'number', 'should be number');
@@ -4524,7 +4522,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     return wasSimple;
   }
-  function parseBinding(lexerFlags, bindingStartToken, scoop, bindingType, bindingOrigin, defaultsOption, dupeChecks, exportedNames, exportedBindings, astProp) {
+  function parseBinding(lexerFlags, bindingStartToken, scoop, bindingType, bindingOrigin, defaultsOption, exportedNames, exportedBindings, astProp) {
     // returns whether a binding had an init (necessary to validate for-header bindings)
     ASSERT(arguments.length === parseBinding.length, 'expecting args');
     ASSERT_BINDING(bindingType);
