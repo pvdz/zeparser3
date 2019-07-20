@@ -6506,6 +6506,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     lexerFlags = resetLexerFlagsForFuncAndArrow(lexerFlags, UNDEF_STAR, asyncToken, IS_ARROW);
+    lexerFlags = sansFlag(lexerFlags, LF_DO_WHILE_ASI); // `do x => y while(z)`
     if (curc === $$CURLY_L_7B) {
       lexerFlags = sansFlag(lexerFlags, LF_IN_FOR_LHS); // this state _is_ reset for block-body arrows, albeit futile
       AST_set('expression', false); // "body of arrow is block"
