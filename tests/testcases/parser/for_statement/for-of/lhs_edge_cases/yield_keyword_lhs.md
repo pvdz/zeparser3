@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Expected to parse a value
+  Unexpected input while parsing the left side of a for-header
 
 function *f(){ for (yield of obj); }
-                                ^------- error
+                             ^------- error
 `````
 
 ### Strict mode

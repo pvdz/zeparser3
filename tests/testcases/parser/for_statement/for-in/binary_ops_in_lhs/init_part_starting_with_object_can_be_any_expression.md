@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unknown input followed the left side of a for loop header: {# IDENT : nl=N ws=N 12:14 curc=105 `in`#}
+  Unknown input followed the left side of a for loop header: {# PUNCTUATOR : nl=N ws=N 18:19 curc=41 `)`#}
 
 for ({} + b in obj);
-            ^------- error
+                  ^------- error
 `````
 
 ### Strict mode

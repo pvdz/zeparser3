@@ -3567,7 +3567,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       //              ^
       // [x]: `for (a);`
       //             ^
-      parseExpressionFromBinaryOp(lexerFlags, startOfForHeaderToken, astProp);
+      // [v]: `for (a instanceof b;;);`
+      // [v]: `for (a instanceof b > c;;);`
+      parseExpressionFromBinaryOp(lexerFlags, startOfForHeaderToken, assignable, astProp);
       // [x]: `for (a + b;;);`
       //                 ^
       // [x]: `for (a, b;;);`
@@ -3743,7 +3745,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       //            ^
       // [x]: `for ({});`
       //           ^
-      parseExpressionFromBinaryOp(lexerFlags, patternStartToken, astProp);
+      // This is bad
+      parseExpressionFromBinaryOp(lexerFlags, patternStartToken, assignable, astProp);
       // [v]: `for ([] + x;;);`
       //                  ^
       if (curc === $$COMMA_2C) {
@@ -5186,28 +5189,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       assignable = parseExpressionFromAssignmentOp(lexerFlags, firstExprToken, assignable, astProp);
     } else {
-      let first = true;
-      while (isNonAssignBinOp(lexerFlags) || curc === $$QMARK_3F) {
-        if (curc === $$QMARK_3F) {
-          let nowAssignable = parseExpressionFromTernaryOp(lexerFlags, firstExprToken, astProp);
-          assignable = setNotAssignable(nowAssignable | assignable);
-        } else {
-          let nowAssignable = parseExpressionFromBinaryOp(lexerFlags, firstExprToken, astProp);
-          assignable = setNotAssignable(nowAssignable | assignable);
-        }
-
-        // note: this is a nice error message for `5+5=10`
-        if (curc === $$IS_3D && curtok.str === '=') {
-          THROW('Cannot assign a value to non-assignable value');
-        }
-
-        first = false;
-      }
+      assignable = parseExpressionFromBinaryOp(lexerFlags, firstExprToken, assignable, astProp)
     }
 
     return assignable;
   }
   function parseExpressionFromAssignmentOp(lexerFlags, firstAssignmentToken, lhsAssignable, astProp) {
+    ASSERT(parseExpressionFromAssignmentOp.length === arguments.length, 'arg count');
     // <SCRUB AST>
     // Conditionally convert the lhs in the AST to a Pattern
     if (curc === $$IS_3D && curtok.str === '=') {
@@ -5236,14 +5224,34 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(curtok.str !== '=');
     return setNotAssignable(mergeAssignable(rhsAssignable, lhsAssignable));
   }
-  function parseExpressionFromBinaryOp(lexerFlags, exprStartToken, astProp) {
+  function parseExpressionFromBinaryOp(lexerFlags, firstExprToken, assignable, astProp) {
     ASSERT(parseExpressionFromBinaryOp.length === arguments.length, 'arg count');
+    let first = true;
+    while (isNonAssignBinOp(lexerFlags) || curc === $$QMARK_3F) {
+      if (curc === $$QMARK_3F) {
+        let nowAssignable = parseExpressionFromTernaryOp(lexerFlags, firstExprToken, astProp);
+        assignable = setNotAssignable(nowAssignable | assignable);
+      } else {
+        let nowAssignable = parseExpressionFromBinaryOpOnlyStronger(lexerFlags, firstExprToken, astProp);
+        assignable = setNotAssignable(nowAssignable | assignable);
+      }
+
+      // note: this is a nice error message for `5+5=10`
+      if (curc === $$IS_3D && curtok.str === '=') {
+        THROW('Cannot assign a value to non-assignable value');
+      }
+
+      first = false;
+    }
+    return assignable;
+  }
+  function parseExpressionFromBinaryOpOnlyStronger(lexerFlags, exprStartToken, astProp) {
+    ASSERT(parseExpressionFromBinaryOpOnlyStronger.length === arguments.length, 'arg count');
     // parseBinary
     // Now parsing the rhs (b) after an operator
     // - `a + b`
     // - `a instanceof b`
     // - `a ** b`
-
     let curop = curtok.str;
     let AST_nodeName = (curop === '&&' || curop === '||') ? 'LogicalExpression' : 'BinaryExpression';
     AST_wrapClosed(astProp, AST_nodeName, 'left', exprStartToken);
@@ -5255,7 +5263,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // for if the previous op was also `**` (and we don't need other checks because it is the strongest binary op).
     // TODO: dedupe the op check which now happens here and at the higher level again
     while ((isNonAssignBinOp(lexerFlags) && getStrength(curtok.str) > getStrength(curop)) || curtok.str === '**') {
-      let nowAssignable = parseExpressionFromBinaryOp(lexerFlags, exprStartToken,'right');
+      let nowAssignable = parseExpressionFromBinaryOpOnlyStronger(lexerFlags, exprStartToken,'right');
       assignable = mergeAssignable(nowAssignable, assignable);
     }
 
