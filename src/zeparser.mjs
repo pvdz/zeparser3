@@ -423,6 +423,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!bool) assertExpectedFail = msg;
   }
 
+  function ASSERT(bool, desc, ...rest) {
+    if (!bool) THROW('Assertion fail: ' + (desc || '<no desc>'), ':', ...rest);
+  }
+
   let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage, $log, $warn, $error);
 
   ASSERT(goalMode === GOAL_SCRIPT || goalMode === GOAL_MODULE);
@@ -1713,6 +1717,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseNestedBodyPart(lexerFlags, scoop, labelSet, fromStmt, astProp) {
     ASSERT(arguments.length === parseNestedBodyPart.length, 'arg count');
     // nested statements like that of if, while, for, try, etc
+    if (hasAnyFlag(curtype, $EOF)) THROW('Statement must have a sub-statement but found EOF instead');
     return parseBodyPart(lexerFlags, scoop, labelSet, UNDEF_EXPORTS, UNDEF_EXPORTS, fromStmt, astProp);
   }
 
