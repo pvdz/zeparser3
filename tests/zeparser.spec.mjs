@@ -524,6 +524,9 @@ async function main() {
   console.log('Read', list.length, 'files');
 
   await extractFiles(list);
+  let beforeLen = list.length;
+  if (!TARGET_FILE) list = list.filter(tob => !tob.aboveTheFold.toLowerCase().includes('\n## skip\n'));
+  console.log('Filtered', beforeLen - list.length,'skipped tests (containing `## skip`)');
 
   if (RUN_VERBOSE_IN_SERIAL) {
     for (let i=0; i<list.length && !stopAsap; ++i) {
