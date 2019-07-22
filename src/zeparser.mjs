@@ -6468,9 +6468,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseCallArgs(lexerFlags, astProp) {
     ASSERT_skipRex('(', lexerFlags);
-
     // [v]: `for (x(y in z);;);`
-    lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS);
+    lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_DO_WHILE_ASI);
 
     let assignable = 0;
     if (curc === $$PAREN_R_29) {
