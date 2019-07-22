@@ -1884,6 +1884,11 @@ function ZeTokenizer(
 
           let subbad = _parseRegexBody(c, groupLevel + 1, ALWAYS_GOOD);
 
+          if (eof()) {
+            uflagStatus = regexSyntaxError('Encountered early EOF');
+            break;
+          }
+
           c = peek();
           if ((wasAssertion || wasUnfixableAssertion) && (c === $$QMARK_3F || c === $$CURLY_L_7B || c === $$STAR_2A || c === $$PLUS_2B)) {
             // Found a quantified assertion
