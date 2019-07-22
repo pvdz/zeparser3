@@ -1516,7 +1516,7 @@ function ZeTokenizer(
       }
       if (c === $$CR_0D) {
         // crlf is considered one line for the sake of reporting line-numbers
-        if (peeky($$LF_0A)) skip();
+        if (neof() && peeky($$LF_0A)) skip();
         incrementLine();
       } else if (isLfPsLs(c)) {
         incrementLine();
