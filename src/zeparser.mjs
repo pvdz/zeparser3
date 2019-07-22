@@ -1692,10 +1692,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - the next line starts with forward slash
     // - the semi would be part of a for-header
     // TODO: should check whether the next token would be "an error"; especially the newline case makes no such effort :(
+
     if (curc === $$FWDSLASH_2F) {
-      ASSERT(false, 'Tried to apply ASI but next token starts with forward slash. This could be a legit error. Confirm and make sure parser path is properly setting regex/div flag.', ''+curtok);
-      THROW('Cannot apply ASI when next token starts with forward slash (this could very well be a bug in the parser...)');
+      // [x]: `for(;;)continue/`
+      // [x]: `debugger\n/foo/`   // (asi does not apply when a line starts with a regular expression)
+      // [x]: `let x/`
+      THROW('The next token starts with a forward slash but neither a division nor a regular expression is legal here');
     }
+
     if (curc === $$SEMI_3B) {
       ASSERT_skipRex(';', lexerFlags);
     } else if (hasAllFlags(lexerFlags, LF_DO_WHILE_ASI)) {
@@ -2845,6 +2849,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipRex($IDENT, lexerFlags);
     } else {
       AST_set('label', null);
+    }
+
+    if (curc === $$FWDSLASH_2F) {
+      if (!curtok.nl) {
+        // Note: it wouldn't be a comment (no whitespace tokens) so this is a div or a regex, both are an error
+        THROW('The token after `continue` can not start with a forward slash, without being preceded by a newline');
+      }
+      THROW('ASI does not apply when the next token starts with a forward slash on the next line, so this is an error');
     }
 
     parseSemiOrAsi(lexerFlags);
