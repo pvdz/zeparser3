@@ -9656,6 +9656,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let destructible = _parseArrowableSpreadOrRest(lexerFlags, spreadToken, scoop, closingCharOrd, bindingType, groupTopLevel, asyncToken, exportedNames, exportedBindings, 'argument');
     AST_close('SpreadElement');
 
+    if (curc !== closingCharOrd && curc !== $$COMMA_2C) THROW('Encountered invalid input after spread/rest argument');
+
     return destructible;
   }
   function _parseArrowableSpreadOrRest(lexerFlags, spreadToken, scoop, closingCharOrd, bindingType, groupTopLevel, asyncToken, exportedNames, exportedBindings, astProp) {

@@ -1,17 +1,19 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/arrays/destructuring/forward_slash_cases/spread_with_a_regex_and_weird_followu.md
+- Path: zeparser3/tests/testcases/parser/objects/eof_after_spread.md
 
-> :: arrays : destructuring : forward slash cases
+> :: objects
 >
-> ::> spread with a regex and weird followu
+> ::> eof after spread
+>
+> Found by fuzzer
+EOF after spread arg would trigger assertion error
+
 
 ## Input
 
 `````js
-[.../x/ y]
++{...x)
 `````
 
 ## Output
@@ -30,8 +32,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   Encountered invalid input after spread/rest argument
 
-[.../x/ y]
-        ^------- error
++{...x)
+      ^------- error
 `````
 
 ### Strict mode
