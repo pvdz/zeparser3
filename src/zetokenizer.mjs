@@ -1067,7 +1067,7 @@ function ZeTokenizer(
       if (c === $$CR_0D) {
         ASSERT_skip($$CR_0D);
         // crlf is considered one line for the sake of reporting line-numbers
-        if (peeky($$LF_0A)) ASSERT_skip($$LF_0A);
+        if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A);
         incrementLine();
       } else if (isLfPsLs(c)) {
         ASSERT_skip(c);
