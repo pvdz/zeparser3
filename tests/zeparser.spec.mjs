@@ -23,12 +23,13 @@ const TRUNC_STACK_TRACE = !process.argv.includes('-S');
 const AUTO_UPDATE = process.argv.includes('-u') || process.argv.includes('-U');
 const CONFIRMED_UPDATE = process.argv.includes('-U');
 const AUTO_GENERATE = process.argv.includes('-g');
+const REDUCING = process.argv.includes('--min');
 const ALL_VARIANTS = process.argv.includes('--all');
 let [a,b,c,d] = [process.argv.includes('--sloppy'), process.argv.includes('--strict'), process.argv.includes('--module'), process.argv.includes('--web')];
-const RUN_SLOPPY = ALL_VARIANTS || (a || (!b && !c && !d)) || (INPUT_OVERRIDE && !(b || c || d));
-const RUN_STRICT = ALL_VARIANTS || b || (!a && !c && !d && !INPUT_OVERRIDE);
-const RUN_MODULE = ALL_VARIANTS || c || (!a && !b && !d && !INPUT_OVERRIDE);
-const RUN_WEB = ALL_VARIANTS || d || (!a && !b && !c && !INPUT_OVERRIDE);
+const RUN_SLOPPY = ALL_VARIANTS || (a || (!b && !c && !d)) || ((INPUT_OVERRIDE || !REDUCING) && !(b || c || d));
+const RUN_STRICT = ALL_VARIANTS || b || (!a && !c && !d && !INPUT_OVERRIDE && !REDUCING);
+const RUN_MODULE = ALL_VARIANTS || c || (!a && !b && !d && !INPUT_OVERRIDE && !REDUCING);
+const RUN_WEB = ALL_VARIANTS || d || (!a && !b && !c && !INPUT_OVERRIDE && !REDUCING);
 const TARGET_ES6 = process.argv.includes('--es6');
 const TARGET_ES7 = process.argv.includes('--es7');
 const TARGET_ES8 = process.argv.includes('--es8');
@@ -66,6 +67,8 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --esX         Where X is one of 6 through 10, like --es6. For -i only, forces the code to run in that version
     --serial      Test all targeted files in serial, verbosely, instead of using parallel phases (which is faster)
                   (Note: -q, -i, -b, and -f implicitly enable --serial)
+    --min         Brute-force simplify a test case that throws an error while maintaining the same error message, only with -f, implies --sloppy
+      -- write    For reducer only; write result to new file
 `);
   process.exit();
 }
@@ -119,6 +122,9 @@ import {
 import {
   generateTestFile,
 } from './generate_test_file.mjs';
+import {
+  reduceAndExit,
+} from './test_case_reducer.mjs';
 
 // node does not expose __dirname under module mode, but we can use import.meta to get it
 let filePath = import.meta.url.replace(/^file:\/\//,'');
@@ -135,6 +141,8 @@ const TEST_SLOPPY = 'sloppy';
 const TEST_STRICT = 'strict';
 const TEST_MODULE = 'module';
 const TEST_WEB = 'web';
+
+if (REDUCING && !TARGET_FILE && !INPUT_OVERRIDE) THROW('Can only use `--min` together with `-f` or `-i`');
 
 let stopAsap = false;
 
@@ -166,14 +174,14 @@ async function extractFiles(list) {
   if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Test file extraction time');
   console.log('Total input size:', bytes, 'bytes');
 }
-async function coreTest(tob, zeparser, testVariant) {
+function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
   wasHit = false;
   let tok;
   let r, e = '';
   let stdout = [];
   try {
     r = zeparser(
-      tob.inputCode,
+      code,
       testVariant === TEST_MODULE ? GOAL_MODULE : GOAL_SCRIPT,
       COLLECT_TOKENS_SOLID,
       {
@@ -191,8 +199,7 @@ async function coreTest(tob, zeparser, testVariant) {
     e = _e;
   }
 
-  // This is quite memory expensive but much easier to work with
-  tob.parserRawOutput[testVariant] = {r, e, tok, stdout};
+  return {r, e, tok, stdout};
 }
 async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "strict" | "module" | "web" */) {
   let {parserRawOutput: {[testVariant]: {r, e, tok, stdout}}, file} = tob;
@@ -299,7 +306,9 @@ async function runTest(list, zeparser, testVariant/*: "sloppy" | "strict" | "mod
   await Promise.all(list.map(async (tob/*: Tob */) => {
     let {inputCode, inputOptions} = tob;
     bytes += inputCode.length;
-    await coreTest(tob, zeparser, testVariant);
+    if (REDUCING) reduceAndExit(tob.inputCode, code => coreTest(tob, zeparser, testVariant, code), tob.file);
+    // This is quite memory expensive but much easier to work with
+    tob.parserRawOutput[testVariant] = coreTest(tob, zeparser, testVariant);
     let rawOutput = tob.parserRawOutput[testVariant];
     if (SEARCH) {
       let e = rawOutput.e;
@@ -339,7 +348,7 @@ function showDiff(tob) {
   );
   execSync(
     // Use base64 to prevent shell interpretation of input. Final `cat` is to suppress `diff`'s exit code when diff.
-    `echo '${Buffer.from(tob.newData).toString('base64')}' | base64 -d - | colordiff -y -w -W200 "${tob.file}" - | cat`,
+    `echo '${Buffer.from(tob.newData).toString('base64')}' | base64 -d - | colordiff --text -y -w -W200 "${tob.file}" - | cat`,
     {stdio: 'inherit'}
   );
 }
@@ -383,12 +392,16 @@ async function runTests(list, zeparser) {
           tob.parserRawOutput.web.stdout.forEach((a) => console.log(...a));
         }
 
-        showDiff(tob);
+        if (!TARGET_FILE && !INPUT_OVERRIDE) {
+          showDiff(tob);
+        }
 
         console.log(BOLD + '\nnode --experimental-modules tests/zeparser.spec.mjs  -q -u -f "' + tob.file + '"\n');
 
-        let cont = await yn('Continue?');
-        if (!cont) hardExit(tob, 'Test output change detected. Aborting early.');
+        if (!TARGET_FILE && !INPUT_OVERRIDE) {
+          let cont = await yn('Continue?');
+          if (!cont) hardExit(tob, 'Test output change detected. Aborting early.');
+        }
       }
     }
   }
@@ -513,6 +526,7 @@ async function main() {
 
   if (TARGET_FILE) {
     console.log('Using explicit file:', TARGET_FILE);
+    if (REDUCING) console.log('And only reducing this test case to a minimal set with the same error, then exiting');
     files = [TARGET_FILE];
   } else {
     files = files.filter(f => !f.endsWith('autogen.md'));
