@@ -4366,7 +4366,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // `delete foo[yield x]`
 
     let identToken = curtok;
-    ASSERT_skipDiv($IDENT, lexerFlags); // this is the `delete` _arg_. could lead to `delete arg / x` (but definitely not a regex)
+    // - `delete foo`
+    //           ^
+    // - `delete foo.bar`
+    //           ^
+    // - `delete /foo/.x`
+    //           ^
+    // - `delete new x`
+    //           ^
+    // This is the `delete` _arg_, which may be a keyword. If not, then the next token cannot be a regex.
+    skipIdentSafeSlowAndExpensive(lexerFlags);
 
     let afterIdentToken = curtok; // store to assert whether anything after the ident was parsed
 
