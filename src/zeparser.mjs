@@ -1624,8 +1624,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     let wasStrict = hasAllFlags(lexerFlags, LF_STRICT_MODE); // unique param check
-
-    let addedLexerFlags = parseDirectivePrologues(LF_NO_FLAGS, 'body');
+    let addedLexerFlags = parseDirectivePrologues(sansFlag(lexerFlags, LF_STRICT_MODE), 'body');
     if (hasAnyFlag(addedLexerFlags, LF_STRICT_MODE)) {
       if (wasSimple === ARGS_COMPLEX) {
         // https://tc39.github.io/ecma262/#sec-function-definitions-static-semantics-early-errors
@@ -1652,13 +1651,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       )) {
         THROW('Can not use reserved keyword `' + functionNameTokenToVerify.canon + '` in strict mode as id for function that has a use strict directive');
       }
-    }
 
-    if (!wasStrict && hasAnyFlag(addedLexerFlags, LF_STRICT_MODE) && hasNoFlag(lexerFlags, LF_IN_GLOBAL)) {
-      SCOPE_verifyArgs(scoop, wasSimple);
-    }
+      if (!wasStrict && hasNoFlag(lexerFlags, LF_IN_GLOBAL)) {
+        SCOPE_verifyArgs(scoop, wasSimple);
+      }
 
-    lexerFlags |= addedLexerFlags;
+      ASSERT(addedLexerFlags === (lexerFlags | LF_STRICT_MODE), 'Not sure what other flags could be added at this point?');
+      lexerFlags |= LF_STRICT_MODE;
+    }
 
     if (dupeParamErrorToken !== NO_DUPE_PARAMS && (!wasSimple || hasAllFlags(lexerFlags, LF_STRICT_MODE))) {
       THROW_TOKEN('Function had duplicate params', dupeParamErrorToken);
