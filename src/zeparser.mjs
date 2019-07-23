@@ -1535,7 +1535,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // [v]: `e => { try {} catch (e) {} }`
           // [v]: `e => { try {} catch ([e]) {} }`
         }
-        else if (value === BINDING_TYPE_NONE) {
+        else if (value !== BINDING_TYPE_NONE) {
           THROW('Can not create a lexical binding for `' + name +'` because an arrow param already has that name');
         }
         else {
