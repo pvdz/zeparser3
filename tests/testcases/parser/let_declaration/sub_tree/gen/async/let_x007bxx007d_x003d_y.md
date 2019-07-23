@@ -38,20 +38,13 @@ async let {x} = y
 
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
-`````
-throws: Parser error!
-  Cannot use future reserved keyword `let` as param of an arrow in strict mode
-
-async let {x} = y
-      ^------- error
-`````
-
+_Output same as sloppy mode._
 
 ### Module goal
 
 Parsed with the module goal.
 
-_Output same as strict mode._
+_Output same as sloppy mode._
 
 ### Web compat mode
 
