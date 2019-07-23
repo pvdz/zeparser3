@@ -26,7 +26,7 @@ export function generateTestFile(tob) {
 
   let [comment, ...code] = data.slice(1).split('###\n');
   code = code.join('###'); // unlikely
-  code = code.split('\n').map(s => s.trimRight()).join('\n').trim();
+  code = code.trim().split(/\n+/g).map(s => s.trimRight()).join('>\n> ');
 
   let relfile = file.slice(file.indexOf('zeparser3'));
 
