@@ -9,6 +9,8 @@
 > The param name is a future reserved keyword and illegal to use as param name in strict mode. But fine in sloppy mode.
 >
 > There was a regression where this would still throw in sloppy mode because the future keyword detection would mark the param as "complex" in order for it to throw if the body turned out to be strict mode. Basically solved it by adding another state to indicate non-strict-but-simple.
+>
+> Another regression was that patterns and rest were not detected as complex.
 
 ## Input
 

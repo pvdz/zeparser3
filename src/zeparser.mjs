@@ -301,7 +301,8 @@ const NOT_QUASI_TAIL = false;
 const PARAM_UNDETERMINED = 0;
 const PARAM_WAS_SIMPLE = 1;
 const PARAM_WAS_NON_STRICT_SIMPLE = 2; // like a future reserved word, `(package) => {"use strict"}`
-const PARAM_HAD_INIT = 3;
+const PARAM_WAS_COMPLEX = 3;
+const PARAM_WAS_COMPLEX_HAD_INIT = 4;
 const PARAMS_ALL_SIMPLE = 1;
 const PARAMS_SOME_NONSTRICT = 2;
 const PARAMS_SOME_COMPLEX = 3;
@@ -4550,14 +4551,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       let wasRest = curc === $$DOT_2E && curtok.str === '...';
       // ident or destructuring of object/array or rest arg
       let bindingMeta = parseBinding(lexerFlags, curtok, scoop, bindingType, bindingOrigin, defaultOptions, exportedNames, exportedBindings, astProp);
-      if (bindingMeta === PARAM_HAD_INIT) inited = true;
       ASSERT(typeof bindingMeta === 'number', 'should be number');
-      ASSERT(bindingMeta >= 0 && bindingMeta <= 3, 'bindingMeta should be enum');
-      if (bindingMeta === PARAM_WAS_NON_STRICT_SIMPLE) {
-        wasSimple = PARAMS_SOME_NONSTRICT;
-      }
-      else if (bindingMeta !== PARAM_WAS_SIMPLE) {
+      ASSERT(bindingMeta >= 0 && bindingMeta <= 4, 'bindingMeta should be enum');
+      if (bindingMeta === PARAM_WAS_COMPLEX_HAD_INIT) {
+        inited = true;
         wasSimple = PARAMS_SOME_COMPLEX;
+      }
+      else if (bindingMeta === PARAM_WAS_COMPLEX) {
+        wasSimple = PARAMS_SOME_COMPLEX;
+      }
+      else if (bindingMeta === PARAM_WAS_NON_STRICT_SIMPLE) {
+        if (wasSimple === PARAMS_ALL_SIMPLE) {
+          wasSimple = PARAMS_SOME_NONSTRICT;
+        }
       }
       if (wasRest) {
         ASSERT(curc === $$PAREN_R_29, 'the "rest is last and no init" check should happen elsewhere and before this point');
@@ -4652,6 +4658,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error when pattern is required
       verifyDestructibleForBinding(destructible, bindingType);
       AST_destruct(astProp);
+      wasSimple = PARAM_WAS_COMPLEX;
       // note: throw for `const {};` and `for (const {};;);` but not `for (const {} in obj);`
       if (
         (bindingOrigin !== FROM_CATCH) &&
@@ -4666,6 +4673,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error when pattern is required
       verifyDestructibleForBinding(destructible, bindingType);
       AST_destruct(astProp);
+      wasSimple = PARAM_WAS_COMPLEX;
       // note: throw for `const {};` and `for (const {};;);` but not `for (const {} in obj);`
       if (
         (bindingOrigin !== FROM_CATCH) &&
@@ -4679,6 +4687,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT(bindingType === BINDING_TYPE_ARG, 'other binding types should catch this sooner?');
       let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, bindingType, IS_GROUP_TOPLEVEL, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
       verifyDestructibleForBinding(subDestruct, bindingType);
+      wasSimple = PARAM_WAS_COMPLEX;
     }
     else if (curc !== $$PAREN_R_29) {
       THROW('Expected to parse a(nother) binding but none was found');
@@ -4686,7 +4695,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc === $$IS_3D && curtok.str === '=') {
       ASSERT_skipRex('=', lexerFlags); // x(foo=/bar/){}
-      wasSimple = PARAM_HAD_INIT; // if this is an arg the arg is not "simple"
+      wasSimple = PARAM_WAS_COMPLEX_HAD_INIT; // if this is an arg the arg is not "simple"
       if (defaultsOption === ASSIGNMENT_IS_DEFAULT) {
         if ((wasSimple === PARAM_WAS_SIMPLE || wasSimple === PARAM_WAS_NON_STRICT_SIMPLE) && bindingOrigin === FROM_CATCH) THROW('The catch clause cannot have a default');
         // - `try {} catch (a) {}`
