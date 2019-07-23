@@ -1186,6 +1186,19 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       SCOPE_addLexBinding(scoop, name, bindingType, fromStmt);
     }
   }
+  function SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, name) {
+    ASSERT(SCOPE_actuallyAddBinding.length === arguments.length, 'arg count');
+    ASSERT(typeof name === 'string', 'name is a string');
+
+    if (bindingType === BINDING_TYPE_VAR) {
+      SCOPE_addVarBinding(lexerFlags, scoop, name, bindingType);
+    }
+    else {
+      // TODO: arg?
+      // TODO: is fromStmt ever relevant when parsing a binding here?
+      SCOPE_addLexBinding(scoop, name, bindingType, FROM_OTHER_STMT);
+    }
+  }
   function SCOPE_addVarBinding(lexerFlags, scoop, name, bindingType) {
     ASSERT(SCOPE_addVarBinding.length === arguments.length, 'arg count');
     ASSERT(typeof name === 'string', 'name = string', name);
@@ -4566,18 +4579,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // See details of specific catch var exceptions in the catch parser
         bindingType = BINDING_TYPE_CATCH_IDENT;
       }
-      if (bindingType === BINDING_TYPE_VAR) {
-        SCOPE_addVarBinding(lexerFlags, scoop, bindingName, bindingType);
-      }
-      else {
-        // TODO: arg?
-        // TODO: is fromStmt ever relevant when parsing a binding here?
-        SCOPE_addLexBinding(scoop, bindingName, bindingType, FROM_OTHER_STMT);
-      }
+      SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, bindingName)
       addNameToExports(exportedNames, bindingName);
       addBindingToExports(exportedBindings, bindingName);
       let identToken = curtok;
-      AST_setIdent(astProp, curtok);
+      AST_setIdent(astProp, identToken);
       ASSERT_skipRex($IDENT, lexerFlags); // note: if this is the end of the var decl and there is no semi the next line can start with a regex
 
       if (
@@ -4595,7 +4601,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     else if (curc === $$CURLY_L_7B) {
-      ASSERT(bindingType !== BINDING_TYPE_NONE, 'must bind as something');
+      ASSERT(bindingType !== BINDING_TYPE_NONE, 'must bind as something'); // TODO: why only this branch?
       let destructible = parseObjectOuter(lexerFlags, scoop, bindingType, SKIP_INIT, exportedNames, exportedBindings, astProp);
       destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error when pattern is required
       verifyDestructibleForBinding(destructible, bindingType);
@@ -7521,7 +7527,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // If this isn't a binding, this is a noop
           // If this is inside a group, this is a noop if it turns out not to be an arrow
           // TODO: add test case for catch shadow
-          SCOPE_addVarBinding(lexerFlags, scoop, identToken.str, bindingType);
+          SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, identToken.str);
           // If this is not an export declaration, the calls below will be noops
           addNameToExports(exportedNames, identToken.str);
           addBindingToExports(exportedBindings, identToken.str);
@@ -7552,7 +7558,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             // If this isn't a binding, this is a noop
             // If this is inside a group, this is a noop if it turns out not to be an arrow
             // TODO: add test case for catch shadow
-            SCOPE_addVarBinding(lexerFlags, scoop, identToken.str, bindingType);
+            SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, identToken.str);
             // If this is not an export declaration, the calls below will be noops
             addNameToExports(exportedNames, identToken.str);
             addBindingToExports(exportedBindings, identToken.str);
@@ -8290,7 +8296,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             // If this isn't a binding, this is a noop
             // If this is inside a group, this is a noop if it turns out not to be an arrow
             // TODO: add test case for catch shadow
-            SCOPE_addVarBinding(lexerFlags, scoop, identToken.str, bindingType);
+            SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, identToken.str);
             // If this is not an export declaration, the calls below will be noops
             addNameToExports(exportedNames, identToken.str);
             addBindingToExports(exportedBindings, identToken.str);
@@ -8306,7 +8312,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
             // If this isn't a binding, this is a noop
             // If this is inside a group, this is a noop if it turns out not to be an arrow
             // TODO: add test case for catch shadow
-            SCOPE_addVarBinding(lexerFlags, scoop, identToken.str, bindingType);
+            SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, identToken.str);
             // If this is not an export declaration, the calls below will be noops
             // TODO: add test case for the exports because that wasnt here before (or assert this cant be reached from an export)
             addNameToExports(exportedNames, identToken.str);
@@ -8359,7 +8365,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // If this isn't a binding, this is a noop
           // If this is inside a group, this is a noop if it turns out not to be an arrow
           // TODO: add test case for catch shadow
-          SCOPE_addVarBinding(lexerFlags, scoop, identToken.str, bindingType);
+          SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, identToken.str);
           // If this is not an export declaration, the calls below will be noops
           // TODO: add test case for the exports because that wasnt here before (or assert this cant be reached from an export)
           addNameToExports(exportedNames, identToken.str);
@@ -8538,7 +8544,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // If this isn't a binding, this is a noop
       // If this is inside a group, this is a noop if it turns out not to be an arrow
       // TODO: add test case for catch shadow
-      SCOPE_addVarBinding(lexerFlags, scoop, propLeadingIdentToken.str, bindingType);
+      SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, propLeadingIdentToken.str);
       // If this is not an export declaration, the calls below will be noops
       addNameToExports(exportedNames, propLeadingIdentToken.str);
       addBindingToExports(exportedBindings, propLeadingIdentToken.str);
@@ -9806,7 +9812,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // If this isn't a binding, this is a noop
         // If this is inside a group, this is a noop if it turns out not to be an arrow
         // TODO: add test case for catch shadow
-        SCOPE_addVarBinding(lexerFlags, scoop, identToken.str, bindingType);
+        SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, identToken.str);
         // If this is not an export declaration, the calls below will be noops
         // TODO: add test case for the exports because that wasnt here before (or assert this cant be reached from an export)
         addNameToExports(exportedNames, identToken.str);
