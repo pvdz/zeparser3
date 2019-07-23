@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Found a lexical binding that is duplicate of a lexical binding on the same statement level
+  Attempted to create a lexical binding for `x` but another binding already existed on the same level
 
 let {a: x, b: x} = obj
                ^------- error

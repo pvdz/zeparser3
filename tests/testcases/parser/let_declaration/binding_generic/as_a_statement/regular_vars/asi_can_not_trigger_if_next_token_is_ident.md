@@ -7,6 +7,10 @@
 > :: let declaration : binding generic : as a statement : regular vars
 >
 > ::> asi can not trigger if next token is ident
+>
+> ASI should not trigger because the next token after `let` does not trigger a syntax error. That only happens at the parenthesis, but the spec does not tell/allow the parser to backtrack to correct for the mistake.
+>
+> Instead a syntax error is triggered when the parenthesis are seen and the possible valid `let;foo();` is never considered.
 
 ## Input
 

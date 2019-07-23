@@ -1,19 +1,22 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/objects/duplicate_keys/let_binding_pattern/nested_dupe_key.md
+- Path: zeparser3/tests/testcases/parser/todo/let_objlit.md
 
-> :: objects : duplicate keys : let binding pattern
+> :: todo
 >
-> ::> nested dupe key
-
+> ::> let objlit
+>
+> The empty object literal can still be a pattern
+>
+> https://twitter.com/Ghost1240145716/status/1152939033439297538
+>
+> This fails because the pattern is valid so ASI does not apply, only after the array pattern the error happens (because missing init) at which point the parser won't backtrack to apply ASI and a syntax error is triggered.
 
 ## Input
 
-
 `````js
-let {a: x, c: {b: x}} = obj
+let
+[]
 `````
 
 ## Output
@@ -30,10 +33,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Attempted to create a lexical binding for `x` but another binding already existed on the same level
+  Declaration destructuring must have init
 
-let {a: x, c: {b: x}} = obj
-                   ^------- error
+let
+[]
+ ^------- error
 `````
 
 ### Strict mode

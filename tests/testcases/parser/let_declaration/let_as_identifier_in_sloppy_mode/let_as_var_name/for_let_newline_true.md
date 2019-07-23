@@ -1,19 +1,26 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/objects/duplicate_keys/let_binding_pattern/nested_dupe_key.md
+- Path: zeparser3/tests/testcases/parser/todo/let_asi_keyword_sloppy.md
 
-> :: objects : duplicate keys : let binding pattern
+> :: todo
 >
-> ::> nested dupe key
-
+> ::> let asi keyword sloppy
+>
+> By fuzzer, zeparser only
+>
+> The newline after `let` should trigger ASI in sloppy mode and not bind the next ident if that was illegal.
+>
+> In strict mode this is always an error regardless.
+>
+> In this case the 
 
 ## Input
 
-
 `````js
-let {a: x, c: {b: x}} = obj
+for (
+let
+true
+;;);
 `````
 
 ## Output
@@ -30,10 +37,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Attempted to create a lexical binding for `x` but another binding already existed on the same level
+  Cannot use this name (true) as a variable name because: Cannot never use this reserved word as a variable name
 
-let {a: x, c: {b: x}} = obj
-                   ^------- error
+for (
+let
+true
+^------- error
+
+;;);
 `````
 
 ### Strict mode

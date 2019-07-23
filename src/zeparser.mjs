@@ -3966,8 +3966,48 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipDiv('let', lexerFlags); // in `let/foo/g` the `/` is always a division, so parse div
 
     // parsing `let` as a declaration if the next token is an ident, `[`, or `{`
-    if (curtype === $IDENT || curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
-      // let declaration
+    if (curtype === $IDENT) {
+      // - `let x`
+      // - `let x, y`
+      // - `let x, [y]`
+      // - `let x, {y}`
+      // - `let \n x`
+      // - `let \n throw x`  // !! the next token may, validly, be keywords in legacy should not throw an error
+      // This is slow but if this `let` was followed by a newline then something wonky is going on anyways.
+      // At any rate, if need be we can optimize this edge case by preventing the first keyword check down the line.
+      if (curtok.nl > 0 && nonFatalBindingIdentCheck(curtok, BINDING_TYPE_LET, lexerFlags) !== '') {
+        // This is a let with a newline following it and the next token is a reserved word.
+        // This must now be a let-expression or a syntax error
+        // - `let \n debugger'               (fine)
+        // - `do let \n while(x)'            (totally valid)
+        if (hasAnyFlag(lexerFlags, LF_STRICT_MODE | LF_NO_ASI)) {
+          if (hasAnyFlag(lexerFlags, LF_STRICT_MODE)) {
+            THROW('`let` must be a declaration in strict mode but the next ident is a reserved keyword (`' + curtok.str + '`) in strict mode');
+          }
+          if (hasAnyFlag(lexerFlags, LF_NO_ASI)) {
+            THROW('The next ident after `let` is a reserved keyword (`' + curtok.str + '`), there is a newline but in the current context ASI is not allowed');
+          }
+          ASSERT(false, 'unreachable');
+        }
+        // Parse a `let`-expression instead of a declaration
+        _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
+      } else {
+        // This is any regular `let` declaration with an ident
+        // - `let foo`
+        // - `do let while(x)'               (totally invalid because do-while requires newline or semi)
+        parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        parseSemiOrAsi(lexerFlags);
+      }
+    } else if (curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
+      // let declaration on (at least) a pattern
+      // - `let [x]`
+      // - `let [x], y`
+      // - `let [x], [y]`
+      // - `let \n [x]`
+      // - `let {x}`
+      // - `let {x}, y`
+      // - `let {x}, {y}`
+      // - `let \n {x}`
       parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
       parseSemiOrAsi(lexerFlags);
     } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
