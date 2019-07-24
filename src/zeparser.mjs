@@ -4278,8 +4278,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(curtok.str !== 'function', 'function ident is already checked before this func');
 
+    let lexerFlagsNoDoWhile = sansFlag(lexerFlags, LF_DO_WHILE_ASI);
+
     // For the sake of simplicity, and because this function should not hit very frequently, we'll take the slow path
-    skipIdentSafeSlowAndExpensive(lexerFlags);
+    skipIdentSafeSlowAndExpensive(lexerFlagsNoDoWhile);
 
     if (curc === $$COLON_3A) {
       // Ident to be verified not to be reserved in the label parser
@@ -4287,7 +4289,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     AST_open(astProp, 'ExpressionStatement', identToken);
-    parseExpressionsAfterIdent(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, 'expression');
+    parseExpressionsAfterIdent(lexerFlagsNoDoWhile, identToken, ASSIGN_EXPR_IS_OK, 'expression');
     parseSemiOrAsi(lexerFlags);
     AST_close('ExpressionStatement');
   }
