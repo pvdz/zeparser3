@@ -4090,12 +4090,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'SwitchStatement', curtok);
     ASSERT_skipAny('switch', lexerFlags); // TODO: optimize; next must be (
-    parseStatementHeader(lexerFlags, 'discriminant');
-    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE); // TODO: in what valid case is this relevant? switch cant appear directly in a template
-    skipAnyOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // TODO: optimize; next must be `case` or `default` or `}`
+
+    // TODO: in what valid case is LF_IN_TEMPLATE relevant? switch cant appear directly in a template
+    let lexerFlagsForSwitch = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_IN_GLOBAL | LF_DO_WHILE_ASI | LF_NO_ASI);
+    parseStatementHeader(lexerFlagsForSwitch, 'discriminant');
+    skipAnyOrDieSingleChar($$CURLY_L_7B, lexerFlagsForSwitch); // TODO: optimize; next must be `case` or `default` or `}`
     AST_set('cases', []);
 
-    parseSwitchCases(lexerFlagsNoTemplate | LF_IN_SWITCH, SCOPE_addLayer(scoop, SCOPE_LAYER_SWITCH, 'parseSwitchStatement'), labelSet, 'cases');
+    parseSwitchCases(lexerFlagsForSwitch | LF_IN_SWITCH, SCOPE_addLayer(scoop, SCOPE_LAYER_SWITCH, 'parseSwitchStatement'), labelSet, 'cases');
 
     skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
     AST_close('SwitchStatement');
