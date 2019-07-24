@@ -3995,7 +3995,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // Parse a `let`-expression instead of a declaration
         _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
       } else {
-        // This is any regular `let` declaration with an ident
+        // This is any regular `let` declaration with an ident and no newline but the ident may cause a keyword error
         // - `let foo`
         // - `do let while(x)'               (totally invalid because do-while requires newline or semi)
         parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
@@ -4030,23 +4030,26 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // next token is ident, {, or [ in most cases. In sloppy mode it can also be any valid value tail, operator, and ASI-able.
     ASSERT_skipDiv('let', lexerFlags); // in `let/foo/g` the `/` is always a division, so parse div
 
-    // parsing `let` as an expression
     if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
       THROW('`let` declaration not allowed here and `let` cannot be a regular var name in strict mode');
-    } else if (curc === $$SQUARE_L_5B && curtok.nl > 0) {
-      // `let \n [` is a restricted production at the start of a statement (and only then)
-      // This means that `let [` can not be the start of an ExpressionStatement (which is what we'd be parsing here)
-      THROW('Must parse expression statement here but that is not allowed to start with `let [` which we just parsed');
-    } else {
-      // let expression statement
-      _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
     }
+
+    if (curc === $$SQUARE_L_5B) {
+      // https://tc39.es/ecma262/#prod-ExpressionStatement
+      // No ASI exception here. A `let [` can simply not start an expression statement, and there's no other way to
+      // validly parse it, so it's an error here.
+      THROW('It is never valid for an expression statement to begin with `let[`, and a `let` declaration would not be valid here');
+    }
+
+    // let expression statement
+    _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
   }
   function _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp) {
     ASSERT(_parseLetAsPlainVarNameExpressionStatement.length === arguments.length, 'arg count');
     ASSERT(identToken.str === 'let', 'should pass on the let token');
     ASSERT(identToken !== curtok, 'the `let` token should have been skipped');
     ASSERT(hasNoFlag(lexerFlags, LF_STRICT_MODE), 'sloppy mode should be asserted at call site');
+    ASSERT(curtok.str !== '[', 'should invalidate expr stmt starting with `let [` before calling this func');
     if (curtype === $EOF) {
       AST_open(astProp, 'ExpressionStatement', identToken);
       AST_setIdent('expression', identToken);

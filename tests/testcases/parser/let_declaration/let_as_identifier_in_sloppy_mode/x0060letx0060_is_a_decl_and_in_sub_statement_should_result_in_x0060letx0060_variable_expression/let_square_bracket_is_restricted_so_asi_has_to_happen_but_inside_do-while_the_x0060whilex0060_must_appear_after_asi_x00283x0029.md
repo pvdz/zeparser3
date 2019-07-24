@@ -41,7 +41,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Must parse expression statement here but that is not allowed to start with `let [` which we just parsed
+  It is never valid for an expression statement to begin with `let[`, and a `let` declaration would not be valid here
 
 do let
  [x]; while (false);
