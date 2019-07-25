@@ -21,6 +21,12 @@
 > > 13.7: In ECMAScript 2015, if the ( token of a for-in statement is immediately followed by the token sequence let [ then the let is treated as the start of a ForDeclaration. In previous editions such a token sequence would be the start of an LeftHandSideExpression.
 >
 > (note: the spec doesn't explicitly allow `let` as a var name but rather forbids it under certain situations. For example: in strict mode and as let/const names)
+>
+> Spidermonkey folks probably know what they're doing:
+>
+> https://github.com/mozilla/gecko-dev/blob/master/js/src/frontend/Parser.cpp#L7570
+
+## FAIL
 
 ## Input
 

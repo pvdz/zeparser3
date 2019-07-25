@@ -3979,6 +3979,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           }
           ASSERT(false, 'unreachable');
         }
+        if (curtok.str === 'let') {
+          // This is still an error
+          // https://github.com/mozilla/gecko-dev/blob/master/js/src/frontend/Parser.cpp#L7575
+          // ASI resolves during parsing. Static semantics only apply to the full parse tree with ASI applied.
+          THROW('You\'re just fishing for edge cases now, so yeah, `let\\nlet` is fail');
+        }
         // Parse a `let`-expression instead of a declaration
         _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
       } else {
