@@ -158,6 +158,8 @@ function parseTestFile(tob) {
 
   ASSERT(oldData.includes(INPUT_HEADER));
   tob.aboveTheFold = oldData.slice(0, oldData.indexOf(INPUT_HEADER));
+  tob.shouldPass = tob.aboveTheFold.toLowerCase().includes('\n## pass\n');
+  tob.shouldFail = tob.aboveTheFold.toLowerCase().includes('\n## fail\n');
 
   let inputHeaderOffset = oldData.indexOf(INPUT_HEADER) + INPUT_HEADER.length;
   ASSERT(oldData.includes(OUTPUT_QUINTICK, inputHeaderOffset));

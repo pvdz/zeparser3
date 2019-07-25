@@ -179,7 +179,6 @@ import ZeTokenizer, {
   GOAL_SCRIPT,
 
   LF_CAN_NEW_DOT_TARGET,
-  LF_DO_WHILE_ASI,
   LF_FOR_REGEX,
   LF_IN_ASYNC,
   LF_IN_CONSTRUCTOR,
@@ -1690,7 +1689,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE), 'I think template resets itself');
 
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
-    parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI), ASSIGN_EXPR_IS_OK, headProp);
+    parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), ASSIGN_EXPR_IS_OK, headProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
   }
 
@@ -1718,9 +1717,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc === $$SEMI_3B) {
       ASSERT_skipRex(';', lexerFlags);
-    } else if (hasAllFlags(lexerFlags, LF_DO_WHILE_ASI)) {
-      if (curtok.nl > 0) tok.asi();
-      else THROW('Unable to ASI inside a do-while statement without a newline');
     } else {
       ASSERT(hasNoFlag(lexerFlags, LF_NO_ASI), 'this case should have been caught sooner');
       // note: must check eof/semi as well otherwise the value would be mandatory and parser would throw
@@ -1808,10 +1804,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // TODO: double label also propagate the name to the parent. add test case
 
-      // I think the do-if-func case is okay because there's no need for an ASI... wow.
-      // [v]: `do x: function s(){}while(y)`
-      lexerFlags = sansFlag(lexerFlags, LF_DO_WHILE_ASI);
-
       if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
         if (fromStmt === FROM_LABEL_SCOPE) {
           // Labelled func decls do not leak their name into global space (but they do for a label in a block!)
@@ -1826,10 +1818,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // This rule ONLY applies to plain functions. Async / generators or other types of declarations are illegal here!
     }
     else if (fromStmt === FROM_IFELSE_STMT) {
-      // I think the do-if-func case is okay because there's no need for an ASI... wow.
-      // [v]: `do if(8)function s(){}while(y)`
-      lexerFlags = sansFlag(lexerFlags, LF_DO_WHILE_ASI);
-
       // in web compat mode func statements are only allowed inside `if` and `else` and label statements in sloppy mode
       if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
         // This is (only) relevant for webcompat function statements that are direct sub-statement of `if` and `else`.
@@ -2245,7 +2233,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(typeof lexerFlags === 'number');
     ASSERT(typeof labelSet === 'object');
-    ASSERT_VALID(hasNoFlag(lexerFlags, LF_DO_WHILE_ASI), 'func body should not receive do-while asi because func is not ever allowed as do-sub-statement');
     ASSERT_VALID(curtok.str === '{', 'block opening token not yet consumed');
 
     let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION);
@@ -2770,7 +2757,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number');
     ASSERT(typeof labelSet === 'object');
 
-    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI | LF_DO_WHILE_ASI);
+    let lexerFlagsNoTemplate = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_NO_ASI);
 
     ASSERT_VALID(curtok.str === '{', 'block opening token not yet consumed');
     AST_open(astProp, 'BlockStatement', curtok);
@@ -2893,7 +2880,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex('do', lexerFlags);
     // if the next part does not start with `{` then it is not a block and ASI can not happen. otherwise dont care here
     // note that functions and classes DO get ASI
-    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags | LF_DO_WHILE_ASI : lexerFlags) | LF_IN_ITERATION, scoop, {'##': 'dowhile', '#': labelSet}, FROM_OTHER_STMT, 'body');
+    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags : lexerFlags) | LF_IN_ITERATION, scoop, {'##': 'dowhile', '#': labelSet}, FROM_OTHER_STMT, 'body');
     skipAnyOrDie($$W_77, 'while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
     // > 11.9.1: In ECMAScript 2015, Automatic Semicolon Insertion adds a semicolon at the end of a do-while statement if the
@@ -3270,7 +3257,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipAny('await', lexerFlags); // TODO: optimize; next must be `(`
     }
     skipRexOrDieSingleChar($$PAREN_L_28, lexerFlags);
-    parseForHeader(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI), forToken, scoop, awaitable, astProp);
+    parseForHeader(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), forToken, scoop, awaitable, astProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
     if (curtype === $EOF) THROW('Missing `for` child statement');
     parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, scoop, {'##': 'for', '#': labelSet}, FROM_OTHER_STMT, 'body');
@@ -4092,7 +4079,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipAny('switch', lexerFlags); // TODO: optimize; next must be (
 
     // TODO: in what valid case is LF_IN_TEMPLATE relevant? switch cant appear directly in a template
-    let lexerFlagsForSwitch = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_IN_GLOBAL | LF_DO_WHILE_ASI | LF_NO_ASI);
+    let lexerFlagsForSwitch = sansFlag(lexerFlags, LF_IN_TEMPLATE | LF_IN_GLOBAL | LF_NO_ASI);
     parseStatementHeader(lexerFlagsForSwitch, 'discriminant');
     skipAnyOrDieSingleChar($$CURLY_L_7B, lexerFlagsForSwitch); // TODO: optimize; next must be `case` or `default` or `}`
     AST_set('cases', []);
@@ -4141,7 +4128,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'ThrowStatement', curtok);
     ASSERT_skipRex('throw', lexerFlags);
     if (curtok.nl > 0) THROW('Found a newline between `throw` and its argument but that is not allowed');
-    let tmpLexerFlags = sansFlag(lexerFlags, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
+    let tmpLexerFlags = sansFlag(lexerFlags, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_IN_FOR_LHS);
     parseExpressions(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'argument'); // mandatory1
     parseSemiOrAsi(lexerFlags);
     AST_close('ThrowStatement');
@@ -4278,10 +4265,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT(curtok.str !== 'function', 'function ident is already checked before this func');
 
-    let lexerFlagsNoDoWhile = sansFlag(lexerFlags, LF_DO_WHILE_ASI);
-
     // For the sake of simplicity, and because this function should not hit very frequently, we'll take the slow path
-    skipIdentSafeSlowAndExpensive(lexerFlagsNoDoWhile);
+    skipIdentSafeSlowAndExpensive(lexerFlags);
 
     if (curc === $$COLON_3A) {
       // Ident to be verified not to be reserved in the label parser
@@ -4289,7 +4274,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     AST_open(astProp, 'ExpressionStatement', identToken);
-    parseExpressionsAfterIdent(lexerFlagsNoDoWhile, identToken, ASSIGN_EXPR_IS_OK, 'expression');
+    parseExpressionsAfterIdent(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, 'expression');
     parseSemiOrAsi(lexerFlags);
     AST_close('ExpressionStatement');
   }
@@ -6309,7 +6294,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (hasAllFlags(curtype, $TICK_HEAD)) {
       parseQuasiPart(lexerFlags | LF_IN_TEMPLATE, NOT_QUASI_TAIL);
 
-      let tmpLexerFlags = sansFlag(lexerFlags | LF_IN_TEMPLATE | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
+      let tmpLexerFlags = sansFlag(lexerFlags | LF_IN_TEMPLATE | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_IN_FOR_LHS);
       // keep parsing expression+tick until tick-tail
       do {
         awaitYieldFlagsFromAssignable |= parseExpressions(tmpLexerFlags, ASSIGN_EXPR_IS_OK, 'expressions');
@@ -6387,7 +6372,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // parseDynamicProperty
       AST_wrapClosed(astProp, 'MemberExpression', 'object', valueFirstToken);
       ASSERT_skipRex('[', lexerFlags);
-      let nowAssignable = parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI), ASSIGN_EXPR_IS_OK, 'property');
+      let nowAssignable = parseExpressions(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), ASSIGN_EXPR_IS_OK, 'property');
       // - `foo[await bar]`
       assignable = mergeAssignable(nowAssignable, assignable); // pass on piggies (yield, await, etc)
       skipDivOrDieSingleChar($$SQUARE_R_5D, lexerFlags);
@@ -6438,7 +6423,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       if (hasAllFlags(curtype, $TICK_HEAD)) {
-        let tmpLexerFlags = sansFlag(lexerFlags | LF_IN_TEMPLATE | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI | LF_IN_FOR_LHS);
+        let tmpLexerFlags = sansFlag(lexerFlags | LF_IN_TEMPLATE | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_IN_FOR_LHS);
         do {
           ASSERT_skipRex($TICK, lexerFlags); // f`x${/foo/}y`
           // - `a${b=c}d`           is valid
@@ -6544,7 +6529,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseCallArgs(lexerFlags, astProp) {
     ASSERT_skipRex('(', lexerFlags);
     // [v]: `for (x(y in z);;);`
-    lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_DO_WHILE_ASI);
+    lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS);
 
     let assignable = 0;
     if (curc === $$PAREN_R_29) {
@@ -6606,7 +6591,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     lexerFlags = resetLexerFlagsForFuncAndArrow(lexerFlags, UNDEF_STAR, asyncToken, IS_ARROW);
-    lexerFlags = sansFlag(lexerFlags, LF_DO_WHILE_ASI); // `do x => y while(z)`
     if (curc === $$CURLY_L_7B) {
       lexerFlags = sansFlag(lexerFlags, LF_IN_FOR_LHS); // this state _is_ reset for block-body arrows, albeit futile
       AST_set('expression', false); // "body of arrow is block"
@@ -6686,7 +6670,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // this function assumes you've just skipped the paren and are now in the first token of a group/arrow/async-call
     // this is either the arg of a delete, or any other group opener that may or may not have been prefixed with async
-    let lexerFlags = sansFlag(lexerFlagsBeforeParen | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION | LF_DO_WHILE_ASI);
+    let lexerFlags = sansFlag(lexerFlagsBeforeParen | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION);
     // parse the group as if it were a group (also for the sake of AST)
     // while doing so keep track of the next three states. At the end
     // act accordingly.

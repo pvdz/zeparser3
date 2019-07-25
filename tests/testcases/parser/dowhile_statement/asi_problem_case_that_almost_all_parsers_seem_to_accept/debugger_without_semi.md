@@ -36,7 +36,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI inside a do-while statement without a newline
+  Unable to ASI, token: {# IDENT : nl=N ws=N 12:17 curc=119 `while`#}
 
 do debugger while(x) x
             ^------- error

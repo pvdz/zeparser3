@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Unable to ASI inside a do-while statement without a newline
+  Unable to ASI, token: {# PUNCTUATOR : nl=N ws=N 7:8 curc=123 `{`#}
 
 do let {} = y while (a);
        ^------- error
