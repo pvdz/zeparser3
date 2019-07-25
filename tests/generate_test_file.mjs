@@ -25,6 +25,7 @@ export function generateTestFile(tob) {
   console.log('Generating test case from', file);
 
   let [comment, ...code] = data.slice(1).split('###\n');
+  comment = comment.trim().split(/\n/g).map(s => s.toLowerCase() === '## fail' ? '\n## FAIL' : s.toLowerCase() === '## pass' ? '\n## PASS' : ('>\n> ' + s)).join('\n');
   code = code.join('###'); // unlikely
   code = code.trim().split(/\n+/g).map(s => s.trimRight()).join('\n');
 
@@ -50,7 +51,7 @@ export function generateTestFile(tob) {
 
 > :: ${descPath}
 >
-> ::> ${descFile}${comment ? '\n>\n> ' + comment : ''}
+> ::> ${descFile}${comment ? '\n' + comment : ''}
 ${INPUT_HEADER}${OUTPUT_QUINTICKJS}${code}${OUTPUT_QUINTICK}
 `;
   fs.writeFileSync(file, newData);

@@ -197,8 +197,10 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
         $error: INPUT_OVERRIDE ? undefined : (...a) => stdout.push(a),
       },
     );
+    if (tob.shouldFail) throw new Error('Assertion fail: test was explicitly marked to fail somehow, but it passed');
   } catch (_e) {
     e = _e;
+    if (tob.shouldPass) e = new Error('Assertion fail: test was explicitly marked to pass, but it failed somehow;\n' + e.stack);
   }
 
   return {r, e, tok, stdout};
