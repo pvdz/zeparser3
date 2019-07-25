@@ -3038,6 +3038,22 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curc === $$STAR_2A) {
       // export * from "x"
+
+      if (curtok.str.length !== 1) {
+        // - `export *= from "x"`
+        // - `export ** from "x"`
+        // - `export **= from "x"`
+        switch (curtok.str) {
+          case '*=':
+          case '**':
+          case '**=':
+            THROW('Encountered `' + curtok.str + '` in a position where expecting to parse an export star');
+            break;
+          default:
+            ASSERT(false, 'unreachable; what token is this?');
+        }
+      }
+
       AST_open(astProp, 'ExportAllDeclaration', exportToken);
       ASSERT_skipAny('*', lexerFlags);
       skipAnyOrDie($$F_66, 'from', lexerFlags);
@@ -3930,6 +3946,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseImportNamespace(lexerFlags, scoop) {
     ASSERT(parseImportNamespace.length === arguments.length, 'arg count');
+
+    if (curtok.str.length !== 1) {
+      // - `import *= from "x"`
+      // - `import ** from "x"`
+      // - `import **= from "x"`
+      switch (curtok.str) {
+        case '*=':
+        case '**':
+        case '**=':
+          THROW('Encountered `' + curtok.str + '` in a position where expecting to parse an import namespace');
+          break;
+        default:
+          ASSERT(false, 'unreachable; what token is this?');
+      }
+    }
 
     // import * as x from 'y'
     ASSERT_skipAny('*', lexerFlags);
@@ -6147,6 +6178,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // [x] `yield \n * x`
       // [x] `yield *;`
 
+      if (curtok.str.length !== 1) {
+        // - `yield *= x`       // valid in sloppy?
+        // - `yield ** x`       // valid in sloppy?
+        // - `yield **= x`      // valid in sloppy?
+        switch (curtok.str) {
+          case '*=':
+          case '**':
+          case '**=':
+            THROW('Encountered `' + curtok.str + '` in a position where expecting to parse a yield star arg');
+            break;
+          default:
+            ASSERT(false, 'unreachable; what token is this?');
+        }
+      }
+
       AST_set('delegate', true);
       ASSERT_skipRex('*', lexerFlags); // next is any value
       parseValue(lexerFlags, allowAssignment, NOT_NEW_ARG, 'argument'); // arg required, no newline restrictions
@@ -8116,6 +8162,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `{*15(){}} = x`
       // - `{*[expr](){}} = x`
 
+      if (curtok.str.length !== 1) {
+        // - `({*=f(){}})`
+        // - `({**f(){}})`
+        // - `({**=f(){}})`
+        switch (curtok.str) {
+          case '*=':
+          case '**':
+          case '**=':
+            THROW('Encountered `' + curtok.str + '` in a position where expecting to parse a member');
+            break;
+          default:
+            ASSERT(false, 'unreachable; what token is this?');
+        }
+      }
+
       destructible |= CANT_DESTRUCT;
 
       let starToken = curtok;
@@ -8705,10 +8766,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     else if (curc === $$STAR_2A) {
       // async with generator
       // note that only async can actually be a generator, getters/setters cannot
-      // - ({async *ident(){}})
-      // - ({async *5(){}})
-      // - ({async *'x'(){}})
-      // - ({async *[x](){}})
+      // - `({async *ident(){}})`
+      // - `({async *5(){}})`
+      // - `({async *'x'(){}})`
+      // - `({async *[x](){}})`
+
+      if (curtok.str.length !== 1) {
+        // - `({async *=f(){}})`
+        // - `({async **f(){}})`
+        // - `({async **=f(){}})`
+        switch (curtok.str) {
+          case '*=':
+          case '**':
+          case '**=':
+            THROW('Encountered `' + curtok.str + '` in a position where expecting to parse an async member');
+            break;
+          default:
+            ASSERT(false, 'unreachable; what token is this?', ''+curtok);
+        }
+      }
 
       destructible |= CANT_DESTRUCT;
 
@@ -9185,6 +9261,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `class x {*"str"(){}}`
       // - `class x {*15(){}}`
       // - `class x {*[expr](){}}`
+
+      if (curtok.str.length !== 1) {
+        // - `class a {*=f(){}}`
+        // - `class a {**f(){}}`
+        // - `class a {**=f(){}}`
+        switch (curtok.str) {
+          case '*=':
+          case '**':
+          case '**=':
+            THROW('Encountered `' + curtok.str + '` in a position where expecting to parse a class member');
+            break;
+          default:
+            ASSERT(false, 'unreachable; what token is this?');
+        }
+      }
 
       starToken = curtok;
       ASSERT_skipAny('*', lexerFlags); // TODO: next must be ident, number, string, `[`
