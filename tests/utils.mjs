@@ -244,9 +244,10 @@ function parseTestFile(tob) {
 }
 
 async function readFiles(files) {
-  return await Promise.all(files.map(promiseToReadFile));
+  return await Promise.all(files.map(promiseToReadFile)).catch(e => { throw new Error(e); });
 }
 function promiseToReadFile(file) {
+  if (!fs.existsSync(file)) console.error(BLINK + 'File does not exist:' + RESET + ' ' + file);
   let res,rej,p = new Promise((resolve, reject) => (res = resolve, rej = reject));
   fs.readFile(file, 'utf8', (err, data) => err ? rej(err) : res(new Tob(file, data)));
   return p;
