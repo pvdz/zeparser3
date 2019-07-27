@@ -320,7 +320,7 @@ async function runTest(list, zeparser, testVariant/*: "sloppy" | "strict" | "mod
       if (INPUT_OVERRIDE) {
         PRINT_HIT(`[${(e&&e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
       } else if (wasHit) {
-        if (!foundCache.has(input)) {
+        if (!foundCache.has(inputCode)) {
           PRINT_HIT(`// [${(e && e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(inputCode)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
           foundCache.add(tob.inputCode);
         }
@@ -368,6 +368,7 @@ async function runTests(list, zeparser) {
   if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Total runtime');
   if (!RUN_VERBOSE_IN_SERIAL) console.log('Now actually running all', list.length, 'test cases... 4x! Single threaded! This may take some time (~20s on my machine)');
   if (RUN_SLOPPY) await runTest(list, zeparser, TEST_SLOPPY);
+  if (SEARCH) return;
   if (RUN_STRICT) await runTest(list, zeparser, TEST_STRICT);
   if (RUN_MODULE) await runTest(list, zeparser, TEST_MODULE);
   if (RUN_WEB) await runTest(list, zeparser, TEST_WEB);
