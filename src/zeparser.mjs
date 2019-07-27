@@ -4386,7 +4386,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let parens = 0;
     let pees = []; // rare use of arrays because we need to remember where it was opened for locs in ASTs (edge case path meh)
-    lexerFlags |= LF_NO_ASI; // cannot asi inside `delete (...)`
+    // Cannot asi inside `delete (...)`, the `in` restriction and template stuff does not apply inside the arg
+    lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_TEMPLATE);
     let parenToken = curtok;
     do {
       ++parens;
