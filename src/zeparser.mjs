@@ -4379,15 +4379,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `delete true.__proto__.foo`       -- and technically it could work so we can't just throw
     // - `delete (a[await x])`
     // - `delete ((((a)))[await x])`
+    // - `delete (foo) => x`
+    // - `delete ((foo) => x)`
 
     ASSERT(curc === $$PAREN_L_28, 'this is why we are here');
 
     let outerParenToken = curtok;
+    let outerLexerflags = lexerFlags;
 
     let parens = 0;
     let pees = []; // rare use of arrays because we need to remember where it was opened for locs in ASTs (edge case path meh)
-    // Cannot asi inside `delete (...)`, the `in` restriction and template stuff does not apply inside the arg
-    lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS | LF_IN_TEMPLATE);
+    // Cannot asi inside `delete (...)`, the `in` restriction stuff does not apply inside the arg
+    lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS);
     let parenToken = curtok;
     do {
       ++parens;
@@ -4431,7 +4434,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         canBeErrorCase = false;
       }
       // at least one rhs paren must appear now
-      skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
+      skipDivOrDieSingleChar($$PAREN_R_29, outerLexerflags);
       if (curtok.str === '=>') {
         // This means the code is deleting an arrow that is wrapped in parentheses
         // The case for deleting an unwrapped arrow is handled elsewhere
@@ -8074,7 +8077,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
 
         destructible |= parseObjectPropertyValueAfterColon(lexerFlags, startOfKeyToken, litToken, bindingType, assignableForPiggies, destructible, scoop, exportedNames, exportedBindings, astProp);
-        ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
+        ASSERT(curtok.str !== '=', 'assignments should be parsed as part of the rhs expression');
       }
       else if (curc === $$PAREN_L_28) {
         // Method shorthand
@@ -8091,7 +8094,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('Object literal keys that are strings or numbers must be a method or have a colon: ' + curtok);
       }
 
-      ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the expression');
+      ASSERT(curtok.str !== '=', 'assignments should be parsed as part of the expression');
     }
     else if (curtok.str === '...') {
       if (targetEsVersion < VERSION_OBJECTSPREAD && targetEsVersion !== VERSION_WHATEVER) {
@@ -8593,7 +8596,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       destructible |= parseOptionalDestructibleRestOfExpression(lexerFlags, valueFirsTtoken, bindingType, nowAssignable, nowDestruct, $$CURLY_R_7D, 'value');
     }
 
-    ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
+    ASSERT(curtok.str !== '=', 'assignments should be parsed as part of the rhs expression');
 
     // There are tests that will catch these
     // - `async function a(){     (foo = [{m: 5 + t(await bar)}]) => {}     }`
@@ -8720,7 +8723,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_set('shorthand', true);
       AST_close('Property');
 
-      ASSERT(curc !== $$IS_3D, 'further assignments should be parsed as part of the rhs expression');
+      ASSERT(curtok.str !== '=', 'further assignments should be parsed as part of the rhs expression');
     }
     else if (curc === $$COLON_3A) {
       // property value or label, some are destructible:
@@ -8747,7 +8750,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       destructible |= parseObjectPropertyValueAfterColon(lexerFlags, propLeadingIdentToken, propLeadingIdentToken, bindingType, assignable, destructible, scoop,exportedNames, exportedBindings, astProp);
-      ASSERT(curc !== $$IS_3D, 'assignments should be parsed as part of the rhs expression');
+      ASSERT(curtok.str !== '=', 'assignments should be parsed as part of the rhs expression');
     }
     else if (curc === $$PAREN_L_28) {
       // Method shorthand, no modifier
