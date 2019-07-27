@@ -1,19 +1,19 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/for_statement/for-in/lhs_edge_cases/arrow_crap_lhs.md
+- Path: zeparser3/tests/testcases/parser/todo/for_function.md
 
-> :: for statement : for-in : lhs edge cases
+> :: todo
 >
-> ::> arrow crap lhs
+> ::> for function
 >
-> Other tests should validate that a member expression is fine in the lhs. You just can't do it on an ArrowExpression
+> By fuzzer, zeparser only
+>
+> Error: Parser error! Next ord should be 41 (`)`) but was 105 (curc: `i`, token: `in`)
 
 ## Input
 
 `````js
-for ((x)=>{}.x in y);
+for(function(){if(x in 3);};;)x
 `````
 
 ## Output
@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Block body arrows can not be immediately accessed without a group
+  Next ord should be 41 (`)`) but was 105 (curc: `i`, token: `in`)
 
-for ((x)=>{}.x in y);
-            ^------- error
+for(function(){if(x in 3);};;)x
+                    ^------- error
 `````
 
 ### Strict mode

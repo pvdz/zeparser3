@@ -3493,7 +3493,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hasAllFlags(destructible, CANT_DESTRUCT)) TODO, THROW('Found something that must and cant destruct');
         destructible = sansFlag(destructible, MUST_DESTRUCT);
       }
-      assignable = parsePatternTailInForHeader(lexerFlags, curlyToken, assignable, destructible, awaitable, astProp);
+      assignable = parsePatternTailInForHeader(lexerFlags, curlyToken, $$CURLY_R_7D, assignable, destructible, awaitable, astProp);
     }
     else if (curc === $$SQUARE_L_5B) {
       // for-in, for-of, for-await
@@ -3523,7 +3523,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (hasAllFlags(destructible, CANT_DESTRUCT)) TODO, THROW('Found something that must and cant destruct');
         destructible = sansFlag(destructible, MUST_DESTRUCT);
       }
-      assignable = parsePatternTailInForHeader(lexerFlags, squareToken, assignable, destructible, awaitable, astProp);0
+      assignable = parsePatternTailInForHeader(lexerFlags, squareToken, $$SQUARE_R_5D, assignable, destructible, awaitable, astProp);0
     }
     else {
       // If the LHS is an object or array then it must cover an AssignmentPattern. In this case it may have an
@@ -3539,6 +3539,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `for ("foo" in y);`            // bad
       // - `for ("foo".x in y);`
       // - `for ("foo".x = z in y);`      // bad
+      // - `for ("foo".x += z in y);`     // bad
+      // - `for ("foo".x += z;;);`        // good (.. ok, "acceptable")
       // - `for (()=>x in y);`            // bad (`in` becomes part of the arrow)
       // - `for (()=>(x) in y);`          // bad
       // - `for ((()=>x) in y);`          // bad (?)
@@ -3682,7 +3684,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpressions(lexerFlags, ASSIGN_EXPR_IS_OK, 'update');
     }
   }
-  function parsePatternTailInForHeader(lexerFlags, patternStartToken, assignable, destructible, awaitable, astProp) {
+  function parsePatternTailInForHeader(lexerFlags, patternStartToken, patternLastChar, assignable, destructible, awaitable, astProp) {
     ASSERT(parsePatternTailInForHeader.length == arguments.length, 'arg count');
 
     assignable = hasAnyFlag(destructible, CANT_DESTRUCT) ? NOT_ASSIGNABLE : IS_ASSIGNABLE;
@@ -3775,12 +3777,24 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     else {
+      // This must lead to a semi-colon, or an error
+
       // [v]: `for ([] + x;;);`
-      //            ^
+      //               ^
+      // [v]: `for ([].w ^= s;;) x;`
+      //              ^
+      // [v]: `for ({}[y] &= x;;) x;`
+      //              ^
+      // [v]: `for ({}.u |= c;;) x;`
       // [x]: `for ({});`
-      //           ^
-      // This is bad
-      parseExpressionFromBinaryOp(lexerFlags, patternStartToken, assignable, astProp);
+      //              ^
+
+      // Note: at this point we've parsed the value tail and checked that the next token is not `in`, `of`, or an
+      // assignment, so all we have to do now is continue parsing a regular value and assert that this must be a
+      // regular for-loop, so the value must be followed by a semi. Hence, we don't care about assignability here.
+      // We also don't care about the yield/await piggies because we are in a for-header, never a function header.
+      parseOptionalDestructibleRestOfExpression(lexerFlags, patternStartToken, BINDING_TYPE_NONE, assignable, destructible, patternLastChar, astProp);
+
       // [v]: `for ([] + x;;);`
       //                  ^
       if (curc === $$COMMA_2C) {
@@ -3791,6 +3805,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
 
       if (curc !== $$SEMI_3B) {
+        // [x]: `for ([]);`
+        //              ^
         // [x]: `for ([]);`
         // [x]: `for ({});`
         //              ^
