@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  An arrow function can not be part of an operator to the right
+  Arrows cannot be lhs to for-in
 
 for ((x)=>{} in y);
              ^------- error

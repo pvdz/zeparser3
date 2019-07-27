@@ -1,17 +1,19 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/for_statement/for-in/lhs_edge_cases/parenless_arrow_lhs.md
+- Path: zeparser3/tests/testcases/parser/for_statement/for-in/lhs_edge_cases/func.md
 
 > :: for statement : for-in : lhs edge cases
 >
-> ::> parenless arrow lhs
+> ::> func
+>
+> Function is not assignable so it fails
+
+## FAIL
 
 ## Input
 
 `````js
-for (x=>{} in y);
+for (function(){} in x);
 `````
 
 ## Output
@@ -28,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Arrows cannot be lhs to for-in
+  Left part of for-in must be assignable
 
-for (x=>{} in y);
-           ^------- error
+for (function(){} in x);
+                  ^------- error
 `````
 
 ### Strict mode

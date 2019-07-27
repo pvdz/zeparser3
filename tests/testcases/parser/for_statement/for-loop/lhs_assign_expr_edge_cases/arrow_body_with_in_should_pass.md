@@ -8,7 +8,9 @@
 >
 > ::> arrow body with `in` should pass
 >
-> counter test to previous one
+> counter test to arrow_body_with_in_should_pass.md (`for (x=>x in y;;);`)
+
+## PASS
 
 ## Input
 

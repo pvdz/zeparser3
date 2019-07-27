@@ -36,9 +36,11 @@
 >
 > {FunctionBody[~Yield, ~Await]}
 >
-> So a block-arrow doesn't care but an expression arrow propagates the "in" flag and disallows it in the
+> So a block-arrow doesn't care but an expression arrow propagates the "in" flag and disallows it in the expression, just like a regular lhs would. So it's not allowed.
 >
-> expression, just like a regular lhs would. So it's not allowed.
+> There is a counter test for `for (x=>{x in y};;);`, which should pass.
+
+## FAIL
 
 ## Input
 

@@ -2151,10 +2151,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
 
     // this resets lexerflags for parsing a function from the arguments onwards or for the body of an arrow
-    lexerFlags = sansFlag(lexerFlags,
-      LF_IN_ASYNC |
-      LF_IN_GENERATOR |
-      LF_IN_FUNC_ARGS
+    lexerFlags =
+      lexerFlags & (
+      LF_STRICT_MODE
+      | LF_IN_TEMPLATE // TODO: handle this differently and add tests why. Only relevant for the token _after_ the func/arrow
+      | LF_SUPER_PROP
+      | LF_SUPER_CALL
     );
 
     // the function name can inherit this state from the enclosing scope but all other parts of a function will
@@ -6658,9 +6660,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW_TOKEN('Arrow had duplicate params', paramScoop.dupeParamErrorToken);
     }
 
+    let insideForLhs = hasAllFlags(lexerFlags, LF_IN_FOR_LHS);
+    let arrowInheritedFlags = lexerFlags & (LF_CAN_NEW_DOT_TARGET | LF_IN_CONSTRUCTOR);
+
     lexerFlags = resetLexerFlagsForFuncAndArrow(lexerFlags, UNDEF_STAR, asyncToken, IS_ARROW);
+    lexerFlags |= arrowInheritedFlags; // Some flags _are_ inherited by arrows (tests will show you the way)
+
     if (curc === $$CURLY_L_7B) {
-      lexerFlags = sansFlag(lexerFlags, LF_IN_FOR_LHS); // this state _is_ reset for block-body arrows, albeit futile
       AST_set('expression', false); // "body of arrow is block"
       let arrowScoop = SCOPE_addLayer(paramScoop, SCOPE_LAYER_FUNC_BODY, 'parseArrowFromPunc');
       parseFunctionBody(lexerFlags, arrowScoop, {_: 'arrow labels'}, IS_EXPRESSION, wasSimple, NO_DUPE_PARAMS, NO_ID_TO_VERIFY);
@@ -6672,13 +6678,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // This is somewhat similar to a regular function, which may be more intuitive:
       // - `async function f(fail = async function(){await x}){}`
       // (Spec wise; the code in the function does not run immediately so there is no race condition to protect)
-      // Note: in `for-in` headers, the LF_IN_FOR_LHS flag is NOT reset for expr-body arrows (doesn't matter much, both error)
+
+      // Note: in `for-in` headers, the LF_IN_FOR_LHS flag is NOT reset for expr-body arrows
+      if (insideForLhs) lexerFlags |= LF_IN_FOR_LHS;
+
       AST_set('expression', true); // "body of arrow is expr"
       parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'body');
     }
 
     // TODO: this may be superseded by assign-expr checks
-    if (hasAllFlags(lexerFlags, LF_IN_FOR_LHS) && curtok.str === 'in') {
+    if (insideForLhs && curtok.str === 'in') {
       THROW('Arrows cannot be lhs to for-in');
     }
     // Arrows cannot have tails. Most expressions will consume them, but not `x++` for example. So do after either path.
