@@ -29,19 +29,19 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:17},source:''},
+  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
+      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
       expression: {
         type: 'UnaryExpression',
-        loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
+        loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
         operator: 'delete',
         prefix: true,
         argument: {
           type: 'MemberExpression',
-          loc:{start:{line:1,col:7},end:{line:2,col:0},source:''},
+          loc:{start:{line:1,col:7},end:{line:1,col:21},source:''},
           object: {
             type: 'ArrowFunctionExpression',
             loc:{start:{line:1,col:8},end:{line:1,col:16},source:''},
@@ -70,44 +70,13 @@ ast: {
           computed: false
         }
       }
-    },
-    {
-      type: 'ExpressionStatement',
-      loc:{start:{line:2,col:0},end:{line:2,col:17},source:''},
-      expression: {
-        type: 'UnaryExpression',
-        loc:{start:{line:2,col:0},end:{line:2,col:17},source:''},
-        operator: 'delete',
-        prefix: true,
-        argument: {
-          type: 'ArrowFunctionExpression',
-          loc:{start:{line:2,col:8},end:{line:2,col:16},source:''},
-          params: [
-            {
-              type: 'Identifier',
-              loc:{start:{line:2,col:9},end:{line:2,col:10},source:''},
-              name: 'x'
-            }
-          ],
-          id: null,
-          generator: false,
-          async: false,
-          expression: true,
-          body: {
-            type: 'Identifier',
-            loc:{start:{line:2,col:15},end:{line:2,col:16},source:''},
-            name: 'x'
-          }
-        }
-      }
     }
   ]
 }
 
-tokens (21x):
+tokens (12x):
        IDENT PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR IDENT
-       PUNCTUATOR PUNCTUATOR IDENT ASI IDENT PUNCTUATOR PUNCTUATOR
-       IDENT PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR ASI
+       PUNCTUATOR PUNCTUATOR IDENT ASI
 `````
 
 ### Strict mode

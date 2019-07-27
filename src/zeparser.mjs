@@ -4531,7 +4531,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     labelSet['#' + identToken.str] = true;
     ASSERT_skipRex(':', lexerFlags);
 
-    parseNestedBodyPart(lexerFlags, scoop, labelSet, fromStmt === FROM_SCOPE_ROOT ? FROM_LABEL_SCOPE : FROM_LABEL_BLOCK, 'body');
+    parseNestedBodyPart(lexerFlags, scoop, labelSet, (fromStmt === FROM_SCOPE_ROOT || fromStmt === FROM_LABEL_SCOPE) ? FROM_LABEL_SCOPE : FROM_LABEL_BLOCK, 'body');
     AST_close('LabeledStatement');
   }
 
@@ -8254,7 +8254,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else {
         THROW('Invalid objlit key character after generator star');
       }
-      ASSERT(curc !== $$IS_3D, 'this struct can not have an init');
+      ASSERT(curtok.str !== '=', 'this struct can not have an init');
     }
     else {
       // ({<?>
@@ -8762,7 +8762,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, propLeadingIdentToken, undefined, astProp);
 
-      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+      ASSERT(curtok.str !== '=', 'this struct does not allow init/defaults');
     }
     else if (curtype === $IDENT) {
       // getter/setter/async shorthand method
@@ -8790,7 +8790,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipAny($IDENT, lexerFlags); // TODO: next is `(`
       parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, identToken2, undefined, astProp);
 
-      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+      ASSERT(curtok.str !== '=', 'this struct does not allow init/defaults');
     }
     else if (curc === $$STAR_2A) {
       // async with generator
@@ -8856,7 +8856,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         THROW('Expected to parse the key of a generator method but found something unexpected', curtok);
       }
 
-      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+      ASSERT(curtok.str !== '=', 'this struct does not allow init/defaults');
     }
     else if (hasAnyFlag(curtype, $NUMBER | $STRING)) {
       // property names can also be strings and numbers but these cannot be shorthanded
@@ -8889,7 +8889,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_setLiteral(astProp, litToken);
 
       parseObjectMethod(lexerFlags, asyncToken, starToken, getToken, setToken, litToken, undefined, astProp);
-      ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+      ASSERT(curtok.str !== '=', 'this struct does not allow init/defaults');
     }
     else if (curc === $$SQUARE_L_5B) {
       // (this is the part after the first ident of the part (or two if there is a "static" prefix)
@@ -8992,7 +8992,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     );
     AST_set('shorthand', false);
     AST_close('Property');
-    ASSERT(curc !== $$IS_3D, 'this struct does not allow init/defaults');
+    ASSERT(curtok.str !== '=', 'this struct does not allow init/defaults');
   }
 
 
@@ -9330,7 +9330,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       else {
         THROW('Invalid objlit key character after generator star');
       }
-      ASSERT(curc !== $$IS_3D, 'this struct can not have an init');
+      ASSERT(curtok.str !== '=', 'this struct can not have an init');
     }
     else if (curc === $$SEMI_3B) {
       // - `class x {;}`

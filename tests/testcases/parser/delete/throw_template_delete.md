@@ -55,16 +55,16 @@ ast: {
             loc:{start:{line:2,col:2},end:{line:3,col:0},source:''},
             argument: {
               type: 'TemplateLiteral',
-              loc:{start:{line:2,col:7},end:{line:2,col:21},source:''},
+              loc:{start:{line:2,col:8},end:{line:2,col:22},source:''},
               expressions: [
                 {
                   type: 'UnaryExpression',
-                  loc:{start:{line:2,col:10},end:{line:2,col:19},source:''},
+                  loc:{start:{line:2,col:11},end:{line:2,col:20},source:''},
                   operator: 'delete',
                   prefix: true,
                   argument: {
                     type: 'Identifier',
-                    loc:{start:{line:2,col:17},end:{line:2,col:18},source:''},
+                    loc:{start:{line:2,col:18},end:{line:2,col:19},source:''},
                     name: 'y'
                   }
                 }
@@ -72,13 +72,13 @@ ast: {
               quasis: [
                 {
                   type: 'TemplateElement',
-                  loc:{start:{line:2,col:7},end:{line:2,col:10},source:''},
+                  loc:{start:{line:2,col:8},end:{line:2,col:11},source:''},
                   tail: false,
                   value: { raw: '`${', cooked: '<TODO>' }
                 },
                 {
                   type: 'TemplateElement',
-                  loc:{start:{line:2,col:19},end:{line:2,col:19},source:''},
+                  loc:{start:{line:2,col:20},end:{line:2,col:20},source:''},
                   tail: true,
                   value: { raw: '}`', cooked: '<TODO>' }
                 }
@@ -106,8 +106,8 @@ throws: Parser error!
   Bad delete case, can not delete an ident wrapped in parens
 
 function f() {
-  throw`${delete(y)}`;
-                   ^------- error
+  throw `${delete(y)}`;
+                    ^------- error
 
 }
 `````

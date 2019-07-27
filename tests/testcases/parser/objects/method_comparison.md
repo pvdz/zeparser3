@@ -1,21 +1,21 @@
 # ZeParser parser test case
 
-- Path: zeparser3/tests/testcases/parser/objects/arrow_regression.md
+- Path: zeparser3/tests/testcases/parser/objects/method_comparison.md
 
 > :: objects
 >
-> ::> arrow regression
+> ::> method comparison
 >
-> Fuzzed
+> Found by fuzzer
 >
-> Was throwing an assertion error over the equal sign. It was only checking curc for `=` instead of `curtok.str` for the whole token.
+> Incorrect assertion error was checking for `=` but not asserting the whole token
 
 ## FAIL
 
 ## Input
 
 `````js
-x/{c:/ /=>
++{f(){}==
 `````
 
 ## Output
@@ -32,10 +32,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 125 (`}`) but was 61 (curc: `=`, token: `=>`)
+  Next ord should be 125 (`}`) but was 61 (curc: `=`, token: `==`)
 
-x/{c:/ /=>
-        ^------- error
++{f(){}==
+       ^------- error
 `````
 
 ### Strict mode
