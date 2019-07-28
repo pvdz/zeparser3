@@ -199,13 +199,13 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
     );
     if (tob.shouldFail) {
       if (TARGET_FILE) console.error(BLINK + 'FILE ASSERTED TO FAIL' + RESET + ', but it passed');
-      else throw new Error('Assertion fail: test was explicitly marked to fail somehow, but it passed');
+      else throw new Error('Assertion fail: test ' + tob.file + ' was explicitly marked to fail somehow, but it passed');
     }
   } catch (_e) {
     e = _e;
     if (tob.shouldPass) {
       if (TARGET_FILE) console.error(BLINK + 'FILE ASSERTED TO PASS' + RESET + ', but it failed');
-      else e = new Error('Assertion fail: test was explicitly marked to pass, but it failed somehow;\n' + e.stack);
+      else e = new Error('Assertion fail: test ' + tob.file + ' was explicitly marked to pass, but it failed somehow;\n' + e.stack);
     }
   }
 
