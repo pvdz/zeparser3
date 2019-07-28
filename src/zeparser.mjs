@@ -10498,14 +10498,13 @@ function getGenericTokenType(type) {
   // sometimes we just want to quickly know whether the token is a
   // string and not care about it being a single or double quoted string.
 
-  let redundantFlags =
-    (($NUMBER_HEX | $NUMBER_DEC | $NUMBER_BIN | $NUMBER_OCT | $NUMBER_OLD | $NUMBER) ^ $NUMBER) |
-    (($REGEXU | $REGEX) ^ $REGEX) |
-    (($STRING_DOUBLE | $STRING_SINGLE | $STRING) ^ $STRING) |
-    (($TICK_BODY | $TICK_HEAD | $TICK_PURE | $TICK_TAIL | $TICK_BAD_ESCAPE | $TICK) ^ $TICK);
-  // (x|y)^y : the or will first make sure the bits are set (regardless) and the xor then unsets them
-  //ASSERT((1 << Math.clz((type | redundantFlags) ^ redundantFlags)) === ((type | redundantFlags) ^ redundantFlags), 'should only have one bit set');
-  return (type | redundantFlags) ^ redundantFlags;
+  if (type & $ERROR) return $ERROR;
+  let r = type & ($NUMBER | $REGEX | $STRING | $TICK | $PUNCTUATOR | $IDENT);
+
+  ASSERT(r !== 0, 'one bit should be set but no bits were set', T(type), r)
+  ASSERT(!Math.clz32 || (r ^ (1<<(31-Math.clz32(r)))) === 0, 'at most one bit should be set', r.toString(2));
+
+  return r;
 }
 
 function isTemplateStart(curtype) {
