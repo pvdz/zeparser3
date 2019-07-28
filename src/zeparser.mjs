@@ -203,7 +203,7 @@ import ZeTokenizer, {
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
 
-  debug_toktype,
+  debug_toktype as T,
 } from '../src/zetokenizer.mjs';
 
 // <BODY>
@@ -956,11 +956,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(typeof what === 'number' || typeof what === 'string', 'what number/string');
     if (typeof what === 'string') {
-      ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', debug_toktype(curtok.type), curtok.str);
+      ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', T(curtok.type), curtok.str);
     } else {
       ASSERT(hasAllFlags(curtype, what), 'expecting to skip token with certain type', 'expect:'
         // <SCRUB DEV>
-        , debug_toktype(what), 'actual:', debug_toktype(curtype)
+        , T(what), 'actual:', T(curtype)
         // </SCRUB DEV>
       );
     }
@@ -972,11 +972,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(typeof what === 'number' || typeof what === 'string', 'what number/string');
     if (typeof what === 'string') {
-      ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', debug_toktype(curtok.type), curtok.str);
+      ASSERT(curtok.str === what, 'expecting to skip token with certain value', 'expect:', what, 'actual:', T(curtok.type), curtok.str);
     } else {
       ASSERT(hasAllFlags(curtype, what), 'expecting to skip token with certain type', 'expect:'
         // <SCRUB DEV>
-        , debug_toktype(what, true), 'actual:', debug_toktype(curtype, true)
+        , T(what, true), 'actual:', T(curtype, true)
         // </SCRUB DEV>
       );
     }
@@ -1770,7 +1770,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       default:
         THROW_TOKEN('Unexpected token'
           // <SCRUB DEV>
-          + ': ' + debug_toktype(curtype), debug_toktype(getGenericTokenType(curtype))
+          + ': ' + T(curtype), T(getGenericTokenType(curtype))
           // </SCRUB DEV>
           , curtok
           , tok.regexerror()
@@ -2450,7 +2450,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof astProp === 'string', 'astprop str', astProp);
 
     if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
-      THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
+      THROW('Template contained an illegal escape', T(curtype), ''+curtok);
     }
     AST_open(astProp, 'ExpressionStatement', tickToken);
     parseTickExpression(lexerFlags, tickToken, 'expression');
@@ -4348,7 +4348,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseIdentLabelOrExpressionStatement(lexerFlags, scoop, labelSet, fdState, astProp) {
     ASSERT(parseIdentLabelOrExpressionStatement.length === arguments.length, 'arg count');
-    ASSERT(curtype === $IDENT, 'should not have consumed the ident yet', debug_toktype(curtype));
+    ASSERT(curtype === $IDENT, 'should not have consumed the ident yet', T(curtype));
     ASSERT(typeof astProp === 'string', 'should be string');
     // ok we get a statement
     // the statement starts with an identifier that is not a statement
@@ -6405,7 +6405,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // parseTemplate
     ASSERT(parseTickExpression.length === arguments.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
-    ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE) || isTemplateStart(curtype), 'if in template this function can only be called by the head of a nested template', debug_toktype(curtype));
+    ASSERT(hasNoFlag(lexerFlags, LF_IN_TEMPLATE) || isTemplateStart(curtype), 'if in template this function can only be called by the head of a nested template', T(curtype));
 
     // basically; parse tick. if head, keep parsing body until parsing tail
 
@@ -6463,7 +6463,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('value', {raw: curtok.str, cooked: '<TODO>'});
 
     if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
-      THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok, curtype, $TICK_BAD_ESCAPE);
+      THROW('Template contained an illegal escape', T(curtype), ''+curtok, curtype, $TICK_BAD_ESCAPE);
     }
     if (hasAllFlags(curtype, $TICK_PURE)) {
       ASSERT_skipDiv(curtok.str, lexerFlags);
@@ -6544,7 +6544,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       AST_close('TemplateElement');
 
       if (!allowBadEscapesInTaggedTemplates && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
-        THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
+        THROW('Template contained an illegal escape', T(curtype), ''+curtok);
       }
 
       if (hasAllFlags(curtype, $TICK_HEAD)) {
@@ -6557,7 +6557,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           assignable = mergeAssignable(nowAssignable, assignable);
 
           if ((targetEsVersion >= 6 && targetEsVersion < 9) && hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
-            THROW('Template contained an illegal escape', debug_toktype(curtype), ''+curtok);
+            THROW('Template contained an illegal escape', T(curtype), ''+curtok);
           }
           if (!hasAllFlags(curtype, $TICK_BODY) && !hasAllFlags(curtype, $TICK_TAIL)) {
             THROW('The first token after the tagged template expression should be a continuation of the template');
