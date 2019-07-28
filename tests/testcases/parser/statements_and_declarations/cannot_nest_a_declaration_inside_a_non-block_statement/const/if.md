@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse a const declaration here, only expecting statements here
+  Cannot parse a class declaration here, only expecting statements here
 
 if (x) const y = x
-       ^------- error
+             ^------- error
 `````
 
 ### Strict mode

@@ -46,7 +46,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  The `import` keyword can not be nested in another statement
+  The `import` keyword is only supported at the top level
 
 if (x) import {x} from "y";
        ^------- error

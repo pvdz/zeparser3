@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse an async function declaration here, only expecting statements here
+  Labelled function statements must be plain functions, not generators
 
 if (x) async function *f(){}
-             ^------- error
+                      ^------- error
 `````
 
 ### Strict mode
@@ -50,11 +50,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Parser error!
-  Only plain function declarations can be a child of `if` or `else` in web compat mode
-
-if (x) async function *f(){}
-             ^------- error
-`````
-
+_Output same as sloppy mode._

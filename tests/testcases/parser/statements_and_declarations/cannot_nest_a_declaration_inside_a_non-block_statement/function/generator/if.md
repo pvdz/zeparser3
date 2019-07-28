@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Function declaration is only allowed as direct child of an `if` or `else` with web compat mode enabled in sloppy mode
+  Labelled function statements must be plain functions, not generators
 
 if (x) function * f() {}
-       ^------- error
+                ^------- error
 `````
 
 ### Strict mode
@@ -50,43 +50,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
-  body: [
-    {
-      type: 'IfStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
-      test: {
-        type: 'Identifier',
-        loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
-        name: 'x'
-      },
-      consequent: {
-        type: 'FunctionDeclaration',
-        loc:{start:{line:1,col:7},end:{line:1,col:24},source:''},
-        generator: true,
-        async: false,
-        id: {
-          type: 'Identifier',
-          loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
-          name: 'f'
-        },
-        params: [],
-        body: {
-          type: 'BlockStatement',
-          loc:{start:{line:1,col:22},end:{line:1,col:24},source:''},
-          body: []
-        }
-      },
-      alternate: null
-    }
-  ]
-}
-
-tokens (12x):
-       IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT
-       PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR
-`````
-
+_Output same as sloppy mode._

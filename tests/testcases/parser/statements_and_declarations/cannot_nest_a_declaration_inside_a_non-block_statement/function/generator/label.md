@@ -30,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Function declaration is only allowed as direct child of a label with web compat mode enabled in sloppy mode
+  A "labelled function declaration" can not be a generator
 
 foo: function *f() {}
-     ^------- error
+               ^------- error
 `````
 
 ### Strict mode
@@ -52,11 +52,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Parser error!
-  Labelled function statements must be plain functions, not generators
-
-foo: function *f() {}
-              ^------- error
-`````
-
+_Output same as sloppy mode._

@@ -36,10 +36,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Function declaration is only allowed as direct child of a label with web compat mode enabled in sloppy mode
+  A "labelled function declaration" is not allowed in this situation
 
 do x: function s(){}
-      ^------- error
+               ^------- error
 
 while(y)
 `````
@@ -60,51 +60,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
-  body: [
-    {
-      type: 'DoWhileStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
-      body: {
-        type: 'LabeledStatement',
-        loc:{start:{line:1,col:3},end:{line:2,col:0},source:''},
-        label: {
-          type: 'Identifier',
-          loc:{start:{line:1,col:3},end:{line:1,col:4},source:''},
-          name: 'x'
-        },
-        body: {
-          type: 'FunctionDeclaration',
-          loc:{start:{line:1,col:6},end:{line:2,col:0},source:''},
-          generator: false,
-          async: false,
-          id: {
-            type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
-            name: 's'
-          },
-          params: [],
-          body: {
-            type: 'BlockStatement',
-            loc:{start:{line:1,col:18},end:{line:2,col:0},source:''},
-            body: []
-          }
-        }
-      },
-      test: {
-        type: 'Identifier',
-        loc:{start:{line:2,col:6},end:{line:2,col:7},source:''},
-        name: 'y'
-      }
-    }
-  ]
-}
-
-tokens (15x):
-       IDENT IDENT PUNCTUATOR IDENT IDENT PUNCTUATOR PUNCTUATOR
-       PUNCTUATOR PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR ASI
-`````
-
+_Output same as sloppy mode._

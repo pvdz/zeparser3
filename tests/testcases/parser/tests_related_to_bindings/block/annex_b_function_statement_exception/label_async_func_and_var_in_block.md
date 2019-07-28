@@ -32,12 +32,12 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse an async function declaration here, only expecting statements here
+  A "labelled function declaration" can not be async
 
 {
   var f = 123;
   oops: async function f(){}
-              ^------- error
+                       ^------- error
 
 }
 `````
@@ -58,15 +58,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Parser error!
-  Only plain function declarations can be a child of a label in web compat mode
-
-{
-  var f = 123;
-  oops: async function f(){}
-              ^------- error
-
-}
-`````
-
+_Output same as sloppy mode._

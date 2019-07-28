@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Function declaration is only allowed as direct child of a label with web compat mode enabled in sloppy mode
+  A "labelled function declaration" is only allowed in sloppy web compat mode
 
 foo: function f() {}
-     ^------- error
+              ^------- error
 `````
 
 ### Strict mode

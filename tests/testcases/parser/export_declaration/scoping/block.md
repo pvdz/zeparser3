@@ -46,7 +46,7 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  The `export` keyword can not be nested in another statement
+  The `export` keyword is only supported at the top level
 
 {export {x};}
  ^------- error

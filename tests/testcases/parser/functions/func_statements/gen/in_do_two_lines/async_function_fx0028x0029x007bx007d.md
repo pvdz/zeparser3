@@ -29,10 +29,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse an async function declaration here, only expecting statements here
+  Cannot parse a function declaration here, only expecting statements here
 
 do async function f(){}
-         ^------- error
+                  ^------- error
 
 while (x);
 `````

@@ -334,18 +334,20 @@ const DO_NOT_BIND = null;
 const UNDEF_EXPORTS = undefined;
 const CHECK_TO_READ = true;
 const CHECK_TO_BIND = false;
-const FROM_OTHER_STMT = {FROM_OTHER_STMT: 1};
-const FROM_IFELSE_STMT = {FROM_IFELSE_STMT: 2};
-const FROM_LABEL_SCOPE = {FROM_LABEL_SCOPE: 3};
-const FROM_LABEL_BLOCK = {FROM_LABEL_BLOCK: 3};
-const FROM_BLOCK_STMT = {FROM_BLOCK_STMT: 4};
-const FROM_SCOPE_ROOT = {FROM_SCOPE_ROOT: 5};
+const FDS_ILLEGAL = {FDS_ILLEGAL: 1}; // function declaration not allowed, period
+const FDS_IFELSE = {FDS_IFELSE: 2};  // if-else specific webcompat exception would apply to a function declaration
+const FDS_LEX = {FDS_LEX: 3};      // a function declaration would be a lexical binding
+const FDS_VAR = {FDS_VAR: 4};      // a function declaration would be a var binding
+const IS_GLOBAL_TOPLEVEL = true;
+const NOT_GLOBAL_TOPLEVEL = false;
+const IS_LABELLED = true;
+const NOT_LABELLED = false;
 
 function ASSERT_ASSIGN_EXPR(allowAssignment) {
   ASSERT(allowAssignment === ASSIGN_EXPR_IS_OK || allowAssignment === ASSIGN_EXPR_IS_ERROR, 'allowAssignment is enum', allowAssignment);
 }
-function ASSERT_FROM(fromStmt) {
-  ASSERT([FROM_LABEL_SCOPE, FROM_LABEL_BLOCK, FROM_IFELSE_STMT, FROM_BLOCK_STMT, FROM_OTHER_STMT, FROM_SCOPE_ROOT].includes(fromStmt), 'fromstmt enum', fromStmt);
+function ASSERT_FDS(fdState) {
+  ASSERT([FDS_ILLEGAL, FDS_IFELSE, FDS_LEX, FDS_VAR].includes(fdState), 'FDS enum', fdState);
 }
 function ASSERT_BINDING(bindingType) {
   ASSERT([BINDING_TYPE_NONE,BINDING_TYPE_ARG,BINDING_TYPE_VAR,BINDING_TYPE_LET,BINDING_TYPE_CONST,BINDING_TYPE_CLASS,BINDING_TYPE_FUNC_VAR,BINDING_TYPE_FUNC_LEX,BINDING_TYPE_FUNC_STMT,BINDING_TYPE_CATCH_IDENT,BINDING_TYPE_CATCH_OTHER].includes(bindingType), 'bindingType enum', bindingType);
@@ -1095,7 +1097,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // </SCRUB AST>
     AST_set('body', []);
     let labelSet = {_: 'labelSet'};
-    parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, PARAMS_ALL_SIMPLE, NO_DUPE_PARAMS, NO_ID_TO_VERIFY, FROM_SCOPE_ROOT, 'body');
+    parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, PARAMS_ALL_SIMPLE, NO_DUPE_PARAMS, NO_ID_TO_VERIFY, IS_GLOBAL_TOPLEVEL, FDS_VAR, 'body');
     // <SCRUB AST>
     ASSERT(_path.length === len, 'should close all that was opened. Open before: ' + JSON.stringify(bak.map(o=>o.type).join(' > ')) + ', open after: ' + JSON.stringify(_path.map(o=>o.type).join(' > ')));
     // </SCRUB AST>
@@ -1149,12 +1151,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(scoopNew._desc = desc + '.scope', '(debugging)');
     return scoopNew;
   }
-  function SCOPE_addFuncDeclName(lexerFlags, scoop, name, bindingType, fromStmt) {
+  function SCOPE_addFuncDeclName(lexerFlags, scoop, name, bindingType, fdState) {
     ASSERT(SCOPE_addFuncDeclName.length === arguments.length, 'arg count');
     ASSERT([BINDING_TYPE_FUNC_VAR, BINDING_TYPE_FUNC_LEX, BINDING_TYPE_FUNC_STMT].includes(bindingType), 'either a func lex or var', bindingType);
     ASSERT(scoop === DO_NOT_BIND || scoop.isScope, 'expecting scoop', JSON.stringify(scoop));
-    ASSERT_FROM(fromStmt);
-    ASSERT(fromStmt !== FROM_OTHER_STMT, 'This would be an error and should be caught elsewhere...');
+    ASSERT_FDS(fdState);
+    ASSERT(fdState !== FDS_ILLEGAL, 'This would be an error and should be caught elsewhere...');
 
     // Function decls are lexical bound, except
     // - in script-goal (!) global root, and
@@ -1180,12 +1182,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // does not propagate up in any context where it is allowed and when nested in `if` or `else` it's considered to
     // be wrapped in a block. So neither legit function propagates to the parent of the statement that encloses it.
 
-    ASSERT((bindingType === BINDING_TYPE_FUNC_VAR) === (fromStmt === FROM_SCOPE_ROOT && (hasNoFlag(lexerFlags, LF_IN_GLOBAL) || goalMode === GOAL_SCRIPT)), 'redundancy?');
+    ASSERT((bindingType === BINDING_TYPE_FUNC_VAR) === (fdState === FDS_VAR && (hasNoFlag(lexerFlags, LF_IN_GLOBAL) || goalMode === GOAL_SCRIPT)), 'redundancy?');
 
     if (bindingType === BINDING_TYPE_FUNC_VAR) {
       SCOPE_addVarBinding(lexerFlags, scoop, name, bindingType);
     } else {
-      SCOPE_addLexBinding(scoop, name, bindingType, fromStmt);
+      SCOPE_addLexBinding(scoop, name, bindingType, fdState);
     }
   }
   function SCOPE_actuallyAddBinding(lexerFlags, scoop, bindingType, name) {
@@ -1197,8 +1199,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else {
       // TODO: arg?
-      // TODO: is fromStmt ever relevant when parsing a binding here?
-      SCOPE_addLexBinding(scoop, name, bindingType, FROM_OTHER_STMT);
+      // TODO: is fdState ever relevant when parsing a binding here?
+      SCOPE_addLexBinding(scoop, name, bindingType, FDS_ILLEGAL);
     }
   }
   function SCOPE_addVarBinding(lexerFlags, scoop, name, bindingType) {
@@ -1453,7 +1455,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_BINDING(t);
     return t === BINDING_TYPE_LET || t === BINDING_TYPE_CONST || t === BINDING_TYPE_FUNC_LEX || t === BINDING_TYPE_FUNC_STMT || t === BINDING_TYPE_CLASS
   }
-  function SCOPE_addLexBinding(scoop, name, bindingType, fromStmt) {
+  function SCOPE_addLexBinding(scoop, name, bindingType, fdState) {
     ASSERT(SCOPE_addLexBinding.length === arguments.length, 'arg count');
 
     // See comments in SCOPE_addVarBinding for excessive rule overview
@@ -1480,7 +1482,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [x]: `((x,x) => x)`
         // [v]: `((x,x))`
         scoop.dupeParamErrorToken = curtok; // TODO: use correct token
-      } else if (options_webCompat === WEB_COMPAT_ON && value === BINDING_TYPE_FUNC_LEX && fromStmt === FROM_BLOCK_STMT) {
+      } else if (options_webCompat === WEB_COMPAT_ON && value === BINDING_TYPE_FUNC_LEX && fdState === FDS_LEX) {
         // https://tc39.es/ecma262/#sec-block-duplicates-allowed-static-semantics
         // > It is a Syntax Error if the LexicallyDeclaredNames of StatementList contains any duplicate entries, unless the
         // > source code matching this production is not strict mode code and the duplicate entries are only bound by FunctionDeclarations.
@@ -1634,11 +1636,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return lexerFlags;
   }
 
-  function parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, paramsSimple, dupeParamErrorToken, functionNameTokenToVerify, fromStmt, astProp) {
+  function parseBodyPartsWithDirectives(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, paramsSimple, dupeParamErrorToken, functionNameTokenToVerify, isGlobalToplevel, fdState, astProp) {
     ASSERT(parseBodyPartsWithDirectives.length === arguments.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
     let wasStrict = hasAllFlags(lexerFlags, LF_STRICT_MODE); // unique param check
+    // (I hope not passing on isGlobalToplevel to this parse step isnt going to come bite me later...)
     let addedLexerFlags = parseDirectivePrologues(sansFlag(lexerFlags, LF_STRICT_MODE), 'body');
     if (hasAnyFlag(addedLexerFlags, LF_STRICT_MODE)) {
       if (paramsSimple === PARAMS_SOME_NONSTRICT || paramsSimple === PARAMS_SOME_COMPLEX) {
@@ -1680,7 +1683,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     while (curtype !== $EOF && curc !== $$CURLY_R_7D) {
-      parseBodyPart(lexerFlags, scoop, {'#': labelSet}, exportedNames, exportedBindings, fromStmt, astProp);
+      parseBodyPart(lexerFlags, scoop, {'#': labelSet}, exportedNames, exportedBindings, isGlobalToplevel, NOT_LABELLED, fdState, astProp);
     }
   }
 
@@ -1730,21 +1733,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
   }
 
-  function parseNestedBodyPart(lexerFlags, scoop, labelSet, fromStmt, astProp) {
+  function parseNestedBodyPart(lexerFlags, scoop, labelSet, isLabelled, fdState, astProp) {
     ASSERT(arguments.length === parseNestedBodyPart.length, 'arg count');
     // nested statements like that of if, while, for, try, etc
     if (hasAnyFlag(curtype, $EOF)) THROW('Statement must have a sub-statement but found EOF instead');
-    return parseBodyPart(lexerFlags, scoop, labelSet, UNDEF_EXPORTS, UNDEF_EXPORTS, fromStmt, astProp);
+    return parseBodyPart(lexerFlags, scoop, labelSet, UNDEF_EXPORTS, UNDEF_EXPORTS, NOT_GLOBAL_TOPLEVEL, isLabelled, fdState, astProp);
   }
 
-  function parseBodyPart(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, fromStmt, astProp) {
+  function parseBodyPart(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, isGlobalToplevel, isLabelled, fdState, astProp) {
     ASSERT(arguments.length === parseBodyPart.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
     ASSERT(hasNoFlag(curtype, $ERROR | $EOF), 'token type should not have $error or $eof at this point');
 
     switch (getGenericTokenType(curtype)) { // TODO: convert to flag index to have perfect hash in the switch
       case $IDENT:
-        parseIdentStatement(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, fromStmt, astProp);
+        parseIdentStatement(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, isGlobalToplevel, isLabelled, fdState, astProp);
         break;
       case $PUNCTUATOR:
         parsePunctuatorStatement(lexerFlags, scoop, labelSet, astProp);
@@ -1777,64 +1780,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   // ### functions
 
-  function parseFunctionDeclaration(lexerFlags, scoop, isFuncDecl, isRealFuncExpr, asyncToken, functionToken, optionalIdent, fromStmt, astProp) {
+  function parseFunctionDeclaration(lexerFlags, scoop, isFuncDecl, isRealFuncExpr, asyncToken, functionToken, optionalIdent, isLabelled, fdState, astProp) {
     ASSERT(parseFunctionDeclaration.length === arguments.length, 'arg count');
     ASSERT(typeof lexerFlags === 'number', 'lexerflags number');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
-    ASSERT_FROM(fromStmt);
+    ASSERT(curtok === functionToken, 'should not have skipped token yet');
+    ASSERT_FDS(fdState);
 
-
-    if (fromStmt === FROM_LABEL_SCOPE || fromStmt === FROM_LABEL_BLOCK) {
-      // This is only valid as a child of label in web compat mode in sloppy mode
-      // https://tc39.es/ecma262/#sec-labelled-statements-static-semantics-early-errors
-      // > It is a Syntax Error if any source text matches this rule.
-      // https://tc39.es/ecma262/#sec-labelled-function-declarations
-      // > It is a Syntax Error if any strict mode source code matches this rule.
-      // Additionally there's a difference in how the name propagates to the parent statement level or not;
-      // https://tc39.es/ecma262/#sec-labelled-statements-static-semantics-lexicallydeclarednames
-      // > LabelledItem: FunctionDeclaration -> Return BoundNames of FunctionDeclaration.
-      // - in script global and function top-level, lexical bindings are not propagated
-      //   - https://tc39.es/ecma262/#sec-labelled-statements-static-semantics-toplevellexicallydeclarednames
-      //   - functions: https://tc39.es/ecma262/#sec-function-definitions-static-semantics-lexicallydeclarednames
-      //   - script: https://tc39.es/ecma262/#sec-scripts-static-semantics-lexicallydeclarednames
-      // - in module or block/switch the function is lexical and the label propagates that to the enclosing space
-      //   - module: https://tc39.es/ecma262/#sec-module-semantics-static-semantics-lexicallydeclarednames
-      //   - block: https://tc39.es/ecma262/#sec-block-static-semantics-lexicallydeclarednames
-      //   - switch: https://tc39.es/ecma262/#sec-switch-statement-static-semantics-lexicallydeclarednames
-
-      // TODO: double label also propagate the name to the parent. add test case
-
-      if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
-        if (fromStmt === FROM_LABEL_SCOPE) {
-          // Labelled func decls do not leak their name into global space (but they do for a label in a block!)
-          // IfStatements always consider a func decl as if wrapped in a block, so never leak its name outward
-          scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FAKE_BLOCK, 'special "fake-block" function statement for label');
-        }
-      } else {
-        THROW('Function declaration is only allowed as direct child of a label with web compat mode enabled in sloppy mode');
-      }
-
-      // TLDR: labelled functions are always statements and use same binding propagation rules as non-labelled functions
-      // This rule ONLY applies to plain functions. Async / generators or other types of declarations are illegal here!
-    }
-    else if (fromStmt === FROM_IFELSE_STMT) {
-      // in web compat mode func statements are only allowed inside `if` and `else` and label statements in sloppy mode
-      if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
-        // This is (only) relevant for webcompat function statements that are direct sub-statement of `if` and `else`.
-        // There exists cases where the lexical binding of the function should not clash with a var binding.
-        // Note that this is not the case for "labelled function statements" (`foo: function f(){}`), their name goes to parent
-        // [v]: `function g(){ var f; if (x) function f() {}; }`
-        scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FAKE_BLOCK, 'special "fake-block" function statement for if-else');
-      } else {
-        THROW('Function declaration is only allowed as direct child of an `if` or `else` with web compat mode enabled in sloppy mode');
-      }
-    }
-    else if (isFuncDecl === IS_FUNC_DECL && fromStmt !== FROM_BLOCK_STMT && fromStmt !== FROM_SCOPE_ROOT) {
-      THROW('Cannot parse a function declaration here, only expecting statements here');
-    }
-    else {
-      // This is always fine in es6+
-    }
+    // - `function f(){}`
+    // - `function f(){ function g(){} }`
+    // - `{ function f(){} }`
+    // - `switch (x) { case a: function f(){} }`
+    // - `switch (x) { default: function f(){} }`
+    // - `if (x) function f(){}`           // web compat only, lex
+    // - `x: function f(){}`               // web compat only, var
+    // - `{ x: function f(){} }`           // web compat only, lex
+    // - `function g(){ x: function f(){} }`           // web compat only, var
+    // - `switch (x) { case a: x: function f(){} }`           // web compat only, lex
+    // - `switch (x) { default: x: function f(){} }`           // web compat only, lex
+    // - `if (x) y: function f(){}`        // web compat only, lex "as if in a block that is child of the `if`"
+    // - `while (x) y: function f(){}`     // always fail
+    // - `do x: function f(){} while (y)`  // always fail
+    // - `for( ... ) function f(){}`       // always fail (any for)
+    // - `for( ... ) x: function f(){}`    // always fail (any for)
 
     /*
      function f() {}
@@ -1856,14 +1824,112 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let starToken = UNDEF_STAR;
     if (curtok.str === '*') {
       starToken = curtok;
-      if (fromStmt === FROM_LABEL_SCOPE || fromStmt === FROM_LABEL_BLOCK) {
+      if (isFuncDecl === IS_FUNC_DECL && fdState === FDS_IFELSE) {
         // [x]: `foo: function *f(){}`
-        THROW('Labelled function statements must be plain functions, not generators');
+        THROW_TOKEN('Labelled function statements must be plain functions, not generators', starToken);
       }
       ASSERT_skipAny('*', lexerFlags);
       if (asyncToken !== UNDEF_ASYNC && !allowAsyncGenerators) {
-        THROW('Async generators are not supported by the current targeted language version, they were introduced in ES9/ES2018');
+        THROW_TOKEN('Async generators are not supported by the current targeted language version, they were introduced in ES9/ES2018', asyncToken);
       }
+    }
+
+    if (isLabelled) {
+      // - `foo: function f(){}`
+
+      // A "labelled function declaration" is only valid in sloppy web compat mode
+      // https://tc39.es/ecma262/#sec-labelled-statements-static-semantics-early-errors
+      // > It is a Syntax Error if any source text matches this rule.
+      // https://tc39.es/ecma262/#sec-labelled-function-declarations
+      // > It is a Syntax Error if any strict mode source code matches this rule.
+      // Additionally there's a difference in how the name propagates to the parent statement level or not;
+      // https://tc39.es/ecma262/#sec-labelled-statements-static-semantics-lexicallydeclarednames
+      // > LabelledItem: FunctionDeclaration -> Return BoundNames of FunctionDeclaration.
+      // - in script global and function top-level, lexical bindings are not propagated
+      //   - https://tc39.es/ecma262/#sec-labelled-statements-static-semantics-toplevellexicallydeclarednames
+      //   - functions: https://tc39.es/ecma262/#sec-function-definitions-static-semantics-lexicallydeclarednames
+      //   - script: https://tc39.es/ecma262/#sec-scripts-static-semantics-lexicallydeclarednames
+      // - in module or block/switch the function is lexical and the label propagates that to the enclosing space
+      //   - module: https://tc39.es/ecma262/#sec-module-semantics-static-semantics-lexicallydeclarednames
+      //   - block: https://tc39.es/ecma262/#sec-block-static-semantics-lexicallydeclarednames
+      //   - switch: https://tc39.es/ecma262/#sec-switch-statement-static-semantics-lexicallydeclarednames
+      if (fdState === FDS_IFELSE) {
+        // - `if (x) foo: function f(){}`
+        // - `if (x); else foo: function f(){}`
+        THROW_TOKEN('A "labelled function declaration" is never allowed inside an if-else', functionToken);
+      }
+      if (fdState === FDS_ILLEGAL) {
+        // - `while (x) foo: function f(){}`
+        // - `for (;;) foo: function f(){}`
+        // - `with (x) foo: function f(){}`
+        THROW_TOKEN('A "labelled function declaration" is not allowed in this situation', functionToken);
+      }
+      if (asyncToken !== UNDEF_ASYNC) {
+        // - `foo: async function f(){}`
+        THROW_TOKEN('A "labelled function declaration" can not be async', asyncToken);
+      }
+      if (starToken !== UNDEF_STAR) {
+        // - `foo: function *f(){}`
+        THROW_TOKEN('A "labelled function declaration" can not be a generator', starToken);
+      }
+      // Put the generic webcompat error last to make all modes as similar as possible
+      if (options_webCompat === WEB_COMPAT_OFF || hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+        THROW('A "labelled function declaration" is only allowed in sloppy web compat mode');
+      }
+    }
+    else if (fdState === FDS_IFELSE) {
+      // NOT labelled!
+
+      if (asyncToken !== UNDEF_ASYNC) {
+        // - `if (x) async function f(){}`
+        THROW_TOKEN('An async function declaration in web compat mode is still not allowed as `if-else` child, only plain func decls are allowed there', asyncToken);
+      }
+      if (starToken !== UNDEF_STAR) {
+        // - `if (x) function *f(){}`
+        THROW_TOKEN('A generator function declaration in web compat mode is still not allowed as `if-else` child, only plain func decls are allowed there', starToken);
+      }
+      // Put the generic webcompat error last to make all modes as similar as possible
+      if (options_webCompat === WEB_COMPAT_OFF || hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+        // - `while (x) function f(){}`
+        // - `with (x) function f(){}`
+        THROW_TOKEN('A function declaration can only be the child of an `if`/`else` in sloppy web compat mode', functionToken);
+      }
+
+      // Labelled func decls do not leak their name into global space (but they do for a label in a block!)
+      // IfStatements always consider a func decl as if wrapped in a block, so never leak its name outward
+      scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FAKE_BLOCK, 'special "fake-block" function statement for label');
+
+      // TLDR: labelled functions are always statements and use same binding propagation rules as non-labelled functions
+      // This rule ONLY applies to plain functions. Async / generators or other types of declarations are illegal here!
+    }
+    // else if (fdState === FDS_VAR) {
+    //   // if (fdState === FDS_VAR) {
+    //   //   // Labelled func decls do not leak their name into global space (but they do for a label in a block!)
+    //   //   // IfStatements always consider a func decl as if wrapped in a block, so never leak its name outward
+    //   //   scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FAKE_BLOCK, 'special "fake-block" function statement for label');
+    //   // }
+    //
+    //
+    //
+    //   // in web compat mode func statements are only allowed inside `if` and `else` and label statements in sloppy mode
+    //   if (options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
+    //     // This is (only) relevant for webcompat function statements that are direct sub-statement of `if` and `else`.
+    //     // There exists cases where the lexical binding of the function should not clash with a var binding.
+    //     // Note that this is not the case for "labelled function statements" (`foo: function f(){}`), their name goes to parent
+    //     // [v]: `function g(){ var f; if (x) function f() {}; }`
+    //     scoop = SCOPE_addLayer(scoop, SCOPE_LAYER_FAKE_BLOCK, 'special "fake-block" function statement for if-else');
+    //   } else {
+    //     THROW('Function declaration is only allowed as direct child of an `if` or `else` with web compat mode enabled in sloppy mode');
+    //   }
+    // }
+    else if (isFuncDecl === IS_FUNC_DECL && fdState === FDS_ILLEGAL) {
+      // https://tc39.es/ecma262/#prod-LabelledItem
+      // A function declaration is allowed as child of a label, but that case does not allow async/star
+      // This case is a "labelled function declaration"
+      THROW_TOKEN('Cannot parse a function declaration here, only expecting statements here', functionToken);
+    }
+    else {
+      // This is always fine in es6+
     }
 
     return parseFunctionAfterKeyword(
@@ -1879,7 +1945,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       UNDEF_GET,
       UNDEF_SET,
       functionToken,
-      fromStmt,
+      fdState,
       astProp
     );
   }
@@ -1909,30 +1975,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       UNDEF_GET,
       UNDEF_SET,
       asyncToken === UNDEF_ASYNC ? functionToken : asyncToken,
-      FROM_OTHER_STMT, // this flag is not relevant for func exprs
+      FDS_ILLEGAL, // this flag is not relevant for func exprs
       astProp
     );
   }
-  function parseAsyncFunctionDecl(lexerFlags, asyncToken, fromStmtOrExpr, scoop, isExport, exportedBindings, fromStmt, astProp) {
+  function parseAsyncFunctionDecl(lexerFlags, asyncToken, fromStmtOrExpr, scoop, isExport, exportedBindings, isLabelled, fdState, astProp) {
     ASSERT(parseAsyncFunctionDecl.length === arguments.length, 'arg count');
     ASSERT(curtok.str === 'function', 'already checked, not yet consumed');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
-
-    // `async function ...`
-    if (fromStmtOrExpr === IS_STATEMENT) {
-      if (fromStmt !== FROM_OTHER_STMT && options_webCompat === WEB_COMPAT_ON && hasNoFlag(lexerFlags, LF_STRICT_MODE)) {
-        // This is the web compat exception (or block..) to where function decls are allowed as children of if/else/label
-        if (fromStmt === FROM_IFELSE_STMT) {
-          THROW('Only plain function declarations can be a child of `if` or `else` in web compat mode');
-        } else if (fromStmt === FROM_LABEL_SCOPE || fromStmt === FROM_LABEL_BLOCK) {
-          THROW('Only plain function declarations can be a child of a label in web compat mode');
-        }
-      } else if (fromStmt !== FROM_BLOCK_STMT && fromStmt !== FROM_SCOPE_ROOT) {
-        THROW('Cannot parse an async function declaration here, only expecting statements here');
-      }
-    }
-
-    // TODO: add tests for: The early error rules for WithStatement, IfStatement, and IterationStatement prevent these statements from containing a labelled FunctionDeclaration in non-strict code.
 
     let name = parseFunctionDeclaration(
       lexerFlags,
@@ -1942,7 +1992,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       asyncToken,
       curtok, // `function`
       (isExport === IS_EXPORT || fromStmtOrExpr === IS_EXPRESSION) ? IDENT_OPTIONAL : IDENT_REQUIRED,
-      fromStmt,
+      isLabelled,
+      fdState,
       astProp
     );
 
@@ -1970,7 +2021,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     getToken,
     setToken,
     firstToken, // for range in AST
-    fromStmt, // for errors and scoping
+    fdState, // for errors and scoping
     astProp
   ) {
     ASSERT(arguments.length === parseFunctionAfterKeyword.length, 'arg count must match');
@@ -1980,7 +2031,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(!!isFuncDecl === (outerScoop !== DO_NOT_BIND), 'outerScoop is only used for func decl ids and required there', !!isFuncDecl, outerScoop !== DO_NOT_BIND);
     ASSERT(typeof firstToken === 'object' && firstToken && typeof firstToken.type === 'number', 'token', firstToken);
-    ASSERT_FROM(fromStmt);
+    ASSERT_FDS(fdState);
 
     /*
     These are the cfg productions for func decls and exprs with various modifiers and how they are inherited.
@@ -2037,7 +2088,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // A function name is bound lexically, except when directly in script-goal global scope or any-goal function scope
       let nameBindingType = (
         isFuncDecl === IS_FUNC_DECL &&
-        fromStmt === FROM_SCOPE_ROOT &&
+        fdState === FDS_VAR &&
         (hasNoFlag(lexerFlags, LF_IN_GLOBAL) || goalMode === GOAL_SCRIPT)
       ) ? BINDING_TYPE_FUNC_VAR : BINDING_TYPE_FUNC_LEX;
 
@@ -2053,8 +2104,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       // declarations bind in outer scope, expressions bind in inner scope, methods bind ...  ehh?
       if (isFuncDecl === IS_FUNC_DECL) {
-        SCOPE_addFuncDeclName(lexerFlags, outerScoop, name, nameBindingType, fromStmt);
         // TODO: add test case for catch shadow
+        SCOPE_addFuncDeclName(lexerFlags, outerScoop, name, nameBindingType, fdState);
       }
 
       // create new lexical binding to "hide" the function name.
@@ -2243,7 +2294,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (options_exposeScopes) AST_set('$scope', scoop);
     AST_set('body', []);
     skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // [v]: `(x)=>{/x/}`
-    parseBodyPartsWithDirectives(lexerFlagsNoTemplate, scoop, labelSet, UNDEF_EXPORTS, UNDEF_EXPORTS, wasSimple, dupeParamErrorToken, functionNameTokenToVerify, FROM_SCOPE_ROOT, 'body');
+    parseBodyPartsWithDirectives(lexerFlagsNoTemplate, scoop, labelSet, UNDEF_EXPORTS, UNDEF_EXPORTS, wasSimple, dupeParamErrorToken, functionNameTokenToVerify, NOT_GLOBAL_TOPLEVEL, FDS_VAR, 'body');
 
     if (blockType === IS_EXPRESSION) {
       // arrow, function expression
@@ -2262,7 +2313,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   // ### statements
 
-  function parseIdentStatement(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, fromStmt, astProp) {
+  function parseIdentStatement(lexerFlags, scoop, labelSet, exportedNames, exportedBindings, isGlobalToplevel, isLabelled, fdState, astProp) {
     ASSERT(parseIdentStatement.length === arguments.length, 'arg count');
     // all statement starting keywords;
 
@@ -2272,8 +2323,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // we deal with async here because it can be a valid label in sloppy mode
         // TODO: test case to this change
         ASSERT_skipDiv('async', lexerFlags); // TODO: async could be ident, so `async/b` is a division
-        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
-        parseAsyncStatement(lexerFlags, scoop, identToken, NOT_EXPORT, UNDEF_EXPORTS, fromStmt, astProp);
+        if (curc === $$COLON_3A) return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
+        parseAsyncStatement(lexerFlags, scoop, identToken, NOT_EXPORT, UNDEF_EXPORTS, isLabelled, fdState, astProp);
         return;
 
       case 'break':
@@ -2281,17 +2332,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case 'class':
-        if (fromStmt !== FROM_SCOPE_ROOT && fromStmt !== FROM_BLOCK_STMT) {
-          THROW('Cannot parse a class declaration here, only expecting statements here');
-        }
-        parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, astProp);
+        parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, isLabelled, fdState, astProp);
         return;
 
       case 'const':
-        if (fromStmt !== FROM_SCOPE_ROOT && fromStmt !== FROM_BLOCK_STMT) {
-          THROW('Cannot parse a const declaration here, only expecting statements here');
-        }
-        parseConstStatement(lexerFlags, scoop, astProp);
+        parseConstStatement(lexerFlags, scoop, isLabelled, fdState, astProp);
         return;
 
       case 'continue':
@@ -2307,7 +2352,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case 'export':
-        parseExportStatement(lexerFlags, scoop, exportedNames, exportedBindings, fromStmt, astProp);
+        parseExportStatement(lexerFlags, scoop, exportedNames, exportedBindings, isGlobalToplevel, fdState, astProp);
         return;
 
       case 'for':
@@ -2316,7 +2361,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       case 'function':
         ASSERT(scoop, 'should have a scoop at this point');
-        parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, identToken, IDENT_REQUIRED, fromStmt, astProp);
+        parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, identToken, IDENT_REQUIRED, isLabelled, fdState, astProp);
         return;
 
       case 'if':
@@ -2324,7 +2369,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       case 'import':
-        parseImportDeclaration(lexerFlags, scoop, fromStmt, astProp);
+        parseImportDeclaration(lexerFlags, scoop, isGlobalToplevel, fdState, astProp);
         return;
 
       case 'let':
@@ -2333,11 +2378,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // However, when parsed as a sub-statement it will always parse a `let` as variable and only in the case where it is
         // followed by an array literal an ASI is forced ("restricted production").
         // Additionally, in strict mode `let` can not be the name of a variable regardless parsing a declaration or statement.
-        if (fromStmt === FROM_SCOPE_ROOT || fromStmt === FROM_BLOCK_STMT) {
-          parseLetDeclaration(lexerFlags, identToken, scoop, labelSet, fromStmt, astProp);
-        } else {
+        if (isLabelled || fdState === FDS_ILLEGAL || fdState === FDS_IFELSE) {
           // declarations not allowed
-          parseLetExpressionStatement(lexerFlags, scoop, labelSet, fromStmt, astProp);
+          parseLetExpressionStatement(lexerFlags, scoop, labelSet, fdState, astProp);
+        } else {
+          parseLetDeclaration(lexerFlags, identToken, scoop, labelSet, fdState, astProp);
         }
         return;
 
@@ -2370,7 +2415,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return;
 
       default:
-        parseIdentLabelOrExpressionStatement(lexerFlags, scoop, labelSet, fromStmt, astProp);
+        parseIdentLabelOrExpressionStatement(lexerFlags, scoop, labelSet, fdState, astProp);
         return;
     }
 
@@ -2417,7 +2462,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('ExpressionStatement');
   }
 
-  function parseAsyncStatement(lexerFlags, scoop, asyncToken, isExport, exportedBindings, fromStmt, astProp) {
+  function parseAsyncStatement(lexerFlags, scoop, asyncToken, isExport, exportedBindings, isLabelled, fdState, astProp) {
     ASSERT(parseAsyncStatement.length === arguments.length, 'arg count');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
 
@@ -2426,16 +2471,16 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // at this point already verified not to be a label.
     // only the `async function ...` form does NOT require a semi as a statement. all other forms do.
     // A statement needs to pass on the scoop because the async func decl needs to record its id in that outer scope
-    _parseAsync(lexerFlags, scoop, IS_STATEMENT, asyncToken, NOT_NEW_ARG, isExport, ASSIGN_EXPR_IS_OK, exportedBindings, fromStmt, astProp);
+    _parseAsync(lexerFlags, scoop, IS_STATEMENT, asyncToken, NOT_NEW_ARG, isExport, ASSIGN_EXPR_IS_OK, exportedBindings, isLabelled, fdState, astProp);
   }
   function parseAsyncExpression(lexerFlags, asyncToken, isNewArg, isExport, allowAssignment, astProp) {
     ASSERT(parseAsyncExpression.length === arguments.length, 'arg count');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT_ASSIGN_EXPR(allowAssignment);
-    // parsed the `async` keyword (-> identToasyncIdentTokenken)
-    return _parseAsync(lexerFlags, DO_NOT_BIND, IS_EXPRESSION, asyncToken, isNewArg, isExport, allowAssignment, UNDEF_EXPORTS, FROM_OTHER_STMT, astProp);
+    // parsed the `async` keyword (-> asyncToken)
+    return _parseAsync(lexerFlags, DO_NOT_BIND, IS_EXPRESSION, asyncToken, isNewArg, isExport, allowAssignment, UNDEF_EXPORTS, NOT_LABELLED, FDS_ILLEGAL, astProp);
   }
-  function _parseAsync(lexerFlags, scoop, fromStmtOrExpr, asyncToken, isNewArg, isExport, allowAssignment, exportedBindings, fromStmt, astProp) {
+  function _parseAsync(lexerFlags, scoop, fromStmtOrExpr, asyncToken, isNewArg, isExport, allowAssignment, exportedBindings, isLabelled, fdState, astProp) {
     ASSERT(_parseAsync.length === arguments.length, 'arg count');
     ASSERT(typeof astProp === 'string', 'astprop = string', astProp);
     ASSERT(asyncToken !== UNDEF_ASYNC && asyncToken.str === 'async', 'async token should be passed on');
@@ -2548,7 +2593,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       if (curtok.str === 'function') {
         // - `async function f(){}`
-        return parseAsyncFunctionDecl(lexerFlags, asyncToken, fromStmtOrExpr, scoop, isExport, exportedBindings, fromStmt, astProp);
+        return parseAsyncFunctionDecl(lexerFlags, asyncToken, fromStmtOrExpr, scoop, isExport, exportedBindings, isLabelled, fdState, astProp);
       }
 
       if (curtok.str === 'in' || curtok.str === 'instanceof') {
@@ -2768,7 +2813,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     skipRexOrDieSingleChar($$CURLY_L_7B, lexerFlagsNoTemplate); // [v]: `(x)=>{/x/}`
     let blockLabelSet = {'#':labelSet};
     while (curtype !== $EOF && curc !== $$CURLY_R_7D) {
-      parseNestedBodyPart(lexerFlagsNoTemplate, scoop, blockLabelSet, FROM_BLOCK_STMT, 'body');
+      parseNestedBodyPart(lexerFlagsNoTemplate, scoop, blockLabelSet, NOT_LABELLED, FDS_LEX, 'body');
     }
     skipRexOrDieSingleChar($$CURLY_R_7D, lexerFlags);
     AST_close('BlockStatement');
@@ -2828,8 +2873,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return false;
   }
 
-  function parseConstStatement(lexerFlags, scoop, astProp) {
+  function parseConstStatement(lexerFlags, scoop, isLabelled, fdState, astProp) {
+    ASSERT(parseConstStatement.length === arguments.length, 'arg count');
     ASSERT_skipAny('const', lexerFlags); // next is ident, [, or {
+
+    if (isLabelled || fdState === FDS_ILLEGAL || fdState === FDS_IFELSE) {
+      THROW('Cannot parse a class declaration here, only expecting statements here');
+    }
+
     parseAnyVarDecls(lexerFlags, curtok, scoop, BINDING_TYPE_CONST, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
     parseSemiOrAsi(lexerFlags);
   }
@@ -2882,7 +2933,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipRex('do', lexerFlags);
     // if the next part does not start with `{` then it is not a block and ASI can not happen. otherwise dont care here
     // note that functions and classes DO get ASI
-    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags : lexerFlags) | LF_IN_ITERATION, scoop, {'##': 'dowhile', '#': labelSet}, FROM_OTHER_STMT, 'body');
+    parseNestedBodyPart((curc !== $$CURLY_L_7B ? lexerFlags : lexerFlags) | LF_IN_ITERATION, scoop, {'##': 'dowhile', '#': labelSet}, NOT_LABELLED, FDS_ILLEGAL, 'body');
     skipAnyOrDie($$W_77, 'while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
     // > 11.9.1: In ECMAScript 2015, Automatic Semicolon Insertion adds a semicolon at the end of a do-while statement if the
@@ -2891,7 +2942,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('DoWhileStatement');
   }
 
-  function parseExportStatement(lexerFlags, scoop, exportedNames, exportedBindings, fromStmt, astProp) {
+  function parseExportStatement(lexerFlags, scoop, exportedNames, exportedBindings, isGlobalToplevel, fdState, astProp) {
     ASSERT(parseExportStatement.length === arguments.length, 'arg count');
     // export * FromClause ;
     // export ExportClause FromClause ;
@@ -2925,8 +2976,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // regarding asi; classes and function decls dont get asi, anything else does. `default` does not change this.
     // note: the regular function, async function, and class may have no name only with `default`
     if (goalMode !== GOAL_MODULE) THROW('The `export` keyword can only be used with the module goal');
-    if (hasNoFlag(lexerFlags, LF_IN_GLOBAL)) THROW('The `export` keyword is only supported at the top level');
-    if (fromStmt !== FROM_SCOPE_ROOT) THROW('The `export` keyword can not be nested in another statement'); // TODO: import()
+    if (isGlobalToplevel === NOT_GLOBAL_TOPLEVEL) THROW('The `export` keyword is only supported at the top level');
 
     let exportToken = curtok;
     ASSERT_skipAny('export', lexerFlags);
@@ -2944,12 +2994,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // `export default class {}`
         // `export default class x{}`
 
-        let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_OPTIONAL, 'declaration');
+        let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_OPTIONAL, NOT_LABELLED, FDS_LEX, 'declaration');
 
         // bound names: class name and "*default*"
         // exported binding: class name and "*default*"
         // exported names: "default"
-        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FROM_SCOPE_ROOT); // TODO: confirm `let`
+        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
         addNameToExports(exportedNames, 'default');
         addBindingToExports(exportedBindings, '*default*');
         addBindingToExports(exportedBindings, exportedName);
@@ -2962,12 +3012,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // `export default function(){}`
         // `export default function* (){}`
 
-        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, curtok, IDENT_OPTIONAL, FROM_SCOPE_ROOT, 'declaration');
+        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, curtok, IDENT_OPTIONAL, NOT_LABELLED, FDS_VAR, 'declaration');
 
         // bound names: func name and "*default*"
         // exported binding: func name and "*default*"
         // exported names: "default"
-        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FROM_SCOPE_ROOT); // TODO: confirm `let`
+        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
         addNameToExports(exportedNames, 'default');
         addBindingToExports(exportedBindings, '*default*');
         addBindingToExports(exportedBindings, exportedName);
@@ -2988,12 +3038,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // `export default async function f(){}`
           // `export default async function(){}`
 
-          parseAsyncStatement(lexerFlags, scoop, identToken, IS_EXPORT, exportedBindings, FROM_SCOPE_ROOT, 'declaration');
+          parseAsyncStatement(lexerFlags, scoop, identToken, IS_EXPORT, exportedBindings, NOT_LABELLED, FDS_VAR, 'declaration');
 
           // bound names: func name and "*default*"
           // exported binding: func name (already recorded if present) and "*default*"
           // exported names: "default"
-          SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FROM_SCOPE_ROOT); // TODO: confirm `let`
+          SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
           addNameToExports(exportedNames, 'default');
           addBindingToExports(exportedBindings, '*default*');
 
@@ -3013,7 +3063,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // bound names: "*default*"
           // exported binding: "*default*"
           // exported names: "default"
-          SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FROM_SCOPE_ROOT); // TODO: confirm `let`
+          SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
           addNameToExports(exportedNames, 'default');
           addBindingToExports(exportedBindings, '*default*');
         }
@@ -3027,7 +3077,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // bound names: "*default*"
         // exported binding: "*default*"
         // exported names: "default"
-        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FROM_SCOPE_ROOT); // TODO: confirm `let`
+        SCOPE_addLexBinding(scoop, '*default*', BINDING_TYPE_LET, FDS_VAR); // TODO: confirm `let`
         addNameToExports(exportedNames, 'default');
         addBindingToExports(exportedBindings, '*default*');
       }
@@ -3118,7 +3168,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           parseAnyVarDecls(lexerFlags, constToken, scoop, BINDING_TYPE_CONST, FROM_EXPORT_DECL, exportedNames, exportedBindings, 'declaration');
         } else if (curtok.str === 'class') {
           // export class ...
-          let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, 'declaration');
+          let exportedName = parseClassDeclaration(lexerFlags, scoop, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX,'declaration');
           addNameToExports(exportedNames, exportedName);
           addBindingToExports(exportedBindings, exportedName);
           needsSemi = false;
@@ -3128,17 +3178,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('source', null);
       }
       else if (curc === $$F_66 && curtok.str === 'function') {
-        // export function f(){}
-        // export function* f(){}
+        // - `export function f(){}`
+        // - `export function* f(){}`
         // (anonymous should not be allowed but parsers seem to do it anyways)
-        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, curtok, IDENT_REQUIRED, FROM_SCOPE_ROOT, 'declaration');
+        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, UNDEF_ASYNC, curtok, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX, 'declaration');
         addNameToExports(exportedNames, exportedName);
         addBindingToExports(exportedBindings, exportedName);
         AST_set('source', null);
         needsSemi = false;
       }
       else if (curc === $$A_61 && curtok.str === 'async') {
-        // export async function f(){}
+        // - `export async function f(){}`
+        // - `export async function *f(){}`
         // (note: no arrows here because we require a name)
         let asyncToken = curtok;
         // TODO: test case to this change
@@ -3153,7 +3204,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('Async can not be followed by a newline as it results in `export async;`, which is not valid (and probably not what you wanted)');
         }
 
-        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, asyncToken, curtok, IDENT_REQUIRED, FROM_SCOPE_ROOT, 'declaration');
+        let exportedName = parseFunctionDeclaration(lexerFlags, scoop, IS_FUNC_DECL, NOT_FUNC_EXPR, asyncToken, curtok, IDENT_REQUIRED, NOT_LABELLED, FDS_LEX, 'declaration');
         addNameToExports(exportedNames, exportedName);
         addBindingToExports(exportedBindings, exportedName);
         AST_set('source', null);
@@ -3278,7 +3329,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseForHeader(sansFlag(lexerFlags | LF_NO_ASI, LF_IN_GLOBAL | LF_IN_SWITCH | LF_IN_ITERATION), forToken, scoop, awaitable, astProp);
     skipRexOrDieSingleChar($$PAREN_R_29, lexerFlags);
     if (curtype === $EOF) THROW('Missing `for` child statement');
-    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, scoop, {'##': 'for', '#': labelSet}, FROM_OTHER_STMT, 'body');
+    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, scoop, {'##': 'for', '#': labelSet}, NOT_LABELLED, FDS_ILLEGAL, 'body');
     AST_close(['ForStatement', 'ForInStatement', 'ForOfStatement']);
   }
   function parseForHeader(lexerFlags, forToken, scoop, awaitable, astProp) {
@@ -3832,17 +3883,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     ASSERT_skipAny('if', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
-    parseNestedBodyPart(lexerFlags, scoop, {'#':labelSet}, FROM_IFELSE_STMT, 'consequent');
+    parseNestedBodyPart(lexerFlags, scoop, {'#':labelSet}, NOT_LABELLED, FDS_IFELSE, 'consequent');
     if (curtype === $IDENT && curtok.str === 'else') {
       ASSERT_skipRex('else', lexerFlags);
-      parseNestedBodyPart(lexerFlags, scoop, {'#':labelSet}, FROM_IFELSE_STMT, 'alternate');
+      parseNestedBodyPart(lexerFlags, scoop, {'#':labelSet}, NOT_LABELLED, FDS_IFELSE, 'alternate');
     } else {
       AST_set('alternate', null);
     }
     AST_close('IfStatement');
   }
 
-  function parseImportDeclaration(lexerFlags, scoop, fromStmt, astProp) {
+  function parseImportDeclaration(lexerFlags, scoop, isGlobalToplevel, fdState, astProp) {
     ASSERT(parseImportDeclaration.length === arguments.length, 'arg count');
     // https://tc39.github.io/ecma262/#sec-imports
     // import 'x'
@@ -3859,8 +3910,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // (cannot create a var named `yield` or `await` or `let` this way)
 
     if (goalMode !== GOAL_MODULE) THROW('The `import` keyword can only be used with the module goal');
-    if (hasNoFlag(lexerFlags, LF_IN_GLOBAL)) THROW('The `import` keyword is only supported at the top level'); // TODO: import()
-    if (fromStmt !== FROM_SCOPE_ROOT) THROW('The `import` keyword can not be nested in another statement'); // TODO: import()
+    if (isGlobalToplevel === NOT_GLOBAL_TOPLEVEL) THROW('The `import` keyword is only supported at the top level'); // TODO: import() ?
 
     AST_open(astProp, 'ImportDeclaration', curtok);
     ASSERT_skipAny('import', lexerFlags);
@@ -3919,7 +3969,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open('specifiers', 'ImportDefaultSpecifier', curtok);
     AST_setIdent('local', curtok);
     fatalBindingIdentCheck(curtok, BINDING_TYPE_CONST, lexerFlags);
-    SCOPE_addLexBinding(scoop, curtok.str, BINDING_TYPE_LET, FROM_OTHER_STMT); // TODO: confirm `let`
+    SCOPE_addLexBinding(scoop, curtok.str, BINDING_TYPE_LET, FDS_LEX); // TODO: confirm `let`
     ASSERT_skipAny($IDENT, lexerFlags); // next must be `as` comma or `from`
     AST_close('ImportDefaultSpecifier');
   }
@@ -3945,11 +3995,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curtype !== $IDENT) THROW('Alias must be an ident');
         AST_setIdent('local', curtok);
         fatalBindingIdentCheck(curtok, BINDING_TYPE_CONST, lexerFlags);
-        SCOPE_addLexBinding(scoop, curtok.str, BINDING_TYPE_LET, FROM_OTHER_STMT); // TODO: confirm `let`
+        SCOPE_addLexBinding(scoop, curtok.str, BINDING_TYPE_LET, FDS_ILLEGAL); // TODO: confirm `let`
         skipAny(lexerFlagsNoTemplate);
       } else {
         fatalBindingIdentCheck(nameToken, BINDING_TYPE_CONST, lexerFlags);
-        SCOPE_addLexBinding(scoop, nameToken.str, BINDING_TYPE_LET, FROM_OTHER_STMT); // TODO: confirm `let`
+        SCOPE_addLexBinding(scoop, nameToken.str, BINDING_TYPE_LET, FDS_ILLEGAL); // TODO: confirm `let`
         AST_setIdent('local', nameToken);
       }
 
@@ -3987,7 +4037,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open('specifiers', 'ImportNamespaceSpecifier', curtok);
     AST_setIdent('local', curtok);
     fatalBindingIdentCheck(curtok, BINDING_TYPE_CONST, lexerFlags);
-    SCOPE_addLexBinding(scoop, curtok.str, BINDING_TYPE_LET, FROM_OTHER_STMT); // TODO: confirm `let`
+    SCOPE_addLexBinding(scoop, curtok.str, BINDING_TYPE_LET, FDS_ILLEGAL); // TODO: confirm `let`
     ASSERT_skipAny($IDENT, lexerFlags); // next must be `as` comma or `from`
     AST_close('ImportNamespaceSpecifier');
 
@@ -3995,7 +4045,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipAny('from', lexerFlags);
   }
 
-  function parseLetDeclaration(lexerFlags, letToken, scoop, labelSet, fromStmt, astProp) {
+  function parseLetDeclaration(lexerFlags, letToken, scoop, labelSet, fdState, astProp) {
     ASSERT(arguments.length === parseLetDeclaration.length, 'arg count');
 
     let identToken = curtok;
@@ -4035,7 +4085,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('You\'re just fishing for edge cases now, so yeah, `let\\nlet` is fail');
         }
         // Parse a `let`-expression instead of a declaration
-        _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
+        _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
       } else {
         // This is any regular `let` declaration with an ident and no newline but the ident may cause a keyword error
         // - `let foo`
@@ -4056,14 +4106,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
       parseSemiOrAsi(lexerFlags);
     } else if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      THROW('Let declaration missing binding names and `let` cannot be a regular var name in strict mode');
+      THROW('Let declaration missing binding names and `let` cannot be a regular var or label name in strict mode');
     } else {
       // let expression statement
       // TODO: add test case `let: function f(){}`
-      _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
+      _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
     }
   }
-  function parseLetExpressionStatement(lexerFlags, scoop, labelSet, fromStmt, astProp) {
+  function parseLetExpressionStatement(lexerFlags, scoop, labelSet, fdState, astProp) {
     ASSERT(arguments.length === parseLetExpressionStatement.length, 'arg count');
 
     let identToken = curtok;
@@ -4073,7 +4123,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT_skipDiv('let', lexerFlags); // in `let/foo/g` the `/` is always a division, so parse div
 
     if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
-      THROW('`let` declaration not allowed here and `let` cannot be a regular var name in strict mode');
+      THROW('`let` declaration not allowed here and `let` cannot be a regular var or label name in strict mode');
     }
 
     if (curc === $$SQUARE_L_5B) {
@@ -4084,9 +4134,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     // let expression statement
-    _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
+    _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
   }
-  function _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp) {
+  function _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fdState, astProp) {
     ASSERT(_parseLetAsPlainVarNameExpressionStatement.length === arguments.length, 'arg count');
     ASSERT(identToken.str === 'let', 'should pass on the let token');
     ASSERT(identToken !== curtok, 'the `let` token should have been skipped');
@@ -4098,7 +4148,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseSemiOrAsi(lexerFlags);
       AST_close('ExpressionStatement');
     } else if (curc === $$COLON_3A) {
-      return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
+      return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
     } else {
       AST_open(astProp, 'ExpressionStatement', identToken);
       parseExpressionAfterPlainVarName(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, 'expression');
@@ -4157,7 +4207,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         if (curc !== $$COLON_3A) THROW('Missing colon after case expr');
         ASSERT_skipRex(':', lexerFlags);
         while (curtype !== $EOF && curc !== $$CURLY_R_7D && (curtype !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) {
-          parseNestedBodyPart(lexerFlags, scoop, {'#':labelSet}, FROM_BLOCK_STMT, 'consequent');
+          parseNestedBodyPart(lexerFlags, scoop, {'#':labelSet}, NOT_LABELLED, FDS_LEX, 'consequent');
         }
         AST_close('SwitchCase');
       } else if (curtok.str === 'default') {
@@ -4170,7 +4220,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         AST_set('test', null);
         AST_set('consequent', []);
         while (curtype !== $EOF && curc !== $$CURLY_R_7D && (curtype !== $IDENT || (curtok.str !== 'case' && curtok.str !== 'default'))) {
-          parseNestedBodyPart(lexerFlags, scoop, {'#': labelSet}, FROM_BLOCK_STMT, 'consequent');
+          parseNestedBodyPart(lexerFlags, scoop, {'#': labelSet}, NOT_LABELLED, FDS_LEX, 'consequent');
         }
         AST_close('SwitchCase');
       } else {
@@ -4292,11 +4342,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'WhileStatement', curtok);
     ASSERT_skipAny('while', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'test');
-    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, scoop, {'##': 'while', '#': labelSet}, FROM_OTHER_STMT, 'body');
+    parseNestedBodyPart(lexerFlags | LF_IN_ITERATION, scoop, {'##': 'while', '#': labelSet}, NOT_LABELLED, FDS_ILLEGAL, 'body');
     AST_close('WhileStatement');
   }
 
-  function parseIdentLabelOrExpressionStatement(lexerFlags, scoop, labelSet, fromStmt, astProp) {
+  function parseIdentLabelOrExpressionStatement(lexerFlags, scoop, labelSet, fdState, astProp) {
     ASSERT(parseIdentLabelOrExpressionStatement.length === arguments.length, 'arg count');
     ASSERT(curtype === $IDENT, 'should not have consumed the ident yet', debug_toktype(curtype));
     ASSERT(typeof astProp === 'string', 'should be string');
@@ -4325,7 +4375,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     if (curc === $$COLON_3A) {
       // Ident to be verified not to be reserved in the label parser
-      return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp);
+      return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
     }
 
     AST_open(astProp, 'ExpressionStatement', identToken);
@@ -4510,11 +4560,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return assignable;
   }
 
-  function parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fromStmt, astProp) {
+  function parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fdState, astProp) {
     ASSERT(arguments.length === parseLabeledStatementInstead.length, 'arg count');
-
-    // TODO: this restriction only applies to "labelled function decls"
-    // if (fromStmt === FROM_OTHER_STMT) THROW('Can not nest labels as the child of an if/else/while/for/do/with statement');
 
     // This is an exception to the general case where eval and arguments are okay to use as label name. Thanks, spec.
     if (identToken.str !== 'eval' && identToken.str !== 'arguments') {
@@ -4531,7 +4578,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     labelSet['#' + identToken.str] = true;
     ASSERT_skipRex(':', lexerFlags);
 
-    parseNestedBodyPart(lexerFlags, scoop, labelSet, (fromStmt === FROM_SCOPE_ROOT || fromStmt === FROM_LABEL_SCOPE) ? FROM_LABEL_SCOPE : FROM_LABEL_BLOCK, 'body');
+    if (fdState === FDS_IFELSE) {
+      // a "labelled func decl" is never allowed as if/else child
+      fdState = FDS_ILLEGAL;
+    }
+    parseNestedBodyPart(lexerFlags, scoop, labelSet, IS_LABELLED, fdState, 'body');
     AST_close('LabeledStatement');
   }
 
@@ -4569,7 +4620,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'WithStatement', curtok);
     ASSERT_skipAny('with', lexerFlags); // TODO: optimize; next must be (
     parseStatementHeader(lexerFlags, 'object');
-    parseNestedBodyPart(lexerFlags, scoop, labelSet, FROM_OTHER_STMT, 'body');
+    parseNestedBodyPart(lexerFlags, scoop, labelSet, NOT_LABELLED, FDS_ILLEGAL, 'body');
     AST_close('WithStatement');
   }
 
@@ -6337,7 +6388,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let paramScoop = SCOPE_addLayer(arrowScoop, SCOPE_LAYER_ARROW_PARAMS, 'parseArrowParenlessFromPunc(arg)');
     if (options_exposeScopes) AST_set('$scope', paramScoop);
     ASSERT(paramScoop._ = 'parenless arrow scope');
-    SCOPE_addLexBinding(paramScoop, identToken.str, BINDING_TYPE_ARG, FROM_OTHER_STMT);
+    SCOPE_addLexBinding(paramScoop, identToken.str, BINDING_TYPE_ARG, FDS_ILLEGAL);
 
     if (identToken.str === 'await' && hasAnyFlag(lexerFlags, LF_IN_ASYNC)) {
       // - `async function f(){ return await => {}; }`
@@ -6852,7 +6903,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
         let exprAssignable = parseExpressionAfterIdent(lexerFlags, identToken, BINDING_TYPE_ARG, ASSIGN_EXPR_IS_OK, astProp);
         assignable = mergeAssignable(exprAssignable, assignable);
-        SCOPE_addLexBinding(paramScoop, identToken.str, BINDING_TYPE_ARG, FROM_OTHER_STMT);
+        SCOPE_addLexBinding(paramScoop, identToken.str, BINDING_TYPE_ARG, FDS_ILLEGAL);
 
         if (wasAssignment) {
           // [v]: `(foo = x) => {}`
@@ -8987,7 +9038,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       getToken,
       setToken,
       methodStartToken,
-      FROM_OTHER_STMT,
+      FDS_ILLEGAL,
       'value',
     );
     AST_set('shorthand', false);
@@ -8996,7 +9047,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
 
 
-  function parseClassDeclaration(lexerFlags, scoop, optionalIdent, astProp) {
+  function parseClassDeclaration(lexerFlags, scoop, optionalIdent, isLabelled, fdState, astProp) {
     ASSERT(arguments.length === parseClassDeclaration.length, 'expecting all args');
     // class x {}
     // ^
@@ -9005,6 +9056,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // class x {[static] <method>[]}
     // export class x {}
     // export class {}
+
+    if (isLabelled || fdState === FDS_ILLEGAL || fdState === FDS_IFELSE) {
+      THROW('Cannot parse a class declaration here, only expecting statements here');
+    }
 
     // _all_ bits of a class decl/expr are strict
     let insideTemplate = hasAnyFlag(lexerFlags, LF_IN_TEMPLATE); // need this to properly consume closing curly
@@ -9070,7 +9125,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // eg: it is a `let` binding in outer scope and a `const` binding in inner scope...
       fatalBindingIdentCheck(curtok, BINDING_TYPE_CLASS, lexerFlags);
       bindingName = curtok.str;
-      SCOPE_addLexBinding(scoop, bindingName, BINDING_TYPE_CLASS, FROM_OTHER_STMT);
+      SCOPE_addLexBinding(scoop, bindingName, BINDING_TYPE_CLASS, FDS_ILLEGAL);
       AST_setIdent('id', curtok);
       ASSERT_skipAny($IDENT, lexerFlags);
     }
@@ -9672,7 +9727,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       getToken,
       setToken,
       methodStartToken,
-      FROM_OTHER_STMT,
+      FDS_ILLEGAL,
       'value'
     );
 
@@ -10388,7 +10443,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       getToken,
       setToken,
       methodStartToken,
-      FROM_OTHER_STMT,
+      FDS_ILLEGAL,
       'value'
     );
 
@@ -10601,14 +10656,12 @@ function _P(f, arr) {
   }
   return f;
 }
-function F(fromStmt) {
-  if (fromStmt === FROM_OTHER_STMT) return ('F=FROM_OTHER_STMT');
-  else if (fromStmt === FROM_IFELSE_STMT) return ('F=FROM_IFELSE_STMT');
-  else if (fromStmt === FROM_LABEL_SCOPE) return ('F=FROM_LABEL_SCOPE');
-  else if (fromStmt === FROM_LABEL_BLOCK) return ('F=FROM_LABEL_BLOCK');
-  else if (fromStmt === FROM_BLOCK_STMT) return ('F=FROM_BLOCK_STMT');
-  else if (fromStmt === FROM_SCOPE_ROOT) return ('F=FROM_SCOPE_ROOT');
-  else ASSERT(false, 'from is enum', fromStmt);
+function F(fdState) {
+  if (fdState === FDS_ILLEGAL) return ('F=FDS_ILLEGAL');
+  else if (fdState === FDS_IFELSE) return ('F=FDS_IFELSE');
+  else if (fdState === FDS_LEX) return ('F=FDS_LEX');
+  else if (fdState === FDS_VAR) return ('F=FDS_VAR');
+  else ASSERT(false, 'F(): fds is enum', fdState);
 }
 
 // </BODY>

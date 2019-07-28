@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Let declaration missing binding names and `let` cannot be a regular var name in strict mode
+  Let declaration missing binding names and `let` cannot be a regular var or label name in strict mode
 
 "use strict"; let = x;
                   ^------- error

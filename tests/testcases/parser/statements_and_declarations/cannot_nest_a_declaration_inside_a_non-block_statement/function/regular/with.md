@@ -33,7 +33,7 @@ throws: Parser error!
   Cannot parse a function declaration here, only expecting statements here
 
 with(x) function f() {}
-        ^------- error
+                 ^------- error
 `````
 
 ### Strict mode

@@ -33,12 +33,12 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot parse an async function declaration here, only expecting statements here
+  An async function declaration in web compat mode is still not allowed as `if-else` child, only plain func decls are allowed there
 
 function f(){
   var f = 123;
   if (true) async function f(){}
-                  ^------- error
+                           ^------- error
 
 }
 `````
@@ -59,15 +59,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Parser error!
-  Only plain function declarations can be a child of `if` or `else` in web compat mode
-
-function f(){
-  var f = 123;
-  if (true) async function f(){}
-                  ^------- error
-
-}
-`````
-
+_Output same as sloppy mode._
