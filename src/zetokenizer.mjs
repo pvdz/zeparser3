@@ -240,6 +240,14 @@ ASSERT($flag < 32, 'cannot use more than 32 flags');
 // - sloppy mode until proven otherwise
 const INITIAL_LEXER_FLAGS = LF_FOR_REGEX | LF_IN_GLOBAL; // not sure about global, that may change depending on options{$?
 
+// https://tc39.es/ecma262/#table-nonbinary-unicode-properties
+// (manually copied from spec)
+const TABLE54 = ',General_Category,gc,Script,sc,Script_Extensions,scx,';
+const TABLE55 = ',ASCII,ASCII_Hex_Digit,AHex,Alphabetic,Alpha,Any,Assigned,Bidi_Control,Bidi_C,Bidi_Mirrored,Bidi_M,Case_Ignorable,CI,Cased,Changes_When_Casefolded,CWCF,Changes_When_Casemapped,CWCM,Changes_When_Lowercased,CWL,Changes_When_NFKC_Casefolded,CWKCF,Changes_When_Titlecased,CWT,Changes_When_Uppercased,CWU,Dash,Default_Ignorable_Code_Point,DI,Deprecated,Dep,Diacritic,Dia,Emoji,Emoji_Component,Emoji_Modifier,Emoji_Modifier_Base,Emoji_Presentation,Extended_Pictographic,Extender,Ext,Grapheme_Base,Gr_Base,Grapheme_Extend,Gr_Ext,Hex_Digit,Hex,IDS_Binary_Operator,IDSB,IDS_Trinary_Operator,IDST,ID_Continue,IDC,ID_Start,IDS,Ideographic,Ideo,Join_Control,Join_C,Logical_Order_Exception,LOE,Lowercase,Lower,Math,Noncharacter_Code_Point,NChar,Pattern_Syntax,Pat_Syn,Pattern_White_Space,Pat_WS,Quotation_Mark,QMark,Radical,Regional_Indicator,RI,Sentence_Terminal,STerm,Soft_Dotted,SD,Terminal_Punctuation,Term,Unified_Ideograph,UIdeo,Uppercase,Upper,Variation_Selector,VS,White_Space,space,XID_Continue,XIDC,XID_Start,XIDS,';
+const TABLE56 = ',Cased_Letter,LC,Close_Punctuation,Pe,Connector_Punctuation,Pc,Control,Cc,cntrl,Currency_Symbol,Sc,Dash_Punctuation,Pd,Decimal_Number,Nd,digit,Enclosing_Mark,Me,Final_Punctuation,Pf,Format,Cf,Initial_Punctuation,Pi,Letter,L,Letter_Number,Nl,Line_Separator,Zl,Lowercase_Letter,Ll,Mark,M,Combining_Mark,Math_Symbol,Sm,Modifier_Letter,Lm,Modifier_Symbol,Sk,Nonspacing_Mark,Mn,Number,N,Open_Punctuation,Ps,Other,C,Other_Letter,Lo,Other_Number,No,Other_Punctuation,Po,Other_Symbol,So,Paragraph_Separator,Zp,Private_Use,Co,Punctuation,P,punct,Separator,Z,Space_Separator,Zs,Spacing_Mark,Mc,Surrogate,Cs,Symbol,S,Titlecase_Letter,Lt,Unassigned,Cn,Uppercase_Letter,Lu,';
+// Note: Added Elym instead of a duplicate Elymaic to table 57 because I think that's a typo in the spec
+const TABLE57 = ',Adlam,Adlm,Ahom,Anatolian_Hieroglyphs,Hluw,Arabic,Arab,Armenian,Armn,Avestan,Avst,Balinese,Bali,Bamum,Bamu,Bassa_Vah,Bass,Batak,Batk,Bengali,Beng,Bhaiksuki,Bhks,Bopomofo,Bopo,Brahmi,Brah,Braille,Brai,Buginese,Bugi,Buhid,Buhd,Canadian_Aboriginal,Cans,Carian,Cari,Caucasian_Albanian,Aghb,Chakma,Cakm,Cham,Cherokee,Cher,Common,Zyyy,Coptic,Copt,Qaac,Cuneiform,Xsux,Cypriot,Cprt,Cyrillic,Cyrl,Deseret,Dsrt,Devanagari,Deva,Dogra,Dogr,Duployan,Dupl,Egyptian_Hieroglyphs,Egyp,Elbasan,Elba,Elymaic,Elym,Ethiopic,Ethi,Georgian,Geor,Glagolitic,Glag,Gothic,Goth,Grantha,Gran,Greek,Grek,Gujarati,Gujr,Gunjala_Gondi,Gong,Gurmukhi,Guru,Han,Hani,Hangul,Hang,Hanifi_Rohingya,Rohg,Hanunoo,Hano,Hatran,Hatr,Hebrew,Hebr,Hiragana,Hira,Imperial_Aramaic,Armi,Inherited,Zinh,Qaai,Inscriptional_Pahlavi,Phli,Inscriptional_Parthian,Prti,Javanese,Java,Kaithi,Kthi,Kannada,Knda,Katakana,Kana,Kayah_Li,Kali,Kharoshthi,Khar,Khmer,Khmr,Khojki,Khoj,Khudawadi,Sind,Lao,Laoo,Latin,Latn,Lepcha,Lepc,Limbu,Limb,Linear_A,Lina,Linear_B,Linb,Lisu,Lycian,Lyci,Lydian,Lydi,Mahajani,Mahj,Makasar,Maka,Malayalam,Mlym,Mandaic,Mand,Manichaean,Mani,Marchen,Marc,Medefaidrin,Medf,Masaram_Gondi,Gonm,Meetei_Mayek,Mtei,Mende_Kikakui,Mend,Meroitic_Cursive,Merc,Meroitic_Hieroglyphs,Mero,Miao,Plrd,Modi,Mongolian,Mong,Mro,Mroo,Multani,Mult,Myanmar,Mymr,Nabataean,Nbat,Nandinagari,Nand,New_Tai_Lue,Talu,Newa,Nko,Nkoo,Nushu,Nshu,Nyiakeng_Puachue_Hmong,Hmnp,Ogham,Ogam,Ol_Chiki,Olck,Old_Hungarian,Hung,Old_Italic,Ital,Old_North_Arabian,Narb,Old_Permic,Perm,Old_Persian,Xpeo,Old_Sogdian,Sogo,Old_South_Arabian,Sarb,Old_Turkic,Orkh,Oriya,Orya,Osage,Osge,Osmanya,Osma,Pahawh_Hmong,Hmng,Palmyrene,Palm,Pau_Cin_Hau,Pauc,Phags_Pa,Phag,Phoenician,Phnx,Psalter_Pahlavi,Phlp,Rejang,Rjng,Runic,Runr,Samaritan,Samr,Saurashtra,Saur,Sharada,Shrd,Shavian,Shaw,Siddham,Sidd,SignWriting,Sgnw,Sinhala,Sinh,Sogdian,Sogd,Sora_Sompeng,Sora,Soyombo,Soyo,Sundanese,Sund,Syloti_Nagri,Sylo,Syriac,Syrc,Tagalog,Tglg,Tagbanwa,Tagb,Tai_Le,Tale,Tai_Tham,Lana,Tai_Viet,Tavt,Takri,Takr,Tamil,Taml,Tangut,Tang,Telugu,Telu,Thaana,Thaa,Thai,Tibetan,Tibt,Tifinagh,Tfng,Tirhuta,Tirh,Ugaritic,Ugar,Vai,Vaii,Wancho,Wcho,Warang_Citi,Wara,Yi,Yiii,Zanabazar_Square,Zanb,';
+
 function LF_DEBUG(flags) {
   let bak = flags;
   let s = [];
@@ -473,14 +481,20 @@ function ZeTokenizer(
   function peekSkip() {
     //ASSERT(neof(), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
+    ASSERT(neof(), 'lexer input pointer not oob');
 
     let t = cache;
     cache = skipPeek();
     return t;
   }
+  function ASSERT_skipPeek(c) {
+    ASSERT(ASSERT_skipPeek.length === arguments.length, 'arg count');
+    ASSERT(cache === c, 'expecting to skip a particular char', c, cache);
+    return skipPeek();
+  }
   function skipPeek() {
-    //ASSERT(neofd(1), 'pointer not oob');
     ASSERT(!arguments.length, 'no args');
+    // ASSERT(neofd(1), 'new lexer input pointer not oob');
 
     return cache = input.charCodeAt(++pointer); // TODO: not unicode aware... should confirm this with unicode strings. and what about unicode identifiers?
   }
@@ -2878,8 +2892,9 @@ function ZeTokenizer(
     return CHARCLASS_BAD;
   }
   function parseRegexPropertyEscape(c) {
-    ASSERT(c === $$P_70 || c === $$P_UC_50, 'this should be \\p');
+    ASSERT(c === $$P_70 || c === $$P_UC_50, 'this should be \\p or \\P', c);
     ASSERT(peek() === c, 'not yet consumed');
+
     // introduced in ES9 / ES2018; https://github.com/tc39/proposal-regexp-unicode-property-escapes
     if (!supportRegexPropertyEscapes) {
       if (webCompat === WEB_COMPAT_ON) return GOOD_SANS_U_FLAG;
@@ -2895,25 +2910,170 @@ function ZeTokenizer(
     // this should only change semantics without causing potential syntax errors by ignoring the `\p` escape.
 
     // skip the p and assert it is immediately followed by a curly
-    if (skipPeek() !== $$CURLY_L_7B) {
+    if (ASSERT_skipPeek(c === $$P_70 ? $$P_70 : $$P_UC_50) !== $$CURLY_L_7B) {
       if (webCompat === WEB_COMPAT_ON) return GOOD_SANS_U_FLAG;
       return regexSyntaxError('Property escape \\p must be followed by a curly bracket (and would be illegal without u-flag)');
     }
 
-    // skip the curly which was just asserted
-    if (skipPeek() === $$CURLY_R_7D) {
+    if (eof()) return regexSyntaxError('Early EOF while parsing regex property escape');
+
+    c = ASSERT_skipPeek($$CURLY_L_7B);
+    if (c === $$CURLY_R_7D) {
+      // TODO: would this be okay in sloppy?
       return regexSyntaxError('Cannot have empty property name brackets (and would be illegal without u-flag too)');
     }
 
+    // https://tc39.es/ecma262/#prod-UnicodePropertyValueExpression
+    // UnicodePropertyValueExpression
+    //  - UnicodePropertyName = UnicodePropertyValue
+    //  - LoneUnicodePropertyNameOrValue
+    // UnicodePropertyName
+    // - a-zA-Z
+    // - `_`
+    // UnicodePropertyValue
+    // - UnicodePropertyValueCharacters
+    // - a-zA-Z
+    // - 0-9
+    // - `_`
+
+    // The name and value must end up composing a name that is part of an explicitly, albeit large, defined set
+    // It should be a syntax error if the names do not appear on their list.
+
     // now skip the Unicode Property name until the first closing curly
-    while (skipPeek() !== $$CURLY_R_7D) {
-      if (eof()) {
-        if (webCompat === WEB_COMPAT_ON) return GOOD_SANS_U_FLAG;
-        return regexSyntaxError('Unexpected EOF while parsing property escape (which would be illegal without u-flag too)');
+    let name = '';
+    let hasEq = false;
+    let value = '';
+    let scanning = true;
+
+    // TODO: since we must validate the name against a fixed table, anyways, we don't actually need to take too much care in parsing the content, just seek for `=` and `}` ..?
+    do {
+      switch (c) {
+        case $$CURLY_R_7D:
+          scanning = false;
+          break;
+
+        case $$IS_3D:
+          if (hasEq) {
+            return regexSyntaxError('An escaped property can only contain one eq sign (`=`) but found a second one');
+          }
+          hasEq = true;
+          break;
+
+        case $$A_61:
+        case $$B_62:
+        case $$C_63:
+        case $$D_64:
+        case $$E_65:
+        case $$F_66:
+        case $$G_67:
+        case $$H_68:
+        case $$I_69:
+        case $$J_6A:
+        case $$K_6B:
+        case $$L_6C:
+        case $$M_6D:
+        case $$N_6E:
+        case $$O_6F:
+        case $$P_70:
+        case $$Q_71:
+        case $$R_72:
+        case $$S_73:
+        case $$T_74:
+        case $$U_75:
+        case $$V_76:
+        case $$W_77:
+        case $$X_78:
+        case $$Y_79:
+        case $$Z_7A:
+
+        case $$A_UC_41:
+        case $$B_UC_42:
+        case $$C_UC_43:
+        case $$D_UC_44:
+        case $$E_UC_45:
+        case $$F_UC_46:
+        case $$G_UC_47:
+        case $$H_UC_48:
+        case $$I_UC_49:
+        case $$J_UC_4A:
+        case $$K_UC_4B:
+        case $$L_UC_4C:
+        case $$M_UC_4D:
+        case $$N_UC_4E:
+        case $$O_UC_4F:
+        case $$P_UC_50:
+        case $$Q_UC_51:
+        case $$R_UC_52:
+        case $$S_UC_53:
+        case $$T_UC_54:
+        case $$U_UC_55:
+        case $$V_UC_56:
+        case $$W_UC_57:
+        case $$X_UC_58:
+        case $$Y_UC_59:
+        case $$Z_UC_5A:
+
+        case $$LODASH_5F:
+          if (hasEq) value += String.fromCharCode(c);
+          else name += String.fromCharCode(c);
+          break;
+
+        case $$0_30:
+        case $$1_31:
+        case $$2_32:
+        case $$3_33:
+        case $$4_34:
+        case $$5_35:
+        case $$6_36:
+        case $$7_37:
+        case $$8_38:
+        case $$9_39:
+          if (hasEq) {
+            value += String.fromCharCode(c);
+          } else {
+            return regexSyntaxError('The escaped property name can only contain a-z, but a digit (`' + String.fromCharCode(c) + '`) was found');
+          }
+          break;
+
+        default:
+          if (hasEq) {
+            return regexSyntaxError('The escaped property value can only contain a-z0-9 or `_`, but encountered `' + String.fromCharCode(c) + '` (' + c + ') and do not know how to proceed');
+          } else {
+            return regexSyntaxError('The escaped property name can only contain a-z or `_`, but encountered `' + String.fromCharCode(c) + '` (' + c + ') and do not know how to proceed');
+          }
+      }
+
+      c = ASSERT_skipPeek(c);
+      if (eof()) return regexSyntaxError('Early EOF while parsing inside regex property escape');
+    } while (scanning);
+
+    // Two cases now; Either this property is a single ident or it's a name=value pair
+    // https://tc39.es/ecma262/#sec-patterns-static-semantics-early-errors
+    // UnicodePropertyValueExpression :: UnicodePropertyName = UnicodePropertyValue
+    // > It is a Syntax Error if the List of Unicode code points that is SourceText of UnicodePropertyName is not identical to a List of Unicode code points that is a Unicode property name or property alias listed in the “Property name and aliases” column of Table 54.
+    // > It is a Syntax Error if the List of Unicode code points that is SourceText of UnicodePropertyValue is not identical to a List of Unicode code points that is a value or value alias for the Unicode property or property alias given by SourceText of UnicodePropertyName listed in the “Property value and aliases” column of the corresponding tables Table 56 or Table 57.
+    // UnicodePropertyValueExpression :: LoneUnicodePropertyNameOrValue
+    // > It is a Syntax Error if the List of Unicode code points that is SourceText of LoneUnicodePropertyNameOrValue is not identical to a List of Unicode code points that is a Unicode general category or general category alias listed in the “Property value and aliases” column of Table 56, nor a binary property or binary property alias listed in the “Property name and aliases” column of Table 55.
+
+    // https://tc39.es/ecma262/#table-nonbinary-unicode-properties
+    if (hasEq) {
+      // Validate name against table 54
+      if (!TABLE54.includes(',' + name + ',')) {
+        THROW('The escaped binary property name `' + name + '` is not valid (does not appear in "table 54")')
+      }
+      // Validate value against table 56 or 57
+      let vc = ',' + value + ',';
+      if (!TABLE56.includes(vc) && !TABLE57.includes(vc)) {
+        THROW('The escaped property value `' + value + '` is not valid (does not appear in "table 56" nor "table 57")')
+      }
+    } else {
+      // Validate value against table 55 or 56
+      let nc = ',' + name + ',';
+      if (!TABLE55.includes(nc) && !TABLE56.includes(nc)) {
+        THROW('The escaped lone property name `' + name + '` is not valid (does not appear in "table 55" nor "table 56")')
       }
     }
 
-    ASSERT_skip($$CURLY_R_7D);
     return GOOD_WITH_U_FLAG;
   }
   function hexToNum(c) {
