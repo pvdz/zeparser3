@@ -10004,17 +10004,21 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       skipIdentSafeSlowAndExpensive(lexerFlags); // will properly deal with div/rex cases
       let assignBefore = curtok.str === '=';
       let willBeSimple = curc === closingCharOrd || curc === $$COMMA_2C || assignBefore;
-      if (willBeSimple && !isAssignable(assignableOrErrorMsg)) {
-        // - `[...await] = obj`
-        // - `[...this];`
-        destructible |= CANT_DESTRUCT;
-      }
-      if (!willBeSimple && closingCharOrd === $$CURLY_R_7D && bindingType !== BINDING_TYPE_ARG) {
-        // - `function f({...a.b}){}`
+      if (willBeSimple) {
+        if (notAssignable(assignableOrErrorMsg)) {
+          // - `[...await] = obj`
+          // - `[...this];`
+          destructible |= CANT_DESTRUCT;
+        }
+      } else { // !willBeSimple
+        // [x]: `function f({...a.b}){}`
         // [v]: `x = {...a + b}`
-        destructible |= CANT_DESTRUCT;
+        // [v]: `([...x.y] = z)`
+        // [x]: `([...x.y]) => z`
         // TODO: restore nice error when assign/arrow is found
-        // THROW('The arrowable spread/rest argument of an object binding pattern must always be a simple ident without suffix');
+        destructible |= DESTRUCT_ASSIGN_ONLY;
+        // Can't _just_ throw here because the arrow may not be an arrow
+        // THROW('The rest argument of an arrow or function must always be a simple ident without suffix');
       }
       assignable = parseValueAfterIdent(lexerFlags, identToken, bindingType, ASSIGN_EXPR_IS_OK, astProp);
       ASSERT(!assignBefore || curtok.str === '=', 'parseValueAfterIdent should not consume the assignment');
