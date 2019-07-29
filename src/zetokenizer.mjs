@@ -317,7 +317,7 @@ function LF_DEBUG(flags) {
   if (flags) {
     throw new Error('UNKNOWN_FLAGS: ' + flags.toString(2) + ' (was: ' + bak.toString(2) + '), so far: [' + s.join('|') + ']');
   }
-  return s.join('|');
+  return 'L:' + s.join('|');
 }
 
 const BAD_ESCAPE = true;
