@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The arguments of an arrow cannot contain an await expression in their defaults
+  The arguments of an async arrow cannot contain an await expression
 
 async function a(){     async ([y] = delete foo[await x]) => {};     }
                                                           ^------- error

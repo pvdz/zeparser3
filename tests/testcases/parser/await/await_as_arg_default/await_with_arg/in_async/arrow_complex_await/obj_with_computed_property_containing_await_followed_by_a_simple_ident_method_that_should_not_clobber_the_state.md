@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  The arguments of an arrow cannot contain an await expression in their defaults
+  An arrow inside an async function/arrow can not have `await` in its arguments
 
 async function f(){    async function f(){   (a= {[await foo](){}, "x"(){}} ) => a    }    }
                                                                               ^------- error

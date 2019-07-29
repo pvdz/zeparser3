@@ -7205,9 +7205,24 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `([[].length]) => x;`
         THROW('The left hand side of the arrow can only be destructed through assignment so arrow is illegal');
       }
-      if (hasAllFlags(destructible, PIGGY_BACK_SAW_AWAIT_KEYWORD)) {
+      if (hasAnyFlag(destructible, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME)) {
+        // Note: the varname is also illegal because you have to refine the CoverCallExpressionAndAsyncArrowHead in
+        // an async context, so the await var name becomes a keyword and it fails anwyays.
         // - `async function a(){     (foo = await bar) => {}     }`
-        THROW('The arguments of an arrow cannot contain an await expression in their defaults');
+        // - `async(a = (await) => {}) => {};`
+        if (hasAnyFlag(destructible, PIGGY_BACK_SAW_AWAIT_KEYWORD)) {
+          if (asyncToken === UNDEF_ASYNC) {
+            THROW('An arrow inside an async function/arrow can not have `await` in its arguments');
+          } else {
+            THROW('The arguments of an async arrow cannot contain an await expression');
+          }
+        } else if (asyncToken !== UNDEF_ASYNC) {
+          THROW('The arguments of an async arrow cannot contain an await varname because it is still illegal when refining the cover grammar');
+        } else {
+          // An arrow that is not nested in an async arrow can have `await`. Not even affected by sloppy mode (because
+          // `await` is not actually a keyword, just contextually restricted).
+          // - `(await) => x`
+        }
       }
       if (hasAllFlags(destructible, PIGGY_BACK_SAW_YIELD_KEYWORD)) {
         // = `async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }`

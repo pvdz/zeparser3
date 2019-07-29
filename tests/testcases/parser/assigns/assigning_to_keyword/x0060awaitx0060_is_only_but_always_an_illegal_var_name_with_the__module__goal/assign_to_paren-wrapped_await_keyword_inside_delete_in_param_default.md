@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Async arrows can not have arg bindings named `await` because it is considered a keyword
+  The arguments of an async arrow cannot contain an await varname because it is still illegal when refining the cover grammar
 
 async (x = delete ((await) = f)) => {}
                                  ^------- error
