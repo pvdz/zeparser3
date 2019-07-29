@@ -2680,11 +2680,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     return (state & NOT_ASSIGNABLE) === NOT_ASSIGNABLE;
   }
   function initAssignable(previous) {
-    ASSERT(arguments.length === 0 || previous === 0, 'if the previous value was set it should still be 0');
+    ASSERT(arguments.length === 0 || previous === ASSIGNABLE_UNDETERMINED, 'if the previous value was set it should still be 0');
     return IS_ASSIGNABLE;
   }
   function initNotAssignable(previous) {
-    ASSERT(arguments.length === 0 || previous === 0, 'if the previous value was set it should still be 0');
+    ASSERT(arguments.length === 0 || previous === ASSIGNABLE_UNDETERMINED, 'if the previous value was set it should still be 0');
     return NOT_ASSIGNABLE;
   }
   function setAssignable(state) {
@@ -3342,7 +3342,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // (This doesn't prevent a=b=c because assignments are right-associative)
 
     // first parse a simple expression and check whether it's assignable (var or prop)
-    let assignable = 0;
+    let assignable = ASSIGNABLE_UNDETERMINED;
     let destructible = MIGHT_DESTRUCT;
     let wasNotDecl = false;
     let emptyInit = false;
@@ -3603,7 +3603,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
     }
 
-    ASSERT(assignable !== 0, 'every branch should update assignable');
+    ASSERT(assignable !== ASSIGNABLE_UNDETERMINED, 'every branch should update assignable');
 
     // in all cases either; parse a var, let, const, or assignment expression
     // there can be multiple vars and inits
@@ -4387,7 +4387,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_open(astProp, 'UnaryExpression', deleteToken);
     AST_set('operator', 'delete');
     AST_set('prefix', true);
-    let assignable = 0;
+    let assignable = ASSIGNABLE_UNDETERMINED;
     if (curtype === $IDENT) {
       assignable = parseDeleteIdent(lexerFlags, astProp);
     } else if (curc === $$PAREN_L_28) {
@@ -4408,7 +4408,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (curtok.str === '**') {
       THROW('The lhs of ** can not be this kind of unary expression (syntactically not allowed, you have to wrap something)');
     }
-    ASSERT(assignable !== 0, 'every branch should update this');
+    ASSERT(assignable !== ASSIGNABLE_UNDETERMINED, 'every branch should update this');
     // Make sure to propagate the input- and found await/yield flags
     return setNotAssignable(assignable | inputAssignable);
   }
@@ -5821,7 +5821,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - array / object
     // - function / arrow / async / generator
     // - class
-    let assignable = 0;
+    let assignable = ASSIGNABLE_UNDETERMINED;
     // note: curtok token has been skipped prior to this call.
     let identName = identToken.str;
     switch (identName) {
@@ -5936,7 +5936,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         fatalBindingIdentCheck(identToken, bindingType, lexerFlags);
         assignable = initAssignable(assignable);
     }
-    ASSERT(assignable !== 0, 'everything that breaks should update this');
+    ASSERT(assignable !== ASSIGNABLE_UNDETERMINED, 'everything that breaks should update this');
 
     return parseIdentOrParenlessArrow(lexerFlags, identToken, assignable, allowAssignment, astProp);
   }
@@ -6413,7 +6413,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_set('expressions', []);
     AST_set('quasis', []);
 
-    let awaitYieldFlagsFromAssignable = 0;
+    let awaitYieldFlagsFromAssignable = ASSIGNABLE_UNDETERMINED;
     if (hasAllFlags(curtype, $TICK_PURE)) {
       parseQuasiPart(lexerFlags, IS_QUASI_TAIL);
     } else if (hasAllFlags(curtype, $TICK_HEAD)) {
@@ -6656,7 +6656,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // [v]: `for (x(y in z);;);`
     lexerFlags = sansFlag(lexerFlags | LF_NO_ASI, LF_IN_FOR_LHS);
 
-    let assignable = 0;
+    let assignable = ASSIGNABLE_UNDETERMINED;
     if (curc === $$PAREN_R_29) {
       ASSERT_skipDiv(')', lexerFlags);
     } else {
@@ -6875,7 +6875,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let foundSingleIdentWrap = false; // did we find `(foo)` ?
     let rootAstProp = astProp; // astprop changes after the first comma when the group becomes a SequenceExpression
     let destructible = MIGHT_DESTRUCT; // this function checks so many things :(
-    let assignable = 0; // true iif first expr is assignable, always false if the group has a comma
+    let assignable = ASSIGNABLE_UNDETERMINED; // true iif first expr is assignable, always false if the group has a comma
     let toplevelComma = false;
     let wasSimple = PARAMS_ALL_SIMPLE; // true if only idents and without assignment (so es5 valid)
     let mustBeArrow = false; // special case; a `...` must mean arrow, and a trailing comma must mean arrow as well
@@ -6899,7 +6899,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         let wasAssignment = curtok.str === '=';
         let wasCommaOrEnd = curc === $$COMMA_2C || curc === $$PAREN_R_29;
 
-        ASSERT(toplevelComma || curc !== $$PAREN_R_29 || assignable === 0, 'for group with one simple element, delete edge case');
+        ASSERT(toplevelComma || curc !== $$PAREN_R_29 || assignable === ASSIGNABLE_UNDETERMINED, 'for group with one simple element, delete edge case');
 
         let exprAssignable = parseExpressionAfterIdent(lexerFlags, identToken, BINDING_TYPE_ARG, ASSIGN_EXPR_IS_OK, astProp);
         assignable = mergeAssignable(exprAssignable, assignable);
@@ -6930,7 +6930,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
           if (!toplevelComma && curc === $$PAREN_R_29) {
             ASSERT(destructible === MIGHT_DESTRUCT, 'should not have parsed anything yet so destructible is still default');
-            // ASSERT(assignable === 0, 'should still be the default');
             ASSERT(wasSimple === PARAMS_ALL_SIMPLE, 'should still be the default');
             // this must be the case where the group consists entirely of one ident, `(foo)`
             // there may still be an arrow trailing, which this function should deal with too
@@ -7245,6 +7244,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // `async(a = await x);`
       // `async(a) => x`
       // `async(a = await x) => x`
+      destructible = copyPiggies(destructible, assignable);
       return parseAfterAsyncGroup(lexerFlags, paramScoop, asyncStmtOrExpr, allowAssignmentForGroupToBeArrow, wasSimple, toplevelComma, newlineAfterAsync, destructible, false, asyncToken, assignable, rootAstProp);
     }
 
@@ -7256,7 +7256,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseArrowAfterGroup(lexerFlags, paramScoop, wasSimple, toplevelComma, UNDEF_ASYNC, parenToken, allowAssignmentForGroupToBeArrow, rootAstProp);
       // we just parsed an arrow. Whatever the state of await/yield was we can ignore that here.
       if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
-      return NOT_ASSIGNABLE; // assignability resets after the arrow
+      // Assignability resets after the arrow but an outer `async` could affect the inner arrow:
+      // [v]: `(await) => {}`
+      // [v]: `(x = (await) => {}) => {}`
+      // [x]: `async (await) => {}`
+      // [x]: `async (x = (await) => {}) => {}`     // <-- this case requires propagation of await piggies to parent
+      assignable = copyPiggies(assignable, destructible);
+      return NOT_ASSIGNABLE | (assignable & (PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME));
     }
 
     // The remaining cases should be handled by caller
@@ -7525,7 +7531,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async(x) => y`
     // - `async \n (x) => y` -> `async; (x) => y`
     // - `async () => {}, await foo
-    return NOT_ASSIGNABLE; // dont care about await/yield flags here
+    // - `async (a = (...await) => {}) => {};`      // <-- the await flags need to be propagated for this case
+    // - `async (a = (...await) => {});`
+    return NOT_ASSIGNABLE | (assignable & (PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME));
   }
   function parseArrowAfterAsyncNoArgGroup(lexerFlags, paramScoop, toplevelComma, asyncToken, allowAssignment, astProp) {
     ASSERT(parseArrowAfterAsyncNoArgGroup.length === arguments.length, 'arg count');
@@ -7675,7 +7683,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     let spreadStage = NO_SPREAD;
-    let assignableYieldAwaitState = 0; // this is ONLY used to track await/yield state flags so we can propagate them back up
+    let assignableYieldAwaitState = ASSIGNABLE_UNDETERMINED; // this is ONLY used to track await/yield state flags so we can propagate them back up
 
     while(curc !== $$SQUARE_R_5D) {
       if (curtype === $IDENT) {
@@ -8064,7 +8072,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let startOfKeyToken = curtok;
 
     let destructible = bindingType === BINDING_TYPE_ARG || bindingType === BINDING_TYPE_NONE ? MIGHT_DESTRUCT : MUST_DESTRUCT;
-    let assignableForPiggies = 0; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
+    let assignableForPiggies = ASSIGNABLE_UNDETERMINED; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
 
     // An objlit property has quite a few (though limited) valid goals
 
@@ -8728,7 +8736,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     //   - `{static set "x"(y){}`
 
     let destructible = MIGHT_DESTRUCT;
-    let assignable = 0; // Propagate await/yield state flags to caller
+    let assignable = ASSIGNABLE_UNDETERMINED; // Propagate await/yield state flags to caller
 
     if (curc === $$COMMA_2C || curc === $$CURLY_R_7D || curtok.str === '=') {
       // property shorthand; `{ident}=x` is valid, x={y} is also valid
@@ -9164,7 +9172,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // Note: methods inside classes can access super properties
     // Note: `super()` is only valid in the constructor a class that uses `extends` (resets when nesting but after `extends`)
 
-    let assignable = 0; // only relevant to propagate the `extends` expression
+    let assignable = ASSIGNABLE_UNDETERMINED; // only relevant to propagate the `extends` expression
 
     // Separate inner from outer because the error is different if encountering yield/await without an async/gen context
     // Computed method key names can also not access super, unless the outer context is a method, too
@@ -9278,7 +9286,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof astProp === 'string', 'astprop string');
 
     let destructible = bindingType === BINDING_TYPE_NONE ? MIGHT_DESTRUCT : MUST_DESTRUCT;
-    let assignable = 0; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
+    let assignable = ASSIGNABLE_UNDETERMINED; // propagate the await/yield state flags, if any (because `(x={a:await f})=>x` should be an error)
 
     // - `class x {ident(){}}`
     // - `class x {'foo'(){}}`        (or double quotes)
@@ -9455,7 +9463,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `class x {static async *key(){}}`
 
     let destructible = MIGHT_DESTRUCT;
-    let assignable = 0; // Propagate await/yield state flags to caller
+    let assignable = ASSIGNABLE_UNDETERMINED; // Propagate await/yield state flags to caller
 
     // The syntactic order of modifiers is
     // { [[async [*]]|get|set] key(){} }
@@ -10550,6 +10558,10 @@ function D(d) {
   }
 
   // perhaps we should throw for this kind of contamination...?
+  if (d & ASSIGNABLE_UNDETERMINED) {
+    arr.push('(ASSIGNABLE_UNDETERMINED)');
+    d ^= ASSIGNABLE_UNDETERMINED;
+  }
   if (d & NOT_ASSIGNABLE) {
     arr.push('(NOT_ASSIGNABLE)');
     d ^= NOT_ASSIGNABLE;
@@ -10564,17 +10576,22 @@ function D(d) {
 
   if (d !== 0) {
     console.log('Gathered flags so far:', arr.join(', '))
-    _THROW('D: unknown flags left:', d.toString(2));
+    ASSERT(false, 'D(): unknown flags left:', d.toString(2));
   }
 
   return 'D='+arr.join(', ');
 }
 function A(a) {
   if (a === 0) {
+    ASSERT(false, 'this changed, not sure whether its ever valid anymore?');
     return 'A=ASSIGNABLE_UNDETERMINED';
   }
 
   let arr = [];
+  if (a & ASSIGNABLE_UNDETERMINED) {
+    arr.push('ASSIGNABLE_UNDETERMINED');
+    a ^= ASSIGNABLE_UNDETERMINED;
+  }
   if (a & NOT_ASSIGNABLE) {
     arr.push('NOT_ASSIGNABLE');
     a ^= NOT_ASSIGNABLE;
@@ -10602,7 +10619,7 @@ function A(a) {
 
   if (a !== 0) {
     console.log('Gathered flags so far:', arr.join(', '))
-    _THROW('A: unknown flags left:', a.toString(2));
+    ASSERT(false, 'A(): unknown flags left:', a.toString(2));
   }
 
   return 'A='+arr.join(', ');

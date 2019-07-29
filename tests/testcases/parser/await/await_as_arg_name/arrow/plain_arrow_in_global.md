@@ -8,8 +8,6 @@
 >
 > ::> plain arrow in global
 
-## PASS
-
 ## Input
 
 `````js

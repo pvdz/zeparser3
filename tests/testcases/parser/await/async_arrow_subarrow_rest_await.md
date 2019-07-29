@@ -1,21 +1,21 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/async_keyword/await_as_param_name_of_an_arrow_that_is_a_param_default_of_an_async_func.md
+- Path: zeparser3/tests/testcases/parser/await/async_arrow_subarrow_rest_await.md
 
-> :: async keyword
+> :: await
 >
-> ::> await as param name of an arrow that is a param default of an async func
+> ::> async arrow subarrow rest await
 >
-> https://twitter.com/Ghost1240145716/status/1127918881727606786
-
-## FAIL
+> From test262/test/language/expressions/async-arrow-function/await-as-param-rest-nested-arrow-parameter-position.js
+>
+> The rest was not properly propagating the await piggy
+>
+> The outer async func will retroactively cause the inner arrow to fail
 
 ## Input
 
 `````js
-async(a = (await) => {}) => {};
+async (a = (...await) => {}) => {};
 `````
 
 ## Output
@@ -34,8 +34,8 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   The arguments of an async arrow cannot contain an await varname because it is still illegal when refining the cover grammar
 
-async(a = (await) => {}) => {};
-                         ^------- error
+async (a = (...await) => {}) => {};
+                             ^------- error
 `````
 
 ### Strict mode
@@ -52,8 +52,8 @@ Parsed with the module goal.
 throws: Parser error!
   Cannot use `await` as var when goal=module but found `await` outside an async function
 
-async(a = (await) => {}) => {};
-                ^------- error
+async (a = (...await) => {}) => {};
+                    ^------- error
 `````
 
 
