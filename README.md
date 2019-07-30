@@ -1,6 +1,6 @@
 # ZeParser 3
 
-A 100% spec compliant JavaScript parser written in JavaScript, parsing ES6-ES9.
+A 100% spec compliant JavaScript parser written in JavaScript, parsing ES6-ES11.
 
 REPL: https://pvdz.github.io/zeparser3/tests/web/repl.html
 
@@ -8,7 +8,7 @@ The parser itself is currently feature complete but not ready for production (_s
 
 Test262 is passing and there are thousands of additional unit tests to improve coverage.
 
-Anything <= ES9 (ES2018) stage 4 should be supported by this parser, opted in by default (but you can request to parse in a specific version >=ES6). You can also opt-in to "annex B web compat" support.
+Anything <= ES11 (ES2020) stage 4 should be supported by this parser, opted in by default (but you can request to parse in a specific version >=ES6). You can also opt-in to "annex B web compat" support.
 
 ## ES modules
 
@@ -45,7 +45,7 @@ const {
     // You use this to parse `eval` code
     allowGlobalReturn = false,
     // Target a very specific ecmascript version (like, reject async)
-    targetEsVersion = lastVersion, // (currently es10)
+    targetEsVersion = lastVersion, // (currently es11)
     // Leave built up scope information in the ASTs (good luck)
     exposeScopes = false,
     // Assign each node a unique incremental id
@@ -77,8 +77,16 @@ See [`tests/testcases/parser/README.md`](./tests/testcases/parser/README.md) for
 node --experimental-modules tests/zeparser.spec.mjs --help
 
 # Run all tests and stop on first failure
-./tests/zeparser.spec.js -f
-node --experimental-modules tests/zeparser.spec.mjs -F
+./tests/zeparser.spec.js -q
+node --experimental-modules tests/zeparser.spec.mjs -q
+
+# Auto update all tests with current output (inline, use git to diff)
+./tests/zeparser.spec.js -u
+node --experimental-modules tests/zeparser.spec.mjs -u
+
+# Run through all tests and prompt for inline update of each test file
+./tests/zeparser.spec.js -u
+node --experimental-modules tests/zeparser.spec.mjs -q -U
 
 # Test a particular input
 ./tests/zeparser.spec.js -i "some.input()"
@@ -90,10 +98,6 @@ node --experimental-modules tests/zeparser.spec.mjs -i "some.input()"
 # Works together with `-i`, too
 ./tests/zeparser.spec.js -s
 node --experimental-modules tests/zeparser.spec.mjs -s
-
-# Do not run tests on builds (cuts down runtime to 1/3rd)
-./tests/zeparser.spec.js -q
-node --experimental-modules tests/zeparser.spec.mjs -q
 
 # Run test262 tests (needs setup)
 ./tests/zeparser.spec.js -t
@@ -144,9 +148,11 @@ Each test is individually encapsulated in an `.md` file in `tests/testcases/pars
 
 If a run passes then the AST and types of tokens are printed in the output. Otherwise the error message and a pointer to where the error occurred are listed.
 
-The files can be auto-updated with the `-n` flag of the test runner. This makes it easy to update something in the parser and use SCM to confirm whether anything changed, and if so what.
+The files can be auto-updated with the `-u` or `-U` flag of the test runner. This makes it easy to update something in the parser and use SCM to confirm whether anything changed, and if so what.
 
-There are also autogen.md files, which generate a bunch of combinatory tests, similar to the other tests.
+There are also `autogen.md` files, which generate a bunch of combinatory tests (`-g` or `-G`), similar to the other tests.
+
+To create a new test simply add a new file, start it with `@`, a description, a line with only `###` and the rest is considered the test case. When you run the test runner this file will automatically be converted to a proper test case.
 
 # Perf testing
 
@@ -164,9 +170,10 @@ See above for configuring the build script. In the perf script you can adjust th
 
 # TODO
 
-The parser itself supports ES5-ES9 but is not production ready;
+The parser itself supports ES5-ES11 but is not production ready;
 
 - Harden the parser and find and fix more edge cases that currently pester the parser
+  - Regular expression edge cases are tricky, especially web compat ones
 - Setup a test running that confirms AST nodes against other engines (Babel/Flow/etc)
 - Wire up the fuzzer
 - Tighter integration between parser and tokenizer of pre-known tokens
@@ -179,5 +186,4 @@ The parser itself supports ES5-ES9 but is not production ready;
 - Improve and visualize test coverage
 - Add a way to put input test cases inline and assert they reach that point. Helps with understanding why something is doing what.
 - Find out what the memory footprint is like, how much can it parse before bailing
-- Automatic test case updating (inline)
 - Improved error messages with proper token locations and good semantics etc

@@ -399,7 +399,7 @@ function ZeTokenizer(
   ASSERT(typeof input === 'string', 'input string should be string; ' + typeof input);
   ASSERT(targetEsVersion !== undefined, 'undefined should become default', targetEsVersion);
   ASSERT(typeof targetEsVersion === 'number', 'targetEsVersion should be a number', typeof targetEsVersion);
-  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 10) || targetEsVersion === Infinity, 'only support v6~10 right now [' + targetEsVersion + ','+(typeof targetEsVersion)+']');
+  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 11) || targetEsVersion === Infinity, 'only support v6~11 right now [' + targetEsVersion + ','+(typeof targetEsVersion)+']');
 
   const supportRegexPropertyEscapes = targetEsVersion === 9 || targetEsVersion === Infinity;
   const supportRegexLookbehinds = targetEsVersion === 9 || targetEsVersion === Infinity;

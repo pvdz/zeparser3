@@ -36,6 +36,7 @@ const TARGET_ES7 = process.argv.includes('--es7');
 const TARGET_ES8 = process.argv.includes('--es8');
 const TARGET_ES9 = process.argv.includes('--es9');
 const TARGET_ES10 = process.argv.includes('--es10');
+const TARGET_ES11 = process.argv.includes('--es11');
 const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || INPUT_OVERRIDE || TARGET_FILE || SKIP_BUILDS || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL;
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
@@ -492,7 +493,7 @@ async function runAndRegenerateList(list, zeparser) {
 async function cli() {
   let zeparser = await loadParserAndPrettier();
 
-  let forcedTarget = TARGET_ES6 ? 6 : TARGET_ES7 ? 7 : TARGET_ES8 ? 8 : TARGET_ES9 ? 9 : TARGET_ES10 ? 10 : undefined;
+  let forcedTarget = TARGET_ES6 ? 6 : TARGET_ES7 ? 7 : TARGET_ES8 ? 8 : TARGET_ES9 ? 9 : TARGET_ES10 ? 10  : TARGET_ES11 ? 11 : undefined;
   if (forcedTarget) console.log('Forcing target version: ES' + forcedTarget);
 
   let tob = new Tob('<cli>', INPUT_OVERRIDE);

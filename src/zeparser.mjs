@@ -208,13 +208,14 @@ import ZeTokenizer, {
 
 // <BODY>
 
-const VERSION_EXPONENTIATION = 7;
-const VERSION_ASYNC = 8;
-const VERSION_TRAILING_FUNC_COMMAS = 8;
-const VERSION_ASYNC_GEN = 9;
-const VERSION_OBJECTSPREAD = 9;
-const VERSION_TAGGED_TEMPLATE_BAD_ESCAPES = 9;
-const VERSION_OPTIONAL_CATCH = 10;
+const VERSION_EXPONENTIATION = 7; // ES2016
+const VERSION_ASYNC = 8; // ES2017
+const VERSION_TRAILING_FUNC_COMMAS = 8; // ES2017
+const VERSION_ASYNC_GEN = 9; // ES2018
+const VERSION_OBJECTSPREAD = 9; // ES2018
+const VERSION_TAGGED_TEMPLATE_BAD_ESCAPES = 9; // ES2018
+const VERSION_OPTIONAL_CATCH = 10; // ES2019
+const VERSION_DYNAMIC_IMPORT = 11; // ES2020
 const VERSION_WHATEVER = Infinity;
 
 const IS_ASYNC_PREFIXED = {};
@@ -395,7 +396,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     tokenStorage: options_tokenStorage = [],
     getTokenizer = null,
     allowGlobalReturn = false, // you may need this to parse arbitrary code or eval code for example
-    targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, Infinity
+    targetEsVersion = VERSION_WHATEVER, // 6, 7, 8, 9, 10, 11, Infinity
     exposeScopes: options_exposeScopes = false, // put scopes in the AST under `$scope` property?
     astUids = false, // add an incremental uid to all ast nodes for debugging
     fullErrorContext = false, // do not trunc the input when throwing an error?
@@ -419,6 +420,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   let failForRegexAssertIfPass = '';
   let regexAssertTrace = undefined;
 
+  let prevtok = null;
+  let curtok = null;
+  let curtype = 0;
+  let curc = 0;
+
   let assertExpectedFail = '';
   function ASSERT_VALID(bool, msg) {
     // An assert that must at least hold when the parser would otherwise accept the input.
@@ -433,21 +439,17 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   let tok = ZeTokenizer(code, targetEsVersion, goalMode, collectTokens, options_webCompat, FAIL_HARD, options_tokenStorage, $log, $warn, $error);
 
-  ASSERT(goalMode === GOAL_SCRIPT || goalMode === GOAL_MODULE);
-  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 10) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 10 or infin');
-
   let allowTrailingFunctionComma = targetEsVersion >= VERSION_TRAILING_FUNC_COMMAS || targetEsVersion === VERSION_WHATEVER;
   let allowAsyncFunctions = targetEsVersion >= VERSION_ASYNC || targetEsVersion === VERSION_WHATEVER;
   let allowAsyncGenerators = targetEsVersion >= VERSION_ASYNC_GEN || targetEsVersion === VERSION_WHATEVER;
   let allowBadEscapesInTaggedTemplates = targetEsVersion >= VERSION_TAGGED_TEMPLATE_BAD_ESCAPES || targetEsVersion === VERSION_WHATEVER;
   let allowOptionalCatchBinding = targetEsVersion >= VERSION_OPTIONAL_CATCH || targetEsVersion === VERSION_WHATEVER;
+  let allowDynamicImport = (targetEsVersion >= VERSION_DYNAMIC_IMPORT || targetEsVersion === VERSION_WHATEVER);
+
+  ASSERT(goalMode === GOAL_SCRIPT || goalMode === GOAL_MODULE);
+  ASSERT((targetEsVersion >= 6 && targetEsVersion <= 11) || targetEsVersion === VERSION_WHATEVER, 'version should be 6 7 8 9 10 11 or infin');
 
   if (getTokenizer) getTokenizer(tok);
-
-  let prevtok = null;
-  let curtok = null;
-  let curtype = 0;
-  let curc = 0;
 
   let catchforofhack = false;
 
@@ -3909,11 +3911,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // import x, {...} from 'x'
     // (cannot create a var named `yield` or `await` or `let` this way)
 
+    let importToken = curtok;
+
+    ASSERT_skipAny('import', lexerFlags);
+    if (curc === $$PAREN_L_28) {
+      // This must be dynamic `import()` or an error
+      return parseDynamicImportStatement(lexerFlags, importToken, astProp);
+    }
+
+    // Note: since `import()` is valid in non-global, and in non-module-goal, we have to check the token after `import` first
+
     if (goalMode !== GOAL_MODULE) THROW('The `import` keyword can only be used with the module goal');
     if (isGlobalToplevel === NOT_GLOBAL_TOPLEVEL) THROW('The `import` keyword is only supported at the top level'); // TODO: import() ?
 
-    AST_open(astProp, 'ImportDeclaration', curtok);
-    ASSERT_skipAny('import', lexerFlags);
+    AST_open(astProp, 'ImportDeclaration', importToken);
     AST_set('specifiers', []);
 
     if (curtype === $IDENT) {
@@ -5937,7 +5948,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - `x = x + yield`
         return parseYield(lexerFlags, identToken, allowAssignment, astProp);
       default:
-        if (!checkIdentReadable(lexerFlags, bindingType, identToken)) THROW('Illegal keyword encountered; is not a value [' + identToken.str + ']');
+        if (!checkIdentReadable(lexerFlags, bindingType, identToken)) {
+          if (curc === $$PAREN_L_28 && identToken.str === 'import') {
+            return parseDynamicImport(lexerFlags, identToken, astProp);
+          }
+          THROW('Illegal keyword encountered; is not a value [' + identToken.str + ']');
+        }
         // - `x` but not `true`
         // - `[x, y, ...z = arr]`
         // TODO: is this check redundant with the binding ident check below? I think that supersedes it?
@@ -6107,6 +6123,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - a`b`            (where a is recursively a memberexpression)
     // - super.b
     // - new.target      (already checked so cannot be here)
+    // - import()        (explicitly not `(new import)()` but `new (import())`)
     // - another new
     // - primary;
     //   - this
@@ -6129,6 +6146,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `new await x()`
     // - `new await x()()`
     // - `new b↵++c;`
+
+    if (curtype === $IDENT && curtok.str === 'import') {
+      // We'll have to revisit this one when `import.meta` becomes spec, but for now this is fine to prevent here.
+      THROW('Cannot use dynamic import as an argument to `new`, the spec simply does not allow it');
+    }
 
     // Note: the `isNewArg` state will make sure the `parseValueTail` function properly deals with the first call arg
     let assignableForPiggies = parseValue(lexerFlags, ASSIGN_EXPR_IS_ERROR, IS_NEW_ARG, 'callee');
@@ -6696,6 +6718,46 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } while (true);
       skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
+    return assignable;
+  }
+  function parseDynamicImportStatement(lexerFlags, importToken, astProp) {
+    ASSERT(parseDynamicImportStatement.length === arguments.length, 'arg count');
+
+    AST_open(astProp, 'ExpressionStatement', importToken);
+    parseDynamicImport(lexerFlags, importToken, 'expression');
+    let assignable = parseValueTail(lexerFlags, importToken, NOT_ASSIGNABLE, NOT_NEW_ARG, 'expression');
+    parseExpressionFromOp(lexerFlags, importToken, assignable, 'expression');
+    AST_close('ExpressionStatement');
+  }
+  function parseDynamicImport(lexerFlags, importToken, astProp) {
+    ASSERT(parseDynamicImport.length === arguments.length, 'arg count');
+    ASSERT(curc === $$PAREN_L_28, 'havent consumed the paren yet');
+
+    // NOTE: dynamic import is NOT bound to the module goal (!) Only to the version (ES2020+)
+
+    if (!allowDynamicImport) {
+      THROW('Dynamic import syntax not supported. Requires version ES2020+ / ES11+.');
+    }
+
+    // https://github.com/estree/estree/blob/master/experimental/import-expression.md
+
+    ASSERT_skipRex('(', lexerFlags);
+    AST_open(astProp, 'CallExpression', importToken);
+    AST_open('callee', 'Import', importToken);
+    AST_close('Import');
+    AST_set('arguments', []);
+    let assignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'arguments');
+    if (curc !== $$PAREN_R_29) {
+      if (curc === $$COMMA_2C) {
+        // [x]: `import(a, b)`
+        THROW('Dynamic `import` only expected exactly one argument');
+      }
+      // [x]: `import(a b)`
+      THROW('The dynamic `import` argument was followed by unknown content');
+    }
+    ASSERT_skipDiv(')', lexerFlags);
+    AST_close('CallExpression');
+
     return assignable;
   }
 

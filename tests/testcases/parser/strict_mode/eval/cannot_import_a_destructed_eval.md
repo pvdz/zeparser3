@@ -33,7 +33,7 @@ throws: Parser error!
   The `import` keyword can only be used with the module goal
 
 import {eval} from "x";
-^------- error
+       ^------- error
 `````
 
 ### Strict mode
