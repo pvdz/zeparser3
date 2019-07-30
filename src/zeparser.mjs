@@ -10310,8 +10310,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (closingCharOrd === $$CURLY_R_7D && !isAssignable(assignable)) destructible |= CANT_DESTRUCT;
       // [v]: `[.../x/]`
       // [v]: `[.../x//yield]`
-      ASSERT(hasNoFlag(assignable, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_YIELD_KEYWORD), 'I htink these are superseded by a new system');
-
+      // [v]: `function *f(){ return { ...(yield) }`
       return copyPiggies(destructible, assignable);
     }
 
