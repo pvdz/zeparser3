@@ -1,20 +1,21 @@
 # ZeParser parser test case
 
-- Path: zeparser3/tests/testcases/parser/yield/restricted_production/in_generator/asi_before_star.md
+- Path: zeparser3/tests/testcases/parser/yield/yield_star/yield_newline_star_id.md
 
-> :: yield : restricted production : in generator
+> :: yield : yield star
 >
-> ::> asi before star
+> ::> yield newline star id
 >
-> `yield * x` not have a newline before the star
+> Yield star is a restricted production
 
+## FAIL
 
 ## Input
 
 `````js
 function *f() {
   yield
-    * x
+  * 1;
 }
 `````
 
@@ -36,8 +37,8 @@ throws: Parser error!
 
 function *f() {
   yield
-    * x
-    ^------- error
+  * 1;
+  ^------- error
 
 }
 `````

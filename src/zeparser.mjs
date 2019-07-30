@@ -6266,6 +6266,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
 
+      if (curtok.nl > 0) {
+        THROW('A newline after `yield` is illegal for `yield *`');
+      }
+
       AST_set('delegate', true);
       ASSERT_skipRex('*', lexerFlags); // next is any value
       parseValue(lexerFlags, allowAssignment, NOT_NEW_ARG, 'argument'); // arg required, no newline restrictions

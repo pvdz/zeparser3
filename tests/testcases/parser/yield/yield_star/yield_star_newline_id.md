@@ -1,17 +1,22 @@
 # ZeParser parser test case
 
-- Added: 2019-06-19 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/newgen/yield/yield_x002a/yield_star_can_be_followed_by_another_argless_yield.md
+- Path: zeparser3/tests/testcases/parser/yield/yield_star/yield_star_newline_id.md
 
-> :: yield : yield *
+> :: yield : yield star
 >
-> ::> yield star can be followed by another argless yield
+> ::> yield star newline id
+>
+> Yield star is a restricted production, but the newline is fine after the star
+
+## PASS
 
 ## Input
 
 `````js
-function* f() { yield* yield; }
+function *f() {
+  yield *
+  1;
+}
 `````
 
 ## Output
@@ -29,11 +34,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
       generator: true,
       async: false,
       id: {
@@ -44,20 +49,20 @@ ast: {
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:14},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,col:14},end:{line:4,col:1},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc:{start:{line:1,col:16},end:{line:1,col:30},source:''},
+            loc:{start:{line:2,col:2},end:{line:4,col:0},source:''},
             expression: {
               type: 'YieldExpression',
-              loc:{start:{line:1,col:16},end:{line:1,col:28},source:''},
+              loc:{start:{line:2,col:2},end:{line:3,col:3},source:''},
               delegate: true,
               argument: {
-                type: 'YieldExpression',
-                loc:{start:{line:1,col:23},end:{line:1,col:28},source:''},
-                delegate: false,
-                argument: null
+                type: 'Literal',
+                loc:{start:{line:3,col:2},end:{line:3,col:2},source:''},
+                value: 1,
+                raw: '1'
               }
             }
           }
@@ -69,7 +74,7 @@ ast: {
 
 tokens (12x):
        IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR IDENT
-       PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
+       PUNCTUATOR NUMBER_DEC PUNCTUATOR PUNCTUATOR
 `````
 
 ### Strict mode

@@ -1,20 +1,20 @@
 # ZeParser parser test case
 
-- Path: zeparser3/tests/testcases/parser/yield/restricted_production/in_generator/asi_before_star.md
+- Path: zeparser3/tests/testcases/parser/yield/yield_star/yield_star.md
 
-> :: yield : restricted production : in generator
+> :: yield : yield star
 >
-> ::> asi before star
+> ::> yield star
 >
-> `yield * x` not have a newline before the star
+> Yield star is a restricted production, but the newline is fine after the star but the arg is mandatory
 
+## FAIL
 
 ## Input
 
 `````js
 function *f() {
-  yield
-    * x
+  yield *
 }
 `````
 
@@ -32,14 +32,12 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  A newline after `yield` is illegal for `yield *`
+  Expected to parse a value
 
 function *f() {
-  yield
-    * x
-    ^------- error
-
+  yield *
 }
+^------- error
 `````
 
 ### Strict mode
