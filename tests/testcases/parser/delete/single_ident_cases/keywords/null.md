@@ -1,17 +1,21 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/delete/can_be_a_keyword_in_sloppy_mode.md
+- Path: zeparser3/tests/testcases/parser/delete/single_ident_cases/keywords/null.md
 
-> :: delete
+> :: delete : single ident cases : keywords
 >
-> ::> can be a keyword in sloppy mode
+> ::> null
+>
+> This tests the "can not delete an identifier without tail in strict mode" rule, which does not apply to keywords
+>
+> But is it a runtime error? ;)
+
+## PASS
 
 ## Input
 
 `````js
-delete true
+delete null;
 `````
 
 ## Output
@@ -29,11 +33,11 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+  loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+      loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
       expression: {
         type: 'UnaryExpression',
         loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
@@ -42,8 +46,8 @@ ast: {
         argument: {
           type: 'Literal',
           loc:{start:{line:1,col:7},end:{line:1,col:11},source:''},
-          value: true,
-          raw: 'true'
+          value: null,
+          raw: 'null'
         }
       }
     }
@@ -51,7 +55,7 @@ ast: {
 }
 
 tokens (4x):
-       IDENT IDENT ASI
+       IDENT IDENT PUNCTUATOR
 `````
 
 ### Strict mode

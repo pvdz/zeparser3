@@ -1,17 +1,19 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/delete/can_be_a_keyword_in_sloppy_mode.md
+- Path: zeparser3/tests/testcases/parser/delete/single_ident_cases/keywords/yield.md
 
-> :: delete
+> :: delete : single ident cases : keywords
 >
-> ::> can be a keyword in sloppy mode
+> ::> yield
+>
+> This tests the "can not delete an identifier without tail in strict mode" rule, which does not apply to keywords
+>
+> Yield is not a keyword in this context in sloppy mode. Will throw in strict.
 
 ## Input
 
 `````js
-delete true
+delete yield;
 `````
 
 ## Output
@@ -29,21 +31,20 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
       expression: {
         type: 'UnaryExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+        loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
         operator: 'delete',
         prefix: true,
         argument: {
-          type: 'Literal',
-          loc:{start:{line:1,col:7},end:{line:1,col:11},source:''},
-          value: true,
-          raw: 'true'
+          type: 'Identifier',
+          loc:{start:{line:1,col:7},end:{line:1,col:12},source:''},
+          name: 'yield'
         }
       }
     }
@@ -51,20 +52,27 @@ ast: {
 }
 
 tokens (4x):
-       IDENT IDENT ASI
+       IDENT IDENT PUNCTUATOR
 `````
 
 ### Strict mode
 
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
-_Output same as sloppy mode._
+`````
+throws: Parser error!
+  Cannot use `yield` outside of generator functions when in strict mode
+
+delete yield;
+            ^------- error
+`````
+
 
 ### Module goal
 
 Parsed with the module goal.
 
-_Output same as sloppy mode._
+_Output same as strict mode._
 
 ### Web compat mode
 
