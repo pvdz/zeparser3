@@ -768,6 +768,7 @@ function ZeTokenizer(
       let d = skipDigits();
       parseExponentMaybe(d);
     }
+    verifyCharAfterNumber();
     return $NUMBER_DEC;
   }
 
@@ -1094,7 +1095,32 @@ function ZeTokenizer(
     return $ERROR;
   }
 
+  function verifyCharAfterNumber() {
+    // Must verify that the character immediately following this number
+    // https://tc39.es/ecma262/#sec-literals-numeric-literals
+    // (See foot note)
+    // > The SourceCharacter immediately following a NumericLiteral must not be an IdentifierStart or DecimalDigit.
+    // So `3in x` is an explicit example that should be considered a syntax error.
+    if (eof()) return;
+    let c = peek();
+    if (
+      // I think some heuristics could make this check easier to grok?
+      // c !== $$SPACE_20 && c!== $$SEMI_3B &&
+      (
+        isIdentStart(c, 0) !== INVALID_IDENT_CHAR || // IdentifierStart, `3in`, `5instanceof` `0x33in`
+        (c >= $$0_30 && c <= $$9_39)                        // DecimalDigit, not even sure about an example
+      )
+    ) {
+      THROW('Found `' + String.fromCharCode(c) + '`. It is not legal for an ident or number token to start after a number token without some form of separation');
+    }
+  }
+
   function parseLeadingZero(lexerFlags) {
+    let r = _parseLeadingZero(lexerFlags);
+    if (r !== $ERROR) verifyCharAfterNumber();
+    return r;
+  }
+  function _parseLeadingZero(lexerFlags) {
     // 0 0. 0.<digits> 0<digits> 0x<hex> 0b<bin> 0o<octal>
 
     if (eof()) return $NUMBER_DEC;
@@ -1137,6 +1163,7 @@ function ZeTokenizer(
       if (c === $$DOT_2E) parseFromFractionDot();
       else parseExponentMaybe(c);
     }
+    verifyCharAfterNumber();
     return $NUMBER_DEC;
   }
   function skipDigits() {
