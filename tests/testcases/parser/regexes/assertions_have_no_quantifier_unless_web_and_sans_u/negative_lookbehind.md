@@ -1,19 +1,19 @@
 # ZeParser parser test case
 
-- Added: 2019-06-19 (mass migration from old system)
+- Added: 2019-06-17 (mass migration from old system)
 - Modified: -
-- Path: zeparser3/tests/testcases/parser/newgen/regexes/some_annexb_stuff/syntax_chars_without_context/charx003dx007b/with_web_compat_and_u-flag.md
+- Path: zeparser3/tests/testcases/parser/regexes/assertions_have_no_quantifier_unless_web_and_sans_u/without_u_flag/webcompat/negative_lookbehind.md
 
-> :: regexes : some annexb stuff : syntax chars without context : char={
+> :: regexes : assertions have no quantifier unless web and sans u : without u flag : webcompat
 >
-> ::> with web compat and u-flag
+> ::> negative lookbehind
 
 
 ## Input
 
 
 `````js
-/{/u
+/a(?<!x)?b/
 `````
 
 ## Output
@@ -30,9 +30,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered unescaped opening curly `{` and the previous character was not part of something quantifiable
+    Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `(?=` can not have `*`, `+`, `?`, or `{` following it)
 
-/{/u
+/a(?<!x)?b/
 ^------- error
 `````
 
@@ -52,11 +52,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Tokenizer error!
-    Regex had syntax that is invalid with u-flag and u-flag was in fact present
-
-/{/u
-^------- error
-`````
-
+_Output same as sloppy mode._

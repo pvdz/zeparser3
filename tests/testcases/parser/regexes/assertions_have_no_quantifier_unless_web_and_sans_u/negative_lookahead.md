@@ -1,17 +1,17 @@
 # ZeParser parser test case
 
-- Added: 2019-06-19 (mass migration from old system)
+- Added: 2019-06-17 (mass migration from old system)
 - Modified: -
-- Path: zeparser3/tests/testcases/parser/newgen/regexes/some_annexb_stuff/syntax_chars_without_context/charx003dx007b/with_web_compat_without_u-flag.md
+- Path: zeparser3/tests/testcases/parser/regexes/assertions_have_no_quantifier_unless_web_and_sans_u/without_u_flag/webcompat/negative_lookahead.md
 
-> :: regexes : some annexb stuff : syntax chars without context : char={
+> :: regexes : assertions have no quantifier unless web and sans u : without u flag : webcompat
 >
-> ::> with web compat without u-flag
+> ::> negative lookahead
 
 ## Input
 
 `````js
-/{/
+/a(?!x)?b/
 `````
 
 ## Output
@@ -28,9 +28,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered unescaped opening curly `{` and the previous character was not part of something quantifiable
+    Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `(?=` can not have `*`, `+`, `?`, or `{` following it)
 
-/{/
+/a(?!x)?b/
 ^------- error
 `````
 
@@ -53,17 +53,17 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+  loc:{start:{line:1,col:0},end:{line:1,col:10},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+      loc:{start:{line:1,col:0},end:{line:1,col:10},source:''},
       expression: {
         type: 'Literal',
-        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+        loc:{start:{line:1,col:0},end:{line:1,col:10},source:''},
         value: null,
-        regex: { pattern: '{', flags: '' },
-        raw: '/{/'
+        regex: { pattern: 'a(?!x)?b', flags: '' },
+        raw: '/a(?!x)?b/'
       }
     }
   ]

@@ -1705,6 +1705,17 @@ function ZeTokenizer(
     ASSERT(c !== $$STAR_2A && c !== $$FWDSLASH_2F, 'earlier checks should already have peeked for a comment token');
     return _parseRegexBody(c, 0, ALWAYS_GOOD);
   }
+  function cannotBeQuantifier(c, uflagStatus, webcompatException, msg) {
+    let badStart = c === $$STAR_2A || c === $$PLUS_2B || c === $$QMARK_3F || c === $$CURLY_L_7B;
+    if (badStart) {
+      if (webcompatException && webCompat === WEB_COMPAT_ON) {
+        uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, msg);
+      } else {
+        uflagStatus = regexSyntaxError(msg);
+      }
+    }
+    return uflagStatus;
+  }
   function _parseRegexBody(c, groupLevel, uflagStatus) {
     //ASSERT(typeof c === 'number', 'c is an ord');
     ASSERT(typeof groupLevel === 'number' && groupLevel >= 0, 'valid group level');
@@ -1717,14 +1728,7 @@ function ZeTokenizer(
     let afterAtom = false;
 
     // dont start with a quantifier
-    let badStart = c === $$STAR_2A || c === $$PLUS_2B || c === $$QMARK_3F || c === $$CURLY_L_7B;
-    if (badStart) {
-      if (c === $$CURLY_L_7B && webCompat === WEB_COMPAT_ON) {
-        uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex was bad with and without u-flag');
-      } else {
-        uflagStatus = regexSyntaxError('Started with a quantifier but that is not allowed');
-      }
-    }
+    uflagStatus = cannotBeQuantifier(c, uflagStatus, c === $$CURLY_L_7B, 'Started with a quantifier but that is not allowed');
 
     let groupNames = {};
     let namedBackRefs = [];
@@ -1772,6 +1776,10 @@ function ZeTokenizer(
         case $$$_24:
           // atom; match the end of a file/line
           ASSERT_skip($$$_24);
+          if (neof()) {
+            c = peek();
+            uflagStatus = cannotBeQuantifier(c, uflagStatus, c === $$CURLY_L_7B, 'Regex Assertion "atoms" can not be quantified but this `$` was quantified anyways');
+          }
           afterAtom = false; // this Assertion can never have a Quantifier
           break;
 
@@ -1779,7 +1787,6 @@ function ZeTokenizer(
           // atom escape is different from charclass escape
           ASSERT_skip($$BACKSLASH_5C);
           afterAtom = true; // except in certain cases...
-
 
           if (eof()) {
             uflagStatus = regexSyntaxError('Early EOF');
@@ -1805,8 +1812,9 @@ function ZeTokenizer(
         case $$PAREN_L_28:
           // Assertions `(?=` and `(?!` can not have quantifiers (`?`,`*`,etc) except without u-flag and in web-compat mode
           // Since this can also be a non-capturing group `(?:` we need to track that bit.
-          let wasAssertion = false;
-          let wasUnfixableAssertion = false; // lookbehind can not get quantified even under webcompat flag (too new)
+          let wasFixableAssertion = false;
+          // lookbehind `(?<=` and `(?<!` can not get quantified even under webcompat flag (too new)
+          let wasUnfixableAssertion = false;
 
           // parse group (?: (!: (
           ASSERT_skip($$PAREN_L_28);
@@ -1831,6 +1839,10 @@ function ZeTokenizer(
               if (c === $$LT_3C) {
                 // (?<
                 ASSERT_skip($$LT_3C);
+                if (eof()) {
+                  uflagStatus = regexSyntaxError('Encountered early EOF');
+                  break;
+                }
                 c = peek();
                 if (c === $$IS_3D || c === $$EXCL_21) {
                   if (!supportRegexLookbehinds) {
@@ -1845,10 +1857,13 @@ function ZeTokenizer(
                   break;
                 } else if (c === $$BACKSLASH_5C) {
                   // parseRegexNamedGroup
+                  // - `(?<\u0065ame>xyz)/``
+                  //       ^
                   ASSERT_skip($$BACKSLASH_5C);
+                  if (eof()) TODO; // pretty sure I need to check eof in between...
                   ASSERT_skip($$U_75);
 
-                  c = parseRegexUnicodeEscape2();
+                  c = parseRegexUnicodeEscape2(); // will check EOF first, consume a valid unicode escape, else bail
                   if (c === INVALID_IDENT_CHAR || c === CHARCLASS_BAD) {
                     uflagStatus = regexSyntaxError('Found invalid quad unicode escape');
                     break;
@@ -1865,19 +1880,20 @@ function ZeTokenizer(
                     uflagStatus = regexSyntaxError('Named capturing group named contained an invalid unicode escaped char');
                     break;
                   }
-                  let result = parseRegexCapturingGroupNameRemainder(c, groupNames);
+                  let result = parseRegexCapturingGroupNameRemainder(c, groupNames); // EOF is checked inside
                   if (result !== ALWAYS_GOOD) {
                     uflagStatus = result;
                     break;
                   }
 
-                  c = $$GT_3E;
+                  c = $$GT_3E; // TODO: dont think this does anything
                 } else {
-                  // (?< ...
+                  // - `(?<name>xyz)/``
+                  //       ^
                   let wide = isIdentStart(c, pointer);
 
                   if (wide === VALID_DOUBLE_CHAR) {
-                    skip();
+                    ASSERT_skip(c);
                     skip();
                   } else {
                     ASSERT(wide === VALID_SINGLE_CHAR || wide === INVALID_IDENT_CHAR, 'enum');
@@ -1891,18 +1907,19 @@ function ZeTokenizer(
                     break;
                   }
 
+                  // Do NOT update c yet. We pass on the first char after consuming it. EOF is checked inside, too.
                   let result = parseRegexCapturingGroupNameRemainder(c, groupNames);
                   if (result !== ALWAYS_GOOD) {
                     uflagStatus = result;
                     break;
                   }
 
-                  c = $$GT_3E;
+                  c = $$GT_3E; // TODO: unnecessary (even bad?) because the first statement after this will c=peek()
                 }
               } else if (c === $$IS_3D || c === $$EXCL_21) {
                 // (?= (?!
                 ASSERT_skip(c);
-                wasAssertion = true; // lookahead assertion might only be quantified without u-flag and in webcompat mode
+                wasFixableAssertion = true; // lookahead assertion might only be quantified without u-flag and in webcompat mode
               }
 
               if (eof()) {
@@ -1926,14 +1943,10 @@ function ZeTokenizer(
           }
 
           c = peek();
-          if ((wasAssertion || wasUnfixableAssertion) && (c === $$QMARK_3F || c === $$CURLY_L_7B || c === $$STAR_2A || c === $$PLUS_2B)) {
-            // Found a quantified assertion
+
+          if (wasFixableAssertion || wasUnfixableAssertion) {
             // Only `(?=` and `(?!` can be legal in web compat mode and without the u-flag. Anything else is always bad.
-            if (wasAssertion && webCompat === WEB_COMPAT_ON) {
-              uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
-            } else {
-              uflagStatus = regexSyntaxError('Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `?=` can not have `*`, `+`, `?`, or `{` following it)');
-            }
+            uflagStatus = cannotBeQuantifier(c, uflagStatus, !wasUnfixableAssertion, 'Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `(?=` can not have `*`, `+`, `?`, or `{` following it)');
           }
 
           afterAtom = true;
@@ -1998,10 +2011,15 @@ function ZeTokenizer(
 
         case $$CURLY_L_7B:
           // explicit quantifier
+          // This is valid if we just parsed an atom, or in webcompat mode without the u-flag
           ASSERT_skip($$CURLY_L_7B);
           if (afterAtom) {
-            if (!parseRegexCurlyQuantifier() && webCompat === WEB_COMPAT_OFF) {
-              uflagStatus = regexSyntaxError('Encountered unescaped closing curly `}` while not parsing a quantifier');
+            if (!parseRegexCurlyQuantifier()) {
+              if (webCompat === WEB_COMPAT_OFF) {
+                uflagStatus = regexSyntaxError('Encountered unescaped closing curly `}` while not parsing a quantifier');
+              } else {
+                uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex was bad with and without u-flag');
+              }
             }
             if (neof() && peeky($$QMARK_3F)) {
               ASSERT_skip($$QMARK_3F);
@@ -2009,23 +2027,42 @@ function ZeTokenizer(
             afterAtom = false;
           } else {
             if (webCompat === WEB_COMPAT_ON) {
-              uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex was bad with and without u-flag');
+              // web compat only:
+              // [v]: `/f{/`
+              // [x]: `/f{1}/`
+              // [x]: `/f{1}?/`
+              // [v]: `/f{?/`
+              // [v]: `/f{/`
+              // [v]: `/f{?/`
+              // [v]: `/f{/`u
+              // [v]: `/f{?/u`
+              // [v]: `/f{/u`
+              // [v]: `/f{?/u`
+              // IF we can parse a curly quantifier, THEN we throw a syntax error. Otherwise we just parse a `{`
+              if (parseRegexCurlyQuantifier()) {
+                uflagStatus = regexSyntaxError('Encountered illegal curly quantifier without anything to quantify. This is `InvalidBracedQuantifier` and explicitly a syntax error');
+              } else {
+                // This in webcompat is `{` as `ExtendedAtom` is a `ExtendedPatternCharacter`, which does not disallow the curly
+                uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Regex was bad with and without u-flag');
+                // in web compat mode this case is treated as an extended atom
+                afterAtom = true;
+              }
             } else {
-              uflagStatus = regexSyntaxError('Encountered unescaped opening curly `}` and the previous character was not part of something quantifiable');
+              uflagStatus = regexSyntaxError('Encountered unescaped opening curly `{` and the previous character was not part of something quantifiable');
             }
           }
           break;
         case $$CURLY_R_7D:
           ASSERT_skip($$CURLY_R_7D);
           if (webCompat === WEB_COMPAT_OFF) {
-            // this is always bad since we have a quantifier parser that consumes valid curlies
+            // this is always bad since we have a quantifier parser that consumes valid curly pairs
             uflagStatus = regexSyntaxError('Encountered unescaped closing curly `}` while not parsing a quantifier');
             afterAtom = false;
           } else {
             // in web compat mode you're allowed to have an unescaped curly as atom
             uflagStatus = updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Found a rhs curly as an Atom, only valid without u-flag and with web compat mode, but already found something that invalidates not having the u-flag so cant validate this regex');
             // in web compat mode this case is treated as an extended atom
-            afterAtom = false;
+            afterAtom = true;
           }
           break;
 
@@ -2052,8 +2089,12 @@ function ZeTokenizer(
     // pointer should be up to date
     // the first char of the group name should have been confirmed and parsed
 
+    if (eof()) {
+      return regexSyntaxError('Encountered early EOF');
+    }
+
     if (peeky($$GT_3E)) {
-      // name is one character
+      // name is one character (BUT NOT NECESSARILY ONE BYTE)
       lastParsedIdent = String.fromCodePoint(firstCharOrd);
     } else {
       parseIdentifierRest(firstCharOrd, '');
@@ -3237,7 +3278,6 @@ function ZeTokenizer(
     }
     if (c === $$CURLY_R_7D) {
       ASSERT_skip($$CURLY_R_7D);
-      //return (hasLow && (min <= max || !hasHi)) || (!hasLow && hasHi);
       return !badNumber && (hasLow !== hasHi || (hasLow && hasHi && min <= max));
     }
     return false;
