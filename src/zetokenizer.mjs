@@ -1430,17 +1430,16 @@ function ZeTokenizer(
     return $ERROR;
   }
 
-  function isIdentStart(c, offset){
+  function isIdentStart(c, offsetOfC){
     ASSERT(isIdentStart.length === arguments.length, 'all args');
-    if (isAsciiLetter(c)) return VALID_SINGLE_CHAR;
-    if (c === $$$_24 || c === $$LODASH_5F) return VALID_SINGLE_CHAR;
+    if (isAsciiLetter(c) || c === $$$_24 || c === $$LODASH_5F) return VALID_SINGLE_CHAR;
     if (c > 127) {
       // now we have to do an expensive... but proper unicode check
-      return veryExpensiveUnicodeCheck(c, offset, ID_START_REGEX);
+      return veryExpensiveUnicodeCheck(c, offsetOfC, ID_START_REGEX);
     }
     return INVALID_IDENT_CHAR;
   }
-  function isIdentRestChr(c, offset){
+  function isIdentRestChr(c, offsetOfC){
     ASSERT(isIdentRestChr.length === arguments.length, 'all args');
     if (isAsciiLetter(c)) return VALID_SINGLE_CHAR;
     if (isAsciiNumber(c)) return VALID_SINGLE_CHAR;
@@ -1453,7 +1452,7 @@ function ZeTokenizer(
       if (c === $$ZWNJ_200C || c === $$ZWJ_200D) return VALID_SINGLE_CHAR;
 
       // now we have to do an expensive... but proper unicode check
-      return veryExpensiveUnicodeCheck(c, offset, ID_CONTINUE_REGEX);
+      return veryExpensiveUnicodeCheck(c, offsetOfC, ID_CONTINUE_REGEX);
     }
     return INVALID_IDENT_CHAR;
   }
@@ -1870,13 +1869,15 @@ function ZeTokenizer(
                   }
                   let wasExtendedEscape = false;
                   if ((c & CHARCLASS_BAD_SANS_U_FLAG) === CHARCLASS_BAD_SANS_U_FLAG) {
+                    // \uxxxx\uxxxx
                     uflagStatus = updateRegexUflagStateCharClass(uflagStatus, CHARCLASS_BAD_SANS_U_FLAG, 'Encountered extended unicode escape `\\u{}` which is only valid with u-flag but this regex is invalid with u-flag');
                     c = c ^ CHARCLASS_BAD_SANS_U_FLAG;
                     wasExtendedEscape = true;
                   }
 
-                  let wide = isIdentStart(c, CODEPOINT_FROM_ESCAPE);
-                  if (wide === INVALID_IDENT_CHAR) {
+                  if (isIdentStart(c, CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR) {
+                    // - `(?<\u0020ame>xyz)/``
+                    //       ^
                     uflagStatus = regexSyntaxError('Named capturing group named contained an invalid unicode escaped char');
                     break;
                   }
