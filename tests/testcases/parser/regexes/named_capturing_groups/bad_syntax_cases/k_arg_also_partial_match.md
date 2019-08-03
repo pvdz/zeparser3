@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Named back reference \k<a> was not defined in this regex: {#b:true}
+    Named back reference \k<a> was not defined in this regex: {#ab:true}
 
 /(?<ab>a)\k<a>/
 ^------- error

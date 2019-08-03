@@ -623,7 +623,7 @@ function ZeTokenizer(
 
     let c = peekSkip();
 
-    if (isAsciiLetter(c)) return parseIdentifierRest(c, String.fromCharCode(c));
+    if (isAsciiLetter(c)) return parseIdentifierRest(String.fromCharCode(c));
 
     // https://www.ecma-international.org/ecma-262/7.0/#sec-punctuators
     switch (c) {
@@ -688,7 +688,7 @@ function ZeTokenizer(
       case $$STAR_2A:
         return parseStar(); // * *= ** **=
       case $$$_24:
-        return parseIdentifierRest(c, '$');
+        return parseIdentifierRest('$');
       case $$PERCENT_25:
         return parseCompoundAssignment(); // % %=
       case $$FF_0C:
@@ -713,7 +713,7 @@ function ZeTokenizer(
       case $$COLON_3A:
         return $PUNCTUATOR;
       case $$LODASH_5F:
-        return parseIdentifierRest(c, '_');
+        return parseIdentifierRest('_');
       case $$OR_7C:
         return parseSameOrCompound(c); // | || |=
       case $$QMARK_3F:
@@ -1305,15 +1305,9 @@ function ZeTokenizer(
     return $PUNCTUATOR;
   }
 
-  function parseIdentifierRest(cLeading, prev) {
-    ASSERT(typeof cLeading === 'number', 'should get the parsed ident start');
-    ASSERT(isIdentStart(cLeading, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR, 'ident start should already have been confirmed');
-    ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
-    return _parseIdentifierRest(cLeading, prev);
-  }
-  function _parseIdentifierRest(c, prev) {
-    ASSERT(typeof c === 'number', 'c is an ord');
-    ASSERT(typeof prev === 'string', 'prev should be string so far or empty');
+  function parseIdentifierRest(prevStr) {
+    ASSERT(parseIdentifierRest.length === arguments.length, 'arg count');
+    ASSERT(typeof prevStr === 'string', 'prev should be string so far or empty');
     if (neof()) {
       let c = peek();
       do {
@@ -1336,8 +1330,8 @@ function ZeTokenizer(
               regexSyntaxError('An escape that might be part of an identifier cannot be anything else so if it is invalid it must be an error');
               return $ERROR;
             }
-            if (wide === VALID_SINGLE_CHAR) prev += String.fromCharCode(c);
-            else prev += String.fromCodePoint(c);
+            if (wide === VALID_SINGLE_CHAR) prevStr += String.fromCharCode(c);
+            else prevStr += String.fromCodePoint(c);
           } else {
             regexSyntaxError('Only unicode escapes are legal in identifier names');
             return $ERROR;
@@ -1347,13 +1341,13 @@ function ZeTokenizer(
           let wide = isIdentRestChr(c, pointer);
           if (wide === INVALID_IDENT_CHAR) break;
           if (wide === VALID_DOUBLE_CHAR) {
-            prev += input.slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
+            prevStr += input.slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
             skip();
             skip();
           } else {
             ASSERT(wide === VALID_SINGLE_CHAR, 'enum');
             ASSERT_skip(c);
-            prev += String.fromCharCode(c); // TODO: if this affects perf we can try a slice after the loop
+            prevStr += String.fromCharCode(c); // TODO: if this affects perf we can try a slice after the loop
           }
         }
         if (eof()) break;
@@ -1362,10 +1356,10 @@ function ZeTokenizer(
       // slow path, dont test this inside the super hot loop above
       if (c === $$BACKSLASH_5C) {
         ASSERT_skip($$BACKSLASH_5C);
-        return parseIdentFromUnicodeEscape(NON_START, prev);
+        return parseIdentFromUnicodeEscape(NON_START, prevStr);
       }
     }
-    lastParsedIdent = prev;
+    lastParsedIdent = prevStr;
     return $IDENT;
   }
   function parseIdentFromUnicodeEscape(fromStart, prev) {
@@ -1415,19 +1409,31 @@ function ZeTokenizer(
       // then can we proceed to parse an identifier. otherwise we'll still parse
       // into an error token.
       if (fromStart === FIRST_CHAR && isIdentStart(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
-        return _parseIdentifierRest(ord, prev);
+        return parseIdentifierRest(prev);
       } else if (fromStart === NON_START && isIdentRestChr(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
-        return _parseIdentifierRest(ord, prev);
+        return parseIdentifierRest(prev);
       } else {
         lastParsedIdent = prev;
         lastReportableTokenizerError = 'Identifier escape did not yield a valid identifier character';
         return $ERROR;
       }
     }
-    _parseIdentifierRest(0, prev); // keep on parsing the identifier but we will make it an error token
+    parseIdentifierRest(prev); // keep on parsing the identifier but we will make it an error token
     lastParsedIdent = prev;
     lastReportableTokenizerError = 'Only _unicode_ escapes are supported in identifiers';
     return $ERROR;
+  }
+
+  function readNextCodepointAsStringExpensive(c, offset) {
+    ASSERT(readNextCodepointAsStringExpensive.length === arguments.length, 'arg count');
+    // 0xDC00–0xDFFF is the surrogate pair range and means the next character is required to form the full unicode
+    // character (hence, "pair"). In that case we defer to more expensive codePointAt/fromCodePoint calls.
+    if (c <= 0xD7FF || (c >= 0xE000 && c <= 0xFFFF)) {
+      ASSERT(String.fromCodePoint(input.codePointAt(offset)) === input[offset], 'single char should still yield the same result in slow path');
+      return input[offset];
+    }
+    ASSERT(c > 0xffff, 'I think the surrogate pair chars 0xD800~0xDFFF should not validate to reach this point, not even escaped', offset, CODEPOINT_FROM_ESCAPE, c);
+    return String.fromCodePoint(input.codePointAt(offset));
   }
 
   function isIdentStart(c, offsetOfC){
@@ -1457,6 +1463,7 @@ function ZeTokenizer(
     return INVALID_IDENT_CHAR;
   }
   function veryExpensiveUnicodeCheck(c, offset, regexScanner) {
+    ASSERT(veryExpensiveUnicodeCheck.length === arguments.length, 'arg count');
     // offset is skipped for escapes. we can assert `c` is correct in those cases.
     if (offset !== CODEPOINT_FROM_ESCAPE) {
       // this is a slow path that only validates if unicode chars are used in an identifier
@@ -1881,7 +1888,10 @@ function ZeTokenizer(
                     uflagStatus = regexSyntaxError('Named capturing group named contained an invalid unicode escaped char');
                     break;
                   }
-                  let result = parseRegexCapturingGroupNameRemainder(c, groupNames); // EOF is checked inside
+
+                  let s = readNextCodepointAsStringExpensive(c, pointer);
+
+                  let result = parseRegexCapturingGroupNameRemainder(s, groupNames); // EOF is checked inside
                   if (result !== ALWAYS_GOOD) {
                     uflagStatus = result;
                     break;
@@ -1892,6 +1902,9 @@ function ZeTokenizer(
                   // - `(?<name>xyz)/``
                   //       ^
                   let wide = isIdentStart(c, pointer);
+                  let cPointer = pointer;
+
+                  let s = readNextCodepointAsStringExpensive(c, cPointer);
 
                   if (wide === VALID_DOUBLE_CHAR) {
                     ASSERT_skip(c);
@@ -1909,7 +1922,7 @@ function ZeTokenizer(
                   }
 
                   // Do NOT update c yet. We pass on the first char after consuming it. EOF is checked inside, too.
-                  let result = parseRegexCapturingGroupNameRemainder(c, groupNames);
+                  let result = parseRegexCapturingGroupNameRemainder(s, groupNames);
                   if (result !== ALWAYS_GOOD) {
                     uflagStatus = result;
                     break;
@@ -2086,7 +2099,9 @@ function ZeTokenizer(
     // this is a fail because we didnt got to the end of input before the closing /
     return regexSyntaxError('Found EOF before regex was closed');
   }
-  function parseRegexCapturingGroupNameRemainder(firstCharOrd, groupNames) {
+  function parseRegexCapturingGroupNameRemainder(firstCharStr, groupNames) {
+    ASSERT(parseRegexCapturingGroupNameRemainder.length === arguments.length, 'arg count');
+
     // pointer should be up to date
     // the first char of the group name should have been confirmed and parsed
 
@@ -2096,9 +2111,9 @@ function ZeTokenizer(
 
     if (peeky($$GT_3E)) {
       // name is one character (BUT NOT NECESSARILY ONE BYTE)
-      lastParsedIdent = String.fromCodePoint(firstCharOrd);
+      lastParsedIdent = firstCharStr;
     } else {
-      parseIdentifierRest(firstCharOrd, '');
+      parseIdentifierRest(firstCharStr);
     }
 
     let name = lastParsedIdent;
@@ -2287,15 +2302,13 @@ function ZeTokenizer(
           }
         }
 
+        let firstCharStr = (wider === VALID_DOUBLE_CHAR) ? input.slice(pointer - 2, pointer) : String.fromCharCode(c);
+
         if (peeky($$GT_3E)) {
           // name is one character
-          if (wider === VALID_DOUBLE_CHAR) {
-            lastParsedIdent = input.slice(pointer - 2, pointer);
-          } else {
-            lastParsedIdent = String.fromCharCode(c);
-          }
+          lastParsedIdent = firstCharStr;
         } else {
-          parseIdentifierRest(c, '');
+          parseIdentifierRest(firstCharStr);
         }
 
         namedBackRefs.push(lastParsedIdent); // we can only validate ths after completely parsing the regex body
@@ -3553,7 +3566,7 @@ function ZeTokenizer(
         let wide = isIdentStart(cu, pointer - 1);
         if (wide !== INVALID_IDENT_CHAR) {
           if (wide === VALID_DOUBLE_CHAR) skip(); // c was skipped but cu was two (16bit) positions
-          return parseIdentifierRest(cu, String.fromCodePoint(cu));
+          return parseIdentifierRest(String.fromCodePoint(cu));
         }
 
         // https://tc39.github.io/ecma262/#sec-unicode-format-control-characters

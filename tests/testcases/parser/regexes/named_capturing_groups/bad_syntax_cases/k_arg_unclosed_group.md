@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Named back reference \k<> was not defined in this regex: {#a:true}
+    Missing closing angle bracket of name of group: [97]
 
 /\k<a(?<a>a)/
 ^------- error

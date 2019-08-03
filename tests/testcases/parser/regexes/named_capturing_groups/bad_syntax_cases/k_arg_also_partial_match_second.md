@@ -1,17 +1,19 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/regexes/named_capturing_groups/bad_syntax_cases/k_before_partial_match.md
+- Path: zeparser3/tests/testcases/parser/regexes/named_capturing_groups/bad_syntax_cases/k_arg_also_partial_match_second.md
 
 > :: regexes : named capturing groups : bad syntax cases
 >
-> ::> k before partial match
+> ::> k arg also partial match second
+>
+> This catches a regression where the first char of the group was omitted and so the original test case would still pass since it would record `ab` as `b` and then check group `a`. So this test checks group `b` for `ab` and if the first char is still omitted then it would pass, where it should fail.
+>
+> This should fail, I think in webcompat as well...
 
 ## Input
 
 `````js
-/\k<a>(?<ab>a)/
+/(?<ab>a)\k<b>/
 `````
 
 ## Output
@@ -28,9 +30,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Named back reference \k<a> was not defined in this regex: {#ab:true}
+    Named back reference \k<b> was not defined in this regex: {#ab:true}
 
-/\k<a>(?<ab>a)/
+/(?<ab>a)\k<b>/
 ^------- error
 `````
 
@@ -62,8 +64,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
         value: null,
-        regex: { pattern: '\\k<a>(?<ab>a)', flags: '' },
-        raw: '/\\k<a>(?<ab>a)/'
+        regex: { pattern: '(?<ab>a)\\k<b>', flags: '' },
+        raw: '/(?<ab>a)\\k<b>/'
       }
     }
   ]
