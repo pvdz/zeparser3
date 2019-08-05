@@ -20,7 +20,7 @@ export function generateTestFile(tob) {
   ASSERT(tob);
   let data = tob.oldData;
   let file = tob.file;
-  ASSERT(data.includes('\n###\n'), 'expected format');
+  ASSERT(data.includes('\n###\n'), 'expected format', file);
 
   console.log('Generating test case from', file);
 
