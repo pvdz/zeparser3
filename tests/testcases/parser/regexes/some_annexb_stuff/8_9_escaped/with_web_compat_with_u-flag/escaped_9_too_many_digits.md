@@ -54,7 +54,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Tokenizer error!
-    Regex had syntax that is invalid with u-flag and u-flag was in fact present
+    Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
 
 /\986a/u
 ^------- error

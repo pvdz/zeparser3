@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Missing closing angle bracket of name of group: [97]
+    Missing closing angle bracket of name of capturing group: [`/`, 47]
 
 /(?<a>.)\k<a/
 ^------- error
@@ -50,26 +50,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
-  body: [
-    {
-      type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
-      expression: {
-        type: 'Literal',
-        loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
-        value: null,
-        regex: { pattern: '(?<a>.)\\k<a', flags: '' },
-        raw: '/(?<a>.)\\k<a/'
-      }
-    }
-  ]
-}
-
-tokens (3x):
-       REGEX ASI
-`````
-
+_Output same as sloppy mode._

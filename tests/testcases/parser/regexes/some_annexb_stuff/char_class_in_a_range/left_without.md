@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Range error with u-flag and unknown reason why regex is invalid without u-flag so it cannot be a valid regex
+    Encountered incorrect range (bad left, bad right, or left>right) which is illegal with u-flag and for unknown reasons it was also illegal without u-flag
 
 /[\d-a]+/
 ^------- error

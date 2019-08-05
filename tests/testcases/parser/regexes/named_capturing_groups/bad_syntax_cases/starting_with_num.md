@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Found unescaped closing paren `)` without a group being open
+    Wanted to parse an unescaped group name specifier but it had a bad start: [`4`, 52]
 
 /(?<42a>a)/
 ^------- error

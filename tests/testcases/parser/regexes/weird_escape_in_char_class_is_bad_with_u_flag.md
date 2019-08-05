@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Regex had syntax that is invalid with u-flag and u-flag was in fact present
+    Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
 
 /[\ ]/u
 ^------- error

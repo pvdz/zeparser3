@@ -93,7 +93,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Tokenizer error!
-    Found EOF before regex was closed
+    Encountered unescaped closing curly `}` while not parsing a quantifier
 
 s = {foo: yield / x}
                 ^------- error

@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Found EOF before regex was closed
+    Encountered unescaped closing curly `}` while not parsing a quantifier
 
 function *f(){   s = {foo: yield / x}   }
                                  ^------- error
@@ -52,4 +52,11 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Tokenizer error!
+    Found a rhs curly as an Atom, only valid without u-flag and with web compat mode, but already found something that invalidates not having the u-flag so cant validate this regex
+
+function *f(){   s = {foo: yield / x}   }
+                                 ^------- error
+`````
+

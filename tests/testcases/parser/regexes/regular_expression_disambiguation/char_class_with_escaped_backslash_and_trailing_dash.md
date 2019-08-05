@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Regex had syntax that is only valid with the u-flag and u-flag was in fact not present
+    Regex body had an escape that is only valid with an u-flag, but it had no u-flag
 
 middleDashMatch = /[\-]/.exec
                   ^------- error

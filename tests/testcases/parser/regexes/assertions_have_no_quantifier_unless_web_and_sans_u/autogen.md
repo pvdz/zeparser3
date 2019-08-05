@@ -16,8 +16,12 @@
 >       - InvalidBracedQuantifier
 >   - https://tc39.es/ecma262/#prod-annexB-InvalidBracedQuantifier
 >     - `{` DecimalDigits `}`
-> - `/a${1}/u` is illegal because the u-flag is like strict mode
-> - In contrast, `/a$+/` is illegal because that path ends in https://tc39.es/ecma262/#prod-annexB-ExtendedPatternCharacter which excludes `+`
+>  > ExtendedAtom :: InvalidBracedQuantifier
+>  >  It is a Syntax Error if any source text matches this rule.
+>
+> - So this is an explicit syntax error, while (`{a}` or unclosed `{1` would have been acceptable).
+> - `/a${1}/u` is just illegal because the u-flag is like strict mode
+> - `/a$+/` is illegal because that path ends in https://tc39.es/ecma262/#prod-annexB-ExtendedPatternCharacter which excludes `+`
 
 These cases are automatically extrapolated and written to their own file.
 Each case is applied to each test by simply replacing `#` with the actual case.

@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Found unescaped closing paren `)` without a group being open
+    Named capturing group named contained an invalid unicode escaped char: [`𐒤`, 66724]
 
 f(/(?<\uD801\uDCA4>.)/u)
   ^------- error

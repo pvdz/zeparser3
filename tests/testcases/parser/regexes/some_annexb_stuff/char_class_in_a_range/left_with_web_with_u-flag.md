@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Range error with u-flag and unknown reason why regex is invalid without u-flag so it cannot be a valid regex
+    Encountered incorrect range (bad left, bad right, or left>right) which is illegal with u-flag and for unknown reasons it was also illegal without u-flag
 
 /[\d-a]+/u
 ^------- error
@@ -54,7 +54,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Tokenizer error!
-    Regex had syntax that is invalid with u-flag and u-flag was in fact present
+    Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
 
 /[\d-a]+/u
 ^------- error

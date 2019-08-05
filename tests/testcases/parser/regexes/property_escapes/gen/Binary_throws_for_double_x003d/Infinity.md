@@ -29,7 +29,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered unescaped closing curly `}` while not parsing a quantifier
+    An escaped property can only contain one eq sign (`=`) but found a second one
 
 /\P{ASCII=LC=LC}/u;
 ^------- error
@@ -51,11 +51,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Tokenizer error!
-    An escaped property can only contain one eq sign (`=`) but found a second one
-
-/\P{ASCII=LC=LC}/u;
-^------- error
-`````
-
+_Output same as sloppy mode._
