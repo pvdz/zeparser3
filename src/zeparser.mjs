@@ -1574,6 +1574,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   function parseDirectivePrologues(lexerFlags, astProp) {
     ASSERT(arguments.length === parseDirectivePrologues.length, 'arg count');
+    let hadOctal = false; // Edge case to guard against: `"x\077";"use strict";` is an error
     // note: there may be multiple (bogus or valid) directives...
     while (hasAllFlags(curtype, $STRING)) {
       // we must first parse as usual to confirm this is an isolated string and not
@@ -1611,6 +1612,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // This is a directive. It may be nonsense, but it's a string in the head so it's a directive.
 
         let dir = stringToken.str.slice(1, -1);
+        if (!hadOctal && /(^|[^\\])\\0/.test(dir)) {
+          // (We have to use regex because an `.includes` would not (easily) be able to validate `\0` vs `\\0`
+          // [v]: `"x\\0"`
+          // [x]: `"x\\0"; "use strict";`
+          // [v]: `"x\\\\0"; "use strict";`
+          hadOctal = curtok;
+        }
         if (AST_directiveNodes) {
           AST_wrapClosed(astProp, 'Directive', 'directive', stringToken);
           AST_set("directive", dir, true); // replace the string token with just the string value, then wrap it
@@ -1633,6 +1641,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseSemiOrAsi(lexerFlags);
         AST_close('ExpressionStatement');
       }
+    }
+
+    if (hadOctal && hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
+      THROW_TOKEN('Octal in directive with strict mode directive or in strict mode is always illegal');
     }
 
     return lexerFlags;
