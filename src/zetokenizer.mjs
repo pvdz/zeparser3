@@ -1486,6 +1486,7 @@ function ZeTokenizer(
           // identifier then the ALWAYS_BAD flag should be returned. If the escape is "es6 unicode escape" then the
           // flag must be set to require the uflag. Note that the escape is evaluated as the canonical value in any
           // case (including surrogate pairs), so `a\u0062c` equals `abc`.
+          if (eofd(1)) return regexSyntaxError('Early EOF while parsing escape inside group name identifier');
           if (peekd(1) === $$U_75) {
             ASSERT_skip($$BACKSLASH_5C);
             ASSERT_skip($$U_75);
@@ -2240,7 +2241,8 @@ function ZeTokenizer(
       // [x]: `/(?<x>foo)met\k<\u{2F9DF}>/`
 
       ASSERT_skip($$BACKSLASH_5C);
-      if (eof()) TODO; // pretty sure I need to check eof in between...
+      if (eof()) return regexSyntaxError('Found EOF at start of a group name identifier');
+      if (!peeky($$U_75)) return regexSyntaxError('Found invalid escape character at the start of a group name identifier');
       ASSERT_skip($$U_75);
 
       c = parseRegexUnicodeEscape2(); // will check EOF first, consume a valid unicode escape, else bail
