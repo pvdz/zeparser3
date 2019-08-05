@@ -1,20 +1,20 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/continue_statement/labels/label_defined_inside_nested_loop.md
+- Path: zeparser3/tests/testcases/parser/labels/dunno.md
 
-> :: continue statement : labels
+> :: labels
 >
-> ::> label defined inside nested loop
+> ::> same statement parent
+>
+> Cannot break to a label defined in the same statement parent
 
 ## Input
 
 `````js
-while (true)
-  while (true) {
-    x: continue x;
-  }
+while(x) {
+  LABEL: x;
+  break LABEL;
+} 
 `````
 
 ## Output
@@ -31,14 +31,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot `continue` to label `x` because it was defined inside the current inner-most loop
+  Cannot `break` to label `LABEL` because it was defined on the same statement level as the `break`
 
-while (true)
-  while (true) {
-    x: continue x;
-                ^------- error
+while(x) {
+  LABEL: x;
+  break LABEL;
+        ^------- error
 
-  }
+}
 `````
 
 ### Strict mode

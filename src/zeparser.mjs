@@ -2840,8 +2840,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseBreakStatement(lexerFlags, scoop, labelSet, astProp) {
     ASSERT(arguments.length === parseBreakStatement.length, 'arg count');
 
-    // TODO: report incorrect reason for failure of test test262/test/language/statements/break/S12.8_A1_T2.js (fails because the label does not appear in the labelSet, since a break with label _can_ be valid)
-
     AST_open(astProp, 'BreakStatement', curtok);
     ASSERT_skipRex('break', lexerFlags);
     // a break may be followed by another identifier which must then be a valid label.
@@ -2867,16 +2865,20 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     parseSemiOrAsi(lexerFlags);
     AST_close('BreakStatement');
   }
-  function findLabel(labelSet, label, checkIteration) {
-    let id = '#' + label;
+  function findLabel(inputLabelSet, labelName, checkIteration) {
+    let id = '#' + labelName;
 
     // for `continue` we can only accept labels defined _before_ the inner-most iteration statement that wraps it
     // this is basically caused by https://tc39.github.io/ecma262/#sec-labelled-statements-static-semantics-containsundefinedcontinuetarget
     let failIfFound = checkIteration === FROM_CONTINUE;
+    let labelSet = inputLabelSet; // Skip the current statement label, sibling labels do not count
     do {
       if (labelSet[id]) {
         if (failIfFound) {
-          THROW('Cannot `continue` to this label because it was defined inside the current inner-most loop');
+          THROW('Cannot `continue` to label `' + labelName + '` because it was defined inside the current inner-most loop');
+        }
+        if (inputLabelSet === labelSet) {
+          THROW('Cannot `break` to label `' + labelName + '` because it was defined on the same statement level as the `break`');
         }
         return true;
       }
@@ -4631,7 +4633,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // a "labelled func decl" is never allowed as if/else child
       fdState = FDS_ILLEGAL;
     }
-    parseNestedBodyPart(lexerFlags, scoop, labelSet, IS_LABELLED, fdState, 'body');
+    parseNestedBodyPart(lexerFlags, scoop, {'#': labelSet}, IS_LABELLED, fdState, 'body');
     AST_close('LabeledStatement');
   }
 
