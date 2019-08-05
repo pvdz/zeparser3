@@ -49,7 +49,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  You're just fishing for edge cases now, so yeah, `let\nlet` is fail
+  Attempted to create a `let` binding on special reserved keyword `let` but: Can not use `let` when binding through `let` or `const`
 
 let
 let;
@@ -60,21 +60,13 @@ let;
 
 Parsed with script goal but as if it was starting with `"use strict"` at the top.
 
-`````
-throws: Parser error!
-  `let` must be a declaration in strict mode but the next ident is a reserved keyword (`let`) in strict mode
-
-let
-let;
-^------- error
-`````
-
+_Output same as sloppy mode._
 
 ### Module goal
 
 Parsed with the module goal.
 
-_Output same as strict mode._
+_Output same as sloppy mode._
 
 ### Web compat mode
 

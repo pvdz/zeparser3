@@ -4087,34 +4087,49 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // - `let \n throw x`  // !! the next token may, validly, be keywords in legacy should not throw an error
       // This is slow but if this `let` was followed by a newline then something wonky is going on anyways.
       // At any rate, if need be we can optimize this edge case by preventing the first keyword check down the line.
-      if (curtok.nl > 0 && nonFatalBindingIdentCheck(curtok, BINDING_TYPE_LET, lexerFlags) !== '') {
-        // This is a let with a newline following it and the next token is a reserved word.
-        // This must now be a let-expression or a syntax error
-        // - `let \n debugger'               (fine)
-        // - `do let \n while(x)'            (totally valid)
-        if (hasAnyFlag(lexerFlags, LF_STRICT_MODE | LF_NO_ASI)) {
-          if (hasAnyFlag(lexerFlags, LF_STRICT_MODE)) {
-            THROW('`let` must be a declaration in strict mode but the next ident is a reserved keyword (`' + curtok.str + '`) in strict mode');
-          }
-          if (hasAnyFlag(lexerFlags, LF_NO_ASI)) {
-            THROW('The next ident after `let` is a reserved keyword (`' + curtok.str + '`), there is a newline but in the current context ASI is not allowed');
-          }
-          ASSERT(false, 'unreachable');
-        }
-        if (curtok.str === 'let') {
-          // This is still an error
-          // https://github.com/mozilla/gecko-dev/blob/master/js/src/frontend/Parser.cpp#L7575
-          // ASI resolves during parsing. Static semantics only apply to the full parse tree with ASI applied.
-          THROW('You\'re just fishing for edge cases now, so yeah, `let\\nlet` is fail');
-        }
-        // Parse a `let`-expression instead of a declaration
-        _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
-      } else {
+
+      // Note that `await` and `yield` are disallowed in certain contexts by static semantics, which apply after parsing
+      // So they do not affect ASI decisions and as such, `let \n await` does not trigger ASI inside an async function
+      // and likewise, `let \n yield` does not trigger ASI inside a generator. So `let \n await 0` and `let \n yield 0`
+      // is always going to trigger a syntax error.
+
+
+      // This is a let with a newline following it and the next token is a reserved word.
+      // This must now be a let-expression or a syntax error
+      // - `let \n debugger'               (fine)
+      // - `do let \n while(x)'            (totally valid)
+      // However, for certain pseudo-keywords this rule will not apply because of how the spec works. These rules are
+      // defined in so called "static semantics", which apply _after_ parsing, and as such do not affect when ASI does
+      // or does not apply. As a result, `let \n await 0` will not apply ASI. Even in an `async` context.
+      // The next logic is: if there's no error, it's fine to bind. If there is an error, then if it concerns any of
+      // these pseudo keywords they will still trigger an error (because the errors are early errors) so we throw.
+      // In all other cases, apply the ASI and treat the next ident as an expression.
+      let identBindingErrorMsg = curtok.nl > 0 ? nonFatalBindingIdentCheck(curtok, BINDING_TYPE_LET, lexerFlags) : '';
+      if (identBindingErrorMsg === '') {
         // This is any regular `let` declaration with an ident and no newline but the ident may cause a keyword error
         // - `let foo`
         // - `do let while(x)'               (totally invalid because do-while requires newline or semi)
         parseAnyVarDecls(lexerFlags, letToken, scoop, BINDING_TYPE_LET, FROM_STATEMENT_START, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         parseSemiOrAsi(lexerFlags);
+      } else if (
+        // This is the case of pseudo keywords. Note that `let \n await` will never trigger ASI and
+        // `let \n await 0` would ASI therefor throw a syntax error because it's parsed as a let declaration, anyways.
+        // In contrast, `let \n await;` is only an error in the context where `await` must be a keyword.
+        ['await', 'yield', 'arguments', 'eval', 'implements', 'interface', 'let', 'package',  'private', 'protected', 'public', 'static'].includes(curtok.str)
+      ) {
+        // This must be an error now. ASI was not applicable but the var was (still) not a valid binding ident, so *boom*
+        THROW('Attempted to create a `let` binding on special reserved keyword `' + curtok.str + '` but: ' + identBindingErrorMsg);
+      } else if (hasAnyFlag(lexerFlags, LF_STRICT_MODE | LF_NO_ASI)) {
+        if (hasAnyFlag(lexerFlags, LF_STRICT_MODE)) {
+          THROW('`let` must be a declaration in strict mode but the next ident is a reserved keyword (`' + curtok.str + '`) in strict mode');
+        }
+        if (hasAnyFlag(lexerFlags, LF_NO_ASI)) {
+          THROW('The next ident after `let` is a reserved keyword (`' + curtok.str + '`), there is a newline but in the current context ASI is not allowed');
+        }
+        ASSERT(false, 'unreachable');
+      } else {
+        // Parse a `let`-expression instead of a declaration
+        _parseLetAsPlainVarNameExpressionStatement(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
       }
     } else if (curc === $$SQUARE_L_5B || curc === $$CURLY_L_7B) {
       // let declaration on (at least) a pattern
