@@ -810,7 +810,8 @@ function ZeTokenizer(
         break;
       }
 
-      if (isLfPsLs(c)) {
+      // Note: LF and PS are newlines that are _explicitly_ allowed in a string, so only check for LF and CR here
+      if (c === $$LF_0A) {
         bad = true;
         break;
       }
@@ -823,6 +824,12 @@ function ZeTokenizer(
       }
 
       ASSERT_skip(c);
+
+      if (isLfPsLs()) {
+        // I think... this is a bit of a weird case for strings.
+        // (Increment after consumption as that's what incrementLine expects and asserts)
+        incrementLine();
+      }
 
       if (c === $$BACKSLASH_5C) {
         bad = parseStringEscape(lexerFlags, NOT_TEMPLATE) === BAD_ESCAPE || bad;
@@ -3809,7 +3816,10 @@ function ZeTokenizer(
 }
 
 function isLfPsLs(c) {
-  return (c === $$LF_0A || c === $$PS_2028 || c === $$LS_2029);
+  return c === $$LF_0A || isPSLS(c);
+}
+function isPSLS(c) {
+  return c === $$PS_2028 || c === $$LS_2029;
 }
 
 function debug_toktype(type, ignoreUnknown) {
