@@ -8,8 +8,6 @@
 >
 > Illegal escape as first char of ident of named capturing group
 
-## FAIL
-
 ## Input
 
 `````js

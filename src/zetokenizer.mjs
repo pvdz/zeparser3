@@ -1615,6 +1615,23 @@ function ZeTokenizer(
     return String.fromCodePoint(input.codePointAt(offset));
   }
 
+  function codepointLen(c, offsetOfC) {
+    if (c < 127) return 1;
+    // now we have to do an expensive... but proper unicode check
+    return codepointLenExpensive(c, offsetOfC);
+  }
+  function codepointLenExpensive(c, offsetOfC) {
+    ASSERT(codepointLenExpensive.length === arguments.length, 'arg count');
+    // offset is skipped for escapes. we can assert `c` is correct in those cases.
+    if (offsetOfC !== CODEPOINT_FROM_ESCAPE) {
+      // this is a slow path that only validates if unicode chars are used in an identifier
+      // since that is pretty uncommon I don't mind doing an extra codepoint lookup here
+      c = input.codePointAt(offsetOfC);
+    }
+    let s = String.fromCodePoint(c);
+    ASSERT(s.length === 1 || s.length === 2, 'up to four bytes...'); // js strings are 16bit
+    return s.length;
+  }
   function isIdentStart(c, offsetOfC){
     ASSERT(isIdentStart.length === arguments.length, 'all args');
     if (isAsciiLetter(c) || c === $$$_24 || c === $$LODASH_5F) return VALID_SINGLE_CHAR;
@@ -1942,9 +1959,12 @@ function ZeTokenizer(
             return regexSyntaxError('Unclosed group');
           }
 
-          for (let i=0,l=namedBackRefs.length;i<l;++i) {
-            if (groupNames['#' + namedBackRefs[i]] === undefined) {
-              THROW('Named back reference \\k<' + namedBackRefs[i] +'> was not defined in this regex: ' + JSON.stringify(groupNames).replace(/"/g,''));
+          // Tests imply that the existence rule does not need to apply in web compat mode. TBD.
+          if (webCompat === WEB_COMPAT_OFF) {
+            for (let i=0,l=namedBackRefs.length;i<l;++i) {
+              if (groupNames['#' + namedBackRefs[i]] === undefined) {
+                THROW('Named back reference \\k<' + namedBackRefs[i] +'> was not defined in this regex: ' + JSON.stringify(groupNames).replace(/"/g,''));
+              }
             }
           }
           ASSERT_skip($$FWDSLASH_2F);
@@ -2236,6 +2256,41 @@ function ZeTokenizer(
     return regexSyntaxError('Found EOF before regex was closed');
   }
   function parseRegexGroupName(c, uflagStatus) {
+    let lastReportableTokenizerErrorBak = lastReportableTokenizerError;
+    let lastPotentialRegexErrorBak = lastPotentialRegexError;
+    let lastRegexStateBak = lastRegexState;
+
+    let r = _parseRegexGroupName(c, uflagStatus);
+
+    ASSERT(r === ALWAYS_BAD || lastParsedIdent !== '', 'a valid parse should always yield an ident, otherwise double check namedBackRefs.push', r);
+
+    if (uflagStatus !== ALWAYS_BAD && r === ALWAYS_BAD && webCompat === WEB_COMPAT_ON && neof()) {
+      // Just ignore whatever happened while parsing a group name ... as long as there is no u-flag
+      if (lastReportableTokenizerErrorBak) lastReportableTokenizerError = lastReportableTokenizerErrorBak;
+      if (lastPotentialRegexErrorBak) lastPotentialRegexError = lastPotentialRegexErrorBak;
+      if (lastRegexStateBak) lastRegexState = lastRegexStateBak;
+      return GOOD_SANS_U_FLAG;
+    }
+
+    return r;
+  }
+  function _parseRegexGroupName(c, uflagStatus) {
+    ASSERT(parseRegexGroupName.length === arguments.length, 'arg count');
+
+    // Note: you are first supposed to parse the generic regex payload with either ~U,~N or +U,+N, depending on
+    // the u-flag. Without the flag, and in web compat mode, you would parse `\k<abc>` first as just an
+    // IdentityEscape --> SourceCharacterIdentityEscape --> `[~N] SourceCharacter but not c`
+    // The GroupName is just parsed as non-special pattern characters. However, this is what the spec calls
+    // https://tc39.es/ecma262/#sec-regexpinitialize
+    // >  If the result of parsing contains a GroupName
+    // This is rather implicit, since according to the grammar you are not parsing a GroupName (TODO: report this)
+    // but since all signs point towards that being the intent;
+    // After the first pass, if the `\k` is found with a proper `GroupName` then parse it with `+N` and act
+    // normal. Otherwise, for any partial or full absence of the `GroupName`, just don't treat the `<` and `>`
+    // as special.
+    // TODO: I think the above includes parsing an invalid identifier (one that starts with ID_Continue)?
+    // TODO: are any regexSyntaxError calls in this function actually okay in web compat mode / +N?
+
     // [v]: `(?<\u0065ame>xyz)/``
     //          ^
     // [x]: `/(?<x>foo)met\k<\u0065>/`
@@ -2280,32 +2335,23 @@ function ZeTokenizer(
     } else {
       let wider = isIdentStart(c, pointer);
       if (wider === INVALID_IDENT_CHAR) {
-        // (The name must be valid ident so non-ident chars will end the parse prematurely)
-        // if (webCompat === WEB_COMPAT_OFF) {
-        // [x]: `/(?<x>foo)met\k<#/`
-        //                       ^
-        // [x]: `/(?<x>foo)met\k<abc#/`
-        //                          ^
-        // [x]: `/(?<x>foo)met\k<5/`
-        //                       ^
-        return regexSyntaxError('Wanted to parse an unescaped group name specifier but it had a bad start', '`' + String.fromCharCode(c) + '`', c);
-        // } else {
-        // [v]: `/(?<x>foo)met\k<#/`
-        //                       ^
-        // [x]: `/(?<x>foo)met\k<abc#/`
-        //                          ^
-        // [v]: `/(?<x>foo)met\k<5/`
-        //                       ^
-
-        // So this is salvegable in web compat mode because you're initially supposed to parse without the
-        // syntactic N flag. This means the annex B syntax allows to parse `\k` as an IdentityEscape without a name:
-        // - https://tc39.es/ecma262/#prod-annexB-IdentityEscape
-        // - https://tc39.es/ecma262/#prod-annexB-SourceCharacterIdentityEscape
-        // However, if named groups are used anywhere in the regex, then N gets turned on and this exception voids.
-        // TODO: throw when using `\k` without a GroupName while also using GroupName elsewhere in the regex
-        // Note that if the u-flag is present, you're supposed to always parse with N enabled
-        // After parsing the first character of the group name all bets are off since we never backtrack and parse greedy
-        //   return GOOo
+        if (webCompat === WEB_COMPAT_ON) {
+          // Ignore this error
+          // Figure out how many chars to skip (slow path)
+          let len = codepointLen(c, pointer);
+          ASSERT(len === 1 || len === 2, 'codepoints are 1 or 2?', [len, c, pointer]);
+          wider = len === 1 ? VALID_SINGLE_CHAR : VALID_DOUBLE_CHAR;
+        } else {
+          // (The name must be valid ident so non-ident chars will end the parse prematurely)
+          // if (webCompat === WEB_COMPAT_OFF) {
+          // [x]: `/(?<x>foo)met\k<#/`
+          //                       ^
+          // [x]: `/(?<x>foo)met\k<abc#/`
+          //                          ^
+          // [x]: `/(?<x>foo)met\k<5/`
+          //                       ^
+          return regexSyntaxError('Wanted to parse an unescaped group name specifier but it had a bad start', '`' + String.fromCharCode(c) + '`', c);
+        }
       }
 
       if (wider === VALID_DOUBLE_CHAR) {
@@ -2327,10 +2373,18 @@ function ZeTokenizer(
       }
     }
 
-    if (eof() || !peeky($$GT_3E)) {
-      // This error is not recoverable in web compat mode
+    if (eof()) {
       return regexSyntaxError('Missing closing angle bracket of name of capturing group', eof() || ('`' + readNextCodepointAsStringExpensive(peek(), pointer, true) + '`'), eof() || peek());
     }
+    if (!peeky($$GT_3E)) {
+      // I think this error should not be recoverable in web compat mode but tests seem to disagree
+      if (webCompat === WEB_COMPAT_OFF) {
+        return regexSyntaxError('Missing closing angle bracket of name of capturing group', eof() || ('`' + readNextCodepointAsStringExpensive(peek(), pointer, true) + '`'), eof() || peek());
+      } else {
+        return updateRegexUflagState(uflagStatus, GOOD_SANS_U_FLAG, 'Missing closing angle bracket of name of capturing group');
+      }
+    }
+
     ASSERT_skip($$GT_3E);
 
     return uflagStatus;
@@ -2487,8 +2541,7 @@ function ZeTokenizer(
         c = peek();
 
         uflagStatus = parseRegexGroupName(c, uflagStatus);
-
-        namedBackRefs.push(lastParsedIdent); // we can only validate ths after completely parsing the regex body
+        if (lastParsedIdent !== '') namedBackRefs.push(lastParsedIdent); // we can only validate ths after completely parsing the regex body
 
         // If the group name contained a `\u{..}` escape then the u-flag must be valid for this regex to be valid
         return uflagStatus;

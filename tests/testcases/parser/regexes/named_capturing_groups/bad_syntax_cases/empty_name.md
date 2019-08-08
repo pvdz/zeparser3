@@ -52,4 +52,26 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+ast: {
+  type: 'Program',
+  loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
+  body: [
+    {
+      type: 'ExpressionStatement',
+      loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
+      expression: {
+        type: 'Literal',
+        loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
+        value: null,
+        regex: { pattern: '(?<>a)', flags: '' },
+        raw: '/(?<>a)/'
+      }
+    }
+  ]
+}
+
+tokens (3x):
+       REGEX ASI
+`````
+
