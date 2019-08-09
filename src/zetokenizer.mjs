@@ -1993,7 +1993,7 @@ function ZeTokenizer(
           ASSERT_skip($$$_24);
           if (neof()) {
             c = peek();
-            uflagStatus = cannotBeQuantifier(c, uflagStatus, c === $$CURLY_L_7B, 'Regex `Assertion` "atoms" can not be quantified but this `$` was quantified anyways');
+            uflagStatus = cannotBeQuantifier(c, uflagStatus, c === $$CURLY_L_7B, 'Regex `A-ssertion` "atoms" can not be quantified but this `$` was quantified anyways');
           }
           afterAtom = false; // this Assertion can never have a Quantifier
           break;
@@ -2116,7 +2116,7 @@ function ZeTokenizer(
 
           if (wasFixableAssertion || wasUnfixableAssertion) {
             // Only `(?=` and `(?!` can be legal in web compat mode and without the u-flag. Anything else is always bad.
-            uflagStatus = cannotBeQuantifier(c, uflagStatus, !wasUnfixableAssertion, 'Regex Assertion "atoms" can not be quantified (so things like `^`, `$`, and `(?=` can not have `*`, `+`, `?`, or `{` following it)');
+            uflagStatus = cannotBeQuantifier(c, uflagStatus, !wasUnfixableAssertion, 'Regex A-ssertion "atoms" can not be quantified (so things like `^`, `$`, and `(?=` can not have `*`, `+`, `?`, or `{` following it)');
           }
 
           afterAtom = true;
@@ -3175,7 +3175,20 @@ function ZeTokenizer(
         // IdentityEscape
         // with u-flag: forward slash or syntax character (`^$\.*+?()[]{}|`) and these cases are already caught above
         // without-u-flag: SourceCharacter but not UnicodeIDContinue
+        // without-u-flag in webcompat: SourceCharacter but not `c`, and not `k` iif there is a regex groupname
         ASSERT(![$$BACKSLASH_5C, $$XOR_5E, $$$_24, $$DOT_2E, $$STAR_2A, $$PLUS_2B, $$QMARK_3F, $$PAREN_L_28, $$PAREN_R_29, $$SQUARE_L_5B, $$SQUARE_R_5D, $$CURLY_L_7B, $$CURLY_R_7D, $$OR_7C].includes(c), 'all these u-flag chars should be checked above');
+
+        if (webCompat === WEB_COMPAT_ON) {
+          // https://tc39.es/ecma262/#prod-annexB-IdentityEscape
+          if (c === $$C_63) {
+            THROW('Cannot have `\\c` in a regex');
+          } else if (c === $$K_6B) {
+            TODO // detection is a little tricky
+          } else {
+            ASSERT_skip(c);
+            return c | CHARCLASS_BAD_WITH_U_FLAG;
+          }
+        }
 
         // so we can already not be valid for u flag, we just need to check here whether we can be valid without u-flag
         // (any unicode continue char would be a problem)
@@ -3186,7 +3199,7 @@ function ZeTokenizer(
           return c | CHARCLASS_BAD_WITH_U_FLAG;
         }
         // else return bad char class because the escape is bad
-        lastPotentialRegexError = 'the char class had an escape that would not be valid with and without u-flag';
+        if (!lastPotentialRegexError) lastPotentialRegexError = 'the char class had an escape that would not be valid with and without u-flag';
         if (wide === VALID_DOUBLE_CHAR) {
           skip();
           skip();
