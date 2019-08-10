@@ -6,6 +6,7 @@
 >
 > ::> octal in quasi
 
+## SKIP
 ## FAIL
 
 ## Input
