@@ -54,11 +54,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Tokenizer error!
-    Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
-
-/(?<\u{1D7D0}>foo)/u
-^------- error
-`````
-
+_Output same as sloppy mode._
