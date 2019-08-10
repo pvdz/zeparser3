@@ -57,7 +57,10 @@ function THROW(str, ...rest) {
   throw new Error(`Test env error! ${str} ${rest.length ? util.inspect(rest, false, null) : ''}`);
 }
 function ASSERT(b, ...args) {
-  if (!b) THROW('test env ASSERT error:', ...args);
+  if (!b) {
+    console.trace();
+    THROW('test env ASSERT error:', ...args);
+  }
 }
 
 function toPrint(s) {
@@ -162,11 +165,11 @@ function parseTestFile(tob) {
   tob.shouldFail = tob.aboveTheFold.toLowerCase().includes('\n## fail\n');
 
   let inputHeaderOffset = oldData.indexOf(INPUT_HEADER) + INPUT_HEADER.length;
-  ASSERT(oldData.includes(OUTPUT_QUINTICK, inputHeaderOffset));
+  ASSERT(oldData.includes(OUTPUT_QUINTICK, inputHeaderOffset), 'old file should contain quinticks', file);
   tob.inputHead = oldData.slice(inputHeaderOffset, oldData.indexOf(OUTPUT_QUINTICKJS, inputHeaderOffset));
 
   let inputCodeOffset = oldData.indexOf(OUTPUT_QUINTICKJS, inputHeaderOffset) + OUTPUT_QUINTICKJS.length;
-  ASSERT(oldData.includes(OUTPUT_QUINTICK, inputCodeOffset));
+  ASSERT(oldData.includes(OUTPUT_QUINTICK, inputCodeOffset), 'old file should contain quinticks', file);
   tob.inputCode = oldData.slice(inputCodeOffset, oldData.indexOf(OUTPUT_QUINTICK, inputCodeOffset));
 
   if (oldData.includes(OUTPUT_HEADER, inputCodeOffset)) {
