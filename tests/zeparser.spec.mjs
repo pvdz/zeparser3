@@ -597,7 +597,7 @@ async function gen() {
 
   files = files.filter(f => f.endsWith('autogen.md'));
   let list = await readFiles(files);
-  for (let ti=0; ti<list.length; ++tb) {
+  for (let ti=0; ti<list.length; ++ti) {
     let tob/*: Tob */ = list[ti];
     let genDir = path.join(path.dirname(tob.file), 'gen');
 
