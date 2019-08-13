@@ -4,7 +4,7 @@
 
 > :: numbers : must be separated
 >
-> ::> 0઼ntanceof
+> ::> 0@{xabc}@ntanceof
 >
 > While unambiguous, in general there is a rule that says:
 >

@@ -8,14 +8,14 @@
 >
 > This checks whether `\u{1D7D0}` / `\uD835\uDFD0` is accepted as the start of a valid group name start
 >
-> Note that this is an ID_REST char, that is not an ID_START char, so it should fail regardless.
-
-## FAIL
+> I think that because RegExpIdentifierName is syntactically not parse-able (because the first character is a number), the whole thing is never "again" parsed as a groupname in webcompat mode. In other words, it never traverses the +N route.
+>
+> Since it won't trigger +N, it won't parse a group in webcompat, so it passes as an extended atom.
 
 ## Input
 
 `````js
-/(?<𝟐rest>foo)/
+/(?<@{x1d7d0}@rest>foo)/
 `````
 
 ## Output
@@ -32,9 +32,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Wanted to parse an unescaped group name specifier but it had a bad start: [`�`, 55349]
+    Wanted to parse an unescaped group name specifier but it had a bad start: [`@{xd835}@`, 55349]
 
-/(?<𝟐rest>foo)/
+/(?<@{x1d7d0}@rest>foo)/
 ^------- error
 `````
 
@@ -66,8 +66,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
         value: null,
-        regex: { pattern: '(?<𝟐rest>foo)', flags: '' },
-        raw: '/(?<𝟐rest>foo)/'
+        regex: { pattern: '(?<@{x1d7d0}@rest>foo)', flags: '' },
+        raw: '/(?<@{x1d7d0}@rest>foo)/'
       }
     }
   ]

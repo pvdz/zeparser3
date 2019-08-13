@@ -40,6 +40,24 @@ So in the above, the test case has no newlines. But if the block contains whites
 
 By the time I migrated to this new system, I solved all the whitespace-specific tokenizer problems so these test cases don't contain weird whitespace-specific tokenizer cases. Newlines can be significant (for ASI) so that's why I'm being explicit about what is and isn't part of a test input.
 
+#### Unicode characters
+
+In certain test cases raw unicode codepoints above the ascii range are required unescaped. However, it turned out that when writing some of these cases the file ended up corrupt (from the point of view of the test case).
+
+To prevent any risk of future corruption, all tests must encode unicode literals above ascii with a special escape sequence, chosen such that it would otherwise never end up in a test case;
+
+```
+/(?<@{x2F9DF}@>foo)/
+```
+
+The above test will ultimately run on the string:
+
+```
+/(?<輸>foo)/
+```
+
+This is only necessary for safe transport. The irony is not lost on me.
+
 ### Options
 
 A test case can have options. These will follow the `## Input` header as a dashed list and, if there's more content, this is the only content that is a dashed list.

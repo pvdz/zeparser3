@@ -13,7 +13,7 @@
 ## Input
 
 `````js
-/(?<輸>foo)/
+/(?<@{x2f9df}@>foo)/
 `````
 
 ## Output
@@ -40,8 +40,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
         value: null,
-        regex: { pattern: '(?<輸>foo)', flags: '' },
-        raw: '/(?<輸>foo)/'
+        regex: { pattern: '(?<@{x2f9df}@>foo)', flags: '' },
+        raw: '/(?<@{x2f9df}@>foo)/'
       }
     }
   ]

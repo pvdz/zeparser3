@@ -13,7 +13,7 @@
 ## Input
 
 `````js
-𐔞foo();
+@{x1051e}@foo();
 `````
 
 ## Output
@@ -42,7 +42,7 @@ ast: {
         callee: {
           type: 'Identifier',
           loc:{start:{line:1,col:0},end:{line:1,col:5},source:''},
-          name: '𐔞foo'
+          name: '@{x1051e}@foo'
         },
         arguments: []
       }

@@ -11,7 +11,7 @@
 ## Input
 
 `````js
-/[💩-💫]/u
+/[@{x1f4a9}@-@{x1f4ab}@]/u
 `````
 
 ## Output
@@ -38,8 +38,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:10},source:''},
         value: null,
-        regex: { pattern: '[💩-💫]', flags: 'u' },
-        raw: '/[💩-💫]/u'
+        regex: { pattern: '[@{x1f4a9}@-@{x1f4ab}@]', flags: 'u' },
+        raw: '/[@{x1f4a9}@-@{x1f4ab}@]/u'
       }
     }
   ]

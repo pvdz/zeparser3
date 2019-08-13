@@ -7,6 +7,20 @@
 > :: regexes : some annexb stuff : char class in a range
 >
 > ::> both with web without u-flag
+>
+> https://tc39.es/ecma262/#sec-patterns-static-semantics-early-errors
+>
+> NonemptyClassRangesNoDash :: ClassAtomNoDash `-` ClassAtomClassRanges
+>
+> > It is a Syntax Error if IsCharacterClass of ClassAtomNoDash is true or IsCharacterClass of ClassAtom is true.
+>
+> So this is illegal outside of webcompat mode.
+>
+> https://tc39.es/ecma262/#sec-patterns-static-semantics-early-errors-annexb
+>
+> This says that under webcompat mode, this rule only applies with u-flag
+>
+> So this should pass in webcompat and fail all other cases
 
 ## Input
 
@@ -28,7 +42,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Range error with u-flag and unknown reason why regex is invalid without u-flag so it cannot be a valid regex
+    Class escapes are illegal for ranges
 
 /[\s-\d]+/
 ^------- error

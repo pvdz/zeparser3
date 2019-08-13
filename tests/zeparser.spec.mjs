@@ -38,6 +38,7 @@ const TARGET_ES9 = process.argv.includes('--es9');
 const TARGET_ES10 = process.argv.includes('--es10');
 const TARGET_ES11 = process.argv.includes('--es11');
 const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || INPUT_OVERRIDE || TARGET_FILE || SKIP_BUILDS || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL;
+const FORCE_WRITE = process.argv.includes('--force-write');
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -72,6 +73,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
                   (Note: -q, -i, -b, and -f implicitly enable --serial)
     --min         Brute-force simplify a test case that throws an error while maintaining the same error message, only with -f, implies --sloppy
       -- write    For reducer only; write result to new file
+    --force-write Always write the test cases to disk, even when no change was detected
 `);
   process.exit();
 }
@@ -88,6 +90,8 @@ let prettierFormat = () => { return 'prettier not loaded'; }; // if available, l
 
 import {
   ASSERT,
+  decodeUnicode,
+  encodeUnicode,
   getTestFiles,
   parseTestFile,
   promiseToWriteFile,
@@ -199,13 +203,15 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
       },
     );
     if (tob.shouldFail) {
-      if (TARGET_FILE || CONFIRMED_UPDATE) console.error(BLINK + 'FILE ASSERTED TO FAIL' + RESET + ', but it passed');
+      tob.continuePrint = BLINK + 'FILE ASSERTED TO FAIL' + RESET + ', but it passed';
+      if (TARGET_FILE || CONFIRMED_UPDATE) console.error(tob.continuePrint);
       else throw new Error('Test Assertion fail: test ' + tob.file + ' was explicitly marked to fail somehow, but it passed');
     }
   } catch (_e) {
     e = _e;
     if (tob.shouldPass) {
-      if (TARGET_FILE || CONFIRMED_UPDATE) console.error(BLINK + 'FILE ASSERTED TO PASS' + RESET + ', but it failed');
+      tob.continuePrint = BLINK + 'FILE ASSERTED TO PASS' + RESET + ', but it failed';
+      if (TARGET_FILE || CONFIRMED_UPDATE) console.error(tob.continuePrint);
       else throw new Error('Test Assertion fail: test ' + tob.file + ' was explicitly marked to pass, but it failed somehow;\n' + e.stack);
     }
   }
@@ -359,7 +365,7 @@ function showDiff(tob) {
   );
   execSync(
     // Use base64 to prevent shell interpretation of input. Final `cat` is to suppress `diff`'s exit code when diff.
-    `echo '${Buffer.from(tob.newData).toString('base64')}' | base64 -d - | colordiff --text -y -w -W200 "${tob.file}" - | cat`,
+    `echo '${Buffer.from(encodeUnicode(tob.newData)).toString('base64')}' | base64 -d - | colordiff --text -y -w -W200 "${tob.file}" - | cat`,
     {stdio: 'inherit'}
   );
 }
@@ -411,6 +417,7 @@ async function runTests(list, zeparser) {
         console.log(BOLD + '\nnode --experimental-modules tests/zeparser.spec.mjs  -q -u -f "' + tob.file + '"\n');
 
         if (!TARGET_FILE && !INPUT_OVERRIDE) {
+          if (tob.continuePrint) console.error(tob.continuePrint);
           let cont = await yn('Continue?');
           if (!cont) hardExit(tob, 'Test output change detected. Aborting early.');
         }
@@ -435,18 +442,25 @@ async function writeNewOutput(list) {
     for (let i=0; i<list.length; ++i) {
       let tob = list[i];
       const {newData, oldData, file} = tob;
-      if (newData !== oldData) {
+      if (newData !== oldData || FORCE_WRITE) {
+        if (tob.continuePrint) console.error(tob.continuePrint);
+        console.log(DIM + '\nnode --experimental-modules tests/zeparser.spec.mjs -f "' + tob.file + '"\n' + RESET);
         let cont = await yn('Continue to overwrite test output?');
         if (cont) {
           ++updated;
           await promiseToWriteFile(file, newData);
+        }
+      } else {
+        if (tob.continuePrint) {
+          console.log(DIM + '\nnode --experimental-modules tests/zeparser.spec.mjs -f "' + tob.file + '"\n' + RESET);
+          if (!await yn('File was not changed, invariant was broken and written anyways. Continue testing?')) process.exit();
         }
       }
     }
   } else {
     await Promise.all(list.map((tob/*: Tob */) => {
       const {newData, oldData, file} = tob;
-      if (newData !== oldData) {
+      if (newData !== oldData || FORCE_WRITE) {
         if (AUTO_UPDATE) {
           if (STOP_AFTER_TEST_FAIL) stopAsap = true;
           ++updated;
@@ -583,7 +597,8 @@ async function gen() {
 
   files = files.filter(f => f.endsWith('autogen.md'));
   let list = await readFiles(files);
-  list.forEach((tob/*: Tob */) => {
+  for (let ti=0; ti<list.length; ++tb) {
+    let tob/*: Tob */ = list[ti];
     let genDir = path.join(path.dirname(tob.file), 'gen');
 
     if (fs.existsSync(genDir)) {
@@ -654,23 +669,26 @@ async function gen() {
 
     let wrote = 0;
     let skipped = 0;
-    templates.forEach(({title, code}) => {
+    for (let i=0; i<templates.length; ++i) {
+      let template = templates[i];
+      let {title, code} = template;
       let caseDir = path.join(genDir, sanitize(String(title)));
       fs.mkdirSync(caseDir, {recursive: true});
-      cases.forEach(c => {
+      for (let j=0; j<cases.length; ++j) {
+        let c = cases[j];
         let testFile = path.join(caseDir, sanitize(String(c)) + '.md');
 
         if (!AUTO_GENERATE_CONSERVATIVE || !fs.existsSync(testFile)) {
           // immediately generate a test case for it, as well
-          fs.writeFileSync(testFile, createAutoGeneratedTestFileContents(tob, caseDir, title, c, params, code));
+          await promiseToWriteFile(testFile, createAutoGeneratedTestFileContents(tob, caseDir, title, c, params, code));
           ++wrote;
         } else {
           ++skipped;
         }
-      });
-    });
+      }
+    }
     console.log('Wrote', wrote, 'new test files' + (skipped ? ' and skipped ' + skipped + ' existing files' : ''), 'dir:', genDir.slice(path.join(dirname, '..').length+1));
-  });
+  }
 }
 function createAutoGeneratedTestFileContents(tob/*: Tob */, caseDir, title, c, params, code) {
   return `# ZeParser parser autogenerated test case

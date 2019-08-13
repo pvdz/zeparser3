@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Largest back reference index exceeded the number of capturing groups
+    Largest back reference index exceeded the number of capturing groups (only valid without u-flag in webcompat mode)
 
 /7\89/
 ^------- error

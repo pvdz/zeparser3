@@ -11,8 +11,10 @@
 > This confirms whether the right hand of surrogate pair `\u{2F9DF}` / `\ud87e\udddf`, which is `\udddf`, is correctly reported as not being declared as a group name
 >
 > The backreference should fail to match the group because it's only half of the surrogate pair
-
-## FAIL
+>
+> I think that because RegExpIdentifierName is syntactically not parse-able (because the the surrogate head cannot be validly parsed at all without a tail) it is never "again" parsed as a groupname in webcompat mode. In other words, it never traverses the +N route.
+>
+> Since it won't trigger +N, it won't parse a group in webcompat, so it passes as an extended atom.
 
 ## Input
 
@@ -34,7 +36,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Named capturing group named contained an invalid unicode escaped char: [`�`, 56799]
+    Named capturing group named contained an invalid unicode escaped char: [`@{xdddf}@`, 56799]
 
 /(?<\ud87e\udddfxyz>foo)met\k<\udddfxyz>/
 ^------- error

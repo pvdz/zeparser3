@@ -15,7 +15,7 @@
 ## Input
 
 `````js
-/(?<輸>foo)met\k<輸>/
+/(?<@{x2f9df}@>foo)met\k<@{x2f9df}@>/
 `````
 
 ## Output
@@ -42,8 +42,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
         value: null,
-        regex: { pattern: '(?<輸>foo)met\\k<輸>', flags: '' },
-        raw: '/(?<輸>foo)met\\k<輸>/'
+        regex: { pattern: '(?<@{x2f9df}@>foo)met\\k<@{x2f9df}@>', flags: '' },
+        raw: '/(?<@{x2f9df}@>foo)met\\k<@{x2f9df}@>/'
       }
     }
   ]

@@ -13,7 +13,7 @@
 ## Input
 
 `````js
-/(?<abc𝟐def>foo\k<abc𝟐def>)/
+/(?<abc@{x1d7d0}@def>foo\k<abc@{x1d7d0}@def>)/
 `````
 
 ## Output
@@ -40,8 +40,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
         value: null,
-        regex: { pattern: '(?<abc𝟐def>foo\\k<abc𝟐def>)', flags: '' },
-        raw: '/(?<abc𝟐def>foo\\k<abc𝟐def>)/'
+        regex: { pattern: '(?<abc@{x1d7d0}@def>foo\\k<abc@{x1d7d0}@def>)', flags: '' },
+        raw: '/(?<abc@{x1d7d0}@def>foo\\k<abc@{x1d7d0}@def>)/'
       }
     }
   ]

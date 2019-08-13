@@ -95,8 +95,9 @@ function toPrint(s) {
 export class Tob {
   constructor(file, data) {
     ASSERT(!data || data.indexOf('\n##'));
+
     this.file = file;
-    this.fileShort = file.slice(file.indexOf('zeparser3'));
+    this.fileShort = file.slice(file.indexOf('zeparser3') + 'zeparser3/'.length);
     this.oldData = data;
     this.newData = data;
 
@@ -246,18 +247,30 @@ function parseTestFile(tob) {
     }, {});
 }
 
+function encodeUnicode(str) {
+  return str.replace(/[^\u0000-\u00ff]/ug, m => '@{x'+m.codePointAt(0).toString(16)+'}@');
+}
+function decodeUnicode(str) {
+  // console.log('decoding', str)
+  return str.replace(/@\{x?([0-9a-z]+)\}@/gi, (_, g) => String.fromCodePoint(parseInt(g, 16)));
+}
+
 async function readFiles(files) {
   return await Promise.all(files.map(promiseToReadFile)).catch(e => { throw new Error(e); });
 }
 function promiseToReadFile(file) {
   if (!fs.existsSync(file)) console.error(BLINK + 'File does not exist:' + RESET + ' ' + file);
   let res,rej,p = new Promise((resolve, reject) => (res = resolve, rej = reject));
-  fs.readFile(file, 'utf8', (err, data) => err ? rej(err) : res(new Tob(file, data)));
+  fs.readFile(file, 'utf8', (err, data) => err ? rej(err) :
+    // Convert `@{abc}@` to a character matching the codepoint `\u{abc}`
+    res(new Tob(file, decodeUnicode(data)))
+  );
   return p;
 }
 
 function promiseToWriteFile(file, data) {
   let res,rej,p = new Promise((resolve, reject) => (res = resolve, rej = reject));
+  data = encodeUnicode(data);
   fs.writeFile(file, data, 'utf8', err => err ? rej(err) : res());
   return p;
 }
@@ -313,6 +326,8 @@ export {
   OUTPUT_QUINTICKJS,
 
   ASSERT,
+  decodeUnicode,
+  encodeUnicode,
   getTestFiles,
   _LOG,
   LOG,

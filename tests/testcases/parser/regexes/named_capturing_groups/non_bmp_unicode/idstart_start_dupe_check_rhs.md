@@ -11,13 +11,15 @@
 > This confirms whether the right hand of surrogate pair `\u{2F9DF}` / `\ud87e\udddf`, which is `\udddf`, is correctly reported as not being declared as a group name
 >
 > The backreference should fail to match the group because it's only half of the surrogate pair
-
-## FAIL
+>
+> I think that because RegExpIdentifierName is syntactically not parse-able (because the the surrogate head cannot be validly parsed at all without a tail) it is never "again" parsed as a groupname in webcompat mode. In other words, it never traverses the +N route.
+>
+> Since it won't trigger +N, it won't parse a group in webcompat, so it passes as an extended atom.
 
 ## Input
 
 `````js
-/(?<輸xyz>foo)met\k<�xyz>/
+/(?<@{x2f9df}@xyz>foo)met\k<@{xfffd}@xyz>/
 `````
 
 ## Output
@@ -34,9 +36,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Wanted to parse an unescaped group name specifier but it had a bad start: [`�`, 65533]
+    Wanted to parse an unescaped group name specifier but it had a bad start: [`@{xfffd}@`, 65533]
 
-/(?<輸xyz>foo)met\k<�xyz>/
+/(?<@{x2f9df}@xyz>foo)met\k<@{xfffd}@xyz>/
 ^------- error
 `````
 
@@ -68,8 +70,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
         value: null,
-        regex: { pattern: '(?<輸xyz>foo)met\\k<�xyz>', flags: '' },
-        raw: '/(?<輸xyz>foo)met\\k<�xyz>/'
+        regex: { pattern: '(?<@{x2f9df}@xyz>foo)met\\k<@{xfffd}@xyz>', flags: '' },
+        raw: '/(?<@{x2f9df}@xyz>foo)met\\k<@{xfffd}@xyz>/'
       }
     }
   ]

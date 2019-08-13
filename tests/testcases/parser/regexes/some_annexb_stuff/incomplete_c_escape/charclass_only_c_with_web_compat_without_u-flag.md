@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered early EOF while parsing char class (3)
+    The `\c` escape is only legal in a char class without uflag and in webcompat mode
 
 /[\c]/
 ^------- error

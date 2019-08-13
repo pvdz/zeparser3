@@ -13,7 +13,7 @@
 ## Input
 
 `````js
-fo𐔞o();
+fo@{x1051e}@o();
 `````
 
 ## Output
@@ -42,7 +42,7 @@ ast: {
         callee: {
           type: 'Identifier',
           loc:{start:{line:1,col:0},end:{line:1,col:5},source:''},
-          name: 'fo𐔞o'
+          name: 'fo@{x1051e}@o'
         },
         arguments: []
       }

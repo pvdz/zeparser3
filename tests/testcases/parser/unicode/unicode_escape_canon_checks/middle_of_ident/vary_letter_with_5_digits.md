@@ -37,7 +37,7 @@ ast: {
       expression: {
         type: 'Identifier',
         loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
-        name: 'PASS𝒁PASS'
+        name: 'PASS@{x1d481}@PASS'
       }
     }
   ]

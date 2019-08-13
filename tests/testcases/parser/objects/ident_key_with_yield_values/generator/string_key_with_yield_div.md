@@ -52,11 +52,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Tokenizer error!
-    Found a rhs curly as an Atom, only valid without u-flag and with web compat mode, but already found something that invalidates not having the u-flag so cant validate this regex
-
-function *f(){   s = {foo: yield / x}   }
-                                 ^------- error
-`````
-
+_Output same as sloppy mode._

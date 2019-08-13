@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered unescaped closing square bracket `]` while not parsing a character class
+    Encountered unescaped closing square bracket `]` while not parsing a character class, which is only valid without u-flag
 
 /]/u
 ^------- error

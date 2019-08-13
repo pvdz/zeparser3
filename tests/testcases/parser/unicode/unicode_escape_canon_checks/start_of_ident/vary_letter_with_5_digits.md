@@ -37,7 +37,7 @@ ast: {
       expression: {
         type: 'Identifier',
         loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
-        name: '𝒁PASS'
+        name: '@{x1d481}@PASS'
       }
     }
   ]

@@ -39,7 +39,7 @@ ast: {
       expression: {
         type: 'Identifier',
         loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
-        name: 'PASSƇPASS'
+        name: 'PASS@{x187}@PASS'
       }
     }
   ]

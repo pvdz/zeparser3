@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Range error with u-flag and unknown reason why regex is invalid without u-flag so it cannot be a valid regex
+    Class escapes are illegal for ranges
 
 /[\s-\d]+/
 ^------- error

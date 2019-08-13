@@ -13,7 +13,7 @@
 ## Input
 
 `````js
-β();
+@{x3b2}@();
 `````
 
 ## Output
@@ -42,7 +42,7 @@ ast: {
         callee: {
           type: 'Identifier',
           loc:{start:{line:1,col:0},end:{line:1,col:1},source:''},
-          name: 'β'
+          name: '@{x3b2}@'
         },
         arguments: []
       }

@@ -12,6 +12,8 @@
 >
 > I think the test is incorrect because the spec says to ignore early errors while parsing a cover grammer, which we are.
 
+TODO: report error in test262
+
 ## SKIP
 ## PASS
 

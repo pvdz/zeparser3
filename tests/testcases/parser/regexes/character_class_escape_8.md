@@ -1,19 +1,17 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/regexes/some_annexb_stuff/8_9_escaped/with_web_compat_with_u-flag/escaped_9_double.md
+- Path: zeparser3/tests/testcases/parser/regexes/character_class_escape_8.md
 
-> :: regexes : some annexb stuff : 8 9 escaped : with web compat with u-flag
+> :: regexes
 >
-> ::> escaped 9 double
-
+> ::> character class escape 8
+>
+> Testing the parseDecimalEscape path
 
 ## Input
 
-
 `````js
-/7\98/u
+/[\8]/
 `````
 
 ## Output
@@ -30,9 +28,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Largest back reference index exceeded the number of capturing groups (only valid without u-flag in webcompat mode)
+    Cannot escape \8 or \9 in a regex char class with u-flag
 
-/7\98/u
+/[\8]/
 ^------- error
 `````
 
@@ -53,10 +51,25 @@ _Output same as sloppy mode._
 Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
-throws: Tokenizer error!
-    Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
+ast: {
+  type: 'Program',
+  loc:{start:{line:1,col:0},end:{line:1,col:6},source:''},
+  body: [
+    {
+      type: 'ExpressionStatement',
+      loc:{start:{line:1,col:0},end:{line:1,col:6},source:''},
+      expression: {
+        type: 'Literal',
+        loc:{start:{line:1,col:0},end:{line:1,col:6},source:''},
+        value: null,
+        regex: { pattern: '[\\8]', flags: '' },
+        raw: '/[\\8]/'
+      }
+    }
+  ]
+}
 
-/7\98/u
-^------- error
+tokens (3x):
+       REGEX ASI
 `````
 

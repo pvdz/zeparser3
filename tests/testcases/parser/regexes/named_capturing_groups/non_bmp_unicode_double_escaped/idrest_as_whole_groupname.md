@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Named capturing group named contained an invalid unicode escaped char: [`𝟐`, 120784]
+    Named capturing group named contained an invalid unicode escaped char: [`@{x1d7d0}@`, 120784]
 
 /(?<\uD835\uDFD0>foo)/
 ^------- error

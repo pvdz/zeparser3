@@ -13,7 +13,7 @@
 ## Input
 
 `````js
-/(?<abc𝟐def>foo)/
+/(?<abc@{x1d7d0}@def>foo)/
 `````
 
 ## Output
@@ -40,8 +40,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
         value: null,
-        regex: { pattern: '(?<abc𝟐def>foo)', flags: '' },
-        raw: '/(?<abc𝟐def>foo)/'
+        regex: { pattern: '(?<abc@{x1d7d0}@def>foo)', flags: '' },
+        raw: '/(?<abc@{x1d7d0}@def>foo)/'
       }
     }
   ]

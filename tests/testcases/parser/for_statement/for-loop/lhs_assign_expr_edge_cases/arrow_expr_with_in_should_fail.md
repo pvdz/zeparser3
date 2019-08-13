@@ -16,7 +16,7 @@
 >
 > IterationStatement[Yield, Await, Return]:
 >
-> for([lookahead ≠ let []Expression[~In, ?Yield, ?Await]opt ; ; ) ;
+> for([lookahead != `let [`]Expression[~In, ?Yield, ?Await]opt ; ; ) ;
 >
 > Expression[In, Yield, Await]:
 >
@@ -32,7 +32,7 @@
 >
 > ConciseBody[In]:
 >
-> [lookahead ≠ {]AssignmentExpression[?In, ~Yield, ~Await]
+> [lookahead != `{`]AssignmentExpression[?In, ~Yield, ~Await]
 >
 > {FunctionBody[~Yield, ~Await]}
 >

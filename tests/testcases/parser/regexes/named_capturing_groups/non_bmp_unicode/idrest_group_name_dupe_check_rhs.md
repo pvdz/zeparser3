@@ -9,13 +9,15 @@
 > This checks whether `\u{1D7D0}` / `\uD835\uDFD0` is accepted inside a valid group
 >
 > The backreference should fail to match the group because it's only half of the surrogate pair
-
-## FAIL
+>
+> I think that because RegExpIdentifierName is syntactically not parse-able (because the the surrogate head cannot be validly parsed at all without a tail) it is never "again" parsed as a groupname in webcompat mode. In other words, it never traverses the +N route.
+>
+> Since it won't trigger +N, it won't parse a group in webcompat, so it passes as an extended atom.
 
 ## Input
 
 `````js
-/(?<abc𝟐def>foo\k<abc�def>)/
+/(?<abc@{x1d7d0}@def>foo\k<abc@{xfffd}@def>)/
 `````
 
 ## Output
@@ -32,9 +34,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Missing closing angle bracket of name of capturing group: [`�`, 65533]
+    Missing closing angle bracket of name of capturing group
 
-/(?<abc𝟐def>foo\k<abc�def>)/
+/(?<abc@{x1d7d0}@def>foo\k<abc@{xfffd}@def>)/
 ^------- error
 `````
 
@@ -66,8 +68,8 @@ ast: {
         type: 'Literal',
         loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
         value: null,
-        regex: { pattern: '(?<abc𝟐def>foo\\k<abc�def>)', flags: '' },
-        raw: '/(?<abc𝟐def>foo\\k<abc�def>)/'
+        regex: { pattern: '(?<abc@{x1d7d0}@def>foo\\k<abc@{xfffd}@def>)', flags: '' },
+        raw: '/(?<abc@{x1d7d0}@def>foo\\k<abc@{xfffd}@def>)/'
       }
     }
   ]

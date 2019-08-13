@@ -5,13 +5,13 @@
 
 > :: test: a/ case
 >
-> :: case: var x;
+> :: case: var@{x1680}@x;
 
 ## Input
 
 
 `````js
-var x;
+var@{x1680}@x;
 `````
 
 ## Output
@@ -28,9 +28,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Unexpected unicode character: 5760 ( )
+    Unexpected unicode character: 5760 (@{x1680}@)
 
-var x;
+var@{x1680}@x;
    ^------- error
 `````
 
