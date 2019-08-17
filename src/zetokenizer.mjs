@@ -2183,7 +2183,6 @@ function ZeTokenizer(
           afterAtom = true;
           break;
         case $$SQUARE_R_5D: {
-          // this is always bad since we have a quantifier parser that consumes valid curlies
           ASSERT_skip($$SQUARE_R_5D);
           let reason = 'Encountered unescaped closing square bracket `]` while not parsing a character class, which is only valid without u-flag';
           if (webCompat === WEB_COMPAT_ON) {
@@ -2191,7 +2190,7 @@ function ZeTokenizer(
           } else {
             uflagStatus = regexSyntaxError(reason);
           }
-          afterAtom = true; // meh
+          afterAtom = true;
           break;
         }
 
