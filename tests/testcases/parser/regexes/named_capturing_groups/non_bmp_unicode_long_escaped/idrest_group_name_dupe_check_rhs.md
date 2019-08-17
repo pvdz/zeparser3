@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Found "es6" unicode escape in regex ident, which is only valid with u-flag in regex
+    The es6 long unicode escape is only valid with u-flag
 
 /(?<abc\u{1D7D0}def>foo\k<abc\uDFD0def>)/
 ^------- error

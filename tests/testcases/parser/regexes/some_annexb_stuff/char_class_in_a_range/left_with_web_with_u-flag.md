@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered incorrect range (left>right) which is illegal with u-flag
+    Character class escapes `\d \D \s \S \w \W \p \P` are only ok as a range with webcompat, without uflag
 
 /[\d-a]+/u
 ^------- error
@@ -52,11 +52,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Tokenizer error!
-    Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
-
-/[\d-a]+/u
-^------- error
-`````
-
+_Output same as sloppy mode._

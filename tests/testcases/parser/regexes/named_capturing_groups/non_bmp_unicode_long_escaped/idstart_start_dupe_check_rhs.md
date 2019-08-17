@@ -36,7 +36,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered extended unicode escape `\u{}` which is only valid with u-flag but this regex is invalid with u-flag
+    The es6 long unicode escape is only valid with u-flag
 
 /(?<\u{2F9DF}xyz>foo)met\k<\udddfxyz>/
 ^------- error

@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered incorrect range (left>right) which is illegal with u-flag
+    Character class escapes `\d \D \s \S \w \W \p \P` are only ok as a range with webcompat, without uflag
 
 /[\d-a]+/
 ^------- error
