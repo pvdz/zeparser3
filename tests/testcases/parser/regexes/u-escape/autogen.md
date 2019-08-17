@@ -46,6 +46,14 @@ One test file is generated for each combination of input case and input template
 > /\u{a}/
 > `````
 
+> `````js
+> /x\ubcde\udabcy/
+> `````
+
+> `````js
+> /[x\ubcde\udabcy]/
+> `````
+
 ### Templates
 
 #### without u-flag

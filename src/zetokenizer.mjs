@@ -2753,9 +2753,9 @@ function ZeTokenizer(
             lastRegexUnicodeEscapeOrd = (((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000;
             return REGEX_ALWAYS_GOOD; // even without u-flag? how does that work...?
           }
-          return regexSyntaxError('Second quad did not yield a valid surrogate pair value');
+          // return regexSyntaxError('Second quad did not yield a valid surrogate pair value');
         }
-        return regexSyntaxError('Encountered illegal quad escaped surrogate pair; the second part of the pair did not meet the requirements');
+        // return regexSyntaxError('Encountered illegal quad(1) escaped surrogate pair; the second part of the pair did not meet the requirements');
       }
 
       lastRegexUnicodeEscapeOrd = firstPart;
@@ -3824,7 +3824,15 @@ function ZeTokenizer(
       // Is this a surrogate high byte? then we'll try another one; https://en.wikipedia.org/wiki/UTF-16
       if (firstPart >= 0xD800 && firstPart <= 0xDBFF) {
         // pretty slow path but we're constructing a low+hi surrogate pair together here
-        if (!eofd(5) && peek() === $$BACKSLASH_5C && peekd(1) === $$U_75 && isHex(peekd(2)) && isHex(peekd(3)) && isHex(peekd(4)) && isHex(peekd(5))) {
+        if (
+          !eofd(5) &&
+          peek() === $$BACKSLASH_5C &&
+          peekd(1) === $$U_75 &&
+          isHex(peekd(2)) &&
+          isHex(peekd(3)) &&
+          isHex(peekd(4)) &&
+          isHex(peekd(5))
+        ) {
           let a = peekd(2);
           let b = peekd(3);
           let c = peekd(4);
@@ -3854,10 +3862,10 @@ function ZeTokenizer(
             // we have a matching low+hi, combine them
             return (((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000;
           }
-          regexSyntaxError('Second quad did not yield a valid surrogate pair value');
+          // regexSyntaxError('Second quad did not yield a valid surrogate pair value');
         }
-        regexSyntaxError('Encountered illegal quad escaped surrogate pair; the second part of the pair did not meet the requirements');
-        return REGEX_CHARCLASS_BAD;
+        // regexSyntaxError('Encountered illegal quad(2) escaped surrogate pair; the second part of the pair did not meet the requirements');
+        // return REGEX_CHARCLASS_BAD;
       }
       return firstPart;
     } else {
