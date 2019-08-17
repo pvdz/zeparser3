@@ -361,6 +361,8 @@ function showDiff(tob) {
     BOLD + '######' + RESET + '\n' +
     BOLD + '## ' + RESET + 'Now showing diff' + '\n' +
     BOLD + '## ' + RESET + 'File:', tob.file, '\n' +
+    BOLD + '###### Input:' + RESET + '\n' +
+    tob.inputCode, '\n' +
     BOLD + '######' + RESET + '\n'
   );
   execSync(
