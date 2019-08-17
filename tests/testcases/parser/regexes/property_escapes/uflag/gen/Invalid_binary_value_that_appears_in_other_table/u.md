@@ -11,7 +11,7 @@
 
 
 `````js
-/\P{ASCII=Variation_Selector}/u;
+/\P{Script_Extensions=Variation_Selector}/u;
 `````
 
 ## Output
@@ -28,9 +28,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    The escaped binary property name `ASCII` is not valid (does not appear in "table 54") with u-flag, and `\p` is not valid without u-flag and without webcompat
+    The escaped property value `Variation_Selector` is not valid (does not appear in "table 56" nor "table 57") with u-flag, and `\p` is not valid without u-flag and without webcompat
 
-/\P{ASCII=Variation_Selector}/u;
+/\P{Script_Extensions=Variation_Selector}/u;
 ^------- error
 `````
 
@@ -52,9 +52,9 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Tokenizer error!
-    The escaped binary property name `ASCII` is not valid (does not appear in "table 54")
+    The escaped property value `Variation_Selector` is not valid (does not appear in "table 56" nor "table 57")
 
-/\P{ASCII=Variation_Selector}/u;
+/\P{Script_Extensions=Variation_Selector}/u;
 ^------- error
 `````
 
