@@ -103,24 +103,28 @@ const update = e => {
 
   let out;
   let threw = 'unknown';
+  let selectedMode = document.querySelector('input[name=mode]:checked').value;
+  let version = +document.querySelector('input[name=version]:checked').value;
   try {
-    console.log('crunching:', '\n```\n' + pret(input) + '\n```');
+    console.log('crunching (mode=', selectedMode, ', version=', version, '):', '\n```\n' + pret(input) + '\n```');
 
-    let mode = document.querySelector('input[name=mode]:checked').value === 'module' ? Tok.GOAL_MODULE : Tok.GOAL_SCRIPT;
+    let mode = selectedMode === 'module' ? Tok.GOAL_MODULE : Tok.GOAL_SCRIPT;
 
-    out = ZeParser(window.ta_input.value, mode, Tok.COLLECT_TOKENS_ALL, {
-      strictMode: document.querySelector('input[name=mode]:checked').value === 'strict',
-      webCompat: !!document.querySelector('input[name=webcompat]:checked'),
+    out = ZeParser(input, mode, Tok.COLLECT_TOKENS_ALL, {
+      strictMode: selectedMode === 'strict',
+      webCompat: selectedMode === 'webcompat',
       astRoot: ast,
       tokenStorage: tokens,
       // getTokenizer: tok => tokenizer = tok,
-      targetEsVersion: +document.querySelector('input[name=version]:checked').value,
+      targetEsVersion: version,
     });
     threw = false;
   } finally {
     // not try/catching here means you can properly debug it...
     if (threw) console.error('An error was thrown. Expecting window.onerror to catch it and amend the trace');
     stderr.value = logs.map(s => s + '\n').join('');
+
+    scheduleOverall(input, selectedMode, version);
   }
   reflectPass();
 
@@ -128,10 +132,43 @@ const update = e => {
   window.ta_ast.value = pret(JSON.stringify(ast.root), true);
   window.ta_output.value = tokens.map(JSON.stringify).join('\n')
   console.log(['out:', out, 'ast:', ast]);
-
-
-
 };
+
+let overallBouncer = 0;
+function scheduleOverall(input, currentMode, currentVersion) {
+  clearTimeout(overallBouncer);
+  overallBouncer = setTimeout(() => {
+    // Update mini-menu indicators, set their class name to `mode_selector true` or `mode_selector false`
+    $sloppy_mode.parentNode.className = 'mode_selector ' + silentPassFail(input, 'sloppy', currentVersion);
+    $compat_mode.parentNode.className = 'mode_selector ' + silentPassFail(input, 'webcompat', currentVersion);
+    $strict_mode.parentNode.className = 'mode_selector ' + silentPassFail(input, 'strict', currentVersion);
+    $module_mode.parentNode.className = 'mode_selector ' + silentPassFail(input, 'module', currentVersion);
+
+    $ver_es6.parentNode.className = 'mode_selector ' + silentPassFail(input, currentMode, 6);
+    $ver_es7.parentNode.className = 'mode_selector ' + silentPassFail(input, currentMode, 7);
+    $ver_es8.parentNode.className = 'mode_selector ' + silentPassFail(input, currentMode, 8);
+    $ver_es9.parentNode.className = 'mode_selector ' + silentPassFail(input, currentMode, 9);
+  }, 100);
+}
+
+function silentPassFail(code, mode/*:sloppy | webcompat | strict | module*/, version) {
+  let threw = false;
+  try {
+    ZeParser(code, mode === 'module' ? Tok.GOAL_MODULE : Tok.GOAL_SCRIPT, Tok.COLLECT_TOKENS_NONE, {
+      strictMode: mode === 'strict',
+      webCompat: mode === 'webcompat',
+      targetEsVersion: version,
+      // Silence all output
+      $log: () => {},
+      $warn: () => {},
+      $error: () => {},
+    });
+    threw = true;
+  } catch (e) {
+    // console.warn('the error was', e)
+  }
+  return threw;
+}
 
 [
   window.ta_input,

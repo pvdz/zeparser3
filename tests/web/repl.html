@@ -30,6 +30,30 @@
     .box.bottom-left .header { border: 0; border-right: 1px solid #aaa; }
     .box.bottom-right .header { border: 0; border-left: 1px solid #aaa; }
 
+    .mode_selector {
+      position: relative;
+      border: 1px solid white;
+    }
+    .mode_selector:hover {
+      border: 1px solid black;
+    }
+    .mode_selector.true {
+      background-color: #bceebd;
+    }
+    .mode_selector.false {
+      background-color: #ffbdb5;
+    }
+    .mode_selector > input {
+      position: absolute;
+      top: 18px;
+      left: 5px;
+    }
+    .mode_selector > label {
+      height: 40px;
+      margin: 0 2px;
+      padding: 0 3px;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
@@ -43,18 +67,52 @@
   <div class="box main" style="align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
     <div class="box left" style="flex-direction: column; align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto; max-width:50%;">
       <div class="box top-left" style="flex-direction: column; align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
-        <div class="header">
-          <b>Input</b>&nbsp;&mdash;
-          <label><input type="checkbox" name="webcompat" value="on"> Web compat</label>&nbsp;&mdash;
-          Parsing mode:
-            <label><input type="radio" name="mode" value="sloppy"/> Sloppy</label>
-            <label><input checked type="radio" name="mode" value="strict"/> Strict</label>
-            <label><input type="radio" name="mode" value="module"/> Module</label>&nbsp;&mdash;
-          Spec:
-            <label><input type="radio" name="version" value="6"/> ES6</label>
-            <label><input type="radio" name="version" value="7"/> ES7</label>
-            <label><input type="radio" name="version" value="8"/> ES8</label>
-            <label><input type="radio" name="version" value="9" checked/> ES9</label>
+        <div class="header" style="height: 51px;">
+          <b>Input</b>
+          &mdash;
+          Display:&nbsp;
+
+          <span class="mode_selector" title="Click here to show the output of the sloppy mode run">
+            <input type="radio" name="mode" id="$sloppy_mode" value="sloppy"/>
+            <label for="$sloppy_mode">Sloppy</label>
+          </span>
+
+          <span class="mode_selector" title="Click here to show the output of the sloppy web compat mode run">
+            <input type="radio" name="mode" id="$compat_mode" value="webcompat"/>
+            <label for="$compat_mode"> Web Compat</label>
+          </span>
+
+          <span class="mode_selector" title="Click here to show the output of the strict mode run">
+            <input checked type="radio" name="mode" id="$strict_mode" value="strict"/>
+            <label for="$strict_mode">Strict</label>
+          </span>
+
+          <span class="mode_selector" title="Click here to show the output of the module mode run">
+            <input type="radio" name="mode" id="$module_mode" value="module"/>
+            <label for="$module_mode">Module</label>
+          </span>
+
+          &nbsp;&mdash; in &mdash;&nbsp;
+
+          <span class="mode_selector" title="Click here to show the output parsed in es6">
+            <input type="radio" name="version" id="$ver_es6" value="6"/>
+            <label for="$ver_es6">ES6</label>
+          </span>
+
+          <span class="mode_selector" title="Click here to show the output parsed in es7">
+            <input type="radio" name="version" id="$ver_es7" value="7"/>
+            <label for="$ver_es7">ES7</label>
+          </span>
+
+          <span class="mode_selector" title="Click here to show the output parsed in es8">
+            <input type="radio" name="version" id="$ver_es8" value="8"/>
+            <label for="$ver_es8">ES8</label>
+          </span>
+
+          <span class="mode_selector" title="Click here to show the output parsed in es9">
+            <input type="radio" name="version" id="$ver_es9" value="9" checked/>
+            <label for="$ver_es9">ES9</label>
+          </span>
         </div>
         <textarea id="ta_input" placeholder="enter code here" class="box tl" style="align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
 // Note: Firefox (&lt;=63) crashes because of import(), >=66 seems to work fine
