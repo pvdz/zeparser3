@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Char class contained a "wide" codepoint that was not unicode ID_CONTINUE
+    Regex: Char class contained a "wide" codepoint that was not unicode ID_CONTINUE; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
 
 /[\ ]/u
 ^------- error
@@ -54,7 +54,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Tokenizer error!
-    Cannot escape ord=32 in a char class with uflag
+    Regex: Cannot escape ord=32 in a char class with uflag; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
 
 /[\ ]/u
 ^------- error

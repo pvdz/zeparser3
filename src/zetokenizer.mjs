@@ -1854,7 +1854,7 @@ function ZeTokenizer(
     }
 
     updateRegexPotentialError(desc + (rest.length ? ': [' + rest.join(', ') + ']' : ''));
-    lastReportableTokenizerError = lastPotentialRegexError;
+    lastReportableTokenizerError = 'Regex: ' + lastPotentialRegexError;
 
     return REGEX_ALWAYS_BAD;
   }
@@ -1955,18 +1955,18 @@ function ZeTokenizer(
     }
 
     if (ustatusBody === REGEX_ALWAYS_BAD) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = lastPotentialRegexError || 'Regex body had an illegal escape sequence';
+      if (!lastReportableTokenizerError) regexSyntaxError('Regex body had an illegal escape sequence');
       return $ERROR;
     }
     if (ustatusFlags === REGEX_ALWAYS_BAD) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = lastPotentialRegexError || 'Regex body had an illegal escape sequence or a regex flag occurred twice (should already have called THROW for this)';
+      if (!lastReportableTokenizerError) regexSyntaxError('Regex body had an illegal escape sequence or a regex flag occurred twice (should already have called THROW for this)');
       return $ERROR;
     }
 
     if (ustatusBody === REGEX_GOOD_WITH_U_FLAG) {
       // body had an escape that is only valid with an u flag
       if (ustatusFlags === REGEX_GOOD_WITH_U_FLAG) return $REGEXU;
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = lastPotentialRegexError || 'Regex body had an escape that is only valid with an u-flag, but it had no u-flag';
+      if (!lastReportableTokenizerError) regexSyntaxError('Regex body had an escape that is only valid with an u-flag, but it had no u-flag');
       regexSyntaxError('Regex had syntax that is only valid with the u-flag and u-flag was in fact not present');
       return $ERROR;
     }
@@ -1975,7 +1975,7 @@ function ZeTokenizer(
       // body had an escape or char class range that is invalid with a u flag
       if (ustatusFlags !== REGEX_GOOD_WITH_U_FLAG) return $REGEX;
       // in this case the body had syntax that's invalid with a u flag and the flag was present anyways
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = lastPotentialRegexError || 'Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag';
+      if (!lastReportableTokenizerError) regexSyntaxError('Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag');
       regexSyntaxError('Regex had syntax that is invalid with u-flag and u-flag was in fact present');
       return $ERROR;
     }

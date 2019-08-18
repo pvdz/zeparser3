@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Illegal char escape char (ord=47)
+    Regex: Illegal char escape char (ord=47)
 
 /\c/
 ^------- error

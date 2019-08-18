@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Only unicode escapes are legal in identifier names
+    Regex: Only unicode escapes are legal in identifier names
 
 /(?<xyz\a>.)/u;
 ^------- error

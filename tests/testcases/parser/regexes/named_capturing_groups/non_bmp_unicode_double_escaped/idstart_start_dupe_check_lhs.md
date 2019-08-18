@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Named capturing group named contained an invalid unicode escaped char: [`@{xd87e}@`, 55422]
+    Regex: Named capturing group named contained an invalid unicode escaped char: [`@{xd87e}@`, 55422]
 
 /(?<\ud87e\udddfxyz>foo)met\k<\ud87exyz>/
 ^------- error

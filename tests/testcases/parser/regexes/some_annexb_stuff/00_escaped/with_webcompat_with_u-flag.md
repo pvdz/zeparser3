@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Back references can not have more two or more consecutive numbers
+    Regex: Back references can not have more two or more consecutive numbers
 
 /\00/u
 ^------- error
@@ -52,4 +52,11 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Tokenizer error!
+    Regex: Back references can not have more two or more consecutive numbers; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
+
+/\00/u
+^------- error
+`````
+

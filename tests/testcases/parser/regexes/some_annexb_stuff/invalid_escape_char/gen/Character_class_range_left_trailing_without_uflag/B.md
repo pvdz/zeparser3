@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Char class can not contain `\B` with u-flag or without webcompat
+    Regex: Char class can not contain `\B` with u-flag or without webcompat
 
 /[\B-]/
 ^------- error

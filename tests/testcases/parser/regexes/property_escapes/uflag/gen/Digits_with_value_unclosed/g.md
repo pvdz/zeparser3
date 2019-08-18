@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Escaped property name/value contained illegal characters
+    Regex: Escaped property name/value contained illegal characters
 
 /\p{1=1234/g;
 ^------- error

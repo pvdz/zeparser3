@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered early EOF while parsing a unicode escape quad
+    Regex: Encountered early EOF while parsing a unicode escape quad
 
 /\u/
 ^------- error

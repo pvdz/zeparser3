@@ -69,7 +69,7 @@ Parsed with the module goal.
 
 `````
 throws: Tokenizer error!
-    Found EOF before regex was closed
+    Regex: Found EOF before regex was closed
 
 await/x
      ^------- error

@@ -64,7 +64,7 @@ Parsed with script goal but as if it was starting with `"use strict"` at the top
 
 `````
 throws: Tokenizer error!
-    Found EOF before regex was closed
+    Regex: Found EOF before regex was closed
 
 yield
 /foo

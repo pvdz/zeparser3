@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Missing closing angle bracket of name of capturing group
+    Regex: Missing closing angle bracket of name of capturing group
 
 /(?<aa)/
 ^------- error

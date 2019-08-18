@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    The `\c` escape is only legal in a char class without uflag and in webcompat mode
+    Regex: The `\c` escape is only legal in a char class without uflag and in webcompat mode
 
 /[\c]/u
 ^------- error
@@ -52,4 +52,11 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Tokenizer error!
+    Regex: The `\c` escape is only legal in a char class without uflag and in webcompat mode; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
+
+/[\c]/u
+^------- error
+`````
+

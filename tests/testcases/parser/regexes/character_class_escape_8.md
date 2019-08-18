@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Cannot escape \8 or \9 in a regex char class with u-flag
+    Regex: Cannot escape \8 or \9 in a regex char class with u-flag
 
 /[\8]/
 ^------- error

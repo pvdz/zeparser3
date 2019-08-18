@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Cannot escape \8 or \9 in a regex char class with u-flag
+    Regex: Cannot escape \8 or \9 in a regex char class with u-flag
 
 /[\9]/u
 ^------- error
@@ -50,4 +50,11 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Tokenizer error!
+    Regex: Cannot escape \8 or \9 in a regex char class with u-flag; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
+
+/[\9]/u
+^------- error
+`````
+

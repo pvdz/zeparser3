@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    the char class had an escape that would not be valid with and without u-flag (ord=-2)
+    Regex: the char class had an escape that would not be valid with and without u-flag (ord=-2)
 
 /[\a-z]/u
 ^------- error
@@ -52,7 +52,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Tokenizer error!
-    Cannot escape ord=97 in a char class with uflag
+    Regex: Cannot escape ord=97 in a char class with uflag; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
 
 /[\a-z]/u
 ^------- error

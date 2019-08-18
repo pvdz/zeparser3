@@ -34,7 +34,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Wanted to parse an unescaped group name specifier but it had a bad start: [`@{xfffd}@`, 65533]
+    Regex: Wanted to parse an unescaped group name specifier but it had a bad start: [`@{xfffd}@`, 65533]
 
 /(?<@{x2f9df}@>foo)met\k<@{xfffd}@>/
 ^------- error

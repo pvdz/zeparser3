@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered unescaped quantifier (ord=63) without a value to quantify
+    Regex: Encountered unescaped quantifier (ord=63) without a value to quantify
 
 /a\B?b/
 ^------- error

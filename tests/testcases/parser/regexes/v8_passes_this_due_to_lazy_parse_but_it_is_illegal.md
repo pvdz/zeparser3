@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Found unescaped closing paren `)` without a group being open
+    Regex: Found unescaped closing paren `)` without a group being open
 
 function l(){((/)/))(/]/)};
                ^------- error

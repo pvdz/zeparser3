@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Found EOF at start of a group name identifier
+    Regex: Found EOF at start of a group name identifier
 
 /(?<\
 ^------- error

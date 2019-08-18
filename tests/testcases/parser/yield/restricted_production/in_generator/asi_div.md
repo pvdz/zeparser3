@@ -32,7 +32,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered early EOF
+    Regex: Encountered early EOF
 
 function *f() {
   yield

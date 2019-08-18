@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    The `\p` property escape is only legal with a u-flag, or as a webcompat edge case
+    Regex: The `\p` property escape is only legal with a u-flag, or as a webcompat edge case; Regex body had an escape that is only valid with an u-flag, but it had no u-flag
 
 /\P{Hex}/g
 ^------- error

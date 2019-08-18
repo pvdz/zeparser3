@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    The escaped lone property name `` is not valid (does not appear in "table 55" nor "table 56") with u-flag, and `\p` is not valid without u-flag and without webcompat
+    Regex: The escaped lone property name `` is not valid (does not appear in "table 55" nor "table 56") with u-flag, and `\p` is not valid without u-flag and without webcompat
 
 /\p{}/u;
 ^------- error
@@ -52,7 +52,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Tokenizer error!
-    The escaped lone property name `` is not valid (does not appear in "table 55" nor "table 56")
+    Regex: The escaped lone property name `` is not valid (does not appear in "table 55" nor "table 56"); Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
 
 /\p{}/u;
 ^------- error

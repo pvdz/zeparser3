@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Each group name can only be declared once: `a`
+    Regex: Each group name can only be declared once: `a`
 
 /(?<a>a)(?<a>a)/
 ^------- error

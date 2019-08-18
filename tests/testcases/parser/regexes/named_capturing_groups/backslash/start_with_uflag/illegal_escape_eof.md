@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Early EOF while parsing escape inside group name identifier
+    Regex: Early EOF while parsing escape inside group name identifier
 
 /(?<u\
 ^------- error

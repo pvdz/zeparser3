@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Illegal character after pseudo group marker `(?` [ord=120]
+    Regex: Illegal character after pseudo group marker `(?` [ord=120]
 
 match(/(?x.).kx/u)
       ^------- error

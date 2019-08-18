@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Char class can not contain `\B` with u-flag or without webcompat
+    Regex: Char class can not contain `\B` with u-flag or without webcompat
 
 /[\B-]/u
 ^------- error
@@ -50,4 +50,11 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Tokenizer error!
+    Regex: Char class can not contain `\B` with u-flag or without webcompat; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
+
+/[\B-]/u
+^------- error
+`````
+

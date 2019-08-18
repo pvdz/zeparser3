@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    An escape that might be part of an identifier cannot be anything else so if it is invalid it must be an error
+    Regex: An escape that might be part of an identifier cannot be anything else so if it is invalid it must be an error
 
 var a\u2E2F
     ^------- error

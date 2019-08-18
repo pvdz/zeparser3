@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Back references can not have more two or more consecutive numbers
+    Regex: Back references can not have more two or more consecutive numbers
 
 /\00/
 ^------- error

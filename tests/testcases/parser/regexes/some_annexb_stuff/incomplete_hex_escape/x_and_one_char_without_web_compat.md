@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Second char of hex escape not a valid digit
+    Regex: Second char of hex escape not a valid digit
 
 /\xa/
 ^------- error

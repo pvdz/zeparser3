@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered unescaped closing curly `}` while not parsing a quantifier
+    Regex: Encountered unescaped closing curly `}` while not parsing a quantifier
 
 /}/
 ^------- error

@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Back reference is only one digit and cannot be followed by another digit
+    Regex: Back reference is only one digit and cannot be followed by another digit
 
 /[\12-\14]/
 ^------- error

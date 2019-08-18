@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Cannot escape this regular identifier character [ord=97][a]
+    Regex: Cannot escape this regular identifier character [ord=97][a]
 
 /\a/
 ^------- error

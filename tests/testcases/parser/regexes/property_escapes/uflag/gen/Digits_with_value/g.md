@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    The escaped binary property name `1` is not valid (does not appear in "table 54") with u-flag, and `\p` is not valid without u-flag and without webcompat
+    Regex: The escaped binary property name `1` is not valid (does not appear in "table 54") with u-flag, and `\p` is not valid without u-flag and without webcompat
 
 /\p{1=1234}/g;
 ^------- error

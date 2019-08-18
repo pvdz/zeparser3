@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Encountered incorrect range (left>right) which is illegal with u-flag; Encountered incorrect range (left>right) when parsing as if without u-flag
+    Regex: Encountered incorrect range (left>right) which is illegal with u-flag; Encountered incorrect range (left>right) when parsing as if without u-flag
 
 /[a-\b]/u
 ^------- error

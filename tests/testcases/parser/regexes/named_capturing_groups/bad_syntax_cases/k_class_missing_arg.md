@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Named back reference \k; missing group name: [47]
+    Regex: Named back reference \k; missing group name: [47]
 
 /(?<a>.)\k/
 ^------- error

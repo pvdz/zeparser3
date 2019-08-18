@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    The escaped lone property name `1,1234` is not valid (does not appear in "table 55" nor "table 56") with u-flag, and `\p` is not valid without u-flag and without webcompat
+    Regex: The escaped lone property name `1,1234` is not valid (does not appear in "table 55" nor "table 56") with u-flag, and `\p` is not valid without u-flag and without webcompat
 
 /\p{1,1234}/g;
 ^------- error
@@ -52,7 +52,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Tokenizer error!
-    Encountered a property escape which could be a quantifier. Without u-flag it fails in webcompat mode. With u-flag it fails because the name is not in the whitelist.
+    Regex: Encountered a property escape which could be a quantifier. Without u-flag it fails in webcompat mode. With u-flag it fails because the name is not in the whitelist.
 
 /\p{1,1234}/g;
 ^------- error

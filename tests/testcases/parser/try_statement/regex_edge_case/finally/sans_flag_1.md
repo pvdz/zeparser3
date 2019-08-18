@@ -31,7 +31,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Found EOF before regex was closed
+    Regex: Found EOF before regex was closed
 
 try {} finally {}
 /foo

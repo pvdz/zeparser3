@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Cannot escape this regular identifier character [ord=97][a]
+    Regex: Cannot escape this regular identifier character [ord=97][a]
 
 /\a/u
 ^------- error
@@ -52,7 +52,7 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 
 `````
 throws: Tokenizer error!
-    Legacy unicode escape is only valid without u-flag
+    Regex: Legacy unicode escape is only valid without u-flag; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
 
 /\a/u
 ^------- error

@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Parsed too many digits
+    Regex: Parsed too many digits
 
 /\500/
 ^------- error
