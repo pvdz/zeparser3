@@ -1612,7 +1612,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // This is a directive. It may be nonsense, but it's a string in the head so it's a directive.
 
         let dir = stringToken.str.slice(1, -1);
-        if (!hadOctal && /(^|[^\\])\\0/.test(dir)) {
+        if (!hadOctal && /(^|[^\\])\\0\d/.test(dir)) {
           // (We have to use regex because an `.includes` would not (easily) be able to validate `\0` vs `\\0`
           // [v]: `"x\\0"`
           // [x]: `"x\\0"; "use strict";`

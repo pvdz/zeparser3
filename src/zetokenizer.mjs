@@ -855,7 +855,18 @@ function ZeTokenizer(
       case $$X_78:
         return parseStringEscapeHex();
 
-      case $$0_30:
+      case $$0_30: {
+        if (eof()) {
+          // Look, the escape is fine. The impending doom is unrelated.
+          return GOOD_ESCAPE;
+        }
+        let d = peek();
+        if (d < $$0_30 || d > $$9_39) {
+          // \0 is not an octal escape, it's a nul
+          return GOOD_ESCAPE;
+        }
+      }
+      // fall-through
       case $$1_31:
       case $$2_32:
       case $$3_33:
