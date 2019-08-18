@@ -336,6 +336,7 @@ const NON_START = false;
 
 const REGEX_CHARCLASS_BAD = 0x110000; // Note: max valid unicode value is <0x110000 so we can use high flags as side channels!
 const REGEX_CHARCLASS_ESCAPED_UC_B = 0x110001;
+const REGEX_CHARCLASS_ESCAPED_C = 0x110002;
 const REGEX_CHARCLASS_BAD_SANS_U_FLAG = 1<<23;
 const REGEX_CHARCLASS_BAD_WITH_U_FLAG = 1<<24;
 const REGEX_CHARCLASS_CLASS_ESCAPE = 1<<25; // \d \w \s etc, for webcompat checks in ranges
@@ -2938,6 +2939,16 @@ function ZeTokenizer(
         } else if (c === INVALID_IDENT_CHAR) {
           ASSERT(lastPotentialRegexError, 'error should be set');
           flagState = regexSyntaxError(lastPotentialRegexError);
+        } else if (c === REGEX_CHARCLASS_ESCAPED_UC_B) {
+          ASSERT(lastPotentialRegexError, 'error should be set');
+          flagState = updateRegexUflagIsIllegal(flagState, lastPotentialRegexError);
+          // In webcompat this is an identity escape, which get the ord of the char being escaped
+          // But this is only necessary for range checks, at which point this would be an error anyways.
+        } else if (c === REGEX_CHARCLASS_ESCAPED_C) {
+          ASSERT(webCompat === WEB_COMPAT_ON, 'only appears with web compat');
+          ASSERT(lastPotentialRegexError, 'error should be set');
+          flagState = updateRegexUflagIsIllegal(flagState, lastPotentialRegexError);
+          c = $$BACKSLASH_5C; // yes... NOT `c`
         } else {
           if (c & REGEX_CHARCLASS_BAD_WITH_U_FLAG) {
             c = c ^ REGEX_CHARCLASS_BAD_WITH_U_FLAG; // remove the CHARCLASS_BAD_WITH_U_FLAG flag (dont use ^= because that deopts... atm; https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean )
@@ -2961,7 +2972,6 @@ function ZeTokenizer(
       } else {
         ASSERT_skip(c);
       }
-
       if (c === REGEX_CHARCLASS_CLASS_ESCAPE || c === REGEX_CHARCLASS_ESCAPED_UC_B) {
         isSurrogate = false;
         isSurrogateHead = false;
@@ -2984,9 +2994,19 @@ function ZeTokenizer(
         // otoh, if c is a tail or a non-surrogate then we can now safely do range checks since the codepoint wont change
         // if this is a head and the previous was too then the previous was the rhs on its own and we check `prev` instead
         let urangeRight = isSurrogate ? surrogate : wasSurrogateHead ? prev : c;
-        if (urangeLeft === REGEX_CHARCLASS_CLASS_ESCAPE || urangeRight === REGEX_CHARCLASS_CLASS_ESCAPE) {
+        if (
+          urangeLeft === REGEX_CHARCLASS_CLASS_ESCAPE ||
+          urangeRight === REGEX_CHARCLASS_CLASS_ESCAPE
+        ) {
           // Class escapes are illegal for ranges
           let reason = 'Character class escapes `\\d \\D \\s \\S \\w \\W \\p \\P` are only ok as a range with webcompat, without uflag';
+          flagState = updateRegexUflagIsIllegal(flagState, reason);
+        } else if (
+          urangeLeft === REGEX_CHARCLASS_ESCAPED_UC_B ||
+          urangeRight === REGEX_CHARCLASS_ESCAPED_UC_B
+        ) {
+          // Class escapes are illegal for ranges
+          let reason = 'Character class escapes `\\B` is never legal with u-flag';
           flagState = updateRegexUflagIsIllegal(flagState, reason);
         } else if (!isSurrogateHead || wasSurrogateHead) {
           urangeOpen = false;
@@ -3023,7 +3043,10 @@ function ZeTokenizer(
       // For the case where there is NO u-flag:
       if (nrangeOpen) {
         const nrangeRight = c; // without u-flag it's always just one char
-        if (nrangeLeft === REGEX_CHARCLASS_CLASS_ESCAPE || nrangeRight === REGEX_CHARCLASS_CLASS_ESCAPE) {
+        if (
+          nrangeLeft === REGEX_CHARCLASS_CLASS_ESCAPE ||
+          nrangeRight === REGEX_CHARCLASS_CLASS_ESCAPE
+        ) {
           // Class escapes are illegal for ranges, however, they are allowed and ignored in webcompat mode
           // The webcompat checks have happened before (because \d \D \s \S \w \W are treated differently from \p \P)
           let reason = 'Character class escapes `\\d \\D \\s \\S \\w \\W \\p \\P` are only ok as a range with webcompat, without uflag';
@@ -3033,6 +3056,13 @@ function ZeTokenizer(
             // when not in webcompat mode, it may also be the case that a range lhs or rhs is a class escape (\s \d \w etc)
             flagState = updateRegexUflagIsMandatory(flagState, reason);
           }
+        } else if (
+          nrangeLeft === REGEX_CHARCLASS_ESCAPED_UC_B ||
+          nrangeRight === REGEX_CHARCLASS_ESCAPED_UC_B
+        ) {
+          // Class escapes are illegal for ranges
+          let reason = 'Character class escapes `\\B` is never legal as part of a char class range';
+          flagState = updateRegexUflagIsIllegal(flagState, reason);
         } else {
           ASSERT(nrangeLeft !== REGEX_CHARCLASS_ESCAPED_UC_B || lastPotentialRegexError, 'error should have been set when flag was returned');
           ASSERT(nrangeRight !== REGEX_CHARCLASS_ESCAPED_UC_B || lastPotentialRegexError, 'error should have been set when flag was returned');
@@ -3124,10 +3154,12 @@ function ZeTokenizer(
         let reason = 'The `\\c` escape is only legal in a char class without uflag and in webcompat mode';
         if (webCompat === WEB_COMPAT_ON) {
           updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);
-          // this is now an `IdentityEscape` and just parses the `c` itself
-          return REGEX_CHARCLASS_BAD_WITH_U_FLAG;
+          // This is now an `IdentityEscape` and just parses the `c` itself
+          // The "character value" will be the backslash (!), NOT the value of `c`
+          // This is relevant for tests like `/[a-\c]/` (bad) vs `/[A-\c]/` (good)
+          return REGEX_CHARCLASS_ESCAPED_C;
         }
-        updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);
+        regexSyntaxError(reason);
         return REGEX_CHARCLASS_BAD;
       }
 
@@ -3138,12 +3170,19 @@ function ZeTokenizer(
         // ClassEscape :: b
         //   Return the code point value of U+0008 (BACKSPACE).
         return $$BACKSPACE_08;
-      case $$B_UC_42:
+      case $$B_UC_42: {
         // "A ClassAtom can use any of the escape sequences that are allowed in the rest of the regular expression
         // except for \b, \B, and backreferences. Inside a CharacterClass, \b means the backspace character, while
         // \B and backreferences raise errors. Using a backreference inside a ClassAtom causes an error."
-        updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, 'Char class had an illegal range because `\\B` is invalid inside a range');
+        let reason = 'Char class can not contain `\\B` with u-flag or without webcompat';
+        if (webCompat === WEB_COMPAT_ON) {
+          updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);
+        } else {
+          regexSyntaxError(reason);
+        }
+        ASSERT_skip($$B_UC_42);
         return REGEX_CHARCLASS_ESCAPED_UC_B;
+      }
 
       // control escapes \f \n \r \t \v
       case $$F_66:
