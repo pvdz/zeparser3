@@ -52,4 +52,11 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-_Output same as sloppy mode._
+`````
+throws: Tokenizer error!
+    Encountered unescaped closing curly `}` while not parsing a quantifier; Found EOF before regex was closed
+
+function *f(){   s = {"foo": yield / x}   }
+                                   ^------- error
+`````
+

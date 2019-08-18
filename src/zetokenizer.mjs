@@ -1852,13 +1852,18 @@ function ZeTokenizer(
       return REGEX_ALWAYS_BAD;
     }
 
-    if (!lastPotentialRegexError) {
-      lastReportableTokenizerError = lastPotentialRegexError = desc + (rest.length ? ': [' + rest.join(', ') + ']' : '');
-    }
+    updateRegexPotentialError(desc + (rest.length ? ': [' + rest.join(', ') + ']' : ''));
 
     lastReportableTokenizerError = lastPotentialRegexError;
 
     return REGEX_ALWAYS_BAD;
+  }
+
+  function updateRegexPotentialError(msg) {
+    if (!lastPotentialRegexError.includes(msg)) {
+      if (lastPotentialRegexError) lastPotentialRegexError += '; ';
+      lastPotentialRegexError += msg;
+    }
   }
 
   function updateRegexUflagIsIllegal(state, reason) {
@@ -1883,7 +1888,7 @@ function ZeTokenizer(
       return regexSyntaxError(error);
     }
     if (currentState === REGEX_ALWAYS_GOOD) {
-      if (!lastPotentialRegexError) lastPotentialRegexError = error;
+      updateRegexPotentialError(error);
       currentState = newState;
     }
     else {
@@ -2624,7 +2629,9 @@ function ZeTokenizer(
           skip();
           skip();
         } else {
-          if (wide === INVALID_IDENT_CHAR) lastPotentialRegexError = 'Tokenizer potential $ERROR: was invalid ident but accepting anyways';
+          if (wide === INVALID_IDENT_CHAR) {
+            updateRegexPotentialError('Tokenizer potential $ERROR: was invalid ident but accepting anyways');
+          }
           ASSERT_skip(c);
         }
 
@@ -2945,7 +2952,7 @@ function ZeTokenizer(
             ASSERT(flagState === REGEX_GOOD_WITH_U_FLAG || flagState === REGEX_ALWAYS_BAD, 'either way, the flag state should now reflect "bad with u-flag", or worse');
           }
         }
-        ASSERT(c === REGEX_CHARCLASS_CLASS_ESCAPE || c <= 0x110000, 'c should now be valid unicode range or 0x110000 for error', c, (REGEX_CHARCLASS_BAD | REGEX_CHARCLASS_CLASS_ESCAPE));
+        ASSERT(c === REGEX_CHARCLASS_CLASS_ESCAPE || c === REGEX_CHARCLASS_ESCAPED_UC_B || c <= 0x110000, 'c should now be valid unicode range or 0x110000 for error', c, (REGEX_CHARCLASS_BAD | REGEX_CHARCLASS_CLASS_ESCAPE), REGEX_CHARCLASS_BAD_SANS_U_FLAG, REGEX_CHARCLASS_BAD_WITH_U_FLAG, REGEX_CHARCLASS_ESCAPED_UC_B);
         // else char class is good :)
       } else if (urangeOpen && c === $$SQUARE_R_5D) {
         flagState = regexSyntaxError('Encountered early end of charclass while parsing character class range');
@@ -2955,7 +2962,7 @@ function ZeTokenizer(
         ASSERT_skip(c);
       }
 
-      if (c === REGEX_CHARCLASS_CLASS_ESCAPE) {
+      if (c === REGEX_CHARCLASS_CLASS_ESCAPE || c === REGEX_CHARCLASS_ESCAPED_UC_B) {
         isSurrogate = false;
         isSurrogateHead = false;
       } else if (wasSurrogateHead && isSurrogateTail(c)) {
@@ -3579,7 +3586,7 @@ function ZeTokenizer(
           } else if ((g|i|m|u|y|s) > 1) {
             return regexSyntaxError('Encountered at least one regex flag twice');
           } else {
-            return u > 0 ? updateRegexUflagIsMandatory(REGEX_ALWAYS_GOOD, 'regex has the u-flag') : updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, 'regex has no u-flag');
+            return u > 0 ? REGEX_GOOD_WITH_U_FLAG : REGEX_GOOD_SANS_U_FLAG;
           }
       }
       ASSERT_skip(c);
@@ -3605,7 +3612,7 @@ function ZeTokenizer(
     } else if ((g|i|m|u|y|s) > 1) {
       return regexSyntaxError('Encountered at least one regex flag twice');
     } else {
-      return u > 0 ? updateRegexUflagIsMandatory(REGEX_ALWAYS_GOOD, 'regex has the u-flag before EOF') : updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, 'regex has no u-flag before EOF');
+      return u > 0 ? REGEX_GOOD_WITH_U_FLAG : REGEX_GOOD_SANS_U_FLAG;
     }
   }
   function parseRegexCurlyQuantifier() {
@@ -3794,7 +3801,7 @@ function ZeTokenizer(
         return REGEX_CHARCLASS_BAD;
       }
       ASSERT_skip($$CURLY_R_7D);
-      lastPotentialRegexError = 'The es6 long unicode escape is only valid with u-flag';
+      updateRegexPotentialError('The es6 long unicode escape is only valid with u-flag');
       return r | REGEX_CHARCLASS_BAD_SANS_U_FLAG; // `\u{}` in regexes is restricted to +u flag
     } else {
       return parseRegexUnicodeEscapeQuad2(c);
@@ -3803,7 +3810,7 @@ function ZeTokenizer(
   function parseRegexUnicodeEscapeQuad2(a) {
     // we've already consumed a char in `a`. we must consume 3 more chars for this quad unicode escape
     if (eofd(3)) {
-      lastPotentialRegexError = 'Unexpected EOF while parsing unicode escape';
+      updateRegexPotentialError('Unexpected EOF while parsing unicode escape');
       return REGEX_CHARCLASS_BAD;
     }
     let b = peekd(1);
@@ -3867,7 +3874,7 @@ function ZeTokenizer(
       }
       return firstPart;
     } else {
-      lastPotentialRegexError = 'Attempted to parse a unicode quad escape but at least one digit was not a hex';
+      updateRegexPotentialError('Attempted to parse a unicode quad escape but at least one digit was not a hex');
       return REGEX_CHARCLASS_BAD;
     }
   }
@@ -3884,7 +3891,7 @@ function ZeTokenizer(
 
     let c = _parseRegexUnicodeEscapeVary2(a);
     if (c === REGEX_CHARCLASS_BAD) {
-      lastPotentialRegexError = 'Encountered early EOF while parsing a unicode long escape in a regex';
+      updateRegexPotentialError('Encountered early EOF while parsing a unicode long escape in a regex');
       return REGEX_CHARCLASS_BAD;
     }
     return c;

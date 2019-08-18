@@ -1,19 +1,17 @@
 # ZeParser parser test case
 
-- Added: 2019-06-17 (mass migration from old system)
-- Modified: -
-- Path: zeparser3/tests/testcases/parser/regexes/some_annexb_stuff/invalid_escape_char/non-special_char_escaped_with_web_compat_and_u-flag.md
+- Path: zeparser3/tests/testcases/parser/regexes/some_annexb_stuff/invalid_escape_char/space_with_uflag.md
 
 > :: regexes : some annexb stuff : invalid escape char
 >
-> ::> non-special char escaped with web compat and u-flag
-
+> ::> space with uflag
+>
+> 
 
 ## Input
 
-
 `````js
-/\a/u
+/\ /u
 `````
 
 ## Output
@@ -30,9 +28,9 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Cannot escape this regular identifier character [ord=97][a]
+    Tokenizer potential $ERROR: was invalid ident but accepting anyways; Legacy unicode escape is only valid without u-flag
 
-/\a/u
+/\ /u
 ^------- error
 `````
 
@@ -52,11 +50,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Tokenizer error!
-    Legacy unicode escape is only valid without u-flag
-
-/\a/u
-^------- error
-`````
-
+_Output same as sloppy mode._
