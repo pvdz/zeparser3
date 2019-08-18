@@ -3140,7 +3140,10 @@ function ZeTokenizer(
 
     // https://www.ecma-international.org/ecma-262/7.0/#sec-classescape
 
-    if (eof()) return -1;
+    if (eof()) {
+      regexSyntaxError('Early EOF after backslash in char class');
+      return REGEX_CHARCLASS_BAD;
+    }
     let c = peek();
 
     switch (c) {
