@@ -1854,7 +1854,6 @@ function ZeTokenizer(
     }
 
     updateRegexPotentialError(desc + (rest.length ? ': [' + rest.join(', ') + ']' : ''));
-
     lastReportableTokenizerError = lastPotentialRegexError;
 
     return REGEX_ALWAYS_BAD;
@@ -1901,10 +1900,16 @@ function ZeTokenizer(
 
   let nCapturingParens = 0;
   let largestBackReference = 0;
+  let declGroupName = ','; // List of comma concatenated declared group names (plain idents). If it occurs then consider +N in the grammar, meaning they must all have it
+  let refGroupName = ','; // List of comma concatenated referenced group names (plain idents). If it occurs then consider +N in the grammar, meaning they must all have it
+  let kCharClassEscaped = false; // If one was missing but there was at least one group name then it's always an error
   function parseRegex(c) {
     nCapturingParens = 0;
     largestBackReference = 0;
     lastPotentialRegexError = '';
+    declGroupName = ',';
+    refGroupName = ',';
+    kCharClassEscaped = false;
     let ustatusBody = parseRegexBody(c);
     if (ustatusBody === REGEX_ALWAYS_BAD) {
       ASSERT(lastReportableTokenizerError, 'last error should be set', lastReportableTokenizerError, lastPotentialRegexError);
@@ -1921,7 +1926,34 @@ function ZeTokenizer(
         ustatusBody = regexSyntaxError(errmsg);
       }
     }
+
     let ustatusFlags = parseRegexFlags();
+
+    if (kCharClassEscaped) {
+      if (declGroupName !== ',') {
+        ustatusBody = regexSyntaxError('Found `\\k` in a char class but the regex also had a group name so this is illegal');
+        return $ERROR;
+      } else if (webCompat === WEB_COMPAT_OFF || ustatusFlags === REGEX_GOOD_WITH_U_FLAG) {
+        ustatusBody = regexSyntaxError('Found `\\k` in a char class but this is only allowed in webcompat mode and without u-flag');
+      }
+    }
+    if (refGroupName !== ',') {
+      // Other than above we don't care about whether group names were declared (by named capturing groups). We do need
+      // to validate the referenced group names with `\k` atom escapes.
+      // This is a fairly unused functionality so I'm going to do this in a slow path for now.
+      refGroupName.split(',').filter(Boolean).forEach(name => {
+        if (!declGroupName.includes(',' + name + ',')) {
+          // Not even webcompat will save you now. This would only be valid if there were no names but by definition,
+          // this is a name so that exception has already been voided.
+          // edit: except that a test262 case thinks otherwise
+          // test262/test/annexB/built-ins/RegExp/named-groups/non-unicode-malformed.js
+          if (webCompat === WEB_COMPAT_OFF) {
+            ustatusBody = regexSyntaxError('Found a `\\k` that referenced `' + name + '` but no capturing group had this name');
+          }
+        }
+      });
+    }
+
     if (ustatusBody === REGEX_ALWAYS_BAD) {
       if (!lastReportableTokenizerError) lastReportableTokenizerError = lastPotentialRegexError || 'Regex body had an illegal escape sequence';
       return $ERROR;
@@ -2112,7 +2144,8 @@ function ZeTokenizer(
                   // [v]: `/(?<name>content)/`
                   // [v]: `/(?<\u0065bc>content)/`
 
-                  uflagStatus = parseRegexGroupName(c, uflagStatus);
+                  const FOR_NAMED_GROUP = true;
+                  uflagStatus = parseRegexGroupName(c, uflagStatus, FOR_NAMED_GROUP);
                   let name = lastParsedIdent;
                   if (groupNames['#' + name]) {
                     uflagStatus = regexSyntaxError('Each group name can only be declared once: `' + name + '`');
@@ -2297,8 +2330,10 @@ function ZeTokenizer(
     // this is a fail because we didnt got to the end of input before the closing /
     return regexSyntaxError('Found EOF before regex was closed');
   }
-  function parseRegexGroupName(c, uflagStatus) {
-    let r = _parseRegexGroupName(c, uflagStatus);
+  function parseRegexGroupName(c, uflagStatus, forGroup) {
+    ASSERT(parseRegexGroupName.length === arguments.length, 'arg count');
+
+    let r = _parseRegexGroupName(c, uflagStatus, forGroup);
 
     ASSERT(r === REGEX_ALWAYS_BAD || lastParsedIdent !== '', 'a valid parse should always yield an ident, otherwise double check namedBackRefs.push', r);
 
@@ -2313,7 +2348,7 @@ function ZeTokenizer(
 
     return r;
   }
-  function _parseRegexGroupName(c, uflagStatus) {
+  function _parseRegexGroupName(c, uflagStatus, forGroup) {
     ASSERT(parseRegexGroupName.length === arguments.length, 'arg count');
 
     // Note: you are first supposed to parse the generic regex payload with either ~U,~N or +U,+N, depending on
@@ -2327,8 +2362,6 @@ function ZeTokenizer(
     // After the first pass, if the `\k` is found with a proper `GroupName` then parse it with `+N` and act
     // normal. Otherwise, for any partial or full absence of the `GroupName`, just don't treat the `<` and `>`
     // as special.
-    // TODO: I think the above includes parsing an invalid identifier (one that starts with ID_Continue)?
-    // TODO: are any regexSyntaxError calls in this function actually okay in web compat mode / +N?
 
     // [v]: `(?<\u0065ame>xyz)/``
     //          ^
@@ -2426,6 +2459,13 @@ function ZeTokenizer(
     }
 
     ASSERT_skip($$GT_3E);
+    // This enables +N mode, meaning `\k` is now disallowed in char classes in webcompat mode too
+    if (forGroup) {
+      declGroupName += lastParsedIdent + ',';
+    } else {
+      // We can only verify existence after completing the body
+      refGroupName += lastParsedIdent + ',';
+    }
 
     return uflagStatus;
   }
@@ -2437,7 +2477,6 @@ function ZeTokenizer(
     // -- char class range _must_ be low-hi unless dash is the first or last char
     // -- \u{...} only allowed with u flag
     // -- unicode, digit, char, hex escapes
-
 
     switch (c) {
       case $$U_75:
@@ -2591,7 +2630,8 @@ function ZeTokenizer(
         ASSERT_skip($$LT_3C);
         c = peek();
 
-        uflagStatus = parseRegexGroupName(c, uflagStatus);
+        const FOR_K_ESCAPE = false;
+        uflagStatus = parseRegexGroupName(c, uflagStatus, FOR_K_ESCAPE);
         if (lastParsedIdent !== '') namedBackRefs.push(lastParsedIdent); // we can only validate ths after completely parsing the regex body
 
         // If the group name contained a `\u{..}` escape then the u-flag must be valid for this regex to be valid
@@ -3362,7 +3402,20 @@ function ZeTokenizer(
             regexSyntaxError('Cannot have `\\c` in a char class')
             return REGEX_CHARCLASS_BAD;
           } else if (c === $$K_6B) {
-            TODO // detection is a little tricky
+            // A character class is not allowed to have `\k` back references.
+            // In webcompat mode without uflag, you can have `\k` appear as long as it has no `<name>` following it and
+            // as long as there is not an actual usage of named capturing groups in the same regex.
+            // We use globals to track that state because it applies retroactively for the whole regex.
+            let reason = 'Can only have `\\k` in a char class without uflag and in webcompat mode';
+            if (webCompat === WEB_COMPAT_ON) {
+              kCharClassEscaped = true;
+              updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);
+              // Note: identity escapes have the escaped char as their "character value", so return `k`
+              return $$K_6B | REGEX_CHARCLASS_BAD_WITH_U_FLAG;
+            } else {
+              regexSyntaxError(reason);
+              return REGEX_CHARCLASS_BAD;
+            }
           } else {
             ASSERT_skip(c);
             updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, 'Cannot escape ord=' + c + ' in a char class with uflag');
