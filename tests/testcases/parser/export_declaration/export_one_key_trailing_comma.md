@@ -47,19 +47,19 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:18},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'x'
           },
           init: null
@@ -68,19 +68,19 @@ ast: {
     },
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:7},end:{line:1,col:18},source:''},
+      loc:{start:{line:1,column:7},end:{line:1,column:18},source:''},
       specifiers: [
         {
           type: 'ExportSpecifier',
-          loc:{start:{line:1,col:15},end:{line:1,col:17},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:17},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
             name: 'x'
           },
           exported: {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
             name: 'x'
           }
         }

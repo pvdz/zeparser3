@@ -31,34 +31,34 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
       expression: {
         type: 'CallExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
         callee: {
           type: 'NewExpression',
-          loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
           arguments: [
             {
               type: 'Identifier',
-              loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+              loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
               name: 'x'
             }
           ],
           callee: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:9},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:9},source:''},
             name: 'async'
           }
         },
         arguments: [
           {
             type: 'Identifier',
-            loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:13},end:{line:1,column:14},source:''},
             name: 'y'
           }
         ]

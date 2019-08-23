@@ -30,38 +30,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:10},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:10},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:2,col:10},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:10},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:2,col:10},source:''},
+        loc:{start:{line:1,column:12},end:{line:2,column:10},source:''},
         body: [
           {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:16},end:{line:2,col:9},source:''},
+            loc:{start:{line:1,column:16},end:{line:2,column:9},source:''},
             body: [
               {
                 type: 'ReturnStatement',
-                loc:{start:{line:1,col:17},end:{line:2,col:1},source:''},
+                loc:{start:{line:1,column:17},end:{line:2,column:1},source:''},
                 argument: null
               },
               {
                 type: 'ExpressionStatement',
-                loc:{start:{line:2,col:1},end:{line:2,col:4},source:''},
+                loc:{start:{line:2,column:1},end:{line:2,column:4},source:''},
                 expression: {
                   type: 'Identifier',
-                  loc:{start:{line:2,col:1},end:{line:2,col:4},source:''},
+                  loc:{start:{line:2,column:1},end:{line:2,column:4},source:''},
                   name: 'foo'
                 }
               }

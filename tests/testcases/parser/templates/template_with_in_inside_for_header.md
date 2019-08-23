@@ -32,27 +32,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
       init: {
         type: 'TemplateLiteral',
-        loc:{start:{line:1,col:4},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:15},source:''},
         expressions: [
           {
             type: 'BinaryExpression',
-            loc:{start:{line:1,col:7},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:7},end:{line:1,column:13},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:7},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:9},source:''},
               name: 'x'
             },
             operator: 'in',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+              loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
               name: 'y'
             }
           }
@@ -60,13 +60,13 @@ ast: {
         quasis: [
           {
             type: 'TemplateElement',
-            loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
             tail: false,
             value: { raw: '`${', cooked: '<TODO>' }
           },
           {
             type: 'TemplateElement',
-            loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:13},end:{line:1,column:13},source:''},
             tail: true,
             value: { raw: '}`', cooked: '<TODO>' }
           }
@@ -76,7 +76,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:18},end:{line:1,col:19},source:''}
+        loc:{start:{line:1,column:18},end:{line:1,column:19},source:''}
       }
     }
   ]

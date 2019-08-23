@@ -33,31 +33,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:5,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:5,column:1},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:5,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:5,column:1},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'x'
       },
       superClass: {
         type: 'Identifier',
-        loc:{start:{line:1,col:16},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:16},end:{line:1,column:18},source:''},
         name: 'y'
       },
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:18},end:{line:5,col:1},source:''},
+        loc:{start:{line:1,column:18},end:{line:5,column:1},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:2,col:2},end:{line:5,col:0},source:''},
+            loc:{start:{line:2,column:2},end:{line:5,column:0},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:2,col:2},end:{line:2,col:13},source:''},
+              loc:{start:{line:2,column:2},end:{line:2,column:13},source:''},
               name: 'constructor'
             },
             static: false,
@@ -65,28 +65,28 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:2,col:2},end:{line:5,col:0},source:''},
+              loc:{start:{line:2,column:2},end:{line:5,column:0},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:2,col:16},end:{line:5,col:0},source:''},
+                loc:{start:{line:2,column:16},end:{line:5,column:0},source:''},
                 body: [
                   {
                     type: 'ExpressionStatement',
-                    loc:{start:{line:3,col:4},end:{line:4,col:2},source:''},
+                    loc:{start:{line:3,column:4},end:{line:4,column:2},source:''},
                     expression: {
                       type: 'ObjectExpression',
-                      loc:{start:{line:3,col:5},end:{line:3,col:22},source:''},
+                      loc:{start:{line:3,column:5},end:{line:3,column:22},source:''},
                       properties: [
                         {
                           type: 'Property',
-                          loc:{start:{line:3,col:6},end:{line:3,col:21},source:''},
+                          loc:{start:{line:3,column:6},end:{line:3,column:21},source:''},
                           key: {
                             type: 'Literal',
-                            loc:{start:{line:3,col:6},end:{line:3,col:11},source:''},
+                            loc:{start:{line:3,column:6},end:{line:3,column:11},source:''},
                             value: 123,
                             raw: '123'
                           },
@@ -95,14 +95,14 @@ ast: {
                           computed: false,
                           value: {
                             type: 'MemberExpression',
-                            loc:{start:{line:3,col:11},end:{line:3,col:21},source:''},
+                            loc:{start:{line:3,column:11},end:{line:3,column:21},source:''},
                             object: {
                               type: 'Super',
-                              loc:{start:{line:3,col:11},end:{line:3,col:16},source:''}
+                              loc:{start:{line:3,column:11},end:{line:3,column:16},source:''}
                             },
                             property: {
                               type: 'Identifier',
-                              loc:{start:{line:3,col:17},end:{line:3,col:17},source:''},
+                              loc:{start:{line:3,column:17},end:{line:3,column:17},source:''},
                               name: 'cool'
                             },
                             computed: false

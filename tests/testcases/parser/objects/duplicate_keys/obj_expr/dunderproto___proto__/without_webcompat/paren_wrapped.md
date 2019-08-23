@@ -31,21 +31,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:54},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:54},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:54},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:54},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:52},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:52},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:3},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:3},end:{line:1,column:18},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:3},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:3},end:{line:1,column:14},source:''},
               name: '__proto__'
             },
             kind: 'init',
@@ -53,7 +53,7 @@ ast: {
             computed: false,
             value: {
               type: 'Literal',
-              loc:{start:{line:1,col:14},end:{line:1,col:18},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:18},source:''},
               value: null,
               raw: 'null'
             },
@@ -61,10 +61,10 @@ ast: {
           },
           {
             type: 'Property',
-            loc:{start:{line:1,col:20},end:{line:1,col:31},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:31},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:20},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:27},source:''},
               name: 'other'
             },
             kind: 'init',
@@ -72,7 +72,7 @@ ast: {
             computed: false,
             value: {
               type: 'Literal',
-              loc:{start:{line:1,col:27},end:{line:1,col:31},source:''},
+              loc:{start:{line:1,column:27},end:{line:1,column:31},source:''},
               value: null,
               raw: 'null'
             },
@@ -80,10 +80,10 @@ ast: {
           },
           {
             type: 'Property',
-            loc:{start:{line:1,col:33},end:{line:1,col:51},source:''},
+            loc:{start:{line:1,column:33},end:{line:1,column:51},source:''},
             key: {
               type: 'Literal',
-              loc:{start:{line:1,col:33},end:{line:1,col:46},source:''},
+              loc:{start:{line:1,column:33},end:{line:1,column:46},source:''},
               value: '__proto__',
               raw: '"__proto__"'
             },
@@ -92,7 +92,7 @@ ast: {
             computed: false,
             value: {
               type: 'Literal',
-              loc:{start:{line:1,col:46},end:{line:1,col:51},source:''},
+              loc:{start:{line:1,column:46},end:{line:1,column:51},source:''},
               value: null,
               raw: 'null'
             },

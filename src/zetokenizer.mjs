@@ -579,7 +579,7 @@ function ZeTokenizer(
     ++solidTokenCount; // eh... i guess.
   }
 
-  function createToken(type, start, stop, col, line, nl, ws, c) {
+  function createToken(type, start, stop, column, line, nl, ws, c) {
     ASSERT(createToken.length === arguments.length);
 //ASSERT(cache === input.charCodeAt(start), 'c should not be skipped yet');
 
@@ -596,7 +596,7 @@ function ZeTokenizer(
       nl, // how many newlines between the start of the previous relevant token and the start of this one?
       start,
       stop, // start of next token
-      col, // of first char of token
+      column, // of first char of token
       line, // of first char of token
       c,
       str,
@@ -3313,7 +3313,7 @@ function ZeTokenizer(
           // https://tc39.es/ecma262/#sec-patterns-static-semantics-character-value
           return REGEX_CHARCLASS_CLASS_ESCAPE;
         }
-        ASSERT(false, 'unreachable');
+        return ASSERT(false, 'unreachable');
 
       // digits
       // https://tc39.github.io/ecma262/#prod-CharacterClass

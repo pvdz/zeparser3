@@ -29,46 +29,46 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
       expression: {
         type: 'ConditionalExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
         test: {
           type: 'BinaryExpression',
-          loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:8},source:''},
           left: {
             type: 'Identifier',
-            loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+            loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
             name: 'a'
           },
           operator: '===',
           right: {
             type: 'Identifier',
-            loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
             name: 'b'
           }
         },
         consequent: {
           type: 'Identifier',
-          loc:{start:{line:1,col:10},end:{line:1,col:12},source:''},
+          loc:{start:{line:1,column:10},end:{line:1,column:12},source:''},
           name: 'c'
         },
         alternate: {
           type: 'BinaryExpression',
-          loc:{start:{line:1,col:14},end:{line:1,col:19},source:''},
+          loc:{start:{line:1,column:14},end:{line:1,column:19},source:''},
           left: {
             type: 'Identifier',
-            loc:{start:{line:1,col:14},end:{line:1,col:16},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:16},source:''},
             name: 'd'
           },
           operator: '%',
           right: {
             type: 'Identifier',
-            loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
             name: 'e'
           }
         }

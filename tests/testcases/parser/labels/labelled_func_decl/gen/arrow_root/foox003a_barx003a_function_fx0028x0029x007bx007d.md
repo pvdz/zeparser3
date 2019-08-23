@@ -53,14 +53,14 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
         params: [],
         id: null,
         generator: false,
@@ -68,38 +68,38 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:6},end:{line:1,col:34},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:34},source:''},
           body: [
             {
               type: 'LabeledStatement',
-              loc:{start:{line:1,col:8},end:{line:1,col:33},source:''},
+              loc:{start:{line:1,column:8},end:{line:1,column:33},source:''},
               label: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:8},end:{line:1,col:11},source:''},
+                loc:{start:{line:1,column:8},end:{line:1,column:11},source:''},
                 name: 'foo'
               },
               body: {
                 type: 'LabeledStatement',
-                loc:{start:{line:1,col:13},end:{line:1,col:33},source:''},
+                loc:{start:{line:1,column:13},end:{line:1,column:33},source:''},
                 label: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
+                  loc:{start:{line:1,column:13},end:{line:1,column:16},source:''},
                   name: 'bar'
                 },
                 body: {
                   type: 'FunctionDeclaration',
-                  loc:{start:{line:1,col:18},end:{line:1,col:33},source:''},
+                  loc:{start:{line:1,column:18},end:{line:1,column:33},source:''},
                   generator: false,
                   async: false,
                   id: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:27},end:{line:1,col:27},source:''},
+                    loc:{start:{line:1,column:27},end:{line:1,column:27},source:''},
                     name: 'f'
                   },
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc:{start:{line:1,col:30},end:{line:1,col:33},source:''},
+                    loc:{start:{line:1,column:30},end:{line:1,column:33},source:''},
                     body: []
                   }
                 }

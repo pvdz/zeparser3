@@ -31,24 +31,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:44},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:44},source:''},
       init: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:32},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:32},source:''},
         left: {
           type: 'Literal',
-          loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
           value: 2935,
           raw: '2935'
         },
         operator: 'instanceof',
         right: {
           type: 'Literal',
-          loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
+          loc:{start:{line:1,column:25},end:{line:1,column:25},source:''},
           value: Infinity,
           raw: '2e308'
         }
@@ -57,7 +57,7 @@ ast: {
       update: null,
       body: {
         type: 'DebuggerStatement',
-        loc:{start:{line:1,col:36},end:{line:1,col:44},source:''}
+        loc:{start:{line:1,column:36},end:{line:1,column:44},source:''}
       }
     }
   ]

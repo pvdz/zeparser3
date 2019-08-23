@@ -29,18 +29,18 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:9},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:9},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:9},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:9},source:''},
       expression: {
         type: 'NewExpression',
-        loc:{start:{line:1,col:2},end:{line:1,col:8},source:''},
+        loc:{start:{line:1,column:2},end:{line:1,column:8},source:''},
         arguments: [],
         callee: {
           type: 'Identifier',
-          loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
           name: 'x'
         }
       }

@@ -29,32 +29,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       expression: {
         type: 'CallExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
         callee: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:1},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:1},source:''},
           name: 'f'
         },
         arguments: [
           {
             type: 'ArrowFunctionExpression',
-            loc:{start:{line:1,col:3},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:3},end:{line:1,column:18},source:''},
             params: [
               {
                 type: 'Identifier',
-                loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+                loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
                 name: 'a'
               },
               {
                 type: 'Identifier',
-                loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+                loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
                 name: 'b'
               }
             ],
@@ -64,16 +64,16 @@ ast: {
             expression: true,
             body: {
               type: 'BinaryExpression',
-              loc:{start:{line:1,col:13},end:{line:1,col:18},source:''},
+              loc:{start:{line:1,column:13},end:{line:1,column:18},source:''},
               left: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:13},end:{line:1,col:15},source:''},
+                loc:{start:{line:1,column:13},end:{line:1,column:15},source:''},
                 name: 'a'
               },
               operator: '+',
               right: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+                loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
                 name: 'b'
               }
             }

@@ -30,68 +30,68 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:74},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:74},source:''},
   body: [
     {
       type: 'DoWhileStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
       body: {
         type: 'ThrowStatement',
-        loc:{start:{line:1,col:3},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:3},end:{line:1,column:22},source:''},
         argument: {
           type: 'FunctionExpression',
-          loc:{start:{line:1,col:9},end:{line:1,col:21},source:''},
+          loc:{start:{line:1,column:9},end:{line:1,column:21},source:''},
           generator: false,
           async: false,
           id: null,
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:19},end:{line:1,col:21},source:''},
+            loc:{start:{line:1,column:19},end:{line:1,column:21},source:''},
             body: []
           }
         }
       },
       test: {
         type: 'Identifier',
-        loc:{start:{line:1,col:28},end:{line:1,col:29},source:''},
+        loc:{start:{line:1,column:28},end:{line:1,column:29},source:''},
         name: 'y'
       }
     },
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:31},end:{line:1,col:74},source:''},
+      loc:{start:{line:1,column:31},end:{line:1,column:74},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:34},end:{line:1,col:67},source:''},
+        loc:{start:{line:1,column:34},end:{line:1,column:67},source:''},
         body: [
           {
             type: 'ForStatement',
-            loc:{start:{line:1,col:35},end:{line:1,col:66},source:''},
+            loc:{start:{line:1,column:35},end:{line:1,column:66},source:''},
             init: null,
             test: null,
             update: null,
             body: {
               type: 'IfStatement',
-              loc:{start:{line:1,col:42},end:{line:1,col:66},source:''},
+              loc:{start:{line:1,column:42},end:{line:1,column:66},source:''},
               test: {
                 type: 'Literal',
-                loc:{start:{line:1,col:45},end:{line:1,col:45},source:''},
+                loc:{start:{line:1,column:45},end:{line:1,column:45},source:''},
                 value: 8,
                 raw: '8'
               },
               consequent: {
                 type: 'SwitchStatement',
-                loc:{start:{line:1,col:47},end:{line:1,col:66},source:''},
+                loc:{start:{line:1,column:47},end:{line:1,column:66},source:''},
                 discriminant: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:54},end:{line:1,col:55},source:''},
+                  loc:{start:{line:1,column:54},end:{line:1,column:55},source:''},
                   name: 'y'
                 },
                 cases: [
                   {
                     type: 'SwitchCase',
-                    loc:{start:{line:1,col:57},end:{line:1,col:65},source:''},
+                    loc:{start:{line:1,column:57},end:{line:1,column:65},source:''},
                     test: null,
                     consequent: []
                   }
@@ -104,11 +104,11 @@ ast: {
       },
       handler: {
         type: 'CatchClause',
-        loc:{start:{line:1,col:67},end:{line:1,col:74},source:''},
+        loc:{start:{line:1,column:67},end:{line:1,column:74},source:''},
         param: null,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:72},end:{line:1,col:74},source:''},
+          loc:{start:{line:1,column:72},end:{line:1,column:74},source:''},
           body: []
         }
       },

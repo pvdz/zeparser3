@@ -29,26 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
   body: [
     {
       type: 'ForOfStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:18},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:18},source:''},
             id: {
               type: 'ArrayPattern',
-              loc:{start:{line:1,col:11},end:{line:1,col:18},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:18},source:''},
               elements: [
                 {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:15},source:''},
                   name: 'foo'
                 }
               ]
@@ -59,13 +59,13 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
+        loc:{start:{line:1,column:21},end:{line:1,column:24},source:''},
         name: 'arr'
       },
       await: false,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:25},end:{line:1,col:26},source:''}
+        loc:{start:{line:1,column:25},end:{line:1,column:26},source:''}
       }
     }
   ]

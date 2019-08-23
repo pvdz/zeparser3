@@ -29,24 +29,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:16},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:16},source:''},
         left: {
           type: 'ObjectPattern',
-          loc:{start:{line:1,col:1},end:{line:1,col:13},source:''},
+          loc:{start:{line:1,column:1},end:{line:1,column:13},source:''},
           properties: [
             {
               type: 'Property',
-              loc:{start:{line:1,col:2},end:{line:1,col:11},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:11},source:''},
               key: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:2},end:{line:1,col:4},source:''},
+                loc:{start:{line:1,column:2},end:{line:1,column:4},source:''},
                 name: 'a'
               },
               kind: 'init',
@@ -54,15 +54,15 @@ ast: {
               computed: false,
               value: {
                 type: 'AssignmentPattern',
-                loc:{start:{line:1,col:4},end:{line:1,col:11},source:''},
+                loc:{start:{line:1,column:4},end:{line:1,column:11},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:5},end:{line:1,col:6},source:''},
+                  loc:{start:{line:1,column:5},end:{line:1,column:6},source:''},
                   name: 'b'
                 },
                 right: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+                  loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
                   value: 0,
                   raw: '0'
                 }
@@ -74,7 +74,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Literal',
-          loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
           value: 1,
           raw: '1'
         }

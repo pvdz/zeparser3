@@ -67,42 +67,42 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:6,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:6,column:1},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:6,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:6,column:1},source:''},
       discriminant: {
         type: 'Literal',
-        loc:{start:{line:1,col:8},end:{line:1,col:8},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:8},source:''},
         value: 0,
         raw: '0'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:2,col:2},end:{line:4,col:2},source:''},
+          loc:{start:{line:2,column:2},end:{line:4,column:2},source:''},
           test: {
             type: 'Literal',
-            loc:{start:{line:2,col:7},end:{line:2,col:7},source:''},
+            loc:{start:{line:2,column:7},end:{line:2,column:7},source:''},
             value: 1,
             raw: '1'
           },
           consequent: [
             {
               type: 'FunctionDeclaration',
-              loc:{start:{line:3,col:4},end:{line:4,col:2},source:''},
+              loc:{start:{line:3,column:4},end:{line:4,column:2},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:3,col:13},end:{line:3,col:13},source:''},
+                loc:{start:{line:3,column:13},end:{line:3,column:13},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:3,col:17},end:{line:4,col:2},source:''},
+                loc:{start:{line:3,column:17},end:{line:4,column:2},source:''},
                 body: []
               }
             }
@@ -110,23 +110,23 @@ ast: {
         },
         {
           type: 'SwitchCase',
-          loc:{start:{line:4,col:2},end:{line:6,col:0},source:''},
+          loc:{start:{line:4,column:2},end:{line:6,column:0},source:''},
           test: null,
           consequent: [
             {
               type: 'FunctionDeclaration',
-              loc:{start:{line:5,col:4},end:{line:6,col:0},source:''},
+              loc:{start:{line:5,column:4},end:{line:6,column:0},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:5,col:13},end:{line:5,col:13},source:''},
+                loc:{start:{line:5,column:13},end:{line:5,column:13},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:5,col:17},end:{line:6,col:0},source:''},
+                loc:{start:{line:5,column:17},end:{line:6,column:0},source:''},
                 body: []
               }
             }

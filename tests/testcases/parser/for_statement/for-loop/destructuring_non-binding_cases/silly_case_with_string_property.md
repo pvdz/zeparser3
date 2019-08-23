@@ -29,23 +29,23 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:18},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:18},source:''},
       init: {
         type: 'MemberExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:14},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:14},source:''},
         object: {
           type: 'Literal',
-          loc:{start:{line:1,col:5},end:{line:1,col:5},source:''},
+          loc:{start:{line:1,column:5},end:{line:1,column:5},source:''},
           value: 'foo',
           raw: '"foo"'
         },
         property: {
           type: 'Identifier',
-          loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:11},end:{line:1,column:11},source:''},
           name: 'bar'
         },
         computed: false
@@ -54,7 +54,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:17},end:{line:1,col:18},source:''}
+        loc:{start:{line:1,column:17},end:{line:1,column:18},source:''}
       }
     }
   ]

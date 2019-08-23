@@ -29,27 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:37},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:37},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'A'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:8},end:{line:1,col:37},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:37},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:9},end:{line:1,col:36},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:36},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:9},end:{line:1,col:20},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:20},source:''},
               name: 'constructor'
             },
             static: false,
@@ -57,30 +57,30 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:9},end:{line:1,col:36},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:36},source:''},
               generator: false,
               async: false,
               id: null,
               params: [
                 {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:21},end:{line:1,col:33},source:''},
+                  loc:{start:{line:1,column:21},end:{line:1,column:33},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:21},end:{line:1,col:21},source:''},
+                    loc:{start:{line:1,column:21},end:{line:1,column:21},source:''},
                     name: 'x'
                   },
                   right: {
                     type: 'MetaProperty',
-                    loc:{start:{line:1,col:23},end:{line:1,col:33},source:''},
+                    loc:{start:{line:1,column:23},end:{line:1,column:33},source:''},
                     meta: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:23},end:{line:1,col:26},source:''},
+                      loc:{start:{line:1,column:23},end:{line:1,column:26},source:''},
                       name: 'new'
                     },
                     property: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:27},end:{line:1,col:27},source:''},
+                      loc:{start:{line:1,column:27},end:{line:1,column:27},source:''},
                       name: 'target'
                     }
                   }
@@ -88,7 +88,7 @@ ast: {
               ],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:34},end:{line:1,col:36},source:''},
+                loc:{start:{line:1,column:34},end:{line:1,column:36},source:''},
                 body: []
               }
             }

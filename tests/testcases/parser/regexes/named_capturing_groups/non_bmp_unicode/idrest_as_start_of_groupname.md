@@ -57,14 +57,14 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
       expression: {
         type: 'Literal',
-        loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
         value: null,
         regex: { pattern: '(?<@{x1d7d0}@rest>foo)', flags: '' },
         raw: '/(?<@{x1d7d0}@rest>foo)/'

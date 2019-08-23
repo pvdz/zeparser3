@@ -31,24 +31,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:12},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:12},source:''},
         left: {
           type: 'ObjectPattern',
-          loc:{start:{line:1,col:1},end:{line:1,col:9},source:''},
+          loc:{start:{line:1,column:1},end:{line:1,column:9},source:''},
           properties: [
             {
               type: 'Property',
-              loc:{start:{line:1,col:2},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:7},source:''},
               key: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:3},end:{line:1,col:4},source:''},
+                loc:{start:{line:1,column:3},end:{line:1,column:4},source:''},
                 name: 'x'
               },
               kind: 'init',
@@ -56,7 +56,7 @@ ast: {
               computed: true,
               value: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+                loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
                 name: 'y'
               },
               shorthand: false
@@ -66,7 +66,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+          loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
           name: 'z'
         }
       }

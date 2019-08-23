@@ -29,131 +29,131 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:44},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:44},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:44},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:44},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:1},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:1},source:''},
           name: 'a'
         },
         operator: '|=',
         right: {
           type: 'AssignmentExpression',
-          loc:{start:{line:1,col:3},end:{line:1,col:44},source:''},
+          loc:{start:{line:1,column:3},end:{line:1,column:44},source:''},
           left: {
             type: 'Identifier',
-            loc:{start:{line:1,col:3},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:3},end:{line:1,column:4},source:''},
             name: 'b'
           },
           operator: '^=',
           right: {
             type: 'AssignmentExpression',
-            loc:{start:{line:1,col:6},end:{line:1,col:44},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:44},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
               name: 'c'
             },
             operator: '&=',
             right: {
               type: 'AssignmentExpression',
-              loc:{start:{line:1,col:9},end:{line:1,col:44},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:44},source:''},
               left: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:9},end:{line:1,col:10},source:''},
+                loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
                 name: 'd'
               },
               operator: '>>>=',
               right: {
                 type: 'AssignmentExpression',
-                loc:{start:{line:1,col:14},end:{line:1,col:44},source:''},
+                loc:{start:{line:1,column:14},end:{line:1,column:44},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
+                  loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
                   name: 'e'
                 },
                 operator: '>>=',
                 right: {
                   type: 'AssignmentExpression',
-                  loc:{start:{line:1,col:18},end:{line:1,col:44},source:''},
+                  loc:{start:{line:1,column:18},end:{line:1,column:44},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+                    loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
                     name: 'f'
                   },
                   operator: '<<=',
                   right: {
                     type: 'AssignmentExpression',
-                    loc:{start:{line:1,col:22},end:{line:1,col:44},source:''},
+                    loc:{start:{line:1,column:22},end:{line:1,column:44},source:''},
                     left: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
+                      loc:{start:{line:1,column:22},end:{line:1,column:23},source:''},
                       name: 'g'
                     },
                     operator: '%=',
                     right: {
                       type: 'AssignmentExpression',
-                      loc:{start:{line:1,col:25},end:{line:1,col:44},source:''},
+                      loc:{start:{line:1,column:25},end:{line:1,column:44},source:''},
                       left: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:25},end:{line:1,col:26},source:''},
+                        loc:{start:{line:1,column:25},end:{line:1,column:26},source:''},
                         name: 'h'
                       },
                       operator: '/=',
                       right: {
                         type: 'AssignmentExpression',
-                        loc:{start:{line:1,col:28},end:{line:1,col:44},source:''},
+                        loc:{start:{line:1,column:28},end:{line:1,column:44},source:''},
                         left: {
                           type: 'Identifier',
-                          loc:{start:{line:1,col:28},end:{line:1,col:29},source:''},
+                          loc:{start:{line:1,column:28},end:{line:1,column:29},source:''},
                           name: 'i'
                         },
                         operator: '*=',
                         right: {
                           type: 'AssignmentExpression',
-                          loc:{start:{line:1,col:31},end:{line:1,col:44},source:''},
+                          loc:{start:{line:1,column:31},end:{line:1,column:44},source:''},
                           left: {
                             type: 'Identifier',
-                            loc:{start:{line:1,col:31},end:{line:1,col:32},source:''},
+                            loc:{start:{line:1,column:31},end:{line:1,column:32},source:''},
                             name: 'j'
                           },
                           operator: '**=',
                           right: {
                             type: 'AssignmentExpression',
-                            loc:{start:{line:1,col:35},end:{line:1,col:44},source:''},
+                            loc:{start:{line:1,column:35},end:{line:1,column:44},source:''},
                             left: {
                               type: 'Identifier',
-                              loc:{start:{line:1,col:35},end:{line:1,col:36},source:''},
+                              loc:{start:{line:1,column:35},end:{line:1,column:36},source:''},
                               name: 'k'
                             },
                             operator: '-=',
                             right: {
                               type: 'AssignmentExpression',
-                              loc:{start:{line:1,col:38},end:{line:1,col:44},source:''},
+                              loc:{start:{line:1,column:38},end:{line:1,column:44},source:''},
                               left: {
                                 type: 'Identifier',
-                                loc:{start:{line:1,col:38},end:{line:1,col:39},source:''},
+                                loc:{start:{line:1,column:38},end:{line:1,column:39},source:''},
                                 name: 'l'
                               },
                               operator: '+=',
                               right: {
                                 type: 'AssignmentExpression',
-                                loc:{start:{line:1,col:41},end:{line:1,col:44},source:''},
+                                loc:{start:{line:1,column:41},end:{line:1,column:44},source:''},
                                 left: {
                                   type: 'Identifier',
-                                  loc:{start:{line:1,col:41},end:{line:1,col:42},source:''},
+                                  loc:{start:{line:1,column:41},end:{line:1,column:42},source:''},
                                   name: 'm'
                                 },
                                 operator: '=',
                                 right: {
                                   type: 'Identifier',
-                                  loc:{start:{line:1,col:43},end:{line:1,col:44},source:''},
+                                  loc:{start:{line:1,column:43},end:{line:1,column:44},source:''},
                                   name: 'n'
                                 }
                               }

@@ -31,22 +31,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:2},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:2},source:''},
   body: [
     {
       type: 'IfStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:0},source:''},
       test: {
         type: 'Identifier',
-        loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
         name: 'a'
       },
       consequent: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:7},end:{line:2,col:0},source:''},
+        loc:{start:{line:1,column:7},end:{line:2,column:0},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:7},end:{line:2,col:0},source:''},
+          loc:{start:{line:1,column:7},end:{line:2,column:0},source:''},
           name: 'let'
         }
       },
@@ -54,7 +54,7 @@ ast: {
     },
     {
       type: 'BlockStatement',
-      loc:{start:{line:2,col:0},end:{line:2,col:2},source:''},
+      loc:{start:{line:2,column:0},end:{line:2,column:2},source:''},
       body: []
     }
   ]

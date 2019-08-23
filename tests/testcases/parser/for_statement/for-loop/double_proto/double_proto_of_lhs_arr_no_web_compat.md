@@ -29,25 +29,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:39},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:39},source:''},
       init: {
         type: 'ArrayExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:35},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:35},source:''},
         elements: [
           {
             type: 'ObjectExpression',
-            loc:{start:{line:1,col:6},end:{line:1,col:34},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:34},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:7},end:{line:1,col:19},source:''},
+                loc:{start:{line:1,column:7},end:{line:1,column:19},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:7},end:{line:1,col:18},source:''},
+                  loc:{start:{line:1,column:7},end:{line:1,column:18},source:''},
                   name: '__proto__'
                 },
                 kind: 'init',
@@ -55,7 +55,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
+                  loc:{start:{line:1,column:18},end:{line:1,column:18},source:''},
                   value: 1,
                   raw: '1'
                 },
@@ -63,10 +63,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc:{start:{line:1,col:21},end:{line:1,col:33},source:''},
+                loc:{start:{line:1,column:21},end:{line:1,column:33},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:21},end:{line:1,col:32},source:''},
+                  loc:{start:{line:1,column:21},end:{line:1,column:32},source:''},
                   name: '__proto__'
                 },
                 kind: 'init',
@@ -74,7 +74,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
+                  loc:{start:{line:1,column:32},end:{line:1,column:32},source:''},
                   value: 2,
                   raw: '2'
                 },
@@ -88,7 +88,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:38},end:{line:1,col:39},source:''}
+        loc:{start:{line:1,column:38},end:{line:1,column:39},source:''}
       }
     }
   ]

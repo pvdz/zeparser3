@@ -29,26 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:23},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:23},source:''},
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:6},end:{line:1,col:23},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:23},source:''},
           id: {
             type: 'ObjectPattern',
-            loc:{start:{line:1,col:6},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:20},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:7},end:{line:1,col:12},source:''},
+                loc:{start:{line:1,column:7},end:{line:1,column:12},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:7},end:{line:1,col:10},source:''},
+                  loc:{start:{line:1,column:7},end:{line:1,column:10},source:''},
                   name: 'foo'
                 },
                 kind: 'init',
@@ -56,15 +56,15 @@ ast: {
                 computed: false,
                 value: {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:7},end:{line:1,col:12},source:''},
+                  loc:{start:{line:1,column:7},end:{line:1,column:12},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:7},end:{line:1,col:10},source:''},
+                    loc:{start:{line:1,column:7},end:{line:1,column:10},source:''},
                     name: 'foo'
                   },
                   right: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+                    loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
                     name: 'a'
                   }
                 },
@@ -72,10 +72,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc:{start:{line:1,col:13},end:{line:1,col:18},source:''},
+                loc:{start:{line:1,column:13},end:{line:1,column:18},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
+                  loc:{start:{line:1,column:13},end:{line:1,column:16},source:''},
                   name: 'bar'
                 },
                 kind: 'init',
@@ -83,15 +83,15 @@ ast: {
                 computed: false,
                 value: {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:13},end:{line:1,col:18},source:''},
+                  loc:{start:{line:1,column:13},end:{line:1,column:18},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
+                    loc:{start:{line:1,column:13},end:{line:1,column:16},source:''},
                     name: 'bar'
                   },
                   right: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+                    loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
                     name: 'b'
                   }
                 },
@@ -101,7 +101,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
+            loc:{start:{line:1,column:22},end:{line:1,column:23},source:''},
             name: 'x'
           }
         }

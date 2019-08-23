@@ -29,21 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:18},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:18},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:16},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:16},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:2},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:15},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:2},end:{line:1,col:5},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:5},source:''},
               name: 'x'
             },
             kind: 'init',
@@ -51,20 +51,20 @@ ast: {
             computed: false,
             value: {
               type: 'UnaryExpression',
-              loc:{start:{line:1,col:5},end:{line:1,col:15},source:''},
+              loc:{start:{line:1,column:5},end:{line:1,column:15},source:''},
               operator: 'delete',
               prefix: true,
               argument: {
                 type: 'MemberExpression',
-                loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
+                loc:{start:{line:1,column:12},end:{line:1,column:15},source:''},
                 object: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
                   name: 'x'
                 },
                 property: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+                  loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
                   name: 'y'
                 },
                 computed: false

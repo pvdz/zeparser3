@@ -29,30 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:87},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:87},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:87},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:87},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'foo'
       },
       params: [
         {
           type: 'AssignmentPattern',
-          loc:{start:{line:1,col:19},end:{line:1,col:63},source:''},
+          loc:{start:{line:1,column:19},end:{line:1,column:63},source:''},
           left: {
             type: 'Identifier',
-            loc:{start:{line:1,col:19},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:19},end:{line:1,column:19},source:''},
             name: 'a'
           },
           right: {
             type: 'ArrowFunctionExpression',
-            loc:{start:{line:1,col:23},end:{line:1,col:63},source:''},
+            loc:{start:{line:1,column:23},end:{line:1,column:63},source:''},
             params: [],
             id: null,
             generator: false,
@@ -60,14 +60,14 @@ ast: {
             expression: false,
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:29},end:{line:1,col:63},source:''},
+              loc:{start:{line:1,column:29},end:{line:1,column:63},source:''},
               body: [
                 {
                   type: 'ExpressionStatement',
-                  loc:{start:{line:1,col:31},end:{line:1,col:45},source:''},
+                  loc:{start:{line:1,column:31},end:{line:1,column:45},source:''},
                   expression: {
                     type: 'Literal',
-                    loc:{start:{line:1,col:31},end:{line:1,col:31},source:''},
+                    loc:{start:{line:1,column:31},end:{line:1,column:31},source:''},
                     value: 'use strict',
                     raw: '"use strict"'
                   },
@@ -75,19 +75,19 @@ ast: {
                 },
                 {
                   type: 'ReturnStatement',
-                  loc:{start:{line:1,col:45},end:{line:1,col:62},source:''},
+                  loc:{start:{line:1,column:45},end:{line:1,column:62},source:''},
                   argument: {
                     type: 'CallExpression',
-                    loc:{start:{line:1,col:52},end:{line:1,col:62},source:''},
+                    loc:{start:{line:1,column:52},end:{line:1,column:62},source:''},
                     callee: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:52},end:{line:1,col:56},source:''},
+                      loc:{start:{line:1,column:52},end:{line:1,column:56},source:''},
                       name: 'eval'
                     },
                     arguments: [
                       {
                         type: 'Literal',
-                        loc:{start:{line:1,col:57},end:{line:1,col:57},source:''},
+                        loc:{start:{line:1,column:57},end:{line:1,column:57},source:''},
                         value: 'x',
                         raw: '"x"'
                       }
@@ -101,19 +101,19 @@ ast: {
       ],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:65},end:{line:1,col:87},source:''},
+        loc:{start:{line:1,column:65},end:{line:1,column:87},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc:{start:{line:1,col:71},end:{line:1,col:72},source:''},
+            loc:{start:{line:1,column:71},end:{line:1,column:72},source:''},
             kind: 'var',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc:{start:{line:1,col:71},end:{line:1,col:72},source:''},
+                loc:{start:{line:1,column:71},end:{line:1,column:72},source:''},
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:71},end:{line:1,col:71},source:''},
+                  loc:{start:{line:1,column:71},end:{line:1,column:71},source:''},
                   name: 'x'
                 },
                 init: null
@@ -122,13 +122,13 @@ ast: {
           },
           {
             type: 'ReturnStatement',
-            loc:{start:{line:1,col:74},end:{line:1,col:86},source:''},
+            loc:{start:{line:1,column:74},end:{line:1,column:86},source:''},
             argument: {
               type: 'CallExpression',
-              loc:{start:{line:1,col:81},end:{line:1,col:84},source:''},
+              loc:{start:{line:1,column:81},end:{line:1,column:84},source:''},
               callee: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:81},end:{line:1,col:82},source:''},
+                loc:{start:{line:1,column:81},end:{line:1,column:82},source:''},
                 name: 'a'
               },
               arguments: []

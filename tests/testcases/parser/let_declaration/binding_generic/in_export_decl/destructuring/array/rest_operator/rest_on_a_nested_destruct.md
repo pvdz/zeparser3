@@ -47,39 +47,39 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:32},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:32},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:32},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:32},source:''},
             id: {
               type: 'ArrayPattern',
-              loc:{start:{line:1,col:11},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:27},source:''},
               elements: [
                 {
                   type: 'RestElement',
-                  loc:{start:{line:1,col:12},end:{line:1,col:25},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:25},source:''},
                   argument: {
                     type: 'ArrayPattern',
-                    loc:{start:{line:1,col:15},end:{line:1,col:25},source:''},
+                    loc:{start:{line:1,column:15},end:{line:1,column:25},source:''},
                     elements: [
                       {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:16},end:{line:1,col:19},source:''},
+                        loc:{start:{line:1,column:16},end:{line:1,column:19},source:''},
                         name: 'foo'
                       },
                       {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
+                        loc:{start:{line:1,column:21},end:{line:1,column:24},source:''},
                         name: 'bar'
                       }
                     ]
@@ -89,7 +89,7 @@ ast: {
             },
             init: {
               type: 'Identifier',
-              loc:{start:{line:1,col:29},end:{line:1,col:32},source:''},
+              loc:{start:{line:1,column:29},end:{line:1,column:32},source:''},
               name: 'obj'
             }
           }

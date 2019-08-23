@@ -29,31 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:71},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:71},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:71},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:71},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'outer'
       },
       superClass: {
         type: 'Identifier',
-        loc:{start:{line:1,col:20},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:20},end:{line:1,column:22},source:''},
         name: 'S'
       },
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:22},end:{line:1,col:71},source:''},
+        loc:{start:{line:1,column:22},end:{line:1,column:71},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:24},end:{line:1,col:70},source:''},
+            loc:{start:{line:1,column:24},end:{line:1,column:70},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:24},end:{line:1,col:35},source:''},
+              loc:{start:{line:1,column:24},end:{line:1,column:35},source:''},
               name: 'constructor'
             },
             static: false,
@@ -61,35 +61,35 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:24},end:{line:1,col:70},source:''},
+              loc:{start:{line:1,column:24},end:{line:1,column:70},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:37},end:{line:1,col:70},source:''},
+                loc:{start:{line:1,column:37},end:{line:1,column:70},source:''},
                 body: [
                   {
                     type: 'ClassDeclaration',
-                    loc:{start:{line:1,col:40},end:{line:1,col:69},source:''},
+                    loc:{start:{line:1,column:40},end:{line:1,column:69},source:''},
                     id: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:46},end:{line:1,col:46},source:''},
+                      loc:{start:{line:1,column:46},end:{line:1,column:46},source:''},
                       name: 'x'
                     },
                     superClass: {
                       type: 'CallExpression',
-                      loc:{start:{line:1,col:56},end:{line:1,col:64},source:''},
+                      loc:{start:{line:1,column:56},end:{line:1,column:64},source:''},
                       callee: {
                         type: 'Super',
-                        loc:{start:{line:1,col:56},end:{line:1,col:61},source:''}
+                        loc:{start:{line:1,column:56},end:{line:1,column:61},source:''}
                       },
                       arguments: []
                     },
                     body: {
                       type: 'ClassBody',
-                      loc:{start:{line:1,col:64},end:{line:1,col:69},source:''},
+                      loc:{start:{line:1,column:64},end:{line:1,column:69},source:''},
                       body: []
                     }
                   }

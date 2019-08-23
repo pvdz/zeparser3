@@ -29,35 +29,35 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:27},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:27},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:27},source:''},
         params: [
           {
             type: 'AssignmentPattern',
-            loc:{start:{line:1,col:7},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:7},end:{line:1,column:20},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:7},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:9},source:''},
               name: 'x'
             },
             right: {
               type: 'AssignmentExpression',
-              loc:{start:{line:1,col:11},end:{line:1,col:20},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:20},source:''},
               left: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
+                loc:{start:{line:1,column:12},end:{line:1,column:15},source:''},
                 name: 'foo'
               },
               operator: '=',
               right: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
+                loc:{start:{line:1,column:19},end:{line:1,column:20},source:''},
                 name: 'f'
               }
             }
@@ -69,7 +69,7 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:25},end:{line:1,col:27},source:''},
+          loc:{start:{line:1,column:25},end:{line:1,column:27},source:''},
           body: []
         }
       }

@@ -34,27 +34,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'x'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:7},end:{line:4,col:1},source:''},
+        loc:{start:{line:1,column:7},end:{line:4,column:1},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:2,col:2},end:{line:3,col:2},source:''},
+            loc:{start:{line:2,column:2},end:{line:3,column:2},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:2,col:2},end:{line:2,col:13},source:''},
+              loc:{start:{line:2,column:2},end:{line:2,column:13},source:''},
               name: 'constructor'
             },
             static: false,
@@ -62,24 +62,24 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:2,col:2},end:{line:3,col:2},source:''},
+              loc:{start:{line:2,column:2},end:{line:3,column:2},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:2,col:15},end:{line:3,col:2},source:''},
+                loc:{start:{line:2,column:15},end:{line:3,column:2},source:''},
                 body: []
               }
             }
           },
           {
             type: 'MethodDefinition',
-            loc:{start:{line:3,col:2},end:{line:4,col:0},source:''},
+            loc:{start:{line:3,column:2},end:{line:4,column:0},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:3,col:2},end:{line:3,col:3},source:''},
+              loc:{start:{line:3,column:2},end:{line:3,column:3},source:''},
               name: 'x'
             },
             static: false,
@@ -87,14 +87,14 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:3,col:2},end:{line:4,col:0},source:''},
+              loc:{start:{line:3,column:2},end:{line:4,column:0},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:3,col:5},end:{line:4,col:0},source:''},
+                loc:{start:{line:3,column:5},end:{line:4,column:0},source:''},
                 body: []
               }
             }

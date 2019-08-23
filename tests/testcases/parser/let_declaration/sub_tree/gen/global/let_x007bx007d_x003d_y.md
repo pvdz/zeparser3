@@ -31,24 +31,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:6},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:2,col:0},end:{line:2,col:6},source:''},
+      loc:{start:{line:2,column:0},end:{line:2,column:6},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:2,col:0},end:{line:2,col:6},source:''},
+          loc:{start:{line:2,column:0},end:{line:2,column:6},source:''},
           id: {
             type: 'ObjectPattern',
-            loc:{start:{line:2,col:0},end:{line:2,col:3},source:''},
+            loc:{start:{line:2,column:0},end:{line:2,column:3},source:''},
             properties: []
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:2,col:5},end:{line:2,col:6},source:''},
+            loc:{start:{line:2,column:5},end:{line:2,column:6},source:''},
             name: 'y'
           }
         }

@@ -31,24 +31,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:24},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:24},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:21},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:21},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'x'
           },
           init: {
             type: 'ArrowFunctionExpression',
-            loc:{start:{line:1,col:8},end:{line:1,col:21},source:''},
+            loc:{start:{line:1,column:8},end:{line:1,column:21},source:''},
             params: [],
             id: null,
             generator: false,
@@ -56,17 +56,17 @@ ast: {
             expression: true,
             body: {
               type: 'Identifier',
-              loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:21},source:''},
               name: 'x'
             }
           }
         },
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+          loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
+            loc:{start:{line:1,column:23},end:{line:1,column:23},source:''},
             name: 'y'
           },
           init: null

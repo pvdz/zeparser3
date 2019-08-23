@@ -30,25 +30,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
         params: [
           {
             type: 'ObjectPattern',
-            loc:{start:{line:1,col:1},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:4},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:2},end:{line:1,col:3},source:''},
+                loc:{start:{line:1,column:2},end:{line:1,column:3},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:2},end:{line:1,col:3},source:''},
+                  loc:{start:{line:1,column:2},end:{line:1,column:3},source:''},
                   name: 'a'
                 },
                 kind: 'init',
@@ -56,7 +56,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:2},end:{line:1,col:3},source:''},
+                  loc:{start:{line:1,column:2},end:{line:1,column:3},source:''},
                   name: 'a'
                 },
                 shorthand: true
@@ -70,7 +70,7 @@ ast: {
         expression: true,
         body: {
           type: 'Identifier',
-          loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
           name: 'x'
         }
       }

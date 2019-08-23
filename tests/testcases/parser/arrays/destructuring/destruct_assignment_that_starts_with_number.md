@@ -29,30 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
         left: {
           type: 'ArrayPattern',
-          loc:{start:{line:1,col:0},end:{line:1,col:10},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:10},source:''},
           elements: [
             {
               type: 'MemberExpression',
-              loc:{start:{line:1,col:1},end:{line:1,col:8},source:''},
+              loc:{start:{line:1,column:1},end:{line:1,column:8},source:''},
               object: {
                 type: 'Literal',
-                loc:{start:{line:1,col:1},end:{line:1,col:1},source:''},
+                loc:{start:{line:1,column:1},end:{line:1,column:1},source:''},
                 value: 50,
                 raw: '50.'
               },
               property: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:5},end:{line:1,col:5},source:''},
+                loc:{start:{line:1,column:5},end:{line:1,column:5},source:''},
                 name: 'foo'
               },
               computed: false
@@ -62,7 +62,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+          loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
           name: 'x'
         }
       }

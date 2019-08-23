@@ -29,58 +29,58 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:48},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:48},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+        loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:14},end:{line:1,col:48},source:''},
+        loc:{start:{line:1,column:14},end:{line:1,column:48},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc:{start:{line:1,col:16},end:{line:1,col:47},source:''},
+            loc:{start:{line:1,column:16},end:{line:1,column:47},source:''},
             expression: {
               type: 'ConditionalExpression',
-              loc:{start:{line:1,col:16},end:{line:1,col:45},source:''},
+              loc:{start:{line:1,column:16},end:{line:1,column:45},source:''},
               test: {
                 type: 'YieldExpression',
-                loc:{start:{line:1,col:17},end:{line:1,col:24},source:''},
+                loc:{start:{line:1,column:17},end:{line:1,column:24},source:''},
                 delegate: false,
                 argument: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
+                  loc:{start:{line:1,column:23},end:{line:1,column:23},source:''},
                   value: 1,
                   raw: '1'
                 }
               },
               consequent: {
                 type: 'YieldExpression',
-                loc:{start:{line:1,col:28},end:{line:1,col:36},source:''},
+                loc:{start:{line:1,column:28},end:{line:1,column:36},source:''},
                 delegate: false,
                 argument: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
+                  loc:{start:{line:1,column:34},end:{line:1,column:34},source:''},
                   value: 2,
                   raw: '2'
                 }
               },
               alternate: {
                 type: 'YieldExpression',
-                loc:{start:{line:1,col:38},end:{line:1,col:45},source:''},
+                loc:{start:{line:1,column:38},end:{line:1,column:45},source:''},
                 delegate: false,
                 argument: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:44},end:{line:1,col:44},source:''},
+                  loc:{start:{line:1,column:44},end:{line:1,column:44},source:''},
                   value: 3,
                   raw: '3'
                 }

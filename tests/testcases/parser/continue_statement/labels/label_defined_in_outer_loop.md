@@ -31,44 +31,44 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:3,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:3,column:1},source:''},
   body: [
     {
       type: 'WhileStatement',
-      loc:{start:{line:1,col:0},end:{line:3,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:3,column:1},source:''},
       test: {
         type: 'Literal',
-        loc:{start:{line:1,col:7},end:{line:1,col:11},source:''},
+        loc:{start:{line:1,column:7},end:{line:1,column:11},source:''},
         value: true,
         raw: 'true'
       },
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:13},end:{line:3,col:1},source:''},
+        loc:{start:{line:1,column:13},end:{line:3,column:1},source:''},
         body: [
           {
             type: 'LabeledStatement',
-            loc:{start:{line:2,col:2},end:{line:3,col:0},source:''},
+            loc:{start:{line:2,column:2},end:{line:3,column:0},source:''},
             label: {
               type: 'Identifier',
-              loc:{start:{line:2,col:2},end:{line:2,col:3},source:''},
+              loc:{start:{line:2,column:2},end:{line:2,column:3},source:''},
               name: 'x'
             },
             body: {
               type: 'WhileStatement',
-              loc:{start:{line:2,col:5},end:{line:3,col:0},source:''},
+              loc:{start:{line:2,column:5},end:{line:3,column:0},source:''},
               test: {
                 type: 'Literal',
-                loc:{start:{line:2,col:12},end:{line:2,col:16},source:''},
+                loc:{start:{line:2,column:12},end:{line:2,column:16},source:''},
                 value: true,
                 raw: 'true'
               },
               body: {
                 type: 'ContinueStatement',
-                loc:{start:{line:2,col:18},end:{line:3,col:0},source:''},
+                loc:{start:{line:2,column:18},end:{line:3,column:0},source:''},
                 label: {
                   type: 'Identifier',
-                  loc:{start:{line:2,col:27},end:{line:2,col:27},source:''},
+                  loc:{start:{line:2,column:27},end:{line:2,column:27},source:''},
                   name: 'x'
                 }
               }

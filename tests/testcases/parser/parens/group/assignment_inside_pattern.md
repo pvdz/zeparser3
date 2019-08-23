@@ -31,52 +31,52 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:31},source:''},
         left: {
           type: 'ArrayPattern',
-          loc:{start:{line:1,col:1},end:{line:1,col:28},source:''},
+          loc:{start:{line:1,column:1},end:{line:1,column:28},source:''},
           elements: [
             {
               type: 'MemberExpression',
-              loc:{start:{line:1,col:1},end:{line:1,col:26},source:''},
+              loc:{start:{line:1,column:1},end:{line:1,column:26},source:''},
               object: {
                 type: 'CallExpression',
-                loc:{start:{line:1,col:1},end:{line:1,col:10},source:''},
+                loc:{start:{line:1,column:1},end:{line:1,column:10},source:''},
                 callee: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:2},end:{line:1,col:8},source:''},
+                  loc:{start:{line:1,column:2},end:{line:1,column:8},source:''},
                   name: 'target'
                 },
                 arguments: []
               },
               property: {
                 type: 'CallExpression',
-                loc:{start:{line:1,col:11},end:{line:1,col:25},source:''},
+                loc:{start:{line:1,column:11},end:{line:1,column:25},source:''},
                 callee: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:11},end:{line:1,col:20},source:''},
+                  loc:{start:{line:1,column:11},end:{line:1,column:20},source:''},
                   name: 'targetKey'
                 },
                 arguments: [
                   {
                     type: 'AssignmentExpression',
-                    loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
+                    loc:{start:{line:1,column:21},end:{line:1,column:24},source:''},
                     left: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
+                      loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
                       name: 'a'
                     },
                     operator: '=',
                     right: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+                      loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
                       name: 'b'
                     }
                   }
@@ -89,7 +89,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:30},end:{line:1,col:31},source:''},
+          loc:{start:{line:1,column:30},end:{line:1,column:31},source:''},
           name: 'x'
         }
       }

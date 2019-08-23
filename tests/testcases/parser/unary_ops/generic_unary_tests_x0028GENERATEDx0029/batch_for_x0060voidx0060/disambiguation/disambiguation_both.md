@@ -31,30 +31,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
         left: {
           type: 'UnaryExpression',
-          loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
           operator: 'void',
           prefix: true,
           argument: {
             type: 'MemberExpression',
-            loc:{start:{line:1,col:5},end:{line:1,col:11},source:''},
+            loc:{start:{line:1,column:5},end:{line:1,column:11},source:''},
             object: {
               type: 'Identifier',
-              loc:{start:{line:1,col:5},end:{line:1,col:6},source:''},
+              loc:{start:{line:1,column:5},end:{line:1,column:6},source:''},
               name: 'x'
             },
             property: {
               type: 'Identifier',
-              loc:{start:{line:1,col:7},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:7},source:''},
               name: 'def'
             },
             computed: false
@@ -63,20 +63,20 @@ ast: {
         operator: '+',
         right: {
           type: 'UnaryExpression',
-          loc:{start:{line:1,col:13},end:{line:1,col:21},source:''},
+          loc:{start:{line:1,column:13},end:{line:1,column:21},source:''},
           operator: 'void',
           prefix: true,
           argument: {
             type: 'MemberExpression',
-            loc:{start:{line:1,col:18},end:{line:1,col:21},source:''},
+            loc:{start:{line:1,column:18},end:{line:1,column:21},source:''},
             object: {
               type: 'Identifier',
-              loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+              loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
               name: 'y'
             },
             property: {
               type: 'Identifier',
-              loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:20},source:''},
               name: 'x'
             },
             computed: false

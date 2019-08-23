@@ -29,35 +29,35 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:27},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:27},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:27},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:27},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:27},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'x'
           },
           init: {
             type: 'FunctionExpression',
-            loc:{start:{line:1,col:8},end:{line:1,col:27},source:''},
+            loc:{start:{line:1,column:8},end:{line:1,column:27},source:''},
             generator: true,
             async: false,
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
+              loc:{start:{line:1,column:18},end:{line:1,column:18},source:''},
               name: 'await'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:25},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:25},end:{line:1,column:27},source:''},
               body: []
             }
           }

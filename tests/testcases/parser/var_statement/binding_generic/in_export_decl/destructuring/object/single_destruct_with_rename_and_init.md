@@ -47,30 +47,30 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:28},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:28},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:28},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:28},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:11},end:{line:1,col:23},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:23},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:12},end:{line:1,col:21},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:21},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:12},end:{line:1,col:16},source:''},
+                    loc:{start:{line:1,column:12},end:{line:1,column:16},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -78,15 +78,15 @@ ast: {
                   computed: false,
                   value: {
                     type: 'AssignmentPattern',
-                    loc:{start:{line:1,col:16},end:{line:1,col:21},source:''},
+                    loc:{start:{line:1,column:16},end:{line:1,column:21},source:''},
                     left: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:16},end:{line:1,col:18},source:''},
+                      loc:{start:{line:1,column:16},end:{line:1,column:18},source:''},
                       name: 'y'
                     },
                     right: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
+                      loc:{start:{line:1,column:20},end:{line:1,column:21},source:''},
                       name: 'z'
                     }
                   },
@@ -96,7 +96,7 @@ ast: {
             },
             init: {
               type: 'Identifier',
-              loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
+              loc:{start:{line:1,column:25},end:{line:1,column:28},source:''},
               name: 'obj'
             }
           }

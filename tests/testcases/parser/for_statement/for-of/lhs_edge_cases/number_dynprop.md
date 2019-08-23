@@ -29,39 +29,39 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
   body: [
     {
       type: 'ForOfStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
       left: {
         type: 'MemberExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:12},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:12},source:''},
         object: {
           type: 'Literal',
-          loc:{start:{line:1,col:5},end:{line:1,col:5},source:''},
+          loc:{start:{line:1,column:5},end:{line:1,column:5},source:''},
           value: 456,
           raw: '456'
         },
         property: {
           type: 'Identifier',
-          loc:{start:{line:1,col:9},end:{line:1,col:10},source:''},
+          loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
           name: 'x'
         },
         computed: true
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
         name: 'c'
       },
       await: false,
       body: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:20},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+          loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
           name: 'd'
         }
       }

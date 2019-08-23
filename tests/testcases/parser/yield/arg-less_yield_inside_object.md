@@ -29,21 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:35},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:35},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:34},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:34},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:3},end:{line:1,col:33},source:''},
+            loc:{start:{line:1,column:3},end:{line:1,column:33},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:4},end:{line:1,col:6},source:''},
+              loc:{start:{line:1,column:4},end:{line:1,column:6},source:''},
               name: 'g1'
             },
             kind: 'init',
@@ -51,28 +51,28 @@ ast: {
             computed: false,
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:3},end:{line:1,col:33},source:''},
+              loc:{start:{line:1,column:3},end:{line:1,column:33},source:''},
               generator: true,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:9},end:{line:1,col:33},source:''},
+                loc:{start:{line:1,column:9},end:{line:1,column:33},source:''},
                 body: [
                   {
                     type: 'ReturnStatement',
-                    loc:{start:{line:1,col:13},end:{line:1,col:32},source:''},
+                    loc:{start:{line:1,column:13},end:{line:1,column:32},source:''},
                     argument: {
                       type: 'ObjectExpression',
-                      loc:{start:{line:1,col:20},end:{line:1,col:32},source:''},
+                      loc:{start:{line:1,column:20},end:{line:1,column:32},source:''},
                       properties: [
                         {
                           type: 'Property',
-                          loc:{start:{line:1,col:21},end:{line:1,col:29},source:''},
+                          loc:{start:{line:1,column:21},end:{line:1,column:29},source:''},
                           key: {
                             type: 'Identifier',
-                            loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
+                            loc:{start:{line:1,column:21},end:{line:1,column:24},source:''},
                             name: 'x'
                           },
                           kind: 'init',
@@ -80,7 +80,7 @@ ast: {
                           computed: false,
                           value: {
                             type: 'YieldExpression',
-                            loc:{start:{line:1,col:24},end:{line:1,col:29},source:''},
+                            loc:{start:{line:1,column:24},end:{line:1,column:29},source:''},
                             delegate: false,
                             argument: null
                           },

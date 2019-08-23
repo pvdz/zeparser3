@@ -48,60 +48,60 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:67},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:67},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:67},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:67},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+        loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:14},end:{line:1,col:67},source:''},
+        loc:{start:{line:1,column:14},end:{line:1,column:67},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc:{start:{line:1,col:20},end:{line:1,col:66},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:66},source:''},
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc:{start:{line:1,col:20},end:{line:1,col:66},source:''},
+                loc:{start:{line:1,column:20},end:{line:1,column:66},source:''},
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
+                  loc:{start:{line:1,column:20},end:{line:1,column:20},source:''},
                   name: 'f'
                 },
                 init: {
                   type: 'FunctionExpression',
-                  loc:{start:{line:1,col:30},end:{line:1,col:66},source:''},
+                  loc:{start:{line:1,column:30},end:{line:1,column:66},source:''},
                   generator: true,
                   async: true,
                   id: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:40},end:{line:1,col:40},source:''},
+                    loc:{start:{line:1,column:40},end:{line:1,column:40},source:''},
                     name: 'f'
                   },
                   params: [],
                   body: {
                     type: 'BlockStatement',
-                    loc:{start:{line:1,col:44},end:{line:1,col:66},source:''},
+                    loc:{start:{line:1,column:44},end:{line:1,column:66},source:''},
                     body: [
                       {
                         type: 'ReturnStatement',
-                        loc:{start:{line:1,col:46},end:{line:1,col:64},source:''},
+                        loc:{start:{line:1,column:46},end:{line:1,column:64},source:''},
                         argument: {
                           type: 'AwaitExpression',
-                          loc:{start:{line:1,col:53},end:{line:1,col:62},source:''},
+                          loc:{start:{line:1,column:53},end:{line:1,column:62},source:''},
                           argument: {
                             type: 'Identifier',
-                            loc:{start:{line:1,col:59},end:{line:1,col:62},source:''},
+                            loc:{start:{line:1,column:59},end:{line:1,column:62},source:''},
                             name: 'foo'
                           }
                         }

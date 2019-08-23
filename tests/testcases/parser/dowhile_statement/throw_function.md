@@ -32,46 +32,46 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:3,col:8},source:''},
+  loc:{start:{line:1,column:0},end:{line:3,column:8},source:''},
   body: [
     {
       type: 'DoWhileStatement',
-      loc:{start:{line:1,col:0},end:{line:3,col:0},source:''},
+      loc:{start:{line:1,column:0},end:{line:3,column:0},source:''},
       body: {
         type: 'ThrowStatement',
-        loc:{start:{line:1,col:3},end:{line:2,col:0},source:''},
+        loc:{start:{line:1,column:3},end:{line:2,column:0},source:''},
         argument: {
           type: 'FunctionExpression',
-          loc:{start:{line:1,col:9},end:{line:2,col:0},source:''},
+          loc:{start:{line:1,column:9},end:{line:2,column:0},source:''},
           generator: false,
           async: false,
           id: null,
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:19},end:{line:2,col:0},source:''},
+            loc:{start:{line:1,column:19},end:{line:2,column:0},source:''},
             body: []
           }
         }
       },
       test: {
         type: 'Identifier',
-        loc:{start:{line:2,col:6},end:{line:2,col:7},source:''},
+        loc:{start:{line:2,column:6},end:{line:2,column:7},source:''},
         name: 'y'
       }
     },
     {
       type: 'ForStatement',
-      loc:{start:{line:3,col:0},end:{line:3,col:8},source:''},
+      loc:{start:{line:3,column:0},end:{line:3,column:8},source:''},
       init: null,
       test: null,
       update: null,
       body: {
         type: 'ExpressionStatement',
-        loc:{start:{line:3,col:7},end:{line:3,col:8},source:''},
+        loc:{start:{line:3,column:7},end:{line:3,column:8},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:3,col:7},end:{line:3,col:8},source:''},
+          loc:{start:{line:3,column:7},end:{line:3,column:8},source:''},
           name: 'x'
         }
       }

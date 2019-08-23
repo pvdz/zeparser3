@@ -53,14 +53,14 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:37},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:37},source:''},
       expression: {
         type: 'Literal',
-        loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
         value: null,
         regex: { pattern: '\\P{ASCNOPE=Connector_Punctuation}', flags: 'g' },
         raw: '/\\P{ASCNOPE=Connector_Punctuation}/g'

@@ -29,49 +29,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+        loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
         name: 'g'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:14},end:{line:1,col:34},source:''},
+        loc:{start:{line:1,column:14},end:{line:1,column:34},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc:{start:{line:1,col:16},end:{line:1,col:33},source:''},
+            loc:{start:{line:1,column:16},end:{line:1,column:33},source:''},
             expression: {
               type: 'YieldExpression',
-              loc:{start:{line:1,col:16},end:{line:1,col:33},source:''},
+              loc:{start:{line:1,column:16},end:{line:1,column:33},source:''},
               delegate: false,
               argument: {
                 type: 'ObjectExpression',
-                loc:{start:{line:1,col:22},end:{line:1,col:33},source:''},
+                loc:{start:{line:1,column:22},end:{line:1,column:33},source:''},
                 properties: [
                   {
                     type: 'SpreadElement',
-                    loc:{start:{line:1,col:23},end:{line:1,col:31},source:''},
+                    loc:{start:{line:1,column:23},end:{line:1,column:31},source:''},
                     argument: {
                       type: 'SequenceExpression',
-                      loc:{start:{line:1,col:27},end:{line:1,col:30},source:''},
+                      loc:{start:{line:1,column:27},end:{line:1,column:30},source:''},
                       expressions: [
                         {
                           type: 'Identifier',
-                          loc:{start:{line:1,col:27},end:{line:1,col:28},source:''},
+                          loc:{start:{line:1,column:27},end:{line:1,column:28},source:''},
                           name: 'x'
                         },
                         {
                           type: 'Identifier',
-                          loc:{start:{line:1,col:29},end:{line:1,col:30},source:''},
+                          loc:{start:{line:1,column:29},end:{line:1,column:30},source:''},
                           name: 'y'
                         }
                       ]

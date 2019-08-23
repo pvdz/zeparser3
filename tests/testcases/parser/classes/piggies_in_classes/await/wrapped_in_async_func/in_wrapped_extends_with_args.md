@@ -29,46 +29,46 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:59},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:59},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:59},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:59},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:59},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:59},source:''},
         body: [
           {
             type: 'ClassDeclaration',
-            loc:{start:{line:1,col:23},end:{line:1,col:58},source:''},
+            loc:{start:{line:1,column:23},end:{line:1,column:58},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:29},end:{line:1,col:29},source:''},
+              loc:{start:{line:1,column:29},end:{line:1,column:29},source:''},
               name: 'x'
             },
             superClass: {
               type: 'CallExpression',
-              loc:{start:{line:1,col:39},end:{line:1,col:52},source:''},
+              loc:{start:{line:1,column:39},end:{line:1,column:52},source:''},
               callee: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:39},end:{line:1,col:42},source:''},
+                loc:{start:{line:1,column:39},end:{line:1,column:42},source:''},
                 name: 'feh'
               },
               arguments: [
                 {
                   type: 'AwaitExpression',
-                  loc:{start:{line:1,col:43},end:{line:1,col:50},source:''},
+                  loc:{start:{line:1,column:43},end:{line:1,column:50},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:49},end:{line:1,col:50},source:''},
+                    loc:{start:{line:1,column:49},end:{line:1,column:50},source:''},
                     name: 'y'
                   }
                 }
@@ -76,7 +76,7 @@ ast: {
             },
             body: {
               type: 'ClassBody',
-              loc:{start:{line:1,col:52},end:{line:1,col:58},source:''},
+              loc:{start:{line:1,column:52},end:{line:1,column:58},source:''},
               body: []
             }
           }

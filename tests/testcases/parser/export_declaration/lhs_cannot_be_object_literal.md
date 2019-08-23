@@ -49,24 +49,24 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
       declaration: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:15},end:{line:1,col:25},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:25},source:''},
         left: {
           type: 'ObjectPattern',
-          loc:{start:{line:1,col:15},end:{line:1,col:22},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:22},source:''},
           properties: [
             {
               type: 'Property',
-              loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+              loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
               key: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+                loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
                 name: 'x'
               },
               kind: 'init',
@@ -74,17 +74,17 @@ ast: {
               computed: false,
               value: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+                loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
                 name: 'x'
               },
               shorthand: true
             },
             {
               type: 'Property',
-              loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
+              loc:{start:{line:1,column:19},end:{line:1,column:20},source:''},
               key: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
+                loc:{start:{line:1,column:19},end:{line:1,column:20},source:''},
                 name: 'y'
               },
               kind: 'init',
@@ -92,7 +92,7 @@ ast: {
               computed: false,
               value: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
+                loc:{start:{line:1,column:19},end:{line:1,column:20},source:''},
                 name: 'y'
               },
               shorthand: true
@@ -102,7 +102,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:24},end:{line:1,col:25},source:''},
+          loc:{start:{line:1,column:24},end:{line:1,column:25},source:''},
           name: 'x'
         }
       }

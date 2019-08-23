@@ -31,14 +31,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:30},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:30},source:''},
       expression: {
         type: 'Literal',
-        loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:30},source:''},
         value: null,
         regex: { pattern: '(?<abc@{x1d7d0}@def>foo\\k<abc@{x1d7d0}@def>)', flags: '' },
         raw: '/(?<abc@{x1d7d0}@def>foo\\k<abc@{x1d7d0}@def>)/'

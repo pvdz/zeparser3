@@ -29,24 +29,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
       init: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:18},source:''},
         left: {
           type: 'ObjectPattern',
-          loc:{start:{line:1,col:5},end:{line:1,col:13},source:''},
+          loc:{start:{line:1,column:5},end:{line:1,column:13},source:''},
           properties: [
             {
               type: 'Property',
-              loc:{start:{line:1,col:6},end:{line:1,col:11},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:11},source:''},
               key: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
+                loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
                 name: 'x'
               },
               kind: 'init',
@@ -54,15 +54,15 @@ ast: {
               computed: false,
               value: {
                 type: 'AssignmentPattern',
-                loc:{start:{line:1,col:6},end:{line:1,col:11},source:''},
+                loc:{start:{line:1,column:6},end:{line:1,column:11},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
+                  loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
                   name: 'x'
                 },
                 right: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                  loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                   name: 'y'
                 }
               },
@@ -73,7 +73,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+          loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
           name: 'z'
         }
       },
@@ -81,7 +81,7 @@ ast: {
       update: null,
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:22},end:{line:1,col:24},source:''},
+        loc:{start:{line:1,column:22},end:{line:1,column:24},source:''},
         body: []
       }
     }

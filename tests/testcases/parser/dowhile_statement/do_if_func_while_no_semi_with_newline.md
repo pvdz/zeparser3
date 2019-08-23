@@ -63,34 +63,34 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:8},source:''},
   body: [
     {
       type: 'DoWhileStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:8},source:''},
       body: {
         type: 'IfStatement',
-        loc:{start:{line:1,col:3},end:{line:2,col:0},source:''},
+        loc:{start:{line:1,column:3},end:{line:2,column:0},source:''},
         test: {
           type: 'Literal',
-          loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
           value: 8,
           raw: '8'
         },
         consequent: {
           type: 'FunctionDeclaration',
-          loc:{start:{line:1,col:8},end:{line:2,col:0},source:''},
+          loc:{start:{line:1,column:8},end:{line:2,column:0},source:''},
           generator: false,
           async: false,
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:17},source:''},
             name: 's'
           },
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:20},end:{line:2,col:0},source:''},
+            loc:{start:{line:1,column:20},end:{line:2,column:0},source:''},
             body: []
           }
         },
@@ -98,7 +98,7 @@ ast: {
       },
       test: {
         type: 'Identifier',
-        loc:{start:{line:2,col:6},end:{line:2,col:7},source:''},
+        loc:{start:{line:2,column:6},end:{line:2,column:7},source:''},
         name: 'y'
       }
     }

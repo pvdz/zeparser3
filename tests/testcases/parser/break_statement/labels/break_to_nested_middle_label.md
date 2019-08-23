@@ -29,47 +29,47 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:39},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:39},source:''},
       label: {
         type: 'Identifier',
-        loc:{start:{line:1,col:0},end:{line:1,col:4},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:4},source:''},
         name: 'ding'
       },
       body: {
         type: 'LabeledStatement',
-        loc:{start:{line:1,col:6},end:{line:1,col:39},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:39},source:''},
         label: {
           type: 'Identifier',
-          loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:9},source:''},
           name: 'foo'
         },
         body: {
           type: 'LabeledStatement',
-          loc:{start:{line:1,col:11},end:{line:1,col:39},source:''},
+          loc:{start:{line:1,column:11},end:{line:1,column:39},source:''},
           label: {
             type: 'Identifier',
-            loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:14},source:''},
             name: 'bar'
           },
           body: {
             type: 'WhileStatement',
-            loc:{start:{line:1,col:16},end:{line:1,col:39},source:''},
+            loc:{start:{line:1,column:16},end:{line:1,column:39},source:''},
             test: {
               type: 'Literal',
-              loc:{start:{line:1,col:23},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:27},source:''},
               value: true,
               raw: 'true'
             },
             body: {
               type: 'BreakStatement',
-              loc:{start:{line:1,col:29},end:{line:1,col:39},source:''},
+              loc:{start:{line:1,column:29},end:{line:1,column:39},source:''},
               label: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:35},end:{line:1,col:35},source:''},
+                loc:{start:{line:1,column:35},end:{line:1,column:35},source:''},
                 name: 'foo'
               }
             }

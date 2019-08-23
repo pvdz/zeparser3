@@ -29,40 +29,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:38},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:38},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:38},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:38},source:''},
       label: {
         type: 'Identifier',
-        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
         name: 'foo'
       },
       body: {
         type: 'SwitchStatement',
-        loc:{start:{line:1,col:5},end:{line:1,col:38},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:38},source:''},
         discriminant: {
           type: 'Identifier',
-          loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
+          loc:{start:{line:1,column:13},end:{line:1,column:14},source:''},
           name: 'x'
         },
         cases: [
           {
             type: 'SwitchCase',
-            loc:{start:{line:1,col:18},end:{line:1,col:37},source:''},
+            loc:{start:{line:1,column:18},end:{line:1,column:37},source:''},
             test: {
               type: 'Identifier',
-              loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
               name: 'x'
             },
             consequent: [
               {
                 type: 'BreakStatement',
-                loc:{start:{line:1,col:26},end:{line:1,col:37},source:''},
+                loc:{start:{line:1,column:26},end:{line:1,column:37},source:''},
                 label: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
+                  loc:{start:{line:1,column:32},end:{line:1,column:32},source:''},
                   name: 'foo'
                 }
               }

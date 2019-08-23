@@ -47,26 +47,26 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
       specifiers: [],
       declaration: {
         type: 'FunctionDeclaration',
-        loc:{start:{line:1,col:13},end:{line:1,col:28},source:''},
+        loc:{start:{line:1,column:13},end:{line:1,column:28},source:''},
         generator: false,
         async: true,
         id: {
           type: 'Identifier',
-          loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
+          loc:{start:{line:1,column:22},end:{line:1,column:22},source:''},
           name: 'f'
         },
         params: [],
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
+          loc:{start:{line:1,column:25},end:{line:1,column:28},source:''},
           body: []
         }
       },
@@ -74,10 +74,10 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:28},end:{line:1,col:31},source:''},
+      loc:{start:{line:1,column:28},end:{line:1,column:31},source:''},
       expression: {
         type: 'Identifier',
-        loc:{start:{line:1,col:28},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,column:28},end:{line:1,column:31},source:''},
         name: 'foo'
       }
     }

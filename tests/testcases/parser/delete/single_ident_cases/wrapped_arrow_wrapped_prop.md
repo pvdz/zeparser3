@@ -29,26 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
       expression: {
         type: 'UnaryExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
         operator: 'delete',
         prefix: true,
         argument: {
           type: 'MemberExpression',
-          loc:{start:{line:1,col:8},end:{line:1,col:18},source:''},
+          loc:{start:{line:1,column:8},end:{line:1,column:18},source:''},
           object: {
             type: 'ArrowFunctionExpression',
-            loc:{start:{line:1,col:9},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:15},source:''},
             params: [
               {
                 type: 'Identifier',
-                loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                 name: 'a'
               }
             ],
@@ -58,13 +58,13 @@ ast: {
             expression: true,
             body: {
               type: 'Identifier',
-              loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
               name: 'b'
             }
           },
           property: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:17},source:''},
             name: 'x'
           },
           computed: false

@@ -29,29 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+        loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:13},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,column:13},end:{line:1,column:31},source:''},
         body: [
           {
             type: 'ForStatement',
-            loc:{start:{line:1,col:15},end:{line:1,col:30},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:30},source:''},
             init: {
               type: 'YieldExpression',
-              loc:{start:{line:1,col:20},end:{line:1,col:25},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:25},source:''},
               delegate: false,
               argument: null
             },
@@ -59,7 +59,7 @@ ast: {
             update: null,
             body: {
               type: 'EmptyStatement',
-              loc:{start:{line:1,col:28},end:{line:1,col:30},source:''}
+              loc:{start:{line:1,column:28},end:{line:1,column:30},source:''}
             }
           }
         ]

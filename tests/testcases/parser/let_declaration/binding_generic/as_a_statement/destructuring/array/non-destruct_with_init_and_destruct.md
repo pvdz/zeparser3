@@ -29,44 +29,44 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:27},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:27},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:13},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:13},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'foo'
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:10},end:{line:1,column:13},source:''},
             name: 'arr'
           }
         },
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:15},end:{line:1,col:27},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:27},source:''},
           id: {
             type: 'ArrayPattern',
-            loc:{start:{line:1,col:15},end:{line:1,col:21},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:21},source:''},
             elements: [
               {
                 type: 'Identifier',
-                loc:{start:{line:1,col:16},end:{line:1,col:19},source:''},
+                loc:{start:{line:1,column:16},end:{line:1,column:19},source:''},
                 name: 'bar'
               }
             ]
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:23},end:{line:1,col:27},source:''},
+            loc:{start:{line:1,column:23},end:{line:1,column:27},source:''},
             name: 'arr2'
           }
         }

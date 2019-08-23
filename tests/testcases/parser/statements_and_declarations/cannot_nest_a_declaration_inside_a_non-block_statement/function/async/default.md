@@ -29,36 +29,36 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
       discriminant: {
         type: 'Identifier',
-        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
         name: 'x'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:1,col:13},end:{line:1,col:44},source:''},
+          loc:{start:{line:1,column:13},end:{line:1,column:44},source:''},
           test: null,
           consequent: [
             {
               type: 'FunctionDeclaration',
-              loc:{start:{line:1,col:28},end:{line:1,col:44},source:''},
+              loc:{start:{line:1,column:28},end:{line:1,column:44},source:''},
               generator: false,
               async: true,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:37},end:{line:1,col:37},source:''},
+                loc:{start:{line:1,column:37},end:{line:1,column:37},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:41},end:{line:1,col:44},source:''},
+                loc:{start:{line:1,column:41},end:{line:1,column:44},source:''},
                 body: []
               }
             }

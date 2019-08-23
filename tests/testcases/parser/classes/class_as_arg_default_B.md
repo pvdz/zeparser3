@@ -29,48 +29,48 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
           name: 'f'
         },
         operator: '=',
         right: {
           type: 'ArrowFunctionExpression',
-          loc:{start:{line:1,col:4},end:{line:1,col:31},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:31},source:''},
           params: [
             {
               type: 'ArrayPattern',
-              loc:{start:{line:1,col:5},end:{line:1,col:24},source:''},
+              loc:{start:{line:1,column:5},end:{line:1,column:24},source:''},
               elements: [
                 {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:5},end:{line:1,col:23},source:''},
+                  loc:{start:{line:1,column:5},end:{line:1,column:23},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:6},end:{line:1,col:11},source:''},
+                    loc:{start:{line:1,column:6},end:{line:1,column:11},source:''},
                     name: 'xCls'
                   },
                   right: {
                     type: 'ClassExpression',
-                    loc:{start:{line:1,col:13},end:{line:1,col:23},source:''},
+                    loc:{start:{line:1,column:13},end:{line:1,column:23},source:''},
                     id: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:19},end:{line:1,col:19},source:''},
+                      loc:{start:{line:1,column:19},end:{line:1,column:19},source:''},
                       name: 'X'
                     },
                     superClass: null,
                     body: {
                       type: 'ClassBody',
-                      loc:{start:{line:1,col:21},end:{line:1,col:23},source:''},
+                      loc:{start:{line:1,column:21},end:{line:1,column:23},source:''},
                       body: []
                     }
                   }
@@ -84,7 +84,7 @@ ast: {
           expression: false,
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:29},end:{line:1,col:31},source:''},
+            loc:{start:{line:1,column:29},end:{line:1,column:31},source:''},
             body: []
           }
         }

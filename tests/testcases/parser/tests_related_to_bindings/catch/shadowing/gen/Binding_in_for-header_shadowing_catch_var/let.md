@@ -29,47 +29,47 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:41},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:41},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc:{start:{line:1,col:7},end:{line:1,col:41},source:''},
+        loc:{start:{line:1,column:7},end:{line:1,column:41},source:''},
         param: {
           type: 'Identifier',
-          loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+          loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
           name: 'e'
         },
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:17},end:{line:1,col:41},source:''},
+          loc:{start:{line:1,column:17},end:{line:1,column:41},source:''},
           body: [
             {
               type: 'ForStatement',
-              loc:{start:{line:1,col:19},end:{line:1,col:40},source:''},
+              loc:{start:{line:1,column:19},end:{line:1,column:40},source:''},
               init: {
                 type: 'VariableDeclaration',
-                loc:{start:{line:1,col:28},end:{line:1,col:33},source:''},
+                loc:{start:{line:1,column:28},end:{line:1,column:33},source:''},
                 kind: 'let',
                 declarations: [
                   {
                     type: 'VariableDeclarator',
-                    loc:{start:{line:1,col:28},end:{line:1,col:33},source:''},
+                    loc:{start:{line:1,column:28},end:{line:1,column:33},source:''},
                     id: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:28},end:{line:1,col:28},source:''},
+                      loc:{start:{line:1,column:28},end:{line:1,column:28},source:''},
                       name: 'e'
                     },
                     init: {
                       type: 'Literal',
-                      loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
+                      loc:{start:{line:1,column:32},end:{line:1,column:32},source:''},
                       value: 1,
                       raw: '1'
                     }
@@ -80,7 +80,7 @@ ast: {
               update: null,
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:37},end:{line:1,col:40},source:''},
+                loc:{start:{line:1,column:37},end:{line:1,column:40},source:''},
                 body: []
               }
             }

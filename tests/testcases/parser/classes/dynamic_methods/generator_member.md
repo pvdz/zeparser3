@@ -29,27 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'A'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:8},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:20},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:9},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:19},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:14},source:''},
               name: 'foo'
             },
             static: false,
@@ -57,14 +57,14 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:9},end:{line:1,col:19},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:19},source:''},
               generator: true,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
+                loc:{start:{line:1,column:17},end:{line:1,column:19},source:''},
                 body: []
               }
             }

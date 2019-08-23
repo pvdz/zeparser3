@@ -29,27 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:38},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:38},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:38},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:38},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'X'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:8},end:{line:1,col:38},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:38},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:10},end:{line:1,col:37},source:''},
+            loc:{start:{line:1,column:10},end:{line:1,column:37},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:17},end:{line:1,col:20},source:''},
+              loc:{start:{line:1,column:17},end:{line:1,column:20},source:''},
               name: 'foo'
             },
             static: true,
@@ -57,29 +57,29 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:10},end:{line:1,col:37},source:''},
+              loc:{start:{line:1,column:10},end:{line:1,column:37},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:23},end:{line:1,col:37},source:''},
+                loc:{start:{line:1,column:23},end:{line:1,column:37},source:''},
                 body: [
                   {
                     type: 'ExpressionStatement',
-                    loc:{start:{line:1,col:25},end:{line:1,col:36},source:''},
+                    loc:{start:{line:1,column:25},end:{line:1,column:36},source:''},
                     expression: {
                       type: 'MetaProperty',
-                      loc:{start:{line:1,col:25},end:{line:1,col:36},source:''},
+                      loc:{start:{line:1,column:25},end:{line:1,column:36},source:''},
                       meta: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
+                        loc:{start:{line:1,column:25},end:{line:1,column:28},source:''},
                         name: 'new'
                       },
                       property: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:29},end:{line:1,col:29},source:''},
+                        loc:{start:{line:1,column:29},end:{line:1,column:29},source:''},
                         name: 'target'
                       }
                     }

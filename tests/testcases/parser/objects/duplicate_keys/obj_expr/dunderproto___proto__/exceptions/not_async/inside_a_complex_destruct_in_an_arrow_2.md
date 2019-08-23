@@ -35,52 +35,52 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:59},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:59},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:59},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:59},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [
         {
           type: 'Identifier',
-          loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:11},end:{line:1,column:11},source:''},
           name: 'a'
         },
         {
           type: 'ArrayPattern',
-          loc:{start:{line:1,col:14},end:{line:1,col:52},source:''},
+          loc:{start:{line:1,column:14},end:{line:1,column:52},source:''},
           elements: [
             {
               type: 'Identifier',
-              loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
+              loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
               name: 'b'
             },
             {
               type: 'ArrayPattern',
-              loc:{start:{line:1,col:18},end:{line:1,col:51},source:''},
+              loc:{start:{line:1,column:18},end:{line:1,column:51},source:''},
               elements: [
                 {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
+                  loc:{start:{line:1,column:19},end:{line:1,column:20},source:''},
                   name: 'c'
                 },
                 {
                   type: 'ObjectPattern',
-                  loc:{start:{line:1,col:22},end:{line:1,col:50},source:''},
+                  loc:{start:{line:1,column:22},end:{line:1,column:50},source:''},
                   properties: [
                     {
                       type: 'Property',
-                      loc:{start:{line:1,col:23},end:{line:1,col:35},source:''},
+                      loc:{start:{line:1,column:23},end:{line:1,column:35},source:''},
                       key: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:23},end:{line:1,col:34},source:''},
+                        loc:{start:{line:1,column:23},end:{line:1,column:34},source:''},
                         name: '__proto__'
                       },
                       kind: 'init',
@@ -88,17 +88,17 @@ ast: {
                       computed: false,
                       value: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:34},end:{line:1,col:35},source:''},
+                        loc:{start:{line:1,column:34},end:{line:1,column:35},source:''},
                         name: 'd'
                       },
                       shorthand: false
                     },
                     {
                       type: 'Property',
-                      loc:{start:{line:1,col:37},end:{line:1,col:49},source:''},
+                      loc:{start:{line:1,column:37},end:{line:1,column:49},source:''},
                       key: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:37},end:{line:1,col:48},source:''},
+                        loc:{start:{line:1,column:37},end:{line:1,column:48},source:''},
                         name: '__proto__'
                       },
                       kind: 'init',
@@ -106,7 +106,7 @@ ast: {
                       computed: false,
                       value: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:48},end:{line:1,col:49},source:''},
+                        loc:{start:{line:1,column:48},end:{line:1,column:49},source:''},
                         name: 'e'
                       },
                       shorthand: false
@@ -119,13 +119,13 @@ ast: {
         },
         {
           type: 'Identifier',
-          loc:{start:{line:1,col:54},end:{line:1,col:54},source:''},
+          loc:{start:{line:1,column:54},end:{line:1,column:54},source:''},
           name: 'f'
         }
       ],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:57},end:{line:1,col:59},source:''},
+        loc:{start:{line:1,column:57},end:{line:1,column:59},source:''},
         body: []
       }
     }

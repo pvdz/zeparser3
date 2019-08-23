@@ -29,32 +29,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:23},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:23},source:''},
       discriminant: {
         type: 'Identifier',
-        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
         name: 'A'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:1,col:12},end:{line:1,col:22},source:''},
+          loc:{start:{line:1,column:12},end:{line:1,column:22},source:''},
           test: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
             name: 'B'
           },
           consequent: [
             {
               type: 'ExpressionStatement',
-              loc:{start:{line:1,col:20},end:{line:1,col:22},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:22},source:''},
               expression: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
+                loc:{start:{line:1,column:20},end:{line:1,column:21},source:''},
                 name: 'C'
               }
             }

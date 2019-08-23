@@ -29,33 +29,33 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:35},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:35},source:''},
       discriminant: {
         type: 'Identifier',
-        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
         name: 'x'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:1,col:12},end:{line:1,col:34},source:''},
+          loc:{start:{line:1,column:12},end:{line:1,column:34},source:''},
           test: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
             name: 'z'
           },
           consequent: [
             {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:23},end:{line:1,col:34},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:34},source:''},
               body: [
                 {
                   type: 'BreakStatement',
-                  loc:{start:{line:1,col:25},end:{line:1,col:31},source:''},
+                  loc:{start:{line:1,column:25},end:{line:1,column:31},source:''},
                   label: null
                 }
               ]

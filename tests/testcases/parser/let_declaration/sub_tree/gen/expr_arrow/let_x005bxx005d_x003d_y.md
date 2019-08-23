@@ -29,14 +29,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
         params: [],
         id: null,
         generator: false,
@@ -44,18 +44,18 @@ ast: {
         expression: true,
         body: {
           type: 'AssignmentExpression',
-          loc:{start:{line:1,col:6},end:{line:1,col:17},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:17},source:''},
           left: {
             type: 'MemberExpression',
-            loc:{start:{line:1,col:6},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:14},source:''},
             object: {
               type: 'Identifier',
-              loc:{start:{line:1,col:6},end:{line:1,col:10},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:10},source:''},
               name: 'let'
             },
             property: {
               type: 'Identifier',
-              loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
               name: 'x'
             },
             computed: true
@@ -63,7 +63,7 @@ ast: {
           operator: '=',
           right: {
             type: 'Identifier',
-            loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
             name: 'y'
           }
         }

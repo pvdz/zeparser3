@@ -29,14 +29,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
         params: [],
         id: null,
         generator: false,
@@ -44,11 +44,11 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:6},end:{line:1,col:14},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:14},source:''},
           body: [
             {
               type: 'ReturnStatement',
-              loc:{start:{line:1,col:7},end:{line:1,col:13},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:13},source:''},
               argument: null
             }
           ]

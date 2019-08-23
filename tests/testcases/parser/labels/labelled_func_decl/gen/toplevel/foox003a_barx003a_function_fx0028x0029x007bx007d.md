@@ -53,38 +53,38 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
       label: {
         type: 'Identifier',
-        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
         name: 'foo'
       },
       body: {
         type: 'LabeledStatement',
-        loc:{start:{line:1,col:5},end:{line:1,col:24},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:24},source:''},
         label: {
           type: 'Identifier',
-          loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
+          loc:{start:{line:1,column:5},end:{line:1,column:8},source:''},
           name: 'bar'
         },
         body: {
           type: 'FunctionDeclaration',
-          loc:{start:{line:1,col:10},end:{line:1,col:24},source:''},
+          loc:{start:{line:1,column:10},end:{line:1,column:24},source:''},
           generator: false,
           async: false,
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:19},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:19},end:{line:1,column:19},source:''},
             name: 'f'
           },
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:22},end:{line:1,col:24},source:''},
+            loc:{start:{line:1,column:22},end:{line:1,column:24},source:''},
             body: []
           }
         }

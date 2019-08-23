@@ -31,37 +31,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:30},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:30},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:30},source:''},
       init: {
         type: 'FunctionExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:26},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:26},source:''},
         generator: false,
         async: false,
         id: null,
         params: [],
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:15},end:{line:1,col:26},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:26},source:''},
           body: [
             {
               type: 'ExpressionStatement',
-              loc:{start:{line:1,col:17},end:{line:1,col:25},source:''},
+              loc:{start:{line:1,column:17},end:{line:1,column:25},source:''},
               expression: {
                 type: 'BinaryExpression',
-                loc:{start:{line:1,col:17},end:{line:1,col:23},source:''},
+                loc:{start:{line:1,column:17},end:{line:1,column:23},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
+                  loc:{start:{line:1,column:17},end:{line:1,column:19},source:''},
                   name: 'a'
                 },
                 operator: 'in',
                 right: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
+                  loc:{start:{line:1,column:22},end:{line:1,column:23},source:''},
                   name: 'b'
                 }
               }
@@ -73,7 +73,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:29},end:{line:1,col:30},source:''}
+        loc:{start:{line:1,column:29},end:{line:1,column:30},source:''}
       }
     }
   ]

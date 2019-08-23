@@ -29,48 +29,48 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:1,col:45},source:''},
+        loc:{start:{line:1,column:12},end:{line:1,column:45},source:''},
         body: [
           {
             type: 'ClassDeclaration',
-            loc:{start:{line:1,col:14},end:{line:1,col:44},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:44},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:20},source:''},
               name: 'x'
             },
             superClass: {
               type: 'MetaProperty',
-              loc:{start:{line:1,col:30},end:{line:1,col:41},source:''},
+              loc:{start:{line:1,column:30},end:{line:1,column:41},source:''},
               meta: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:30},end:{line:1,col:33},source:''},
+                loc:{start:{line:1,column:30},end:{line:1,column:33},source:''},
                 name: 'new'
               },
               property: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
+                loc:{start:{line:1,column:34},end:{line:1,column:34},source:''},
                 name: 'target'
               }
             },
             body: {
               type: 'ClassBody',
-              loc:{start:{line:1,col:41},end:{line:1,col:44},source:''},
+              loc:{start:{line:1,column:41},end:{line:1,column:44},source:''},
               body: []
             }
           }

@@ -87,24 +87,24 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:20},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:11},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:11},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:11},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'f'
           },
           init: {
             type: 'Literal',
-            loc:{start:{line:1,col:8},end:{line:1,col:8},source:''},
+            loc:{start:{line:1,column:8},end:{line:1,column:8},source:''},
             value: 123,
             raw: '123'
           }
@@ -113,26 +113,26 @@ ast: {
     },
     {
       type: 'LabeledStatement',
-      loc:{start:{line:2,col:0},end:{line:2,col:20},source:''},
+      loc:{start:{line:2,column:0},end:{line:2,column:20},source:''},
       label: {
         type: 'Identifier',
-        loc:{start:{line:2,col:0},end:{line:2,col:4},source:''},
+        loc:{start:{line:2,column:0},end:{line:2,column:4},source:''},
         name: 'oops'
       },
       body: {
         type: 'FunctionDeclaration',
-        loc:{start:{line:2,col:6},end:{line:2,col:20},source:''},
+        loc:{start:{line:2,column:6},end:{line:2,column:20},source:''},
         generator: false,
         async: false,
         id: {
           type: 'Identifier',
-          loc:{start:{line:2,col:15},end:{line:2,col:15},source:''},
+          loc:{start:{line:2,column:15},end:{line:2,column:15},source:''},
           name: 'f'
         },
         params: [],
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:2,col:18},end:{line:2,col:20},source:''},
+          loc:{start:{line:2,column:18},end:{line:2,column:20},source:''},
           body: []
         }
       }

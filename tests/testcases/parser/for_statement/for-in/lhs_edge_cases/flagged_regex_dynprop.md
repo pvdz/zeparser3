@@ -29,39 +29,39 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:23},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:23},source:''},
       left: {
         type: 'MemberExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:15},source:''},
         object: {
           type: 'Literal',
-          loc:{start:{line:1,col:5},end:{line:1,col:5},source:''},
+          loc:{start:{line:1,column:5},end:{line:1,column:5},source:''},
           value: null,
           regex: { pattern: 'foo', flags: 'g' },
           raw: '/foo/g'
         },
         property: {
           type: 'Identifier',
-          loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+          loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
           name: 'x'
         },
         computed: true
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
         name: 'c'
       },
       body: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:21},end:{line:1,col:23},source:''},
+        loc:{start:{line:1,column:21},end:{line:1,column:23},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
+          loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
           name: 'd'
         }
       }

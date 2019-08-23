@@ -43,51 +43,51 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:11,col:2},source:''},
+  loc:{start:{line:1,column:0},end:{line:11,column:2},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:11,col:1},source:''},
+      loc:{start:{line:1,column:4},end:{line:11,column:1},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:11,col:1},source:''},
+          loc:{start:{line:1,column:4},end:{line:11,column:1},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'gen'
           },
           init: {
             type: 'FunctionExpression',
-            loc:{start:{line:1,col:16},end:{line:11,col:1},source:''},
+            loc:{start:{line:1,column:16},end:{line:11,column:1},source:''},
             generator: true,
             async: true,
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:26},end:{line:1,col:26},source:''},
+              loc:{start:{line:1,column:26},end:{line:1,column:26},source:''},
               name: 'g'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:30},end:{line:11,col:1},source:''},
+              loc:{start:{line:1,column:30},end:{line:11,column:1},source:''},
               body: [
                 {
                   type: 'ExpressionStatement',
-                  loc:{start:{line:2,col:2},end:{line:3,col:2},source:''},
+                  loc:{start:{line:2,column:2},end:{line:3,column:2},source:''},
                   expression: {
                     type: 'AssignmentExpression',
-                    loc:{start:{line:2,col:2},end:{line:2,col:16},source:''},
+                    loc:{start:{line:2,column:2},end:{line:2,column:16},source:''},
                     left: {
                       type: 'Identifier',
-                      loc:{start:{line:2,col:2},end:{line:2,col:12},source:''},
+                      loc:{start:{line:2,column:2},end:{line:2,column:12},source:''},
                       name: 'callCount'
                     },
                     operator: '+=',
                     right: {
                       type: 'Literal',
-                      loc:{start:{line:2,col:15},end:{line:2,col:15},source:''},
+                      loc:{start:{line:2,column:15},end:{line:2,column:15},source:''},
                       value: 1,
                       raw: '1'
                     }
@@ -95,25 +95,25 @@ ast: {
                 },
                 {
                   type: 'ExpressionStatement',
-                  loc:{start:{line:3,col:2},end:{line:11,col:0},source:''},
+                  loc:{start:{line:3,column:2},end:{line:11,column:0},source:''},
                   expression: {
                     type: 'YieldExpression',
-                    loc:{start:{line:3,col:2},end:{line:11,col:0},source:''},
+                    loc:{start:{line:3,column:2},end:{line:11,column:0},source:''},
                     delegate: false,
                     argument: {
                       type: 'ObjectExpression',
-                      loc:{start:{line:3,col:8},end:{line:11,col:0},source:''},
+                      loc:{start:{line:3,column:8},end:{line:11,column:0},source:''},
                       properties: [
                         {
                           type: 'SpreadElement',
-                          loc:{start:{line:4,col:7},end:{line:4,col:21},source:''},
+                          loc:{start:{line:4,column:7},end:{line:4,column:21},source:''},
                           argument: {
                             type: 'YieldExpression',
-                            loc:{start:{line:4,col:10},end:{line:4,col:21},source:''},
+                            loc:{start:{line:4,column:10},end:{line:4,column:21},source:''},
                             delegate: false,
                             argument: {
                               type: 'YieldExpression',
-                              loc:{start:{line:4,col:16},end:{line:4,col:21},source:''},
+                              loc:{start:{line:4,column:16},end:{line:4,column:21},source:''},
                               delegate: false,
                               argument: null
                             }
@@ -121,43 +121,43 @@ ast: {
                         },
                         {
                           type: 'SpreadElement',
-                          loc:{start:{line:5,col:7},end:{line:8,col:16},source:''},
+                          loc:{start:{line:5,column:7},end:{line:8,column:16},source:''},
                           argument: {
                             type: 'CallExpression',
-                            loc:{start:{line:5,col:11},end:{line:8,col:15},source:''},
+                            loc:{start:{line:5,column:11},end:{line:8,column:15},source:''},
                             callee: {
                               type: 'FunctionExpression',
-                              loc:{start:{line:5,col:11},end:{line:8,col:8},source:''},
+                              loc:{start:{line:5,column:11},end:{line:8,column:8},source:''},
                               generator: false,
                               async: false,
                               id: null,
                               params: [
                                 {
                                   type: 'Identifier',
-                                  loc:{start:{line:5,col:20},end:{line:5,col:20},source:''},
+                                  loc:{start:{line:5,column:20},end:{line:5,column:20},source:''},
                                   name: 'arg'
                                 }
                               ],
                               body: {
                                 type: 'BlockStatement',
-                                loc:{start:{line:5,col:25},end:{line:8,col:8},source:''},
+                                loc:{start:{line:5,column:25},end:{line:8,column:8},source:''},
                                 body: [
                                   {
                                     type: 'VariableDeclaration',
-                                    loc:{start:{line:6,col:14},end:{line:6,col:25},source:''},
+                                    loc:{start:{line:6,column:14},end:{line:6,column:25},source:''},
                                     kind: 'var',
                                     declarations: [
                                       {
                                         type: 'VariableDeclarator',
-                                        loc:{start:{line:6,col:14},end:{line:6,col:25},source:''},
+                                        loc:{start:{line:6,column:14},end:{line:6,column:25},source:''},
                                         id: {
                                           type: 'Identifier',
-                                          loc:{start:{line:6,col:14},end:{line:6,col:14},source:''},
+                                          loc:{start:{line:6,column:14},end:{line:6,column:14},source:''},
                                           name: 'yield'
                                         },
                                         init: {
                                           type: 'Identifier',
-                                          loc:{start:{line:6,col:22},end:{line:6,col:25},source:''},
+                                          loc:{start:{line:6,column:22},end:{line:6,column:25},source:''},
                                           name: 'arg'
                                         }
                                       }
@@ -165,17 +165,17 @@ ast: {
                                   },
                                   {
                                     type: 'ReturnStatement',
-                                    loc:{start:{line:7,col:10},end:{line:8,col:7},source:''},
+                                    loc:{start:{line:7,column:10},end:{line:8,column:7},source:''},
                                     argument: {
                                       type: 'ObjectExpression',
-                                      loc:{start:{line:7,col:17},end:{line:7,col:27},source:''},
+                                      loc:{start:{line:7,column:17},end:{line:7,column:27},source:''},
                                       properties: [
                                         {
                                           type: 'SpreadElement',
-                                          loc:{start:{line:7,col:18},end:{line:7,col:26},source:''},
+                                          loc:{start:{line:7,column:18},end:{line:7,column:26},source:''},
                                           argument: {
                                             type: 'Identifier',
-                                            loc:{start:{line:7,col:21},end:{line:7,col:26},source:''},
+                                            loc:{start:{line:7,column:21},end:{line:7,column:26},source:''},
                                             name: 'yield'
                                           }
                                         }
@@ -188,7 +188,7 @@ ast: {
                             arguments: [
                               {
                                 type: 'YieldExpression',
-                                loc:{start:{line:8,col:9},end:{line:8,col:14},source:''},
+                                loc:{start:{line:8,column:9},end:{line:8,column:14},source:''},
                                 delegate: false,
                                 argument: null
                               }
@@ -197,10 +197,10 @@ ast: {
                         },
                         {
                           type: 'SpreadElement',
-                          loc:{start:{line:9,col:7},end:{line:9,col:15},source:''},
+                          loc:{start:{line:9,column:7},end:{line:9,column:15},source:''},
                           argument: {
                             type: 'YieldExpression',
-                            loc:{start:{line:9,col:10},end:{line:9,col:15},source:''},
+                            loc:{start:{line:9,column:10},end:{line:9,column:15},source:''},
                             delegate: false,
                             argument: null
                           }

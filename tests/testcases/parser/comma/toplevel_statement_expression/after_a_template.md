@@ -29,23 +29,23 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:7},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:7},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:7},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:7},source:''},
       expression: {
         type: 'SequenceExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:7},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:7},source:''},
         expressions: [
           {
             type: 'TemplateLiteral',
-            loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+            loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
             expressions: [],
             quasis: [
               {
                 type: 'TemplateElement',
-                loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+                loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
                 tail: true,
                 value: { raw: '`x`', cooked: '<TODO>' }
               }
@@ -53,12 +53,12 @@ ast: {
           },
           {
             type: 'TemplateLiteral',
-            loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
             expressions: [],
             quasis: [
               {
                 type: 'TemplateElement',
-                loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+                loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
                 tail: true,
                 value: { raw: '`y`', cooked: '<TODO>' }
               }

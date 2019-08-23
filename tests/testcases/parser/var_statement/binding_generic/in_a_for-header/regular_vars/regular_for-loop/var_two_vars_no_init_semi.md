@@ -29,32 +29,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:17},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:17},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:12},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:12},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
               name: 'foo'
             },
             init: null
           },
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:14},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:17},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
               name: 'bar'
             },
             init: null
@@ -65,7 +65,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:20},end:{line:1,col:21},source:''}
+        loc:{start:{line:1,column:20},end:{line:1,column:21},source:''}
       }
     }
   ]

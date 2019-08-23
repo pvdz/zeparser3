@@ -47,24 +47,24 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:18},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:18},source:''},
       specifiers: [],
       declaration: {
         type: 'ClassDeclaration',
-        loc:{start:{line:1,col:7},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:7},end:{line:1,column:18},source:''},
         id: {
           type: 'Identifier',
-          loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
+          loc:{start:{line:1,column:13},end:{line:1,column:13},source:''},
           name: 'x'
         },
         superClass: null,
         body: {
           type: 'ClassBody',
-          loc:{start:{line:1,col:15},end:{line:1,col:18},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:18},source:''},
           body: []
         }
       },
@@ -72,10 +72,10 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:18},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:18},end:{line:1,column:21},source:''},
       expression: {
         type: 'Identifier',
-        loc:{start:{line:1,col:18},end:{line:1,col:21},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:21},source:''},
         name: 'foo'
       }
     }

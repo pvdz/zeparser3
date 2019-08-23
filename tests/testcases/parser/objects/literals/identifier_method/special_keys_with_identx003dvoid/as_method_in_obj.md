@@ -29,21 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:11},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:11},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:2},end:{line:1,col:10},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:10},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:2},end:{line:1,col:6},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:6},source:''},
               name: 'void'
             },
             kind: 'init',
@@ -51,14 +51,14 @@ ast: {
             computed: false,
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:2},end:{line:1,col:10},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:10},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:8},end:{line:1,col:10},source:''},
+                loc:{start:{line:1,column:8},end:{line:1,column:10},source:''},
                 body: []
               }
             },

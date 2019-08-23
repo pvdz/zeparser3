@@ -29,40 +29,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
           name: 'f'
         },
         operator: '=',
         right: {
           type: 'FunctionExpression',
-          loc:{start:{line:1,col:4},end:{line:1,col:28},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:28},source:''},
           generator: false,
           async: false,
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:13},end:{line:1,column:13},source:''},
             name: 'interface'
           },
           params: [
             {
               type: 'Identifier',
-              loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:23},source:''},
               name: 'a'
             }
           ],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
+            loc:{start:{line:1,column:25},end:{line:1,column:28},source:''},
             body: []
           }
         }

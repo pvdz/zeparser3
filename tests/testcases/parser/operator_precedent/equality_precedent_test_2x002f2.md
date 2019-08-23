@@ -29,53 +29,53 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:23},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:23},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:23},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:23},source:''},
         left: {
           type: 'BinaryExpression',
-          loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
           left: {
             type: 'BinaryExpression',
-            loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
             left: {
               type: 'BinaryExpression',
-              loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
+              loc:{start:{line:1,column:0},end:{line:1,column:8},source:''},
               left: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+                loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
                 name: 'a'
               },
               operator: '!==',
               right: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
+                loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
                 name: 'b'
               }
             },
             operator: '===',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:12},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:12},end:{line:1,column:14},source:''},
               name: 'c'
             }
           },
           operator: '!=',
           right: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:19},source:''},
             name: 'd'
           }
         },
         operator: '==',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
+          loc:{start:{line:1,column:22},end:{line:1,column:23},source:''},
           name: 'e'
         }
       }

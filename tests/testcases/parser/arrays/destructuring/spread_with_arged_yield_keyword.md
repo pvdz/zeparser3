@@ -29,40 +29,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:37},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:37},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+        loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:13},end:{line:1,col:37},source:''},
+        loc:{start:{line:1,column:13},end:{line:1,column:37},source:''},
         body: [
           {
             type: 'ReturnStatement',
-            loc:{start:{line:1,col:15},end:{line:1,col:36},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:36},source:''},
             argument: {
               type: 'ArrayExpression',
-              loc:{start:{line:1,col:22},end:{line:1,col:34},source:''},
+              loc:{start:{line:1,column:22},end:{line:1,column:34},source:''},
               elements: [
                 {
                   type: 'SpreadElement',
-                  loc:{start:{line:1,col:23},end:{line:1,col:33},source:''},
+                  loc:{start:{line:1,column:23},end:{line:1,column:33},source:''},
                   argument: {
                     type: 'YieldExpression',
-                    loc:{start:{line:1,col:26},end:{line:1,col:33},source:''},
+                    loc:{start:{line:1,column:26},end:{line:1,column:33},source:''},
                     delegate: false,
                     argument: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:32},end:{line:1,col:33},source:''},
+                      loc:{start:{line:1,column:32},end:{line:1,column:33},source:''},
                       name: 'x'
                     }
                   }

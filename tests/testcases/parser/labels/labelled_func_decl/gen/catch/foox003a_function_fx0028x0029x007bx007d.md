@@ -53,50 +53,50 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:41},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:41},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:8},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:8},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc:{start:{line:1,col:8},end:{line:1,col:41},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:41},source:''},
         param: {
           type: 'Identifier',
-          loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
           name: 'e'
         },
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:18},end:{line:1,col:41},source:''},
+          loc:{start:{line:1,column:18},end:{line:1,column:41},source:''},
           body: [
             {
               type: 'LabeledStatement',
-              loc:{start:{line:1,col:20},end:{line:1,col:40},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:40},source:''},
               label: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:20},end:{line:1,col:23},source:''},
+                loc:{start:{line:1,column:20},end:{line:1,column:23},source:''},
                 name: 'foo'
               },
               body: {
                 type: 'FunctionDeclaration',
-                loc:{start:{line:1,col:25},end:{line:1,col:40},source:''},
+                loc:{start:{line:1,column:25},end:{line:1,column:40},source:''},
                 generator: false,
                 async: false,
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
+                  loc:{start:{line:1,column:34},end:{line:1,column:34},source:''},
                   name: 'f'
                 },
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  loc:{start:{line:1,col:37},end:{line:1,col:40},source:''},
+                  loc:{start:{line:1,column:37},end:{line:1,column:40},source:''},
                   body: []
                 }
               }

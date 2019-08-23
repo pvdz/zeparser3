@@ -29,51 +29,51 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:47},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:47},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+        loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:13},end:{line:1,col:47},source:''},
+        loc:{start:{line:1,column:13},end:{line:1,column:47},source:''},
         body: [
           {
             type: 'ReturnStatement',
-            loc:{start:{line:1,col:16},end:{line:1,col:46},source:''},
+            loc:{start:{line:1,column:16},end:{line:1,column:46},source:''},
             argument: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:23},end:{line:1,col:43},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:43},source:''},
               generator: false,
               async: false,
               id: null,
               params: [
                 {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:32},end:{line:1,col:39},source:''},
+                  loc:{start:{line:1,column:32},end:{line:1,column:39},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
+                    loc:{start:{line:1,column:32},end:{line:1,column:32},source:''},
                     name: 'x'
                   },
                   right: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:34},end:{line:1,col:39},source:''},
+                    loc:{start:{line:1,column:34},end:{line:1,column:39},source:''},
                     name: 'yield'
                   }
                 }
               ],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:41},end:{line:1,col:43},source:''},
+                loc:{start:{line:1,column:41},end:{line:1,column:43},source:''},
                 body: []
               }
             }

@@ -29,32 +29,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:100},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:100},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
       expression: {
         type: 'Identifier',
-        loc:{start:{line:1,col:0},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:9},source:''},
         name: 'arguments'
       }
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:11},end:{line:1,col:27},source:''},
+      loc:{start:{line:1,column:11},end:{line:1,column:27},source:''},
       expression: {
         type: 'CallExpression',
-        loc:{start:{line:1,col:11},end:{line:1,col:25},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:25},source:''},
         callee: {
           type: 'Identifier',
-          loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
+          loc:{start:{line:1,column:11},end:{line:1,column:14},source:''},
           name: 'log'
         },
         arguments: [
           {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:24},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:24},source:''},
             name: 'arguments'
           }
         ]
@@ -62,18 +62,18 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:27},end:{line:1,col:42},source:''},
+      loc:{start:{line:1,column:27},end:{line:1,column:42},source:''},
       expression: {
         type: 'MemberExpression',
-        loc:{start:{line:1,col:27},end:{line:1,col:40},source:''},
+        loc:{start:{line:1,column:27},end:{line:1,column:40},source:''},
         object: {
           type: 'Identifier',
-          loc:{start:{line:1,col:27},end:{line:1,col:36},source:''},
+          loc:{start:{line:1,column:27},end:{line:1,column:36},source:''},
           name: 'arguments'
         },
         property: {
           type: 'Identifier',
-          loc:{start:{line:1,col:37},end:{line:1,col:37},source:''},
+          loc:{start:{line:1,column:37},end:{line:1,column:37},source:''},
           name: 'foo'
         },
         computed: false
@@ -81,18 +81,18 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:42},end:{line:1,col:58},source:''},
+      loc:{start:{line:1,column:42},end:{line:1,column:58},source:''},
       expression: {
         type: 'MemberExpression',
-        loc:{start:{line:1,col:42},end:{line:1,col:56},source:''},
+        loc:{start:{line:1,column:42},end:{line:1,column:56},source:''},
         object: {
           type: 'Identifier',
-          loc:{start:{line:1,col:42},end:{line:1,col:51},source:''},
+          loc:{start:{line:1,column:42},end:{line:1,column:51},source:''},
           name: 'arguments'
         },
         property: {
           type: 'Identifier',
-          loc:{start:{line:1,col:52},end:{line:1,col:55},source:''},
+          loc:{start:{line:1,column:52},end:{line:1,column:55},source:''},
           name: 'foo'
         },
         computed: true
@@ -100,21 +100,21 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:58},end:{line:1,col:79},source:''},
+      loc:{start:{line:1,column:58},end:{line:1,column:79},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:58},end:{line:1,col:77},source:''},
+        loc:{start:{line:1,column:58},end:{line:1,column:77},source:''},
         left: {
           type: 'MemberExpression',
-          loc:{start:{line:1,col:58},end:{line:1,col:72},source:''},
+          loc:{start:{line:1,column:58},end:{line:1,column:72},source:''},
           object: {
             type: 'Identifier',
-            loc:{start:{line:1,col:58},end:{line:1,col:67},source:''},
+            loc:{start:{line:1,column:58},end:{line:1,column:67},source:''},
             name: 'arguments'
           },
           property: {
             type: 'Identifier',
-            loc:{start:{line:1,col:68},end:{line:1,col:68},source:''},
+            loc:{start:{line:1,column:68},end:{line:1,column:68},source:''},
             name: 'foo'
           },
           computed: false
@@ -122,28 +122,28 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:74},end:{line:1,col:77},source:''},
+          loc:{start:{line:1,column:74},end:{line:1,column:77},source:''},
           name: 'bar'
         }
       }
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:79},end:{line:1,col:100},source:''},
+      loc:{start:{line:1,column:79},end:{line:1,column:100},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:79},end:{line:1,col:99},source:''},
+        loc:{start:{line:1,column:79},end:{line:1,column:99},source:''},
         left: {
           type: 'MemberExpression',
-          loc:{start:{line:1,col:79},end:{line:1,col:94},source:''},
+          loc:{start:{line:1,column:79},end:{line:1,column:94},source:''},
           object: {
             type: 'Identifier',
-            loc:{start:{line:1,col:79},end:{line:1,col:88},source:''},
+            loc:{start:{line:1,column:79},end:{line:1,column:88},source:''},
             name: 'arguments'
           },
           property: {
             type: 'Identifier',
-            loc:{start:{line:1,col:89},end:{line:1,col:92},source:''},
+            loc:{start:{line:1,column:89},end:{line:1,column:92},source:''},
             name: 'foo'
           },
           computed: true
@@ -151,7 +151,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:96},end:{line:1,col:99},source:''},
+          loc:{start:{line:1,column:96},end:{line:1,column:99},source:''},
           name: 'bar'
         }
       }

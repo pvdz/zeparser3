@@ -29,51 +29,51 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
           name: 'x'
         },
         operator: '=',
         right: {
           type: 'FunctionExpression',
-          loc:{start:{line:1,col:10},end:{line:1,col:36},source:''},
+          loc:{start:{line:1,column:10},end:{line:1,column:36},source:''},
           generator: true,
           async: true,
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:20},source:''},
             name: 'f'
           },
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:23},end:{line:1,col:36},source:''},
+            loc:{start:{line:1,column:23},end:{line:1,column:36},source:''},
             body: [
               {
                 type: 'VariableDeclaration',
-                loc:{start:{line:1,col:29},end:{line:1,col:35},source:''},
+                loc:{start:{line:1,column:29},end:{line:1,column:35},source:''},
                 kind: 'var',
                 declarations: [
                   {
                     type: 'VariableDeclarator',
-                    loc:{start:{line:1,col:29},end:{line:1,col:35},source:''},
+                    loc:{start:{line:1,column:29},end:{line:1,column:35},source:''},
                     id: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:29},end:{line:1,col:29},source:''},
+                      loc:{start:{line:1,column:29},end:{line:1,column:29},source:''},
                       name: 'f'
                     },
                     init: {
                       type: 'Literal',
-                      loc:{start:{line:1,col:33},end:{line:1,col:33},source:''},
+                      loc:{start:{line:1,column:33},end:{line:1,column:33},source:''},
                       value: 1,
                       raw: '1'
                     }

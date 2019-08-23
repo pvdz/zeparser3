@@ -29,59 +29,59 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
       init: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:20},source:''},
         left: {
           type: 'BinaryExpression',
-          loc:{start:{line:1,col:6},end:{line:1,col:15},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:15},source:''},
           left: {
             type: 'BinaryExpression',
-            loc:{start:{line:1,col:6},end:{line:1,col:12},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:12},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
               name: 'a'
             },
             operator: '*',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:10},end:{line:1,col:12},source:''},
+              loc:{start:{line:1,column:10},end:{line:1,column:12},source:''},
               name: 'b'
             }
           },
           operator: '+',
           right: {
             type: 'Identifier',
-            loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
             name: 'c'
           }
         },
         operator: '*',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
+          loc:{start:{line:1,column:19},end:{line:1,column:20},source:''},
           name: 'd'
         }
       },
       test: {
         type: 'Identifier',
-        loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
         name: 'b'
       },
       update: {
         type: 'Identifier',
-        loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+        loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
         name: 'c'
       },
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:25},end:{line:1,col:26},source:''}
+        loc:{start:{line:1,column:25},end:{line:1,column:26},source:''}
       }
     }
   ]

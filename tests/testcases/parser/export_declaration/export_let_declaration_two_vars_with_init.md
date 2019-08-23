@@ -47,43 +47,43 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:25},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:25},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:17},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:11},source:''},
               name: 'x'
             },
             init: {
               type: 'Literal',
-              loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+              loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
               value: 10,
               raw: '10'
             }
           },
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:19},end:{line:1,col:25},source:''},
+            loc:{start:{line:1,column:19},end:{line:1,column:25},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:19},end:{line:1,col:19},source:''},
+              loc:{start:{line:1,column:19},end:{line:1,column:19},source:''},
               name: 'y'
             },
             init: {
               type: 'Literal',
-              loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:23},source:''},
               value: 20,
               raw: '20'
             }

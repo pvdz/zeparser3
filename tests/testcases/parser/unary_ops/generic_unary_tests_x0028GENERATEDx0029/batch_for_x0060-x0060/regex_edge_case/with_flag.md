@@ -30,33 +30,33 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:6},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:6},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
+        loc:{start:{line:1,column:0},end:{line:2,column:6},source:''},
         left: {
           type: 'BinaryExpression',
-          loc:{start:{line:1,col:0},end:{line:2,col:4},source:''},
+          loc:{start:{line:1,column:0},end:{line:2,column:4},source:''},
           left: {
             type: 'UnaryExpression',
-            loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
+            loc:{start:{line:1,column:0},end:{line:2,column:0},source:''},
             operator: '-',
             prefix: true,
             argument: {
               type: 'MemberExpression',
-              loc:{start:{line:1,col:2},end:{line:2,col:0},source:''},
+              loc:{start:{line:1,column:2},end:{line:2,column:0},source:''},
               object: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:2},end:{line:1,col:3},source:''},
+                loc:{start:{line:1,column:2},end:{line:1,column:3},source:''},
                 name: 'a'
               },
               property: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+                loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
                 name: 'b'
               },
               computed: false
@@ -65,14 +65,14 @@ ast: {
           operator: '/',
           right: {
             type: 'Identifier',
-            loc:{start:{line:2,col:1},end:{line:2,col:4},source:''},
+            loc:{start:{line:2,column:1},end:{line:2,column:4},source:''},
             name: 'foo'
           }
         },
         operator: '/',
         right: {
           type: 'Identifier',
-          loc:{start:{line:2,col:5},end:{line:2,col:6},source:''},
+          loc:{start:{line:2,column:5},end:{line:2,column:6},source:''},
           name: 'g'
         }
       }

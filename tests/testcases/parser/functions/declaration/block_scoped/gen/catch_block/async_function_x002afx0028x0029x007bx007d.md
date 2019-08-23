@@ -53,59 +53,59 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:65},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:65},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:65},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:65},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:8},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:8},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc:{start:{line:1,col:8},end:{line:1,col:65},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:65},source:''},
         param: {
           type: 'Identifier',
-          loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
           name: 'e'
         },
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:18},end:{line:1,col:65},source:''},
+          loc:{start:{line:1,column:18},end:{line:1,column:65},source:''},
           body: [
             {
               type: 'FunctionDeclaration',
-              loc:{start:{line:1,col:26},end:{line:1,col:42},source:''},
+              loc:{start:{line:1,column:26},end:{line:1,column:42},source:''},
               generator: true,
               async: true,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:36},end:{line:1,col:36},source:''},
+                loc:{start:{line:1,column:36},end:{line:1,column:36},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:39},end:{line:1,col:42},source:''},
+                loc:{start:{line:1,column:39},end:{line:1,column:42},source:''},
                 body: []
               }
             },
             {
               type: 'FunctionDeclaration',
-              loc:{start:{line:1,col:48},end:{line:1,col:64},source:''},
+              loc:{start:{line:1,column:48},end:{line:1,column:64},source:''},
               generator: true,
               async: true,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:58},end:{line:1,col:58},source:''},
+                loc:{start:{line:1,column:58},end:{line:1,column:58},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:61},end:{line:1,col:64},source:''},
+                loc:{start:{line:1,column:61},end:{line:1,column:64},source:''},
                 body: []
               }
             }

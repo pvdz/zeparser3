@@ -29,31 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
       expression: {
         type: 'ArrayExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
         elements: [
           {
             type: 'SpreadElement',
-            loc:{start:{line:1,col:1},end:{line:1,col:11},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:11},source:''},
             argument: {
               type: 'BinaryExpression',
-              loc:{start:{line:1,col:4},end:{line:1,col:11},source:''},
+              loc:{start:{line:1,column:4},end:{line:1,column:11},source:''},
               left: {
                 type: 'ObjectExpression',
-                loc:{start:{line:1,col:4},end:{line:1,col:9},source:''},
+                loc:{start:{line:1,column:4},end:{line:1,column:9},source:''},
                 properties: [
                   {
                     type: 'Property',
-                    loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
+                    loc:{start:{line:1,column:5},end:{line:1,column:8},source:''},
                     key: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:5},end:{line:1,col:7},source:''},
+                      loc:{start:{line:1,column:5},end:{line:1,column:7},source:''},
                       name: 'x'
                     },
                     kind: 'init',
@@ -61,7 +61,7 @@ ast: {
                     computed: false,
                     value: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+                      loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
                       name: 'y'
                     },
                     shorthand: false
@@ -71,7 +71,7 @@ ast: {
               operator: '/',
               right: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                 name: 'y'
               }
             }

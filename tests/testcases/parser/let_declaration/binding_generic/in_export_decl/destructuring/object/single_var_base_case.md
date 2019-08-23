@@ -47,30 +47,30 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:20},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:20},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:11},end:{line:1,col:15},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:15},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+                    loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -78,7 +78,7 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+                    loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
                     name: 'x'
                   },
                   shorthand: true
@@ -87,7 +87,7 @@ ast: {
             },
             init: {
               type: 'Identifier',
-              loc:{start:{line:1,col:17},end:{line:1,col:20},source:''},
+              loc:{start:{line:1,column:17},end:{line:1,column:20},source:''},
               name: 'obj'
             }
           }

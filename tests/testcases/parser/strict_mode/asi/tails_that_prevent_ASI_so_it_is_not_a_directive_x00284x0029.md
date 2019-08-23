@@ -30,58 +30,58 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:33},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:33},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:2,col:33},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:33},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:2,col:33},source:''},
+        loc:{start:{line:1,column:12},end:{line:2,column:33},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc:{start:{line:1,col:14},end:{line:2,col:22},source:''},
+            loc:{start:{line:1,column:14},end:{line:2,column:22},source:''},
             expression: {
               type: 'BinaryExpression',
-              loc:{start:{line:1,col:14},end:{line:2,col:20},source:''},
+              loc:{start:{line:1,column:14},end:{line:2,column:20},source:''},
               left: {
                 type: 'Literal',
-                loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+                loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
                 value: 'use strict',
                 raw: '"use strict"'
               },
               operator: '+',
               right: {
                 type: 'Identifier',
-                loc:{start:{line:2,col:19},end:{line:2,col:20},source:''},
+                loc:{start:{line:2,column:19},end:{line:2,column:20},source:''},
                 name: 'x'
               }
             }
           },
           {
             type: 'ExpressionStatement',
-            loc:{start:{line:2,col:22},end:{line:2,col:32},source:''},
+            loc:{start:{line:2,column:22},end:{line:2,column:32},source:''},
             expression: {
               type: 'AssignmentExpression',
-              loc:{start:{line:2,col:22},end:{line:2,col:30},source:''},
+              loc:{start:{line:2,column:22},end:{line:2,column:30},source:''},
               left: {
                 type: 'Identifier',
-                loc:{start:{line:2,col:22},end:{line:2,col:27},source:''},
+                loc:{start:{line:2,column:22},end:{line:2,column:27},source:''},
                 name: 'eval'
               },
               operator: '=',
               right: {
                 type: 'Literal',
-                loc:{start:{line:2,col:29},end:{line:2,col:29},source:''},
+                loc:{start:{line:2,column:29},end:{line:2,column:29},source:''},
                 value: 1,
                 raw: '1'
               }

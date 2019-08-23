@@ -29,29 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:24},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:24},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:24},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:24},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:9},end:{line:1,col:21},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:21},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                  loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                    loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                     name: 'a'
                   },
                   kind: 'init',
@@ -59,17 +59,17 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                    loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                     name: 'a'
                   },
                   shorthand: true
                 },
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:13},end:{line:1,col:19},source:''},
+                  loc:{start:{line:1,column:13},end:{line:1,column:19},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
+                    loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -77,7 +77,7 @@ ast: {
                   computed: true,
                   value: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+                    loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
                     name: 'y'
                   },
                   shorthand: false
@@ -86,7 +86,7 @@ ast: {
             },
             init: {
               type: 'Identifier',
-              loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
               name: 'a'
             }
           }
@@ -96,7 +96,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:27},end:{line:1,col:28},source:''}
+        loc:{start:{line:1,column:27},end:{line:1,column:28},source:''}
       }
     }
   ]

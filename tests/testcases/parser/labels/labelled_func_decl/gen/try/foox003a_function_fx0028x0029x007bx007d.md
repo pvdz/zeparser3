@@ -53,37 +53,37 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:38},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:38},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:38},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:38},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:28},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:28},source:''},
         body: [
           {
             type: 'LabeledStatement',
-            loc:{start:{line:1,col:6},end:{line:1,col:26},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:26},source:''},
             label: {
               type: 'Identifier',
-              loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:9},source:''},
               name: 'foo'
             },
             body: {
               type: 'FunctionDeclaration',
-              loc:{start:{line:1,col:11},end:{line:1,col:26},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:26},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
+                loc:{start:{line:1,column:20},end:{line:1,column:20},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:23},end:{line:1,col:26},source:''},
+                loc:{start:{line:1,column:23},end:{line:1,column:26},source:''},
                 body: []
               }
             }
@@ -93,7 +93,7 @@ ast: {
       handler: null,
       finalizer: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:36},end:{line:1,col:38},source:''},
+        loc:{start:{line:1,column:36},end:{line:1,column:38},source:''},
         body: []
       }
     }

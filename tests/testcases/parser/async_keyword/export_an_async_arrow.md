@@ -47,18 +47,18 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
       declaration: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:15},end:{line:1,col:29},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:29},source:''},
         params: [
           {
             type: 'Identifier',
-            loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
+            loc:{start:{line:1,column:22},end:{line:1,column:23},source:''},
             name: 'x'
           }
         ],
@@ -68,7 +68,7 @@ ast: {
         expression: true,
         body: {
           type: 'Identifier',
-          loc:{start:{line:1,col:28},end:{line:1,col:29},source:''},
+          loc:{start:{line:1,column:28},end:{line:1,column:29},source:''},
           name: 'y'
         }
       }

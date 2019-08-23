@@ -48,33 +48,33 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:41},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:41},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:41},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:41},source:''},
       generator: true,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:16},end:{line:1,col:16},source:''},
+        loc:{start:{line:1,column:16},end:{line:1,column:16},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:20},end:{line:1,col:41},source:''},
+        loc:{start:{line:1,column:20},end:{line:1,column:41},source:''},
         body: [
           {
             type: 'ReturnStatement',
-            loc:{start:{line:1,col:22},end:{line:1,col:40},source:''},
+            loc:{start:{line:1,column:22},end:{line:1,column:40},source:''},
             argument: {
               type: 'YieldExpression',
-              loc:{start:{line:1,col:29},end:{line:1,col:38},source:''},
+              loc:{start:{line:1,column:29},end:{line:1,column:38},source:''},
               delegate: false,
               argument: {
                 type: 'Literal',
-                loc:{start:{line:1,col:35},end:{line:1,col:35},source:''},
+                loc:{start:{line:1,column:35},end:{line:1,column:35},source:''},
                 value: 100,
                 raw: '100'
               }

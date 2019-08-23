@@ -29,29 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:18},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:18},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:11},end:{line:1,col:18},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:18},source:''},
               properties: [
                 {
                   type: 'RestElement',
-                  loc:{start:{line:1,col:12},end:{line:1,col:16},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:16},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
+                    loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
                     name: 'x'
                   }
                 }
@@ -63,12 +63,12 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
         name: 'y'
       },
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:23},end:{line:1,col:25},source:''},
+        loc:{start:{line:1,column:23},end:{line:1,column:25},source:''},
         body: []
       }
     }

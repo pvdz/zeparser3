@@ -29,43 +29,43 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:54},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:54},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:54},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:54},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:54},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:54},source:''},
         body: [
           {
             type: 'ClassDeclaration',
-            loc:{start:{line:1,col:23},end:{line:1,col:53},source:''},
+            loc:{start:{line:1,column:23},end:{line:1,column:53},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:29},end:{line:1,col:29},source:''},
+              loc:{start:{line:1,column:29},end:{line:1,column:29},source:''},
               name: 'x'
             },
             superClass: {
               type: 'AwaitExpression',
-              loc:{start:{line:1,col:39},end:{line:1,col:47},source:''},
+              loc:{start:{line:1,column:39},end:{line:1,column:47},source:''},
               argument: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:45},end:{line:1,col:47},source:''},
+                loc:{start:{line:1,column:45},end:{line:1,column:47},source:''},
                 name: 'y'
               }
             },
             body: {
               type: 'ClassBody',
-              loc:{start:{line:1,col:47},end:{line:1,col:53},source:''},
+              loc:{start:{line:1,column:47},end:{line:1,column:53},source:''},
               body: []
             }
           }

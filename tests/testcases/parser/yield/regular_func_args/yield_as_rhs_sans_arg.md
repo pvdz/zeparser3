@@ -31,54 +31,54 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:47},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:47},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+        loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
         name: 'g'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:14},end:{line:1,col:47},source:''},
+        loc:{start:{line:1,column:14},end:{line:1,column:47},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc:{start:{line:1,col:16},end:{line:1,col:44},source:''},
+            loc:{start:{line:1,column:16},end:{line:1,column:44},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
+              loc:{start:{line:1,column:25},end:{line:1,column:25},source:''},
               name: 'f'
             },
             params: [
               {
                 type: 'AssignmentPattern',
-                loc:{start:{line:1,col:27},end:{line:1,col:40},source:''},
+                loc:{start:{line:1,column:27},end:{line:1,column:40},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:27},end:{line:1,col:27},source:''},
+                  loc:{start:{line:1,column:27},end:{line:1,column:27},source:''},
                   name: 'x'
                 },
                 right: {
                   type: 'BinaryExpression',
-                  loc:{start:{line:1,col:31},end:{line:1,col:40},source:''},
+                  loc:{start:{line:1,column:31},end:{line:1,column:40},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:31},end:{line:1,col:33},source:''},
+                    loc:{start:{line:1,column:31},end:{line:1,column:33},source:''},
                     name: 'x'
                   },
                   operator: '+',
                   right: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:35},end:{line:1,col:40},source:''},
+                    loc:{start:{line:1,column:35},end:{line:1,column:40},source:''},
                     name: 'yield'
                   }
                 }
@@ -86,13 +86,13 @@ ast: {
             ],
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:42},end:{line:1,col:44},source:''},
+              loc:{start:{line:1,column:42},end:{line:1,column:44},source:''},
               body: []
             }
           },
           {
             type: 'EmptyStatement',
-            loc:{start:{line:1,col:44},end:{line:1,col:46},source:''}
+            loc:{start:{line:1,column:44},end:{line:1,column:46},source:''}
           }
         ]
       }

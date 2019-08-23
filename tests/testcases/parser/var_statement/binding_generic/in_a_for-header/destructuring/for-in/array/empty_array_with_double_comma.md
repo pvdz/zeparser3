@@ -29,22 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:14},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:14},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:14},source:''},
             id: {
               type: 'ArrayPattern',
-              loc:{start:{line:1,col:9},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:14},source:''},
               elements: [ null, null ]
             },
             init: null
@@ -53,12 +53,12 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
         name: 'x'
       },
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:20},source:''}
+        loc:{start:{line:1,column:19},end:{line:1,column:20},source:''}
       }
     }
   ]

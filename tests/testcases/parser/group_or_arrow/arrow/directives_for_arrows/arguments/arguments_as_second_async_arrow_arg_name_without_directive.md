@@ -29,23 +29,23 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
         params: [
           {
             type: 'Identifier',
-            loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+            loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
             name: 'a'
           },
           {
             type: 'Identifier',
-            loc:{start:{line:1,col:10},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:10},end:{line:1,column:19},source:''},
             name: 'arguments'
           }
         ],
@@ -55,7 +55,7 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:24},end:{line:1,col:26},source:''},
+          loc:{start:{line:1,column:24},end:{line:1,column:26},source:''},
           body: []
         }
       }

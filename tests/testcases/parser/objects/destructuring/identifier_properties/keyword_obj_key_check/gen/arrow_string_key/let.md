@@ -29,25 +29,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
         params: [
           {
             type: 'ObjectPattern',
-            loc:{start:{line:1,col:1},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:13},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:2},end:{line:1,col:12},source:''},
+                loc:{start:{line:1,column:2},end:{line:1,column:12},source:''},
                 key: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:2},end:{line:1,col:9},source:''},
+                  loc:{start:{line:1,column:2},end:{line:1,column:9},source:''},
                   value: 'key',
                   raw: '"key"'
                 },
@@ -56,7 +56,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:9},end:{line:1,col:12},source:''},
+                  loc:{start:{line:1,column:9},end:{line:1,column:12},source:''},
                   name: 'let'
                 },
                 shorthand: false
@@ -70,7 +70,7 @@ ast: {
         expression: true,
         body: {
           type: 'Literal',
-          loc:{start:{line:1,col:18},end:{line:1,col:22},source:''},
+          loc:{start:{line:1,column:18},end:{line:1,column:22},source:''},
           value: null,
           raw: 'null'
         }

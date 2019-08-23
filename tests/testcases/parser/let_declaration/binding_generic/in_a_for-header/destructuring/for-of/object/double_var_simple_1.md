@@ -29,29 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
   body: [
     {
       type: 'ForOfStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:16},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:16},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:16},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:16},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:9},end:{line:1,col:16},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:16},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                  loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                    loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -59,17 +59,17 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                    loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                     name: 'x'
                   },
                   shorthand: true
                 },
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
+                  loc:{start:{line:1,column:13},end:{line:1,column:14},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
+                    loc:{start:{line:1,column:13},end:{line:1,column:14},source:''},
                     name: 'y'
                   },
                   kind: 'init',
@@ -77,7 +77,7 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
+                    loc:{start:{line:1,column:13},end:{line:1,column:14},source:''},
                     name: 'y'
                   },
                   shorthand: true
@@ -90,13 +90,13 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:19},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:22},source:''},
         name: 'obj'
       },
       await: false,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:23},end:{line:1,col:24},source:''}
+        loc:{start:{line:1,column:23},end:{line:1,column:24},source:''}
       }
     }
   ]

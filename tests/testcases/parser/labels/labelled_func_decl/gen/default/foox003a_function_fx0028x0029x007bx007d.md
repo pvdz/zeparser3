@@ -60,44 +60,44 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
       discriminant: {
         type: 'Identifier',
-        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
         name: 'x'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:2,col:2},end:{line:4,col:0},source:''},
+          loc:{start:{line:2,column:2},end:{line:4,column:0},source:''},
           test: null,
           consequent: [
             {
               type: 'LabeledStatement',
-              loc:{start:{line:3,col:4},end:{line:4,col:0},source:''},
+              loc:{start:{line:3,column:4},end:{line:4,column:0},source:''},
               label: {
                 type: 'Identifier',
-                loc:{start:{line:3,col:4},end:{line:3,col:7},source:''},
+                loc:{start:{line:3,column:4},end:{line:3,column:7},source:''},
                 name: 'foo'
               },
               body: {
                 type: 'FunctionDeclaration',
-                loc:{start:{line:3,col:9},end:{line:4,col:0},source:''},
+                loc:{start:{line:3,column:9},end:{line:4,column:0},source:''},
                 generator: false,
                 async: false,
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:3,col:18},end:{line:3,col:18},source:''},
+                  loc:{start:{line:3,column:18},end:{line:3,column:18},source:''},
                   name: 'f'
                 },
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  loc:{start:{line:3,col:21},end:{line:4,col:0},source:''},
+                  loc:{start:{line:3,column:21},end:{line:4,column:0},source:''},
                   body: []
                 }
               }

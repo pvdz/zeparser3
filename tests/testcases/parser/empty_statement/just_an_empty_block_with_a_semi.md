@@ -29,15 +29,15 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
   body: [
     {
       type: 'EmptyStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:1},source:''}
+      loc:{start:{line:1,column:0},end:{line:1,column:1},source:''}
     },
     {
       type: 'BlockStatement',
-      loc:{start:{line:1,col:1},end:{line:1,col:3},source:''},
+      loc:{start:{line:1,column:1},end:{line:1,column:3},source:''},
       body: []
     }
   ]

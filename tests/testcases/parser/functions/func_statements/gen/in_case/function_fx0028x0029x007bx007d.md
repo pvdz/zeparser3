@@ -32,40 +32,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
       discriminant: {
         type: 'Identifier',
-        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
         name: 'x'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:2,col:2},end:{line:4,col:0},source:''},
+          loc:{start:{line:2,column:2},end:{line:4,column:0},source:''},
           test: {
             type: 'Identifier',
-            loc:{start:{line:2,col:7},end:{line:2,col:10},source:''},
+            loc:{start:{line:2,column:7},end:{line:2,column:10},source:''},
             name: 'foo'
           },
           consequent: [
             {
               type: 'FunctionDeclaration',
-              loc:{start:{line:3,col:4},end:{line:4,col:0},source:''},
+              loc:{start:{line:3,column:4},end:{line:4,column:0},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:3,col:13},end:{line:3,col:13},source:''},
+                loc:{start:{line:3,column:13},end:{line:3,column:13},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:3,col:16},end:{line:4,col:0},source:''},
+                loc:{start:{line:3,column:16},end:{line:4,column:0},source:''},
                 body: []
               }
             }

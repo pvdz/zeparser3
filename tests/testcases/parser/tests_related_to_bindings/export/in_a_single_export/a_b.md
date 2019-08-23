@@ -63,29 +63,29 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'a'
           },
           init: null
         },
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
             name: 'b'
           },
           init: null
@@ -94,33 +94,33 @@ ast: {
     },
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:9},end:{line:1,col:22},source:''},
+      loc:{start:{line:1,column:9},end:{line:1,column:22},source:''},
       specifiers: [
         {
           type: 'ExportSpecifier',
-          loc:{start:{line:1,col:17},end:{line:1,col:20},source:''},
+          loc:{start:{line:1,column:17},end:{line:1,column:20},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:17},source:''},
             name: 'a'
           },
           exported: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
             name: 'a'
           }
         },
         {
           type: 'ExportSpecifier',
-          loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
+          loc:{start:{line:1,column:20},end:{line:1,column:21},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:20},source:''},
             name: 'b'
           },
           exported: {
             type: 'Identifier',
-            loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:21},source:''},
             name: 'b'
           }
         }

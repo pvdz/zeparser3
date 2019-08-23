@@ -30,15 +30,15 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:9},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:9},source:''},
   body: [
     {
       type: 'DebuggerStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:0},source:''}
+      loc:{start:{line:1,column:0},end:{line:2,column:0},source:''}
     },
     {
       type: 'DebuggerStatement',
-      loc:{start:{line:2,col:0},end:{line:2,col:9},source:''}
+      loc:{start:{line:2,column:0},end:{line:2,column:9},source:''}
     }
   ]
 }

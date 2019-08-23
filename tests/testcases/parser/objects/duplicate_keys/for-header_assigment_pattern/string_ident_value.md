@@ -29,21 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:27},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:27},source:''},
       left: {
         type: 'ObjectPattern',
-        loc:{start:{line:1,col:5},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:19},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
               name: 'x'
             },
             kind: 'init',
@@ -51,17 +51,17 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
               name: 'x'
             },
             shorthand: true
           },
           {
             type: 'Property',
-            loc:{start:{line:1,col:9},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:17},source:''},
             key: {
               type: 'Literal',
-              loc:{start:{line:1,col:9},end:{line:1,col:16},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:16},source:''},
               value: 'foo',
               raw: '"foo"'
             },
@@ -70,7 +70,7 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+              loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
               name: 'x'
             },
             shorthand: false
@@ -79,12 +79,12 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:22},end:{line:1,col:25},source:''},
+        loc:{start:{line:1,column:22},end:{line:1,column:25},source:''},
         name: 'obj'
       },
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:26},end:{line:1,col:27},source:''}
+        loc:{start:{line:1,column:26},end:{line:1,column:27},source:''}
       }
     }
   ]

@@ -29,52 +29,52 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:42},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:42},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:42},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:42},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:42},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:42},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc:{start:{line:1,col:25},end:{line:1,col:41},source:''},
+            loc:{start:{line:1,column:25},end:{line:1,column:41},source:''},
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc:{start:{line:1,col:25},end:{line:1,col:41},source:''},
+                loc:{start:{line:1,column:25},end:{line:1,column:41},source:''},
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
+                  loc:{start:{line:1,column:25},end:{line:1,column:25},source:''},
                   name: 'y'
                 },
                 init: {
                   type: 'BinaryExpression',
-                  loc:{start:{line:1,col:29},end:{line:1,col:41},source:''},
+                  loc:{start:{line:1,column:29},end:{line:1,column:41},source:''},
                   left: {
                     type: 'AwaitExpression',
-                    loc:{start:{line:1,col:29},end:{line:1,col:37},source:''},
+                    loc:{start:{line:1,column:29},end:{line:1,column:37},source:''},
                     argument: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:35},end:{line:1,col:37},source:''},
+                      loc:{start:{line:1,column:35},end:{line:1,column:37},source:''},
                       name: 'x'
                     }
                   },
                   operator: '*',
                   right: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:39},end:{line:1,col:41},source:''},
+                    loc:{start:{line:1,column:39},end:{line:1,column:41},source:''},
                     name: 'x'
                   }
                 }

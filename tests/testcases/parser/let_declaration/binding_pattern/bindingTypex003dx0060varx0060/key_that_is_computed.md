@@ -29,26 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:16},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:16},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:16},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:16},source:''},
           id: {
             type: 'ObjectPattern',
-            loc:{start:{line:1,col:4},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:13},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:5},end:{line:1,col:11},source:''},
+                loc:{start:{line:1,column:5},end:{line:1,column:11},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+                  loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
                   name: 'a'
                 },
                 kind: 'init',
@@ -56,7 +56,7 @@ ast: {
                 computed: true,
                 value: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                  loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                   name: 'c'
                 },
                 shorthand: false
@@ -65,7 +65,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
             name: 'v'
           }
         }

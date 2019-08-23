@@ -53,43 +53,43 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
       body: [
         {
           type: 'FunctionDeclaration',
-          loc:{start:{line:1,col:8},end:{line:1,col:23},source:''},
+          loc:{start:{line:1,column:8},end:{line:1,column:23},source:''},
           generator: false,
           async: true,
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:17},source:''},
             name: 'f'
           },
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:20},end:{line:1,col:23},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:23},source:''},
             body: []
           }
         },
         {
           type: 'FunctionDeclaration',
-          loc:{start:{line:1,col:29},end:{line:1,col:44},source:''},
+          loc:{start:{line:1,column:29},end:{line:1,column:44},source:''},
           generator: false,
           async: true,
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:38},end:{line:1,col:38},source:''},
+            loc:{start:{line:1,column:38},end:{line:1,column:38},source:''},
             name: 'f'
           },
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:41},end:{line:1,col:44},source:''},
+            loc:{start:{line:1,column:41},end:{line:1,column:44},source:''},
             body: []
           }
         }

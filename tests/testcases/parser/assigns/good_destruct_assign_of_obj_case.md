@@ -29,28 +29,28 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:90},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:90},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:90},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:90},source:''},
       expression: {
         type: 'SequenceExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:90},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:90},source:''},
         expressions: [
           {
             type: 'AssignmentExpression',
-            loc:{start:{line:1,col:1},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:17},source:''},
             left: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:1},end:{line:1,col:12},source:''},
+              loc:{start:{line:1,column:1},end:{line:1,column:12},source:''},
               properties: [
                 {
                   type: 'RestElement',
-                  loc:{start:{line:1,col:2},end:{line:1,col:10},source:''},
+                  loc:{start:{line:1,column:2},end:{line:1,column:10},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
+                    loc:{start:{line:1,column:6},end:{line:1,column:9},source:''},
                     name: 'obj'
                   }
                 }
@@ -59,23 +59,23 @@ ast: {
             operator: '=',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:14},end:{line:1,col:17},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:17},source:''},
               name: 'foo'
             }
           },
           {
             type: 'AssignmentExpression',
-            loc:{start:{line:1,col:20},end:{line:1,col:34},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:34},source:''},
             left: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:20},end:{line:1,col:29},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:29},source:''},
               properties: [
                 {
                   type: 'RestElement',
-                  loc:{start:{line:1,col:21},end:{line:1,col:27},source:''},
+                  loc:{start:{line:1,column:21},end:{line:1,column:27},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:24},end:{line:1,col:27},source:''},
+                    loc:{start:{line:1,column:24},end:{line:1,column:27},source:''},
                     name: 'obj'
                   }
                 }
@@ -84,31 +84,31 @@ ast: {
             operator: '=',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:31},end:{line:1,col:34},source:''},
+              loc:{start:{line:1,column:31},end:{line:1,column:34},source:''},
               name: 'foo'
             }
           },
           {
             type: 'AssignmentExpression',
-            loc:{start:{line:1,col:37},end:{line:1,col:53},source:''},
+            loc:{start:{line:1,column:37},end:{line:1,column:53},source:''},
             left: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:37},end:{line:1,col:48},source:''},
+              loc:{start:{line:1,column:37},end:{line:1,column:48},source:''},
               properties: [
                 {
                   type: 'RestElement',
-                  loc:{start:{line:1,col:38},end:{line:1,col:46},source:''},
+                  loc:{start:{line:1,column:38},end:{line:1,column:46},source:''},
                   argument: {
                     type: 'MemberExpression',
-                    loc:{start:{line:1,col:41},end:{line:1,col:46},source:''},
+                    loc:{start:{line:1,column:41},end:{line:1,column:46},source:''},
                     object: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:41},end:{line:1,col:44},source:''},
+                      loc:{start:{line:1,column:41},end:{line:1,column:44},source:''},
                       name: 'obj'
                     },
                     property: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:45},end:{line:1,col:45},source:''},
+                      loc:{start:{line:1,column:45},end:{line:1,column:45},source:''},
                       name: 'x'
                     },
                     computed: false
@@ -119,31 +119,31 @@ ast: {
             operator: '=',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:50},end:{line:1,col:53},source:''},
+              loc:{start:{line:1,column:50},end:{line:1,column:53},source:''},
               name: 'foo'
             }
           },
           {
             type: 'AssignmentExpression',
-            loc:{start:{line:1,col:56},end:{line:1,col:71},source:''},
+            loc:{start:{line:1,column:56},end:{line:1,column:71},source:''},
             left: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:56},end:{line:1,col:66},source:''},
+              loc:{start:{line:1,column:56},end:{line:1,column:66},source:''},
               properties: [
                 {
                   type: 'RestElement',
-                  loc:{start:{line:1,col:57},end:{line:1,col:64},source:''},
+                  loc:{start:{line:1,column:57},end:{line:1,column:64},source:''},
                   argument: {
                     type: 'MemberExpression',
-                    loc:{start:{line:1,col:60},end:{line:1,col:64},source:''},
+                    loc:{start:{line:1,column:60},end:{line:1,column:64},source:''},
                     object: {
                       type: 'ObjectExpression',
-                      loc:{start:{line:1,col:60},end:{line:1,col:62},source:''},
+                      loc:{start:{line:1,column:60},end:{line:1,column:62},source:''},
                       properties: []
                     },
                     property: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:63},end:{line:1,col:63},source:''},
+                      loc:{start:{line:1,column:63},end:{line:1,column:63},source:''},
                       name: 'x'
                     },
                     computed: false
@@ -154,31 +154,31 @@ ast: {
             operator: '=',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:68},end:{line:1,col:71},source:''},
+              loc:{start:{line:1,column:68},end:{line:1,column:71},source:''},
               name: 'foo'
             }
           },
           {
             type: 'AssignmentExpression',
-            loc:{start:{line:1,col:74},end:{line:1,col:89},source:''},
+            loc:{start:{line:1,column:74},end:{line:1,column:89},source:''},
             left: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:74},end:{line:1,col:84},source:''},
+              loc:{start:{line:1,column:74},end:{line:1,column:84},source:''},
               properties: [
                 {
                   type: 'RestElement',
-                  loc:{start:{line:1,col:75},end:{line:1,col:82},source:''},
+                  loc:{start:{line:1,column:75},end:{line:1,column:82},source:''},
                   argument: {
                     type: 'MemberExpression',
-                    loc:{start:{line:1,col:75},end:{line:1,col:82},source:''},
+                    loc:{start:{line:1,column:75},end:{line:1,column:82},source:''},
                     object: {
                       type: 'ArrayExpression',
-                      loc:{start:{line:1,col:78},end:{line:1,col:80},source:''},
+                      loc:{start:{line:1,column:78},end:{line:1,column:80},source:''},
                       elements: []
                     },
                     property: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:81},end:{line:1,col:81},source:''},
+                      loc:{start:{line:1,column:81},end:{line:1,column:81},source:''},
                       name: 'x'
                     },
                     computed: false
@@ -189,7 +189,7 @@ ast: {
             operator: '=',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:86},end:{line:1,col:89},source:''},
+              loc:{start:{line:1,column:86},end:{line:1,column:89},source:''},
               name: 'foo'
             }
           }

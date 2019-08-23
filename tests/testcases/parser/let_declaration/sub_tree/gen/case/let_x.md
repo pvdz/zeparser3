@@ -29,37 +29,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
       discriminant: {
         type: 'Identifier',
-        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
         name: 'a'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:1,col:13},end:{line:1,col:27},source:''},
+          loc:{start:{line:1,column:13},end:{line:1,column:27},source:''},
           test: {
             type: 'Identifier',
-            loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
             name: 'b'
           },
           consequent: [
             {
               type: 'VariableDeclaration',
-              loc:{start:{line:1,col:25},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:25},end:{line:1,column:27},source:''},
               kind: 'let',
               declarations: [
                 {
                   type: 'VariableDeclarator',
-                  loc:{start:{line:1,col:25},end:{line:1,col:27},source:''},
+                  loc:{start:{line:1,column:25},end:{line:1,column:27},source:''},
                   id: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
+                    loc:{start:{line:1,column:25},end:{line:1,column:25},source:''},
                     name: 'x'
                   },
                   init: null

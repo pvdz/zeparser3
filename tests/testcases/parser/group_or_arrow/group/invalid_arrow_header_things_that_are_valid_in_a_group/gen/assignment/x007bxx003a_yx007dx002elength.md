@@ -29,27 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
         left: {
           type: 'MemberExpression',
-          loc:{start:{line:1,col:2},end:{line:1,col:16},source:''},
+          loc:{start:{line:1,column:2},end:{line:1,column:16},source:''},
           object: {
             type: 'ObjectExpression',
-            loc:{start:{line:1,col:2},end:{line:1,col:8},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:8},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:3},end:{line:1,col:7},source:''},
+                loc:{start:{line:1,column:3},end:{line:1,column:7},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:3},end:{line:1,col:6},source:''},
+                  loc:{start:{line:1,column:3},end:{line:1,column:6},source:''},
                   name: 'x'
                 },
                 kind: 'init',
@@ -57,7 +57,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+                  loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
                   name: 'y'
                 },
                 shorthand: false
@@ -66,7 +66,7 @@ ast: {
           },
           property: {
             type: 'Identifier',
-            loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
             name: 'length'
           },
           computed: false
@@ -74,7 +74,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
+          loc:{start:{line:1,column:20},end:{line:1,column:21},source:''},
           name: 'x'
         }
       }

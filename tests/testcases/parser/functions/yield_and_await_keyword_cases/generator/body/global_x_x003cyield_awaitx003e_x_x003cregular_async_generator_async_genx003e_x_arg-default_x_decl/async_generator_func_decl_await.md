@@ -48,47 +48,47 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:59},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:59},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:59},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:59},source:''},
       generator: true,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:10},end:{line:1,col:10},source:''},
+        loc:{start:{line:1,column:10},end:{line:1,column:10},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:14},end:{line:1,col:59},source:''},
+        loc:{start:{line:1,column:14},end:{line:1,column:59},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc:{start:{line:1,col:22},end:{line:1,col:58},source:''},
+            loc:{start:{line:1,column:22},end:{line:1,column:58},source:''},
             generator: true,
             async: true,
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
+              loc:{start:{line:1,column:32},end:{line:1,column:32},source:''},
               name: 'f'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:36},end:{line:1,col:58},source:''},
+              loc:{start:{line:1,column:36},end:{line:1,column:58},source:''},
               body: [
                 {
                   type: 'ReturnStatement',
-                  loc:{start:{line:1,col:38},end:{line:1,col:56},source:''},
+                  loc:{start:{line:1,column:38},end:{line:1,column:56},source:''},
                   argument: {
                     type: 'AwaitExpression',
-                    loc:{start:{line:1,col:45},end:{line:1,col:54},source:''},
+                    loc:{start:{line:1,column:45},end:{line:1,column:54},source:''},
                     argument: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:51},end:{line:1,col:54},source:''},
+                      loc:{start:{line:1,column:51},end:{line:1,column:54},source:''},
                       name: 'foo'
                     }
                   }

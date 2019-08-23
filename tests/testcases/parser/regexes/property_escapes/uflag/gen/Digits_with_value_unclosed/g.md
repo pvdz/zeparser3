@@ -53,14 +53,14 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
       expression: {
         type: 'Literal',
-        loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
         value: null,
         regex: { pattern: '\\p{1=1234', flags: 'g' },
         raw: '/\\p{1=1234/g'

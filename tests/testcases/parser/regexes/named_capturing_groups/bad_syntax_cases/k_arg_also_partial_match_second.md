@@ -55,14 +55,14 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
       expression: {
         type: 'Literal',
-        loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
         value: null,
         regex: { pattern: '(?<ab>a)\\k<b>', flags: '' },
         raw: '/(?<ab>a)\\k<b>/'

@@ -34,18 +34,18 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+        loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
         params: [
           {
             type: 'Identifier',
-            loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+            loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
             name: 'g'
           }
         ],
@@ -55,27 +55,27 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:5},end:{line:4,col:1},source:''},
+          loc:{start:{line:1,column:5},end:{line:4,column:1},source:''},
           body: [
             {
               type: 'TryStatement',
-              loc:{start:{line:2,col:2},end:{line:4,col:0},source:''},
+              loc:{start:{line:2,column:2},end:{line:4,column:0},source:''},
               block: {
                 type: 'BlockStatement',
-                loc:{start:{line:2,col:6},end:{line:3,col:2},source:''},
+                loc:{start:{line:2,column:6},end:{line:3,column:2},source:''},
                 body: []
               },
               handler: {
                 type: 'CatchClause',
-                loc:{start:{line:3,col:2},end:{line:4,col:0},source:''},
+                loc:{start:{line:3,column:2},end:{line:4,column:0},source:''},
                 param: {
                   type: 'Identifier',
-                  loc:{start:{line:3,col:9},end:{line:3,col:9},source:''},
+                  loc:{start:{line:3,column:9},end:{line:3,column:9},source:''},
                   name: 'g'
                 },
                 body: {
                   type: 'BlockStatement',
-                  loc:{start:{line:3,col:12},end:{line:4,col:0},source:''},
+                  loc:{start:{line:3,column:12},end:{line:4,column:0},source:''},
                   body: []
                 }
               },

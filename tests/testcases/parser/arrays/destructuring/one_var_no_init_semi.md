@@ -29,21 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
         left: {
           type: 'ArrayPattern',
-          loc:{start:{line:1,col:0},end:{line:1,col:6},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:6},source:''},
           elements: [
             {
               type: 'Identifier',
-              loc:{start:{line:1,col:1},end:{line:1,col:4},source:''},
+              loc:{start:{line:1,column:1},end:{line:1,column:4},source:''},
               name: 'foo'
             }
           ]
@@ -51,7 +51,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:8},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:8},end:{line:1,column:11},source:''},
           name: 'arr'
         }
       }

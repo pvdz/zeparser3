@@ -37,24 +37,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:9},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:9},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:9},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:9},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'x'
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+            loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
             name: 'a'
           }
         }
@@ -62,20 +62,20 @@ ast: {
     },
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:15},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:15},end:{line:1,column:20},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:15},end:{line:1,col:20},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:20},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
             name: 'x'
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:19},end:{line:1,column:20},source:''},
             name: 'b'
           }
         }

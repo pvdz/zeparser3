@@ -28,29 +28,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:83},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:83},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:40},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:40},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:27},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:27},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:27},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:27},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:9},end:{line:1,col:16},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:16},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+                  loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+                    loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -58,7 +58,7 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+                    loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
                     name: 'x'
                   },
                   shorthand: true
@@ -67,14 +67,14 @@ ast: {
             },
             init: {
               type: 'ObjectExpression',
-              loc:{start:{line:1,col:18},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:18},end:{line:1,column:27},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:20},end:{line:1,col:26},source:''},
+                  loc:{start:{line:1,column:20},end:{line:1,column:26},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:20},end:{line:1,col:23},source:''},
+                    loc:{start:{line:1,column:20},end:{line:1,column:23},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -82,7 +82,7 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Literal',
-                    loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
+                    loc:{start:{line:1,column:23},end:{line:1,column:23},source:''},
                     value: 23,
                     raw: '23'
                   },
@@ -95,16 +95,16 @@ ast: {
       },
       test: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:29},end:{line:1,col:34},source:''},
+        loc:{start:{line:1,column:29},end:{line:1,column:34},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:29},end:{line:1,col:31},source:''},
+          loc:{start:{line:1,column:29},end:{line:1,column:31},source:''},
           name: 'a'
         },
         operator: '<',
         right: {
           type: 'Literal',
-          loc:{start:{line:1,col:33},end:{line:1,col:33},source:''},
+          loc:{start:{line:1,column:33},end:{line:1,column:33},source:''},
           value: 1,
           raw: '1'
         }
@@ -112,35 +112,35 @@ ast: {
       update: null,
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:38},end:{line:1,col:40},source:''},
+        loc:{start:{line:1,column:38},end:{line:1,column:40},source:''},
         body: []
       }
     },
     {
       type: 'EmptyStatement',
-      loc:{start:{line:1,col:40},end:{line:1,col:42},source:''}
+      loc:{start:{line:1,column:40},end:{line:1,column:42},source:''}
     },
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:42},end:{line:1,col:82},source:''},
+      loc:{start:{line:1,column:42},end:{line:1,column:82},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:51},end:{line:1,col:69},source:''},
+        loc:{start:{line:1,column:51},end:{line:1,column:69},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:51},end:{line:1,col:69},source:''},
+            loc:{start:{line:1,column:51},end:{line:1,column:69},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:51},end:{line:1,col:58},source:''},
+              loc:{start:{line:1,column:51},end:{line:1,column:58},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:53},end:{line:1,col:54},source:''},
+                  loc:{start:{line:1,column:53},end:{line:1,column:54},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:53},end:{line:1,col:54},source:''},
+                    loc:{start:{line:1,column:53},end:{line:1,column:54},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -148,7 +148,7 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:53},end:{line:1,col:54},source:''},
+                    loc:{start:{line:1,column:53},end:{line:1,column:54},source:''},
                     name: 'x'
                   },
                   shorthand: true
@@ -157,14 +157,14 @@ ast: {
             },
             init: {
               type: 'ObjectExpression',
-              loc:{start:{line:1,col:60},end:{line:1,col:69},source:''},
+              loc:{start:{line:1,column:60},end:{line:1,column:69},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:62},end:{line:1,col:68},source:''},
+                  loc:{start:{line:1,column:62},end:{line:1,column:68},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:62},end:{line:1,col:65},source:''},
+                    loc:{start:{line:1,column:62},end:{line:1,column:65},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -172,7 +172,7 @@ ast: {
                   computed: false,
                   value: {
                     type: 'Literal',
-                    loc:{start:{line:1,col:65},end:{line:1,col:65},source:''},
+                    loc:{start:{line:1,column:65},end:{line:1,column:65},source:''},
                     value: 23,
                     raw: '23'
                   },
@@ -185,16 +185,16 @@ ast: {
       },
       test: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:71},end:{line:1,col:76},source:''},
+        loc:{start:{line:1,column:71},end:{line:1,column:76},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:71},end:{line:1,col:73},source:''},
+          loc:{start:{line:1,column:71},end:{line:1,column:73},source:''},
           name: 'a'
         },
         operator: '<',
         right: {
           type: 'Literal',
-          loc:{start:{line:1,col:75},end:{line:1,col:75},source:''},
+          loc:{start:{line:1,column:75},end:{line:1,column:75},source:''},
           value: 1,
           raw: '1'
         }
@@ -202,13 +202,13 @@ ast: {
       update: null,
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:80},end:{line:1,col:82},source:''},
+        loc:{start:{line:1,column:80},end:{line:1,column:82},source:''},
         body: []
       }
     },
     {
       type: 'EmptyStatement',
-      loc:{start:{line:1,col:82},end:{line:1,col:83},source:''}
+      loc:{start:{line:1,column:82},end:{line:1,column:83},source:''}
     }
   ]
 }

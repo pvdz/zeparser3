@@ -59,59 +59,59 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:47},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:47},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:47},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'w'
       },
       params: [
         {
           type: 'Identifier',
-          loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:11},end:{line:1,column:11},source:''},
           name: 'casecase'
         }
       ],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:20},end:{line:1,col:47},source:''},
+        loc:{start:{line:1,column:20},end:{line:1,column:47},source:''},
         body: [
           {
             type: 'LabeledStatement',
-            loc:{start:{line:1,col:21},end:{line:1,col:46},source:''},
+            loc:{start:{line:1,column:21},end:{line:1,column:46},source:''},
             label: {
               type: 'Identifier',
-              loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
+              loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
               name: 'y'
             },
             body: {
               type: 'LabeledStatement',
-              loc:{start:{line:1,col:23},end:{line:1,col:46},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:46},source:''},
               label: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+                loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
                 name: 'j'
               },
               body: {
                 type: 'FunctionDeclaration',
-                loc:{start:{line:1,col:25},end:{line:1,col:46},source:''},
+                loc:{start:{line:1,column:25},end:{line:1,column:46},source:''},
                 generator: false,
                 async: false,
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
+                  loc:{start:{line:1,column:34},end:{line:1,column:34},source:''},
                   name: 'casecase'
                 },
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  loc:{start:{line:1,col:44},end:{line:1,col:46},source:''},
+                  loc:{start:{line:1,column:44},end:{line:1,column:46},source:''},
                   body: []
                 }
               }

@@ -47,23 +47,23 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
       specifiers: [
         {
           type: 'ExportSpecifier',
-          loc:{start:{line:1,col:8},end:{line:1,col:14},source:''},
+          loc:{start:{line:1,column:8},end:{line:1,column:14},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,col:8},end:{line:1,col:8},source:''},
+            loc:{start:{line:1,column:8},end:{line:1,column:8},source:''},
             name: 'x'
           },
           exported: {
             type: 'Identifier',
-            loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:13},end:{line:1,column:13},source:''},
             name: 'a'
           }
         }
@@ -71,7 +71,7 @@ ast: {
       declaration: null,
       source: {
         type: 'Literal',
-        loc:{start:{line:1,col:21},end:{line:1,col:21},source:''},
+        loc:{start:{line:1,column:21},end:{line:1,column:21},source:''},
         value: 'foo',
         raw: '"foo"'
       }

@@ -31,32 +31,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
       init: {
         type: 'CallExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:14},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:14},source:''},
         callee: {
           type: 'Identifier',
-          loc:{start:{line:1,col:5},end:{line:1,col:6},source:''},
+          loc:{start:{line:1,column:5},end:{line:1,column:6},source:''},
           name: 'x'
         },
         arguments: [
           {
             type: 'BinaryExpression',
-            loc:{start:{line:1,col:7},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:7},end:{line:1,column:13},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:7},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:9},source:''},
               name: 'x'
             },
             operator: 'in',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+              loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
               name: 't'
             }
           }
@@ -66,10 +66,10 @@ ast: {
       update: null,
       body: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+          loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
           name: 'x'
         }
       }

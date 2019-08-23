@@ -29,29 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc:{start:{line:1,col:7},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:7},end:{line:1,column:19},source:''},
         param: {
           type: 'ObjectPattern',
-          loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
+          loc:{start:{line:1,column:13},end:{line:1,column:16},source:''},
           properties: [
             {
               type: 'Property',
-              loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
               key: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
+                loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
                 name: 'e'
               },
               kind: 'init',
@@ -59,7 +59,7 @@ ast: {
               computed: false,
               value: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
+                loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
                 name: 'e'
               },
               shorthand: true
@@ -68,7 +68,7 @@ ast: {
         },
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
+          loc:{start:{line:1,column:17},end:{line:1,column:19},source:''},
           body: []
         }
       },

@@ -476,11 +476,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     loc: {
       start: {
         line: 1,
-        col: 0,
+        column: 0,
       },
       end: { // Initialized here but properly updated at the end
         line: 1,
-        col: 0,
+        column: 0,
       },
       // The spec says to add the whole source of the range but that just sounds a little redundant to me :/
       source: sourceField,
@@ -512,11 +512,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       loc: {
         start: {
           line: token.line, // offset 1
-          col: token.col, // offset 0
+          column: token.column, // offset 0
         },
         end: { // Updated in AST_close with the next token (which seems to be accurate)
           line: 1,
-          col: 0,
+          column: 0,
         },
         source: sourceField, // File containing the code being parsed. Source maps may use this.
       },
@@ -546,10 +546,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(_pnames.length === _path.length, 'pnames should have as many names as paths');
 
     let was = _path.pop();
-    ASSERT(was.loc.end.col === 0, 'only set once, when closing the node');
+    ASSERT(was.loc.end.column === 0, 'only set once, when closing the node');
     ASSERT(was.loc.end.line === 1, 'only set once, when closing the node');
     // In all cases where AST_close is called, `curtok` should be the first token of the next node(s)
-    was.loc.end.col = curtok.col;
+    was.loc.end.column = curtok.column;
     was.loc.end.line = curtok.line;
     _pnames.pop();
     ASSERT(!names || (typeof names === 'string' && names === was.type) || (names instanceof Array && names.indexOf(was.type) >= 0), 'Expecting to close a node with given name(s), expected: ' + names + ' but closed: ' + was.type)
@@ -10612,7 +10612,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
   // <SCRUB AST>
   _tree.loc.end.line = curtok.line;
-  _tree.loc.end.col = curtok.col;
+  _tree.loc.end.column = curtok.column;
   // </SCRUB AST>
 
   return {

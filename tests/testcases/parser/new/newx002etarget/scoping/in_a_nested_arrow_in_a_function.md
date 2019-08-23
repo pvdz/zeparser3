@@ -31,33 +31,33 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:1,col:36},source:''},
+        loc:{start:{line:1,column:12},end:{line:1,column:36},source:''},
         body: [
           {
             type: 'ExpressionStatement',
-            loc:{start:{line:1,col:14},end:{line:1,col:35},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:35},source:''},
             expression: {
               type: 'ArrowFunctionExpression',
-              loc:{start:{line:1,col:14},end:{line:1,col:35},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:35},source:''},
               params: [
                 {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:14},end:{line:1,col:16},source:''},
+                  loc:{start:{line:1,column:14},end:{line:1,column:16},source:''},
                   name: '_'
                 }
               ],
@@ -67,11 +67,11 @@ ast: {
               expression: true,
               body: {
                 type: 'ArrowFunctionExpression',
-                loc:{start:{line:1,col:19},end:{line:1,col:35},source:''},
+                loc:{start:{line:1,column:19},end:{line:1,column:35},source:''},
                 params: [
                   {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:19},end:{line:1,col:21},source:''},
+                    loc:{start:{line:1,column:19},end:{line:1,column:21},source:''},
                     name: '_'
                   }
                 ],
@@ -81,15 +81,15 @@ ast: {
                 expression: true,
                 body: {
                   type: 'MetaProperty',
-                  loc:{start:{line:1,col:24},end:{line:1,col:35},source:''},
+                  loc:{start:{line:1,column:24},end:{line:1,column:35},source:''},
                   meta: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:24},end:{line:1,col:27},source:''},
+                    loc:{start:{line:1,column:24},end:{line:1,column:27},source:''},
                     name: 'new'
                   },
                   property: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:28},end:{line:1,col:28},source:''},
+                    loc:{start:{line:1,column:28},end:{line:1,column:28},source:''},
                     name: 'target'
                   }
                 }

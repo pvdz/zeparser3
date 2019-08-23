@@ -29,36 +29,36 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:17},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:17},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'a'
           },
           init: null
         },
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:7},end:{line:1,col:17},source:''},
+          loc:{start:{line:1,column:7},end:{line:1,column:17},source:''},
           id: {
             type: 'ArrayPattern',
-            loc:{start:{line:1,col:7},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:7},end:{line:1,column:14},source:''},
             elements: [
               {
                 type: 'RestElement',
-                loc:{start:{line:1,col:8},end:{line:1,col:12},source:''},
+                loc:{start:{line:1,column:8},end:{line:1,column:12},source:''},
                 argument: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+                  loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
                   name: 'x'
                 }
               }
@@ -66,7 +66,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
             name: 'y'
           }
         }

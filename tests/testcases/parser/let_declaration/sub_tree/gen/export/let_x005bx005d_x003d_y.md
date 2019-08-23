@@ -51,28 +51,28 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:6},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:2,col:6},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:6},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc:{start:{line:2,col:0},end:{line:2,col:6},source:''},
+        loc:{start:{line:2,column:0},end:{line:2,column:6},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:2,col:0},end:{line:2,col:6},source:''},
+            loc:{start:{line:2,column:0},end:{line:2,column:6},source:''},
             id: {
               type: 'ArrayPattern',
-              loc:{start:{line:2,col:0},end:{line:2,col:3},source:''},
+              loc:{start:{line:2,column:0},end:{line:2,column:3},source:''},
               elements: []
             },
             init: {
               type: 'Identifier',
-              loc:{start:{line:2,col:5},end:{line:2,col:6},source:''},
+              loc:{start:{line:2,column:5},end:{line:2,column:6},source:''},
               name: 'y'
             }
           }

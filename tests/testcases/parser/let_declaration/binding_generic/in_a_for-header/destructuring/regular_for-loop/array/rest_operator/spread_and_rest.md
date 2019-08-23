@@ -29,41 +29,41 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:35},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:35},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:35},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:31},source:''},
         kind: 'let',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:31},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:31},source:''},
             id: {
               type: 'ArrayPattern',
-              loc:{start:{line:1,col:9},end:{line:1,col:26},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:26},source:''},
               elements: [
                 {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:9},end:{line:1,col:18},source:''},
+                  loc:{start:{line:1,column:9},end:{line:1,column:18},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+                    loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
                     name: 'a'
                   },
                   right: {
                     type: 'ArrayExpression',
-                    loc:{start:{line:1,col:12},end:{line:1,col:18},source:''},
+                    loc:{start:{line:1,column:12},end:{line:1,column:18},source:''},
                     elements: [
                       {
                         type: 'SpreadElement',
-                        loc:{start:{line:1,col:13},end:{line:1,col:17},source:''},
+                        loc:{start:{line:1,column:13},end:{line:1,column:17},source:''},
                         argument: {
                           type: 'Identifier',
-                          loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+                          loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
                           name: 'b'
                         }
                       }
@@ -72,10 +72,10 @@ ast: {
                 },
                 {
                   type: 'RestElement',
-                  loc:{start:{line:1,col:20},end:{line:1,col:24},source:''},
+                  loc:{start:{line:1,column:20},end:{line:1,column:24},source:''},
                   argument: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+                    loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
                     name: 'c'
                   }
                 }
@@ -83,7 +83,7 @@ ast: {
             },
             init: {
               type: 'Identifier',
-              loc:{start:{line:1,col:28},end:{line:1,col:31},source:''},
+              loc:{start:{line:1,column:28},end:{line:1,column:31},source:''},
               name: 'obj'
             }
           }
@@ -93,7 +93,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:34},end:{line:1,col:35},source:''}
+        loc:{start:{line:1,column:34},end:{line:1,column:35},source:''}
       }
     }
   ]

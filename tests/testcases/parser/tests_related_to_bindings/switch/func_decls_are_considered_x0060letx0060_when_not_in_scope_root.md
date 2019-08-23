@@ -65,87 +65,87 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:75},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:75},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:75},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:75},source:''},
       discriminant: {
         type: 'Identifier',
-        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
         name: 'x'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:1,col:12},end:{line:1,col:43},source:''},
+          loc:{start:{line:1,column:12},end:{line:1,column:43},source:''},
           test: {
             type: 'Identifier',
-            loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
             name: 'a'
           },
           consequent: [
             {
               type: 'FunctionDeclaration',
-              loc:{start:{line:1,col:20},end:{line:1,col:34},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:34},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:29},end:{line:1,col:29},source:''},
+                loc:{start:{line:1,column:29},end:{line:1,column:29},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:32},end:{line:1,col:34},source:''},
+                loc:{start:{line:1,column:32},end:{line:1,column:34},source:''},
                 body: []
               }
             },
             {
               type: 'EmptyStatement',
-              loc:{start:{line:1,col:34},end:{line:1,col:36},source:''}
+              loc:{start:{line:1,column:34},end:{line:1,column:36},source:''}
             },
             {
               type: 'BreakStatement',
-              loc:{start:{line:1,col:36},end:{line:1,col:43},source:''},
+              loc:{start:{line:1,column:36},end:{line:1,column:43},source:''},
               label: null
             }
           ]
         },
         {
           type: 'SwitchCase',
-          loc:{start:{line:1,col:43},end:{line:1,col:74},source:''},
+          loc:{start:{line:1,column:43},end:{line:1,column:74},source:''},
           test: {
             type: 'Identifier',
-            loc:{start:{line:1,col:48},end:{line:1,col:49},source:''},
+            loc:{start:{line:1,column:48},end:{line:1,column:49},source:''},
             name: 'b'
           },
           consequent: [
             {
               type: 'FunctionDeclaration',
-              loc:{start:{line:1,col:51},end:{line:1,col:65},source:''},
+              loc:{start:{line:1,column:51},end:{line:1,column:65},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:60},end:{line:1,col:60},source:''},
+                loc:{start:{line:1,column:60},end:{line:1,column:60},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:63},end:{line:1,col:65},source:''},
+                loc:{start:{line:1,column:63},end:{line:1,column:65},source:''},
                 body: []
               }
             },
             {
               type: 'EmptyStatement',
-              loc:{start:{line:1,col:65},end:{line:1,col:67},source:''}
+              loc:{start:{line:1,column:65},end:{line:1,column:67},source:''}
             },
             {
               type: 'BreakStatement',
-              loc:{start:{line:1,col:67},end:{line:1,col:74},source:''},
+              loc:{start:{line:1,column:67},end:{line:1,column:74},source:''},
               label: null
             }
           ]

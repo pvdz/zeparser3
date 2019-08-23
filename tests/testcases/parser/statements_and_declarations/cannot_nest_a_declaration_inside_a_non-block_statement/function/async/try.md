@@ -29,29 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:40},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:40},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:40},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:40},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:30},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:30},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc:{start:{line:1,col:12},end:{line:1,col:28},source:''},
+            loc:{start:{line:1,column:12},end:{line:1,column:28},source:''},
             generator: false,
             async: true,
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:21},end:{line:1,col:21},source:''},
+              loc:{start:{line:1,column:21},end:{line:1,column:21},source:''},
               name: 'f'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
+              loc:{start:{line:1,column:25},end:{line:1,column:28},source:''},
               body: []
             }
           }
@@ -60,7 +60,7 @@ ast: {
       handler: null,
       finalizer: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:38},end:{line:1,col:40},source:''},
+        loc:{start:{line:1,column:38},end:{line:1,column:40},source:''},
         body: []
       }
     }

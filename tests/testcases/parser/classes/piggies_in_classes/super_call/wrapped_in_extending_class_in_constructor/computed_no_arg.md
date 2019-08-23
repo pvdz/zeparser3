@@ -29,31 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:69},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:69},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:69},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:69},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'outer'
       },
       superClass: {
         type: 'Identifier',
-        loc:{start:{line:1,col:20},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:20},end:{line:1,column:22},source:''},
         name: 'S'
       },
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:22},end:{line:1,col:69},source:''},
+        loc:{start:{line:1,column:22},end:{line:1,column:69},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:24},end:{line:1,col:68},source:''},
+            loc:{start:{line:1,column:24},end:{line:1,column:68},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:24},end:{line:1,col:35},source:''},
+              loc:{start:{line:1,column:24},end:{line:1,column:35},source:''},
               name: 'constructor'
             },
             static: false,
@@ -61,37 +61,37 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:24},end:{line:1,col:68},source:''},
+              loc:{start:{line:1,column:24},end:{line:1,column:68},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:37},end:{line:1,col:68},source:''},
+                loc:{start:{line:1,column:37},end:{line:1,column:68},source:''},
                 body: [
                   {
                     type: 'ClassDeclaration',
-                    loc:{start:{line:1,col:40},end:{line:1,col:67},source:''},
+                    loc:{start:{line:1,column:40},end:{line:1,column:67},source:''},
                     id: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:46},end:{line:1,col:46},source:''},
+                      loc:{start:{line:1,column:46},end:{line:1,column:46},source:''},
                       name: 'x'
                     },
                     superClass: null,
                     body: {
                       type: 'ClassBody',
-                      loc:{start:{line:1,col:48},end:{line:1,col:67},source:''},
+                      loc:{start:{line:1,column:48},end:{line:1,column:67},source:''},
                       body: [
                         {
                           type: 'MethodDefinition',
-                          loc:{start:{line:1,col:50},end:{line:1,col:64},source:''},
+                          loc:{start:{line:1,column:50},end:{line:1,column:64},source:''},
                           key: {
                             type: 'CallExpression',
-                            loc:{start:{line:1,col:51},end:{line:1,col:58},source:''},
+                            loc:{start:{line:1,column:51},end:{line:1,column:58},source:''},
                             callee: {
                               type: 'Super',
-                              loc:{start:{line:1,col:51},end:{line:1,col:56},source:''}
+                              loc:{start:{line:1,column:51},end:{line:1,column:56},source:''}
                             },
                             arguments: []
                           },
@@ -100,14 +100,14 @@ ast: {
                           kind: 'method',
                           value: {
                             type: 'FunctionExpression',
-                            loc:{start:{line:1,col:50},end:{line:1,col:64},source:''},
+                            loc:{start:{line:1,column:50},end:{line:1,column:64},source:''},
                             generator: false,
                             async: false,
                             id: null,
                             params: [],
                             body: {
                               type: 'BlockStatement',
-                              loc:{start:{line:1,col:61},end:{line:1,col:64},source:''},
+                              loc:{start:{line:1,column:61},end:{line:1,column:64},source:''},
                               body: []
                             }
                           }

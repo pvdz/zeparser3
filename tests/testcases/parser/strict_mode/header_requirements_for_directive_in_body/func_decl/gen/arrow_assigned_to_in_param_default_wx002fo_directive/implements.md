@@ -29,35 +29,35 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
         params: [
           {
             type: 'AssignmentPattern',
-            loc:{start:{line:1,col:1},end:{line:1,col:16},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:16},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:1},end:{line:1,col:2},source:''},
+              loc:{start:{line:1,column:1},end:{line:1,column:2},source:''},
               name: 'x'
             },
             right: {
               type: 'AssignmentExpression',
-              loc:{start:{line:1,col:3},end:{line:1,col:16},source:''},
+              loc:{start:{line:1,column:3},end:{line:1,column:16},source:''},
               left: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:3},end:{line:1,col:13},source:''},
+                loc:{start:{line:1,column:3},end:{line:1,column:13},source:''},
                 name: 'implements'
               },
               operator: '=',
               right: {
                 type: 'Literal',
-                loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+                loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
                 value: 10,
                 raw: '10'
               }
@@ -70,7 +70,7 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
+          loc:{start:{line:1,column:21},end:{line:1,column:24},source:''},
           body: []
         }
       }

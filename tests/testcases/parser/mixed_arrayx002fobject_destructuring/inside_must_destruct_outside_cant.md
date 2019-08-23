@@ -31,31 +31,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
       expression: {
         type: 'ArrayExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
         elements: [
           {
             type: 'SpreadElement',
-            loc:{start:{line:1,col:1},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:15},source:''},
             argument: {
               type: 'AssignmentExpression',
-              loc:{start:{line:1,col:4},end:{line:1,col:15},source:''},
+              loc:{start:{line:1,column:4},end:{line:1,column:15},source:''},
               left: {
                 type: 'ObjectPattern',
-                loc:{start:{line:1,col:4},end:{line:1,col:12},source:''},
+                loc:{start:{line:1,column:4},end:{line:1,column:12},source:''},
                 properties: [
                   {
                     type: 'Property',
-                    loc:{start:{line:1,col:5},end:{line:1,col:10},source:''},
+                    loc:{start:{line:1,column:5},end:{line:1,column:10},source:''},
                     key: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:5},end:{line:1,col:7},source:''},
+                      loc:{start:{line:1,column:5},end:{line:1,column:7},source:''},
                       name: 'a'
                     },
                     kind: 'init',
@@ -63,15 +63,15 @@ ast: {
                     computed: false,
                     value: {
                       type: 'AssignmentPattern',
-                      loc:{start:{line:1,col:5},end:{line:1,col:10},source:''},
+                      loc:{start:{line:1,column:5},end:{line:1,column:10},source:''},
                       left: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:5},end:{line:1,col:7},source:''},
+                        loc:{start:{line:1,column:5},end:{line:1,column:7},source:''},
                         name: 'a'
                       },
                       right: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:9},end:{line:1,col:10},source:''},
+                        loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
                         name: 'b'
                       }
                     },
@@ -82,7 +82,7 @@ ast: {
               operator: '=',
               right: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:14},end:{line:1,col:15},source:''},
+                loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
                 name: 'c'
               }
             }

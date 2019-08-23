@@ -29,37 +29,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:15},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:10},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
               name: 'a'
             },
             init: null
           },
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:12},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:12},end:{line:1,column:15},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:12},end:{line:1,col:12},source:''},
+              loc:{start:{line:1,column:12},end:{line:1,column:12},source:''},
               name: 'b'
             },
             init: {
               type: 'Literal',
-              loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
               value: 1,
               raw: '1'
             }
@@ -70,7 +70,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:18},end:{line:1,col:19},source:''}
+        loc:{start:{line:1,column:18},end:{line:1,column:19},source:''}
       }
     }
   ]

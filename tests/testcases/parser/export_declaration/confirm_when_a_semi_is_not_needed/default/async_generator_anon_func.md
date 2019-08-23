@@ -49,31 +49,31 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:39},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
       declaration: {
         type: 'FunctionDeclaration',
-        loc:{start:{line:1,col:21},end:{line:1,col:36},source:''},
+        loc:{start:{line:1,column:21},end:{line:1,column:36},source:''},
         generator: true,
         async: true,
         id: null,
         params: [],
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:33},end:{line:1,col:36},source:''},
+          loc:{start:{line:1,column:33},end:{line:1,column:36},source:''},
           body: []
         }
       }
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:36},end:{line:1,col:39},source:''},
+      loc:{start:{line:1,column:36},end:{line:1,column:39},source:''},
       expression: {
         type: 'Identifier',
-        loc:{start:{line:1,col:36},end:{line:1,col:39},source:''},
+        loc:{start:{line:1,column:36},end:{line:1,column:39},source:''},
         name: 'foo'
       }
     }

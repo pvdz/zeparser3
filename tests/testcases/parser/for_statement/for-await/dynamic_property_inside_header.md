@@ -32,46 +32,46 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:3,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:3,column:1},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:3,col:1},source:''},
+      loc:{start:{line:1,column:6},end:{line:3,column:1},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:3,col:1},source:''},
+        loc:{start:{line:1,column:19},end:{line:3,column:1},source:''},
         body: [
           {
             type: 'ForOfStatement',
-            loc:{start:{line:2,col:4},end:{line:3,col:0},source:''},
+            loc:{start:{line:2,column:4},end:{line:3,column:0},source:''},
             left: {
               type: 'MemberExpression',
-              loc:{start:{line:2,col:15},end:{line:2,col:25},source:''},
+              loc:{start:{line:2,column:15},end:{line:2,column:25},source:''},
               object: {
                 type: 'Identifier',
-                loc:{start:{line:2,col:15},end:{line:2,col:16},source:''},
+                loc:{start:{line:2,column:15},end:{line:2,column:16},source:''},
                 name: 'x'
               },
               property: {
                 type: 'BinaryExpression',
-                loc:{start:{line:2,col:17},end:{line:2,col:23},source:''},
+                loc:{start:{line:2,column:17},end:{line:2,column:23},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:2,col:17},end:{line:2,col:19},source:''},
+                  loc:{start:{line:2,column:17},end:{line:2,column:19},source:''},
                   name: 'a'
                 },
                 operator: 'in',
                 right: {
                   type: 'Identifier',
-                  loc:{start:{line:2,col:22},end:{line:2,col:23},source:''},
+                  loc:{start:{line:2,column:22},end:{line:2,column:23},source:''},
                   name: 'b'
                 }
               },
@@ -79,13 +79,13 @@ ast: {
             },
             right: {
               type: 'Identifier',
-              loc:{start:{line:2,col:28},end:{line:2,col:29},source:''},
+              loc:{start:{line:2,column:28},end:{line:2,column:29},source:''},
               name: 'y'
             },
             await: true,
             body: {
               type: 'EmptyStatement',
-              loc:{start:{line:2,col:30},end:{line:3,col:0},source:''}
+              loc:{start:{line:2,column:30},end:{line:3,column:0},source:''}
             }
           }
         ]

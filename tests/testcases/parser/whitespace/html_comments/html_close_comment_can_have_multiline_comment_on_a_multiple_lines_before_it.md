@@ -37,7 +37,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:3,col:18},source:''},
+  loc:{start:{line:1,column:0},end:{line:3,column:18},source:''},
   body: []
 }
 

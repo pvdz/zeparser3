@@ -68,27 +68,27 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:15},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:15},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
               name: 'a'
             },
             init: {
               type: 'Literal',
-              loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
+              loc:{start:{line:1,column:13},end:{line:1,column:13},source:''},
               value: 0,
               raw: '0'
             }
@@ -97,33 +97,33 @@ ast: {
       },
       right: {
         type: 'SequenceExpression',
-        loc:{start:{line:1,col:18},end:{line:1,col:32},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:32},source:''},
         expressions: [
           {
             type: 'AssignmentExpression',
-            loc:{start:{line:1,col:18},end:{line:1,col:28},source:''},
+            loc:{start:{line:1,column:18},end:{line:1,column:28},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:18},end:{line:1,col:25},source:''},
+              loc:{start:{line:1,column:18},end:{line:1,column:25},source:''},
               name: 'stored'
             },
             operator: '=',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:27},end:{line:1,col:28},source:''},
+              loc:{start:{line:1,column:27},end:{line:1,column:28},source:''},
               name: 'a'
             }
           },
           {
             type: 'ObjectExpression',
-            loc:{start:{line:1,col:30},end:{line:1,col:32},source:''},
+            loc:{start:{line:1,column:30},end:{line:1,column:32},source:''},
             properties: []
           }
         ]
       },
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:33},end:{line:1,col:34},source:''}
+        loc:{start:{line:1,column:33},end:{line:1,column:34},source:''}
       }
     }
   ]

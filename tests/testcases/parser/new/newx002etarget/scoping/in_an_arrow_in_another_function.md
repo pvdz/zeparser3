@@ -31,33 +31,33 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:38},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:38},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:38},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:38},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:1,col:38},source:''},
+        loc:{start:{line:1,column:12},end:{line:1,column:38},source:''},
         body: [
           {
             type: 'ReturnStatement',
-            loc:{start:{line:1,col:14},end:{line:1,col:37},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:37},source:''},
             argument: {
               type: 'ArrowFunctionExpression',
-              loc:{start:{line:1,col:21},end:{line:1,col:37},source:''},
+              loc:{start:{line:1,column:21},end:{line:1,column:37},source:''},
               params: [
                 {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:21},end:{line:1,col:23},source:''},
+                  loc:{start:{line:1,column:21},end:{line:1,column:23},source:''},
                   name: '_'
                 }
               ],
@@ -67,15 +67,15 @@ ast: {
               expression: true,
               body: {
                 type: 'MetaProperty',
-                loc:{start:{line:1,col:26},end:{line:1,col:37},source:''},
+                loc:{start:{line:1,column:26},end:{line:1,column:37},source:''},
                 meta: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:26},end:{line:1,col:29},source:''},
+                  loc:{start:{line:1,column:26},end:{line:1,column:29},source:''},
                   name: 'new'
                 },
                 property: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:30},end:{line:1,col:30},source:''},
+                  loc:{start:{line:1,column:30},end:{line:1,column:30},source:''},
                   name: 'target'
                 }
               }

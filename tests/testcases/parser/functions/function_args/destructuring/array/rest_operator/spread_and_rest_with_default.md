@@ -29,44 +29,44 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:37},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:37},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:37},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [
         {
           type: 'AssignmentPattern',
-          loc:{start:{line:1,col:12},end:{line:1,col:34},source:''},
+          loc:{start:{line:1,column:12},end:{line:1,column:34},source:''},
           left: {
             type: 'ArrayPattern',
-            loc:{start:{line:1,col:12},end:{line:1,col:29},source:''},
+            loc:{start:{line:1,column:12},end:{line:1,column:29},source:''},
             elements: [
               {
                 type: 'AssignmentPattern',
-                loc:{start:{line:1,col:12},end:{line:1,col:21},source:''},
+                loc:{start:{line:1,column:12},end:{line:1,column:21},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
+                  loc:{start:{line:1,column:13},end:{line:1,column:14},source:''},
                   name: 'a'
                 },
                 right: {
                   type: 'ArrayExpression',
-                  loc:{start:{line:1,col:15},end:{line:1,col:21},source:''},
+                  loc:{start:{line:1,column:15},end:{line:1,column:21},source:''},
                   elements: [
                     {
                       type: 'SpreadElement',
-                      loc:{start:{line:1,col:16},end:{line:1,col:20},source:''},
+                      loc:{start:{line:1,column:16},end:{line:1,column:20},source:''},
                       argument: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:19},end:{line:1,col:20},source:''},
+                        loc:{start:{line:1,column:19},end:{line:1,column:20},source:''},
                         name: 'b'
                       }
                     }
@@ -75,10 +75,10 @@ ast: {
               },
               {
                 type: 'RestElement',
-                loc:{start:{line:1,col:23},end:{line:1,col:27},source:''},
+                loc:{start:{line:1,column:23},end:{line:1,column:27},source:''},
                 argument: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:26},end:{line:1,col:27},source:''},
+                  loc:{start:{line:1,column:26},end:{line:1,column:27},source:''},
                   name: 'c'
                 }
               }
@@ -86,14 +86,14 @@ ast: {
           },
           right: {
             type: 'Identifier',
-            loc:{start:{line:1,col:31},end:{line:1,col:34},source:''},
+            loc:{start:{line:1,column:31},end:{line:1,column:34},source:''},
             name: 'obj'
           }
         }
       ],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:35},end:{line:1,col:37},source:''},
+        loc:{start:{line:1,column:35},end:{line:1,column:37},source:''},
         body: []
       }
     }

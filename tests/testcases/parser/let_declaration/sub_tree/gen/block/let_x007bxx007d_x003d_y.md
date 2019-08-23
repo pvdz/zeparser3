@@ -29,30 +29,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
       body: [
         {
           type: 'VariableDeclaration',
-          loc:{start:{line:1,col:6},end:{line:1,col:14},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:14},source:''},
           kind: 'let',
           declarations: [
             {
               type: 'VariableDeclarator',
-              loc:{start:{line:1,col:6},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:14},source:''},
               id: {
                 type: 'ObjectPattern',
-                loc:{start:{line:1,col:6},end:{line:1,col:10},source:''},
+                loc:{start:{line:1,column:6},end:{line:1,column:10},source:''},
                 properties: [
                   {
                     type: 'Property',
-                    loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+                    loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
                     key: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+                      loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
                       name: 'x'
                     },
                     kind: 'init',
@@ -60,7 +60,7 @@ ast: {
                     computed: false,
                     value: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+                      loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
                       name: 'x'
                     },
                     shorthand: true
@@ -69,7 +69,7 @@ ast: {
               },
               init: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:12},end:{line:1,col:14},source:''},
+                loc:{start:{line:1,column:12},end:{line:1,column:14},source:''},
                 name: 'y'
               }
             }

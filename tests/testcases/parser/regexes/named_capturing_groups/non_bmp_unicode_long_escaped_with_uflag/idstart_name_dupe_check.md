@@ -33,14 +33,14 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:39},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:39},source:''},
       expression: {
         type: 'Literal',
-        loc:{start:{line:1,col:0},end:{line:1,col:39},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:39},source:''},
         value: null,
         regex: {
           pattern: '(?<\\u{2F9DF}>foo)met\\k<\\ud87e\\udddf>',

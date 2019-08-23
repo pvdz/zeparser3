@@ -29,26 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:27},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:26},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:26},source:''},
       kind: 'const',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:6},end:{line:1,col:26},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:26},source:''},
           id: {
             type: 'ObjectPattern',
-            loc:{start:{line:1,col:6},end:{line:1,col:21},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:21},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:7},end:{line:1,col:12},source:''},
+                loc:{start:{line:1,column:7},end:{line:1,column:12},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:7},end:{line:1,col:11},source:''},
+                  loc:{start:{line:1,column:7},end:{line:1,column:11},source:''},
                   name: 'x'
                 },
                 kind: 'init',
@@ -56,17 +56,17 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+                  loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
                   name: 'y'
                 },
                 shorthand: false
               },
               {
                 type: 'Property',
-                loc:{start:{line:1,col:14},end:{line:1,col:19},source:''},
+                loc:{start:{line:1,column:14},end:{line:1,column:19},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:14},end:{line:1,col:18},source:''},
+                  loc:{start:{line:1,column:14},end:{line:1,column:18},source:''},
                   name: 'z'
                 },
                 kind: 'init',
@@ -74,7 +74,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+                  loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
                   name: 'a'
                 },
                 shorthand: false
@@ -83,7 +83,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:23},end:{line:1,col:26},source:''},
+            loc:{start:{line:1,column:23},end:{line:1,column:26},source:''},
             name: 'obj'
           }
         }

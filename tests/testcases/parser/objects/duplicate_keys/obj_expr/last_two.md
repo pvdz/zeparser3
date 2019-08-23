@@ -33,21 +33,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:19},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:2},end:{line:1,col:6},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:6},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:2},end:{line:1,col:5},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:5},source:''},
               name: 'b'
             },
             kind: 'init',
@@ -55,17 +55,17 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc:{start:{line:1,col:5},end:{line:1,col:6},source:''},
+              loc:{start:{line:1,column:5},end:{line:1,column:6},source:''},
               name: 'x'
             },
             shorthand: false
           },
           {
             type: 'Property',
-            loc:{start:{line:1,col:8},end:{line:1,col:12},source:''},
+            loc:{start:{line:1,column:8},end:{line:1,column:12},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:8},end:{line:1,col:11},source:''},
+              loc:{start:{line:1,column:8},end:{line:1,column:11},source:''},
               name: 'a'
             },
             kind: 'init',
@@ -73,7 +73,7 @@ ast: {
             computed: false,
             value: {
               type: 'Literal',
-              loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:11},source:''},
               value: 1,
               raw: '1'
             },
@@ -81,10 +81,10 @@ ast: {
           },
           {
             type: 'Property',
-            loc:{start:{line:1,col:14},end:{line:1,col:18},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:18},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:14},end:{line:1,col:17},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:17},source:''},
               name: 'a'
             },
             kind: 'init',
@@ -92,7 +92,7 @@ ast: {
             computed: false,
             value: {
               type: 'Literal',
-              loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
+              loc:{start:{line:1,column:17},end:{line:1,column:17},source:''},
               value: 2,
               raw: '2'
             },

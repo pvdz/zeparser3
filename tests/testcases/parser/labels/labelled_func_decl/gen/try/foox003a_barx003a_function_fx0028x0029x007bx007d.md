@@ -53,45 +53,45 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:43},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:43},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:33},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:33},source:''},
         body: [
           {
             type: 'LabeledStatement',
-            loc:{start:{line:1,col:6},end:{line:1,col:31},source:''},
+            loc:{start:{line:1,column:6},end:{line:1,column:31},source:''},
             label: {
               type: 'Identifier',
-              loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:9},source:''},
               name: 'foo'
             },
             body: {
               type: 'LabeledStatement',
-              loc:{start:{line:1,col:11},end:{line:1,col:31},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:31},source:''},
               label: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
+                loc:{start:{line:1,column:11},end:{line:1,column:14},source:''},
                 name: 'bar'
               },
               body: {
                 type: 'FunctionDeclaration',
-                loc:{start:{line:1,col:16},end:{line:1,col:31},source:''},
+                loc:{start:{line:1,column:16},end:{line:1,column:31},source:''},
                 generator: false,
                 async: false,
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
+                  loc:{start:{line:1,column:25},end:{line:1,column:25},source:''},
                   name: 'f'
                 },
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  loc:{start:{line:1,col:28},end:{line:1,col:31},source:''},
+                  loc:{start:{line:1,column:28},end:{line:1,column:31},source:''},
                   body: []
                 }
               }
@@ -102,7 +102,7 @@ ast: {
       handler: null,
       finalizer: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:41},end:{line:1,col:43},source:''},
+        loc:{start:{line:1,column:41},end:{line:1,column:43},source:''},
         body: []
       }
     }

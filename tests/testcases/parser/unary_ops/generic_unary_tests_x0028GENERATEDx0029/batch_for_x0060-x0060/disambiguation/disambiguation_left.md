@@ -31,30 +31,30 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
         left: {
           type: 'UnaryExpression',
-          loc:{start:{line:1,col:0},end:{line:1,col:8},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:8},source:''},
           operator: '-',
           prefix: true,
           argument: {
             type: 'MemberExpression',
-            loc:{start:{line:1,col:2},end:{line:1,col:8},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:8},source:''},
             object: {
               type: 'Identifier',
-              loc:{start:{line:1,col:2},end:{line:1,col:3},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:3},source:''},
               name: 'x'
             },
             property: {
               type: 'Identifier',
-              loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+              loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
               name: 'abc'
             },
             computed: false
@@ -63,15 +63,15 @@ ast: {
         operator: '+',
         right: {
           type: 'MemberExpression',
-          loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
+          loc:{start:{line:1,column:10},end:{line:1,column:13},source:''},
           object: {
             type: 'Identifier',
-            loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+            loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
             name: 'y'
           },
           property: {
             type: 'Identifier',
-            loc:{start:{line:1,col:12},end:{line:1,col:12},source:''},
+            loc:{start:{line:1,column:12},end:{line:1,column:12},source:''},
             name: 'x'
           },
           computed: false

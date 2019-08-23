@@ -47,19 +47,19 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:57},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:57},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'x'
           },
           init: null
@@ -68,19 +68,19 @@ ast: {
     },
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:7},end:{line:1,col:26},source:''},
+      loc:{start:{line:1,column:7},end:{line:1,column:26},source:''},
       specifiers: [
         {
           type: 'ExportSpecifier',
-          loc:{start:{line:1,col:15},end:{line:1,col:23},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:23},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
             name: 'x'
           },
           exported: {
             type: 'Identifier',
-            loc:{start:{line:1,col:20},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:20},source:''},
             name: 'new'
           }
         }
@@ -90,26 +90,26 @@ ast: {
     },
     {
       type: 'ImportDeclaration',
-      loc:{start:{line:1,col:26},end:{line:1,col:57},source:''},
+      loc:{start:{line:1,column:26},end:{line:1,column:57},source:''},
       specifiers: [
         {
           type: 'ImportSpecifier',
-          loc:{start:{line:1,col:34},end:{line:1,col:44},source:''},
+          loc:{start:{line:1,column:34},end:{line:1,column:44},source:''},
           imported: {
             type: 'Identifier',
-            loc:{start:{line:1,col:34},end:{line:1,col:34},source:''},
+            loc:{start:{line:1,column:34},end:{line:1,column:34},source:''},
             name: 'new'
           },
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,col:41},end:{line:1,col:41},source:''},
+            loc:{start:{line:1,column:41},end:{line:1,column:41},source:''},
             name: 'foo'
           }
         }
       ],
       source: {
         type: 'Literal',
-        loc:{start:{line:1,col:51},end:{line:1,col:51},source:''},
+        loc:{start:{line:1,column:51},end:{line:1,column:51},source:''},
         value: 'bar',
         raw: '"bar"'
       }

@@ -31,31 +31,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:68},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:68},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:68},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:68},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'x'
       },
       superClass: {
         type: 'Identifier',
-        loc:{start:{line:1,col:16},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:16},end:{line:1,column:18},source:''},
         name: 'y'
       },
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:18},end:{line:1,col:68},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:68},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:19},end:{line:1,col:67},source:''},
+            loc:{start:{line:1,column:19},end:{line:1,column:67},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:19},end:{line:1,col:30},source:''},
+              loc:{start:{line:1,column:19},end:{line:1,column:30},source:''},
               name: 'constructor'
             },
             static: false,
@@ -63,31 +63,31 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:19},end:{line:1,col:67},source:''},
+              loc:{start:{line:1,column:19},end:{line:1,column:67},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:32},end:{line:1,col:67},source:''},
+                loc:{start:{line:1,column:32},end:{line:1,column:67},source:''},
                 body: [
                   {
                     type: 'ExpressionStatement',
-                    loc:{start:{line:1,col:37},end:{line:1,col:66},source:''},
+                    loc:{start:{line:1,column:37},end:{line:1,column:66},source:''},
                     expression: {
                       type: 'AssignmentExpression',
-                      loc:{start:{line:1,col:38},end:{line:1,col:61},source:''},
+                      loc:{start:{line:1,column:38},end:{line:1,column:61},source:''},
                       left: {
                         type: 'ObjectPattern',
-                        loc:{start:{line:1,col:38},end:{line:1,col:58},source:''},
+                        loc:{start:{line:1,column:38},end:{line:1,column:58},source:''},
                         properties: [
                           {
                             type: 'Property',
-                            loc:{start:{line:1,col:39},end:{line:1,col:56},source:''},
+                            loc:{start:{line:1,column:39},end:{line:1,column:56},source:''},
                             key: {
                               type: 'Literal',
-                              loc:{start:{line:1,col:39},end:{line:1,col:46},source:''},
+                              loc:{start:{line:1,column:39},end:{line:1,column:46},source:''},
                               value: 'foo',
                               raw: '"foo"'
                             },
@@ -96,14 +96,14 @@ ast: {
                             computed: false,
                             value: {
                               type: 'MemberExpression',
-                              loc:{start:{line:1,col:46},end:{line:1,col:56},source:''},
+                              loc:{start:{line:1,column:46},end:{line:1,column:56},source:''},
                               object: {
                                 type: 'Super',
-                                loc:{start:{line:1,col:46},end:{line:1,col:51},source:''}
+                                loc:{start:{line:1,column:46},end:{line:1,column:51},source:''}
                               },
                               property: {
                                 type: 'Identifier',
-                                loc:{start:{line:1,col:52},end:{line:1,col:52},source:''},
+                                loc:{start:{line:1,column:52},end:{line:1,column:52},source:''},
                                 name: 'cool'
                               },
                               computed: false
@@ -115,7 +115,7 @@ ast: {
                       operator: '=',
                       right: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:60},end:{line:1,col:61},source:''},
+                        loc:{start:{line:1,column:60},end:{line:1,column:61},source:''},
                         name: 'x'
                       }
                     }

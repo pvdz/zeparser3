@@ -30,23 +30,23 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc:{start:{line:1,col:7},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:7},end:{line:1,column:15},source:''},
         param: null,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:13},end:{line:1,col:15},source:''},
+          loc:{start:{line:1,column:13},end:{line:1,column:15},source:''},
           body: []
         }
       },

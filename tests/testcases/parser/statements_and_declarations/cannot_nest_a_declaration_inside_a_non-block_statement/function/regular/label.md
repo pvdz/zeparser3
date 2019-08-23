@@ -53,30 +53,30 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
   body: [
     {
       type: 'LabeledStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
       label: {
         type: 'Identifier',
-        loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
         name: 'foo'
       },
       body: {
         type: 'FunctionDeclaration',
-        loc:{start:{line:1,col:5},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:20},source:''},
         generator: false,
         async: false,
         id: {
           type: 'Identifier',
-          loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+          loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
           name: 'f'
         },
         params: [],
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
+          loc:{start:{line:1,column:18},end:{line:1,column:20},source:''},
           body: []
         }
       }

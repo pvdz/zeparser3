@@ -53,42 +53,42 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
       body: [
         {
           type: 'LabeledStatement',
-          loc:{start:{line:1,col:2},end:{line:1,col:27},source:''},
+          loc:{start:{line:1,column:2},end:{line:1,column:27},source:''},
           label: {
             type: 'Identifier',
-            loc:{start:{line:1,col:2},end:{line:1,col:5},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:5},source:''},
             name: 'foo'
           },
           body: {
             type: 'LabeledStatement',
-            loc:{start:{line:1,col:7},end:{line:1,col:27},source:''},
+            loc:{start:{line:1,column:7},end:{line:1,column:27},source:''},
             label: {
               type: 'Identifier',
-              loc:{start:{line:1,col:7},end:{line:1,col:10},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:10},source:''},
               name: 'bar'
             },
             body: {
               type: 'FunctionDeclaration',
-              loc:{start:{line:1,col:12},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:12},end:{line:1,column:27},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:21},end:{line:1,col:21},source:''},
+                loc:{start:{line:1,column:21},end:{line:1,column:21},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:24},end:{line:1,col:27},source:''},
+                loc:{start:{line:1,column:24},end:{line:1,column:27},source:''},
                 body: []
               }
             }

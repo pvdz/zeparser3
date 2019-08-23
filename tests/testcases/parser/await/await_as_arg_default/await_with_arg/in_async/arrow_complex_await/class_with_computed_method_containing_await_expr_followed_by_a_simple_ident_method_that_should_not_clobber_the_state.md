@@ -31,42 +31,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:45},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:45},source:''},
         params: [
           {
             type: 'AssignmentPattern',
-            loc:{start:{line:1,col:1},end:{line:1,col:38},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:38},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:1},end:{line:1,col:6},source:''},
+              loc:{start:{line:1,column:1},end:{line:1,column:6},source:''},
               name: 'fail'
             },
             right: {
               type: 'ClassExpression',
-              loc:{start:{line:1,col:8},end:{line:1,col:38},source:''},
+              loc:{start:{line:1,column:8},end:{line:1,column:38},source:''},
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+                loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
                 name: 'A'
               },
               superClass: null,
               body: {
                 type: 'ClassBody',
-                loc:{start:{line:1,col:16},end:{line:1,col:38},source:''},
+                loc:{start:{line:1,column:16},end:{line:1,column:38},source:''},
                 body: [
                   {
                     type: 'MethodDefinition',
-                    loc:{start:{line:1,col:17},end:{line:1,col:28},source:''},
+                    loc:{start:{line:1,column:17},end:{line:1,column:28},source:''},
                     key: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:18},end:{line:1,col:23},source:''},
+                      loc:{start:{line:1,column:18},end:{line:1,column:23},source:''},
                       name: 'await'
                     },
                     static: false,
@@ -74,24 +74,24 @@ ast: {
                     kind: 'method',
                     value: {
                       type: 'FunctionExpression',
-                      loc:{start:{line:1,col:17},end:{line:1,col:28},source:''},
+                      loc:{start:{line:1,column:17},end:{line:1,column:28},source:''},
                       generator: false,
                       async: false,
                       id: null,
                       params: [],
                       body: {
                         type: 'BlockStatement',
-                        loc:{start:{line:1,col:26},end:{line:1,col:28},source:''},
+                        loc:{start:{line:1,column:26},end:{line:1,column:28},source:''},
                         body: []
                       }
                     }
                   },
                   {
                     type: 'MethodDefinition',
-                    loc:{start:{line:1,col:30},end:{line:1,col:37},source:''},
+                    loc:{start:{line:1,column:30},end:{line:1,column:37},source:''},
                     key: {
                       type: 'Literal',
-                      loc:{start:{line:1,col:30},end:{line:1,col:30},source:''},
+                      loc:{start:{line:1,column:30},end:{line:1,column:30},source:''},
                       value: 'x',
                       raw: '"x"'
                     },
@@ -100,14 +100,14 @@ ast: {
                     kind: 'method',
                     value: {
                       type: 'FunctionExpression',
-                      loc:{start:{line:1,col:30},end:{line:1,col:37},source:''},
+                      loc:{start:{line:1,column:30},end:{line:1,column:37},source:''},
                       generator: false,
                       async: false,
                       id: null,
                       params: [],
                       body: {
                         type: 'BlockStatement',
-                        loc:{start:{line:1,col:35},end:{line:1,col:37},source:''},
+                        loc:{start:{line:1,column:35},end:{line:1,column:37},source:''},
                         body: []
                       }
                     }
@@ -123,7 +123,7 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:43},end:{line:1,col:45},source:''},
+          loc:{start:{line:1,column:43},end:{line:1,column:45},source:''},
           body: []
         }
       }

@@ -29,26 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       body: [
         {
           type: 'FunctionDeclaration',
-          loc:{start:{line:1,col:2},end:{line:1,col:20},source:''},
+          loc:{start:{line:1,column:2},end:{line:1,column:20},source:''},
           generator: true,
           async: false,
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:13},end:{line:1,column:13},source:''},
             name: 'f'
           },
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:17},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:20},source:''},
             body: []
           }
         }

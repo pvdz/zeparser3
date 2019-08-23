@@ -79,39 +79,39 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'g'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:4,col:1},source:''},
+        loc:{start:{line:1,column:12},end:{line:4,column:1},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc:{start:{line:2,col:6},end:{line:2,col:13},source:''},
+            loc:{start:{line:2,column:6},end:{line:2,column:13},source:''},
             kind: 'var',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc:{start:{line:2,col:6},end:{line:2,col:13},source:''},
+                loc:{start:{line:2,column:6},end:{line:2,column:13},source:''},
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:2,col:6},end:{line:2,col:6},source:''},
+                  loc:{start:{line:2,column:6},end:{line:2,column:6},source:''},
                   name: 'f'
                 },
                 init: {
                   type: 'Literal',
-                  loc:{start:{line:2,col:10},end:{line:2,col:10},source:''},
+                  loc:{start:{line:2,column:10},end:{line:2,column:10},source:''},
                   value: 123,
                   raw: '123'
                 }
@@ -120,26 +120,26 @@ ast: {
           },
           {
             type: 'LabeledStatement',
-            loc:{start:{line:3,col:2},end:{line:4,col:0},source:''},
+            loc:{start:{line:3,column:2},end:{line:4,column:0},source:''},
             label: {
               type: 'Identifier',
-              loc:{start:{line:3,col:2},end:{line:3,col:6},source:''},
+              loc:{start:{line:3,column:2},end:{line:3,column:6},source:''},
               name: 'oops'
             },
             body: {
               type: 'FunctionDeclaration',
-              loc:{start:{line:3,col:8},end:{line:4,col:0},source:''},
+              loc:{start:{line:3,column:8},end:{line:4,column:0},source:''},
               generator: false,
               async: false,
               id: {
                 type: 'Identifier',
-                loc:{start:{line:3,col:17},end:{line:3,col:17},source:''},
+                loc:{start:{line:3,column:17},end:{line:3,column:17},source:''},
                 name: 'f'
               },
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:3,col:20},end:{line:4,col:0},source:''},
+                loc:{start:{line:3,column:20},end:{line:4,column:0},source:''},
                 body: []
               }
             }

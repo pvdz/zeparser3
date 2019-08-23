@@ -48,42 +48,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:65},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:65},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:65},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:65},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:65},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:65},source:''},
         body: [
           {
             type: 'ClassDeclaration',
-            loc:{start:{line:1,col:21},end:{line:1,col:64},source:''},
+            loc:{start:{line:1,column:21},end:{line:1,column:64},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:27},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:27},end:{line:1,column:27},source:''},
               name: 'A'
             },
             superClass: null,
             body: {
               type: 'ClassBody',
-              loc:{start:{line:1,col:29},end:{line:1,col:64},source:''},
+              loc:{start:{line:1,column:29},end:{line:1,column:64},source:''},
               body: [
                 {
                   type: 'MethodDefinition',
-                  loc:{start:{line:1,col:30},end:{line:1,col:62},source:''},
+                  loc:{start:{line:1,column:30},end:{line:1,column:62},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:37},end:{line:1,col:38},source:''},
+                    loc:{start:{line:1,column:37},end:{line:1,column:38},source:''},
                     name: 'f'
                   },
                   static: false,
@@ -91,24 +91,24 @@ ast: {
                   kind: 'method',
                   value: {
                     type: 'FunctionExpression',
-                    loc:{start:{line:1,col:30},end:{line:1,col:62},source:''},
+                    loc:{start:{line:1,column:30},end:{line:1,column:62},source:''},
                     generator: true,
                     async: true,
                     id: null,
                     params: [],
                     body: {
                       type: 'BlockStatement',
-                      loc:{start:{line:1,col:41},end:{line:1,col:62},source:''},
+                      loc:{start:{line:1,column:41},end:{line:1,column:62},source:''},
                       body: [
                         {
                           type: 'ReturnStatement',
-                          loc:{start:{line:1,col:43},end:{line:1,col:61},source:''},
+                          loc:{start:{line:1,column:43},end:{line:1,column:61},source:''},
                           argument: {
                             type: 'AwaitExpression',
-                            loc:{start:{line:1,col:50},end:{line:1,col:59},source:''},
+                            loc:{start:{line:1,column:50},end:{line:1,column:59},source:''},
                             argument: {
                               type: 'Identifier',
-                              loc:{start:{line:1,col:56},end:{line:1,col:59},source:''},
+                              loc:{start:{line:1,column:56},end:{line:1,column:59},source:''},
                               name: 'foo'
                             }
                           }

@@ -31,44 +31,44 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
       init: {
         type: 'FunctionExpression',
-        loc:{start:{line:1,col:4},end:{line:1,col:27},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:27},source:''},
         generator: false,
         async: false,
         id: null,
         params: [],
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:14},end:{line:1,col:27},source:''},
+          loc:{start:{line:1,column:14},end:{line:1,column:27},source:''},
           body: [
             {
               type: 'IfStatement',
-              loc:{start:{line:1,col:15},end:{line:1,col:26},source:''},
+              loc:{start:{line:1,column:15},end:{line:1,column:26},source:''},
               test: {
                 type: 'BinaryExpression',
-                loc:{start:{line:1,col:18},end:{line:1,col:24},source:''},
+                loc:{start:{line:1,column:18},end:{line:1,column:24},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
+                  loc:{start:{line:1,column:18},end:{line:1,column:20},source:''},
                   name: 'x'
                 },
                 operator: 'in',
                 right: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
+                  loc:{start:{line:1,column:23},end:{line:1,column:23},source:''},
                   value: 3,
                   raw: '3'
                 }
               },
               consequent: {
                 type: 'EmptyStatement',
-                loc:{start:{line:1,col:25},end:{line:1,col:26},source:''}
+                loc:{start:{line:1,column:25},end:{line:1,column:26},source:''}
               },
               alternate: null
             }
@@ -79,10 +79,10 @@ ast: {
       update: null,
       body: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:30},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,column:30},end:{line:1,column:31},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:30},end:{line:1,col:31},source:''},
+          loc:{start:{line:1,column:30},end:{line:1,column:31},source:''},
           name: 'x'
         }
       }

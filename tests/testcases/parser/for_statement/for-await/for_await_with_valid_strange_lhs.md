@@ -29,51 +29,51 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:50},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:50},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:50},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:50},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:50},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:50},source:''},
         body: [
           {
             type: 'ForOfStatement',
-            loc:{start:{line:1,col:21},end:{line:1,col:49},source:''},
+            loc:{start:{line:1,column:21},end:{line:1,column:49},source:''},
             left: {
               type: 'MemberExpression',
-              loc:{start:{line:1,col:32},end:{line:1,col:40},source:''},
+              loc:{start:{line:1,column:32},end:{line:1,column:40},source:''},
               object: {
                 type: 'Literal',
-                loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
+                loc:{start:{line:1,column:32},end:{line:1,column:32},source:''},
                 value: 'foo',
                 raw: '"foo"'
               },
               property: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:38},end:{line:1,col:38},source:''},
+                loc:{start:{line:1,column:38},end:{line:1,column:38},source:''},
                 name: 'x'
               },
               computed: false
             },
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:43},end:{line:1,col:44},source:''},
+              loc:{start:{line:1,column:43},end:{line:1,column:44},source:''},
               name: 'y'
             },
             await: true,
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:46},end:{line:1,col:49},source:''},
+              loc:{start:{line:1,column:46},end:{line:1,column:49},source:''},
               body: []
             }
           }

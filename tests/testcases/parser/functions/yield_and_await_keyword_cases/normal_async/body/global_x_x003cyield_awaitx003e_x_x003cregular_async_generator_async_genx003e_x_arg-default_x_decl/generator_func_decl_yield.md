@@ -48,48 +48,48 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:58},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:58},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:58},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:58},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:58},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:58},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc:{start:{line:1,col:21},end:{line:1,col:57},source:''},
+            loc:{start:{line:1,column:21},end:{line:1,column:57},source:''},
             generator: true,
             async: false,
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:31},end:{line:1,col:31},source:''},
+              loc:{start:{line:1,column:31},end:{line:1,column:31},source:''},
               name: 'f'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:35},end:{line:1,col:57},source:''},
+              loc:{start:{line:1,column:35},end:{line:1,column:57},source:''},
               body: [
                 {
                   type: 'ReturnStatement',
-                  loc:{start:{line:1,col:37},end:{line:1,col:55},source:''},
+                  loc:{start:{line:1,column:37},end:{line:1,column:55},source:''},
                   argument: {
                     type: 'YieldExpression',
-                    loc:{start:{line:1,col:44},end:{line:1,col:53},source:''},
+                    loc:{start:{line:1,column:44},end:{line:1,column:53},source:''},
                     delegate: false,
                     argument: {
                       type: 'Literal',
-                      loc:{start:{line:1,col:50},end:{line:1,col:50},source:''},
+                      loc:{start:{line:1,column:50},end:{line:1,column:50},source:''},
                       value: 100,
                       raw: '100'
                     }

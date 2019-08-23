@@ -29,27 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
       expression: {
         type: 'TaggedTemplateExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
         tag: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
           name: 'foo'
         },
         quasi: {
           type: 'TemplateLiteral',
-          loc:{start:{line:1,col:3},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:3},end:{line:1,column:11},source:''},
           expressions: [],
           quasis: [
             {
               type: 'TemplateElement',
-              loc:{start:{line:1,col:3},end:{line:1,col:3},source:''},
+              loc:{start:{line:1,column:3},end:{line:1,column:3},source:''},
               value: { raw: 'H\\x45Y', cooked: '<TODO>' },
               tail: true
             }

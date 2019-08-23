@@ -29,40 +29,40 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
       expression: {
         type: 'ArrayExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
         elements: [
           {
             type: 'SpreadElement',
-            loc:{start:{line:1,col:2},end:{line:1,col:25},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:25},source:''},
             argument: {
               type: 'BinaryExpression',
-              loc:{start:{line:1,col:2},end:{line:1,col:25},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:25},source:''},
               left: {
                 type: 'BinaryExpression',
-                loc:{start:{line:1,col:2},end:{line:1,col:21},source:''},
+                loc:{start:{line:1,column:2},end:{line:1,column:21},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:6},end:{line:1,col:8},source:''},
+                  loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
                   name: 'a'
                 },
                 operator: 'instanceof',
                 right: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:19},end:{line:1,col:21},source:''},
+                  loc:{start:{line:1,column:19},end:{line:1,column:21},source:''},
                   name: 'b'
                 }
               },
               operator: '>',
               right: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:23},end:{line:1,col:25},source:''},
+                loc:{start:{line:1,column:23},end:{line:1,column:25},source:''},
                 name: 'c'
               }
             }

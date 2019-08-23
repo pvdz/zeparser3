@@ -47,34 +47,34 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
   body: [
     {
       type: 'ImportDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
       specifiers: [
         {
           type: 'ImportDefaultSpecifier',
-          loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+          loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,col:7},end:{line:1,col:7},source:''},
+            loc:{start:{line:1,column:7},end:{line:1,column:7},source:''},
             name: 'x'
           }
         },
         {
           type: 'ImportNamespaceSpecifier',
-          loc:{start:{line:1,col:15},end:{line:1,col:17},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:17},source:''},
           local: {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
             name: 'a'
           }
         }
       ],
       source: {
         type: 'Literal',
-        loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:22},end:{line:1,column:22},source:''},
         value: 'y',
         raw: '"y"'
       }

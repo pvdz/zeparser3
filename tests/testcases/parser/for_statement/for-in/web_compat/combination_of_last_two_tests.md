@@ -66,47 +66,47 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:64},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:64},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:64},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:64},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:29},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:29},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:29},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:29},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
               name: 'a'
             },
             init: {
               type: 'SequenceExpression',
-              loc:{start:{line:1,col:14},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:14},end:{line:1,column:27},source:''},
               expressions: [
                 {
                   type: 'UpdateExpression',
-                  loc:{start:{line:1,col:14},end:{line:1,col:23},source:''},
+                  loc:{start:{line:1,column:14},end:{line:1,column:23},source:''},
                   operator: '++',
                   prefix: true,
                   argument: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:16},end:{line:1,col:23},source:''},
+                    loc:{start:{line:1,column:16},end:{line:1,column:23},source:''},
                     name: 'effects'
                   }
                 },
                 {
                   type: 'UnaryExpression',
-                  loc:{start:{line:1,col:25},end:{line:1,col:27},source:''},
+                  loc:{start:{line:1,column:25},end:{line:1,column:27},source:''},
                   operator: '-',
                   prefix: true,
                   argument: {
                     type: 'Literal',
-                    loc:{start:{line:1,col:26},end:{line:1,col:26},source:''},
+                    loc:{start:{line:1,column:26},end:{line:1,column:26},source:''},
                     value: 1,
                     raw: '1'
                   }
@@ -118,33 +118,33 @@ ast: {
       },
       right: {
         type: 'SequenceExpression',
-        loc:{start:{line:1,col:32},end:{line:1,col:62},source:''},
+        loc:{start:{line:1,column:32},end:{line:1,column:62},source:''},
         expressions: [
           {
             type: 'AssignmentExpression',
-            loc:{start:{line:1,col:32},end:{line:1,col:42},source:''},
+            loc:{start:{line:1,column:32},end:{line:1,column:42},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:32},end:{line:1,col:39},source:''},
+              loc:{start:{line:1,column:32},end:{line:1,column:39},source:''},
               name: 'stored'
             },
             operator: '=',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:41},end:{line:1,col:42},source:''},
+              loc:{start:{line:1,column:41},end:{line:1,column:42},source:''},
               name: 'a'
             }
           },
           {
             type: 'ObjectExpression',
-            loc:{start:{line:1,col:44},end:{line:1,col:62},source:''},
+            loc:{start:{line:1,column:44},end:{line:1,column:62},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:45},end:{line:1,col:49},source:''},
+                loc:{start:{line:1,column:45},end:{line:1,column:49},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:45},end:{line:1,col:48},source:''},
+                  loc:{start:{line:1,column:45},end:{line:1,column:48},source:''},
                   name: 'a'
                 },
                 kind: 'init',
@@ -152,7 +152,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:48},end:{line:1,col:48},source:''},
+                  loc:{start:{line:1,column:48},end:{line:1,column:48},source:''},
                   value: 0,
                   raw: '0'
                 },
@@ -160,10 +160,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc:{start:{line:1,col:51},end:{line:1,col:55},source:''},
+                loc:{start:{line:1,column:51},end:{line:1,column:55},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:51},end:{line:1,col:54},source:''},
+                  loc:{start:{line:1,column:51},end:{line:1,column:54},source:''},
                   name: 'b'
                 },
                 kind: 'init',
@@ -171,7 +171,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:54},end:{line:1,col:54},source:''},
+                  loc:{start:{line:1,column:54},end:{line:1,column:54},source:''},
                   value: 1,
                   raw: '1'
                 },
@@ -179,10 +179,10 @@ ast: {
               },
               {
                 type: 'Property',
-                loc:{start:{line:1,col:57},end:{line:1,col:61},source:''},
+                loc:{start:{line:1,column:57},end:{line:1,column:61},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:57},end:{line:1,col:60},source:''},
+                  loc:{start:{line:1,column:57},end:{line:1,column:60},source:''},
                   name: 'c'
                 },
                 kind: 'init',
@@ -190,7 +190,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:60},end:{line:1,col:60},source:''},
+                  loc:{start:{line:1,column:60},end:{line:1,column:60},source:''},
                   value: 2,
                   raw: '2'
                 },
@@ -202,7 +202,7 @@ ast: {
       },
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:63},end:{line:1,col:64},source:''}
+        loc:{start:{line:1,column:63},end:{line:1,column:64},source:''}
       }
     }
   ]

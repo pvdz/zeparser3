@@ -29,39 +29,39 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:33},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:33},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:18},end:{line:1,col:33},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:33},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc:{start:{line:1,col:26},end:{line:1,col:32},source:''},
+            loc:{start:{line:1,column:26},end:{line:1,column:32},source:''},
             kind: 'const',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc:{start:{line:1,col:26},end:{line:1,col:32},source:''},
+                loc:{start:{line:1,column:26},end:{line:1,column:32},source:''},
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:26},end:{line:1,col:26},source:''},
+                  loc:{start:{line:1,column:26},end:{line:1,column:26},source:''},
                   name: 'f'
                 },
                 init: {
                   type: 'Literal',
-                  loc:{start:{line:1,col:30},end:{line:1,col:30},source:''},
+                  loc:{start:{line:1,column:30},end:{line:1,column:30},source:''},
                   value: 1,
                   raw: '1'
                 }

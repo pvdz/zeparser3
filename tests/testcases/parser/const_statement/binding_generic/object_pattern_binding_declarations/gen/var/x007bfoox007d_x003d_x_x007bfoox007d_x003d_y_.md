@@ -29,26 +29,26 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:24},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:24},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:13},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:13},source:''},
           id: {
             type: 'ObjectPattern',
-            loc:{start:{line:1,col:4},end:{line:1,col:10},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:10},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
+                loc:{start:{line:1,column:5},end:{line:1,column:8},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
+                  loc:{start:{line:1,column:5},end:{line:1,column:8},source:''},
                   name: 'foo'
                 },
                 kind: 'init',
@@ -56,7 +56,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
+                  loc:{start:{line:1,column:5},end:{line:1,column:8},source:''},
                   name: 'foo'
                 },
                 shorthand: true
@@ -65,23 +65,23 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
             name: 'x'
           }
         },
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:15},end:{line:1,col:24},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:24},source:''},
           id: {
             type: 'ObjectPattern',
-            loc:{start:{line:1,col:15},end:{line:1,col:21},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:21},source:''},
             properties: [
               {
                 type: 'Property',
-                loc:{start:{line:1,col:16},end:{line:1,col:19},source:''},
+                loc:{start:{line:1,column:16},end:{line:1,column:19},source:''},
                 key: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:16},end:{line:1,col:19},source:''},
+                  loc:{start:{line:1,column:16},end:{line:1,column:19},source:''},
                   name: 'foo'
                 },
                 kind: 'init',
@@ -89,7 +89,7 @@ ast: {
                 computed: false,
                 value: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:16},end:{line:1,col:19},source:''},
+                  loc:{start:{line:1,column:16},end:{line:1,column:19},source:''},
                   name: 'foo'
                 },
                 shorthand: true
@@ -98,7 +98,7 @@ ast: {
           },
           init: {
             type: 'Identifier',
-            loc:{start:{line:1,col:23},end:{line:1,col:24},source:''},
+            loc:{start:{line:1,column:23},end:{line:1,column:24},source:''},
             name: 'y'
           }
         }

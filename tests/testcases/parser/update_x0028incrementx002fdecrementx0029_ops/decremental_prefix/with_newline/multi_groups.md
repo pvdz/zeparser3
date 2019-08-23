@@ -30,19 +30,19 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:8},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:8},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:8},source:''},
       expression: {
         type: 'UpdateExpression',
-        loc:{start:{line:1,col:0},end:{line:2,col:7},source:''},
+        loc:{start:{line:1,column:0},end:{line:2,column:7},source:''},
         operator: '--',
         prefix: true,
         argument: {
           type: 'Identifier',
-          loc:{start:{line:2,col:3},end:{line:2,col:4},source:''},
+          loc:{start:{line:2,column:3},end:{line:2,column:4},source:''},
           name: 'x'
         }
       }

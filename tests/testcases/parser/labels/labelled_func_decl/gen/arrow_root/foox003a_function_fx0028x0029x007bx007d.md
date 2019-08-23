@@ -53,14 +53,14 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
       expression: {
         type: 'ArrowFunctionExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
         params: [],
         id: null,
         generator: false,
@@ -68,30 +68,30 @@ ast: {
         expression: false,
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:6},end:{line:1,col:29},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:29},source:''},
           body: [
             {
               type: 'LabeledStatement',
-              loc:{start:{line:1,col:8},end:{line:1,col:28},source:''},
+              loc:{start:{line:1,column:8},end:{line:1,column:28},source:''},
               label: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:8},end:{line:1,col:11},source:''},
+                loc:{start:{line:1,column:8},end:{line:1,column:11},source:''},
                 name: 'foo'
               },
               body: {
                 type: 'FunctionDeclaration',
-                loc:{start:{line:1,col:13},end:{line:1,col:28},source:''},
+                loc:{start:{line:1,column:13},end:{line:1,column:28},source:''},
                 generator: false,
                 async: false,
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:22},end:{line:1,col:22},source:''},
+                  loc:{start:{line:1,column:22},end:{line:1,column:22},source:''},
                   name: 'f'
                 },
                 params: [],
                 body: {
                   type: 'BlockStatement',
-                  loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
+                  loc:{start:{line:1,column:25},end:{line:1,column:28},source:''},
                   body: []
                 }
               }

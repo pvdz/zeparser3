@@ -29,31 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:65},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:65},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:65},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:65},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'outer'
       },
       superClass: {
         type: 'Identifier',
-        loc:{start:{line:1,col:20},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:20},end:{line:1,column:22},source:''},
         name: 'S'
       },
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:22},end:{line:1,col:65},source:''},
+        loc:{start:{line:1,column:22},end:{line:1,column:65},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:24},end:{line:1,col:64},source:''},
+            loc:{start:{line:1,column:24},end:{line:1,column:64},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:24},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:24},end:{line:1,column:27},source:''},
               name: 'meh'
             },
             static: false,
@@ -61,40 +61,40 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:24},end:{line:1,col:64},source:''},
+              loc:{start:{line:1,column:24},end:{line:1,column:64},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:29},end:{line:1,col:64},source:''},
+                loc:{start:{line:1,column:29},end:{line:1,column:64},source:''},
                 body: [
                   {
                     type: 'ClassDeclaration',
-                    loc:{start:{line:1,col:32},end:{line:1,col:63},source:''},
+                    loc:{start:{line:1,column:32},end:{line:1,column:63},source:''},
                     id: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:38},end:{line:1,col:38},source:''},
+                      loc:{start:{line:1,column:38},end:{line:1,column:38},source:''},
                       name: 'x'
                     },
                     superClass: {
                       type: 'MemberExpression',
-                      loc:{start:{line:1,col:48},end:{line:1,col:58},source:''},
+                      loc:{start:{line:1,column:48},end:{line:1,column:58},source:''},
                       object: {
                         type: 'Super',
-                        loc:{start:{line:1,col:48},end:{line:1,col:53},source:''}
+                        loc:{start:{line:1,column:48},end:{line:1,column:53},source:''}
                       },
                       property: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:54},end:{line:1,col:54},source:''},
+                        loc:{start:{line:1,column:54},end:{line:1,column:54},source:''},
                         name: 'foo'
                       },
                       computed: false
                     },
                     body: {
                       type: 'ClassBody',
-                      loc:{start:{line:1,col:58},end:{line:1,col:63},source:''},
+                      loc:{start:{line:1,column:58},end:{line:1,column:63},source:''},
                       body: []
                     }
                   }

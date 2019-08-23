@@ -31,49 +31,49 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:27},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:27},source:''},
   body: [
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:4},end:{line:1,col:27},source:''},
+      loc:{start:{line:1,column:4},end:{line:1,column:27},source:''},
       kind: 'let',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:4},end:{line:1,col:27},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:27},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
             name: 'f'
           },
           init: {
             type: 'BinaryExpression',
-            loc:{start:{line:1,col:8},end:{line:1,col:27},source:''},
+            loc:{start:{line:1,column:8},end:{line:1,column:27},source:''},
             left: {
               type: 'BinaryExpression',
-              loc:{start:{line:1,col:8},end:{line:1,col:24},source:''},
+              loc:{start:{line:1,column:8},end:{line:1,column:24},source:''},
               left: {
                 type: 'BinaryExpression',
-                loc:{start:{line:1,col:8},end:{line:1,col:14},source:''},
+                loc:{start:{line:1,column:8},end:{line:1,column:14},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:8},end:{line:1,col:10},source:''},
+                  loc:{start:{line:1,column:8},end:{line:1,column:10},source:''},
                   name: 'a'
                 },
                 operator: '+',
                 right: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:12},end:{line:1,col:14},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:14},source:''},
                   name: 'b'
                 }
               },
               operator: '+',
               right: {
                 type: 'CallExpression',
-                loc:{start:{line:1,col:16},end:{line:1,col:24},source:''},
+                loc:{start:{line:1,column:16},end:{line:1,column:24},source:''},
                 callee: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:16},end:{line:1,col:24},source:''},
+                  loc:{start:{line:1,column:16},end:{line:1,column:24},source:''},
                   name: 'async'
                 },
                 arguments: []
@@ -82,7 +82,7 @@ ast: {
             operator: '+',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:26},end:{line:1,col:27},source:''},
+              loc:{start:{line:1,column:26},end:{line:1,column:27},source:''},
               name: 'd'
             }
           }

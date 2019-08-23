@@ -29,22 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
   body: [
     {
       type: 'ForOfStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:14},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:14},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:14},source:''},
               properties: []
             },
             init: null
@@ -53,13 +53,13 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:17},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:17},end:{line:1,column:20},source:''},
         name: 'obj'
       },
       await: false,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:21},end:{line:1,col:22},source:''}
+        loc:{start:{line:1,column:21},end:{line:1,column:22},source:''}
       }
     }
   ]

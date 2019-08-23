@@ -32,43 +32,43 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:3,col:3},source:''},
+  loc:{start:{line:1,column:0},end:{line:3,column:3},source:''},
   body: [
     {
       type: 'IfStatement',
-      loc:{start:{line:1,col:0},end:{line:3,col:0},source:''},
+      loc:{start:{line:1,column:0},end:{line:3,column:0},source:''},
       test: {
         type: 'Identifier',
-        loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
         name: 'a'
       },
       consequent: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:7},end:{line:2,col:0},source:''},
+        loc:{start:{line:1,column:7},end:{line:2,column:0},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+          loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
           name: 'b'
         }
       },
       alternate: {
         type: 'ExpressionStatement',
-        loc:{start:{line:2,col:5},end:{line:3,col:0},source:''},
+        loc:{start:{line:2,column:5},end:{line:3,column:0},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:2,col:5},end:{line:3,col:0},source:''},
+          loc:{start:{line:2,column:5},end:{line:3,column:0},source:''},
           name: 'let'
         }
       }
     },
     {
       type: 'BlockStatement',
-      loc:{start:{line:3,col:0},end:{line:3,col:2},source:''},
+      loc:{start:{line:3,column:0},end:{line:3,column:2},source:''},
       body: []
     },
     {
       type: 'EmptyStatement',
-      loc:{start:{line:3,col:2},end:{line:3,col:3},source:''}
+      loc:{start:{line:3,column:2},end:{line:3,column:3},source:''}
     }
   ]
 }

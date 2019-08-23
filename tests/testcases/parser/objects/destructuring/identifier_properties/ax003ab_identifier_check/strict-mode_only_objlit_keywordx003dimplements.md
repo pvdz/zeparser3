@@ -29,21 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:19},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:19},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:18},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:2},end:{line:1,col:17},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:17},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:2},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:7},source:''},
               name: 'xxxx'
             },
             kind: 'init',
@@ -51,7 +51,7 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc:{start:{line:1,col:7},end:{line:1,col:17},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:17},source:''},
               name: 'implements'
             },
             shorthand: false

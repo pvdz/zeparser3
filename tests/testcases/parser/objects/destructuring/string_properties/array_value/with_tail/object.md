@@ -29,21 +29,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:20},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:2},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:19},source:''},
             key: {
               type: 'Literal',
-              loc:{start:{line:1,col:2},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:7},source:''},
               value: 'x',
               raw: '"x"'
             },
@@ -52,24 +52,24 @@ ast: {
             computed: false,
             value: {
               type: 'CallExpression',
-              loc:{start:{line:1,col:7},end:{line:1,col:19},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:19},source:''},
               callee: {
                 type: 'MemberExpression',
-                loc:{start:{line:1,col:7},end:{line:1,col:16},source:''},
+                loc:{start:{line:1,column:7},end:{line:1,column:16},source:''},
                 object: {
                   type: 'ArrayExpression',
-                  loc:{start:{line:1,col:7},end:{line:1,col:10},source:''},
+                  loc:{start:{line:1,column:7},end:{line:1,column:10},source:''},
                   elements: [
                     {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+                      loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
                       name: 'y'
                     }
                   ]
                 },
                 property: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
+                  loc:{start:{line:1,column:11},end:{line:1,column:11},source:''},
                   name: 'slice'
                 },
                 computed: false
@@ -77,7 +77,7 @@ ast: {
               arguments: [
                 {
                   type: 'Literal',
-                  loc:{start:{line:1,col:17},end:{line:1,col:17},source:''},
+                  loc:{start:{line:1,column:17},end:{line:1,column:17},source:''},
                   value: 0,
                   raw: '0'
                 }

@@ -31,50 +31,50 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
       expression: {
         type: 'CallExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:31},source:''},
         callee: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
           name: 'foo'
         },
         arguments: [
           {
             type: 'FunctionExpression',
-            loc:{start:{line:1,col:4},end:{line:1,col:30},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:30},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:13},end:{line:1,col:13},source:''},
+              loc:{start:{line:1,column:13},end:{line:1,column:13},source:''},
               name: 'f'
             },
             params: [
               {
                 type: 'AssignmentPattern',
-                loc:{start:{line:1,col:15},end:{line:1,col:27},source:''},
+                loc:{start:{line:1,column:15},end:{line:1,column:27},source:''},
                 left: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+                  loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
                   name: 'f'
                 },
                 right: {
                   type: 'MetaProperty',
-                  loc:{start:{line:1,col:17},end:{line:1,col:27},source:''},
+                  loc:{start:{line:1,column:17},end:{line:1,column:27},source:''},
                   meta: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:17},end:{line:1,col:20},source:''},
+                    loc:{start:{line:1,column:17},end:{line:1,column:20},source:''},
                     name: 'new'
                   },
                   property: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:21},end:{line:1,col:21},source:''},
+                    loc:{start:{line:1,column:21},end:{line:1,column:21},source:''},
                     name: 'target'
                   }
                 }
@@ -82,7 +82,7 @@ ast: {
             ],
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:28},end:{line:1,col:30},source:''},
+              loc:{start:{line:1,column:28},end:{line:1,column:30},source:''},
               body: []
             }
           }

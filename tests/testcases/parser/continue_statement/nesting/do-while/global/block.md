@@ -29,25 +29,25 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
   body: [
     {
       type: 'DoWhileStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:7},end:{line:1,col:21},source:''},
+        loc:{start:{line:1,column:7},end:{line:1,column:21},source:''},
         body: [
           {
             type: 'ContinueStatement',
-            loc:{start:{line:1,col:8},end:{line:1,col:16},source:''},
+            loc:{start:{line:1,column:8},end:{line:1,column:16},source:''},
             label: null
           }
         ]
       },
       test: {
         type: 'Literal',
-        loc:{start:{line:1,col:27},end:{line:1,col:31},source:''},
+        loc:{start:{line:1,column:27},end:{line:1,column:31},source:''},
         value: true,
         raw: 'true'
       }

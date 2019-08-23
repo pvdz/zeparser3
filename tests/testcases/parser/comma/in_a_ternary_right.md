@@ -31,37 +31,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
       expression: {
         type: 'SequenceExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:12},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:12},source:''},
         expressions: [
           {
             type: 'ConditionalExpression',
-            loc:{start:{line:1,col:0},end:{line:1,col:9},source:''},
+            loc:{start:{line:1,column:0},end:{line:1,column:9},source:''},
             test: {
               type: 'Identifier',
-              loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+              loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
               name: 'a'
             },
             consequent: {
               type: 'Identifier',
-              loc:{start:{line:1,col:4},end:{line:1,col:6},source:''},
+              loc:{start:{line:1,column:4},end:{line:1,column:6},source:''},
               name: 'b'
             },
             alternate: {
               type: 'Identifier',
-              loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
               name: 'c'
             }
           },
           {
             type: 'Identifier',
-            loc:{start:{line:1,col:11},end:{line:1,col:12},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:12},source:''},
             name: 'd'
           }
         ]

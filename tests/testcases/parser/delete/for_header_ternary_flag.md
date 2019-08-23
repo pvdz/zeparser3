@@ -31,42 +31,42 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
       init: {
         type: 'UnaryExpression',
-        loc:{start:{line:1,col:4},end:{line:1,col:24},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:24},source:''},
         operator: 'delete',
         prefix: true,
         argument: {
           type: 'ConditionalExpression',
-          loc:{start:{line:1,col:11},end:{line:1,col:23},source:''},
+          loc:{start:{line:1,column:11},end:{line:1,column:23},source:''},
           test: {
             type: 'Literal',
-            loc:{start:{line:1,col:12},end:{line:1,col:12},source:''},
+            loc:{start:{line:1,column:12},end:{line:1,column:12},source:''},
             value: 1,
             raw: '1'
           },
           consequent: {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
             name: 'y'
           },
           alternate: {
             type: 'BinaryExpression',
-            loc:{start:{line:1,col:17},end:{line:1,col:23},source:''},
+            loc:{start:{line:1,column:17},end:{line:1,column:23},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:17},end:{line:1,col:19},source:''},
+              loc:{start:{line:1,column:17},end:{line:1,column:19},source:''},
               name: 'x'
             },
             operator: 'in',
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
+              loc:{start:{line:1,column:22},end:{line:1,column:23},source:''},
               name: 'y'
             }
           }
@@ -76,10 +76,10 @@ ast: {
       update: null,
       body: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:27},end:{line:1,col:28},source:''},
+        loc:{start:{line:1,column:27},end:{line:1,column:28},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:27},end:{line:1,col:28},source:''},
+          loc:{start:{line:1,column:27},end:{line:1,column:28},source:''},
           name: 'x'
         }
       }

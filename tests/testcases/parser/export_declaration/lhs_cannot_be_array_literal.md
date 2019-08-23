@@ -49,21 +49,21 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
       declaration: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:15},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:22},source:''},
         left: {
           type: 'ArrayPattern',
-          loc:{start:{line:1,col:15},end:{line:1,col:19},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:19},source:''},
           elements: [
             {
               type: 'Identifier',
-              loc:{start:{line:1,col:16},end:{line:1,col:17},source:''},
+              loc:{start:{line:1,column:16},end:{line:1,column:17},source:''},
               name: 'x'
             }
           ]
@@ -71,7 +71,7 @@ ast: {
         operator: '=',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
+          loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
           name: 'y'
         }
       }

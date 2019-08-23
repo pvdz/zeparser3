@@ -49,23 +49,23 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       declaration: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:15},end:{line:1,col:21},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:21},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:15},end:{line:1,col:17},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:17},source:''},
           name: 'a'
         },
         operator: 'in',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:20},end:{line:1,col:21},source:''},
+          loc:{start:{line:1,column:20},end:{line:1,column:21},source:''},
           name: 'b'
         }
       }

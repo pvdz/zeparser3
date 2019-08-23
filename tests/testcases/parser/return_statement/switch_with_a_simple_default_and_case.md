@@ -29,28 +29,28 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
   body: [
     {
       type: 'SwitchStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:36},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:36},source:''},
       discriminant: {
         type: 'Identifier',
-        loc:{start:{line:1,col:8},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:9},source:''},
         name: 'A'
       },
       cases: [
         {
           type: 'SwitchCase',
-          loc:{start:{line:1,col:12},end:{line:1,col:24},source:''},
+          loc:{start:{line:1,column:12},end:{line:1,column:24},source:''},
           test: null,
           consequent: [
             {
               type: 'ExpressionStatement',
-              loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
+              loc:{start:{line:1,column:21},end:{line:1,column:24},source:''},
               expression: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
+                loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
                 name: 'D'
               }
             }
@@ -58,19 +58,19 @@ ast: {
         },
         {
           type: 'SwitchCase',
-          loc:{start:{line:1,col:24},end:{line:1,col:35},source:''},
+          loc:{start:{line:1,column:24},end:{line:1,column:35},source:''},
           test: {
             type: 'Identifier',
-            loc:{start:{line:1,col:29},end:{line:1,col:30},source:''},
+            loc:{start:{line:1,column:29},end:{line:1,column:30},source:''},
             name: 'B'
           },
           consequent: [
             {
               type: 'ExpressionStatement',
-              loc:{start:{line:1,col:32},end:{line:1,col:35},source:''},
+              loc:{start:{line:1,column:32},end:{line:1,column:35},source:''},
               expression: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:32},end:{line:1,col:33},source:''},
+                loc:{start:{line:1,column:32},end:{line:1,column:33},source:''},
                 name: 'C'
               }
             }

@@ -29,27 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:26},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:26},source:''},
       init: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:22},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:22},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:22},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:22},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
               name: 'interface'
             },
             init: {
               type: 'Identifier',
-              loc:{start:{line:1,col:21},end:{line:1,col:22},source:''},
+              loc:{start:{line:1,column:21},end:{line:1,column:22},source:''},
               name: 'x'
             }
           }
@@ -59,7 +59,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:25},end:{line:1,col:26},source:''}
+        loc:{start:{line:1,column:25},end:{line:1,column:26},source:''}
       }
     }
   ]

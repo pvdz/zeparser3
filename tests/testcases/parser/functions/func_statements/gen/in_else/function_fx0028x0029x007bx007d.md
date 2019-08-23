@@ -55,39 +55,39 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:19},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:19},source:''},
   body: [
     {
       type: 'IfStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:19},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:19},source:''},
       test: {
         type: 'Identifier',
-        loc:{start:{line:1,col:4},end:{line:1,col:5},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:5},source:''},
         name: 'x'
       },
       consequent: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:7},end:{line:2,col:0},source:''},
+        loc:{start:{line:1,column:7},end:{line:2,column:0},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+          loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
           name: 'x'
         }
       },
       alternate: {
         type: 'FunctionDeclaration',
-        loc:{start:{line:2,col:5},end:{line:2,col:19},source:''},
+        loc:{start:{line:2,column:5},end:{line:2,column:19},source:''},
         generator: false,
         async: false,
         id: {
           type: 'Identifier',
-          loc:{start:{line:2,col:14},end:{line:2,col:14},source:''},
+          loc:{start:{line:2,column:14},end:{line:2,column:14},source:''},
           name: 'f'
         },
         params: [],
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:2,col:17},end:{line:2,col:19},source:''},
+          loc:{start:{line:2,column:17},end:{line:2,column:19},source:''},
           body: []
         }
       }

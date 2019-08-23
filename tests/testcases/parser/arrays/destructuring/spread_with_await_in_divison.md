@@ -29,24 +29,24 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
       expression: {
         type: 'ArrayExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:14},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:14},source:''},
         elements: [
           {
             type: 'SpreadElement',
-            loc:{start:{line:1,col:1},end:{line:1,col:13},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:13},source:''},
             argument: {
               type: 'BinaryExpression',
-              loc:{start:{line:1,col:4},end:{line:1,col:13},source:''},
+              loc:{start:{line:1,column:4},end:{line:1,column:13},source:''},
               left: {
                 type: 'Literal',
-                loc:{start:{line:1,col:4},end:{line:1,col:4},source:''},
+                loc:{start:{line:1,column:4},end:{line:1,column:4},source:''},
                 value: null,
                 regex: { pattern: 'x', flags: '' },
                 raw: '/x/'
@@ -54,7 +54,7 @@ ast: {
               operator: '/',
               right: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:8},end:{line:1,col:13},source:''},
+                loc:{start:{line:1,column:8},end:{line:1,column:13},source:''},
                 name: 'yield'
               }
             }

@@ -29,23 +29,23 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
   body: [
     {
       type: 'ForStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:15},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
       init: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:11},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:11},source:''},
         left: {
           type: 'ArrayExpression',
-          loc:{start:{line:1,col:5},end:{line:1,col:8},source:''},
+          loc:{start:{line:1,column:5},end:{line:1,column:8},source:''},
           elements: []
         },
         operator: '+',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,col:10},end:{line:1,col:11},source:''},
+          loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
           name: 'b'
         }
       },
@@ -53,7 +53,7 @@ ast: {
       update: null,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:14},end:{line:1,col:15},source:''}
+        loc:{start:{line:1,column:14},end:{line:1,column:15},source:''}
       }
     }
   ]

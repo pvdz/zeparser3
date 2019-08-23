@@ -29,44 +29,44 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:57},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:57},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:57},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:57},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:1,col:57},source:''},
+        loc:{start:{line:1,column:12},end:{line:1,column:57},source:''},
         body: [
           {
             type: 'DoWhileStatement',
-            loc:{start:{line:1,col:14},end:{line:1,col:56},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:56},source:''},
             body: {
               type: 'IfStatement',
-              loc:{start:{line:1,col:24},end:{line:1,col:44},source:''},
+              loc:{start:{line:1,column:24},end:{line:1,column:44},source:''},
               test: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:28},end:{line:1,col:29},source:''},
+                loc:{start:{line:1,column:28},end:{line:1,column:29},source:''},
                 name: 'x'
               },
               consequent: {
                 type: 'ContinueStatement',
-                loc:{start:{line:1,col:31},end:{line:1,col:44},source:''},
+                loc:{start:{line:1,column:31},end:{line:1,column:44},source:''},
                 label: null
               },
               alternate: null
             },
             test: {
               type: 'Literal',
-              loc:{start:{line:1,col:50},end:{line:1,col:54},source:''},
+              loc:{start:{line:1,column:50},end:{line:1,column:54},source:''},
               value: true,
               raw: 'true'
             }

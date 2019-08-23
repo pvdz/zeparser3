@@ -34,28 +34,28 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:3},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:3},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:0},source:''},
       expression: {
         type: 'Identifier',
-        loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
+        loc:{start:{line:1,column:0},end:{line:2,column:0},source:''},
         name: 'a'
       }
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:2,col:0},end:{line:2,col:3},source:''},
+      loc:{start:{line:2,column:0},end:{line:2,column:3},source:''},
       expression: {
         type: 'UpdateExpression',
-        loc:{start:{line:2,col:0},end:{line:2,col:3},source:''},
+        loc:{start:{line:2,column:0},end:{line:2,column:3},source:''},
         operator: '++',
         prefix: true,
         argument: {
           type: 'Identifier',
-          loc:{start:{line:2,col:2},end:{line:2,col:3},source:''},
+          loc:{start:{line:2,column:2},end:{line:2,column:3},source:''},
           name: 'b'
         }
       }

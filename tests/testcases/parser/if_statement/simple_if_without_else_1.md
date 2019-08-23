@@ -29,22 +29,22 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
   body: [
     {
       type: 'IfStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:13},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:13},source:''},
       test: {
         type: 'Identifier',
-        loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
         name: 'foo'
       },
       consequent: {
         type: 'ExpressionStatement',
-        loc:{start:{line:1,col:9},end:{line:1,col:13},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:13},source:''},
         expression: {
           type: 'Identifier',
-          loc:{start:{line:1,col:9},end:{line:1,col:12},source:''},
+          loc:{start:{line:1,column:9},end:{line:1,column:12},source:''},
           name: 'bar'
         }
       },

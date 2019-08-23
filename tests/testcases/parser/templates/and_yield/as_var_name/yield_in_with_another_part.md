@@ -29,32 +29,32 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:29},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:29},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
           name: 'x'
         },
         operator: '=',
         right: {
           type: 'TemplateLiteral',
-          loc:{start:{line:1,col:4},end:{line:1,col:29},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:29},source:''},
           expressions: [
             {
               type: 'Identifier',
-              loc:{start:{line:1,col:10},end:{line:1,col:16},source:''},
+              loc:{start:{line:1,column:10},end:{line:1,column:16},source:''},
               name: 'yield'
             },
             {
               type: 'Literal',
-              loc:{start:{line:1,col:23},end:{line:1,col:23},source:''},
+              loc:{start:{line:1,column:23},end:{line:1,column:23},source:''},
               value: 3,
               raw: '3'
             }
@@ -62,19 +62,19 @@ ast: {
           quasis: [
             {
               type: 'TemplateElement',
-              loc:{start:{line:1,col:4},end:{line:1,col:10},source:''},
+              loc:{start:{line:1,column:4},end:{line:1,column:10},source:''},
               tail: false,
               value: { raw: '`1 ${', cooked: '<TODO>' }
             },
             {
               type: 'TemplateElement',
-              loc:{start:{line:1,col:16},end:{line:1,col:16},source:''},
+              loc:{start:{line:1,column:16},end:{line:1,column:16},source:''},
               tail: false,
               value: { raw: '} 2 ${', cooked: '<TODO>' }
             },
             {
               type: 'TemplateElement',
-              loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
+              loc:{start:{line:1,column:25},end:{line:1,column:25},source:''},
               tail: true,
               value: { raw: '} 4`', cooked: '<TODO>' }
             }

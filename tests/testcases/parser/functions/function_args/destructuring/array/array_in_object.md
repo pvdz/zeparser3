@@ -29,29 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:33},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:33},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'fk'
       },
       params: [
         {
           type: 'ObjectPattern',
-          loc:{start:{line:1,col:12},end:{line:1,col:29},source:''},
+          loc:{start:{line:1,column:12},end:{line:1,column:29},source:''},
           properties: [
             {
               type: 'Property',
-              loc:{start:{line:1,col:13},end:{line:1,col:28},source:''},
+              loc:{start:{line:1,column:13},end:{line:1,column:28},source:''},
               key: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:13},end:{line:1,col:16},source:''},
+                loc:{start:{line:1,column:13},end:{line:1,column:16},source:''},
                 name: 'x'
               },
               kind: 'init',
@@ -59,23 +59,23 @@ ast: {
               computed: false,
               value: {
                 type: 'ArrayPattern',
-                loc:{start:{line:1,col:16},end:{line:1,col:28},source:''},
+                loc:{start:{line:1,column:16},end:{line:1,column:28},source:''},
                 elements: [
                   {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+                    loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
                     name: 'a'
                   },
                   {
                     type: 'ObjectPattern',
-                    loc:{start:{line:1,col:20},end:{line:1,col:27},source:''},
+                    loc:{start:{line:1,column:20},end:{line:1,column:27},source:''},
                     properties: [
                       {
                         type: 'Property',
-                        loc:{start:{line:1,col:21},end:{line:1,col:26},source:''},
+                        loc:{start:{line:1,column:21},end:{line:1,column:26},source:''},
                         key: {
                           type: 'Identifier',
-                          loc:{start:{line:1,col:21},end:{line:1,col:24},source:''},
+                          loc:{start:{line:1,column:21},end:{line:1,column:24},source:''},
                           name: 'b'
                         },
                         kind: 'init',
@@ -83,7 +83,7 @@ ast: {
                         computed: false,
                         value: {
                           type: 'ArrayPattern',
-                          loc:{start:{line:1,col:24},end:{line:1,col:26},source:''},
+                          loc:{start:{line:1,column:24},end:{line:1,column:26},source:''},
                           elements: []
                         },
                         shorthand: false
@@ -99,7 +99,7 @@ ast: {
       ],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:31},end:{line:1,col:33},source:''},
+        loc:{start:{line:1,column:31},end:{line:1,column:33},source:''},
         body: []
       }
     }

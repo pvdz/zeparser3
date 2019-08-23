@@ -33,46 +33,46 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:43},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:43},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:43},source:''},
       left: {
         type: 'MemberExpression',
-        loc:{start:{line:1,col:5},end:{line:1,col:37},source:''},
+        loc:{start:{line:1,column:5},end:{line:1,column:37},source:''},
         object: {
           type: 'FunctionExpression',
-          loc:{start:{line:1,col:5},end:{line:1,col:31},source:''},
+          loc:{start:{line:1,column:5},end:{line:1,column:31},source:''},
           generator: false,
           async: false,
           id: null,
           params: [],
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:15},end:{line:1,col:31},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:31},source:''},
             body: [
               {
                 type: 'IfStatement',
-                loc:{start:{line:1,col:17},end:{line:1,col:30},source:''},
+                loc:{start:{line:1,column:17},end:{line:1,column:30},source:''},
                 test: {
                   type: 'BinaryExpression',
-                  loc:{start:{line:1,col:21},end:{line:1,col:27},source:''},
+                  loc:{start:{line:1,column:21},end:{line:1,column:27},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:21},end:{line:1,col:23},source:''},
+                    loc:{start:{line:1,column:21},end:{line:1,column:23},source:''},
                     name: 'a'
                   },
                   operator: 'in',
                   right: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:26},end:{line:1,col:27},source:''},
+                    loc:{start:{line:1,column:26},end:{line:1,column:27},source:''},
                     name: 'b'
                   }
                 },
                 consequent: {
                   type: 'EmptyStatement',
-                  loc:{start:{line:1,col:28},end:{line:1,col:30},source:''}
+                  loc:{start:{line:1,column:28},end:{line:1,column:30},source:''}
                 },
                 alternate: null
               }
@@ -81,19 +81,19 @@ ast: {
         },
         property: {
           type: 'Identifier',
-          loc:{start:{line:1,col:32},end:{line:1,col:32},source:''},
+          loc:{start:{line:1,column:32},end:{line:1,column:32},source:''},
           name: 'prop'
         },
         computed: false
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:40},end:{line:1,col:41},source:''},
+        loc:{start:{line:1,column:40},end:{line:1,column:41},source:''},
         name: 'x'
       },
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:42},end:{line:1,col:43},source:''}
+        loc:{start:{line:1,column:42},end:{line:1,column:43},source:''}
       }
     }
   ]

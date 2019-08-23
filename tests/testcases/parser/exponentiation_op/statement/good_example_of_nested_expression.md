@@ -29,47 +29,47 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
         left: {
           type: 'UnaryExpression',
-          loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
           operator: '+',
           prefix: true,
           argument: {
             type: 'Identifier',
-            loc:{start:{line:1,col:1},end:{line:1,col:3},source:''},
+            loc:{start:{line:1,column:1},end:{line:1,column:3},source:''},
             name: 'a'
           }
         },
         operator: '*',
         right: {
           type: 'BinaryExpression',
-          loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
           left: {
             type: 'Identifier',
-            loc:{start:{line:1,col:5},end:{line:1,col:7},source:''},
+            loc:{start:{line:1,column:5},end:{line:1,column:7},source:''},
             name: 'b'
           },
           operator: '**',
           right: {
             type: 'BinaryExpression',
-            loc:{start:{line:1,col:0},end:{line:1,col:16},source:''},
+            loc:{start:{line:1,column:0},end:{line:1,column:16},source:''},
             left: {
               type: 'Identifier',
-              loc:{start:{line:1,col:10},end:{line:1,col:12},source:''},
+              loc:{start:{line:1,column:10},end:{line:1,column:12},source:''},
               name: 'c'
             },
             operator: '**',
             right: {
               type: 'Literal',
-              loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+              loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
               value: 3,
               raw: '3'
             }

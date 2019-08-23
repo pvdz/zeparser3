@@ -33,38 +33,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:13},end:{line:4,col:1},source:''},
+        loc:{start:{line:1,column:13},end:{line:4,column:1},source:''},
         body: [
           {
             type: 'DoWhileStatement',
-            loc:{start:{line:2,col:2},end:{line:4,col:0},source:''},
+            loc:{start:{line:2,column:2},end:{line:4,column:0},source:''},
             body: {
               type: 'ThrowStatement',
-              loc:{start:{line:2,col:5},end:{line:3,col:2},source:''},
+              loc:{start:{line:2,column:5},end:{line:3,column:2},source:''},
               argument: {
                 type: 'Identifier',
-                loc:{start:{line:2,col:11},end:{line:3,col:2},source:''},
+                loc:{start:{line:2,column:11},end:{line:3,column:2},source:''},
                 name: 'pass'
               }
             },
             test: {
               type: 'Identifier',
-              loc:{start:{line:3,col:8},end:{line:3,col:9},source:''},
+              loc:{start:{line:3,column:8},end:{line:3,column:9},source:''},
               name: 'x'
             }
           }

@@ -47,33 +47,33 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
   body: [
     {
       type: 'ExportNamedDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
       specifiers: [],
       declaration: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:19},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:14},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:11},source:''},
               name: 'foo'
             },
             init: null
           },
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:16},end:{line:1,col:19},source:''},
+            loc:{start:{line:1,column:16},end:{line:1,column:19},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:16},end:{line:1,col:16},source:''},
+              loc:{start:{line:1,column:16},end:{line:1,column:16},source:''},
               name: 'bar'
             },
             init: null

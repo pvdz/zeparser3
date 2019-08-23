@@ -70,27 +70,27 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
   body: [
     {
       type: 'ForInStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:21},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:21},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:9},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:15},source:''},
         kind: 'var',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:9},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:9},end:{line:1,column:15},source:''},
             id: {
               type: 'Identifier',
-              loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
               name: 'a'
             },
             init: {
               type: 'Identifier',
-              loc:{start:{line:1,col:13},end:{line:1,col:15},source:''},
+              loc:{start:{line:1,column:13},end:{line:1,column:15},source:''},
               name: 'b'
             }
           }
@@ -98,12 +98,12 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:18},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:19},source:''},
         name: 'c'
       },
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:20},end:{line:1,col:21},source:''}
+        loc:{start:{line:1,column:20},end:{line:1,column:21},source:''}
       }
     }
   ]

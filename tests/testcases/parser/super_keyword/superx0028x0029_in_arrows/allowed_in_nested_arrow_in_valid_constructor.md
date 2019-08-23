@@ -29,31 +29,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:65},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:65},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:65},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:65},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'x'
       },
       superClass: {
         type: 'Identifier',
-        loc:{start:{line:1,col:16},end:{line:1,col:18},source:''},
+        loc:{start:{line:1,column:16},end:{line:1,column:18},source:''},
         name: 'y'
       },
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:18},end:{line:1,col:65},source:''},
+        loc:{start:{line:1,column:18},end:{line:1,column:65},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:20},end:{line:1,col:64},source:''},
+            loc:{start:{line:1,column:20},end:{line:1,column:64},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:20},end:{line:1,col:31},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:31},source:''},
               name: 'constructor'
             },
             static: false,
@@ -61,21 +61,21 @@ ast: {
             kind: 'constructor',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:20},end:{line:1,col:64},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:64},source:''},
               generator: false,
               async: false,
               id: null,
               params: [],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:33},end:{line:1,col:64},source:''},
+                loc:{start:{line:1,column:33},end:{line:1,column:64},source:''},
                 body: [
                   {
                     type: 'ReturnStatement',
-                    loc:{start:{line:1,col:35},end:{line:1,col:63},source:''},
+                    loc:{start:{line:1,column:35},end:{line:1,column:63},source:''},
                     argument: {
                       type: 'ArrowFunctionExpression',
-                      loc:{start:{line:1,col:42},end:{line:1,col:61},source:''},
+                      loc:{start:{line:1,column:42},end:{line:1,column:61},source:''},
                       params: [],
                       id: null,
                       generator: false,
@@ -83,7 +83,7 @@ ast: {
                       expression: true,
                       body: {
                         type: 'ArrowFunctionExpression',
-                        loc:{start:{line:1,col:48},end:{line:1,col:61},source:''},
+                        loc:{start:{line:1,column:48},end:{line:1,column:61},source:''},
                         params: [],
                         id: null,
                         generator: false,
@@ -91,10 +91,10 @@ ast: {
                         expression: true,
                         body: {
                           type: 'CallExpression',
-                          loc:{start:{line:1,col:54},end:{line:1,col:61},source:''},
+                          loc:{start:{line:1,column:54},end:{line:1,column:61},source:''},
                           callee: {
                             type: 'Super',
-                            loc:{start:{line:1,col:54},end:{line:1,col:59},source:''}
+                            loc:{start:{line:1,column:54},end:{line:1,column:59},source:''}
                           },
                           arguments: []
                         }

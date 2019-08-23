@@ -29,37 +29,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:48},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:48},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:48},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:48},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:48},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:48},source:''},
         body: [
           {
             type: 'ForOfStatement',
-            loc:{start:{line:1,col:21},end:{line:1,col:47},source:''},
+            loc:{start:{line:1,column:21},end:{line:1,column:47},source:''},
             left: {
               type: 'VariableDeclaration',
-              loc:{start:{line:1,col:36},end:{line:1,col:38},source:''},
+              loc:{start:{line:1,column:36},end:{line:1,column:38},source:''},
               kind: 'var',
               declarations: [
                 {
                   type: 'VariableDeclarator',
-                  loc:{start:{line:1,col:36},end:{line:1,col:38},source:''},
+                  loc:{start:{line:1,column:36},end:{line:1,column:38},source:''},
                   id: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:36},end:{line:1,col:36},source:''},
+                    loc:{start:{line:1,column:36},end:{line:1,column:36},source:''},
                     name: 'x'
                   },
                   init: null
@@ -68,13 +68,13 @@ ast: {
             },
             right: {
               type: 'Identifier',
-              loc:{start:{line:1,col:41},end:{line:1,col:42},source:''},
+              loc:{start:{line:1,column:41},end:{line:1,column:42},source:''},
               name: 'y'
             },
             await: true,
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:1,col:44},end:{line:1,col:47},source:''},
+              loc:{start:{line:1,column:44},end:{line:1,column:47},source:''},
               body: []
             }
           }

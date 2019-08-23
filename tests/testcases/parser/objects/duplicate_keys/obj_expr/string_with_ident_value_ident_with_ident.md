@@ -33,21 +33,21 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
       expression: {
         type: 'ObjectExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:15},source:''},
         properties: [
           {
             type: 'Property',
-            loc:{start:{line:1,col:2},end:{line:1,col:8},source:''},
+            loc:{start:{line:1,column:2},end:{line:1,column:8},source:''},
             key: {
               type: 'Literal',
-              loc:{start:{line:1,col:2},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:7},source:''},
               value: 'x',
               raw: '"x"'
             },
@@ -56,17 +56,17 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc:{start:{line:1,col:7},end:{line:1,col:8},source:''},
+              loc:{start:{line:1,column:7},end:{line:1,column:8},source:''},
               name: 'a'
             },
             shorthand: false
           },
           {
             type: 'Property',
-            loc:{start:{line:1,col:10},end:{line:1,col:14},source:''},
+            loc:{start:{line:1,column:10},end:{line:1,column:14},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
+              loc:{start:{line:1,column:10},end:{line:1,column:13},source:''},
               name: 'y'
             },
             kind: 'init',
@@ -74,7 +74,7 @@ ast: {
             computed: false,
             value: {
               type: 'Identifier',
-              loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:13},end:{line:1,column:14},source:''},
               name: 'a'
             },
             shorthand: false

@@ -47,14 +47,14 @@ Parsed with the module goal.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
   body: [
     {
       type: 'ExportDefaultDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:20},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:20},source:''},
       declaration: {
         type: 'Literal',
-        loc:{start:{line:1,col:15},end:{line:1,col:19},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:19},source:''},
         value: null,
         raw: 'null'
       }

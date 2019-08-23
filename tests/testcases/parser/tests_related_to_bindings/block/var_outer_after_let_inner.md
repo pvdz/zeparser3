@@ -33,23 +33,23 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:17},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:17},source:''},
   body: [
     {
       type: 'BlockStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:11},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
       body: [
         {
           type: 'VariableDeclaration',
-          loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+          loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
           kind: 'let',
           declarations: [
             {
               type: 'VariableDeclarator',
-              loc:{start:{line:1,col:6},end:{line:1,col:7},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
               id: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+                loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
                 name: 'x'
               },
               init: null
@@ -60,15 +60,15 @@ ast: {
     },
     {
       type: 'VariableDeclaration',
-      loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
+      loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
       kind: 'var',
       declarations: [
         {
           type: 'VariableDeclarator',
-          loc:{start:{line:1,col:15},end:{line:1,col:16},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:16},source:''},
           id: {
             type: 'Identifier',
-            loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+            loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
             name: 'x'
           },
           init: null

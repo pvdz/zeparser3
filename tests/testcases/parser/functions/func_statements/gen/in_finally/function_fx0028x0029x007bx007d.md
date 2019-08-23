@@ -32,35 +32,35 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+  loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:4,col:1},source:''},
+      loc:{start:{line:1,column:0},end:{line:4,column:1},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:2,col:2},source:''},
+        loc:{start:{line:1,column:4},end:{line:2,column:2},source:''},
         body: []
       },
       handler: null,
       finalizer: {
         type: 'BlockStatement',
-        loc:{start:{line:2,col:10},end:{line:4,col:1},source:''},
+        loc:{start:{line:2,column:10},end:{line:4,column:1},source:''},
         body: [
           {
             type: 'FunctionDeclaration',
-            loc:{start:{line:3,col:2},end:{line:4,col:0},source:''},
+            loc:{start:{line:3,column:2},end:{line:4,column:0},source:''},
             generator: false,
             async: false,
             id: {
               type: 'Identifier',
-              loc:{start:{line:3,col:11},end:{line:3,col:11},source:''},
+              loc:{start:{line:3,column:11},end:{line:3,column:11},source:''},
               name: 'f'
             },
             params: [],
             body: {
               type: 'BlockStatement',
-              loc:{start:{line:3,col:14},end:{line:4,col:0},source:''},
+              loc:{start:{line:3,column:14},end:{line:4,column:0},source:''},
               body: []
             }
           }

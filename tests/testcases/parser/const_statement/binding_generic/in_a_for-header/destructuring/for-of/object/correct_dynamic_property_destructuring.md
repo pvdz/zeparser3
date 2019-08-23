@@ -29,29 +29,29 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
   body: [
     {
       type: 'ForOfStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:28},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:28},source:''},
       left: {
         type: 'VariableDeclaration',
-        loc:{start:{line:1,col:11},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:11},end:{line:1,column:20},source:''},
         kind: 'const',
         declarations: [
           {
             type: 'VariableDeclarator',
-            loc:{start:{line:1,col:11},end:{line:1,col:20},source:''},
+            loc:{start:{line:1,column:11},end:{line:1,column:20},source:''},
             id: {
               type: 'ObjectPattern',
-              loc:{start:{line:1,col:11},end:{line:1,col:20},source:''},
+              loc:{start:{line:1,column:11},end:{line:1,column:20},source:''},
               properties: [
                 {
                   type: 'Property',
-                  loc:{start:{line:1,col:12},end:{line:1,col:18},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:18},source:''},
                   key: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:13},end:{line:1,col:14},source:''},
+                    loc:{start:{line:1,column:13},end:{line:1,column:14},source:''},
                     name: 'x'
                   },
                   kind: 'init',
@@ -59,7 +59,7 @@ ast: {
                   computed: true,
                   value: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:17},end:{line:1,col:18},source:''},
+                    loc:{start:{line:1,column:17},end:{line:1,column:18},source:''},
                     name: 'y'
                   },
                   shorthand: false
@@ -72,13 +72,13 @@ ast: {
       },
       right: {
         type: 'Identifier',
-        loc:{start:{line:1,col:23},end:{line:1,col:26},source:''},
+        loc:{start:{line:1,column:23},end:{line:1,column:26},source:''},
         name: 'obj'
       },
       await: false,
       body: {
         type: 'EmptyStatement',
-        loc:{start:{line:1,col:27},end:{line:1,col:28},source:''}
+        loc:{start:{line:1,column:27},end:{line:1,column:28},source:''}
       }
     }
   ]

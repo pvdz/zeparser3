@@ -29,27 +29,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
   body: [
     {
       type: 'ClassDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:34},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:34},source:''},
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:6},end:{line:1,col:6},source:''},
+        loc:{start:{line:1,column:6},end:{line:1,column:6},source:''},
         name: 'x'
       },
       superClass: null,
       body: {
         type: 'ClassBody',
-        loc:{start:{line:1,col:8},end:{line:1,col:34},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:34},source:''},
         body: [
           {
             type: 'MethodDefinition',
-            loc:{start:{line:1,col:10},end:{line:1,col:33},source:''},
+            loc:{start:{line:1,column:10},end:{line:1,column:33},source:''},
             key: {
               type: 'Identifier',
-              loc:{start:{line:1,col:10},end:{line:1,col:13},source:''},
+              loc:{start:{line:1,column:10},end:{line:1,column:13},source:''},
               name: 'foo'
             },
             static: false,
@@ -57,26 +57,26 @@ ast: {
             kind: 'method',
             value: {
               type: 'FunctionExpression',
-              loc:{start:{line:1,col:10},end:{line:1,col:33},source:''},
+              loc:{start:{line:1,column:10},end:{line:1,column:33},source:''},
               generator: false,
               async: false,
               id: null,
               params: [
                 {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:14},end:{line:1,col:29},source:''},
+                  loc:{start:{line:1,column:14},end:{line:1,column:29},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+                    loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
                     name: 'x'
                   },
                   right: {
                     type: 'NewExpression',
-                    loc:{start:{line:1,col:16},end:{line:1,col:29},source:''},
+                    loc:{start:{line:1,column:16},end:{line:1,column:29},source:''},
                     arguments: [],
                     callee: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:21},end:{line:1,col:26},source:''},
+                      loc:{start:{line:1,column:21},end:{line:1,column:26},source:''},
                       name: 'await'
                     }
                   }
@@ -84,7 +84,7 @@ ast: {
               ],
               body: {
                 type: 'BlockStatement',
-                loc:{start:{line:1,col:30},end:{line:1,col:33},source:''},
+                loc:{start:{line:1,column:30},end:{line:1,column:33},source:''},
                 body: []
               }
             }

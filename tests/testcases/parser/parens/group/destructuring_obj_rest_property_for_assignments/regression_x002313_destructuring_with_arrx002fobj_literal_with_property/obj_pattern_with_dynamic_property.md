@@ -29,34 +29,34 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:22},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:22},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:1},end:{line:1,col:20},source:''},
+        loc:{start:{line:1,column:1},end:{line:1,column:20},source:''},
         left: {
           type: 'ObjectPattern',
-          loc:{start:{line:1,col:1},end:{line:1,col:16},source:''},
+          loc:{start:{line:1,column:1},end:{line:1,column:16},source:''},
           properties: [
             {
               type: 'RestElement',
-              loc:{start:{line:1,col:2},end:{line:1,col:14},source:''},
+              loc:{start:{line:1,column:2},end:{line:1,column:14},source:''},
               argument: {
                 type: 'MemberExpression',
-                loc:{start:{line:1,col:5},end:{line:1,col:14},source:''},
+                loc:{start:{line:1,column:5},end:{line:1,column:14},source:''},
                 object: {
                   type: 'ObjectExpression',
-                  loc:{start:{line:1,col:5},end:{line:1,col:11},source:''},
+                  loc:{start:{line:1,column:5},end:{line:1,column:11},source:''},
                   properties: [
                     {
                       type: 'Property',
-                      loc:{start:{line:1,col:6},end:{line:1,col:10},source:''},
+                      loc:{start:{line:1,column:6},end:{line:1,column:10},source:''},
                       key: {
                         type: 'Identifier',
-                        loc:{start:{line:1,col:6},end:{line:1,col:9},source:''},
+                        loc:{start:{line:1,column:6},end:{line:1,column:9},source:''},
                         name: 'b'
                       },
                       kind: 'init',
@@ -64,7 +64,7 @@ ast: {
                       computed: false,
                       value: {
                         type: 'Literal',
-                        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+                        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
                         value: 0,
                         raw: '0'
                       },
@@ -74,7 +74,7 @@ ast: {
                 },
                 property: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:12},end:{line:1,col:13},source:''},
+                  loc:{start:{line:1,column:12},end:{line:1,column:13},source:''},
                   name: 'x'
                 },
                 computed: true
@@ -85,7 +85,7 @@ ast: {
         operator: '=',
         right: {
           type: 'ObjectExpression',
-          loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
+          loc:{start:{line:1,column:18},end:{line:1,column:20},source:''},
           properties: []
         }
       }

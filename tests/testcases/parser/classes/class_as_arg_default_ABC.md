@@ -29,95 +29,95 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:83},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:83},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:83},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:83},source:''},
       expression: {
         type: 'AssignmentExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:83},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:83},source:''},
         left: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:2},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:2},source:''},
           name: 'f'
         },
         operator: '=',
         right: {
           type: 'ArrowFunctionExpression',
-          loc:{start:{line:1,col:4},end:{line:1,col:83},source:''},
+          loc:{start:{line:1,column:4},end:{line:1,column:83},source:''},
           params: [
             {
               type: 'ArrayPattern',
-              loc:{start:{line:1,col:5},end:{line:1,col:76},source:''},
+              loc:{start:{line:1,column:5},end:{line:1,column:76},source:''},
               elements: [
                 {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:5},end:{line:1,col:20},source:''},
+                  loc:{start:{line:1,column:5},end:{line:1,column:20},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:6},end:{line:1,col:10},source:''},
+                    loc:{start:{line:1,column:6},end:{line:1,column:10},source:''},
                     name: 'cls'
                   },
                   right: {
                     type: 'ClassExpression',
-                    loc:{start:{line:1,col:12},end:{line:1,col:20},source:''},
+                    loc:{start:{line:1,column:12},end:{line:1,column:20},source:''},
                     id: null,
                     superClass: null,
                     body: {
                       type: 'ClassBody',
-                      loc:{start:{line:1,col:18},end:{line:1,col:20},source:''},
+                      loc:{start:{line:1,column:18},end:{line:1,column:20},source:''},
                       body: []
                     }
                   }
                 },
                 {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:5},end:{line:1,col:39},source:''},
+                  loc:{start:{line:1,column:5},end:{line:1,column:39},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:22},end:{line:1,col:27},source:''},
+                    loc:{start:{line:1,column:22},end:{line:1,column:27},source:''},
                     name: 'xCls'
                   },
                   right: {
                     type: 'ClassExpression',
-                    loc:{start:{line:1,col:29},end:{line:1,col:39},source:''},
+                    loc:{start:{line:1,column:29},end:{line:1,column:39},source:''},
                     id: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:35},end:{line:1,col:35},source:''},
+                      loc:{start:{line:1,column:35},end:{line:1,column:35},source:''},
                       name: 'X'
                     },
                     superClass: null,
                     body: {
                       type: 'ClassBody',
-                      loc:{start:{line:1,col:37},end:{line:1,col:39},source:''},
+                      loc:{start:{line:1,column:37},end:{line:1,column:39},source:''},
                       body: []
                     }
                   }
                 },
                 {
                   type: 'AssignmentPattern',
-                  loc:{start:{line:1,col:5},end:{line:1,col:75},source:''},
+                  loc:{start:{line:1,column:5},end:{line:1,column:75},source:''},
                   left: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:41},end:{line:1,col:47},source:''},
+                    loc:{start:{line:1,column:41},end:{line:1,column:47},source:''},
                     name: 'xCls2'
                   },
                   right: {
                     type: 'ClassExpression',
-                    loc:{start:{line:1,col:49},end:{line:1,col:75},source:''},
+                    loc:{start:{line:1,column:49},end:{line:1,column:75},source:''},
                     id: null,
                     superClass: null,
                     body: {
                       type: 'ClassBody',
-                      loc:{start:{line:1,col:55},end:{line:1,col:75},source:''},
+                      loc:{start:{line:1,column:55},end:{line:1,column:75},source:''},
                       body: [
                         {
                           type: 'MethodDefinition',
-                          loc:{start:{line:1,col:57},end:{line:1,col:74},source:''},
+                          loc:{start:{line:1,column:57},end:{line:1,column:74},source:''},
                           key: {
                             type: 'Identifier',
-                            loc:{start:{line:1,col:64},end:{line:1,col:68},source:''},
+                            loc:{start:{line:1,column:64},end:{line:1,column:68},source:''},
                             name: 'name'
                           },
                           static: true,
@@ -125,14 +125,14 @@ ast: {
                           kind: 'method',
                           value: {
                             type: 'FunctionExpression',
-                            loc:{start:{line:1,col:57},end:{line:1,col:74},source:''},
+                            loc:{start:{line:1,column:57},end:{line:1,column:74},source:''},
                             generator: false,
                             async: false,
                             id: null,
                             params: [],
                             body: {
                               type: 'BlockStatement',
-                              loc:{start:{line:1,col:71},end:{line:1,col:74},source:''},
+                              loc:{start:{line:1,column:71},end:{line:1,column:74},source:''},
                               body: []
                             }
                           }
@@ -150,7 +150,7 @@ ast: {
           expression: false,
           body: {
             type: 'BlockStatement',
-            loc:{start:{line:1,col:81},end:{line:1,col:83},source:''},
+            loc:{start:{line:1,column:81},end:{line:1,column:83},source:''},
             body: []
           }
         }

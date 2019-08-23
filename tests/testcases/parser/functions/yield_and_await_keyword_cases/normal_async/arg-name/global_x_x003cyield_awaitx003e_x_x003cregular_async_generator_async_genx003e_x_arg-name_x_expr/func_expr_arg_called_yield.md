@@ -48,56 +48,56 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:51},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:51},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:6},end:{line:1,col:51},source:''},
+      loc:{start:{line:1,column:6},end:{line:1,column:51},source:''},
       generator: false,
       async: true,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+        loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
         name: 'as'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:19},end:{line:1,col:51},source:''},
+        loc:{start:{line:1,column:19},end:{line:1,column:51},source:''},
         body: [
           {
             type: 'VariableDeclaration',
-            loc:{start:{line:1,col:25},end:{line:1,col:50},source:''},
+            loc:{start:{line:1,column:25},end:{line:1,column:50},source:''},
             kind: 'let',
             declarations: [
               {
                 type: 'VariableDeclarator',
-                loc:{start:{line:1,col:25},end:{line:1,col:50},source:''},
+                loc:{start:{line:1,column:25},end:{line:1,column:50},source:''},
                 id: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:25},end:{line:1,col:25},source:''},
+                  loc:{start:{line:1,column:25},end:{line:1,column:25},source:''},
                   name: 'f'
                 },
                 init: {
                   type: 'FunctionExpression',
-                  loc:{start:{line:1,col:29},end:{line:1,col:50},source:''},
+                  loc:{start:{line:1,column:29},end:{line:1,column:50},source:''},
                   generator: false,
                   async: false,
                   id: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:38},end:{line:1,col:38},source:''},
+                    loc:{start:{line:1,column:38},end:{line:1,column:38},source:''},
                     name: 'f'
                   },
                   params: [
                     {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:40},end:{line:1,col:40},source:''},
+                      loc:{start:{line:1,column:40},end:{line:1,column:40},source:''},
                       name: 'yield'
                     }
                   ],
                   body: {
                     type: 'BlockStatement',
-                    loc:{start:{line:1,col:47},end:{line:1,col:50},source:''},
+                    loc:{start:{line:1,column:47},end:{line:1,column:50},source:''},
                     body: []
                   }
                 }

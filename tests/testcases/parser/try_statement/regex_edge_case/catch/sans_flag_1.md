@@ -32,27 +32,27 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:2,col:5},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:5},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:2,col:0},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:0},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:7},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:7},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc:{start:{line:1,col:7},end:{line:2,col:0},source:''},
+        loc:{start:{line:1,column:7},end:{line:2,column:0},source:''},
         param: {
           type: 'Identifier',
-          loc:{start:{line:1,col:14},end:{line:1,col:14},source:''},
+          loc:{start:{line:1,column:14},end:{line:1,column:14},source:''},
           name: 'e'
         },
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:17},end:{line:2,col:0},source:''},
+          loc:{start:{line:1,column:17},end:{line:2,column:0},source:''},
           body: []
         }
       },
@@ -60,10 +60,10 @@ ast: {
     },
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:2,col:0},end:{line:2,col:5},source:''},
+      loc:{start:{line:2,column:0},end:{line:2,column:5},source:''},
       expression: {
         type: 'Literal',
-        loc:{start:{line:2,col:0},end:{line:2,col:5},source:''},
+        loc:{start:{line:2,column:0},end:{line:2,column:5},source:''},
         value: null,
         regex: { pattern: 'foo', flags: '' },
         raw: '/foo/'

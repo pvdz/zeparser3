@@ -30,37 +30,37 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:25},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:25},source:''},
       expression: {
         type: 'CallExpression',
-        loc:{start:{line:1,col:0},end:{line:1,col:24},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:24},source:''},
         callee: {
           type: 'Identifier',
-          loc:{start:{line:1,col:0},end:{line:1,col:3},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:3},source:''},
           name: 'foo'
         },
         arguments: [
           {
             type: 'CallExpression',
-            loc:{start:{line:1,col:4},end:{line:1,col:23},source:''},
+            loc:{start:{line:1,column:4},end:{line:1,column:23},source:''},
             callee: {
               type: 'MemberExpression',
-              loc:{start:{line:1,col:4},end:{line:1,col:21},source:''},
+              loc:{start:{line:1,column:4},end:{line:1,column:21},source:''},
               object: {
                 type: 'CallExpression',
-                loc:{start:{line:1,col:4},end:{line:1,col:17},source:''},
+                loc:{start:{line:1,column:4},end:{line:1,column:17},source:''},
                 callee: {
                   type: 'Import',
-                  loc:{start:{line:1,col:4},end:{line:1,col:11},source:''}
+                  loc:{start:{line:1,column:4},end:{line:1,column:11},source:''}
                 },
                 arguments: [
                   {
                     type: 'Literal',
-                    loc:{start:{line:1,col:11},end:{line:1,col:11},source:''},
+                    loc:{start:{line:1,column:11},end:{line:1,column:11},source:''},
                     value: 'foo',
                     raw: "'foo'"
                   }
@@ -68,7 +68,7 @@ ast: {
               },
               property: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:18},end:{line:1,col:18},source:''},
+                loc:{start:{line:1,column:18},end:{line:1,column:18},source:''},
                 name: 'den'
               },
               computed: false

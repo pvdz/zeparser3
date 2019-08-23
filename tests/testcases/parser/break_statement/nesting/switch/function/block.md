@@ -29,48 +29,48 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:55},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:55},source:''},
   body: [
     {
       type: 'FunctionDeclaration',
-      loc:{start:{line:1,col:0},end:{line:1,col:55},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:55},source:''},
       generator: false,
       async: false,
       id: {
         type: 'Identifier',
-        loc:{start:{line:1,col:9},end:{line:1,col:9},source:''},
+        loc:{start:{line:1,column:9},end:{line:1,column:9},source:''},
         name: 'f'
       },
       params: [],
       body: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:12},end:{line:1,col:55},source:''},
+        loc:{start:{line:1,column:12},end:{line:1,column:55},source:''},
         body: [
           {
             type: 'SwitchStatement',
-            loc:{start:{line:1,col:14},end:{line:1,col:54},source:''},
+            loc:{start:{line:1,column:14},end:{line:1,column:54},source:''},
             discriminant: {
               type: 'Identifier',
-              loc:{start:{line:1,col:22},end:{line:1,col:23},source:''},
+              loc:{start:{line:1,column:22},end:{line:1,column:23},source:''},
               name: 'x'
             },
             cases: [
               {
                 type: 'SwitchCase',
-                loc:{start:{line:1,col:26},end:{line:1,col:53},source:''},
+                loc:{start:{line:1,column:26},end:{line:1,column:53},source:''},
                 test: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:31},end:{line:1,col:32},source:''},
+                  loc:{start:{line:1,column:31},end:{line:1,column:32},source:''},
                   name: 'z'
                 },
                 consequent: [
                   {
                     type: 'BlockStatement',
-                    loc:{start:{line:1,col:40},end:{line:1,col:53},source:''},
+                    loc:{start:{line:1,column:40},end:{line:1,column:53},source:''},
                     body: [
                       {
                         type: 'BreakStatement',
-                        loc:{start:{line:1,col:42},end:{line:1,col:48},source:''},
+                        loc:{start:{line:1,column:42},end:{line:1,column:48},source:''},
                         label: null
                       }
                     ]

@@ -53,66 +53,66 @@ Parsed in sloppy script mode but with the web compat flag enabled.
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,col:0},end:{line:1,col:53},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:53},source:''},
   body: [
     {
       type: 'TryStatement',
-      loc:{start:{line:1,col:0},end:{line:1,col:53},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:53},source:''},
       block: {
         type: 'BlockStatement',
-        loc:{start:{line:1,col:4},end:{line:1,col:8},source:''},
+        loc:{start:{line:1,column:4},end:{line:1,column:8},source:''},
         body: []
       },
       handler: {
         type: 'CatchClause',
-        loc:{start:{line:1,col:8},end:{line:1,col:53},source:''},
+        loc:{start:{line:1,column:8},end:{line:1,column:53},source:''},
         param: {
           type: 'Identifier',
-          loc:{start:{line:1,col:15},end:{line:1,col:15},source:''},
+          loc:{start:{line:1,column:15},end:{line:1,column:15},source:''},
           name: 'e'
         },
         body: {
           type: 'BlockStatement',
-          loc:{start:{line:1,col:18},end:{line:1,col:53},source:''},
+          loc:{start:{line:1,column:18},end:{line:1,column:53},source:''},
           body: [
             {
               type: 'LabeledStatement',
-              loc:{start:{line:1,col:20},end:{line:1,col:52},source:''},
+              loc:{start:{line:1,column:20},end:{line:1,column:52},source:''},
               label: {
                 type: 'Identifier',
-                loc:{start:{line:1,col:20},end:{line:1,col:23},source:''},
+                loc:{start:{line:1,column:20},end:{line:1,column:23},source:''},
                 name: 'foo'
               },
               body: {
                 type: 'LabeledStatement',
-                loc:{start:{line:1,col:25},end:{line:1,col:52},source:''},
+                loc:{start:{line:1,column:25},end:{line:1,column:52},source:''},
                 label: {
                   type: 'Identifier',
-                  loc:{start:{line:1,col:25},end:{line:1,col:28},source:''},
+                  loc:{start:{line:1,column:25},end:{line:1,column:28},source:''},
                   name: 'bar'
                 },
                 body: {
                   type: 'LabeledStatement',
-                  loc:{start:{line:1,col:30},end:{line:1,col:52},source:''},
+                  loc:{start:{line:1,column:30},end:{line:1,column:52},source:''},
                   label: {
                     type: 'Identifier',
-                    loc:{start:{line:1,col:30},end:{line:1,col:35},source:''},
+                    loc:{start:{line:1,column:30},end:{line:1,column:35},source:''},
                     name: 'third'
                   },
                   body: {
                     type: 'FunctionDeclaration',
-                    loc:{start:{line:1,col:37},end:{line:1,col:52},source:''},
+                    loc:{start:{line:1,column:37},end:{line:1,column:52},source:''},
                     generator: false,
                     async: false,
                     id: {
                       type: 'Identifier',
-                      loc:{start:{line:1,col:46},end:{line:1,col:46},source:''},
+                      loc:{start:{line:1,column:46},end:{line:1,column:46},source:''},
                       name: 'f'
                     },
                     params: [],
                     body: {
                       type: 'BlockStatement',
-                      loc:{start:{line:1,col:49},end:{line:1,col:52},source:''},
+                      loc:{start:{line:1,column:49},end:{line:1,column:52},source:''},
                       body: []
                     }
                   }
