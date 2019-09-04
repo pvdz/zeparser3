@@ -122,16 +122,15 @@ import {
 // TODO: collapse the dynamic initializations to static numbers
 // flags for token types
 let $flag = 0;
-const $ERROR = 0;
 const $WHITE = 1 << ++$flag;
 const $SPACE = (1 << ++$flag) | $WHITE;
 const $TAB = (1 << ++$flag) | $WHITE;
 const $NL = (1 << ++$flag) | $WHITE;
-const $CRLF = (1 << ++$flag) | $WHITE | $NL;
+const $CRLF = (1 << ++$flag) | $NL;
 const $COMMENT = (1 << ++$flag) | $WHITE;
-const $COMMENT_SINGLE = (1 << ++$flag) | $WHITE | $COMMENT;
-const $COMMENT_MULTI = (1 << ++$flag) | $WHITE | $COMMENT;
-const $COMMENT_HTML = (1 << ++$flag) | $WHITE | $COMMENT;
+const $COMMENT_SINGLE = (1 << ++$flag) | $COMMENT;
+const $COMMENT_MULTI = (1 << ++$flag) | $COMMENT;
+const $COMMENT_HTML = (1 << ++$flag) | $COMMENT;
 const $NUMBER = 1 << ++$flag;
 const $NUMBER_HEX = (1 << ++$flag) | $NUMBER;
 const $NUMBER_DEC = (1 << ++$flag) | $NUMBER;
@@ -153,7 +152,8 @@ const $TICK_PURE = (1 << ++$flag) | $TICK;
 const $TICK_BAD_ESCAPE = 1 << ++$flag; // these are only valid in tagged templates from es9 onward...
 const $ASI = 1 << ++$flag;
 const $EOF = 1 << ++$flag;
-ASSERT($flag < 32, 'cannot use more than 32 flags');
+const $ERROR = 1 << ++$flag;
+ASSERT($flag < 32, 'cannot use more than 32 flags but have ' + $flag);
 
 // flags for operators/punctuators
 //let $_flag = 0;
@@ -348,8 +348,9 @@ const COLLECT_TOKENS_ALL = 2;
 const WEB_COMPAT_OFF = false;
 const WEB_COMPAT_ON = true;
 
-const RETURN_ANY_TOKENS = true;
-const RETURN_SOLID_TOKENS = false;
+const RETURN_ANY_TOKENS = 1;
+const RETURN_COMMENT_TOKENS = 2;
+const RETURN_SOLID_TOKENS = 3;
 
 const WHITESPACE_TOKEN = true;
 const SOLID_TOKEN = false;
@@ -381,6 +382,9 @@ let ID_CONTINUE_REGEX = /|/;
   }
 })();
 
+let disableCanonPoison = false;
+ASSERT(!void (typeof window !== 'undefined' && window.disableCanonPoison && (disableCanonPoison = true)), 'dont enable this in web env');
+
 function ZeTokenizer(
   input,
   targetEsVersion = 6,
@@ -408,16 +412,27 @@ function ZeTokenizer(
   let len = input.length;
 
   let wasWhite = false;
+  let wasComment = false; // for Babel, I guess...
   let consumedNewlinesThisToken = 0; // whitespace newline token or string token that contained newline or multiline comment
-  let consumedComment = false; // needed to confirm requirement to parse --> closing html comment
+  let consumedCommentSincePrevSolid = false; // needed to confirm requirement to parse --> closing html comment
   let finished = false; // generated an $EOF?
   let lastParsedIdent = ''; // updated after parsing an ident. used to canonicalize escaped identifiers (a\u{65}b -> aab). this var will NOT contain escapes
+  let lastCanonizedString = ''; // updated while parsing a string token. escapes will be unescaped. Used for .value in AST.
   let lastRegexUnicodeEscapeOrd = 0; // need this to validate unicode escapes in named group identifiers :/
   let lastPotentialRegexError = ''; // If regex scanner is an error then this is the message. Many errors require flag validation at the end.
   let lastReportableTokenizerError = ''; // Set whenever an $error is or will be returned
 
   let currentLine = 1; // the number of newlines, crlf sensitive (the pair is considered 1 line)
   let currentColOffset = 0; // position in the input code of the first character after the last newline
+
+  let prevTokenEndColumn = 0;
+  let prevTokenEndLine = 0;
+  let prevTokenSolid = true;
+
+  nextToken.prevEndColumn = () => prevTokenEndColumn;
+  nextToken.prevEndLine = () => prevTokenEndLine;
+  nextToken.currColumn = () => pointer - currentColOffset;
+  nextToken.currLine = () => currentLine;
 
   let cache = input.charCodeAt(0);
 
@@ -528,11 +543,22 @@ function ZeTokenizer(
 
   let startForError = 0;
   function nextToken(lexerFlags = INITIAL_LEXER_FLAGS, _returnAny=RETURN_SOLID_TOKENS) {
-    ASSERT(arguments.length >= 1 && arguments.length <= 4, 'arg count 1~4');
+    ASSERT(arguments.length >= 1 && arguments.length <= 2, 'arg count 1~2');
     ASSERT(!finished, 'should not next() after eof token');
     // https://stackoverflow.com/questions/34595356/what-does-compound-let-const-assignment-mean
-
     let token;
+
+    if (prevTokenSolid) {
+      // Do this at the start because otherwise something like `a \n b` would reset this when forward parsing `b` and
+      // would cause `a` to be set to the wrong column data.
+      prevTokenEndColumn = pointer - currentColOffset;
+      prevTokenEndLine = currentLine;
+      prevTokenSolid = false;
+    }
+
+    lastCanonizedString = ''; // also used by templates
+
+    // These vars are relevant for between anything that gets location data in the AST
     do {
       ++anyTokenCount;
       let startCol = pointer - currentColOffset;
@@ -541,21 +567,41 @@ function ZeTokenizer(
         let cstart = cache;
         let start = startForError = pointer; // TODO: see if startForError makes a dent at all
         wasWhite = false;
+        wasComment = false;
         let nlwas = consumedNewlinesThisToken; // Do not include the newlines for the token itself unless whitespace (ex: `` throw `\n` ``)
         let consumedTokenType = next(lexerFlags);
+        ASSERT((consumedTokenType>>>0) > 0, 'enum does not have zero', consumedTokenType);
         token = createToken(consumedTokenType, start, pointer, startCol, startRow, nlwas, wasWhite, cstart);
         if (collectTokens === COLLECT_TOKENS_ALL) tokens.push(token);
       } else {
         token = createToken($EOF, pointer, pointer, startCol, startRow, consumedNewlinesThisToken, WHITESPACE_TOKEN, 0);
         finished = true;
+        wasWhite = false;
         break;
       }
-    } while (wasWhite && _returnAny === RETURN_SOLID_TOKENS);
+
+      if (wasWhite) {
+        if (_returnAny === RETURN_ANY_TOKENS) {
+          break;
+        }
+        if (wasComment) {
+          if (_returnAny === RETURN_COMMENT_TOKENS) {
+            break;
+          }
+        }
+      }
+      else {
+        // Any solid should be returned so break
+        break;
+      }
+
+    } while (true);
     ++solidTokenCount;
-    if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
     if (!wasWhite) {
+      if (collectTokens === COLLECT_TOKENS_SOLID) tokens.push(token);
       consumedNewlinesThisToken = 0;
-      consumedComment = false;
+      consumedCommentSincePrevSolid = false;
+      prevTokenSolid = true;
     }
 
     return token;
@@ -574,22 +620,45 @@ function ZeTokenizer(
     let token = createToken($ASI, pointer, pointer, pointer - currentColOffset, currentLine, consumedNewlinesThisToken, SOLID_TOKEN, $$SEMI_3B);
     // are asi's whitespace? i dunno. they're kinda special so maybe.
     // put it _before_ the current token (that should be the "offending" token)
-    if (collectTokens !== COLLECT_TOKENS_NONE) tokens.push(token, tokens.pop());
+    if (collectTokens !== COLLECT_TOKENS_NONE) {
+      tokens.push(token, tokens.pop());
+    }
     ++anyTokenCount;
     ++solidTokenCount; // eh... i guess.
+    prevTokenSolid = true;
   }
 
   function createToken(type, start, stop, column, line, nl, ws, c) {
     ASSERT(createToken.length === arguments.length);
-//ASSERT(cache === input.charCodeAt(start), 'c should not be skipped yet');
 
     ASSERT(typeof c === 'number' && c >= 0 && c <= 0x10ffff, 'valid c', c);
 
     let str = slice(start, stop);
-    let canon = type === $IDENT ? lastParsedIdent : str;
-    return {
+
+    let canon = '';
+    if (type === $IDENT) canon = lastParsedIdent;
+    else if ((type & $STRING) === $STRING) {
+      // TODO: mostly necessary for AST output. There are `constructor` and `__proto__` checks that use it, though.
+      canon = str[0] + lastCanonizedString + str[0];
+    }
+    else if ((type & $TICK) === $TICK) {
+      // TODO: mostly necessary for AST output. There are `constructor` and `__proto__` checks that use it, though.
+      if ((type & $TICK_PURE) === $TICK_PURE) {
+        canon = '`' + lastCanonizedString + '`';
+      } else if ((type & $TICK_HEAD) === $TICK_HEAD) {
+        canon = '`' + lastCanonizedString + '${';
+      } else if ((type & $TICK_BODY) === $TICK_BODY) {
+        canon = '}' + lastCanonizedString + '${';
+      } else if ((type & $TICK_TAIL) === $TICK_TAIL) {
+        canon = '}' + lastCanonizedString + '`';
+      } else {
+        ASSERT(false, 'tick should be enum');
+      }
+    }
+
+    let token = {
       // <SCRUB DEV>
-      _t: debug_toktype(type),
+      _t: toktypeToString(type),
       // </SCRUB DEV>
       type,
       ws, // is this token considered whitespace? (space, tab, newline, comment)
@@ -603,14 +672,16 @@ function ZeTokenizer(
       // :'( https://tc39.github.io/ecma262/#prod-EscapeSequence
       // The ReservedWord definitions are specified as literal sequences of specific SourceCharacter elements.
       // A code point in a ReservedWord cannot be expressed by a \ UnicodeEscapeSequence.
-      canon, // will NOT contain escapes // TODO: should perf check this, perhaps we need to take this slowpath differently
+      canon, // will NOT contain escapes, only for idents, strings, and templates // TODO: should perf check this, perhaps we need to take this slowpath differently
 
       // <SCRUB DEV>
       toString() {
-        return `{# ${debug_toktype(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} ${start}:${stop} curc=${c} \`${str}\`${canon!==str?' (canonical=`' + canon + '`)':''}#}`;
+        return `{# ${toktypeToString(type)} : nl=${nl?'Y':'N'} ws=${ws?'Y':'N'} pos=${start}:${stop} loc=${column}:${line} curc=${c} \`${str}\`${canon&&canon!==str?' (canonical=`' + canon + '`)':''}#}`;
       },
       // </SCRUB DEV>
     };
+    ASSERT(disableCanonPoison || type === $IDENT || (type & $STRING) === $STRING || (type & $TICK) === $TICK || !void Object.defineProperty(token, 'canon', {get: ASSERT.bind(undefined, false, 'do not read .canon on non-ident tokens'), set: ASSERT.bind(undefined, false, 'do not write to .canon on non-ident tokens')}), 'debugging');
+    return token;
   }
 
   function next(lexerFlags) {
@@ -668,10 +739,9 @@ function ZeTokenizer(
       case $$DASH_2D:
         // https://tc39.github.io/ecma262/#sec-html-like-comments
         // The syntax and semantics of 11.4 is extended as follows except that this extension is not allowed when parsing source code using the goal symbol Module:
-        // TODO: only support this under the webcompat flag
         // TODO: and properly parse this, not like the duplicate hack it is now
-        if (!eofd(1) && moduleGoal === GOAL_SCRIPT && peek() === $$DASH_2D && peekd(1) === $$GT_3E) {
-          if (consumedNewlinesThisToken > 0 || consumedComment) {
+        if (moduleGoal === GOAL_SCRIPT && webCompat === WEB_COMPAT_ON && !eofd(1) && peeky($$DASH_2D) && peekd(1) === $$GT_3E) {
+          if (consumedNewlinesThisToken > 0 || consumedCommentSincePrevSolid) {
             return parseCommentHtmlClose();
           } else {
             // Note that the `-->` is not picked up as a comment since that requires a newline to precede it.
@@ -715,7 +785,7 @@ function ZeTokenizer(
       case $$QMARK_3F:
         return $PUNCTUATOR;
       case $$LT_3C:
-        if (!eofd(3) && moduleGoal === GOAL_SCRIPT && peek() === $$EXCL_21 && peekd(1) === $$DASH_2D && peekd(2) === $$DASH_2D) {
+        if (moduleGoal === GOAL_SCRIPT && webCompat === WEB_COMPAT_ON && !eofd(3) && peek() === $$EXCL_21 && peekd(1) === $$DASH_2D && peekd(2) === $$DASH_2D) {
           return parseCommentHtmlOpen();
         }
         return parseLtPunctuator(); // < << <= <<=
@@ -801,6 +871,7 @@ function ZeTokenizer(
       // while we will want to consume at least one more byte for proper strings,
       // there could be a malformed string and we wouldnt want to consume the newline
       c = peek();
+
       if (c === marker) {
         ASSERT_skip(marker);
         break;
@@ -819,16 +890,16 @@ function ZeTokenizer(
         break;
       }
 
-      ASSERT_skip(c);
-
-      if (isLfPsLs()) {
-        // I think... this is a bit of a weird case for strings.
-        // (Increment after consumption as that's what incrementLine expects and asserts)
-        incrementLine();
-      }
-
       if (c === $$BACKSLASH_5C) {
         bad = parseStringEscape(lexerFlags, NOT_TEMPLATE) === BAD_ESCAPE || bad;
+      } else {
+        ASSERT_skip(c);
+        if (isPsLs(c)) {
+          // This is a bit of a weird case for strings.
+          // (Increment after consumption as that's what incrementLine expects and asserts)
+          incrementLine();
+        }
+        lastCanonizedString += String.fromCharCode(c);
       }
     }
 
@@ -836,13 +907,19 @@ function ZeTokenizer(
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Unclosed string or string had an illegal escape';
       return $ERROR;
     }
+
     return tokenType;
   }
   function parseStringEscape(lexerFlags, forTemplate) {
     ASSERT(arguments.length === parseStringEscape.length, 'need args');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    if (eof()) return BAD_ESCAPE; // you cant escape eof ;)
+    ASSERT_skip($$BACKSLASH_5C);
+    if (eof()) {
+      // You cant escape eof ;)
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Backslash at end of input';
+      return BAD_ESCAPE;
+    }
 
     // read() because we need to consume at least one char here
     let c = peekSkip();
@@ -855,18 +932,7 @@ function ZeTokenizer(
       case $$X_78:
         return parseStringEscapeHex();
 
-      case $$0_30: {
-        if (eof()) {
-          // Look, the escape is fine. The impending doom is unrelated.
-          return GOOD_ESCAPE;
-        }
-        let d = peek();
-        if (d < $$0_30 || d > $$9_39) {
-          // \0 is not an octal escape, it's a nul
-          return GOOD_ESCAPE;
-        }
-      }
-      // fall-through
+      case $$0_30:
       case $$1_31:
       case $$2_32:
       case $$3_33:
@@ -876,21 +942,60 @@ function ZeTokenizer(
       case $$7_37:
       case $$8_38:
       case $$9_39:
-        // need to determine what to do with \8 and \9 in strict mode
-        return parseStringEscapeOctal(c, forTemplate, lexerFlags);
+        return parseStringEscapeOctalOrDigit(c, forTemplate, lexerFlags);
 
+      case $$T_74:
+        lastCanonizedString += '\t';
+        return GOOD_ESCAPE;
+      case $$N_6E:
+        lastCanonizedString += '\n';
+        return GOOD_ESCAPE;
+      case $$R_72:
+        lastCanonizedString += '\r';
+        return GOOD_ESCAPE;
+      case $$B_62:
+        lastCanonizedString += '\b';
+        return GOOD_ESCAPE;
+      case $$F_66:
+        lastCanonizedString += '\f';
+        return GOOD_ESCAPE;
+      case $$V_76:
+        lastCanonizedString += '\v';
+        return GOOD_ESCAPE;
+      case $$SQUOTE_27:
+        lastCanonizedString += '\'';
+        return GOOD_ESCAPE;
+      case $$DQUOTE_22:
+        lastCanonizedString += '"';
+        return GOOD_ESCAPE;
+      case $$BACKSLASH_5C:
+        lastCanonizedString += '\\';
+        return GOOD_ESCAPE;
+
+      // A line continuation does not contribute to the string value
+      case $$LF_0A:
+      case $$PS_2028:
+      case $$LS_2029:
+        incrementLine();
+        return GOOD_ESCAPE;
       case $$CR_0D:
-        // edge case: `\crlf` is a valid line continuation
+        // Does not add anything to `lastCanonizedString`
+        // Edge case: `\crlf` is a valid line continuation
         if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A);
-        break;
+        incrementLine();
+        return GOOD_ESCAPE;
+
+      default:
+        lastCanonizedString += String.fromCharCode(c);
     }
+
 
     // we can ignore this escape. treat it as a single char escape.
     return GOOD_ESCAPE;
   }
   function parseIdentOrStringEscapeUnicode() {
     // this is _after_ `\u` have been consumed already!
-    if (eof()) return BAD_ESCAPE;
+    if (eof()) return GOOD_ESCAPE; // Leads to EOF error, later
     // we could read() here because we want to consume two more chars (at least)
     // however, if the escape is bad we would also consume the closing quote so we peek()
     let c = peek();
@@ -903,7 +1008,10 @@ function ZeTokenizer(
   }
   function parseStringEscapeUnicodeQuad(a) {
     // we've already consumed a. we must consume 3 more chars for this quad unicode escape
-    if (eofd(3)) return BAD_ESCAPE;
+    if (eofd(3)) {
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Not enough characters left for a proper unicode escape';
+      return BAD_ESCAPE;
+    }
     let b = peekd(1);
     let c = peekd(2);
     let d = peekd(3);
@@ -915,8 +1023,10 @@ function ZeTokenizer(
       ASSERT_skip(b);
       ASSERT_skip(c);
       ASSERT_skip(d);
+      lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b, c, d), 16));
       return GOOD_ESCAPE;
     } else {
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'At least one character of the unicode escape was not a valid hex (0-9a-f) character';
       return BAD_ESCAPE;
     }
   }
@@ -925,93 +1035,103 @@ function ZeTokenizer(
     // this means the actual hex value cannot exceed 6 chars (0x10ffff). however,
     // it can have any number of leading zeroes so we still need to loop
     // must at least parse one hex digit (but it may be invalid so we can't read())
-    if (eof()) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Missing content of long unicode escape';
+    if (eof()) return GOOD_ESCAPE; // Trigger EOF error elsewhere
+    let a = peek();
+    if (!isHex(a)) {
+      // Must have at least one character between the curlies
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'The variable unicode escape had no valid hex characters (0-9a-f)';
       return BAD_ESCAPE;
     }
-    let a = peek();
-    if (!isHex(a)) return BAD_ESCAPE; // first one is mandatory
     ASSERT_skip(a);
     // skip leading zeroes if there are any
     if (a === $$0_30) {
-      if (eof()) {
-        if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Missing `}` after long unicode escape';
-        return BAD_ESCAPE;
-      }
+      if (eof()) return GOOD_ESCAPE; // Trigger EOF error elsewhere
       a = skipZeroes();
       // Note: we already asserted a zero. We _can_ find a curly close now
       if (!isHex(a)) {
-        if (a === $$CURLY_R_7D) return GOOD_ESCAPE;
-        if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Long unicode escape contained non-hex character `' + String.fromCodePoint(a) + '`';
+        if (a === $$CURLY_R_7D) {
+          lastCanonizedString += '\0';
+          ASSERT_skip($$CURLY_R_7D);
+          return GOOD_ESCAPE;
+        }
+        if (!lastReportableTokenizerError) lastReportableTokenizerError = 'The variable unicode escape contained non-hex character `' + String.fromCodePoint(a) + '`';
         return BAD_ESCAPE;
       }
       ASSERT_skip(a);
     }
-    if (eof()) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Missing `}` after long unicode escape';
-      return BAD_ESCAPE;
-    }
+    if (eof()) return GOOD_ESCAPE; // Trigger EOF error elsewhere
     let b = peek();
     if (!isHex(b)) {
-      if (b === $$CURLY_R_7D) return GOOD_ESCAPE;
+      if (b === $$CURLY_R_7D) {
+        lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a), 16));
+        ASSERT_skip($$CURLY_R_7D);
+        return GOOD_ESCAPE;
+      }
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Long unicode escape contained non-hex character `' + String.fromCodePoint(b) + '`';
       return BAD_ESCAPE;
     }
     ASSERT_skip(b);
-    if (eof()) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Missing `}` after long unicode escape';
-      return BAD_ESCAPE;
-    }
+    if (eof()) return GOOD_ESCAPE;
     let c = peek();
     if (!isHex(c)) {
-      if (c === $$CURLY_R_7D) return GOOD_ESCAPE;
+      if (c === $$CURLY_R_7D) {
+        lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b), 16));
+        ASSERT_skip($$CURLY_R_7D);
+        return GOOD_ESCAPE;
+      }
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Long unicode escape contained non-hex character `' + String.fromCodePoint(c) + '`';
       return BAD_ESCAPE;
     }
     ASSERT_skip(c);
-    if (eof()) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Missing `}` after long unicode escape';
-      return BAD_ESCAPE;
-    }
+    if (eof()) return GOOD_ESCAPE; // Trigger EOF error elsewhere
     let d = peek();
     if (!isHex(d)) {
-      if (d === $$CURLY_R_7D) return GOOD_ESCAPE;
+      if (d === $$CURLY_R_7D) {
+        lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b, c), 16));
+        ASSERT_skip($$CURLY_R_7D);
+        return GOOD_ESCAPE;
+      }
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Long unicode escape contained non-hex character `' + String.fromCodePoint(d) + '`';
       return BAD_ESCAPE;
     }
     ASSERT_skip(d);
-    if (eof()) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Missing `}` after long unicode escape';
-      return BAD_ESCAPE;
-    }
+    if (eof()) return GOOD_ESCAPE; // Trigger EOF error elsewhere
     let e = peek();
     if (!isHex(e)) {
-      if (e === $$CURLY_R_7D) return GOOD_ESCAPE;
+      if (e === $$CURLY_R_7D) {
+        lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b, c, d), 16));
+        ASSERT_skip($$CURLY_R_7D);
+        return GOOD_ESCAPE;
+      }
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Long unicode escape contained non-hex character `' + String.fromCodePoint(e) + '`';
       return BAD_ESCAPE;
     }
     ASSERT_skip(e);
-    if (eof()) {
-      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Missing `}` after long unicode escape';
-      return BAD_ESCAPE;
-    }
+    if (eof()) return GOOD_ESCAPE; // Trigger EOF error elsewhere
     let f = peek();
     if (!isHex(f)) {
-      if (f === $$CURLY_R_7D) return GOOD_ESCAPE;
+      if (f === $$CURLY_R_7D) {
+        lastCanonizedString += String.fromCodePoint(parseInt(String.fromCharCode(a, b, c, d, e), 16));
+        ASSERT_skip($$CURLY_R_7D);
+        return GOOD_ESCAPE;
+      }
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Long unicode escape contained non-hex character `' + String.fromCodePoint(f) + '`';
       return BAD_ESCAPE;
     }
     ASSERT_skip(f);
     // we've parsed 6 hexdigits now. the biggest number allowed is 0x10ffff but first we _must_ find a curly next
-    if (eof() || !peeky($$CURLY_R_7D)) {
+    if (eof()) return GOOD_ESCAPE; // Trigger EOF error elsewhere
+    if (!peeky($$CURLY_R_7D)) {
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Must find `}` after 6 digits of a long unicode escape';
       return BAD_ESCAPE;
     }
-    ASSERT_skip($$CURLY_R_7D);
 
     // the total may not exceed 0x10ffff which means that at six digits we only have to validate the first two
-    if (a === $$0_30) return GOOD_ESCAPE;
-    if (a === $$1_31 && b === $$0_30) return GOOD_ESCAPE;
+    if (a === $$0_30 || (a === $$1_31 && b === $$0_30)) {
+      lastCanonizedString += String.fromCodePoint(parseInt(String.fromCharCode(a, b, c, d, e, f), 16));
+      ASSERT_skip($$CURLY_R_7D);
+      return GOOD_ESCAPE;
+    }
 
     // the number represented by the digits MUST exceed the explicitly allowed max of 0x10ffff so reject
     if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Total of long unicode escape would exceed 0x10ffff, which is not allowed';
@@ -1029,7 +1149,11 @@ function ZeTokenizer(
     return c;
   }
   function parseStringEscapeHex() {
-    if (eofd(1)) return BAD_ESCAPE;
+    if (eofd(1)) {
+      if (eof()) return GOOD_ESCAPE; // Let it error somewhere else
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Not enough of input left to create valid hex escape';
+      return BAD_ESCAPE;
+    }
     let a = peek();
     let b = peekd(1);
     // confirm they are both hex digits
@@ -1037,47 +1161,113 @@ function ZeTokenizer(
       // okay, _now_ consume them
       ASSERT_skip(a);
       ASSERT_skip(b);
+      lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b), 16));
       return GOOD_ESCAPE;
     } else {
+      // '\xz' should have 'xz' as canonized value
+      lastCanonizedString += 'x';
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'At least one of the two hex characters were not hex character (0-9a-f)';
       return BAD_ESCAPE;
     }
   }
-  function parseStringEscapeOctal(a, forTemplate, lexerFlags) {
-    ASSERT(arguments.length === parseStringEscapeOctal.length, 'need args');
+  function parseStringEscapeOctalOrDigit(a, forTemplate, lexerFlags) {
+    ASSERT(arguments.length === parseStringEscapeOctalOrDigit.length, 'need args');
     ASSERT(typeof a === 'number', 'first digit ord');
     ASSERT(typeof lexerFlags === 'number', 'lexerFlags number');
 
-    if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE || forTemplate === FOR_TEMPLATE) {
-      if (a === $$0_30) {
-        if (eof()) return GOOD_ESCAPE; // will still lead to an eof error later for the next token
-        let b = peek();
-        if (b < $$0_30 || b > $$9_39) return GOOD_ESCAPE; // `\0` without digit following is ok in strict/tpl
+    if (eof()) return GOOD_ESCAPE; // Will error somewhere else
+    let b = peek();
+
+    // Octals are only supported in web compat, sloppy mode, and only in strings
+    // In web compat, \1 ~ \7 are considered start of an octal escape. Otherwise they are just a single digit escaped.
+
+    // There is a nasty edge case regarding nul (zero byte); In sloppy webcompat mode the nul escape may be followed by
+    // an 8 or 9 and still be a valid nul. In other modes and templates, `\08` and `\09` are considered syntax errors.
+
+    // Strings: octal escapes are only supported in sloppy mode with web compat enabled
+    // Template literals: explicitly do never support octal escapes so trigger a syntax error in the parser
+    // Tagged templates: are allowed to have bad escapes although they will cause `.value` to be `null` in the AST
+    // (Note that we do not know here whether the template will be tagged or just a literal, so just return BAD_ESCAPE)
+
+    if (forTemplate || webCompat === WEB_COMPAT_OFF || (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+      // If octals are invalid, then the nul escape can not be followed by 8 or 9 either
+      // Note: in templates, octals are never valid escapes so `\08` is always a bad escape regardless of mode
+      if (a === $$0_30 && (b < $$0_30 || b > $$9_39)) {
+        // [v]: `"\0"`
+        // [v]: `"\0x"`
+        // \0 is not an octal escape, it's a nul, but whatever
+        lastCanonizedString += '\0';
+        return GOOD_ESCAPE;
+      } else if (!forTemplate && a >= $$1_31 && a <= $$9_39) {
+        // Escapes of a single non-zero digit are legal in strict etc and contribute only that digit as a literal
+        // > A conforming implementation, when processing strict mode code, must not extend the syntax of
+        // > EscapeSequence to include LegacyOctalEscapeSequence as described in B.1.2.
+        // I believe that by parsing `\20` as `'\2' + '0'` this is following that rule as there are syntactic rules
+        // for parsing an escaped non-zero digit without lookahead requirements.
+        // [v]: `'\2'`
+        // [v]: `'\223'`
+        // For templates this _is_ explicitly disallowed through NotEscapeSequence . But that is not used for strings.
+        // https://tc39.es/ecma262/#sec-static-semantics-template-early-errors
+        lastCanonizedString += String.fromCharCode(a - 0x30);
+        return GOOD_ESCAPE;
       }
-      return BAD_ESCAPE; // early error
+
+      // [v]: `"\07"`
+      // [v]: `"\08"`
+      // [v]: `"\09"`
+
+      if (forTemplate) {
+        if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Illegal legacy octal escape in template, where octal escapes are never allowed';
+      } else if ((lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+        if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Illegal legacy octal escape in strict mode';
+      } else {
+        ASSERT(webCompat === WEB_COMPAT_OFF);
+        if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Octal escapes are only allowed in sloppy mode with web compat enabled';
+      }
+      return BAD_ESCAPE;
+    } else {
+      // If octals are allowed then the nul escape may be followed by 8 or 9
+      if (a === $$0_30 && (b < $$0_30 || b > $$7_37)) {
+        // [v]: `"\0"`
+        // [v]: `"\0x"`
+        // [v]: `"\07"`
+        // [v]: `"\08"`
+        // [v]: `"\09"`
+        // \0 is not an octal escape, it's a nul, but whatever
+        // In web compat mode the following char can be 8 and 9 according to the extended syntax
+        lastCanonizedString += '\0';
+        return GOOD_ESCAPE;
+      } else if (a === $$8_38) {
+        lastCanonizedString += '8';
+        return GOOD_ESCAPE;
+      } else if (a === $$9_39) {
+        lastCanonizedString += '9';
+        return GOOD_ESCAPE;
+      }
     }
-    // TODO: what to do with \8 and \9? (a=9
-    if (a === $$8_38 || a === $$9_39) return BAD_ESCAPE; // i guess.
 
-    // the cfg is a little awkward but the point is that the octal escape will
-    // consume as many digits as there octal digits follow AND for as long as
-    // the total will not exceed 255. in practice that means \* \** \[0123]**
+    if (b < $$0_30 || b > $$7_37) {
+      // Max valid octal escape is 0377 so if a >= 4 then it's max 2 digits so we can return now
+      lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a), 8));
+      return GOOD_ESCAPE;
+    }
 
-    // tbh we dont really need to parse any further. it's irrelevant to the parser whether
-    // 1 2 or 3 digits are consumed here as those digits can not lead to other problems
-    // and we've already consumed one character at callsite
+    ASSERT_skip(b);
+    if (eof()) return GOOD_ESCAPE; // Will error somewhere else
+    if (a > $$3_33) {
+      // Max valid octal escape is 0377 so if a >= 4 then it's max 2 digits so we can return now
+      lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b), 8));
+      return GOOD_ESCAPE;
+    }
+    let c = peek();
+    if (c < $$0_30 || c > $$7_37) {
+      lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b), 8));
+      return GOOD_ESCAPE;
+    }
+
+    ASSERT_skip(c);
+    lastCanonizedString += String.fromCharCode(parseInt(String.fromCharCode(a, b, c), 8));
     return GOOD_ESCAPE;
-
-    //if (eof()) return GOOD_ESCAPE;
-    //let b = peek();
-    //if (!isOctal(b)) return GOOD_ESCAPE;
-    //ASSERT_skip(b);
-    //
-    //if (a >= $$0_30 && a <= $$3_33) {
-    //  if (eof()) return GOOD_ESCAPE;
-    //  let c = peek();
-    //  if (!isOctal(c)) return GOOD_ESCAPE;
-    //  ASSERT_skip(c);
-    //}
   }
 
   function parseSameOrCompound(c) {
@@ -1130,6 +1320,8 @@ function ZeTokenizer(
           ASSERT_skip($$CURLY_L_7B);
           return (fromTick ? $TICK_HEAD : $TICK_BODY) | (badEscapes ? $TICK_BAD_ESCAPE : 0);
         }
+
+        lastCanonizedString += '$';
       }
 
       if (c === $$TICK_60) {
@@ -1139,17 +1331,21 @@ function ZeTokenizer(
 
       if (c === $$CR_0D) {
         ASSERT_skip($$CR_0D);
+        lastCanonizedString += '\r';
         // crlf is considered one line for the sake of reporting line-numbers
-        if (neof() && peeky($$LF_0A)) ASSERT_skip($$LF_0A);
+        if (neof() && peeky($$LF_0A)) {
+          lastCanonizedString += '\n';
+          ASSERT_skip($$LF_0A);
+        }
         incrementLine();
       } else if (isLfPsLs(c)) {
         ASSERT_skip(c);
+        lastCanonizedString += String.fromCharCode(c);
         incrementLine();
       } else if (c === $$BACKSLASH_5C) {
-        // TODO: isnt a string escape in a template always considered a strict mode escape?
-        ASSERT_skip($$BACKSLASH_5C);
         badEscapes = parseStringEscape(lexerFlags, FOR_TEMPLATE) || badEscapes;
       } else {
+        lastCanonizedString += String.fromCharCode(c);
         ASSERT_skip(c);
       }
     }
@@ -1382,12 +1578,13 @@ function ZeTokenizer(
             ASSERT_skip($$BACKSLASH_5C);
             ASSERT_skip($$U_75);
             let errbak = lastPotentialRegexError;
-            c = parseRegexUnicodeEscape2();
+            c = parseRegexCharClassUnicodeEscape();
             if (c === INVALID_IDENT_CHAR || c === REGEX_CHARCLASS_BAD) {
               regexSyntaxError('Found invalid quad unicode escape, the escape must be part of the ident so the ident is an error');
               return $ERROR;
             }
             if ((c & REGEX_CHARCLASS_BAD_SANS_U_FLAG) === REGEX_CHARCLASS_BAD_SANS_U_FLAG) {
+              // There is no condition for es6 unicode escapes or double quad surrogate pairs for plain identifiers
               c = c ^ REGEX_CHARCLASS_BAD_SANS_U_FLAG;
               lastPotentialRegexError = errbak;
             }
@@ -1445,49 +1642,34 @@ function ZeTokenizer(
 
     // Note: this is a slow path. and a super edge case.
     let start = pointer;
-    if (parseIdentOrStringEscapeUnicode() === GOOD_ESCAPE) {
-      let data;
-      if (peekyd(start - pointer, $$CURLY_L_7B)) {
-        data = slice(start + 1, pointer);
-        if (eof()) {
-          lastParsedIdent = prev;
-          if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Identifier contained dynamic unicode escape that was not closed';
-          return $ERROR;
-        }
-        if (peeky($$CURLY_R_7D)) {
-          ASSERT_skip($$CURLY_R_7D);
-        } else {
-          lastParsedIdent = prev;
-          if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Identifier contained dynamic unicode escape that was not closed';
-          return $ERROR;
-        }
-      } else {
-        data = slice(start , pointer);
-      }
-      ASSERT(data.length > 0, 'a valid escape should contain at least one digit');
-      ASSERT(data.charCodeAt(0) !== $$CURLY_L_7B && isHex(data.charCodeAt(0)), 'if wrapped, the opener should be removed');
-      ASSERT(data.charCodeAt(data.length - 1) !== $$CURLY_R_7D && isHex(data.charCodeAt(data.length - 1)), 'if wrapped, the closer should not be consumed yet');
-
-      let ord = parseInt(data, 16);
-      if (ord > 0xffff) prev += String.fromCodePoint(ord); // there's a test... but if ord is >0xffff then fromCharCode can't properly deal with it
-      else prev += String.fromCharCode(ord);
-      // the escaped char must still be a valid identifier character. then and only
-      // then can we proceed to parse an identifier. otherwise we'll still parse
-      // into an error token.
-      if (fromStart === FIRST_CHAR && isIdentStart(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
-        return parseIdentifierRest(prev);
-      } else if (fromStart === NON_START && isIdentRestChr(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
-        return parseIdentifierRest(prev);
-      } else {
-        lastParsedIdent = prev;
-        if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Identifier escape did not yield a valid identifier character';
-        return $ERROR;
-      }
+    if (parseIdentOrStringEscapeUnicode() === BAD_ESCAPE) {
+      parseIdentifierRest(prev); // keep on parsing the identifier but we will make it an error token
+      lastParsedIdent = prev;
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Only _unicode_ escapes are supported in identifiers';
+      return $ERROR;
     }
-    parseIdentifierRest(prev); // keep on parsing the identifier but we will make it an error token
-    lastParsedIdent = prev;
-    if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Only _unicode_ escapes are supported in identifiers';
-    return $ERROR;
+
+    ASSERT(neof(), 'would have been a BAD_ESCAPE if it was an EOF here');
+    let data = input.charCodeAt(start) === $$CURLY_L_7B ? slice(start + 1, pointer - 1) : slice(start, pointer);
+    ASSERT(data.length > 0, 'a valid escape should contain at least one digit');
+    ASSERT(data.charCodeAt(0) !== $$CURLY_L_7B && isHex(data.charCodeAt(0)), 'if wrapped, the opener should be removed');
+    ASSERT(data.charCodeAt(data.length - 1) !== $$CURLY_R_7D && isHex(data.charCodeAt(data.length - 1)), 'if wrapped, the closer should not be consumed yet');
+
+    let ord = parseInt(data, 16);
+    if (ord > 0xffff) prev += String.fromCodePoint(ord); // there's a test... but if ord is >0xffff then fromCharCode can't properly deal with it
+    else prev += String.fromCharCode(ord);
+    // the escaped char must still be a valid identifier character. then and only
+    // then can we proceed to parse an identifier. otherwise we'll still parse
+    // into an error token.
+    if (fromStart === FIRST_CHAR && isIdentStart(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
+      return parseIdentifierRest(prev);
+    } else if (fromStart === NON_START && isIdentRestChr(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
+      return parseIdentifierRest(prev);
+    } else {
+      lastParsedIdent = prev;
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Identifier escape did not yield a valid identifier character';
+      return $ERROR;
+    }
   }
   function parseRegexIdentifierRest(prevStr, uflagStatus) {
     // Returns a uflagStatus enum. See parseIdentifierRest for non-regex idents.
@@ -1506,12 +1688,12 @@ function ZeTokenizer(
           if (peekd(1) === $$U_75) {
             ASSERT_skip($$BACKSLASH_5C);
             ASSERT_skip($$U_75);
-            c = parseRegexUnicodeEscape2();
+            c = parseRegexCharClassUnicodeEscape();
             if (c === INVALID_IDENT_CHAR || c === REGEX_CHARCLASS_BAD) {
               return regexSyntaxError('Found invalid quad unicode escape in regex ident, the escape must be part of the ident so the ident is an error');
             }
             if ((c & REGEX_CHARCLASS_BAD_SANS_U_FLAG) === REGEX_CHARCLASS_BAD_SANS_U_FLAG) {
-              uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'Found "es6" unicode escape in regex ident, which is only valid with u-flag in regex');
+              uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'Found "es6" unicode escape (`\\u{..}`) or surrogate pair quads (`\\uxxxx\\uxxxx`) in regex ident, which is only valid with u-flag in regex');
               c = c ^ REGEX_CHARCLASS_BAD_SANS_U_FLAG;
             }
             ASSERT(!(c & REGEX_CHARCLASS_BAD_WITH_U_FLAG), 'regex idents cant be bad with u-flag? I think', c, uflagStatus);
@@ -1529,10 +1711,12 @@ function ZeTokenizer(
           let wide = isIdentRestChr(c, pointer);
           if (wide === INVALID_IDENT_CHAR) break;
           if (wide === VALID_DOUBLE_CHAR) {
+            uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'name contained a character that is only a valid identifier with u-flag');
             prevStr += input.slice(pointer, pointer + 2); // we could try to get the ord and fromCodePoint for perf
             skip();
             skip();
-          } else {
+          }
+          else {
             ASSERT(wide === VALID_SINGLE_CHAR, 'enum');
             ASSERT_skip(c);
             prevStr += String.fromCharCode(c); // TODO: if this affects perf we can try a slice after the loop
@@ -1567,45 +1751,32 @@ function ZeTokenizer(
 
     // Note: this is a slow path. and a super edge case.
     let start = pointer;
-    if (parseIdentOrStringEscapeUnicode() === GOOD_ESCAPE) {
-      let data;
-      if (peekyd(start - pointer, $$CURLY_L_7B)) {
-        data = slice(start + 1, pointer);
-        if (eof()) {
-          lastParsedIdent = prev;
-          return regexSyntaxError('Identifier contained dynamic unicode escape that was not closed');
-        }
-        if (peeky($$CURLY_R_7D)) {
-          ASSERT_skip($$CURLY_R_7D);
-        } else {
-          lastParsedIdent = prev;
-          return regexSyntaxError('Identifier contained dynamic unicode escape that was not closed');
-        }
-      } else {
-        data = slice(start , pointer);
-      }
-      ASSERT(data.length > 0, 'a valid escape should contain at least one digit');
-      ASSERT(data.charCodeAt(0) !== $$CURLY_L_7B && isHex(data.charCodeAt(0)), 'if wrapped, the opener should be removed');
-      ASSERT(data.charCodeAt(data.length - 1) !== $$CURLY_R_7D && isHex(data.charCodeAt(data.length - 1)), 'if wrapped, the closer should not be consumed yet');
-
-      let ord = parseInt(data, 16);
-      if (ord > 0xffff) prev += String.fromCodePoint(ord); // there's a test... but if ord is >0xffff then fromCharCode can't properly deal with it
-      else prev += String.fromCharCode(ord);
-      // the escaped char must still be a valid identifier character. then and only
-      // then can we proceed to parse an identifier. otherwise we'll still parse
-      // into an error token.
-      if (fromStart === FIRST_CHAR && isIdentStart(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
-        return parseIdentifierRest(prev, uflagStatus);
-      } else if (fromStart === NON_START && isIdentRestChr(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
-        return parseIdentifierRest(prev, uflagStatus);
-      } else {
-        lastParsedIdent = prev;
-        return regexSyntaxError('Identifier escape did not yield a valid identifier character');
-      }
+    if (parseIdentOrStringEscapeUnicode() === BAD_ESCAPE) {
+      parseRegexIdentifierRest(prev, uflagStatus); // keep on parsing the identifier but we will make it an error token
+      lastParsedIdent = prev;
+      return regexSyntaxError('Only _unicode_ escapes are supported in identifiers');
     }
-    parseRegexIdentifierRest(prev, uflagStatus); // keep on parsing the identifier but we will make it an error token
-    lastParsedIdent = prev;
-    return regexSyntaxError('Only _unicode_ escapes are supported in identifiers');
+
+    ASSERT(neof(), 'would have been a BAD_ESCAPE if it was an EOF here');
+    let data = input.charCodeAt(start) === $$CURLY_L_7B ? slice(start + 1, pointer - 1) : slice(start, pointer);
+    ASSERT(data.length > 0, 'a valid escape should contain at least one digit');
+    ASSERT(data.charCodeAt(0) !== $$CURLY_L_7B && isHex(data.charCodeAt(0)), 'if wrapped, the opener should be removed');
+    ASSERT(data.charCodeAt(data.length - 1) !== $$CURLY_R_7D && isHex(data.charCodeAt(data.length - 1)), 'if wrapped, the closer should not be consumed yet');
+
+    let ord = parseInt(data, 16);
+    if (ord > 0xffff) prev += String.fromCodePoint(ord); // there's a test... but if ord is >0xffff then fromCharCode can't properly deal with it
+    else prev += String.fromCharCode(ord);
+    // the escaped char must still be a valid identifier character. then and only
+    // then can we proceed to parse an identifier. otherwise we'll still parse
+    // into an error token.
+    if (fromStart === FIRST_CHAR && isIdentStart(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
+      return parseRegexIdentifierRest(prev, uflagStatus);
+    } else if (fromStart === NON_START && isIdentRestChr(ord, CODEPOINT_FROM_ESCAPE) !== INVALID_IDENT_CHAR) {
+      return parseRegexIdentifierRest(prev, uflagStatus);
+    } else {
+      lastParsedIdent = prev;
+      return regexSyntaxError('Identifier escape did not yield a valid identifier character');
+    }
   }
 
   function readNextCodepointAsStringExpensive(c, offset, forError) {
@@ -1710,12 +1881,12 @@ function ZeTokenizer(
     let c = peek();
     if (c === $$FWDSLASH_2F) {
       // must be single comment
-      ASSERT_skip($$FWDSLASH_2F); // //
+      ASSERT_skip($$FWDSLASH_2F); // `//`
       wasWhite = true;
       return parseCommentSingle();
     } else if (c === $$STAR_2A) {
       // must be multi comment
-      ASSERT_skip($$STAR_2A); // /*
+      ASSERT_skip($$STAR_2A); // `/*`
       return parseCommentMulti();
     } else {
       return parseSingleFwdSlash(lexerFlags, c);
@@ -1734,7 +1905,8 @@ function ZeTokenizer(
     }
   }
   function parseCommentSingle() {
-    consumedComment = true;
+    consumedCommentSincePrevSolid = true;
+    wasComment = true;
     while (neof()) {
       let c = peek();
       if (c === $$CR_0D || isLfPsLs(c)) {
@@ -1746,7 +1918,8 @@ function ZeTokenizer(
     return $COMMENT_SINGLE;
   }
   function parseCommentMulti() {
-    consumedComment = true;
+    consumedCommentSincePrevSolid = true;
+    wasComment = true;
     let c;
     while (neof()) {
       c = peekSkip();
@@ -1774,7 +1947,7 @@ function ZeTokenizer(
   }
   function parseCommentHtmlOpen() {
     // parseHtmlComment
-    // This is the starting html comment <!--
+    // This is the starting html comment `<!--`
     // the spec defines it as the start of a single line JS comment
     // TODO: hide this under the web compat flag
     // TODO: and clean the check up already
@@ -1784,6 +1957,8 @@ function ZeTokenizer(
   }
   function parseCommentHtmlClose() {
     // parseHtmlComment
+    // This is the closing html comment, `-->`
+    // Note: parseCommentSingle will just skip the - - > because they are not newlines.
     parseCommentSingle();
     wasWhite = true;
     return $COMMENT_HTML;
@@ -1914,6 +2089,8 @@ function ZeTokenizer(
   let declGroupName = ','; // List of comma concatenated declared group names (plain idents). If it occurs then consider +N in the grammar, meaning they must all have it
   let refGroupName = ','; // List of comma concatenated referenced group names (plain idents). If it occurs then consider +N in the grammar, meaning they must all have it
   let kCharClassEscaped = false; // If one was missing but there was at least one group name then it's always an error
+  let foundValidGroupName = false; // used for +N post-regex check
+  let foundInvalidGroupName = false; // used for +N post-regex check
   function parseRegex(c) {
     nCapturingParens = 0;
     largestBackReference = 0;
@@ -1921,6 +2098,8 @@ function ZeTokenizer(
     declGroupName = ',';
     refGroupName = ',';
     kCharClassEscaped = false;
+    foundValidGroupName = false;
+    foundInvalidGroupName = false;
     let ustatusBody = parseRegexBody(c);
     if (ustatusBody === REGEX_ALWAYS_BAD) {
       ASSERT(lastReportableTokenizerError, 'last error should be set', lastReportableTokenizerError, lastPotentialRegexError);
@@ -1936,6 +2115,10 @@ function ZeTokenizer(
       } else {
         ustatusBody = regexSyntaxError(errmsg);
       }
+    }
+
+    if (foundInvalidGroupName && foundValidGroupName) {
+      ustatusBody = regexSyntaxError('Found at least one invalid group name but also at least one valid group name, so this activates +N and triggers this error');
     }
 
     let ustatusFlags = parseRegexFlags();
@@ -2092,7 +2275,7 @@ function ZeTokenizer(
               afterAtom = false; // this Assertion can never have a Quantifier
             } else {
               let escapeStatus = parseRegexAtomEscape(d, namedBackRefs);
-              ASSERT(escapeStatus === REGEX_ALWAYS_GOOD || lastPotentialRegexError, 'if not good then error should be set');
+              ASSERT(escapeStatus === REGEX_ALWAYS_GOOD || lastPotentialRegexError || lastReportableTokenizerError, 'if not good then error should be set');
               if (escapeStatus === REGEX_ALWAYS_BAD) {
                 uflagStatus = REGEX_ALWAYS_BAD;
               } else if (escapeStatus === REGEX_GOOD_SANS_U_FLAG) {
@@ -2151,12 +2334,13 @@ function ZeTokenizer(
                   uflagStatus = regexSyntaxError('The lookbehind group `(?<` must be followed by `=` or `!` but wasnt [ord=' + c + ']');
                   break;
                 } else {
-                  // parseRegexNamedGroup
+                  // parseRegexNamedGroup, parseNamedCapturingGroup
                   // [v]: `/(?<name>content)/`
                   // [v]: `/(?<\u0065bc>content)/`
 
                   const FOR_NAMED_GROUP = true;
                   uflagStatus = parseRegexGroupName(c, uflagStatus, FOR_NAMED_GROUP);
+
                   let name = lastParsedIdent;
                   if (groupNames['#' + name]) {
                     uflagStatus = regexSyntaxError('Each group name can only be declared once: `' + name + '`');
@@ -2346,7 +2530,7 @@ function ZeTokenizer(
 
     let r = _parseRegexGroupName(c, uflagStatus, forGroup);
 
-    ASSERT(r === REGEX_ALWAYS_BAD || lastParsedIdent !== '', 'a valid parse should always yield an ident, otherwise double check namedBackRefs.push', r);
+    ASSERT(r === REGEX_ALWAYS_BAD || foundInvalidGroupName || lastParsedIdent !== '', 'a valid parse should always yield an ident, otherwise double check namedBackRefs.push', r);
 
     if (uflagStatus !== REGEX_ALWAYS_BAD && r === REGEX_ALWAYS_BAD) {
       let reason = 'An illegal group name composition is only valid without u-flag and in webcompat mode';
@@ -2373,6 +2557,10 @@ function ZeTokenizer(
     // After the first pass, if the `\k` is found with a proper `GroupName` then parse it with `+N` and act
     // normal. Otherwise, for any partial or full absence of the `GroupName`, just don't treat the `<` and `>`
     // as special.
+    // We use a global (for now) for this. Set `foundValidGroupName` or `foundInvalidGroupName` and confirm afterwards
+    // whether invalid names were found and, if so, no valid names were found. Throw accordingly. (TODO: juggle this)
+
+    let thisNameInvalid = false;
 
     // [v]: `(?<\u0065ame>xyz)/``
     //          ^
@@ -2390,20 +2578,39 @@ function ZeTokenizer(
       if (!peeky($$U_75)) return regexSyntaxError('Found invalid escape character at the start of a group name identifier');
       ASSERT_skip($$U_75);
 
-      c = parseRegexUnicodeEscape2(); // will check EOF first, consume a valid unicode escape, else bail
+      // We need to parse a unicode escape here that can be a quad, a double quad, or a variable length escape
+      // However, we also need to know the size of the code point (one or two characters or invalid)
+      // Without u-flag, the variable length and non-bmp code points are not considered and will cause an error here.
+
+      c = parseRegexCharClassUnicodeEscape(); // will check EOF first, consume a valid unicode escape, else bail
       if (c === INVALID_IDENT_CHAR || c === REGEX_CHARCLASS_BAD) {
         return regexSyntaxError('Found invalid quad unicode escape');
       }
       if ((c & REGEX_CHARCLASS_BAD_SANS_U_FLAG) === REGEX_CHARCLASS_BAD_SANS_U_FLAG) {
-        uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'Encountered extended unicode escape `\\u{}` which is only valid with u-flag but this regex is invalid with u-flag');
+        uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'Encountered extended unicode escape (`\\u{}`) or surrogate pair unicode quads (`\\uxxxx\\uxxxx`) which is only valid with u-flag');
         c = c ^ REGEX_CHARCLASS_BAD_SANS_U_FLAG;
       }
 
-      if (isIdentStart(c, CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR) {
-        // - `/(?<\u0020ame>xyz)/``
-        //        ^
-        // - `/(?<x>foo)\k<\u0020ame>xyz/``
+      let wide = isIdentStart(c, CODEPOINT_FROM_ESCAPE);
+      // Note: if wide or if the escape was of the `\u{}` form then the uflag will have been updated here so skip that
+      if (wide === VALID_SINGLE_CHAR) {
+        // [v]: `/(?<\u0041>.)/`
+        // Fine with and without u-flag
+      }
+      else if (wide === VALID_DOUBLE_CHAR) {
+        // [x]: `/(?<\ud87e\udddfrest>foo)/`
+        // [v]: `/(?<\ud87e\udddfrest>foo)/u`
+        // The first character is a valid ident start, however, it only is as a code point, which is only the case
+        // when u-flag is present. So this is an error without u-flag, since surrogate pair heads are not valid here.
+      }
+      else {
+        ASSERT(wide === INVALID_IDENT_CHAR, 'enum');
+        // [x]: `/(?<\uD835\uDFD0rest>foo)/`
+        //                       ^
+        // [x]: `/(?<\u0020ame>xyz)/``
         //                 ^
+        // [x]: `/(?<x>foo)\k<\u0020ame>xyz/``
+        //                          ^
         return regexSyntaxError('Named capturing group named contained an invalid unicode escaped char', '`' + readNextCodepointAsStringExpensive(c, CODEPOINT_FROM_ESCAPE, true) + '`', c);
       }
 
@@ -2415,16 +2622,64 @@ function ZeTokenizer(
       } else {
         uflagStatus = parseRegexIdentifierRest(firstCharStr, uflagStatus); // updates lastParsedIdent
       }
+      foundValidGroupName = true;
     } else {
-      let wider = isIdentStart(c, pointer);
-      if (wider === INVALID_IDENT_CHAR) {
+      // [v]: `/(?<name>x)*/`
+      //           ^
+      // [v]: `/(?<name>x)*/u`
+      // [v]: `/(?<輸rest>foo)/u`
+      //           ^
+      let wide = isIdentStart(c, pointer);
+      if (wide === VALID_SINGLE_CHAR) {
+        // [v]: `/(?<name>x)*/`
+        //           ^
+        // [v]: `/(?<name>x)*/u`
+        // Fine with and without u-flag
+        ASSERT_skip(c);
+        foundValidGroupName = true;
+      }
+      else if (wide === VALID_DOUBLE_CHAR) {
+        // [v]: `/(?<輸rest>foo)/u`
+        //           ^
+        // The first character is a valid ident start, however, it only is as a code point, which is only the case
+        // when u-flag is present. So this is an error without u-flag, since surrogate pair heads are not valid here.
+        uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'The start of an group name had a surrogate pair and is therefor only valid with u-flag');
+        ASSERT_skip(c);
+        skip();
+        foundValidGroupName = true;
+      }
+      else {
+        ASSERT(wide === INVALID_IDENT_CHAR, 'enum');
+        // [x]: `/(?<>a)/`
+        //           ^
+        // [x]: `/(?<4>a)/`
+        //           ^
+        // [v]: `/(?<𝟐rest>fxoo)/`
+        //           ^
+        // [x]: `/(?<輸>foo)met\k<�>/u`
+        //                        ^
         if (webCompat === WEB_COMPAT_ON) {
           // Ignore this error
+          foundInvalidGroupName = true;
+          thisNameInvalid = true;
           // Figure out how many chars to skip (slow path)
           let len = codepointLen(c, pointer);
           ASSERT(len === 1 || len === 2, 'codepoints are 1 or 2?', [len, c, pointer]);
-          wider = len === 1 ? VALID_SINGLE_CHAR : VALID_DOUBLE_CHAR;
-        } else {
+          if (len === 1) {
+            // [x]: `/(?<>a)/`
+            //           ^
+            wide = VALID_SINGLE_CHAR;
+            ASSERT_skip(c);
+          } else {
+            // [v]: `/(?<𝟐rest>fxoo)/`
+            //           ^
+            // Do we need to throw without u-flag? Is it relevant to only skip one character without u-flag? I don't think so because I don't think a valid surrogate tail can lead to a significant syntax character
+            wide = VALID_DOUBLE_CHAR;
+            ASSERT_skip(c);
+            skip();
+          }
+        }
+        else {
           // (The name must be valid ident so non-ident chars will end the parse prematurely)
           // if (webCompat === WEB_COMPAT_OFF) {
           // [x]: `/(?<x>foo)met\k<#/`
@@ -2437,22 +2692,21 @@ function ZeTokenizer(
         }
       }
 
-      if (wider === VALID_DOUBLE_CHAR) {
-        skip();
-        skip();
-      } else {
-        ASSERT(wider === VALID_SINGLE_CHAR || wider === INVALID_IDENT_CHAR, 'enum');
-        ASSERT_skip(c);
-      }
-
-      let firstCharStr = (wider === VALID_DOUBLE_CHAR) ? input.slice(pointer - 2, pointer) : String.fromCharCode(c);
+      let firstCharStr = (wide === VALID_DOUBLE_CHAR) ? input.slice(pointer - 2, pointer) : String.fromCharCode(c);
 
       if (peeky($$GT_3E)) {
         // name is one character
         lastParsedIdent = firstCharStr;
-      } else {
+      }
+      else {
         uflagStatus = parseRegexIdentifierRest(firstCharStr, uflagStatus); // updates lastParsedIdent
         if (uflagStatus === REGEX_ALWAYS_BAD) return REGEX_ALWAYS_BAD;
+      }
+
+      if (thisNameInvalid) {
+        // Prevent backreference errors. If the group name is allowed to be an invalid ident then it won't matter
+        // and otherwise the presence of a valid group name will trigger this error.
+        lastParsedIdent = '';
       }
     }
 
@@ -2470,12 +2724,15 @@ function ZeTokenizer(
     }
 
     ASSERT_skip($$GT_3E);
-    // This enables +N mode, meaning `\k` is now disallowed in char classes in webcompat mode too
-    if (forGroup) {
-      declGroupName += lastParsedIdent + ',';
-    } else {
-      // We can only verify existence after completing the body
-      refGroupName += lastParsedIdent + ',';
+
+    if (lastParsedIdent) {
+      // This enables +N mode, meaning `\k` is now disallowed in char classes in webcompat mode too
+      if (forGroup) {
+        declGroupName += lastParsedIdent + ',';
+      } else {
+        // We can only verify existence after completing the body
+        refGroupName += lastParsedIdent + ',';
+      }
     }
 
     return uflagStatus;
@@ -2492,7 +2749,7 @@ function ZeTokenizer(
     switch (c) {
       case $$U_75:
         ASSERT_skip($$U_75);
-        return parseRegexUnicodeEscape();
+        return parseRegexAtomUnicodeEscape();
 
       // hex
       case $$X_78:
@@ -2668,27 +2925,35 @@ function ZeTokenizer(
         //   [+U] SyntaxCharacter
         //   [+U] /
         //   [~U] SourceCharacter but not UnicodeIDContinue
+        //
+        // Note: SyntaxCharacter and `/` is already checked in the switch above, so we focus on the ~U step
 
         let wide = isIdentRestChr(c, pointer);
-        if (wide !== INVALID_IDENT_CHAR) { // backslash is parsed, c is peeked
-          if (webCompat === WEB_COMPAT_OFF) {
-            return regexSyntaxError('Cannot escape this regular identifier character [ord=' + c + '][' + String.fromCharCode(c) + ']');
-          }
-        }
-
         if (wide === VALID_DOUBLE_CHAR) {
+          // The regex is already invalid with u-flag but (still?) valid without u-flag because the code _point_ is a
+          // id_continue while the code _unit_ is just a surrogate head, which by itself is not an id_continue. So it
+          // does not violate the syntax.
+
           c = input.codePointAt(pointer);
           skip();
           skip();
-        } else {
-          if (wide === INVALID_IDENT_CHAR) {
-            updateRegexPotentialError('Tokenizer potential $ERROR: was invalid ident but accepting anyways');
+        } else if (wide === VALID_SINGLE_CHAR) {
+          // backslash is parsed, c is peeked
+          // This means the code unit is a valid unicode continue character, which is not legal with or without u-flag
+          // In webcompat mode it is still legal as long as it isn't a `c` or, with +N, a `k`.
+
+          ASSERT_skip(c);
+          if (webCompat === WEB_COMPAT_OFF) {
+            return regexSyntaxError('Cannot escape this regular identifier character [ord=' + c + '][' + String.fromCharCode(c) + ']');
           }
+        } else {
+          ASSERT(wide === INVALID_IDENT_CHAR, 'enum');
+          // Illegal ident chars are fine to escape, apparently.
           ASSERT_skip(c);
         }
 
         // ok unicode escape was acceptable
-        return updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, 'Legacy unicode escape is only valid without u-flag');
+        return updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, 'Atom escape can only escape certain syntax chars with u-flag');
     }
     THROW('dis be dead code');
   }
@@ -2727,7 +2992,7 @@ function ZeTokenizer(
 
     return REGEX_ALWAYS_GOOD;
   }
-  function parseRegexUnicodeEscape() {
+  function parseRegexAtomUnicodeEscape() {
     // if unicode flag
     // - surrogate pairs may matter
     // - class char status matters
@@ -2743,17 +3008,17 @@ function ZeTokenizer(
     let c = peek(); // dont read. we dont want to consume a bad \n here
     if (c === $$CURLY_L_7B) {
       ASSERT_skip($$CURLY_L_7B);
-      let r = parseRegexUnicodeEscapeVary();
+      let r = parseRegexAtomUnicodeEscapeVary();
       if (r === GOOD_ESCAPE) {
         ASSERT_skip($$CURLY_R_7D);
         return updateRegexUflagIsMandatory(REGEX_ALWAYS_GOOD, 'The es6 unicode escape `\\u{...}` is only valid in regex with a u-flag');
       }
       return regexSyntaxError('Error while trying to parse new unicode escape');
     } else {
-      return parseRegexUnicodeEscapeQuad(c);
+      return parseRegexAtomUnicodeEscapeQuad(c);
     }
   }
-  function parseRegexUnicodeEscapeQuad(a) {
+  function parseRegexAtomUnicodeEscapeQuad(a) {
     // we've already consumed a. we must consume 3 more chars for this quad unicode escape
     if (eofd(3)) {
       let reason = 'Encountered early EOF while parsing a unicode escape quad';
@@ -2828,15 +3093,19 @@ function ZeTokenizer(
       }
     }
   }
-  function parseRegexUnicodeEscapeVary() {
+  function parseRegexAtomUnicodeEscapeVary() {
     // "It is a Syntax Error if the MV of HexDigits > 1114111."
     // this means the actual hex value cannot exceed 6 chars (0x10ffff). however,
     // it can have any number of leading zeroes so we still need to loop
 
     // must at least parse one hex digit (but it may be invalid so we can't read())
-    if (eof()) return BAD_ESCAPE;  // first one is mandatory
+    if (eof()) return GOOD_ESCAPE;  // first one is mandatory
     let a = peek();
-    if (!isHex(a)) return BAD_ESCAPE; // first one is mandatory
+    if (!isHex(a)) {
+      // First one is mandatory
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape started with non-hex character (0-9a-f)';
+      return BAD_ESCAPE;
+    }
     ASSERT_skip(a);
 
     return _parseRegexUnicodeEscapeVary(a);
@@ -2844,7 +3113,7 @@ function ZeTokenizer(
   function _parseRegexUnicodeEscapeVary(a) {
     // skip leading zeroes if there are any
     if (a === $$0_30) {
-      if (eof()) return BAD_ESCAPE;
+      if (eof()) return GOOD_ESCAPE;
       a = skipZeroes();
       if (!isHex(a)) {
         // note: we already asserted a zero
@@ -2852,6 +3121,7 @@ function ZeTokenizer(
           lastRegexUnicodeEscapeOrd = 0;
           return GOOD_ESCAPE
         }
+        if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape contained at least one non-hex character (0-9a-f)';
         return BAD_ESCAPE;
       }
       ASSERT_skip(a);
@@ -2859,65 +3129,70 @@ function ZeTokenizer(
     return ___parseRegexUnicodeEscapeVary(a);
   }
   function ___parseRegexUnicodeEscapeVary(a) {
-    if (eof()) return BAD_ESCAPE;
+    if (eof()) return GOOD_ESCAPE;
     let b = peek();
     if (!isHex(b)) {
       if (b === $$CURLY_R_7D) {
         lastRegexUnicodeEscapeOrd = hexToNum(a);
         return GOOD_ESCAPE
       }
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape contained at least one non-hex character (0-9a-f)';
       return BAD_ESCAPE;
     }
     ASSERT_skip(b);
     return ____parseRegexUnicodeEscapeVary(a, b);
   }
   function ____parseRegexUnicodeEscapeVary(a, b) {
-    if (eof()) return BAD_ESCAPE;
+    if (eof()) return GOOD_ESCAPE;
     let c = peek();
     if (!isHex(c)) {
       if (c === $$CURLY_R_7D) {
         lastRegexUnicodeEscapeOrd = hexToNum(a) << 4 | hexToNum(b);
         return GOOD_ESCAPE
       }
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape contained at least one non-hex character (0-9a-f)';
       return BAD_ESCAPE;
     }
     ASSERT_skip(c);
     return _____parseRegexUnicodeEscapeVary(a, b, c);
   }
   function _____parseRegexUnicodeEscapeVary(a, b, c) {
-    if (eof()) return BAD_ESCAPE;
+    if (eof()) return GOOD_ESCAPE;
     let d = peek();
     if (!isHex(d)) {
       if (d === $$CURLY_R_7D) {
         lastRegexUnicodeEscapeOrd = hexToNum(a) << 8 | hexToNum(b) << 4 | hexToNum(c);
         return GOOD_ESCAPE
       }
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape contained at least one non-hex character (0-9a-f)';
       return BAD_ESCAPE;
     }
     ASSERT_skip(d);
     return ______parseRegexUnicodeEscapeVary(a, b, c, d);
   }
   function ______parseRegexUnicodeEscapeVary(a, b, c, d) {
-    if (eof()) return BAD_ESCAPE;
+    if (eof()) return GOOD_ESCAPE;
     let e = peek();
     if (!isHex(e)) {
       if (e === $$CURLY_R_7D) {
         lastRegexUnicodeEscapeOrd = hexToNum(a) << 12 | hexToNum(b) << 8 | hexToNum(c) << 4 | hexToNum(d);
         return GOOD_ESCAPE
       }
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape contained at least one non-hex character (0-9a-f)';
       return BAD_ESCAPE;
     }
     ASSERT_skip(e);
     return _______parseRegexUnicodeEscapeVary(a, b, c, d, e);
   }
   function _______parseRegexUnicodeEscapeVary(a, b, c, d, e) {
-    if (eof()) return BAD_ESCAPE;
+    if (eof()) return GOOD_ESCAPE;
     let f = peek();
     if (!isHex(f)) {
       if (f === $$CURLY_R_7D) {
         lastRegexUnicodeEscapeOrd = hexToNum(a) << 16 | hexToNum(b) << 12 | hexToNum(c) << 8 | hexToNum(d) << 4 | hexToNum(e);
         return GOOD_ESCAPE
       }
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape contained at least one non-hex character (0-9a-f)';
       return BAD_ESCAPE;
     }
     ASSERT_skip(f);
@@ -2926,9 +3201,15 @@ function ZeTokenizer(
   function ________parseRegexUnicodeEscapeVary(a, b, c, d, e, f) {
     let codePoint = hexToNum(a) << 20 | hexToNum(b) << 16 | hexToNum(c) << 12 | hexToNum(d) << 8 | hexToNum(e) << 4 | hexToNum(f);
     // the total may not exceed 0x10ffff
-    if (codePoint > 0x10ffff) return BAD_ESCAPE;
-    if (eof()) return BAD_ESCAPE;
-    if (!peeky($$CURLY_R_7D)) return BAD_ESCAPE;
+    if (codePoint > 0x10ffff) {
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape escaped a code point that was out of bounds (>0x10ffff)';
+      return BAD_ESCAPE;
+    }
+    if (eof()) return GOOD_ESCAPE;
+    if (!peeky($$CURLY_R_7D)) {
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Variable unicode escape was not closed after finding the max allowed hex digits';
+      return BAD_ESCAPE;
+    }
     lastRegexUnicodeEscapeOrd = codePoint;
     return GOOD_ESCAPE;
   }
@@ -3161,7 +3442,7 @@ function ZeTokenizer(
       // \u<????> and \u{<?..?>}
       case $$U_75:
         ASSERT_skip($$U_75);
-        return parseRegexUnicodeEscape2();
+        return parseRegexCharClassUnicodeEscape();
 
       // \x<??>
       case $$X_78:
@@ -3176,6 +3457,7 @@ function ZeTokenizer(
           // I think the \x should be accepted as SourceCharacterIdentityEscape now...?
           if (webCompat === WEB_COMPAT_ON) {
             updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);
+            // TODO: what's the code point value?
             return REGEX_CHARCLASS_BAD_WITH_U_FLAG;
           } else {
             regexSyntaxError(reason);
@@ -3705,7 +3987,7 @@ function ZeTokenizer(
         if (eof()) return regexSyntaxError('Encountered early EOF while trying to parse a regex flag that is escaped (the backslash is the very last char which is illegal)');
         if (peeky($$U_75)) {
           ASSERT_skip($$U_75);
-          parseRegexUnicodeEscape();
+          parseRegexAtomUnicodeEscape();
         }
         ++bad;
         regexSyntaxError('Unknown regex flag [ord=' + c + ']');
@@ -3873,10 +4155,15 @@ function ZeTokenizer(
     return c >= $$4_34 && c <= $$7_37;
   }
 
-  function parseRegexUnicodeEscape2() {
+  function parseRegexCharClassUnicodeEscape() {
+    // This returns the code point, if valid, possibly together with REGEX_CHARCLASS_BAD_SANS_U_FLAG
+    // May also return REGEX_CHARCLASS_BAD
+
     // `\u{...}`
     //    ^
     // `\uxxxx`
+    //    ^
+    // `\uxxxx\uxxxx`         (only if the first quad is a surrogate head and second quad a surrogate tail!)
     //    ^
 
     // if unicode flag
@@ -3896,7 +4183,7 @@ function ZeTokenizer(
     let c = peek(); // dont read. we dont want to consume a bad \n here
     if (c === $$CURLY_L_7B) {
       ASSERT_skip($$CURLY_L_7B);
-      let r = parseRegexUnicodeEscapeVary2();
+      let r = parseRegexCharClassUnicodeEscapeVary();
       if (r === REGEX_CHARCLASS_BAD) {
         regexSyntaxError('Missing curly of unicode long escape in a regex');
         return REGEX_CHARCLASS_BAD;
@@ -3910,11 +4197,18 @@ function ZeTokenizer(
       updateRegexPotentialError('The es6 long unicode escape is only valid with u-flag');
       return r | REGEX_CHARCLASS_BAD_SANS_U_FLAG; // `\u{}` in regexes is restricted to +u flag
     } else {
-      return parseRegexUnicodeEscapeQuad2(c);
+      return parseRegexCharClassUnicodeEscapeQuad(c);
     }
   }
-  function parseRegexUnicodeEscapeQuad2(a) {
-    // we've already consumed a char in `a`. we must consume 3 more chars for this quad unicode escape
+  function parseRegexCharClassUnicodeEscapeQuad(a) {
+    // This returns the code point, if valid, possibly together with REGEX_CHARCLASS_BAD_SANS_U_FLAG
+    // We've already consumed a char in `a`. we must consume 3 more chars for this quad unicode escape
+
+    // `\uxxxx`
+    //    ^
+    // `\uxxxx\uxxxx`         (only if the first quad is a surrogate head and second quad a surrogate tail!)
+    //    ^
+
     if (eofd(3)) {
       updateRegexPotentialError('Unexpected EOF while parsing unicode escape');
       return REGEX_CHARCLASS_BAD;
@@ -3934,6 +4228,9 @@ function ZeTokenizer(
 
       // Is this a surrogate high byte? then we'll try another one; https://en.wikipedia.org/wiki/UTF-16
       if (firstPart >= 0xD800 && firstPart <= 0xDBFF) {
+        // `\uxxxx\uxxxx`         (we've verified the first quad is a valid surrogate head)
+        //        ^
+
         // pretty slow path but we're constructing a low+hi surrogate pair together here
         if (
           !eofd(5) &&
@@ -3965,13 +4262,16 @@ function ZeTokenizer(
             // now skip `\uxxxx` (6)
             ASSERT_skip($$BACKSLASH_5C);
             ASSERT_skip($$U_75);
-            skip();
-            skip();
-            skip();
-            skip();
+            ASSERT_skip(a);
+            ASSERT_skip(b);
+            ASSERT_skip(c);
+            ASSERT_skip(d);
 
-            // we have a matching low+hi, combine them
-            return (((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000;
+            updateRegexPotentialError('A double unicode quad escape that represents a surrogate pair in char class or group name is only valid with u-flag');
+
+            // We have a matching low+hi, combine them
+            // This will be considered illegal without u-flag, which will ignore the surrogate tail
+            return ((((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000) | REGEX_CHARCLASS_BAD_SANS_U_FLAG;
           }
           // regexSyntaxError('Second quad did not yield a valid surrogate pair value');
         }
@@ -3984,7 +4284,7 @@ function ZeTokenizer(
       return REGEX_CHARCLASS_BAD;
     }
   }
-  function parseRegexUnicodeEscapeVary2() {
+  function parseRegexCharClassUnicodeEscapeVary() {
     // "It is a Syntax Error if the MV of HexDigits > 1114111."
     // this means the actual hex value cannot exceed 6 chars (0x10ffff). however,
     // it can have any number of leading zeroes so we still need to loop
@@ -4162,15 +4462,16 @@ function ZeTokenizer(
 }
 
 function isLfPsLs(c) {
-  return c === $$LF_0A || isPSLS(c);
+  return c === $$LF_0A || isPsLs(c);
 }
-function isPSLS(c) {
+function isPsLs(c) {
   return c === $$PS_2028 || c === $$LS_2029;
 }
 
-function debug_toktype(type, ignoreUnknown) {
+function toktypeToString(type, _, ignoreUnknown) {
   ASSERT(typeof type === 'number', 'expecting valid type', type, ignoreUnknown);
-  if (type & $TICK_BAD_ESCAPE) return debug_toktype(type ^ $TICK_BAD_ESCAPE, ignoreUnknown) + '+$TICK_BAD_ESCAPE';
+  if (type & $TICK_BAD_ESCAPE) return toktypeToString(type ^ $TICK_BAD_ESCAPE, undefined, ignoreUnknown) + '+$TICK_BAD_ESCAPE';
+
   switch (type) {
     case $ASI: return 'ASI';
     case $COMMENT: return 'COMMENT';
@@ -4205,8 +4506,56 @@ function debug_toktype(type, ignoreUnknown) {
     case $WHITE: return 'WHITE';
     default:
       if (ignoreUnknown) return 'UNKNOWN[' + type + ']';
-      throw new Error('debug_toktype: UNKNOWN[' + JSON.stringify(type) + ']')
+      throw new Error('toktypeToString: UNKNOWN[' + JSON.stringify(type) + ']')
   }
+}
+
+function DEBUG_T(type) {
+  ASSERT(typeof type === 'number', 'expecting valid type', type);
+  ASSERT(type !== 0, 'token type is an enum that is not zero');
+
+  let out = [];
+  if ((type & $ASI) === $ASI) out.push('$ASI');
+  if ((type & $COMMENT) === $COMMENT) out.push('$COMMENT');
+  if ((type & $COMMENT_SINGLE) === $COMMENT_SINGLE) out.push('$COMMENT_SINGLE');
+  if ((type & $COMMENT_MULTI) === $COMMENT_MULTI) out.push('$COMMENT_MULTI');
+  if ((type & $COMMENT_HTML) === $COMMENT_HTML) out.push('$COMMENT_HTML');
+  if ((type & $CRLF) === $CRLF) out.push('$CRLF');
+  if ((type & $EOF) === $EOF) out.push('$EOF');
+  if ((type & $ERROR) === $ERROR) out.push('$ERROR');
+  if ((type & $IDENT) === $IDENT) out.push('$IDENT');
+  if ((type & $NL) === $NL) out.push('$NL');
+  if ((type & $NUMBER) === $NUMBER) out.push('$NUMBER');
+  if ((type & $NUMBER_DEC) === $NUMBER_DEC) out.push('$NUMBER_DEC');
+  if ((type & $NUMBER_HEX) === $NUMBER_HEX) out.push('$NUMBER_HEX');
+  if ((type & $NUMBER_OCT) === $NUMBER_OCT) out.push('$NUMBER_OCT');
+  if ((type & $NUMBER_BIN) === $NUMBER_BIN) out.push('$NUMBER_BIN');
+  if ((type & $NUMBER_OLD) === $NUMBER_OLD) out.push('$NUMBER_OLD');
+  if ((type & $PUNCTUATOR) === $PUNCTUATOR) out.push('$PUNCTUATOR');
+  if ((type & $REGEX) === $REGEX) out.push('$REGEX');
+  if ((type & $REGEXU) === $REGEXU) out.push('$REGEXU');
+  if ((type & $SPACE) === $SPACE) out.push('$SPACE');
+  if ((type & $STRING) === $STRING) out.push('$STRING');
+  if ((type & $STRING_DOUBLE) === $STRING_DOUBLE) out.push('$STRING_DOUBLE');
+  if ((type & $STRING_SINGLE) === $STRING_SINGLE) out.push('$STRING_SINGLE');
+  if ((type & $TAB) === $TAB) out.push('$TAB');
+  if ((type & $TICK) === $TICK) out.push('$TICK');
+  if ((type & $TICK_HEAD) === $TICK_HEAD) out.push('$TICK_HEAD');
+  if ((type & $TICK_BODY) === $TICK_BODY) out.push('$TICK_BODY');
+  if ((type & $TICK_TAIL) === $TICK_TAIL) out.push('$TICK_TAIL');
+  if ((type & $TICK_PURE) === $TICK_PURE) out.push('$TICK_PURE');
+  if ((type & $TICK_BAD_ESCAPE) === $TICK_BAD_ESCAPE) out.push('$TICK_BAD_ESCAPE');
+  if ((type & $WHITE) === $WHITE) out.push('$WHITE');
+
+  if (out.length === 0) {
+    if ((type & $TICK_BAD_ESCAPE) === $TICK_BAD_ESCAPE) {
+      out.push('$TICK_BAD_ESCAPE');
+    } else {
+      throw new Error('DEBUG_T: UNKNOWN[' + JSON.stringify(type) + ']')
+    }
+  }
+
+  return 'T<' + out.join(',') + '>';
 }
 
 // </BODY>
@@ -4275,10 +4624,12 @@ export {
   LF_DEBUG,
 
   RETURN_ANY_TOKENS,
+  RETURN_COMMENT_TOKENS,
   RETURN_SOLID_TOKENS,
 
   WEB_COMPAT_OFF,
   WEB_COMPAT_ON,
 
-  debug_toktype,
+  toktypeToString,
+  DEBUG_T,
 };

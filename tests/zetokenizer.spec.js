@@ -53,7 +53,7 @@ import ZeTokenizer, {
 
   RETURN_ANY_TOKENS,
 
-  debug_toktype,
+  toktypeToString,
   LF_DEBUG,
 } from '../src/zetokenizer.mjs';
 
@@ -224,13 +224,13 @@ for (let [[input, output, modi, desc, skip], fromPath] of all) {
                     '(1) failed=',
                     failed,
                     'because we got',
-                    debug_toktype(token.type || 0),
+                    toktypeToString(token.type),
                     'but expected',
-                    debug_toktype(exp || 0),
+                    toktypeToString(exp),
                     'token:',
                     token,
                     'exp:',
-                    debug_toktype(exp),
+                    toktypeToString(exp),
                   );
                 }
                 if (token.type === $EOF) break;
@@ -262,7 +262,7 @@ for (let [[input, output, modi, desc, skip], fromPath] of all) {
                   (webMode === WEB_COMPAT_ALWAYS ? 'WEBC' : 'SPEC') +
                   ']: ',
                 [toPrint(code)],
-                '  -->  ' + outs.map(debug_toktype) + ', was; ' + collects.map(debug_toktype) + (!failed ? '' : ' => ' + desc),
+                '  -->  ' + outs.map(toktypeToString) + ', was; ' + collects.map(toktypeToString) + (!failed ? '' : ' => ' + desc),
               );
               if (failed) LOG(fromPath);
               if (failed) {
@@ -286,9 +286,9 @@ for (let [[input, output, modi, desc, skip], fromPath] of all) {
                   ']: `' +
                   toPrint(code) +
                   '`  -->  ' +
-                  outs.map(debug_toktype) +
+                  outs.map(toktypeToString) +
                   ', was so far; ' +
-                  collects.map(debug_toktype) +
+                  collects.map(toktypeToString) +
                   ' => ' +
                   desc,
               );

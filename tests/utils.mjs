@@ -13,6 +13,11 @@ let WEB_COMPAT_NEVER = 32;
 import util from 'util';
 import fs from 'fs';
 import readline from 'readline';
+import path from 'path';
+
+// node does not expose __dirname under module mode, but we can use import.meta to get it
+let filePath = import.meta.url.replace(/^file:\/\//,'');
+let dirname = path.dirname(filePath);
 
 const BOLD = '\x1b[;1;1m';
 const BLINK = '\x1b[;5;1m';
@@ -28,6 +33,9 @@ const OUTPUT_HEADER_MODULE = '\n### Module goal\n';
 const OUTPUT_HEADER_WEB = '\n### Web compat mode\n';
 const OUTPUT_QUINTICK = '\n`````\n';
 const OUTPUT_QUINTICKJS = '\n`````js\n';
+
+ASSERT(dirname.endsWith('/tests'), 'update root detection if this changes');
+let PROJECT_ROOT_DIR = path.resolve(path.join(dirname, '..'));
 
 let prefixLogOrigin = false; // this slows things down considerably so just used for debugging
 const _LOG = console.log; // global hijack :(
@@ -59,7 +67,7 @@ function THROW(str, ...rest) {
 function ASSERT(b, ...args) {
   if (!b) {
     console.trace();
-    THROW('test env ASSERT error:', ...args);
+    THROW('test env ASSERT error: ' + args.join(' :: '));
   }
 }
 
@@ -160,7 +168,7 @@ function parseTestFile(tob) {
   let {file, oldData} = tob;
   if (!oldData) return;
 
-  ASSERT(oldData.includes(INPUT_HEADER));
+  ASSERT(oldData.includes(INPUT_HEADER), 'missing input header in ' + tob.file);
   tob.aboveTheFold = oldData.slice(0, oldData.indexOf(INPUT_HEADER));
   tob.shouldPass = tob.aboveTheFold.toLowerCase().includes('\n## pass\n');
   tob.shouldFail = tob.aboveTheFold.toLowerCase().includes('\n## fail\n');
@@ -232,7 +240,7 @@ function parseTestFile(tob) {
     .reduce((obj, s) => {
       // Each line should be ``- `name = value` ``
       let [k, is, ...v] = s.slice(3, -1).split(' ');
-      ASSERT(is === '=', 'key=value', file, s);
+      ASSERT(is === '=', 'separate the key and value of input options with a `=` and surrounding spaces', ' ' + file + ' ', s);
 
       let value = v.join(' ');
       if (String(parseFloat(value)) === value) value = parseFloat(v);
@@ -303,6 +311,67 @@ async function yn(msg = 'Answer?') {
   return true;
 }
 
+function normalizeAst(ast, parentProp) {
+  // Given an object model, re-assign properties in lexicographical order except put `type` first
+
+  let names = Object.getOwnPropertyNames(ast);
+  names = names.sort((a,b) => a === 'type' ? -1 : b === 'type' ? b : a > b ? -1 : a < b ? 1 : 0);
+  names.forEach(prop => {
+    // Drop meta data I'm not adding atm
+    if (parentProp === 'program') {
+      if ([].includes(prop)) {
+        delete ast[prop];
+        return;
+      }
+    }
+    if (parentProp === 'loc') {
+      if (prop === 'source') { // this just needs some regex fu
+        delete ast[prop];
+        return;
+      }
+    } else if (prop === 'start' || prop === 'end') {
+      delete ast[prop];
+      return;
+    }
+    // if (prop === 'extra') {
+    //   delete ast[prop];
+    //   return;
+    // }
+    // Work around a poisoned getter/setter on .canon in non-ident tokens in dev mode
+    let opd = Object.getOwnPropertyDescriptor(ast, prop);
+    if (opd && 'value' in opd) {
+      if (ast[prop] && typeof ast[prop] === 'object') {
+        normalizeAst(ast[prop], prop);
+      }
+      let v = ast[prop];
+      // Have to delete the prop in some cases, or re-ordering won't work
+      // Need to trap because deleting array.length will throw an error
+      try { delete ast[prop]; } catch (e) {}
+      ast[prop] = v;
+    }
+  });
+  return ast;
+}
+function astToString(ast) {
+  return util
+  .inspect(ast, false, null)
+  // Flatten location tracking objects to a single line
+  /*
+  loc: {
+    start: { line: 1, col: 0 },
+    end: { line: 2, col: 2 },
+    source: ''
+  },
+  ->
+  loc:{start:{line:1,col:0},end:{line:2,col:2},source:''},
+  */
+  // (Test cases won't contain this as string-content so the regex should be safe)
+  .replace(
+    /loc:\s*\{\s*start:\s*\{\s*line:\s*\d+,\s*column:\s*\d+\s*\}\s*(?:,\s*identifierName:\s*'[^']*')?,\s*end:\s*\{\s*line:\s*\d+,\s*column?:\s*\d+\s*\}(?:,\s*source:\s*'[^']*')?(?:,\s*identifierName:\s*'[^']*')?\s*}/g,
+    s => s.replace(/\s+/g, '')
+  );
+}
+
 export {
   PASS,
   FAIL,
@@ -326,12 +395,15 @@ export {
   OUTPUT_QUINTICKJS,
 
   ASSERT,
+  astToString,
   decodeUnicode,
   encodeUnicode,
   getTestFiles,
   _LOG,
   LOG,
+  normalizeAst,
   parseTestFile,
+  PROJECT_ROOT_DIR,
   promiseToReadFile,
   promiseToWriteFile,
   readFiles,

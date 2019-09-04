@@ -1,8 +1,8 @@
 #!/usr/bin/env node --experimental-modules
 
-// For as long as node does not support it out of the box and you use nvm you can only execute this through:
+// Shorthand test runner api from project root through:
 //
-//     node --experimental-modules tests/zeparser.spec.mjs
+//     ./t --help
 //
 
 if (!(process.version.slice(1, 3) >= 10)) throw new Error('Requires node 10+, did you forget `nvm use 10`?');
@@ -11,7 +11,7 @@ Error.stackTraceLimit = Infinity; // TODO: cut off at node boundary...
 
 console.log('Start of ZeParser3 test suite');
 
-const INPUT_OVERRIDE = process.argv.includes('-i') ? process.argv[process.argv.indexOf('-i') + 1] : '';
+const INPUT_OVERRIDE = process.argv.includes('-F') ? fs.readFileSync(process.argv[process.argv.indexOf('-F') + 1], 'utf8') : process.argv.includes('-i') ? process.argv[process.argv.indexOf('-i') + 1] : '';
 const TARGET_FILE = process.argv.includes('-f') ? process.argv[process.argv.indexOf('-f') + 1] : '';
 const SEARCH = process.argv.includes('-s');
 const SKIP_BUILDS = process.argv.includes('-b') || SEARCH;
@@ -39,10 +39,15 @@ const TARGET_ES10 = process.argv.includes('--es10');
 const TARGET_ES11 = process.argv.includes('--es11');
 const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || INPUT_OVERRIDE || TARGET_FILE || SKIP_BUILDS || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL;
 const FORCE_WRITE = process.argv.includes('--force-write');
+const BABEL_COMPAT = process.argv.includes('--babel');
+const BABEL_COMPARE = process.argv.includes('--babel-test');
+const TEST_BABEL = BABEL_COMPARE && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore babel flag with -u, we dont want to record babel deltas into test files
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
   ZeParser Test Runner
+
+  You probably want to use ./t for easy api access... But in case you really want details on this script, here you go :)
 
   Usage:
     \`tests/zeparser.spec.mjs\` [options]
@@ -54,6 +59,7 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
   Options:
     -b            Quick: don't run builds as well (implied if the files don't exist)
     -f "path"     Only test this file / dir
+    -F "path"     Use file contents as input
     -i "input"    Test input only (sloppy, strict, module), implies --sloppy unless at least one mode explicitly given
     -g            Regenerate computed test case blocks (process all autogen.md files)
     -G            Same as -g except it skips existing files
@@ -67,6 +73,8 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --strict      Only run tests in strict mode (can be combined with other modes like --module)
     --module      Only run tests with module goal (can be combined with other modes like --strict)
     --web         Only run tests in sloppy mode with web compat mode on (can be combined with other modes like --strict)
+    --babel       Run in Babel compat mode (\`babelCompat=true\`)
+    --babel-test  Also show diff with Babel AST / pass/fail with test cases (not the same as --babel !)
     --all         Force to run all four modes (on input)
     --esX         Where X is one of 6 through 10, like --es6. For -i only, forces the code to run in that version
     --serial      Test all targeted files in serial, verbosely, instead of using parallel phases (which is faster)
@@ -90,10 +98,13 @@ let prettierFormat = () => { return 'prettier not loaded'; }; // if available, l
 
 import {
   ASSERT,
+  astToString,
   decodeUnicode,
   encodeUnicode,
   getTestFiles,
+  normalizeAst,
   parseTestFile,
+  PROJECT_ROOT_DIR,
   promiseToWriteFile,
   readFiles,
   Tob,
@@ -124,7 +135,7 @@ import ZeParser, {
 import {
   $EOF,
 
-  debug_toktype,
+  toktypeToString,
 } from '../src/zetokenizer.mjs';
 import {
   generateTestFile,
@@ -132,6 +143,12 @@ import {
 import {
   reduceAndExit,
 } from './test_case_reducer.mjs';
+
+import {
+  compareBabel,
+  ignoreZeparserTest,
+  processBabelResult,
+} from './parse_babel.mjs';
 
 // node does not expose __dirname under module mode, but we can use import.meta to get it
 let filePath = import.meta.url.replace(/^file:\/\//,'');
@@ -195,6 +212,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
         strictMode: testVariant === TEST_STRICT,
         webCompat: testVariant === TEST_WEB,
         targetEsVersion: tob.inputOptions.es,
+        babelCompat: BABEL_COMPAT,
 
         getTokenizer: tokenizer => tok = tokenizer,
         $log: INPUT_OVERRIDE ? undefined : (...a) => stdout.push(a),
@@ -216,10 +234,17 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
     }
   }
 
-  return {r, e, tok, stdout};
+  let babelOk, babelFail, zasb;
+  // Tests with specific versions should also have non-specific counter parts. Since Babel does not support targeting
+  // specific spec versions, we should just skip those variants because they lead to false positives.
+  if (TEST_BABEL && (!Number.isFinite(tob.inputOptions.es) || TARGET_FILE || INPUT_OVERRIDE)) {
+    [babelOk, babelFail, zasb] = compareBabel(code, !e, testVariant, tob.file)
+  }
+
+  return {r, e, tok, stdout, babelOk, babelFail, zasb};
 }
 async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "strict" | "module" | "web" */) {
-  let {parserRawOutput: {[testVariant]: {r, e, tok, stdout}}, file} = tob;
+  let {parserRawOutput: {[testVariant]: {r, e, tok, stdout, babelOk, babelFail, zasb}}, file} = tob;
   if (!r && !e) return; // no output for this variant
 
   let errorMessage = '';
@@ -272,44 +297,37 @@ async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "stric
     // Using util.inspect makes the output formatting highly tightly bound to node's formatting rules
     // At the same time, the same could be said for Prettier (although we can lock that down by package version,
     // independent from node version). However, using prettier takes roughly 23 secods, inspect half a second. Meh.
-    (r ? 'ast: ' +
-      util
-        .inspect(r.ast, false, null)
-        // Flatten location tracking objects to a single line
-        /*
-        loc: {
-          start: { line: 1, col: 0 },
-          end: { line: 2, col: 2 },
-          source: ''
-        },
-        ->
-        loc:{start:{line:1,col:0},end:{line:2,col:2},source:''},
-        */
-        // (Test cases won't contain this as string-content so the regex should be safe)
-        .replace(
-          /loc:\s*\{\s*start:\s*\{\s*line:\s*\d+,\s*col:\s*\d+\s*}\s*,\s*end:\s*\{\s*line:\s*\d+,\s*col:\s*\d+\s*\},\s*source:\s*'[^']*'\s*}/g,
-            s => s.replace(/\s+/g, '')
-        )
-      + '\n\n' + formatTokens(r.tokens) : '')
+    (r ? 'ast: ' + astToString(r.ast) + '\n\n' + formatTokens(r.tokens) : '')
   );
+
+  let outputBabel = '';
+  // Skip this if babel doesnt support the mode (strict / web compat) or when specific ES versions are requested
+  if (TEST_BABEL && !Number.isFinite(tob.inputOptions.es) && babelOk !== false) {
+    outputBabel = processBabelResult(babelOk, babelFail, !!e, zasb, tob, TEST_BABEL, INPUT_OVERRIDE);
+  }
 
   // Caching it like this takes up more memory but makes deduping other modes so-much-easier
   switch (testVariant) {
     case TEST_SLOPPY:
       tob.newOutputSloppy = outputTestString;
+      tob.newOutputSloppyBabel = outputBabel;
       break;
     case TEST_STRICT:
       tob.newOutputStrict = outputTestString;
+      tob.newOutputStrictBabel = outputBabel;
       break;
     case TEST_MODULE:
       tob.newOutputModule = outputTestString;
+      tob.newOutputModuleBabel = outputBabel;
       break;
     case TEST_WEB:
       tob.newOutputWeb = outputTestString;
+      tob.newOutputWebBabel = outputBabel;
       break;
     default: FIXME;
   }
 }
+
 async function runTest(list, zeparser, testVariant/*: "sloppy" | "strict" | "module" | "web" */) {
   if (!RUN_VERBOSE_IN_SERIAL) console.log(' - Now testing', INPUT_OVERRIDE ? 'for:' : 'all cases for:', testVariant);
   if (!RUN_VERBOSE_IN_SERIAL) console.time('  $$ Batch for ' + testVariant);
@@ -365,10 +383,33 @@ function showDiff(tob) {
     tob.inputCode, '\n' +
     BOLD + '######' + RESET + '\n'
   );
+  // We omit some test-boiler plate from the diff because we don't care about that in the diff
+  // (This is visual to the test runner only, actual test cases will still have this stuff)
   execSync(
     // Use base64 to prevent shell interpretation of input. Final `cat` is to suppress `diff`'s exit code when diff.
-    `echo '${Buffer.from(encodeUnicode(tob.newData)).toString('base64')}' | base64 -d - | colordiff --text -y -w -W200 "${tob.file}" - | cat`,
-    {stdio: 'inherit'}
+    `colordiff -a -y -w -W200 <(
+      cat "${tob.file}" |
+      grep -v "_Note: the whole output block is auto-generated. Manual changes will be overwritten!_" |
+      grep -v "Below follow outputs in four parsing modes: sloppy mode, strict mode script goal, module goal" |
+      grep -v "Note that the output parts are auto-generated by the test runner to reflect actual result." |
+      grep -v "Parsed with script goal and as if the code did not start with strict mode header." |
+      grep -v "Parsed with script goal but as if it was starting with \\\`\\"use strict\\"\\\` at the top." |
+      grep -v "Parsed with the module goal." |
+      grep -v "Parsed in sloppy script mode but with the web compat flag enabled." |
+      sed '/^$/N;/^\\n$/D'
+    ) <(
+      echo '${Buffer.from(encodeUnicode(tob.newData)).toString('base64')}' | base64 -d - |
+      grep -v "_Note: the whole output block is auto-generated. Manual changes will be overwritten!_" |
+      grep -v "Below follow outputs in four parsing modes: sloppy mode, strict mode script goal, module goal" |
+      grep -v "Note that the output parts are auto-generated by the test runner to reflect actual result." |
+      grep -v "Parsed with script goal and as if the code did not start with strict mode header." |
+      grep -v "Parsed with script goal but as if it was starting with \\\`\\"use strict\\"\\\` at the top." |
+      grep -v "Parsed with the module goal." |
+      grep -v "Parsed in sloppy script mode but with the web compat flag enabled." |
+      sed '/^$/N;/^\\n$/D'
+    ) |
+    cat`,
+    {stdio: 'inherit', shell: '/bin/bash', encoding: 'utf8'}
   );
 }
 function hardExit(tob, msg) {
@@ -416,7 +457,8 @@ async function runTests(list, zeparser) {
           showDiff(tob);
         }
 
-        console.log(BOLD + '\nnode --experimental-modules tests/zeparser.spec.mjs  -q -u -f "' + tob.file + '"\n');
+        console.log('\n' + DIM + tob.fileShort + RESET);
+        console.log(BOLD + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n');
 
         if (!TARGET_FILE && !INPUT_OVERRIDE) {
           if (tob.continuePrint) console.error(tob.continuePrint);
@@ -446,15 +488,21 @@ async function writeNewOutput(list) {
       const {newData, oldData, file} = tob;
       if (newData !== oldData || FORCE_WRITE) {
         if (tob.continuePrint) console.error(tob.continuePrint);
-        console.log(DIM + '\nnode --experimental-modules tests/zeparser.spec.mjs -f "' + tob.file + '"\n' + RESET);
-        let cont = await yn('Continue to overwrite test output?');
-        if (cont) {
-          ++updated;
-          await promiseToWriteFile(file, newData);
+        console.log('\n' + DIM + tob.fileShort + RESET);
+        console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n' + RESET);
+        if (TEST_BABEL && ignoreZeparserTest(tob.file)) {
+          console.log('Skipping mismatch because known Babel bug');
+        } else {
+          let cont = await yn('Continue to overwrite test output?');
+          if (cont) {
+            ++updated;
+            await promiseToWriteFile(file, newData);
+          }
         }
       } else {
         if (tob.continuePrint) {
-          console.log(DIM + '\nnode --experimental-modules tests/zeparser.spec.mjs -f "' + tob.file + '"\n' + RESET);
+          console.log('\n' + DIM + tob.fileShort + RESET);
+          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n' + RESET);
           if (!await yn('File was not changed, invariant was broken and written anyways. Continue testing?')) process.exit();
         }
       }
@@ -468,6 +516,8 @@ async function writeNewOutput(list) {
           ++updated;
           return promiseToWriteFile(file, newData);
         } else {
+          console.log('\n' + DIM + tob.fileShort + RESET);
+          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n' + RESET);
           console.error('Output mismatch for', file);
           return Promise.resolve();
         }
@@ -483,6 +533,7 @@ async function writeNewOutput(list) {
   if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Write updated test files');
   if (!RUN_VERBOSE_IN_SERIAL) console.log('Updated', updated, 'files');
 }
+
 async function loadParserAndPrettier() {
   let zeparser;
   if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Parser and Prettier load');
@@ -722,10 +773,10 @@ function formatTokens(tokens) {
   // console.log('tokens:', tokens)
 
   let s = 'tokens (' + tokens.length + 'x):\n';
-  let line = ' '.repeat(6);
+  let line = tokens.length > 1 ? ' '.repeat(6) : '';
 
   for (let i=0, l=tokens.length-1; i<l; ++i) {
-    let next = debug_toktype(tokens[i].type);
+    let next = toktypeToString(tokens[i].type);
     if ((line + ' ' + next).length > 70) {
       s += line + '\n';
       line = ' '.repeat(7) + next;
@@ -753,7 +804,38 @@ function formatAst(ast) {
   }).replace(/(?:^;?\(?)|(?:\)[\s\n]*$)/g, '');
 }
 
+function updateAboveTheFold(tob) {
 
+  /*
+The format is something like this:
+
+```
+# ZeParser parser test case
+
+- Path: zeparser3/tests/testcases/dir/dir/dir/file_name.md
+
+> :: dir : dir : dir
+>
+> ::> file name
+>
+> Actual comments go here
+  ```
+  */
+  let topGrep = /^\s*(# ZeParser parser (?:autogenerated )?test case)\n\s*\n(- From:.*?\s*\n)*(?:- (?:Path|Added|Modified):.*?\s*\n)*(> :: .*\s*\n>\s*\n)?(> ::>? .*\s*\n)?/;
+
+  ASSERT(/\s*^# ZeParser parser (autogenerated )?test case/.test(tob.aboveTheFold), 'all test cases should include this title: ' + tob.file + ' did not');
+  let fold = tob.aboveTheFold.replace(topGrep, (_, title, from) => title + `
+
+${from||''}- Path: ${tob.fileShort}
+
+> :: ${path.dirname(tob.fileShort).split('/').filter(s => !['tests', 'testcases'].includes(s)).map(s => s.replace(/_/g, ' ')).join(' : ').replace(/ +/g, ' ').trim()}
+>
+> ::> ${path.basename(tob.fileShort, path.extname(tob.fileShort)).replace(/_/g, ' ').replace(/ +/g, ' ').trim()}
+`
+  );
+
+  return fold;
+}
 function generateOutputBlock(tob) {
   // Replace the whole output block with the current results. We then compare the old to the new and write if different.
   // Some may not have been generated (yet) and will default to the old value
@@ -763,14 +845,16 @@ function generateOutputBlock(tob) {
   let module = ifNotFalse(tob.newOutputModule, tob.oldOutputModule);
   let web = ifNotFalse(tob.newOutputWeb, tob.oldOutputWeb);
 
+  let fold = updateAboveTheFold(tob);
+
   return tob.newData =
-    tob.aboveTheFold +
+    fold +
     generateInput(tob) +
     generateOutputHeader() +
-    generateOutputSloppy(sloppy) +
-    generateOutputStrict(strict, sloppy) +
-    generateOutputModule(module, strict, sloppy) +
-    generateOutputWeb(web, sloppy) +
+    generateOutputSloppy(sloppy, ifNotFalse(tob.newOutputSloppyBabel, tob.newOutputSloppyBabel)) +
+    generateOutputStrict(strict, sloppy, ifNotFalse(tob.newOutputStrictBabel, tob.newOutputStrictBabel)) +
+    generateOutputModule(module, strict, sloppy, ifNotFalse(tob.newOutputModuleBabel, tob.newOutputModuleBabel)) +
+    generateOutputWeb(web, sloppy, ifNotFalse(tob.newOutputWebBabel, tob.newOutputWebBabel)) +
   '';
 }
 function ifNotFalse(a, b) {
@@ -787,29 +871,32 @@ function generateOutputHeader() {
     'Note that the output parts are auto-generated by the test runner to reflect actual result.\n' +
     '';
 }
-function generateOutputSloppy(sloppyOutput) {
+function generateOutputSloppy(sloppyOutput, babelOutput) {
   return OUTPUT_HEADER_SLOPPY + '\n' +
     'Parsed with script goal and as if the code did not start with strict mode header.\n' +
     OUTPUT_QUINTICK + sloppyOutput + OUTPUT_QUINTICK +
+    babelOutput +
     '';
 }
-function generateOutputStrict(strictOutput, sloppyOutput) {
+function generateOutputStrict(strictOutput, sloppyOutput, babelOutput) {
   return OUTPUT_HEADER_STRICT + '\n' +
     'Parsed with script goal but as if it was starting with `"use strict"` at the top.\n' +
     (strictOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_QUINTICK + strictOutput + OUTPUT_QUINTICK)) + '\n' +
+    babelOutput +
     '';
 }
-function generateOutputModule(moduleOutput, strictOutput, sloppyOutput) {
+function generateOutputModule(moduleOutput, strictOutput, sloppyOutput, babelOutput) {
   return OUTPUT_HEADER_MODULE + '\n' +
     'Parsed with the module goal.\n' +
-    (moduleOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : moduleOutput === strictOutput ? '\n_Output same as strict mode._' : (OUTPUT_QUINTICK + moduleOutput + OUTPUT_QUINTICK)) +
-    '\n' +
+    (moduleOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : moduleOutput === strictOutput ? '\n_Output same as strict mode._' : (OUTPUT_QUINTICK + moduleOutput + OUTPUT_QUINTICK)) + '\n' +
+    babelOutput +
     '';
 }
-function generateOutputWeb(webOutput, sloppyOutput) {
+function generateOutputWeb(webOutput, sloppyOutput, babelOutput) {
   return OUTPUT_HEADER_WEB + '\n' +
     'Parsed in sloppy script mode but with the web compat flag enabled.\n' +
     (webOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : (OUTPUT_QUINTICK + webOutput + OUTPUT_QUINTICK)) + '\n' +
+    babelOutput +
     '';
 }
 
@@ -823,7 +910,7 @@ if (INPUT_OVERRIDE) {
   LOG('=============================================\n');
 } else {
   if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Test search discovery time');
-  getTestFiles(path.join(dirname, 'testcases/parser'), '', files, true);
+  getTestFiles(path.join(dirname, 'testcases'), '', files, true);
   if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Test search discovery time');
   console.log('Read all test files, gathered', files.length, 'files');
 

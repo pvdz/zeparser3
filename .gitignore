@@ -16,3 +16,5 @@ node_modules
 
 # Random stuff not for git
 ignore
+
+tests/testcases/todo

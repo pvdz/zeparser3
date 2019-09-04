@@ -113,6 +113,23 @@
             <input type="radio" name="version" id="$ver_es9" value="9" checked/>
             <label for="$ver_es9">ES9</label>
           </span>
+
+          &nbsp;&mdash; AST &mdash;&nbsp;
+<!-- This is not a mode; it's a build...
+          <span class="mode_selector" title="Click here to disable AST generation">
+            <input type="radio" name="ast" id="$ast_none" value="none"/>
+            <label for="$ast_none">None</label>
+          </span>
+-->
+          <span class="mode_selector" title="Click here generate an Estree AST">
+            <input type="radio" name="ast" id="$ast_estree" value="estree" checked/>
+            <label for="$ast_estree">Estree</label>
+          </span>
+
+          <span class="mode_selector" title="Click here to generate a Babel AST">
+            <input type="radio" name="ast" id="$ast_babel" value="babel"/>
+            <label for="$ast_babel">Babel</label>
+          </span>
         </div>
         <textarea id="ta_input" placeholder="enter code here" class="box tl" style="align-self: stretch; order: initial; flex-grow: 1; flex-shrink: 1; flex-basis: auto;">
 // Note: Firefox (&lt;=63) crashes because of import(), >=66 seems to work fine
@@ -148,6 +165,7 @@ how('are').you().doing ? oh: right;
 <script>
   var global = window;
   var exports = {};
+  var disableCanonPoison = true; // disables dev-only poisoned getter for .canon in tokenizer
 </script>
-<script src="./prettier.mjs"></script>
+<script src="./lib/prettier.mjs"></script>
 <script src="./repl.js" type="module"></script>

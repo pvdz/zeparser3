@@ -104,6 +104,7 @@ const update = e => {
   let out;
   let threw = 'unknown';
   let selectedMode = document.querySelector('input[name=mode]:checked').value;
+  let selectedAst = document.querySelector('input[name=ast]:checked').value;
   let version = +document.querySelector('input[name=version]:checked').value;
   try {
     console.log('crunching (mode=', selectedMode, ', version=', version, '):', '\n```\n' + pret(input) + '\n```');
@@ -113,6 +114,7 @@ const update = e => {
     out = ZeParser(input, mode, Tok.COLLECT_TOKENS_ALL, {
       strictMode: selectedMode === 'strict',
       webCompat: selectedMode === 'webcompat',
+      babelCompat: selectedAst === 'babel',
       astRoot: ast,
       tokenStorage: tokens,
       // getTokenizer: tok => tokenizer = tok,

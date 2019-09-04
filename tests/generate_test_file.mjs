@@ -32,7 +32,7 @@ export function generateTestFile(tob) {
   let relfile = file.slice(file.indexOf('zeparser3'));
 
   let descPath = path
-    .dirname(relfile.slice(relfile.indexOf('tests/testcases/parser/') + 'tests/testcases/parser/'.length))
+    .dirname(relfile.slice(relfile.indexOf('tests/testcases/') + 'tests/testcases/'.length))
     .split('/')
     .map(s =>
       s
