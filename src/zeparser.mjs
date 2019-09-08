@@ -7456,7 +7456,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - ({..}.foo = x)
         // - ({..} + foo)
         let startOfPattern = curtok;
-        destructible |= parseObjectOuter(lexerFlags, paramScoop, BINDING_TYPE_ARG, leftHandSideExpression ? SKIP_INIT : PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        destructible |= parseObjectOuter(lexerFlags, paramScoop, BINDING_TYPE_ARG, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         // - `({web: true,  __proto__: x, __proto__: y});`
         destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error in potential arrow header
         if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
@@ -7479,7 +7479,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // - ([..].foo = x)
         // - ([..] + foo)
         let startOfPattern = curtok;
-        destructible |= parseArrayOuter(lexerFlags, paramScoop, BINDING_TYPE_ARG, leftHandSideExpression ? SKIP_INIT : PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        destructible |= parseArrayOuter(lexerFlags, paramScoop, BINDING_TYPE_ARG, PARSE_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         // - `([{web: true,  __proto__: x, __proto__: y}]);`
         destructible = sansFlag(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO); // not an error in potential arrow header
         if (curc !== $$COMMA_2C && curc !== $$PAREN_R_29) {
