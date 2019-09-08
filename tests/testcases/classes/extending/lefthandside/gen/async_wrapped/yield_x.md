@@ -6,13 +6,15 @@
 > :: classes : extending : lefthandside : gen : async wrapped
 >
 > ::> yield x
+>          x
 
 ## Input
 
 
 `````js
 async function p(){
-  class C extends yield x {}
+  class C extends yield
+x {}
 }
 `````
 
@@ -33,9 +35,10 @@ throws: Parser error!
   A `yield` expression is not allowed here
 
 async function p(){
-  class C extends yield x {}
+  class C extends yield
                   ^------- error
 
+x {}
 }
 `````
 

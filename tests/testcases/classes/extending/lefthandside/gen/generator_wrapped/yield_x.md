@@ -6,13 +6,15 @@
 > :: classes : extending : lefthandside : gen : generator wrapped
 >
 > ::> yield x
+>          x
 
 ## Input
 
 
 `````js
 function *P(){
-  class D extends yield x {}
+  class D extends yield
+x {}
 }
 `````
 
@@ -33,9 +35,10 @@ throws: Parser error!
   A `yield` expression is not allowed here
 
 function *P(){
-  class D extends yield x {}
+  class D extends yield
                   ^------- error
 
+x {}
 }
 `````
 

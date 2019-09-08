@@ -6066,11 +6066,13 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     else if (curtype === $PUNCTUATOR) {
       if (curc === $$CURLY_L_7B) {
-        let wasDestruct = parseObjectOuter(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, allowAssignment && !leftHandSideExpression ? PARSE_INIT : SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        let skipInit = allowAssignment && leftHandSideExpression === NOT_LHSE && isNewArg === NOT_NEW_ARG ? PARSE_INIT : SKIP_INIT;
+        let wasDestruct = parseObjectOuter(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, skipInit, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         return _parseValueHeadBodyAfterObjArr(wasDestruct);
       }
       else if (curc === $$SQUARE_L_5B) {
-        let wasDestruct = parseArrayOuter(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, allowAssignment && !leftHandSideExpression ? PARSE_INIT : SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+        let skipInit = allowAssignment && leftHandSideExpression === NOT_LHSE && isNewArg === NOT_NEW_ARG ? PARSE_INIT : SKIP_INIT;
+        let wasDestruct = parseArrayOuter(lexerFlags, DO_NOT_BIND, BINDING_TYPE_NONE, skipInit, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
         return _parseValueHeadBodyAfterObjArr(wasDestruct);
       }
       else if (curc === $$PAREN_L_28) {

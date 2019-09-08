@@ -220,7 +220,7 @@ One test file is generated for each combination of input case and input template
 
 > `````js
 > await
-> x
+> x;
 > `````
 
 > `````js
@@ -352,6 +352,54 @@ One test file is generated for each combination of input case and input template
 > `````
 
 > `````js
+> [x]
+> `````
+
+> `````js
+> [x] = b
+> `````
+
+> `````js
+> [x=y]
+> `````
+
+> `````js
+> [x=y] = b
+> `````
+
+> `````js
+> {x}
+> `````
+
+> `````js
+> {x} = b
+> `````
+
+> `````js
+> {x=y}
+> `````
+
+> `````js
+> {x=y} = b
+> `````
+
+> `````js
+> {x: y}
+> `````
+
+> `````js
+> {x: y} = b
+> `````
+
+> `````js
+> {x: y=y}
+> `````
+
+> `````js
+> {x: y=y} = b
+> `````
+
+> `````js
 > [...x]
 > `````
 
@@ -365,6 +413,38 @@ One test file is generated for each combination of input case and input template
 
 > `````js
 > [...x=y] = b
+> `````
+
+> `````js
+> {...x}
+> `````
+
+> `````js
+> {...x} = b
+> `````
+
+> `````js
+> {...x=y}
+> `````
+
+> `````js
+> {...x=y} = b
+> `````
+
+> `````js
+> {...x: y}
+> `````
+
+> `````js
+> {...x: y} = b
+> `````
+
+> `````js
+> {...x: y = y}
+> `````
+
+> `````js
+> {...x: y = y} = b
 > `````
 
 > `````js
@@ -403,4 +483,16 @@ async function p(){
 function *P(){
   class D extends # {}
 }
+`````
+
+#### new arg
+
+`````js
+new #
+`````
+
+#### for-in lhs
+
+`````js
+for (# in x) ;
 `````

@@ -6,12 +6,14 @@
 > :: classes : extending : lefthandside : gen : expression
 >
 > ::> yield x
+>          x
 
 ## Input
 
 
 `````js
-(class B extends yield x {})
+(class B extends yield
+x {})
 `````
 
 ## Output
@@ -30,8 +32,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 throws: Parser error!
   A `yield` expression is not allowed here
 
-(class B extends yield x {})
+(class B extends yield
                  ^------- error
+
+x {})
 `````
 
 ### Strict mode
