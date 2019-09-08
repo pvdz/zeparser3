@@ -5,6 +5,10 @@
 > :: classes : piggies in classes : await : wrapped in async func
 >
 > ::> in extends no args
+>
+> Extends ("ClassHeritage") is expecting a "LeftHandSideExpression" which is a production that does not lead to an `await` expression. Under an `async` function the name "await" can also not be a binding name so it must be an error.
+
+## FAIL
 
 ## Input
 
@@ -26,10 +30,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Next ord should be 123 (`{`) but was 125 (curc: `}`, token: `}`)
+  An `await` expression is not allowed here
 
 async function f() {   class x extends await { }   }
-                                                   ^------- error
+                                       ^------- error
 `````
 
 ### Strict mode

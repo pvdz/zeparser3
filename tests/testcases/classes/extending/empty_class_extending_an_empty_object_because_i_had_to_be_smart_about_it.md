@@ -5,6 +5,7 @@
 > :: classes : extending
 >
 > ::> empty class extending an empty object because i had to be smart about it
+## PASS
 
 ## Input
 

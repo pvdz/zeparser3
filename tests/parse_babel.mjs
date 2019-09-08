@@ -125,13 +125,15 @@ function ignoreZeparserTest(file) {
     'tests/testcases/destructuring/destructuring_assignments_of_groups/noop_parens/many_paren_properties_are_simple_assignments.md',
 
     // Bug in babel; regex on new line after typeof statement
+    //     https://github.com/babel/babel/issues/10410
     'tests/testcases/functions/expression/regex_edge_case/with_async/expression/with_flag.md',
 
-    // Bug in babel; plus on newline after arrow can not be binary expression
+    // Bug in ZeParser; plus on newline after arrow can not be binary expression
     'tests/testcases/group_or_arrow/arrow/arrows_is_not_a_normal_expression_value/asi_and_the_x002b_is_a_unary_operator.md',
     'tests/testcases/parens/arrow/arrows_is_not_a_normal_expression_value/asi_and_the_x002b_is_a_unary_operator.md',
 
     // Bug in babel; incorrect use strict assignments to arguments/eval
+    //    https://github.com/babel/babel/issues/10411
     'tests/testcases/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/shorthand/arguments.md',
     'tests/testcases/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/shorthand/eval.md',
     'tests/testcases/objects/literals/arguments_as_shorthand_keys.md',
@@ -144,6 +146,7 @@ function ignoreZeparserTest(file) {
     'tests/testcases/random_stuff/x002318/ax002f0.md',
     'tests/testcases/random_stuff/x002318/gen/ax002f_case/x0028x007bx002ex002ex002ex007bevalx007dx002exx007d_x003d_x007bx007dx0029_.md',
     // same but because Babel doesn't notice the property access on the next line
+    //    https://github.com/babel/babel/issues/10412
     'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00280x0029.md',
     'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00281x0029.md',
     'tests/testcases/strict_mode/asi/tails_that_prevent_ASI_so_it_is_not_a_directive_x00282x0029.md',
@@ -171,6 +174,7 @@ function ignoreZeparserTest(file) {
     'tests/testcases/string/2029_is_ok.md',
 
     // This is just a weird sloppy/strict thing in Babel. Meh
+    //    https://github.com/babel/babel/issues/10413
     'tests/testcases/var_statement/binding_generic/reserved_words/gen/catch_clause/let.md',
 
     // Babel has no webcompat mode but still rejects the double proto (which is an AnnexB-only error)
@@ -202,12 +206,9 @@ function ignoreZeparserTest(file) {
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/obj_paren_wrapped_is_explicitly_exempted.md',
     'tests/testcases/objects/duplicate_keys/obj_expr/dunderproto___proto__/paren_wrapped.md',
 
-    // Babel bug, I think the html comment here is not recognized as such because that rule only applies to the start of the line
+    // HTML comments are AnnexB only, but Babel applies it anyways
     'tests/testcases/whitespace/html_comments/html_open_on_its_own_line.md',
     'tests/testcases/whitespace/html_comments/html_open_without_close_2.md',
-
-    // Babel bug, the class extends ("ClassHeritage") is a left hand side expression. So is "AwaitExpression"
-    'tests/testcases/classes/piggies_in_classes/await/wrapped_in_async_func/in_extends_with_args.md',
 
     // Babel has no notion of strict vs sloppy so can't deal with a tagged template containing bad escapes in sloppy:
     // (In sloppy the octal escape is fine so `cooked` has a value, in strict it's a bad escape so `cooked` is `null`)

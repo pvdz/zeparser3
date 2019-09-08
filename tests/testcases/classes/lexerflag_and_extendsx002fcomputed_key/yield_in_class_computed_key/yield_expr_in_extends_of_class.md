@@ -28,10 +28,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Cannot use `yield` outside of generator functions when in strict mode
+  A `yield` expression is not allowed here
 
 class x extends yield {}
-                      ^------- error
+                ^------- error
 `````
 
 ### Strict mode

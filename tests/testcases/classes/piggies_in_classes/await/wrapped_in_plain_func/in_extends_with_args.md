@@ -44,10 +44,10 @@ Parsed with the module goal.
 
 `````
 throws: Parser error!
-  Cannot use `await` as var when goal=module but found `await` outside an async function
+  An `await` expression is not allowed here
 
 function f() {   class x extends await y { }   }
-                                       ^------- error
+                                 ^------- error
 `````
 
 

@@ -29,10 +29,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Did not expect to parse an AssignmentExpression but found `yield`
+  A `yield` expression is not allowed here
 
 function *f(){  class x extends yield y{}  }
-                                      ^------- error
+                                ^------- error
 `````
 
 ### Strict mode

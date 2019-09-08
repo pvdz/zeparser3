@@ -26,10 +26,10 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  An arrow inside an async function/arrow can not have `await` in its arguments
+  An `await` expression is not allowed here
 
 async function f(){    (fail = class A extends await foo {}) => fail    }
-                                                             ^------- error
+                                               ^------- error
 `````
 
 ### Strict mode
