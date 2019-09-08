@@ -128,10 +128,6 @@ function ignoreZeparserTest(file) {
     //     https://github.com/babel/babel/issues/10410
     'tests/testcases/functions/expression/regex_edge_case/with_async/expression/with_flag.md',
 
-    // Bug in ZeParser; plus on newline after arrow can not be binary expression
-    'tests/testcases/group_or_arrow/arrow/arrows_is_not_a_normal_expression_value/asi_and_the_x002b_is_a_unary_operator.md',
-    'tests/testcases/parens/arrow/arrows_is_not_a_normal_expression_value/asi_and_the_x002b_is_a_unary_operator.md',
-
     // Bug in babel; incorrect use strict assignments to arguments/eval
     //    https://github.com/babel/babel/issues/10411
     'tests/testcases/objects/destructuring/identifier_properties/keyword_obj_key_check/gen/shorthand/arguments.md',

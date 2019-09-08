@@ -292,6 +292,7 @@ const PIGGY_BACK_SAW_YIELD_KEYWORD = 1 << 13  ; // parsed an expression containi
 const PIGGY_BACK_WAS_CONSTRUCTOR = 1 << 14; // signal having found a constructor (special case)
 const PIGGY_BACK_WAS_PROTO = 1 << 15; // signal that a `__proto__: x` was parsed (do detect double occurrence)
 const PIGGY_BACK_WAS_DOUBLE_PROTO = 1 << 16; // signal that double proto was found on object; error in web compat outside of arrow headers
+const PIGGY_BACK_WAS_ARROW = 1 << 17; // signal that double proto was found on object; error in web compat outside of arrow headers
 const NO_SPREAD = 0;
 const LAST_SPREAD = 1;
 const MID_SPREAD = 2;
@@ -369,29 +370,30 @@ const PIGGIES = (0
   | PIGGY_BACK_WAS_CONSTRUCTOR
   | PIGGY_BACK_WAS_PROTO
   | PIGGY_BACK_WAS_DOUBLE_PROTO
+  | PIGGY_BACK_WAS_ARROW
 );
 function copyPiggies(output, input) {
   return output | (input & PIGGIES);
 }
 
 function sansFlag(flags, flag) {
-  ASSERT(typeof flag === 'number', 'sansFlag flag 1 should be number;', typeof flags1, typeof flags2, flag, flags);
-  ASSERT(typeof flags === 'number', 'sansFlag flag 2 should be number;', typeof flags1, typeof flags2, flag, flags);
+  ASSERT(typeof flag === 'number', 'sansFlag flag 1 should be number;', flag, flags);
+  ASSERT(typeof flags === 'number', 'sansFlag flag 2 should be number;', flag, flags);
   return (flags | flag) ^ flag;
 }
 function hasAllFlags(flags1, flags2) {
-  ASSERT(typeof flags1 === 'number', 'hasAllFlags flag 1 should be number;', typeof flags1, typeof flags2, flags1, flags2);
-  ASSERT(typeof flags2 === 'number', 'hasAllFlags flag 2 should be number;', typeof flags1, typeof flags2, flags1, flags2);
+  ASSERT(typeof flags1 === 'number', 'hasAllFlags flag 1 should be number;', flags1, flags2);
+  ASSERT(typeof flags2 === 'number', 'hasAllFlags flag 2 should be number;', flags1, flags2);
   return (flags1 & flags2) === flags2;
 }
 function hasAnyFlag(flags1, flags2) {
-  ASSERT(typeof flags1 === 'number', 'hasAnyFlag flag 1 should be a number;', typeof flags1, typeof flags2, flags1, flags2);
-  ASSERT(typeof flags2 === 'number', 'hasAnyFlag flag 2 should be a number;', typeof flags1, typeof flags2, flags1, flags2);
+  ASSERT(typeof flags1 === 'number', 'hasAnyFlag flag 1 should be a number;', flags1, flags2);
+  ASSERT(typeof flags2 === 'number', 'hasAnyFlag flag 2 should be a number;', flags1, flags2);
   return (flags1 & flags2) !== 0;
 }
 function hasNoFlag(flags, flag) {
-  ASSERT(typeof flag === 'number', 'hasNoFlag flag 1 should be number;', typeof flags1, typeof flags2, flag, flags);
-  ASSERT(typeof flags === 'number', 'hasNoFlag flag 2 should be number;', typeof flags1, typeof flags2, flag, flags);
+  ASSERT(typeof flag === 'number', 'hasNoFlag flag 1 should be number;', flag, flags);
+  ASSERT(typeof flags === 'number', 'hasNoFlag flag 2 should be number;', flag, flags);
   return (flags & flag) === 0;
 }
 
@@ -5143,6 +5145,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         mustHaveInit = true;
       }
     }
+
     else if (curc === $$DOT_2E && curtok.str === '...') {
       ASSERT(bindingType === BINDING_TYPE_ARG, 'other binding types should catch this sooner?');
       let subDestruct = parseArrowableSpreadOrRest(lexerFlags, scoop, $$PAREN_R_29, bindingType, IS_GROUP_TOPLEVEL, UNDEF_ASYNC, exportedNames, exportedBindings, astProp);
@@ -5643,7 +5646,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     let assignable = NOT_ASSIGNABLE;
     if (curc === $$IS_3D && curtok.str === '=>') {
       // Note: param name is `async` and there is nothing else so args guaranteed to be simple
-      parseArrowParenlessFromPunc(lexerFlags, asyncToken, asyncToken, allowAssignment, PARAMS_ALL_SIMPLE, UNDEF_ASYNC, astProp);
+      assignable |= parseArrowParenlessFromPunc(lexerFlags, asyncToken, asyncToken, allowAssignment, PARAMS_ALL_SIMPLE, UNDEF_ASYNC, astProp);
     } else {
       assignable = parseIdentOrParenlessArrow(lexerFlags, asyncToken, IS_ASSIGNABLE, allowAssignment, astProp);
       assignable = parseValueTail(lexerFlags, asyncToken, assignable, isNewArg, NOT_LHSE, astProp);
@@ -5716,12 +5719,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       isSimple = PARAMS_SOME_NONSTRICT;
     }
     skipAny(lexerFlags); // this was `async <curtok>` and curtok is not a keyword; next must be `=>`
-    parseArrowParenlessFromPunc(lexerFlags, asyncToken, identToken, allowAssignment, isSimple, asyncToken, astProp);
+
+    let assignable = parseArrowParenlessFromPunc(lexerFlags, asyncToken, identToken, allowAssignment, isSimple, asyncToken, astProp);
 
     if (fromStmtOrExpr === IS_STATEMENT) {
       parseSemiOrAsi(lexerFlags); // this is not a func decl!
       AST_close('ExpressionStatement');
     }
+
+    return assignable;
   }
   function parseExpressionFromOp(lexerFlags, firstExprToken, assignable, astProp) {
     ASSERT(parseExpressionFromOp.length === arguments.length, 'arg count');
@@ -5770,6 +5776,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   }
   function parseExpressionFromBinaryOp(lexerFlags, firstExprToken, assignable, astProp) {
     ASSERT(parseExpressionFromBinaryOp.length === arguments.length, 'arg count');
+
+    if (hasAllFlags(assignable, PIGGY_BACK_WAS_ARROW)) return assignable;
+
     let first = true;
     while (isNonAssignBinOp(lexerFlags) || curc === $$QMARK_3F) {
       if (curc === $$QMARK_3F) {
@@ -6196,8 +6205,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
             THROW('Can not use `arguments` as arg name in strict mode');
           }
-          parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, ASSIGN_EXPR_IS_OK, PARAMS_SOME_COMPLEX, UNDEF_ASYNC, astProp);
-          return NOT_ASSIGNABLE;
+          return parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, ASSIGN_EXPR_IS_OK, PARAMS_SOME_COMPLEX, UNDEF_ASYNC, astProp);
         }
         AST_setIdent(astProp, identToken);
         return assignable;
@@ -6221,8 +6229,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           if (hasAllFlags(lexerFlags, LF_STRICT_MODE)) {
             THROW('Can not use `eval` as arg name in strict mode');
           }
-          parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, ASSIGN_EXPR_IS_OK, PARAMS_SOME_COMPLEX, UNDEF_ASYNC, astProp);
-          return NOT_ASSIGNABLE;
+          return parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, ASSIGN_EXPR_IS_OK, PARAMS_SOME_COMPLEX, UNDEF_ASYNC, astProp);
         }
         AST_setIdent(astProp, identToken);
         return assignable;
@@ -6695,8 +6702,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     // `yield` is a var name in sloppy mode:
-    parseIdentOrParenlessArrow(lexerFlags, identToken, IS_ASSIGNABLE, allowAssignment, astProp);
-    return IS_ASSIGNABLE | PIGGY_BACK_SAW_YIELD_VARNAME;
+    let assignableFlags = parseIdentOrParenlessArrow(lexerFlags, identToken, IS_ASSIGNABLE, allowAssignment, astProp);
+    return copyPiggies(IS_ASSIGNABLE | PIGGY_BACK_SAW_YIELD_VARNAME, assignableFlags);
   }
   function parseYieldArgument(lexerFlags, astProp) {
     ASSERT(parseYieldArgument.length === arguments.length, 'arg count');
@@ -6723,8 +6730,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // (in the case of `await`, consider it a regular var)
     if (curc === $$IS_3D && curtok.str === '=>') {
       ASSERT(isAssignable(assignable), 'not sure whether an arrow can be valid if the arg is marked as non-assignable');
-      parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, allowAssignment, PARAMS_ALL_SIMPLE, UNDEF_ASYNC, astProp);
-      return NOT_ASSIGNABLE;
+      return parseArrowParenlessFromPunc(lexerFlags, identToken, identToken, allowAssignment, PARAMS_ALL_SIMPLE, UNDEF_ASYNC, astProp);
     } else {
       AST_setIdent(astProp, identToken);
       return assignable;
@@ -6803,6 +6809,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, wasSimple);
     AST_close('ArrowFunctionExpression');
+
+    return NOT_ASSIGNABLE | PIGGY_BACK_WAS_ARROW;
   }
 
   function parseTickExpression(lexerFlags, tickToken, astProp) {
@@ -6885,6 +6893,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(typeof assignable === 'number', 'assignable num', assignable);
     ASSERT(typeof isNewArg === 'number', 'isNewArg num', isNewArg);
     ASSERT(typeof astProp === 'string', 'should be string', astProp);
+
+    if (hasAllFlags(assignable, PIGGY_BACK_WAS_ARROW)) return assignable;
 
     if (curc === $$DOT_2E && curtok.str === '.') {
       // parseMemberExpression dot
@@ -7075,7 +7085,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } while (true);
       skipDivOrDieSingleChar($$PAREN_R_29, lexerFlags);
     }
-    return assignable;
+    return sansFlag(assignable, PIGGY_BACK_WAS_ARROW);
   }
   function parseDynamicImportStatement(lexerFlags, importToken, astProp) {
     ASSERT(parseDynamicImportStatement.length === arguments.length, 'arg count');
@@ -7179,34 +7189,38 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'body');
     }
 
-    // TODO: this may be superseded by assign-expr checks
-    if (insideForLhs && curtok.str === 'in') {
-      THROW('Arrows cannot be lhs to for-in');
+    {
+      // All checks in this block only serve to provide a nicer error message. Omitting them would still lead to an error.
+      if (insideForLhs && curtok.str === 'in') {
+        THROW('Arrows cannot be lhs to for-in');
+      }
+      // Arrows cannot have tails. Most expressions will consume them, but not `x++` for example. So do after either path.
+      if (curtok.str === '.') {
+        THROW('Block body arrows can not be immediately accessed without a group');
+      }
+      if (curc === $$PAREN_L_28) {
+        THROW('Block body arrows can not be immediately invoked without a group');
+      }
+      if (curc === $$SQUARE_L_5B) {
+        THROW('Block body arrows can not be immediately accessed without a group');
+      }
+      if (curc === $$TICK_60) {
+        THROW('Block body arrows can not be immediately tagged without a group');
+      }
+      if ((isAssignBinOp() || isNonAssignBinOp(lexerFlags)) && (curtok.nl === 0 || curc === $$FWDSLASH_2F)) {
+        // - `()=>{}+a'
+        THROW('An arrow function can not be part of an operator to the right');
+      }
+      if ((curtok.str === '++' || curtok.str === '--') && curtok.nl === 0) {
+        // - `()=>{}++'
+        // - `()=>{}--'
+        // - `()=>{}\n++x'
+        // - `()=>{}\n--x'
+        THROW('An arrow function can not have a postfix update operator');
+      }
     }
-    // Arrows cannot have tails. Most expressions will consume them, but not `x++` for example. So do after either path.
-    if (curtok.str === '.') {
-      THROW('Block body arrows can not be immediately accessed without a group');
-    }
-    if (curc === $$PAREN_L_28) {
-      THROW('Block body arrows can not be immediately invoked without a group');
-    }
-    if (curc === $$SQUARE_L_5B) {
-      THROW('Block body arrows can not be immediately accessed without a group');
-    }
-    if (curc === $$TICK_60) {
-      THROW('Block body arrows can not be immediately tagged without a group');
-    }
-    if ((isAssignBinOp() || isNonAssignBinOp(lexerFlags)) && (curtok.nl === 0 || curc === $$FWDSLASH_2F)) {
-      // - `()=>{}+a'
-      THROW('An arrow function can not be part of an operator to the right');
-    }
-    if ((curtok.str === '++' || curtok.str === '--') && curtok.nl === 0) {
-      // - `()=>{}++'
-      // - `()=>{}--'
-      // - `()=>{}\n++x'
-      // - `()=>{}\n--x'
-      THROW('An arrow function can not have a postfix update operator');
-    }
+
+    return NOT_ASSIGNABLE | PIGGY_BACK_WAS_ARROW;
   }
   function parseGroupToplevels(lexerFlags, asyncStmtOrExpr, allowAssignment, asyncToken, newlineAfterAsync, leftHandSideExpression, astProp) {
     ASSERT(parseGroupToplevels.length === arguments.length, 'arg count');
@@ -7307,11 +7321,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
       AST_open(astProp, 'ArrowFunctionExpression', parenToken);
       AST_set('params', []);
-      parseArrowFromPunc(lexerFlags, paramScoop, UNDEF_ASYNC, allowAssignmentForGroupToBeArrow, PARAMS_ALL_SIMPLE);
+      let assignable = parseArrowFromPunc(lexerFlags, paramScoop, UNDEF_ASYNC, allowAssignmentForGroupToBeArrow, PARAMS_ALL_SIMPLE);
       AST_close('ArrowFunctionExpression');
 
-      if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA;
-      return NOT_ASSIGNABLE;
+      if (isDeleteArg === IS_DELETE_ARG) return NOT_SINGLE_IDENT_WRAP_NA | PIGGY_BACK_WAS_ARROW;
+      return assignable;
     }
 
     let foundSingleIdentWrap = false; // did we find `(foo)` ?
@@ -7549,10 +7563,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `delete ("x"[(await)])`
           // - `async x => delete ("x"[(await x)])`
           // - `function *f(){ delete ("x"[(yield)]) }`
-          return copyPiggies(isAssignable(assignable) ? NOT_SINGLE_IDENT_WRAP_A : NOT_SINGLE_IDENT_WRAP_NA, assignable);
+          return copyPiggies(isAssignable(sansFlag(assignable, PIGGY_BACK_WAS_ARROW)) ? NOT_SINGLE_IDENT_WRAP_A : NOT_SINGLE_IDENT_WRAP_NA, assignable);
         }
         // - `((a)) = b;`
-        return assignable;
+        return sansFlag(assignable, PIGGY_BACK_WAS_ARROW);
       }
 
       if (curc !== $$COMMA_2C) break;
@@ -7638,6 +7652,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (isArrow) {
       // These are some errors for async and plain arrows
 
+      destructible |= PIGGY_BACK_WAS_ARROW; // Probably redundant...?
+
       if (leftHandSideExpression) THROW_TOKEN('Arrow not allowed in this position', asyncToken === UNDEF_ASYNC ? parenToken : asyncToken);
 
       if (curtok.nl > 0) {
@@ -7710,7 +7726,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       // [x]: `async (await) => {}`
       // [x]: `async (x = (await) => {}) => {}`     // <-- this case requires propagation of await piggies to parent
       assignable = copyPiggies(assignable, destructible);
-      return NOT_ASSIGNABLE | (assignable & (PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME));
+      // TODO: why not copy all piggies here?
+      return NOT_ASSIGNABLE | PIGGY_BACK_WAS_ARROW | (assignable & (PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME));
     }
 
     if (babelCompat && !toplevelComma) {
@@ -7759,7 +7776,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // a group. those still exist?
     // - `((a)) = b;`
 
-    return assignable;
+    return sansFlag(assignable, PIGGY_BACK_WAS_ARROW);
   }
   function parseAfterPatternInGroup(lexerFlags, startOfPattern, assignable, destructible, astProp) {
     ASSERT(curtok.str !== '=', 'destruct assignments should be parsed at this point');
@@ -7880,12 +7897,14 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       else if (
         // - `async (foo = await x) => foo`            (fail)
-      //                            ^
+        //                          ^
         // have to check both assignable and destructible for the state flags
-        hasAnyFlag(assignable, PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_AWAIT_KEYWORD) ||
-        hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_AWAIT_KEYWORD)
+        hasAnyFlag(
+          assignable | groupDestructible,
+          PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME | PIGGY_BACK_SAW_AWAIT_KEYWORD
+        )
       ) {
-        if (hasAnyFlag(assignable, PIGGY_BACK_SAW_AWAIT_KEYWORD) || hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_AWAIT_KEYWORD)) {
+        if (hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_KEYWORD)) {
           THROW('Async arrow arg defaults can not contain `await` expressions');
         }
         // - `async await => foo`            (fail)
@@ -7906,16 +7925,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // have to check both assignable and destructible for the state flags, for now. hopefully I can merge them asap.
         (
           hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE) &&
-          (
-            hasAnyFlag(assignable, PIGGY_BACK_SAW_YIELD_VARNAME) ||
-            hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_YIELD_VARNAME)
-          )
+          hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_YIELD_VARNAME | PIGGY_BACK_SAW_YIELD_VARNAME)
         ) ||
-        hasAnyFlag(assignable, PIGGY_BACK_SAW_YIELD_KEYWORD) ||
-        hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD)
+        hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_KEYWORD)
       ) {
         TODO
-        if (hasAnyFlag(assignable, PIGGY_BACK_SAW_YIELD_KEYWORD) || hasAnyFlag(groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD)) {
+        if (hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_KEYWORD)) {
           // - `async (foo = await x) => foo`                             (fail)
           THROW('Async arrow arg defaults can not contain `yield` expressions');
         }
@@ -7932,7 +7947,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         parseArrowAfterGroup(lexerFlags, paramScoop, wasSimple, toplevelComma, asyncToken, asyncToken, allowAssignment, astProp);
       }
     }
-    else {
+    else { // curtok != arrow
 
       if (zeroArgs) {
         // - `async ();`
@@ -7993,14 +8008,18 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
 
     // an async prefixed group is never assignable:
+    // - `async(x)`
     // - `async(x) = y`
-    // - `async \n (x) = y` -> `async(x) = y`
     // - `async(x) => y`
-    // - `async \n (x) => y` -> `async; (x) => y`
-    // - `async () => {}, await foo
+    // - `async()`
+    // - `async() = y`
+    // - `async() => y`
+    // - `async \n (x)`        -> `async(x)`
+    // - `async \n (x) = y`    -> `async(x) = y`
+    // - `async \n (x) => y`   -> `async; (x) => y`
     // - `async (a = (...await) => {}) => {};`      // <-- the await flags need to be propagated for this case
     // - `async (a = (...await) => {});`
-    return NOT_ASSIGNABLE | (assignable & (PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME));
+    return NOT_ASSIGNABLE | PIGGY_BACK_WAS_ARROW | (assignable & (PIGGY_BACK_SAW_AWAIT_KEYWORD | PIGGY_BACK_SAW_AWAIT_VARNAME));
   }
   function parseArrowAfterAsyncNoArgGroup(lexerFlags, paramScoop, toplevelComma, asyncToken, allowAssignment, astProp) {
     ASSERT(parseArrowAfterAsyncNoArgGroup.length === arguments.length, 'arg count');
@@ -8027,8 +8046,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     AST_open(astProp, 'ArrowFunctionExpression', asyncToken);
     AST_set('params', []);
-    parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, isSimple);
+    let assignable = parseArrowFromPunc(lexerFlags, paramScoop, asyncToken, allowAssignment, isSimple);
     AST_close('ArrowFunctionExpression');
+    return assignable;
   }
 
   function parseArrowAfterGroup(lexerFlags, paramScoop, wasSimple, toplevelComma, asyncToken, arrowStartToken, allowAssignment, astProp) {
@@ -11175,6 +11195,10 @@ function _P(f, arr) {
   if (f & PIGGY_BACK_SAW_YIELD_VARNAME) {
     arr.push('PIGGY_BACK_SAW_YIELD_VARNAME');
     f ^= PIGGY_BACK_SAW_YIELD_VARNAME;
+  }
+  if (f & PIGGY_BACK_WAS_ARROW) {
+    arr.push('PIGGY_BACK_WAS_ARROW');
+    f ^= PIGGY_BACK_WAS_ARROW;
   }
   return f;
 }

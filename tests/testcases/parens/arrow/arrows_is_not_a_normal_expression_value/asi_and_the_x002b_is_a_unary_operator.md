@@ -32,26 +32,31 @@ ast: {
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,column:0},end:{line:2,column:13},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:8},source:''},
       expression: {
-        type: 'BinaryExpression',
-        loc:{start:{line:1,column:0},end:{line:2,column:13},source:''},
-        left: {
-          type: 'ArrowFunctionExpression',
-          loc:{start:{line:1,column:0},end:{line:1,column:8},source:''},
-          params: [],
-          id: null,
-          generator: false,
-          async: false,
-          expression: false,
-          body: {
-            type: 'BlockStatement',
-            loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
-            body: []
-          }
-        },
+        type: 'ArrowFunctionExpression',
+        loc:{start:{line:1,column:0},end:{line:1,column:8},source:''},
+        params: [],
+        id: null,
+        generator: false,
+        async: false,
+        expression: false,
+        body: {
+          type: 'BlockStatement',
+          loc:{start:{line:1,column:6},end:{line:1,column:8},source:''},
+          body: []
+        }
+      }
+    },
+    {
+      type: 'ExpressionStatement',
+      loc:{start:{line:2,column:0},end:{line:2,column:13},source:''},
+      expression: {
+        type: 'UnaryExpression',
+        loc:{start:{line:2,column:0},end:{line:2,column:13},source:''},
         operator: '+',
-        right: {
+        prefix: true,
+        argument: {
           type: 'FunctionExpression',
           loc:{start:{line:2,column:1},end:{line:2,column:13},source:''},
           generator: false,
@@ -69,8 +74,8 @@ ast: {
   ]
 }
 
-tokens (13x):
-       PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR
+tokens (14x):
+       PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR ASI
        PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR PUNCTUATOR
        ASI
 `````
