@@ -24,6 +24,7 @@ ZeParser test runner help:
  m             Run all tests and ask for update one-by-one
  t             Run test262 suite (only)
  b             Alias for `./t m --babel-test`, to verify ZeParser output against the Babel AST
+ fu            Test file and ask to update it if necessary
  fuzz          Run fuzzer
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
  --web         Enable sloppy script with web compat / AnnexB mode, do not auto-enable other modes
@@ -71,6 +72,12 @@ ZeParser test runner help:
     m)
       # Run all files and ask for any test case that needs updating (slower)
       ACTION='-q -U'
+      ;;
+    fu)
+      # Update all test files with their current output (fast)
+      ACTION='-U -f'
+      shift
+      ARG=$1
       ;;
     t)
       # Run all test262 tests
