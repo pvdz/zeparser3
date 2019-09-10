@@ -224,6 +224,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
       tob.continuePrint = BLINK + 'FILE ASSERTED TO FAIL' + RESET + ', but it passed';
       if (TARGET_FILE || CONFIRMED_UPDATE) console.error(tob.continuePrint);
       else throw new Error('Test Assertion fail: test ' + tob.file + ' was explicitly marked to fail somehow, but it passed');
+      process.exit();
     }
   } catch (_e) {
     e = _e;
@@ -231,6 +232,11 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
       tob.continuePrint = BLINK + 'FILE ASSERTED TO PASS' + RESET + ', but it failed';
       if (TARGET_FILE || CONFIRMED_UPDATE) console.error(tob.continuePrint);
       else throw new Error('Test Assertion fail: test ' + tob.file + ' was explicitly marked to pass, but it failed somehow;\n' + e.stack);
+    }
+  } finally {
+    if (AUTO_UPDATE && tob.continuePrint && !CONFIRMED_UPDATE) {
+      console.error(BOLD + 'Test Assertion fail' + RESET + ': test ' + BOLD + tob.file + RESET + ' was explicitly marked to pass, but it failed somehow;');
+      process.exit();
     }
   }
 
