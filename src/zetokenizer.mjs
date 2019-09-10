@@ -340,6 +340,7 @@ const REGEX_CHARCLASS_ESCAPED_C = 0x110002;
 const REGEX_CHARCLASS_BAD_SANS_U_FLAG = 1<<23;
 const REGEX_CHARCLASS_BAD_WITH_U_FLAG = 1<<24;
 const REGEX_CHARCLASS_CLASS_ESCAPE = 1<<25; // \d \w \s etc, for webcompat checks in ranges
+const REGEX_CHARCLASS_DOUBLE_QUAD = 1<<26; // The returned code point was a double quad (matters for ranges and u-flag disambiguation)
 
 const COLLECT_TOKENS_NONE = 0;
 const COLLECT_TOKENS_SOLID = 1; // non-whitespace
@@ -1574,12 +1575,19 @@ function ZeTokenizer(
         if (c === $$BACKSLASH_5C) {
           // this ident is part of an identifier. if the backslash is invalid or the escaped codepoint not valid for the
           // identifier then an $ERROR token should be yielded since the backslash cannot be valid in any other way here
+          if (eofd(1)) {
+            if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Encountered a backslash at end of input';
+            return $ERROR;
+          }
           if (peekd(1) === $$U_75) {
             ASSERT_skip($$BACKSLASH_5C);
             ASSERT_skip($$U_75);
             let errbak = lastPotentialRegexError;
             c = parseRegexCharClassUnicodeEscape();
-            if (c === INVALID_IDENT_CHAR || c === REGEX_CHARCLASS_BAD) {
+            let wasDoubleQuad = c & REGEX_CHARCLASS_DOUBLE_QUAD;
+            if (wasDoubleQuad) c ^= REGEX_CHARCLASS_DOUBLE_QUAD;
+            ASSERT(c !== INVALID_IDENT_CHAR, 'dont think this can happen');
+            if (c === REGEX_CHARCLASS_BAD) {
               regexSyntaxError('Found invalid quad unicode escape, the escape must be part of the ident so the ident is an error');
               return $ERROR;
             }
@@ -1593,8 +1601,13 @@ function ZeTokenizer(
               regexSyntaxError('An escape that might be part of an identifier cannot be anything else so if it is invalid it must be an error');
               return $ERROR;
             }
-            if (wide === VALID_SINGLE_CHAR) prevStr += String.fromCharCode(c);
-            else prevStr += String.fromCodePoint(c);
+            if (wide === VALID_SINGLE_CHAR) {
+              ASSERT(!wasDoubleQuad, 'The first quad of a valid surrogate pair cannot yield a valid single ident character');
+              prevStr += String.fromCharCode(c);
+            } else {
+              ASSERT(!wasDoubleQuad || (isIdentRestChr(codePointToSurrogateHead(c), CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR && isIdentRestChr(codePointToSurrogateTail(c), CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR), 'The first quad of a surrogate pair cannot yield a valid single ident rest character')
+              prevStr += String.fromCodePoint(c);
+            }
           } else {
             regexSyntaxError('Only unicode escapes are legal in identifier names');
             return $ERROR;
@@ -1648,8 +1661,11 @@ function ZeTokenizer(
       if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Only _unicode_ escapes are supported in identifiers';
       return $ERROR;
     }
+    if (eof()) {
+      if (!lastReportableTokenizerError) lastReportableTokenizerError = 'Reached end of input before closing the current ident escape';
+      return $ERROR;
+    }
 
-    ASSERT(neof(), 'would have been a BAD_ESCAPE if it was an EOF here');
     let data = input.charCodeAt(start) === $$CURLY_L_7B ? slice(start + 1, pointer - 1) : slice(start, pointer);
     ASSERT(data.length > 0, 'a valid escape should contain at least one digit');
     ASSERT(data.charCodeAt(0) !== $$CURLY_L_7B && isHex(data.charCodeAt(0)), 'if wrapped, the opener should be removed');
@@ -1689,6 +1705,8 @@ function ZeTokenizer(
             ASSERT_skip($$BACKSLASH_5C);
             ASSERT_skip($$U_75);
             c = parseRegexCharClassUnicodeEscape();
+            let wasDoubleQuad = c & REGEX_CHARCLASS_DOUBLE_QUAD;
+            if (wasDoubleQuad) c ^= REGEX_CHARCLASS_DOUBLE_QUAD;
             if (c === INVALID_IDENT_CHAR || c === REGEX_CHARCLASS_BAD) {
               return regexSyntaxError('Found invalid quad unicode escape in regex ident, the escape must be part of the ident so the ident is an error');
             }
@@ -1701,8 +1719,16 @@ function ZeTokenizer(
             if (wide === INVALID_IDENT_CHAR) {
               return regexSyntaxError('An escape that might be part of an identifier cannot be anything else so if it is invalid it must be an error');
             }
-            if (wide === VALID_SINGLE_CHAR) prevStr += String.fromCharCode(c);
-            else prevStr += String.fromCodePoint(c);
+            if (wide === VALID_SINGLE_CHAR) {
+              ASSERT(!wasDoubleQuad, 'The first quad of a valid surrogate pair cannot yield a valid single ident character');
+              prevStr += String.fromCharCode(c);
+            } else {
+              ASSERT(!wasDoubleQuad || (isIdentRestChr(codePointToSurrogateHead(c), CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR && isIdentRestChr(codePointToSurrogateTail(c), CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR), 'The first quad of a surrogate pair cannot yield a valid single rest ident rest character')
+              prevStr += String.fromCodePoint(c);
+              if (wasDoubleQuad) {
+                uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'Found a quad that was a surrogate pair which created a valid identifier character and that will only work with u-flag');
+              }
+            }
           } else {
             return regexSyntaxError('Only unicode escapes are legal in identifier names');
           }
@@ -2404,8 +2430,6 @@ function ZeTokenizer(
 
         case $$SQUARE_L_5B:
           // CharacterClass
-          ASSERT_skip($$SQUARE_L_5B);
-
           let charClassEscapeStatus = parseRegexCharClass();
           if (charClassEscapeStatus === REGEX_ALWAYS_BAD) {
             uflagStatus = REGEX_ALWAYS_BAD; // should already have THROWn for this
@@ -2583,6 +2607,8 @@ function ZeTokenizer(
       // Without u-flag, the variable length and non-bmp code points are not considered and will cause an error here.
 
       c = parseRegexCharClassUnicodeEscape(); // will check EOF first, consume a valid unicode escape, else bail
+      let wasDoubleQuad = c & REGEX_CHARCLASS_DOUBLE_QUAD;
+      if (wasDoubleQuad) c ^= REGEX_CHARCLASS_DOUBLE_QUAD;
       if (c === INVALID_IDENT_CHAR || c === REGEX_CHARCLASS_BAD) {
         return regexSyntaxError('Found invalid quad unicode escape');
       }
@@ -2594,14 +2620,19 @@ function ZeTokenizer(
       let wide = isIdentStart(c, CODEPOINT_FROM_ESCAPE);
       // Note: if wide or if the escape was of the `\u{}` form then the uflag will have been updated here so skip that
       if (wide === VALID_SINGLE_CHAR) {
+        ASSERT(!wasDoubleQuad, 'The first quad of a valid surrogate pair cannot yield a valid single ident character');
         // [v]: `/(?<\u0041>.)/`
         // Fine with and without u-flag
       }
       else if (wide === VALID_DOUBLE_CHAR) {
+        ASSERT(!wasDoubleQuad || (isIdentRestChr(codePointToSurrogateHead(c), CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR && isIdentRestChr(codePointToSurrogateTail(c), CODEPOINT_FROM_ESCAPE) === INVALID_IDENT_CHAR), 'The first quad of a surrogate pair cannot yield a valid single ident rest character for regex')
         // [x]: `/(?<\ud87e\udddfrest>foo)/`
         // [v]: `/(?<\ud87e\udddfrest>foo)/u`
         // The first character is a valid ident start, however, it only is as a code point, which is only the case
         // when u-flag is present. So this is an error without u-flag, since surrogate pair heads are not valid here.
+        if (wasDoubleQuad) {
+          uflagStatus = updateRegexUflagIsMandatory(uflagStatus, 'Found a quad that was a surrogate pair which created a valid identifier character and that will only work with u-flag');
+        }
       }
       else {
         ASSERT(wide === INVALID_IDENT_CHAR, 'enum');
@@ -2739,6 +2770,7 @@ function ZeTokenizer(
   }
   function parseRegexAtomEscape(c, namedBackRefs) {
     // backslash already parsed, c is peeked
+    // return REGEX_*** enum
 
     // -- u flag is important
     // -- u flag can affect range (surrogate pairs in es5 vs es6)
@@ -2887,6 +2919,7 @@ function ZeTokenizer(
         let uflagStatus = REGEX_ALWAYS_GOOD;
 
         ASSERT_skip($$K_6B);
+        if (eof()) return regexSyntaxError('Early EOF while parsing `\\k` escape in regex character class');
         c = peek();
         if (c !== $$LT_3C) {
           let reason = 'Named back reference \\k; missing group name';
@@ -2896,6 +2929,7 @@ function ZeTokenizer(
           return updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);
         }
         ASSERT_skip($$LT_3C);
+        if (eof()) return regexSyntaxError('Early EOF while parsing `\\k` escape in regex character class');
         c = peek();
 
         const FOR_K_ESCAPE = false;
@@ -2952,7 +2986,7 @@ function ZeTokenizer(
           ASSERT_skip(c);
         }
 
-        // ok unicode escape was acceptable
+        // Ok, atom escape was acceptable but only without u-flag
         return updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, 'Atom escape can only escape certain syntax chars with u-flag');
     }
     THROW('dis be dead code');
@@ -2972,6 +3006,7 @@ function ZeTokenizer(
     ASSERT(c >= $$1_31 && c <= $$9_39, 'should be digit 1~9');
     ASSERT_skip(c);
 
+    if (eof()) return regexSyntaxError('Early EOF while parsing decimal escape in regex');
     let d = peek();
     if (d >= $$0_30 && d <= $$9_39) {
       ASSERT_skip(d);
@@ -2993,6 +3028,8 @@ function ZeTokenizer(
     return REGEX_ALWAYS_GOOD;
   }
   function parseRegexAtomUnicodeEscape() {
+    // Return REGEX_*** enum
+
     // if unicode flag
     // - surrogate pairs may matter
     // - class char status matters
@@ -3004,12 +3041,15 @@ function ZeTokenizer(
 
     lastRegexUnicodeEscapeOrd = 0;
 
-    if (eof()) return BAD_ESCAPE;
+    if (eofd(3)) { // We are after the `\u` and now we parse either 4 hex digits or, at least, `{}` and one hex digit
+      return regexSyntaxError('Early EOF while trying to parse unicode escape');
+    }
     let c = peek(); // dont read. we dont want to consume a bad \n here
     if (c === $$CURLY_L_7B) {
       ASSERT_skip($$CURLY_L_7B);
       let r = parseRegexAtomUnicodeEscapeVary();
       if (r === GOOD_ESCAPE) {
+        if (eof()) return regexSyntaxError('Early EOF after parsing variable unicode escape in regex');
         ASSERT_skip($$CURLY_R_7D);
         return updateRegexUflagIsMandatory(REGEX_ALWAYS_GOOD, 'The es6 unicode escape `\\u{...}` is only valid in regex with a u-flag');
       }
@@ -3042,7 +3082,7 @@ function ZeTokenizer(
       ASSERT_skip(d);
       let firstPart = hexToNum(a) << 12 | hexToNum(b) << 8 | hexToNum(c) << 4 | hexToNum(d);
 
-      // Is this a surrogate high byte? then we'll try another one; https://en.wikipedia.org/wiki/UTF-16
+      // Is this a surrogate high byte? then we'll try another one
       if (firstPart >= 0xD800 && firstPart <= 0xDBFF) {
         // pretty slow path but we're constructing a low+hi surrogate pair together here
         if (!eofd(5) && peek() === $$BACKSLASH_5C && peekd(1) === $$U_75 && isHex(peekd(2)) && isHex(peekd(3)) && isHex(peekd(4)) && isHex(peekd(5))) {
@@ -3073,12 +3113,10 @@ function ZeTokenizer(
             skip();
 
             // we have a matching low+hi, combine them
-            lastRegexUnicodeEscapeOrd = (((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000;
-            return REGEX_ALWAYS_GOOD; // even without u-flag? how does that work...?
+            lastRegexUnicodeEscapeOrd = surrogateToCodepoint(firstPart, secondPart);
+            return REGEX_ALWAYS_GOOD; // Without u-flag it won't matter for atom escapes and can't lead to syntax errors
           }
-          // return regexSyntaxError('Second quad did not yield a valid surrogate pair value');
         }
-        // return regexSyntaxError('Encountered illegal quad(1) escaped surrogate pair; the second part of the pair did not meet the requirements');
       }
 
       lastRegexUnicodeEscapeOrd = firstPart;
@@ -3215,19 +3253,25 @@ function ZeTokenizer(
   }
 
   function parseRegexCharClass() {
-    // parse a character class
-    // the problem is a combination of;
+    // Parse a character class (a set of chars by which to match one character)
+    // The problem is a combination of;
     // - ranges
     // - u-flag enabling surrogate pairs
     // - surrogate heads and tails can appear without the other without error
     // - flags only known after the body is parsed
-    // this leads to situations where the same dash may mean a range with
-    // the u-flag and it may mean an actual dash without the u-flag and
-    // vice versa. and you wont know until you parsed the flags whether
-    // which case to enforce.
-    // the other problem is that surrogates cause you to need the next
-    // character for u-mode before confirming ranges but not needing this
-    // without u-mode.
+    // This leads to situations where the same dash may mean a range with the u-flag and it may mean an actual dash
+    // without the u-flag and vice versa. You can even run into situations where the range is different with and without
+    // u-flag. In some cases these ranges are both valid, in some cases both invalid, and in some cases only one of the
+    // two ranges is valid. Bonkers. And you wont know until you parsed the flags whether which case to enforce!
+
+    // Since we want to parse the regex before knowing the flag and do not want to backtrack, we have to track these
+    // ranges and its progress in two separate ways while progressing the pointer of the same lexer. Fun!
+
+    // Note that surrogate pairs (only supported with u-flag) can only appear as a pair as literal characters, or as
+    // the variable unicode escape (`\u{...}`), or as a double quad escape (`\uxxxx\uxxxx`). Other escapes or a mix of
+    // these methods will not lead to a pair, which can be important for validating ranges with and without u-flag.
+
+    ASSERT_skip($$SQUARE_L_5B);
 
     let prev = 0;
     let surrogate = 0; // current surrogate if prev is a head and c is a tail
@@ -3250,14 +3294,26 @@ function ZeTokenizer(
       c = peek();
     }
 
-    let canonicalCodePoints = 0;
-    while (true) {
+    // With u-flag, a surrogate pair encoded as double unicode escaped quads must be consumed as one char. Without
+    // u-flag, each quad must be consumed individually but we must still forward the scanner when finding it (for
+    // u-flag support). So we'll cache the second quad, which must be a valid surrogate tail in such case (so no
+    // worries about that stuff) so that we can process it separately
+    // Keep in mind; no mixing of surrogate pair encoding. Either both literal, one variable unicode, or double quads.
 
-      if (c === $$SQUARE_R_5D) {
-        return parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState);
-      } else if (c === $$BACKSLASH_5C) {
+    while (c !== $$SQUARE_R_5D) {
+      // There is no single escape that can be combined with an existing character here as a surrogate pair.
+      // Variable escapes can yield codepoints > 0xffff, and double quad unicode escapes can. Only other way is literal.
+      let wasEscape = false;
+      let wasDoubleQuad = false;
+      if (c === $$BACKSLASH_5C) {
         ASSERT_skip($$BACKSLASH_5C);
-        c = parseRegexCharClassEscape(); // note: this may lead to c being >0xffff !! can also be 0 for certain escapes
+        // `c` may be >0xffff by variable unicode escape or double quad unicode escape (only...)
+        c = parseRegexCharClassEscape();
+        // It matters explicitly for this function due to unicode range ambiguity. For double quad the second quad may
+        // be part of a new range which may be relevant in case there is no u-flag.
+        wasDoubleQuad = c & REGEX_CHARCLASS_DOUBLE_QUAD;
+        if (wasDoubleQuad) c ^= REGEX_CHARCLASS_DOUBLE_QUAD;
+
         if (c === REGEX_CHARCLASS_BAD) {
           // `/[\N]/`
           ASSERT(lastPotentialRegexError, 'error should be set');
@@ -3304,7 +3360,15 @@ function ZeTokenizer(
       } else {
         ASSERT_skip(c);
       }
-      if (c === REGEX_CHARCLASS_CLASS_ESCAPE || c === REGEX_CHARCLASS_ESCAPED_UC_B) {
+
+      if (wasEscape) {
+        // Even if `c` is a surrogate tail, this won't lead to a pair with a previous code unit
+        // But if the current codepoint is >0xffff then we still mark it as such
+        isSurrogate = c > 0xffff;
+        ASSERT(!isSurrogate || (c & 0x1fffff) === c, 'non-bmp ranges should be explicitly bounded when they come from escapes');
+        if (isSurrogate) surrogate = c;
+        isSurrogateHead = false;
+      } else if (c === REGEX_CHARCLASS_CLASS_ESCAPE || c === REGEX_CHARCLASS_ESCAPED_UC_B) {
         isSurrogate = false;
         isSurrogateHead = false;
       } else if (wasSurrogateHead && isSurrogateTail(c)) {
@@ -3355,7 +3419,6 @@ function ZeTokenizer(
         ASSERT(urangeLeft !== -1, 'U: if we are opening a range here then we should have parsed and set the left codepoint value by now');
         urangeOpen = true;
       } else {
-        // ASSERT(urangeLeft === -1, 'U: apparently we werent in a range so this should be the start of a left side of a codepoint and the var should be cleared');
         ASSERT(urangeOpen === false, 'U: we should only be updating left codepoint if we are not inside a range');
         urangeLeft = isSurrogate ? surrogate : c;
       }
@@ -3371,60 +3434,142 @@ function ZeTokenizer(
       // Webcompat does not change this, it only affects isCharacterClass checks
       // https://tc39.es/ecma262/#sec-patterns-static-semantics-early-errors-annexb
 
-
       // For the case where there is NO u-flag:
-      if (nrangeOpen) {
-        const nrangeRight = c; // without u-flag it's always just one char
-        if (
-          nrangeLeft === REGEX_CHARCLASS_CLASS_ESCAPE ||
-          nrangeRight === REGEX_CHARCLASS_CLASS_ESCAPE
-        ) {
-          // Class escapes are illegal for ranges, however, they are allowed and ignored in webcompat mode
-          // The webcompat checks have happened before (because \d \D \s \S \w \W are treated differently from \p \P)
-          let reason = 'Character class escapes `\\d \\D \\s \\S \\w \\W \\p \\P` are only ok as a range with webcompat, without uflag';
-          if (webCompat === WEB_COMPAT_ON) {
-            // return REGEX_CHARCLASS_BAD_SANS_U_FLAG;
-          } else {
-            // when not in webcompat mode, it may also be the case that a range lhs or rhs is a class escape (\s \d \w etc)
-            flagState = updateRegexUflagIsMandatory(flagState, reason);
-          }
-        } else if (
-          nrangeLeft === REGEX_CHARCLASS_ESCAPED_UC_B ||
-          nrangeRight === REGEX_CHARCLASS_ESCAPED_UC_B
-        ) {
-          // Class escapes are illegal for ranges
-          let reason = 'Character class escapes `\\B` is never legal as part of a char class range';
-          flagState = updateRegexUflagIsIllegal(flagState, reason);
-        } else {
-          ASSERT(nrangeLeft !== REGEX_CHARCLASS_ESCAPED_UC_B || lastPotentialRegexError, 'error should have been set when flag was returned');
-          ASSERT(nrangeRight !== REGEX_CHARCLASS_ESCAPED_UC_B || lastPotentialRegexError, 'error should have been set when flag was returned');
-          if (nrangeLeft > nrangeRight) {
-            flagState = updateRegexUflagIsMandatory(flagState, 'Encountered incorrect range (left>right) when parsing as if without u-flag');
-          } else if (isSurrogateHead) {
+      let cTmp = c;
+      let cTail = c; // If double quad, this will hold the second quad ("low surrogate") while the first is processed
+      let stillDataLeft = true;
+      while (stillDataLeft) {
+        // Deal with the "surrogate pair encoded as double quads are ignored without u-flag" case first
+        if (wasDoubleQuad) {
+          // - `/[\uD800\uDC00-\uFFFF]/`
+          //                  ^
+          // `c` contains the ord for the surrogate pair encoded by a quad. The quad _must_ be surrogate head + tail here.
+          ASSERT(cTmp > 0xffff, 'a double quad is only consumed if it is a valid surrogate pair, which in turn must be >0xffff');
+          // Without u-flag we can only consume the head part here so buffer the tail for next loop iteration
+          wasDoubleQuad = false;
 
-            flagState = updateRegexUflagIsMandatory(flagState, 'Class had a range with right side being surrogate pair which is only recognized as a single codepoint with uflag but uflag was missing');
-          }
+          cTail = codePointToSurrogateTail(cTmp);
+          cTmp = codePointToSurrogateHead(cTmp);
+          ASSERT(cTail >= 0xDC00 && cTail <= 0xDFFF, 'must be surrogate tail');
+          ASSERT(cTmp >= 0xD800 && cTmp <= 0xDBFF, 'must be surrogate head');
+        } else {
+          // Processing the surrogate tail of a double unicode encoded quad now
+          stillDataLeft = false;
+          cTmp = cTail; // Note: cTail can still be >0xffff if it's the first iteration. But that's a syntax error -u
+          ASSERT(cTail <= 0xffff || cTail > 0x10ffff || lastPotentialRegexError, 'either ctail is <=0xffff, a high end flag, or a sans flag error is prepared', cTail, c);
         }
-        nrangeLeft = -1;
-        nrangeOpen = false;
-      } else if (c === $$DASH_2D && nrangeLeft !== -1) {
-        ASSERT(nrangeLeft !== -1, 'N if we are opening a range here then we should have parsed and set the left codepoint value by now');
-        nrangeOpen = true;
-      } else {
-        // ASSERT(nrangeLeft === -1, 'N apparently we werent in a range so this should be the start of a left side of a codepoint and the var should be cleared');
-        ASSERT(nrangeOpen === false, 'N we should only be updating left codepoint if we are not inside a range');
-        nrangeLeft = c;
+
+        if (nrangeOpen) {
+          const nrangeRight = cTmp; // without u-flag it's always just one char
+          if (
+            nrangeLeft === REGEX_CHARCLASS_CLASS_ESCAPE ||
+            nrangeRight === REGEX_CHARCLASS_CLASS_ESCAPE
+          ) {
+            // Class escapes are illegal for ranges, however, they are allowed and ignored in webcompat mode
+            // The webcompat checks have happened before (because \d \D \s \S \w \W are treated differently from \p \P)
+            let reason = 'Character class escapes `\\d \\D \\s \\S \\w \\W \\p \\P` are only ok as a range with webcompat, without uflag';
+            if (webCompat === WEB_COMPAT_ON) {
+              // return REGEX_CHARCLASS_BAD_SANS_U_FLAG;
+            } else {
+              // when not in webcompat mode, it may also be the case that a range lhs or rhs is a class escape (\s \d \w etc)
+              flagState = updateRegexUflagIsMandatory(flagState, reason);
+            }
+          } else if (
+            nrangeLeft === REGEX_CHARCLASS_ESCAPED_UC_B ||
+            nrangeRight === REGEX_CHARCLASS_ESCAPED_UC_B
+          ) {
+            // Class escapes are illegal for ranges
+            let reason = 'Character class escapes `\\B` is never legal as part of a char class range';
+            flagState = updateRegexUflagIsIllegal(flagState, reason);
+          } else {
+            ASSERT(nrangeLeft !== REGEX_CHARCLASS_ESCAPED_UC_B || lastPotentialRegexError, 'error should have been set when flag was returned');
+            ASSERT(nrangeRight !== REGEX_CHARCLASS_ESCAPED_UC_B || lastPotentialRegexError, 'error should have been set when flag was returned');
+            if (nrangeLeft > nrangeRight) {
+              flagState = updateRegexUflagIsMandatory(flagState, 'Encountered incorrect range (left>right) when parsing as if without u-flag');
+            } else if (isSurrogateHead) {
+
+              flagState = updateRegexUflagIsMandatory(flagState, 'Class had a range with right side being surrogate pair which is only recognized as a single codepoint with uflag but uflag was missing');
+            }
+          }
+          nrangeLeft = -1;
+          nrangeOpen = false;
+        } else if (cTmp === $$DASH_2D && nrangeLeft !== -1) {
+          ASSERT(nrangeLeft !== -1, 'N if we are opening a range here then we should have parsed and set the left codepoint value by now');
+          nrangeOpen = true;
+        } else {
+          // ASSERT(nrangeLeft === -1, 'N apparently we werent in a range so this should be the start of a left side of a codepoint and the var should be cleared');
+          ASSERT(nrangeOpen === false, 'N we should only be updating left codepoint if we are not inside a range');
+          nrangeLeft = cTmp;
+        }
       }
 
       wasSurrogate = isSurrogate;
       wasSurrogateHead = isSurrogateHead;
       prev = c;
 
-      ++canonicalCodePoints;
-      if (eof()) break;
+      if (eof()) {
+        return regexSyntaxError('Unexpected early EOF while parsing character class'); // no end
+      }
       c = peek();
     }
-    return regexSyntaxError('Unexpected early EOF while parsing character class'); // no end
+    return parseRegexCharClassEnd(urangeOpen, wasSurrogateHead, urangeLeft, prev, flagState);
+  }
+
+  ASSERT(surrogateToCodepoint(0xD801, 0xDC37) === 0x10437);
+  ASSERT(codePointToSurrogateHead(0x10437) === 0xD801);
+  ASSERT(codePointToSurrogateTail(0x10437) === 0xDC37);
+  ASSERT(surrogateToCodepoint(codePointToSurrogateHead(0x10437), codePointToSurrogateTail(0x10437)) === 0x10437);
+
+  function surrogateToCodepoint(head, tail) {
+    /*
+      https://en.wikipedia.org/wiki/UTF-16
+      To decode U+10437 (𐐷) from UTF-16:
+      Take the high surrogate (0xD801) and subtract 0xD800, then multiply by 0x400, resulting in 0x0001 * 0x400 = 0x0400.
+      Take the low surrogate (0xDC37) and subtract 0xDC00, resulting in 0x37.
+      Add these two results together (0x0437), and finally add 0x10000 to get the final decoded UTF-32 code point, 0x10437.
+
+      We have to reverse this process... :/ Above, we applied the following:
+      codepoint = ((((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000);
+
+      The reverse:
+      Tail: ((result-0x10000) >> 10) + 0xD800
+      Head: ((result-0x10000) & 0b1111111111) + 0xDC00
+    */
+    return ((((head & 0x3ff) << 10) | (tail & 0x3ff)) + 0x10000);
+  }
+  function codePointToSurrogateTail(codepoint) {
+    /*
+      https://en.wikipedia.org/wiki/UTF-16
+      To decode U+10437 (𐐷) from UTF-16:
+      Take the high surrogate (0xD801) and subtract 0xD800, then multiply by 0x400, resulting in 0x0001 * 0x400 = 0x0400.
+      Take the low surrogate (0xDC37) and subtract 0xDC00, resulting in 0x37.
+      Add these two results together (0x0437), and finally add 0x10000 to get the final decoded UTF-32 code point, 0x10437.
+
+      We have to reverse this process... :/ Above, we applied the following:
+      codepoint = ((((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000);
+
+      The reverse:
+      Tail: ((result-0x10000) >> 10) + 0xD800
+      Head: ((result-0x10000) & 0b1111111111) + 0xDC00
+     */
+    return ((codepoint - 0x10000) & 0b1111111111) + 0xDC00
+  }
+  function codePointToSurrogateHead(codepoint) {
+    /*
+      https://en.wikipedia.org/wiki/UTF-16
+      To decode U+10437 (𐐷) from UTF-16:
+      Take the high surrogate (0xD801) and subtract 0xD800, then multiply by 0x400, resulting in 0x0001 * 0x400 = 0x0400.
+      Take the low surrogate (0xDC37) and subtract 0xDC00, resulting in 0x37.
+      Add these two results together (0x0437), and finally add 0x10000 to get the final decoded UTF-32 code point, 0x10437.
+
+      We have to reverse this process... :/ Above, we applied the following:
+      codepoint = ((((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000);
+
+      The reverse:
+      Tail: ((result-0x10000) >> 10) + 0xD800
+      Head: ((result-0x10000) & 0b1111111111) + 0xDC00
+     */
+    return ((codepoint - 0x10000) >> 10) + 0xD800
   }
 
   function parseRegexCharClassEscape() {
@@ -3617,12 +3762,12 @@ function ZeTokenizer(
       case $$0_30: {
         ASSERT_skip(c);
         // cannot be followed by another digit
-        let reason = 'An escaped zero cannot be followed by another number because that would be an octal escape';
-        if (webCompat === WEB_COMPAT_ON) {
-          updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);
-          return parseOctalFromSecondDigit(c) | REGEX_CHARCLASS_BAD_WITH_U_FLAG;
-        }
         if (neof() && isAsciiNumber(peek())) {
+          let reason = 'An escaped zero cannot be followed by another number because that would be an octal escape';
+          if (webCompat === WEB_COMPAT_ON) {
+            updateRegexUflagIsIllegal(REGEX_ALWAYS_GOOD, reason);
+            return parseOctalFromSecondDigit(c) | REGEX_CHARCLASS_BAD_WITH_U_FLAG;
+          }
           regexSyntaxError(reason);
           return REGEX_CHARCLASS_BAD;
         }
@@ -3988,9 +4133,11 @@ function ZeTokenizer(
         if (peeky($$U_75)) {
           ASSERT_skip($$U_75);
           parseRegexAtomUnicodeEscape();
+          regexSyntaxError('Regex flags can not be escaped in any form');
+        } else {
+          regexSyntaxError('Unknown regex flag [ord=' + c + ']');
         }
         ++bad;
-        regexSyntaxError('Unknown regex flag [ord=' + c + ']');
       }
     }
     // the error is the (slightly and very theoretical) slow path because it leads to an error anyways
@@ -4110,18 +4257,19 @@ function ZeTokenizer(
     //   return CHARCLASS_BAD
     // }
 
+    if (eof()) return firstChar - $$0_30;
+    let secondChar = peek();
     if (isLowerOctal(firstChar)) {
       // third char may be any octal
-      let secondChar = peek();
       if (isOctal(secondChar)) {
         ASSERT_skip(secondChar);
-
+        if (eof()) return ((firstChar - $$0_30) * 8) + (secondChar - $$0_30);
         let thirdChar = peek();
         if (isOctal(thirdChar)) {
           ASSERT_skip(thirdChar);
           return ((firstChar - $$0_30) * 8 * 8) + ((secondChar - $$0_30) * 8) + (thirdChar - $$0_30);
         } else {
-          return ((firstChar - $$0_30) * 8) + (thirdChar - $$0_30);
+          return ((firstChar - $$0_30) * 8) + (secondChar - $$0_30);
         }
       } else {
         return firstChar - $$0_30;
@@ -4129,16 +4277,15 @@ function ZeTokenizer(
     } else {
       ASSERT(isUpperOctal(firstChar));
       // third char may only be the lower octals
-      let secondChar = peek();
       if (isOctal(secondChar)) {
         ASSERT_skip(secondChar);
-
+        if (eof()) return ((firstChar - $$0_30) * 8) + (secondChar - $$0_30);
         let thirdChar = peek();
         if (isLowerOctal(thirdChar)) {
           ASSERT_skip(thirdChar);
           return ((firstChar - $$0_30) * 8 * 8) + ((secondChar - $$0_30) * 8) + (thirdChar - $$0_30);
         } else {
-          return ((firstChar - $$0_30) * 8) + (thirdChar - $$0_30);
+          return ((firstChar - $$0_30) * 8) + (secondChar - $$0_30);
         }
       } else {
         return firstChar - $$0_30;
@@ -4188,8 +4335,11 @@ function ZeTokenizer(
         regexSyntaxError('Missing curly of unicode long escape in a regex');
         return REGEX_CHARCLASS_BAD;
       }
-      let x = peek();
-      if (x !== $$CURLY_R_7D) {
+      if (eof()) {
+        regexSyntaxError('Early EOF while parsing variable unicode escape in regex character class');
+        return REGEX_CHARCLASS_BAD;
+      }
+      if (!peeky($$CURLY_R_7D)) {
         regexSyntaxError('Missing curly of unicode long escape in a regex');
         return REGEX_CHARCLASS_BAD;
       }
@@ -4226,7 +4376,7 @@ function ZeTokenizer(
 
       let firstPart = (hexToNum(a) << 12) | (hexToNum(b) << 8) | (hexToNum(c) << 4) | hexToNum(d);
 
-      // Is this a surrogate high byte? then we'll try another one; https://en.wikipedia.org/wiki/UTF-16
+      // Is this a surrogate high byte? then we'll try another one
       if (firstPart >= 0xD800 && firstPart <= 0xDBFF) {
         // `\uxxxx\uxxxx`         (we've verified the first quad is a valid surrogate head)
         //        ^
@@ -4267,16 +4417,15 @@ function ZeTokenizer(
             ASSERT_skip(c);
             ASSERT_skip(d);
 
+            let codepoint = surrogateToCodepoint(firstPart, secondPart);
+
             updateRegexPotentialError('A double unicode quad escape that represents a surrogate pair in char class or group name is only valid with u-flag');
 
             // We have a matching low+hi, combine them
-            // This will be considered illegal without u-flag, which will ignore the surrogate tail
-            return ((((firstPart & 0x3ff) << 10) | (secondPart & 0x3ff)) + 0x10000) | REGEX_CHARCLASS_BAD_SANS_U_FLAG;
+            // Without u-flag the surrogate tail is just a separate character
+            return codepoint | REGEX_CHARCLASS_DOUBLE_QUAD;
           }
-          // regexSyntaxError('Second quad did not yield a valid surrogate pair value');
         }
-        // regexSyntaxError('Encountered illegal quad(2) escaped surrogate pair; the second part of the pair did not meet the requirements');
-        // return REGEX_CHARCLASS_BAD;
       }
       return firstPart;
     } else {

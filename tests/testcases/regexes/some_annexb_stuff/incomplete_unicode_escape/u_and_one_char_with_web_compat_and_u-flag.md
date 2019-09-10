@@ -27,7 +27,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Regex: Encountered early EOF while parsing a unicode escape quad
+    Regex: Early EOF while trying to parse unicode escape
 
 /\ua/u
 ^------- error
@@ -49,11 +49,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-throws: Tokenizer error!
-    Regex: Encountered early EOF while parsing a unicode escape quad; Regex body had an escape or char class range that is invalid with a u-flag, but it did have a u-flag
-
-/\ua/u
-^------- error
-`````
-
+_Output same as sloppy mode._

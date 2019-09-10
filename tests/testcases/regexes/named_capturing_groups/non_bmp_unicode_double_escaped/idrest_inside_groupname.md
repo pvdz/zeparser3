@@ -30,7 +30,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Regex: A double unicode quad escape that represents a surrogate pair in char class or group name is only valid with u-flag; Found "es6" unicode escape (`\u{..}`) or surrogate pair quads (`\uxxxx\uxxxx`) in regex ident, which is only valid with u-flag in regex; Regex body had an escape that is only valid with an u-flag, but it had no u-flag
+    Regex: A double unicode quad escape that represents a surrogate pair in char class or group name is only valid with u-flag; Found a quad that was a surrogate pair which created a valid identifier character and that will only work with u-flag; Regex body had an escape that is only valid with an u-flag, but it had no u-flag
 
 /(?<abc\uD835\uDFD0def>foo)/
 ^------- error

@@ -26,7 +26,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Regex: Encountered early EOF while parsing a unicode escape quad
+    Regex: Early EOF while trying to parse unicode escape
 
 /\ua/
 ^------- error
@@ -48,26 +48,4 @@ _Output same as sloppy mode._
 
 Parsed in sloppy script mode but with the web compat flag enabled.
 
-`````
-ast: {
-  type: 'Program',
-  loc:{start:{line:1,column:0},end:{line:1,column:5},source:''},
-  body: [
-    {
-      type: 'ExpressionStatement',
-      loc:{start:{line:1,column:0},end:{line:1,column:5},source:''},
-      expression: {
-        type: 'Literal',
-        loc:{start:{line:1,column:0},end:{line:1,column:5},source:''},
-        value: null,
-        regex: { pattern: '\\ua', flags: '' },
-        raw: '/\\ua/'
-      }
-    }
-  ]
-}
-
-tokens (3x):
-       REGEX ASI
-`````
-
+_Output same as sloppy mode._

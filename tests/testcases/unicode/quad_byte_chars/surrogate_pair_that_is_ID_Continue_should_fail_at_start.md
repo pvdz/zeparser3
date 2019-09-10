@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Tokenizer error!
-    Regex: A double unicode quad escape that represents a surrogate pair in char class or group name is only valid with u-flag; Encountered extended unicode escape (`\u{}`) or surrogate pair unicode quads (`\uxxxx\uxxxx`) which is only valid with u-flag; Named capturing group named contained an invalid unicode escaped char: [`@{x104a4}@`, 66724]
+    Regex: A double unicode quad escape that represents a surrogate pair in char class or group name is only valid with u-flag; Named capturing group named contained an invalid unicode escaped char: [`@{x104a4}@`, 66724]
 
 f(/(?<\uD801\uDCA4>.)/u)
   ^------- error
