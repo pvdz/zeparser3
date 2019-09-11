@@ -4464,7 +4464,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       return parseLabeledStatementInstead(lexerFlags, scoop, labelSet, identToken, fdState, astProp);
     } else {
       AST_open(astProp, 'ExpressionStatement', identToken);
-      parseExpressionAfterPlainVarName(lexerFlags, identToken, ASSIGN_EXPR_IS_OK, 'expression');
+      let assignable = parseIdentOrParenlessArrow(lexerFlags, identToken, IS_ASSIGNABLE, ASSIGN_EXPR_IS_OK, 'expression');
+      assignable = parseValueTail(lexerFlags, identToken, assignable, NOT_NEW_ARG, NOT_LHSE, 'expression');
+      parseExpressionFromOp(lexerFlags, identToken, assignable, 'expression');
       if (curc === $$COMMA_2C) {
         // Don't care about assignable await/yield flags
         _parseExpressions(lexerFlags, identToken, initNotAssignable(), 'expression');
@@ -5614,21 +5616,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     assignable = parseExpressionFromOp(lexerFlags, identToken, assignable, astProp);
     ASSERT(typeof assignable === 'number', 'assignanum', assignable);
     return assignable;
-  }
-  function parseExpressionAfterPlainVarName(lexerFlags, identToken, allowAssignment, astProp) {
-    ASSERT(parseExpressionAfterPlainVarName.length === arguments.length, 'arg count');
-    ASSERT_ASSIGN_EXPR(allowAssignment);
-    // similar to parseExpressionAfterIdentifier except it shortcuts the ident check (assumes
-    // special paths from call sites where the var name must be a plain var name)
-    // TODO: assert the varname is not special (dev only)
-    ASSERT(identToken.str === 'let', 'currently only used for let, update is_assignable flag if this changes');
-    let assignable = parseIdentOrParenlessArrow(lexerFlags, identToken, IS_ASSIGNABLE, allowAssignment, astProp);
-    assignable = parseValueTail(lexerFlags, identToken, assignable, NOT_NEW_ARG, NOT_LHSE, astProp);
-    if (allowAssignment === ASSIGN_EXPR_IS_ERROR) {
-      TODO // this is wrong
-      assignable = setNotAssignable(assignable);
-    }
-    return parseExpressionFromOp(lexerFlags, identToken, assignable, astProp);
   }
   function parseExpressionAfterAsyncAsVarName(lexerFlags, stmtOrExpr, asyncToken, isNewArg, allowAssignment, astProp) {
     ASSERT(arguments.length === parseExpressionAfterAsyncAsVarName.length, 'arg count');
