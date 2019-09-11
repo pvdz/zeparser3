@@ -27,17 +27,18 @@ const AUTO_GENERATE_CONSERVATIVE = process.argv.includes('-G');
 const REDUCING = process.argv.includes('--min');
 const ALL_VARIANTS = process.argv.includes('--all');
 let [a,b,c,d] = [process.argv.includes('--sloppy'), process.argv.includes('--strict'), process.argv.includes('--module'), process.argv.includes('--web')];
-const RUN_SLOPPY = ALL_VARIANTS || (a || (!b && !c && !d)) || ((INPUT_OVERRIDE || !REDUCING) && !(b || c || d));
-const RUN_STRICT = ALL_VARIANTS || b || (!a && !c && !d && !INPUT_OVERRIDE && !REDUCING);
-const RUN_MODULE = ALL_VARIANTS || c || (!a && !b && !d && !INPUT_OVERRIDE && !REDUCING);
-const RUN_WEB = ALL_VARIANTS || d || (!a && !b && !c && !INPUT_OVERRIDE && !REDUCING);
+const DISABLE_VARIANTS_UNLESS_OVERRIDE = SEARCH || INPUT_OVERRIDE || REDUCING;
+const RUN_SLOPPY = ALL_VARIANTS || (a || (!b && !c && !d));
+const RUN_STRICT = ALL_VARIANTS || b || (!DISABLE_VARIANTS_UNLESS_OVERRIDE && !a && !c && !d);
+const RUN_MODULE = ALL_VARIANTS || c || (!DISABLE_VARIANTS_UNLESS_OVERRIDE && !a && !b && !d);
+const RUN_WEB = ALL_VARIANTS || d || (!DISABLE_VARIANTS_UNLESS_OVERRIDE && !a && !b && !c);
 const TARGET_ES6 = process.argv.includes('--es6');
 const TARGET_ES7 = process.argv.includes('--es7');
 const TARGET_ES8 = process.argv.includes('--es8');
 const TARGET_ES9 = process.argv.includes('--es9');
 const TARGET_ES10 = process.argv.includes('--es10');
 const TARGET_ES11 = process.argv.includes('--es11');
-const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || INPUT_OVERRIDE || TARGET_FILE || SKIP_BUILDS || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL;
+const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || (!SEARCH && (INPUT_OVERRIDE || TARGET_FILE || SKIP_BUILDS || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL));
 const FORCE_WRITE = process.argv.includes('--force-write');
 const BABEL_COMPAT = process.argv.includes('--babel');
 const BABEL_COMPARE = process.argv.includes('--babel-test');
@@ -181,7 +182,7 @@ if (SEARCH) {
   console.log = () => {};
   console.warn = () => {};
   console.error = () => {};
-  console.dir = () => {};
+  // console.dir = () => {}; // This is usually my workaround goto method to circumvent console blocking ;)
   LOG = () => {};
   PRINT_HIT(BLINK + 'Suppressing __all__ further output, only printing hits...' + RESET);
 } else {
@@ -378,7 +379,7 @@ async function runTest(list, zeparser, testVariant/*: "sloppy" | "strict" | "mod
       let e = rawOutput.e;
       // If you use -q -i then you just want to know whether or not some codepath hits some code
       if (INPUT_OVERRIDE) {
-        PRINT_HIT(`[${(e&&e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? 'WAS' : 'was NOT'} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
+        PRINT_HIT(`[${(e&&e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}] Input ${wasHit ? BOLD + 'WAS' + RESET : ('was ' + BOLD + 'NOT' + RESET)} hit` + (wasHit === true ? '' : '    (' + wasHit + ')'));
       } else if (wasHit) {
         if (!foundCache.has(inputCode)) {
           PRINT_HIT(`// [${(e && e.message.includes('TODO')?'T':e?RED+'x':GREEN+'v')+RESET}]: \`${toPrint(inputCode)}\`` + (wasHit === true ? '' : '    (' + wasHit + ')'));
@@ -453,11 +454,11 @@ async function runTests(list, zeparser) {
   if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Total runtime');
   if (!RUN_VERBOSE_IN_SERIAL) console.log('Now actually running all', list.length, 'test cases... 4x! Single threaded! This may take some time (~20s on my machine)');
   if (RUN_SLOPPY) await runTest(list, zeparser, TEST_SLOPPY);
-  if (SEARCH) return;
   if (RUN_STRICT) await runTest(list, zeparser, TEST_STRICT);
   if (RUN_MODULE) await runTest(list, zeparser, TEST_MODULE);
   if (RUN_WEB) await runTest(list, zeparser, TEST_WEB);
   if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Total runtime');
+  if (SEARCH) return;
 
   if (RUN_VERBOSE_IN_SERIAL && !AUTO_UPDATE && !INPUT_OVERRIDE) {
     for (let i=0; i<list.length; ++i) {
@@ -598,34 +599,36 @@ async function cli() {
   let list = [tob];
   await runTests(list, zeparser);
 
-  console.log('=============================================');
-  if (RUN_SLOPPY) {
-    ASSERT(list[0].newOutputSloppy !== false, 'should update');
-    console.log('### Sloppy mode:');
-    console.log(list[0].newOutputSloppy);
-    console.log('=============================================\n');
-  }
-  if (RUN_STRICT) {
-    ASSERT(list[0].newOutputStrict !== false, 'should update');
-    console.log('### Strict mode:');
-    if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputStrict) console.log('Same as sloppy');
-    else console.log(list[0].newOutputStrict);
-    console.log('=============================================\n');
-  }
-  if (RUN_MODULE) {
-    ASSERT(list[0].newOutputModule !== false, 'should update');
-    console.log('### Module goal:');
-    if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputModule) console.log('Same as sloppy');
-    else if (RUN_STRICT && list[0].newOutputStrict === list[0].newOutputModule) console.log('Same as strict');
-    else console.log(list[0].newOutputModule);
-    console.log('=============================================\n');
-  }
-  if (RUN_WEB) {
-    ASSERT(list[0].newOutputWeb !== false, 'should update');
-    console.log('### Web compat mode:');
-    if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputWeb) console.log('Same as sloppy');
-    else console.log(list[0].newOutputWeb);
-    console.log('=============================================\n');
+  if (!SEARCH) {
+    console.log('=============================================');
+    if (RUN_SLOPPY) {
+      ASSERT(list[0].newOutputSloppy !== false, 'should update');
+      console.log('### Sloppy mode:');
+      console.log(list[0].newOutputSloppy);
+      console.log('=============================================\n');
+    }
+    if (RUN_STRICT) {
+      ASSERT(list[0].newOutputStrict !== false, 'should update');
+      console.log('### Strict mode:');
+      if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputStrict) console.log('Same as sloppy');
+      else console.log(list[0].newOutputStrict);
+      console.log('=============================================\n');
+    }
+    if (RUN_MODULE) {
+      ASSERT(list[0].newOutputModule !== false, 'should update');
+      console.log('### Module goal:');
+      if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputModule) console.log('Same as sloppy');
+      else if (RUN_STRICT && list[0].newOutputStrict === list[0].newOutputModule) console.log('Same as strict');
+      else console.log(list[0].newOutputModule);
+      console.log('=============================================\n');
+    }
+    if (RUN_WEB) {
+      ASSERT(list[0].newOutputWeb !== false, 'should update');
+      console.log('### Web compat mode:');
+      if (RUN_SLOPPY && list[0].newOutputSloppy === list[0].newOutputWeb) console.log('Same as sloppy');
+      else console.log(list[0].newOutputWeb);
+      console.log('=============================================\n');
+    }
   }
 }
 
@@ -642,6 +645,7 @@ async function main() {
 
   if (!RUN_VERBOSE_IN_SERIAL) console.time('$$ Test file read time');
   let list = await readFiles(files);
+  if (!TARGET_FILE) list = list.filter(tob => !tob.fileShort.startsWith('tests/testcases/todo/')); // Skip todo dir unless explicitly asking for it
   if (!RUN_VERBOSE_IN_SERIAL) console.timeEnd('$$ Test file read time');
   console.log('Read', list.length, 'files');
 

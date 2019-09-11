@@ -105,16 +105,36 @@ See [`tests/testcases/README.md`](./tests/parser/README.md) for details on test 
 # Run test262 tests (requires some setup)
 ./t t
 
-# Regenerate all autogen test files
-./t g     (all files, regardless)
-./t G     (only create new files)
+# Regenerate all autogen test files. Regenerates files still need to be updated (`./t u`).
+./t g                All files, regardless
+./t G                Only create new files
+
+# QoL shortcuts:
+./t b            Alias for `./t u --babel-test`
+./t fu <file>    Combined `./t m` with `./t f <file>`
 
 # Find out which tests execute a particular code branch in the parser
 # Add `HIT()` to any part of the code in src
-# Running the following will print all the test cases that called it
-# Works together with `-i`, too
-./t s
-# (this might be broken atm)
+./t s                Optionally combinable with `-i` or `-f`. Reports all inputs that trigger a `HIT()` call in zeparser
+
+Most flags can be modified:
+
+--sloppy             Run in non-strict mode (but non-web compat!)
+--strict             Run with script goal but consider the code strict
+--module             Run with module goal (enabling strict mode by default)
+--web                Run with script goal, non-strict, and enable web compat (AnnexB rules)
+
+6                    Run as close to the rules as of ES6  / ES2015 as possible
+7                    Run as close to the rules as of ES7  / ES2016 as possible
+8                    Run as close to the rules as of ES8  / ES2017 as possible
+9                    Run as close to the rules as of ES9  / ES2018 as possible
+10                   Run as close to the rules as of ES10 / ES2019 as possible
+11                   Run as close to the rules as of ES11 / ES2020 as possible
+
+--min                Given a broken input, brute force minify the input while maintaining the same error message
+--babel              Output a Babel compatible AST
+--babel-test         Compare the `--babel` output to the actual output of Babel on same input
+--test-node          Compile input in a `Function()` and report whether that throws when zeparser throws
 ```
 
 You can find the REPL in [`tests/web/repl.html`](./tests/web/repl.js), github link: https://pvdz.github.io/zeparser3/tests/web/repl.html

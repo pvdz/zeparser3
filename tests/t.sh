@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-ACTION='--help'
+ACTION=''
 ARG=''
 MODE=''
 BABEL=''
-MIN=''
+EXTRA=''
 ES=''
 
 while [[ $# > 0 ]] ; do
@@ -22,8 +22,9 @@ ZeParser test runner help:
  G             Autogenerate only files that don't already exist
  u             Run all test files and just write output
  m             Run all tests and ask for update one-by-one
+ s             Search for needles (call HIT() to place a needle and find all tests that hit them)
  t             Run test262 suite (only)
- b             Alias for `./t m --babel-test`, to verify ZeParser output against the Babel AST
+ b             Alias for ./t m --babel-test, to verify ZeParser output against the Babel AST
  fu            Test file and ask to update it if necessary
  fuzz          Run fuzzer
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
@@ -33,7 +34,6 @@ ZeParser test runner help:
  --min         Only for f and i, for invalid input; minify the test case while keeping same error
  --babel       Run in Babel compat mode
  --babel-test  Also compare AST of test cases to Babel output
- --min         Brute force shorten given input that causes an error while maintaining the same error message
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -73,6 +73,13 @@ ZeParser test runner help:
       # Run all files and ask for any test case that needs updating (slower)
       ACTION='-q -U'
       ;;
+    s)
+      # Add `HIT()` to zeparser src and this will report all inputs that trigger that call in a very concise list
+      if [[ "${ACTION}" = "--help" ]]; then
+          ACTION='-s'
+      fi
+      EXTRA='-s'
+      ;;
     fu)
       # Update all test files with their current output (fast)
       ACTION='-U -f'
@@ -100,26 +107,13 @@ ZeParser test runner help:
     --module)       MODE='--module'       ;;
     --babel)        BABEL='--babel'       ;;
     --babel-test)   BABEL='--babel-test'  ;;
-    --min)          MIN='--min'           ;;
 
-    6)
-      ES='--es6'
-      ;;
-    7)
-      ES='--es7'
-      ;;
-    8)
-      ES='--es8'
-      ;;
-    9)
-      ES='--es9'
-      ;;
-    10)
-      ES='--es10'
-      ;;
-    11)
-      ES='--es11'
-      ;;
+    6)  ES='--es6'  ;;
+    7)  ES='--es7'  ;;
+    8)  ES='--es8'  ;;
+    9)  ES='--es9'  ;;
+    10) ES='--es10' ;;
+    11) ES='--es11' ;;
 
     *)
       echo "t: Unsupported action or option... \`$1\` Use --help for options"
@@ -140,6 +134,6 @@ elif [[ "${ACTION}" = "fuzz" ]]; then
   set +x
 else
   set -x
-  node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${BABEL} ${MIN} ${ES}
+  node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${BABEL} ${EXTRA} ${ES}
   set +x
 fi
