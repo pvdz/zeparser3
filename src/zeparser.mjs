@@ -3827,6 +3827,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
 
       destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, DO_NOT_BIND, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      ASSERT(!hasAllFlags(destructible, MUST_DESTRUCT | CANT_DESTRUCT), 'parseObjectOuter should throw for must/cant destruct state');
+
       if (options_webCompat === WEB_COMPAT_ON) {
         if (hasAllFlags(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
           ASSERT(curtok.str !== '=' && curtok.str !== 'in' && curtok.str !== 'of', 'an init should be parsed already and have reset the flag');
@@ -3835,7 +3837,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         }
       }
       if (hasAllFlags(destructible, MUST_DESTRUCT) && curtok.str === '=') {
-        if (hasAllFlags(destructible, CANT_DESTRUCT)) TODO, THROW('Found something that must and cant destruct');
+        // [x]: `for ({x=y} = b in x) ;`
+        // [x]: `async function f(){ for await ({x=y}=x of x) ; }`
+        // [x]: `for ({x=y}=x in x) ;`
+        // [v]: `for ({x=y}=x ;;) ;`
         destructible = sansFlag(destructible, MUST_DESTRUCT);
       }
       assignable = parsePatternTailInForHeader(lexerFlags, curlyToken, $$CURLY_R_7D, assignable, destructible, awaitable, astProp);
@@ -3857,6 +3862,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
 
       destructible = parseArrayOuter(lexerFlags | LF_IN_FOR_LHS, DO_NOT_BIND, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
+      ASSERT(!hasAllFlags(destructible, MUST_DESTRUCT | CANT_DESTRUCT), 'parseArrayOuter should throw for must/cant destruct state');
+
       if (options_webCompat === WEB_COMPAT_ON) {
         if (hasAllFlags(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
           ASSERT(curtok.str !== '=', 'an init should be parsed already and have reset the flag');
@@ -3864,8 +3871,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           THROW('Found an object with double `__proto__` which is not allowed here in webcompat');
         }
       }
+
       if (hasAllFlags(destructible, MUST_DESTRUCT) && curtok.str === '=') {
-        if (hasAllFlags(destructible, CANT_DESTRUCT)) TODO, THROW('Found something that must and cant destruct');
+        // - `for ([{x=y}]=x in x) ;`
         destructible = sansFlag(destructible, MUST_DESTRUCT);
       }
       assignable = parsePatternTailInForHeader(lexerFlags, squareToken, $$SQUARE_R_5D, assignable, destructible, awaitable, astProp);0
