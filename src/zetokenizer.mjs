@@ -557,6 +557,8 @@ function ZeTokenizer(
       prevTokenSolid = false;
     }
 
+    lastPotentialRegexError = ''; // reset at start of a new token
+    lastReportableTokenizerError = ''; // reset at start of a new token
     lastCanonizedString = ''; // also used by templates
 
     // These vars are relevant for between anything that gets location data in the AST
