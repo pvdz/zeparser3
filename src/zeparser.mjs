@@ -6852,16 +6852,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     let tickToken = curtok;
 
-    // https://github.com/estree/estree/issues/90#issuecomment-109140678
-    // The raw value should normalize newlines (\r \r\n) to \n, but not \u000a
-    // The cooked value should convert escapes to literals but skip further normalization
-    let quasiValue = tickToken.str.slice(1, tail === IS_QUASI_TAIL ? -1 : -2);
-    quasiValue = quasiValue.replace(/\r\n?/g, '\n');
-    let cookedValue = tickToken.canon.slice(1, tail === IS_QUASI_TAIL ? -1 : -2);
-
+    let noCooked = false;
     if (hasAllFlags(curtype, $TICK_BAD_ESCAPE)) {
-      if (!allowBadEscapes) THROW('Template contained an illegal escape, these are only allowed in _tagged_ templates in >=ES2018');
-      cookedValue = null;
+      if (!allowBadEscapes) THROW_TOKEN('Template contained an illegal escape, these are only allowed in _tagged_ templates in >=ES2018', tickToken);
+      noCooked = true;
     }
 
     if (hasAllFlags(curtype, $TICK_PURE) || hasAllFlags(curtype, $TICK_TAIL)) {
@@ -6869,8 +6863,15 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     } else if (hasAllFlags(curtype, $TICK_HEAD) || hasAllFlags(curtype, $TICK_BODY)) {
       skipRex(lexerFlags); // First token in template expression can be regex
     } else {
-      THROW('The first token after the template expression should be a continuation of the template');
+      THROW_TOKEN('The first token after the template expression should be a continuation of the template', tickToken);
     }
+
+    // https://github.com/estree/estree/issues/90#issuecomment-109140678
+    // The raw value should normalize newlines (\r \r\n) to \n, but not \u000a
+    // The cooked value should convert escapes to literals but skip further normalization
+    let quasiValue = tickToken.str.slice(1, tail === IS_QUASI_TAIL ? -1 : -2).replace(/\r\n?/g, '\n');
+    let cookedValue = noCooked ? null : tickToken.canon.slice(1, tail === IS_QUASI_TAIL ? -1 : -2);
+
     AST_open('quasis', 'TemplateElement', tickToken);
     AST_set('tail', tail);
     AST_set('value', {
