@@ -1,15 +1,15 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/async_varname/sanity_test_to_make_sure_this_conceptually_works.md
+- Path: tests/testcases/async_varname/call/make_sure_statement_remainder_is_parsed_after_call_with_args.md
 
-> :: async varname
+> :: async varname : call
 >
-> ::> sanity test to make sure this conceptually works
+> ::> make sure statement remainder is parsed after call with args
 
 ## Input
 
 `````js
-f(a, b) * c
+async(a, b) * c
 `````
 
 ## Output
@@ -27,31 +27,31 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
+  loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
+      loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
       expression: {
         type: 'BinaryExpression',
-        loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
+        loc:{start:{line:1,column:0},end:{line:1,column:15},source:''},
         left: {
           type: 'CallExpression',
-          loc:{start:{line:1,column:0},end:{line:1,column:7},source:''},
+          loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
           callee: {
             type: 'Identifier',
-            loc:{start:{line:1,column:0},end:{line:1,column:1},source:''},
-            name: 'f'
+            loc:{start:{line:1,column:0},end:{line:1,column:5},source:''},
+            name: 'async'
           },
           arguments: [
             {
               type: 'Identifier',
-              loc:{start:{line:1,column:2},end:{line:1,column:3},source:''},
+              loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
               name: 'a'
             },
             {
               type: 'Identifier',
-              loc:{start:{line:1,column:5},end:{line:1,column:6},source:''},
+              loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
               name: 'b'
             }
           ]
@@ -59,7 +59,7 @@ ast: {
         operator: '*',
         right: {
           type: 'Identifier',
-          loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
+          loc:{start:{line:1,column:14},end:{line:1,column:15},source:''},
           name: 'c'
         }
       }

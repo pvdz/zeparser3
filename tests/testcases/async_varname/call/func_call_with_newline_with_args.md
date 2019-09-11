@@ -1,15 +1,16 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/async_varname/make_sure_statement_remainder_is_parsed_after_call_without_args.md
+- Path: tests/testcases/async_varname/call/func_call_with_newline_with_args.md
 
-> :: async varname
+> :: async varname : call
 >
-> ::> make sure statement remainder is parsed after call without args
+> ::> func call with newline with args
 
 ## Input
 
 `````js
-async() * b
+async 
+ (x, y)
 `````
 
 ## Output
@@ -27,37 +28,38 @@ Parsed with script goal and as if the code did not start with strict mode header
 `````
 ast: {
   type: 'Program',
-  loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
+  loc:{start:{line:1,column:0},end:{line:2,column:7},source:''},
   body: [
     {
       type: 'ExpressionStatement',
-      loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
+      loc:{start:{line:1,column:0},end:{line:2,column:7},source:''},
       expression: {
-        type: 'BinaryExpression',
-        loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
-        left: {
-          type: 'CallExpression',
-          loc:{start:{line:1,column:0},end:{line:1,column:7},source:''},
-          callee: {
-            type: 'Identifier',
-            loc:{start:{line:1,column:0},end:{line:1,column:5},source:''},
-            name: 'async'
-          },
-          arguments: []
-        },
-        operator: '*',
-        right: {
+        type: 'CallExpression',
+        loc:{start:{line:1,column:0},end:{line:2,column:7},source:''},
+        callee: {
           type: 'Identifier',
-          loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
-          name: 'b'
-        }
+          loc:{start:{line:1,column:0},end:{line:1,column:5},source:''},
+          name: 'async'
+        },
+        arguments: [
+          {
+            type: 'Identifier',
+            loc:{start:{line:2,column:2},end:{line:2,column:3},source:''},
+            name: 'x'
+          },
+          {
+            type: 'Identifier',
+            loc:{start:{line:2,column:5},end:{line:2,column:6},source:''},
+            name: 'y'
+          }
+        ]
       }
     }
   ]
 }
 
-tokens (7x):
-       IDENT PUNCTUATOR PUNCTUATOR PUNCTUATOR IDENT ASI
+tokens (8x):
+       IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR ASI
 `````
 
 ### Strict mode

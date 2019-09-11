@@ -1,15 +1,15 @@
 # ZeParser parser test case
 
-- Path: tests/testcases/async_varname/func_call_with_args.md
+- Path: tests/testcases/async_varname/call/sanity_test_to_make_sure_this_conceptually_works.md
 
-> :: async varname
+> :: async varname : call
 >
-> ::> func call with args
+> ::> sanity test to make sure this conceptually works
 
 ## Input
 
 `````js
-async(x, y)
+f(a, b) * c
 `````
 
 ## Output
@@ -33,32 +33,43 @@ ast: {
       type: 'ExpressionStatement',
       loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
       expression: {
-        type: 'CallExpression',
+        type: 'BinaryExpression',
         loc:{start:{line:1,column:0},end:{line:1,column:11},source:''},
-        callee: {
-          type: 'Identifier',
-          loc:{start:{line:1,column:0},end:{line:1,column:5},source:''},
-          name: 'async'
-        },
-        arguments: [
-          {
+        left: {
+          type: 'CallExpression',
+          loc:{start:{line:1,column:0},end:{line:1,column:7},source:''},
+          callee: {
             type: 'Identifier',
-            loc:{start:{line:1,column:6},end:{line:1,column:7},source:''},
-            name: 'x'
+            loc:{start:{line:1,column:0},end:{line:1,column:1},source:''},
+            name: 'f'
           },
-          {
-            type: 'Identifier',
-            loc:{start:{line:1,column:9},end:{line:1,column:10},source:''},
-            name: 'y'
-          }
-        ]
+          arguments: [
+            {
+              type: 'Identifier',
+              loc:{start:{line:1,column:2},end:{line:1,column:3},source:''},
+              name: 'a'
+            },
+            {
+              type: 'Identifier',
+              loc:{start:{line:1,column:5},end:{line:1,column:6},source:''},
+              name: 'b'
+            }
+          ]
+        },
+        operator: '*',
+        right: {
+          type: 'Identifier',
+          loc:{start:{line:1,column:10},end:{line:1,column:11},source:''},
+          name: 'c'
+        }
       }
     }
   ]
 }
 
-tokens (8x):
-       IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR ASI
+tokens (10x):
+       IDENT PUNCTUATOR IDENT PUNCTUATOR IDENT PUNCTUATOR PUNCTUATOR
+       IDENT ASI
 `````
 
 ### Strict mode

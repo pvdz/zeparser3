@@ -7989,6 +7989,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       if (fromStmtOrExpr === IS_STATEMENT) {
         // in expressions operator precedence is handled elsewhere. in statements this is the start,
         assignable = parseExpressionFromOp(lexerFlags, asyncToken, assignable, astProp);
+        if (curtok.str === ',') {
+          assignable = _parseExpressions(lexerFlags, asyncToken, assignable, astProp);
+        }
         parseSemiOrAsi(lexerFlags);
       }
 
