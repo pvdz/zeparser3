@@ -107,6 +107,7 @@ ZeParser test runner help:
     --module)       MODE='--module'       ;;
     --babel)        BABEL='--babel'       ;;
     --babel-test)   BABEL='--babel-test'  ;;
+    --min)          EXTRA='--min'         ;;
 
     6)  ES='--es6'  ;;
     7)  ES='--es7'  ;;
