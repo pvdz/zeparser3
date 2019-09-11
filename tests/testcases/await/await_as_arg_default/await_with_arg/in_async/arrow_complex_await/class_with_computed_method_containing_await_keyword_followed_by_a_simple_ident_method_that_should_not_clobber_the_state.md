@@ -6,7 +6,13 @@
 >
 > ::> class with computed method containing await keyword followed by a simple ident method that should not clobber the state
 >
-> there was a bug where a regular method would plainly clobber the state flags
+> This should fail because the method name definition of the class runs in the context of the arg default.
+>
+> As such it's violating the rule of no await/yield in arg defaults and should reject.
+>
+> There was a bug where a regular method after such violation would plainly clobber the state flags that track this
+
+## FAIL
 
 ## Input
 

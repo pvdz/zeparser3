@@ -7887,7 +7887,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
           // - `async (a, ...b=fail) => a;`
           THROW('The group was not destructible and yet the next token is an arrow');
         }
-        TODO
+        ASSERT(false, 'unreachable..?');
+        THROW('Unknown error. Did not think input could reach this place :(');
       }
       else if (zeroArgs) {
         // - `async () => foo`
@@ -7910,37 +7911,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         //                ^
         THROW('Async arrows can not have arg bindings named `await` because it is considered a keyword');
       }
-      else if (
-        // Note: in strict mode all below cases fail since `yield` is then always a YieldExpression
-        // - `async (foo = yield) => foo`                               (pass in sloppy)
-        //                        ^
-        // - `async (foo = yield x) => foo`                             (fail)
-        // - `async (foo = yield)`                                      (pass in sloppy)
-        // - `async (foo = yield x)`                                    (fail)
-        // - `function *f(){ async (foo = yield) => foo }`              (fail)
-        // - `function *f(){ async (foo = yield x) => foo }`            (fail)
-        // - `function *f(){ async (foo = yield) }`                     (pass)
-        // - `function *f(){ async (foo = yield x) }`                   (pass)
-        // have to check both assignable and destructible for the state flags, for now. hopefully I can merge them asap.
-        (
-          hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE) &&
-          hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_YIELD_VARNAME | PIGGY_BACK_SAW_YIELD_VARNAME)
-        ) ||
-        hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_KEYWORD)
-      ) {
-        TODO
-        if (hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_KEYWORD)) {
-          // - `async (foo = await x) => foo`                             (fail)
-          THROW('Async arrow arg defaults can not contain `yield` expressions');
-        }
-        // - `async yield => foo`                                 (pass in sloppy)
-        //                ^
-        // - `async (yield) => foo`                               (pass in sloppy)
-        // - `function *f(){  async yield => foo  }`              (pass in sloppy)
-        // - `function *f(){  async (yield) => foo  }`            (pass in sloppy)
-        THROW('This async arrow can not have arg bindings named `yield` because it is contained in a generator or strict mode');
-      }
       else {
+        // If this had a yield violation then the call sites should have taken care of it already
+        ASSERT(!(hasAnyFlag(lexerFlags, LF_IN_GENERATOR | LF_STRICT_MODE) && hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_YIELD_VARNAME | PIGGY_BACK_SAW_YIELD_VARNAME)), 'Call sites should have thrown for yield in arrow args in invalid context');
+        ASSERT(!hasAnyFlag(assignable | groupDestructible, PIGGY_BACK_SAW_YIELD_KEYWORD | PIGGY_BACK_SAW_YIELD_KEYWORD), 'caller should have dealt with `yield` in arrow args');
         // - `async (foo) => foo`
         //                ^
         parseArrowAfterGroup(lexerFlags, paramScoop, wasSimple, toplevelComma, asyncToken, asyncToken, allowAssignment, astProp);
@@ -9536,7 +9510,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
                 keyToken :
                 bracketOpenToken;
 
-    if (!methodStartToken) TODO
+    ASSERT(methodStartToken, 'the start of this method should be either the async, star, get, set, key, or bracket token. at least one should have been passed on');
 
     AST_wrapClosed(astProp, NODE_NAME_METHOD_OBJECT, 'key', methodStartToken);
     AST_set('kind', getToken !== UNDEF_GET ? 'get' : setToken !== UNDEF_SET ? 'set' : (babelCompat ? 'method' : 'init')); // only getters/setters get special value here, "init" for the others. In the Babel AST the "other" kind is "method" instead.
@@ -9782,7 +9756,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }`
     // - `(fail = class A {[await](){}; "x"(){}}) => {}`
     // - `function *f(){  class x{[yield foo](a){}}  }`
-    if (hasAnyFlag(destructibleForPiggies, PIGGY_BACK_SAW_YIELD_VARNAME)) TODO // add tests
+    ASSERT(!hasAnyFlag(destructibleForPiggies, PIGGY_BACK_SAW_YIELD_VARNAME), 'Since `yield` is considered a keyword with and without argument, I dont think this case can be hit');
 
     return destructibleForPiggies;
   }
@@ -10918,7 +10892,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
               bracketOpenToken !== undefined ?
                 bracketOpenToken :
                 keyToken;
-    if (!methodStartToken) TODO
+
+    ASSERT(methodStartToken, 'the start of this method should be either the async, star, get, set, key, or bracket token. at least one should have been passed on');
 
     AST_wrapClosed(astProp, NODE_NAME_METHOD_OBJECT, 'key', methodStartToken);
 
