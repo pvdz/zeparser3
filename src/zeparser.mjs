@@ -3390,7 +3390,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       ASSERT_skipAny('*', lexerFlags);
       skipAnyOrDie($$F_66, 'from', lexerFlags);
       if (!hasAllFlags(curtype, $STRING)) {
-        TODO,THROW('Source must be a string literal');
+        THROW('Source must be a string literal');
       }
       let sourceToken = curtok;
       ASSERT_skipRex($STRING, lexerFlags);
@@ -5855,6 +5855,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
   function parseExpressionsAfterIdent(lexerFlags, identToken, allowAssignment, astProp) {
     ASSERT(parseExpressionsAfterIdent.length === arguments.length, 'arg count');
     ASSERT_ASSIGN_EXPR(allowAssignment);
+
     let assignableForPiggies = parseExpressionAfterIdent(lexerFlags, identToken, BINDING_TYPE_NONE, allowAssignment, astProp)
     if (curc === $$COMMA_2C) {
       assignableForPiggies = _parseExpressions(lexerFlags, identToken, assignableForPiggies, astProp);
@@ -6785,10 +6786,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     }
     ASSERT((identToken.str === 'eval' || identToken.str === 'argument') ? wasSimple === PARAMS_SOME_COMPLEX : true, 'eval and arguments must pass on complex so they throw if the body contains use strict');
     ASSERT(!((identToken.str === 'eval' || identToken.str === 'argument') && hasAllFlags(lexerFlags, LF_STRICT_MODE)), 'caller should throw for eval/argument already in strict mode');
-    if (hasAnyFlag(lexerFlags, LF_STRICT_MODE) && identToken.str === 'yield') {
-      TODO//: can it hit here at all? `yield => {}` doesn't seem to reach here
-      THROW('Yield in generator or strict mode is keyword');
-    }
+    ASSERT(!(hasAnyFlag(lexerFlags, LF_STRICT_MODE) && identToken.str === 'yield'), 'in strict mode this function will not be called by the parse yield function so we dont need to make an edge case for it');
 
     // arrow with single param
     AST_open(astProp, 'ArrowFunctionExpression', arrowStartToken);
@@ -7662,7 +7660,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
       if (hasAllFlags(destructible, CANT_DESTRUCT)) {
         // - `([...{a = b} = c]) => d;`
-        THROW('The left hand side of the arrow is not destructible so arrow is illegal');
+        if (asyncToken) THROW('The left hand side of the async arrow is not destructible so arrow is illegal');
+        else THROW('The left hand side of the arrow is not destructible so arrow is illegal');
       }
       if (hasAllFlags(destructible, DESTRUCT_ASSIGN_ONLY)) {
         // - `([[].length]) => x;`
