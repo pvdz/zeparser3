@@ -420,18 +420,21 @@ function cycle(input) {
       // // Binding patterns:
       // // v8 is allowing `([y()=0])`, patterns with assignments to calls, which lead to false positives
       // || ((input.includes('()=') || input.includes('))=')) && zefailed.includes('Cannot assign to lhs'))
-      //
-      // // Regexes
-      // // v8 is lazy parsing regexes and I'm not sure zeparser is spec compliant, especially in web compat
+
+      // Regexes
+      // v8 is lazy parsing regexes and I'm not sure zeparser is spec compliant, especially in web compat
       || zefailed.includes('Tokenizer error! Regex:')
-      //
-      // // Delete
-      // // v8 doesn't seem to statically detect the delete-on-ident case
+
+      // Delete
+      // v8 doesn't seem to statically detect the delete-on-ident case
       || zefailed.includes('Bad delete case')
       // || zefailed.includes('delete an identifier')
-      //
-      // // Labels
+
+      // Labels
       || zefailed.includes('same label twice')
+
+      // `let \n keyword` case is not covered by v8, I guess (`let \n while (x);`)
+      || zefailed.includes('must be a declaration in strict mode but the next ident is a reserved keyword')
     )))) {
       // ignore (based on original input)
     }
