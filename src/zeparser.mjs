@@ -714,7 +714,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       }
     }
     else if (c === $$FWDSLASH_2F) {
-      ASSERT(token.str.split('/').length > 2);
+      ASSERT(token.str.split('/').length > 2, 'a regular expression should have at least two forward slashes', token.str);
       let pos = token.str.lastIndexOf('/');
       let body = token.str.slice(1, pos);
       let tail = token.str.slice(pos + 1);

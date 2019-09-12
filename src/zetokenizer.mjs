@@ -2476,12 +2476,42 @@ function ZeTokenizer(
           // This is valid if we just parsed an atom, or in webcompat mode without the u-flag
           ASSERT_skip($$CURLY_L_7B);
           if (afterAtom) {
-            if (!parseRegexCurlyQuantifier()) {
-              let reason = 'Encountered unescaped closing curly `}` while not parsing a quantifier';
-              if (webCompat === WEB_COMPAT_OFF) {
-                uflagStatus = regexSyntaxError(reason);
-              } else {
-                uflagStatus = updateRegexUflagIsIllegal(uflagStatus, reason);
+            if (eof()) {
+              return regexSyntaxError('Early EOF at the start of a regex quantifier');
+            }
+            else {
+              let c = peek();
+              if (!isAsciiNumber(c)) {
+                if (webCompat === WEB_COMPAT_OFF) {
+                  if (peeky($$COMMA_2C)) {
+                    uflagStatus = regexSyntaxError('The first digit of a regex curly quantifier is mandatory');
+                  }
+                  else if (peeky($$CURLY_R_7D)) {
+                    uflagStatus = regexSyntaxError('A regex curly quantifier had no content');
+                  }
+                  else {
+                    uflagStatus = regexSyntaxError('Found invalid regex curly quantifier');
+                  }
+                } else {
+                  afterAtom = true; // in webcompat the InvalidBracedQuantifier is an atom
+                  if (peeky($$COMMA_2C)) {
+                    uflagStatus = updateRegexUflagIsIllegal(uflagStatus, 'The first digit of a regex curly quantifier is mandatory');
+                  }
+                  else if (peeky($$CURLY_R_7D)) {
+                    uflagStatus = updateRegexUflagIsIllegal(uflagStatus, 'A regex curly quantifier had no content');
+                  }
+                  else {
+                    uflagStatus = updateRegexUflagIsIllegal(uflagStatus, 'Found invalid regex curly quantifier');
+                  }
+                }
+              }
+              else if (!parseRegexCurlyQuantifier(c)) {
+                let reason = 'Encountered unescaped closing curly `}` while not parsing a quantifier';
+                if (webCompat === WEB_COMPAT_OFF) {
+                  uflagStatus = regexSyntaxError(reason);
+                } else {
+                  uflagStatus = updateRegexUflagIsIllegal(uflagStatus, reason);
+                }
               }
             }
             if (neof() && peeky($$QMARK_3F)) {
@@ -2503,13 +2533,44 @@ function ZeTokenizer(
               // [v]: `/f{/u`
               // [v]: `/f{?/u`
               // IF we can parse a curly quantifier, THEN we throw a syntax error. Otherwise we just parse a `{`
-              if (parseRegexCurlyQuantifier()) {
-                uflagStatus = regexSyntaxError(reason);
-              } else {
-                // This in webcompat is `{` as `ExtendedAtom` is a `ExtendedPatternCharacter`, which does not disallow the curly
-                uflagStatus = updateRegexUflagIsIllegal(uflagStatus, reason);
-                // in web compat mode this case is treated as an extended atom
-                afterAtom = true;
+              if (eof()) {
+                uflagStatus = regexSyntaxError('Early EOF at the start of a regex quantifier');
+              }
+              else {
+                let c = peek();
+                if (!isAsciiNumber(c)) {
+                  if (webCompat === WEB_COMPAT_OFF) {
+                    if (peeky($$COMMA_2C)) {
+                      uflagStatus = regexSyntaxError('The first digit of a regex curly quantifier is mandatory');
+                    }
+                    else if (peeky($$CURLY_R_7D)) {
+                      uflagStatus = regexSyntaxError('A regex curly quantifier had no content');
+                    }
+                    else {
+                      uflagStatus = regexSyntaxError('Found invalid regex curly quantifier');
+                    }
+                  } else {
+                    afterAtom = true; // in webcompat the InvalidBracedQuantifier is an atom
+                    if (peeky($$COMMA_2C)) {
+                      uflagStatus = updateRegexUflagIsIllegal(uflagStatus, 'The first digit of a regex curly quantifier is mandatory');
+                    }
+                    else if (peeky($$CURLY_R_7D)) {
+                      uflagStatus = updateRegexUflagIsIllegal(uflagStatus, 'A regex curly quantifier had no content');
+                    }
+                    else {
+                      uflagStatus = updateRegexUflagIsIllegal(uflagStatus, 'Found invalid regex curly quantifier');
+                    }
+                  }
+                }
+                else if (parseRegexCurlyQuantifier(c)) {
+                  uflagStatus = regexSyntaxError(reason);
+                }
+                else {
+                  // This in webcompat is `{` as `ExtendedAtom` is a `ExtendedPatternCharacter`, which does not disallow the curly
+                  uflagStatus = updateRegexUflagIsIllegal(uflagStatus, reason);
+                  // in web compat mode this case is treated as an extended atom
+                  afterAtom = true;
+                }
               }
             } else {
               uflagStatus = regexSyntaxError('Encountered unescaped opening curly `{` and the previous character was not part of something quantifiable');
@@ -4152,60 +4213,73 @@ function ZeTokenizer(
       return u > 0 ? REGEX_GOOD_WITH_U_FLAG : REGEX_GOOD_SANS_U_FLAG;
     }
   }
-  function parseRegexCurlyQuantifier() {
-    // parsed the curly, verify the range is not {hi,lo}
+  function parseRegexCurlyQuantifier(c) {
+    ASSERT(neof(), 'call site will have verified neof()');
+    ASSERT(c === peek(), 'c should be current peek()');
+    ASSERT(isAsciiNumber(c), 'call site will have asserted that the first next char is a digit');
+    // Parsed the curly, verified first next char is a digit
+    // Verify the range is not {hi,lo}
 
-    // next should be either a comma or a digit
-    if (eof()) return false;
-    let hasLow = false;
+    // next should be a digit
     let hasHi = false;
-    let min = 0;
     let max = 0;
-    let c;
-    let start = true;
     let badNumber = false;
-    do {
-      c = peek();
-      if (!isAsciiNumber(c)) break;
-      ASSERT_skip(c);
-      hasLow = true;
-      if (start) {
-        start = false;
-        if (c === $$0_30) {
-          if (eof()) return false;
-          c = peek();
-          if (!isAsciiNumber(c)) break;
-          badNumber = true;
-          ASSERT_skip(c);
-        }
+
+    let a = c;
+    let min = a - $$0_30; // ascii for 0x30 is digit `0`
+    ASSERT_skip(c);
+    if (eof()) return false;
+    c = peek();
+
+    if (a === $$0_30) {
+      // - `/x{0}/`
+      //       ^
+      if (isAsciiNumber(c)) {
+        // - `/x{01}/`
+        //        ^
+        badNumber = true;
       }
+    }
+    while (isAsciiNumber(c)) {
       min = (min * 10) + (c - $$0_30);
-    } while (neof());
+      ASSERT_skip(c);
+      if (eof()) return false;
+      c = peek();
+    }
+
     if (c === $$COMMA_2C) {
       ASSERT_skip($$COMMA_2C);
-      start = true;
       if (eof()) return false;
-      do {
-        c = peek();
-        if (!isAsciiNumber(c)) break;
-        ASSERT_skip(c);
+      c = peek();
+
+      if (isAsciiNumber(c)) {
         hasHi = true;
-        if (start) {
-          start = false;
-          if (c === $$0_30) {
-            if (eof()) return false;
-            c = peek();
-            if (!isAsciiNumber(c)) break;
+        let b = c;
+        max = b - $$0_30; // ascii for 0x30 is digit `0`
+        ASSERT_skip(b);
+        if (eof()) return false;
+        c = peek();
+
+        if (b === $$0_30) {
+          // - `/x{0,0}/`
+          //         ^
+          if (isAsciiNumber(c)) {
+            // - `/x{01}/`
+            //        ^
             badNumber = true;
-            ASSERT_skip(c);
           }
         }
-        max = (max * 10) + (c - $$0_30);
-      } while (neof());
+        while (isAsciiNumber(c)) {
+          max = (max * 10) + (c - $$0_30);
+          ASSERT_skip(c);
+          if (eof()) return false;
+          c = peek();
+        }
+      }
     }
     if (c === $$CURLY_R_7D) {
       ASSERT_skip($$CURLY_R_7D);
-      return !badNumber && (hasLow !== hasHi || (hasLow && hasHi && min <= max));
+      return !badNumber && (!hasHi || min <= max);
     }
     return false;
   }
