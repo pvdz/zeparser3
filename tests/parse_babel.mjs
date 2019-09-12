@@ -106,7 +106,7 @@ function processBabelResult(babelOk, babelFail, zeparserFail, zasb, INPUT_OVERRI
   return outputBabel;
 }
 
-function ignoreZeparserTest(file) {
+function ignoreZeparserTestForBabel(file) {
   // There are some files where I've asserted that the AST mismatch between Babel and ZeParser is caused by something
   // either I won't fix, Babel does wrong, or a difference that is benign enough not to matter to me.
 
@@ -341,7 +341,7 @@ export {
   babelScrub,
   compareBabel,
   ignoreTest262,
-  ignoreZeparserTest,
+  ignoreZeparserTestForBabel,
   processBabelResult,
   testBabel,
 };

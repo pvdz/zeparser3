@@ -148,7 +148,7 @@ import {
 
 import {
   compareBabel,
-  ignoreZeparserTest,
+  ignoreZeparserTestForBabel,
   processBabelResult,
 } from './parse_babel.mjs';
 
@@ -519,7 +519,7 @@ async function writeNewOutput(list) {
         if (tob.continuePrint) console.error(tob.continuePrint);
         console.log('\n' + DIM + tob.fileShort + RESET);
         console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n' + RESET);
-        if (TEST_BABEL && ignoreZeparserTest(tob.file)) {
+        if (TEST_BABEL && ignoreZeparserTestForBabel(tob.file)) {
           console.log('Skipping mismatch because known Babel bug');
         } else {
           let cont = await yn('Continue to overwrite test output?');
