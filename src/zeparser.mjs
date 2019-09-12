@@ -2506,7 +2506,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     // - `x = {f(a){}}`
     //          ^
 
-    // TODO: await expression inside the params (like default param) of an async function are illegal
     lexerFlags = lexerFlags | LF_IN_FUNC_ARGS; // prevents await expression as default arg
     AST_set('params', []);
 
@@ -7110,17 +7109,29 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     AST_close('Import');
     ASSERT_skipRex('(', lexerFlags);
     AST_set('arguments', []);
-    let assignable = parseExpression(lexerFlags, ASSIGN_EXPR_IS_OK, 'arguments');
+    // Note: the import call arg sets the +IN flag in the grammar (can't use `in` operator). So that's why we set it too
+    let assignable = parseExpression(lexerFlags | LF_IN_FOR_LHS, ASSIGN_EXPR_IS_OK, 'arguments');
     if (curc !== $$PAREN_R_29) {
       if (curc === $$COMMA_2C) {
         // [x]: `import(a, b)`
-        THROW('Dynamic `import` only expected exactly one argument');
+        THROW('Dynamic `import` only expected exactly one argument and does not allow for a trailing comma');
+      }
+      if (curtok.str === 'in') {
+        THROW('The dynamic import syntax explicitly forbids the `in` operator');
       }
       // [x]: `import(a b)`
       THROW('The dynamic `import` argument was followed by unknown content');
     }
     ASSERT_skipDiv(')', lexerFlags);
     AST_close('CallExpression');
+
+    // - `function f(x = import(yield)) {}`
+    // - `function f(x = import(await)) {}`
+    // - `function *a() { function f(x = import(yield)) {} }`
+    // - `function *a() { function f(x = import(yield x)) {} }`
+    // - `async function a() { function f(x = import(await x)) {} }`
+    // - `import(() => {})`
+    // - `import(() => {} + x)`
 
     return assignable;
   }

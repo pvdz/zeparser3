@@ -152,3 +152,27 @@ Syntactically valid, but you'd be doing `new (new Promise)`... *shrug*
 `````js
 new (import(x));
 `````
+
+#### NoIn
+
+Syntactically valid, but you'd be doing `new (new Promise)`... *shrug*
+
+https://tc39.es/ecma262/#prod-ImportCall
+
+> ImportCall [Yield, Await]:
+>
+>   `import` `(` AssignmentExpression [+In, ?Yield, ?Await] `)`
+
+`````js
+import(x in y);
+`````
+
+#### No trailing comma
+
+The grammar does not allow for a trailing argument comma
+
+## FAIL
+
+`````js
+import(x,);
+`````
