@@ -6104,8 +6104,12 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // the ... should be confirmed at any and only point where that might be legal
         if (curtok.str === '...') {
           // Can't be something like `foo(...x)` since that is caught elsewhere
-          // - `let x = ...y;`
-          // - `foo[...x];`
+          // [x]: `let x = ...y;`
+          // [x]: `foo[...x];`
+          // [x]: `for (...x in y){}`
+          // [x]: `y, ...x => x`
+          // [x]: `...x => x`
+          // [x]: `import(...a);`
           THROW('Unexpected spread/rest dots');
         } else {
           // - `foo[.bar]`    or something silly like that...?
@@ -6917,7 +6921,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       assignable = parseValueTail(lexerFlags, valueFirstToken, setAssignable(assignable), isNewArg, NOT_LHSE, astProp); // member expressions are assignable
     }
     else if (curc === $$PAREN_L_28) {
-      ASSERT(curtype === $PUNCTUATOR && curtok.str === '(');
+      ASSERT_VALID(curtype === $PUNCTUATOR && curtok.str === '(');
       if (isNewArg === IS_NEW_ARG) { // exception for `new`
         let nowAssignable = parseCallArgs(lexerFlags, 'arguments');
         if (curtok.str === '=>') {
@@ -9505,6 +9509,10 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
     ASSERT(getToken === UNDEF_GET || getToken.str === 'get', 'get token');
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
+    ASSERT_VALID(curtok.str === '(', 'Should be at the start of the method parameter definition', curtok);
+
+    // - `{*[expr](){}} = x`
+    //            ^
 
     let methodStartToken =
       asyncToken !== UNDEF_ASYNC ?
@@ -10141,6 +10149,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(keyToken === undefined || keyToken.str, 'keyToken is a token');
     ASSERT(!bracketOpenToken || bracketOpenToken.str === '[', 'bracketOpenToken should be [', bracketOpenToken);
     ASSERT(keyToken === undefined || (keyToken.type === $IDENT || hasAnyFlag(keyToken.type, $STRING | $NUMBER)), 'keyToken is a number, string or ident', ''+keyToken);
+    ASSERT_VALID(curtok.str === '(', 'Should be at the start of the method parameter definition');
 
     verifyGeneralMethodState(asyncToken, starToken, getToken, setToken, keyToken, true);
 
