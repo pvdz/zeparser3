@@ -6234,6 +6234,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       case 'function':
         parseFunctionExpression(lexerFlags, UNDEF_ASYNC, identToken, astProp);
         return NOT_ASSIGNABLE;
+      case 'import':
+        if (curc === $$PAREN_L_28) {
+          return parseDynamicImport(lexerFlags, identToken, astProp);
+        }
+        return THROW('Import keyword only allowed on toplevel or in a dynamic import');
       case 'let':
         if (bindingType === BINDING_TYPE_CLASS) {
           THROW('Can not use `let` as a class name');
@@ -6295,9 +6300,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         return parseYield(lexerFlags, identToken, allowAssignment, astProp);
       default:
         if (!checkIdentReadable(lexerFlags, bindingType, identToken)) {
-          if (curc === $$PAREN_L_28 && identToken.str === 'import') {
-            return parseDynamicImport(lexerFlags, identToken, astProp);
-          }
           THROW('Illegal keyword encountered; is not a value [' + identToken.str + ']');
         }
         // - `x` but not `true`

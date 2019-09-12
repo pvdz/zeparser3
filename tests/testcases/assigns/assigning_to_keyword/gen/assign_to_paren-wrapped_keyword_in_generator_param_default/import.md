@@ -28,7 +28,7 @@ Parsed with script goal and as if the code did not start with strict mode header
 
 `````
 throws: Parser error!
-  Illegal keyword encountered; is not a value [import]
+  Import keyword only allowed on toplevel or in a dynamic import
 
 function *f(x = (import) = f) {}
                        ^------- error
