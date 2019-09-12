@@ -3693,7 +3693,14 @@ function ZeTokenizer(
         let d = peek();
         if (isAsciiLetter(d)) {
           ASSERT_skip(d);
-          return d;
+
+          // https://tc39.es/ecma262/#sec-patterns-static-semantics-character-value
+          // > CharacterEscape :: `c` ControlLetter
+          //   > Let ch be the code point matched by ControlLetter.
+          //   > Let i be ch's code point value.
+          //   > Return the remainder of dividing i by 32.
+          // Basically \c is a way to encode the first 26 ascii characters safely, A=1, Z=26, a=1, z=26
+          return d % 32;
         }
         let reason = 'The `\\c` escape is only legal in a char class without uflag and in webcompat mode';
         if (webCompat === WEB_COMPAT_ON) {
