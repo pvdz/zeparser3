@@ -204,8 +204,8 @@ const IS_CALLED_FROM_WRAPPER = dev() ? {IS_CALLED_FROM_WRAPPER: undefined} : tru
 const NOT_CALLED_FROM_WRAPPER = dev() ? {NOT_CALLED_FROM_WRAPPER: undefined} :false;
 const IS_FUNC_DECL = dev() ? {IS_FUNC_DECL: undefined} : true;
 const NOT_FUNC_DECL = dev() ? {NOT_FUNC_DECL: undefined} : false;
-const IS_FUNC_EXPR = true;
-const NOT_FUNC_EXPR = false;
+const IS_FUNC_EXPR = dev() ? {IS_FUNC_EXPR: undefined} : true;
+const NOT_FUNC_EXPR = dev() ? {NOT_FUNC_EXPR: undefined} : false;
 const IDENT_OPTIONAL = true;
 const IDENT_REQUIRED = false;
 const PARSE_VALUE_MAYBE = true;
@@ -2263,33 +2263,35 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     return name;
   }
-  function getFuncIdentGeneratorState(isFuncExpr, enclosingScopeFlags, starToken) {
+  function getFuncIdentGeneratorState(isRealFuncExpr, enclosingScopeFlags, starToken) {
     ASSERT(getFuncIdentGeneratorState.length === arguments.length, 'arg count');
     ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
+    ASSERT(isRealFuncExpr === IS_FUNC_EXPR || isRealFuncExpr === NOT_FUNC_EXPR, 'enum');
 
     // function idents can never be `yield` with the module goal
     if (hasAllFlags(enclosingScopeFlags, LF_STRICT_MODE)) return LF_IN_GENERATOR;
 
-    if (isFuncExpr) return starToken !== UNDEF_STAR ? LF_IN_GENERATOR : 0;
+    if (isRealFuncExpr === IS_FUNC_EXPR) return starToken !== UNDEF_STAR ? LF_IN_GENERATOR : 0;
     return hasAnyFlag(enclosingScopeFlags, LF_IN_GENERATOR) ? LF_IN_GENERATOR : 0;
   }
-  function getFuncIdentAsyncState(isFuncExpr, enclosingScopeFlags, asyncToken) {
+  function getFuncIdentAsyncState(isRealFuncExpr, enclosingScopeFlags, asyncToken) {
     ASSERT(getFuncIdentAsyncState.length === arguments.length, 'arg count');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
+    ASSERT(isRealFuncExpr === IS_FUNC_EXPR || isRealFuncExpr === NOT_FUNC_EXPR, 'enum');
 
     // function idents can never be `await` with the module goal
     if (goalMode === GOAL_MODULE) return LF_IN_ASYNC;
 
-    if (isFuncExpr) return asyncToken !== UNDEF_ASYNC ? LF_IN_ASYNC : 0;
+    if (isRealFuncExpr === IS_FUNC_EXPR) return asyncToken !== UNDEF_ASYNC ? LF_IN_ASYNC : 0;
     return hasAnyFlag(enclosingScopeFlags, LF_IN_ASYNC) ? LF_IN_ASYNC : 0;
   }
-  function getFuncIdentAsyncGenState(isFuncExpr, enclosingScopeFlags, starToken, asyncToken) {
+  function getFuncIdentAsyncGenState(isRealFuncExpr, enclosingScopeFlags, starToken, asyncToken) {
     ASSERT(getFuncIdentAsyncGenState.length === arguments.length, 'arg count');
     ASSERT(asyncToken === UNDEF_ASYNC || asyncToken.str === 'async', 'async token');
     ASSERT(starToken === UNDEF_STAR || starToken.str === '*', 'gen token');
 
-    return getFuncIdentGeneratorState(isFuncExpr, enclosingScopeFlags, starToken) |
-      getFuncIdentAsyncState(isFuncExpr, enclosingScopeFlags, asyncToken)
+    return getFuncIdentGeneratorState(isRealFuncExpr, enclosingScopeFlags, starToken) |
+      getFuncIdentAsyncState(isRealFuncExpr, enclosingScopeFlags, asyncToken)
   }
   function resetLexerFlagsForFuncAndArrow(lexerFlags, starToken, asyncToken, funcType) {
     ASSERT(resetLexerFlagsForFuncAndArrow.length === arguments.length, 'arg count');
