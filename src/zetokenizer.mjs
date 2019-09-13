@@ -1183,6 +1183,8 @@ function ZeTokenizer(
 
     // Octals are only supported in web compat, sloppy mode, and only in strings
     // In web compat, \1 ~ \7 are considered start of an octal escape. Otherwise they are just a single digit escaped.
+    // Otherwise, \1~\9 are illegal through CharacterEscapeSequence -> NonEscapeCharacter -> "SourceCharacter but not
+    // one of EscapeCharacter or LineTerminator" -> EscapeCharacter -> DecimalDigit
 
     // There is a nasty edge case regarding nul (zero byte); In sloppy webcompat mode the nul escape may be followed by
     // an 8 or 9 and still be a valid nul. In other modes and templates, `\08` and `\09` are considered syntax errors.
@@ -1192,7 +1194,7 @@ function ZeTokenizer(
     // Tagged templates: are allowed to have bad escapes although they will cause `.value` to be `null` in the AST
     // (Note that we do not know here whether the template will be tagged or just a literal, so just return BAD_ESCAPE)
 
-    if (forTemplate || webCompat === WEB_COMPAT_OFF || (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
+    if (webCompat === WEB_COMPAT_OFF || forTemplate || (lexerFlags & LF_STRICT_MODE) === LF_STRICT_MODE) {
       // If octals are invalid, then the nul escape can not be followed by 8 or 9 either
       // Note: in templates, octals are never valid escapes so `\08` is always a bad escape regardless of mode
       if (a === $$0_30 && (b < $$0_30 || b > $$9_39)) {
@@ -1200,18 +1202,6 @@ function ZeTokenizer(
         // [v]: `"\0x"`
         // \0 is not an octal escape, it's a nul, but whatever
         lastCanonizedString += '\0';
-        return GOOD_ESCAPE;
-      } else if (!forTemplate && a >= $$1_31 && a <= $$9_39) {
-        // Escapes of a single non-zero digit are legal in strict etc and contribute only that digit as a literal
-        // > A conforming implementation, when processing strict mode code, must not extend the syntax of
-        // > EscapeSequence to include LegacyOctalEscapeSequence as described in B.1.2.
-        // I believe that by parsing `\20` as `'\2' + '0'` this is following that rule as there are syntactic rules
-        // for parsing an escaped non-zero digit without lookahead requirements.
-        // [v]: `'\2'`
-        // [v]: `'\223'`
-        // For templates this _is_ explicitly disallowed through NotEscapeSequence . But that is not used for strings.
-        // https://tc39.es/ecma262/#sec-static-semantics-template-early-errors
-        lastCanonizedString += String.fromCharCode(a - 0x30);
         return GOOD_ESCAPE;
       }
 
