@@ -110,7 +110,8 @@ See [`tests/testcases/README.md`](./tests/parser/README.md) for details on test 
 ./t G                Only create new files
 
 # QoL shortcuts:
-./t b            Alias for `./t u --babel-test`
+./t a            Alias for `./t u --test-acorn`
+./t b            Alias for `./t u --test-babel`
 ./t fu <file>    Combined `./t m` with `./t f <file>`
 
 # Find out which tests execute a particular code branch in the parser
@@ -132,8 +133,10 @@ Most flags can be modified:
 11                   Run as close to the rules as of ES11 / ES2020 as possible
 
 --min                Given a broken input, brute force minify the input while maintaining the same error message
+--acorn              Output a Acorn compatible AST
 --babel              Output a Babel compatible AST
---babel-test         Compare the `--babel` output to the actual output of Babel on same input
+--test-acorn         Compare the `--acorn` output to the actual output of Acorn on same input
+--test-babel         Compare the `--babel` output to the actual output of Babel on same input
 --test-node          Compile input in a `Function()` and report whether that throws when zeparser throws
 ```
 

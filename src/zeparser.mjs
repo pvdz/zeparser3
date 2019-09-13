@@ -419,6 +419,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     // ast compatibility stuff?
     babelCompat = false,
+    acornCompat = false,
 
     // Should we parse directives as their own AST nodes? (Other parsers do not, they just use ExpressionStatement)
     // I'm super confused since I read https://github.com/estree/estree/pull/99 as that directives get their own node
@@ -504,6 +505,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     delete _tree.source;
     _tree.sourceType = goalMode === GOAL_SCRIPT ? 'script' : 'module';
     _tree.interpreter = null; // https://github.com/babel/babel/blob/master/packages/babel-parser/ast/spec.md#interpreterdirective
+  }
+  if (acornCompat) {
+    _tree.sourceType = goalMode === GOAL_SCRIPT ? 'script' : 'module';
   }
   let _path = [_tree];
   let _pnames = ['ROOT'];
@@ -707,6 +711,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // AST_set('raw', token.str);
         node = AST_close('NumericLiteral');
       } else {
+        if (acornCompat) {
+          if (value === Infinity) value = null; // Note: token can't be `Infinity` for that's an identifier. Nor negative.
+        }
         AST_open(astProp, 'Literal', token);
         AST_set('value', value);
         AST_set('raw', token.str);
@@ -727,7 +734,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       } else {
         // https://github.com/estree/estree/blob/master/es5.md#regexpliteral
         AST_open(astProp, 'Literal', token);
-        AST_set('value', null);
+        AST_set('value', acornCompat ? {} : null);
         AST_set('regex', {
           pattern: body,
           flags: tail,
@@ -2295,6 +2302,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     if (!babelCompat || !isMethod) { // Babel extends the Function node to be a ClassMethod, rather than .value
       AST_open(astProp, isFuncDecl === IS_FUNC_DECL ? 'FunctionDeclaration' : 'FunctionExpression', firstToken);
     }
+    if (acornCompat) AST_set('expression', false);
 
     if (asyncToken !== UNDEF_ASYNC) {
       if (!allowAsyncFunctions) {
@@ -3826,7 +3834,6 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       wasNotDecl = true;
 
       destructible = parseObjectOuter(lexerFlags | LF_IN_FOR_LHS, DO_NOT_BIND, BINDING_TYPE_NONE, SKIP_INIT, UNDEF_EXPORTS, UNDEF_EXPORTS, astProp);
-      ASSERT(!hasAllFlags(destructible, MUST_DESTRUCT | CANT_DESTRUCT), 'parseObjectOuter should throw for must/cant destruct state');
 
       if (options_webCompat === WEB_COMPAT_ON) {
         if (hasAllFlags(destructible, PIGGY_BACK_WAS_DOUBLE_PROTO)) {
@@ -3840,6 +3847,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
         // [x]: `async function f(){ for await ({x=y}=x of x) ; }`
         // [x]: `for ({x=y}=x in x) ;`
         // [v]: `for ({x=y}=x ;;) ;`
+        // [x]: `for ({eval = 0} in x);`   // Must destruct (due to init to shorthand) and cant (due to assignment to eval in strict)
+        // [v]: `for ({eval = 0} ;;);`     // No writing to eval going on here
         destructible = sansFlag(destructible, MUST_DESTRUCT);
       }
       assignable = parsePatternTailInForHeader(lexerFlags, curlyToken, $$CURLY_R_7D, assignable, destructible, awaitable, astProp);
@@ -7101,20 +7110,25 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(curc === $$PAREN_L_28, 'havent consumed the paren yet');
 
     // NOTE: dynamic import is NOT bound to the module goal (!) Only to the version (ES2020+)
-
     if (!allowDynamicImport) {
       THROW('Dynamic import syntax not supported. Requires version ES2020+ / ES11+.');
     }
 
     // https://github.com/estree/estree/blob/master/experimental/import-expression.md
 
-    AST_open(astProp, 'CallExpression', importToken);
-    AST_open('callee', 'Import', importToken);
-    AST_close('Import');
+    if (acornCompat) {
+      AST_open(astProp, 'ImportExpression', importToken);
+      // AST_set('source', '');
+    } else {
+      AST_open(astProp, 'CallExpression', importToken);
+      AST_open('callee', 'Import', importToken);
+      AST_close('Import');
+    }
+
     ASSERT_skipRex('(', lexerFlags);
-    AST_set('arguments', []);
+    AST_set('arguments', [], undefined, acornCompat);
     // Note: the import call arg sets the +IN flag in the grammar (can't use `in` operator). So that's why we set it too
-    let assignable = parseExpression(lexerFlags | LF_IN_FOR_LHS, ASSIGN_EXPR_IS_OK, 'arguments');
+    let assignable = parseExpression(lexerFlags | LF_IN_FOR_LHS, ASSIGN_EXPR_IS_OK, acornCompat ? 'source' : 'arguments');
     if (curc !== $$PAREN_R_29) {
       if (curc === $$COMMA_2C) {
         // [x]: `import(a, b)`
@@ -7127,7 +7141,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       THROW('The dynamic `import` argument was followed by unknown content');
     }
     ASSERT_skipDiv(')', lexerFlags);
-    AST_close('CallExpression');
+    if (acornCompat) {
+      AST_close('ImportExpression');
+    } else {
+      AST_close('CallExpression');
+    }
 
     // - `function f(x = import(yield)) {}`
     // - `function f(x = import(await)) {}`
@@ -9527,8 +9545,11 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
                 keyToken :
                 bracketOpenToken;
 
+    let parenToken = curtok;
+
     ASSERT(methodStartToken, 'the start of this method should be either the async, star, get, set, key, or bracket token. at least one should have been passed on');
 
+    // Acorn uses the parenthesis open as start of method while zeparser/babel uses the start of the first modifier and otherwise the id
     AST_wrapClosed(astProp, NODE_NAME_METHOD_OBJECT, 'key', methodStartToken);
     AST_set('kind', getToken !== UNDEF_GET ? 'get' : setToken !== UNDEF_SET ? 'set' : (babelCompat ? 'method' : 'init')); // only getters/setters get special value here, "init" for the others. In the Babel AST the "other" kind is "method" instead.
     AST_set('method', getToken === UNDEF_GET && setToken === UNDEF_SET); // getters and setters are not methods but properties
@@ -9552,7 +9573,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       starToken,
       getToken,
       setToken,
-      methodStartToken,
+      acornCompat ? parenToken : methodStartToken,
       FDS_ILLEGAL,
       'value',
     );
@@ -10153,6 +10174,8 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
 
     verifyGeneralMethodState(asyncToken, starToken, getToken, setToken, keyToken, true);
 
+    let parenToken = curtok;
+
     // [x]: `async function f(){    (fail = class A {[await foo](){}; "x"(){}}) => {}    }`
 
     let methodStartToken =
@@ -10249,7 +10272,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       starToken,
       getToken,
       setToken,
-      methodStartToken,
+      acornCompat ? parenToken : methodStartToken,
       FDS_ILLEGAL,
       'value'
     );
@@ -10875,6 +10898,9 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
     ASSERT(setToken === UNDEF_SET || setToken.str === 'set', 'set token');
     ASSERT(keyToken === undefined || keyToken.str, 'keyToken is a token');
     ASSERT(keyToken === undefined || (keyToken.type === $IDENT || hasAnyFlag(keyToken.type, $STRING | $NUMBER)), 'keyToken is a number, string or ident', ''+keyToken);
+    ASSERT_VALID(curtok.str === '(');
+
+    let parenToken = curtok;
 
     let destructible = CANT_DESTRUCT; // this is mostly for piggy flags like detecting duplicate constructors
 
@@ -10971,7 +10997,7 @@ function ZeParser(code, goalMode = GOAL_SCRIPT, collectTokens = COLLECT_TOKENS_N
       starToken,
       getToken,
       setToken,
-      methodStartToken,
+      acornCompat ? parenToken : methodStartToken,
       FDS_ILLEGAL,
       'value'
     );

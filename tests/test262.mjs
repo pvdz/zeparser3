@@ -16,8 +16,13 @@ import {
 } from "./utils.mjs";
 import Par from "../src/zeparser.mjs";
 import {
+  compareAcorn,
+  ignoreTest262Acorn,
+  processAcornResult,
+} from './parse_acorn.mjs';
+import {
   compareBabel,
-  ignoreTest262,
+  ignoreTest262Babel,
   processBabelResult,
 } from './parse_babel.mjs';
 
@@ -25,8 +30,10 @@ import {
 let filePath = import.meta.url.replace(/^file:\/\//, '');
 let dirname = path.dirname(filePath);
 
-const BABEL_AST = false; // run zeparser with babelCompat=true?
-const COMPARE_BABEL = false; // compare zeparser output for each test with babel output?
+const BABEL_AST = process.argv.includes('--babel'); // run zeparser with babelCompat=true?
+const COMPARE_BABEL = process.argv.includes('--test-babel'); // compare zeparser output for each test with babel output?
+const ACORN_AST = process.argv.includes('--acorn'); // run zeparser with babelCompat=true?
+const COMPARE_ACORN = process.argv.includes('--test-acorn'); // compare zeparser output for each test with babel output?
 
 const BOLD = '\x1b[;1;1m';
 const BLINK = '\x1b[;5;1m';
@@ -48,6 +55,7 @@ function parse(input, strict, module, web) {
     {
       strictMode: strict,
       webCompat: !!web,
+      acornCompat: ACORN_AST,
       babelCompat: BABEL_AST,
       // astRoot: ast,
       // tokenStorage: tokens,
@@ -76,7 +84,7 @@ function read(path, file, onContent) {
 let counter = 0;
 read(PATH262, '', (file, content) => {
   ++counter;
-  // if (counter < 32200) return;
+  // if (counter < 12200) return;
 
   let displayFile = file.slice(path.resolve(dirname, '../ignore').length + 1);
   if (displayFile.includes('FIXTURE')) return;
@@ -99,280 +107,8 @@ read(PATH262, '', (file, content) => {
       //       either we parse the whole thing as an AtomEscape, in which case the semantics seem to apply (because
       //       annexB doesn't update this rule), or it doesn't parse and the GroupName is invalid, but I don't think so.
 
-    case 'test262/test/language/literals/string/S7.8.4_A4.3_T1.js':
-    case 'test262/test/language/literals/string/S7.8.4_A4.3_T2.js':
-    case 'test262/test/language/literals/string/legacy-octal-escape-sequence-strict.js':
-      // TODO: I think that the spec allows \1 ~ \9 in strings in strict mode (but not templates)
-
       console.log(BOLD, 'SKIP', RESET, '(see test runner code for reasoning)');
       return;
-
-    // Tests to ignore while comparing to Babel:
-    case 'test262/test/language/comments/multi-line-asi-carriage-return.js':
-    case 'test262/test/language/comments/multi-line-asi-line-separator.js':
-    case 'test262/test/language/comments/multi-line-asi-paragraph-separator.js':
-      // These tests multiline comment with newline. Stripping comments for Babel causes a syntax error. So just skip it.
-    case 'test262/test/language/expressions/assignment/destructuring/obj-prop-__proto__dup.js':
-      // Bug in Babel (I guess? Or wrong config ..?)
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-break-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-case-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-catch-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-class-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-const-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-continue-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-debugger-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-default-escaped-ext.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-default-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-delete-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-do-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-else-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-export-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-extends-escaped-ext.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-extends-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-finally-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-for-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-function-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-if-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-import-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-in-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-instanceof-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-new-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-return-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-super-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-switch-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-this-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-throw-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-try-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-typeof-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-var-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-void-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-while-escaped.js':
-    case 'test262/test/language/expressions/assignment/dstr/ident-name-prop-name-literal-with-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-break-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-case-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-catch-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-class-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-const-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-continue-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-debugger-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-default-escaped-ext.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-default-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-delete-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-do-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-else-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-export-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-extends-escaped-ext.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-extends-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-finally-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-for-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-function-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-if-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-import-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-in-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-instanceof-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-new-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-return-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-super-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-switch-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-this-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-throw-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-try-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-typeof-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-var-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-void-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-while-escaped.js':
-    case 'test262/test/language/expressions/assignment/member-expr-ident-name-with-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-break-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-case-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-catch-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-class-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-const-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-continue-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-debugger-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-default-escaped-ext.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-default-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-delete-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-do-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-else-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-export-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-extends-escaped-ext.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-extends-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-finally-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-for-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-function-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-if-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-import-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-in-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-instanceof-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-new-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-return-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-super-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-switch-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-this-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-throw-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-try-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-typeof-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-var-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-void-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-while-escaped.js':
-    case 'test262/test/language/expressions/class/ident-name-method-def-with-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-break-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-case-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-catch-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-class-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-const-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-continue-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-debugger-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-default-escaped-ext.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-default-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-delete-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-do-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-else-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-export-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-extends-escaped-ext.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-extends-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-finally-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-for-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-function-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-if-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-import-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-in-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-instanceof-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-new-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-return-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-super-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-switch-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-this-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-throw-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-try-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-typeof-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-var-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-void-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-while-escaped.js':
-    case 'test262/test/language/expressions/object/covered-ident-name-prop-name-literal-with-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-break-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-case-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-catch-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-class-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-const-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-continue-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-debugger-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-default-escaped-ext.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-default-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-delete-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-do-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-else-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-export-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-extends-escaped-ext.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-extends-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-finally-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-for-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-function-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-if-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-import-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-in-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-instanceof-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-new-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-return-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-super-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-switch-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-this-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-throw-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-try-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-typeof-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-var-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-void-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-while-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-method-def-with-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-break-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-case-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-catch-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-class-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-const-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-continue-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-debugger-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-default-escaped-ext.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-default-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-delete-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-do-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-else-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-export-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-extends-escaped-ext.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-extends-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-finally-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-for-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-function-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-if-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-import-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-in-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-instanceof-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-new-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-return-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-super-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-switch-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-this-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-throw-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-try-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-typeof-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-var-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-void-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-while-escaped.js':
-    case 'test262/test/language/expressions/object/ident-name-prop-name-literal-with-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-break-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-case-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-catch-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-class-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-const-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-continue-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-debugger-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-default-escaped-ext.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-default-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-delete-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-do-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-else-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-export-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-extends-escaped-ext.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-extends-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-finally-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-for-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-function-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-if-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-import-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-in-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-instanceof-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-new-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-return-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-super-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-switch-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-this-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-throw-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-try-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-typeof-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-var-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-void-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-while-escaped.js':
-    case 'test262/test/language/statements/class/ident-name-method-def-with-escaped.js':
-      // I'm not sure why Babel throws here (why would it ever consider that part to be a block? Why else throw?)
-
-    case 'test262/test/language/expressions/class/scope-name-lex-open-heritage.js':
-    case 'test262/test/language/expressions/function/scope-name-var-open-non-strict.js':
-    case 'test262/test/language/expressions/generators/scope-name-var-open-non-strict.js':
-    case 'test262/test/language/statements/class/scope-name-lex-open-heritage.js':
-      // Grouped sequence expression has incorrect range end
-
-    case 'test262/test/language/expressions/template-literal/tv-line-continuation.js':
-    case 'test262/test/language/expressions/template-literal/tv-line-terminator-sequence.js':
-    case 'test262/test/language/literals/string/line-continuation-double.js':
-    case 'test262/test/language/literals/string/line-continuation-single.js':
-    case 'test262/test/language/literals/string/line-separator.js':
-    case 'test262/test/language/literals/string/paragraph-separator.js':
-      // Should PS/LS increment the location line? Pending https://github.com/estree/estree/issues/199
-
-      if (COMPARE_BABEL) {
-        console.log(BOLD, 'SKIP for Babel', RESET, '(see test runner code for reasoning)');
-        return;
-      }
-      break;
   }
 
   ASSERT(content.includes('/*---') && content.includes('---*/'), 'missing test262 header', file);
@@ -415,6 +151,8 @@ read(PATH262, '', (file, content) => {
 
   let webstr = webcompat ? 'web' : 'sloppy';
   if (!flags.includes('onlyStrict') && !flags.includes('module')) {
+    // This is the sloppy or web run
+
     let failed = false;
     let z;
     try {
@@ -447,19 +185,40 @@ read(PATH262, '', (file, content) => {
       throw new Error('File ' + BOLD + file + RESET + ' did not meet expectations in '+BOLD+webstr+RESET+', expecting ' + (negative?'fail':'pass') + ' but got '  + (failed?'fail':'pass'));
     }
 
-    if (COMPARE_BABEL && !webcompat && !ignoreTest262(file)) {
-      // Parse and hope for the best. Unsure what to do with annexb
+    // #######################
+    // ###  OTHER PARSERS  ###
+    // #######################
 
+    if (COMPARE_ACORN && !ignoreTest262Acorn(file)) {
+      // Parse and hope for the best. AnnexB is applied by default, no opt-out
+      // Acorn doesn't spam comments so we don't have to scrub the input
+
+      let [acornOk, acornFail, zasa] = compareAcorn(content, !failed, 'web', file);
+      let outputAcorn = processAcornResult(acornOk, acornFail, failed, zasa, false);
+      if (outputAcorn) {
+        console.log('##### "web" content that was tested in Acorn:');
+        console.log(content);
+        console.log('#####');
+        console.log(zasa ? astToString(zasa.ast) : '<no zasa>');
+        console.log(outputAcorn);
+        console.log('File:', file);
+        console.error('Exit now.');
+        process.exit(1);
+      }
+    }
+
+    if (COMPARE_BABEL && !ignoreTest262Babel(file)) {
+      // Parse and hope for the best. AnnexB is applied by default, no opt-out
       let noCommentContent = content;
       if (z) {
         // Strip comment nodes because that's the only expected difference between the two ASTs
         noCommentContent = z.tokens.map(token => (token.type & $COMMENT) !== $COMMENT ? token.str : token.str.includes('\n') ? '\n' : '').join('');
       }
 
-      let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'sloppy', file);
+      let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'web', file);
       let outputBabel = processBabelResult(babelOk, babelFail, failed, zasb, false);
-      if (outputBabel) {``
-        console.log('##### no comment content that was tested:');
+      if (outputBabel) {
+        console.log('##### no comment "web" content that was tested in Babel:');
         console.log(noCommentContent);
         console.log('#####');
         console.log(zasb ? astToString(zasb.ast) : '<no zasb>');
@@ -473,9 +232,12 @@ read(PATH262, '', (file, content) => {
 
   let modstr = flags.includes('module') ? 'module' : 'strict';
   if (!webcompat && !flags.includes('noStrict')) {
+    // This is the module run
+
     let failed = false;
+    let z;
     try {
-      parse(content, true, flags.includes('module'), webcompat);
+      z = parse(content, true, flags.includes('module'), false);
       console.log(GREEN, 'PASS', RESET, modstr);
     } catch (e) {
       console.log(GREEN, 'FAIL', RESET, modstr);
@@ -499,6 +261,50 @@ read(PATH262, '', (file, content) => {
       console.log('e:', failed);
       console.log('flags:', flags);
       throw new Error('File ' + BOLD + file + RESET + ' did not meet expectations in '+BOLD+modstr+RESET+', expecting ' + (failed?'fail':'pass') + ' but got '  + (!failed?'fail':'pass'));
+    }
+
+    // #######################
+    // ###  OTHER PARSERS  ###
+    // #######################
+
+    if (COMPARE_ACORN && flags.includes('module') && !ignoreTest262Acorn(file)) {
+      // Parse and hope for the best. AnnexB is applied by default, no opt-out
+      // Acorn doesn't spam comments so we don't have to scrub the input
+
+      let [acornOk, acornFail, zasa] = compareAcorn(content, !failed, 'module', file);
+      let outputAcorn = processAcornResult(acornOk, acornFail, failed, zasa, false);
+      if (outputAcorn) {
+        console.log('##### "module" content that was tested in Acorn:');
+        console.log(content);
+        console.log('#####');
+        console.log(zasa ? astToString(zasa.ast) : '<no zasa>');
+        console.log(outputAcorn);
+        console.log('File:', file);
+        console.error('Exit now.');
+        process.exit(1);
+      }
+    }
+
+    if (COMPARE_BABEL && flags.includes('module') && !ignoreTest262Babel(file)) {
+      // Parse and hope for the best. AnnexB is applied by default, no opt-out
+      let noCommentContent = content;
+      if (z) {
+        // Strip comment nodes because that's the only expected difference between the two ASTs
+        noCommentContent = z.tokens.map(token => (token.type & $COMMENT) !== $COMMENT ? token.str : token.str.includes('\n') ? '\n' : '').join('');
+      }
+
+      let [babelOk, babelFail, zasb] = compareBabel(noCommentContent, !failed, 'module', file);
+      let outputBabel = processBabelResult(babelOk, babelFail, failed, zasb, false);
+      if (outputBabel) {
+        console.log('##### no comment "module" content that was tested in Babel:');
+        console.log(noCommentContent);
+        console.log('#####');
+        console.log(zasb ? astToString(zasb.ast) : '<no zasb>');
+        console.log(outputBabel);
+        console.log('File:', file);
+        console.error('Exit now.');
+        process.exit(1);
+      }
     }
   }
 });

@@ -3,6 +3,7 @@
 ACTION=''
 ARG=''
 MODE=''
+ACORN=''
 BABEL=''
 EXTRA=''
 ES=''
@@ -24,7 +25,8 @@ ZeParser test runner help:
  m             Run all tests and ask for update one-by-one
  s             Search for needles (call HIT() to place a needle and find all tests that hit them)
  t             Run test262 suite (only)
- b             Alias for ./t m --babel-test, to verify ZeParser output against the Babel AST
+ a             Alias for ./t m --test-acorn, to verify ZeParser output against the Acorn AST
+ b             Alias for ./t m --test-babel, to verify ZeParser output against the Babel AST
  fu            Test file and ask to update it if necessary
  fuzz          Run fuzzer
  --sloppy      Enable sloppy script mode, do not auto-enable other modes
@@ -32,8 +34,10 @@ ZeParser test runner help:
  --strict      Enable strict script mode, do not auto-enable other modes
  --module      Enable module goal mode, do not auto-enable other modes
  --min         Only for f and i, for invalid input; minify the test case while keeping same error
+ --acorn       Run in Acorn compat mode
+ --test-acorn  Also compare AST of test cases to Acorn output
  --babel       Run in Babel compat mode
- --babel-test  Also compare AST of test cases to Babel output
+ --test-babel  Also compare AST of test cases to Babel output
  6 ... 11      Parse according to the rules of this particular version of the spec
         "
       exit
@@ -75,7 +79,7 @@ ZeParser test runner help:
       ;;
     s)
       # Add `HIT()` to zeparser src and this will report all inputs that trigger that call in a very concise list
-      if [[ "${ACTION}" = "--help" ]]; then
+      if [[ "${ACTION}" = "" ]]; then
           ACTION='-s'
       fi
       EXTRA='-s'
@@ -95,18 +99,29 @@ ZeParser test runner help:
       ACTION='fuzz'
       ;;
 
+    a)
+      # Alias for `m --test-acorn` because I'm lazy
+      if [[ "${ACTION}" = "" ]]; then
+          ACTION='-q -U'
+      fi
+      ACORN='--test-acorn'
+      ;;
     b)
-      # Alias for `m --babel-test` because I'm lazy
-      ACTION='-q -U'
-      BABEL='--babel-test'
+      # Alias for `m --test-acorn` because I'm lazy
+      if [[ "${ACTION}" = "" ]]; then
+          ACTION='-q -U'
+      fi
+      BABEL='--test-babel'
       ;;
 
     --sloppy)       MODE='--sloppy'       ;;
     --web)          MODE='--web'          ;;
     --strict)       MODE='--strict'       ;;
     --module)       MODE='--module'       ;;
+    --acorn)        ACORN='--acorn'       ;;
+    --test-acorn)   ACORN='--test-acorn'  ;;
     --babel)        BABEL='--babel'       ;;
-    --babel-test)   BABEL='--babel-test'  ;;
+    --test-babel)   BABEL='--test-babel'  ;;
     --min)          EXTRA='--min'         ;;
 
     6)  ES='--es6'  ;;
@@ -127,7 +142,7 @@ done
 
 if [[ "${ACTION}" = "test262" ]]; then
   set -x
-  node --experimental-modules tests/test262.mjs
+  node --experimental-modules tests/test262.mjs ${ACORN} ${BABEL}
   set +x
 elif [[ "${ACTION}" = "fuzz" ]]; then
   set -x
@@ -135,6 +150,6 @@ elif [[ "${ACTION}" = "fuzz" ]]; then
   set +x
 else
   set -x
-  node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${BABEL} ${EXTRA} ${ES}
+  node --experimental-modules --max-old-space-size=8192 tests/zeparser.spec.mjs ${ACTION} "${ARG}" ${MODE} ${ACORN} ${BABEL} ${EXTRA} ${ES}
   set +x
 fi

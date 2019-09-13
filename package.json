@@ -4,8 +4,8 @@
   "author": "Peter van der Zee",
   "description": "A \"pixel perfect\" 100% spec compliant JavaScript parser written in JavaScript, parsing ES6-ES11.",
   "main": "index.js",
-  "dependencies": {},
   "devDependencies": {
+    "acorn": "7.0.0",
     "@babel/parser": "7.5.5",
     "esfuzz": "0.3.1",
     "eslump": "2.0.0",

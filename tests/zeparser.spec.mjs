@@ -40,10 +40,13 @@ const TARGET_ES10 = process.argv.includes('--es10');
 const TARGET_ES11 = process.argv.includes('--es11');
 const RUN_VERBOSE_IN_SERIAL = process.argv.includes('--serial') || (!SEARCH && (INPUT_OVERRIDE || TARGET_FILE || SKIP_BUILDS || STOP_AFTER_TEST_FAIL || STOP_AFTER_FILE_FAIL));
 const FORCE_WRITE = process.argv.includes('--force-write');
+const ACORN_COMPAT = process.argv.includes('--acorn');
 const BABEL_COMPAT = process.argv.includes('--babel');
-const BABEL_COMPARE = process.argv.includes('--babel-test');
+const COMPARE_ACORN = process.argv.includes('--test-acorn');
+const COMPARE_BABEL = process.argv.includes('--test-babel');
 const COMPARE_NODE = process.argv.includes('--test-node');
-const TEST_BABEL = BABEL_COMPARE && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore babel flag with -u, we dont want to record babel deltas into test files
+const TEST_ACORN = COMPARE_ACORN && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record acorn deltas into test files
+const TEST_BABEL = COMPARE_BABEL && (!AUTO_UPDATE || CONFIRMED_UPDATE); // ignore this flag with -u, we dont want to record babel deltas into test files
 
 if (process.argv.includes('-?') || process.argv.includes('--help')) {
   console.log(`
@@ -75,8 +78,10 @@ if (process.argv.includes('-?') || process.argv.includes('--help')) {
     --strict      Only run tests in strict mode (can be combined with other modes like --module)
     --module      Only run tests with module goal (can be combined with other modes like --strict)
     --web         Only run tests in sloppy mode with web compat mode on (can be combined with other modes like --strict)
+    --acorn       Run in Acorn compat mode (\`acornCompat=true\`)
     --babel       Run in Babel compat mode (\`babelCompat=true\`)
-    --babel-test  Also show diff with Babel AST / pass/fail with test cases (not the same as --babel !)
+    --test-acorn  Also show diff with Acorn AST / pass/fail with test cases (not the same as --acorn !)
+    --test-babel  Also show diff with Babel AST / pass/fail with test cases (not the same as --babel !)
     --all         Force to run all four modes (on input)
     --esX         Where X is one of 6 through 10, like --es6. For -i only, forces the code to run in that version
     --serial      Test all targeted files in serial, verbosely, instead of using parallel phases (which is faster)
@@ -151,6 +156,11 @@ import {
   ignoreZeparserTestForBabel,
   processBabelResult,
 } from './parse_babel.mjs';
+import {
+  compareAcorn,
+  ignoreZeparserTestForAcorn,
+  processAcornResult,
+} from './parse_acorn.mjs';
 
 // node does not expose __dirname under module mode, but we can use import.meta to get it
 let filePath = import.meta.url.replace(/^file:\/\//,'');
@@ -215,6 +225,7 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
         webCompat: testVariant === TEST_WEB,
         targetEsVersion: tob.inputOptions.es,
         babelCompat: BABEL_COMPAT,
+        acornCompat: ACORN_COMPAT,
 
         getTokenizer: tokenizer => tok = tokenizer,
         $log: INPUT_OVERRIDE ? undefined : (...a) => stdout.push(a),
@@ -245,7 +256,11 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
   // Tests with specific versions should also have non-specific counter parts. Since Babel does not support targeting
   // specific spec versions, we should just skip those variants because they lead to false positives.
   if (TEST_BABEL && (!Number.isFinite(tob.inputOptions.es) || TARGET_FILE || INPUT_OVERRIDE)) {
-    [babelOk, babelFail, zasb] = compareBabel(code, !e, testVariant, tob.file)
+    [babelOk, babelFail, zasb] = compareBabel(code, !e, testVariant, tob.file);
+  }
+  let acornOk, acornFail, zasa;
+  if (TEST_ACORN && (!Number.isFinite(tob.inputOptions.es) || TARGET_FILE || INPUT_OVERRIDE)) {
+    [acornOk, acornFail, zasa] = compareAcorn(code, !e, testVariant, tob.file, tob.inputOptions.es);
   }
 
   let nodeFail = undefined;
@@ -260,10 +275,10 @@ function coreTest(tob, zeparser, testVariant, code = tob.inputCode) {
     }
   }
 
-  return {r, e, tok, stdout, babelOk, babelFail, zasb, nodeFail};
+  return {r, e, tok, stdout, babelOk, babelFail, zasb, nodeFail, acornOk, acornFail, zasa};
 }
 async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "strict" | "module" | "web" */) {
-  let {parserRawOutput: {[testVariant]: {r, e, tok, stdout, babelOk, babelFail, zasb, nodeFail}}, file} = tob;
+  let {parserRawOutput: {[testVariant]: {r, e, tok, stdout, babelOk, babelFail, zasb, nodeFail, acornOk, acornFail, zasa}}, file} = tob;
   if (!r && !e) return; // no output for this variant
 
   let errorMessage = '';
@@ -323,6 +338,12 @@ async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "stric
   // Skip this if babel doesnt support the mode (strict / web compat) or when specific ES versions are requested
   if (TEST_BABEL && !Number.isFinite(tob.inputOptions.es) && babelOk !== false) {
     outputBabel = processBabelResult(babelOk, babelFail, !!e, zasb, tob, TEST_BABEL, INPUT_OVERRIDE);
+    if (outputBabel && !INPUT_OVERRIDE && !TARGET_FILE && ignoreZeparserTestForBabel(tob.file)) outputBabel = '';
+  }
+  let outputAcorn = '';
+  if (TEST_ACORN && !Number.isFinite(tob.inputOptions.es) && babelOk !== false) {
+    outputAcorn = processAcornResult(acornOk, acornFail, !!e, zasa, tob, TEST_ACORN, INPUT_OVERRIDE);
+    if (outputAcorn && !INPUT_OVERRIDE && !TARGET_FILE && ignoreZeparserTestForAcorn(tob.file)) outputAcorn = '';
   }
 
   let nodeOutput = (
@@ -339,19 +360,23 @@ async function postProcessResult(tob/*: Tob */, testVariant/*: "sloppy" | "stric
       tob.newOutputSloppy = outputTestString;
       tob.newOutputSloppyBabel = outputBabel;
       tob.newOutputSloppyNode = nodeOutput;
+      tob.newOutputSloppyAcorn = outputAcorn;
       break;
     case TEST_STRICT:
       tob.newOutputStrict = outputTestString;
       tob.newOutputStrictBabel = outputBabel;
       tob.newOutputStrictNode = nodeOutput;
+      tob.newOutputStrictAcorn = '';
       break;
     case TEST_MODULE:
       tob.newOutputModule = outputTestString;
       tob.newOutputModuleBabel = outputBabel;
+      tob.newOutputModuleAcorn = outputAcorn;
       break;
     case TEST_WEB:
       tob.newOutputWeb = outputTestString;
       tob.newOutputWebBabel = outputBabel;
+      tob.newOutputWebAcorn = outputAcorn;
       break;
     default: FIXME;
   }
@@ -487,7 +512,7 @@ async function runTests(list, zeparser) {
         }
 
         console.log('\n' + DIM + tob.fileShort + RESET);
-        console.log(BOLD + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n');
+        console.log(BOLD + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n');
 
         if (!TARGET_FILE && !INPUT_OVERRIDE) {
           if (tob.continuePrint) console.error(tob.continuePrint);
@@ -518,20 +543,16 @@ async function writeNewOutput(list) {
       if (newData !== oldData || FORCE_WRITE) {
         if (tob.continuePrint) console.error(tob.continuePrint);
         console.log('\n' + DIM + tob.fileShort + RESET);
-        console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n' + RESET);
-        if (TEST_BABEL && ignoreZeparserTestForBabel(tob.file)) {
-          console.log('Skipping mismatch because known Babel bug');
-        } else {
-          let cont = await yn('Continue to overwrite test output?');
-          if (cont) {
-            ++updated;
-            await promiseToWriteFile(file, newData);
-          }
+        console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n' + RESET);
+        let cont = await yn('Continue to overwrite test output?');
+        if (cont) {
+          ++updated;
+          await promiseToWriteFile(file, newData);
         }
       } else {
         if (tob.continuePrint) {
           console.log('\n' + DIM + tob.fileShort + RESET);
-          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n' + RESET);
+          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n' + RESET);
           if (!await yn('File was not changed, invariant was broken and written anyways. Continue testing?')) process.exit();
         }
       }
@@ -546,7 +567,7 @@ async function writeNewOutput(list) {
           return promiseToWriteFile(file, newData);
         } else {
           console.log('\n' + DIM + tob.fileShort + RESET);
-          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --babel-test' : '')+'\n' + RESET);
+          console.log(DIM + '\n./t f "' + tob.file + '"'+(TEST_BABEL ? ' --test-babel' : '')+(TEST_ACORN ? ' --test-acorn' : '')+'\n' + RESET);
           console.error('Output mismatch for', file);
           return Promise.resolve();
         }
@@ -883,9 +904,9 @@ function generateOutputBlock(tob) {
     fold +
     generateInput(tob) +
     generateOutputHeader() +
-    generateOutputSloppy(sloppy, tob.newOutputSloppyBabel, tob.newOutputSloppyNode) +
+    generateOutputSloppy(sloppy, tob.newOutputSloppyBabel, tob.newOutputSloppyNode, tob.newOutputSloppyAcorn) +
     generateOutputStrict(strict, sloppy, tob.newOutputStrictBabel, tob.newOutputStrictNode) +
-    generateOutputModule(module, strict, sloppy, tob.newOutputModuleBabel) +
+    generateOutputModule(module, strict, sloppy, tob.newOutputModuleBabel, tob.newOutputModuleAcorn) +
     generateOutputWeb(web, sloppy, tob.newOutputWebBabel) +
   '';
 }
@@ -903,12 +924,13 @@ function generateOutputHeader() {
     'Note that the output parts are auto-generated by the test runner to reflect actual result.\n' +
     '';
 }
-function generateOutputSloppy(sloppyOutput, babelOutput, nodeOutput) {
+function generateOutputSloppy(sloppyOutput, babelOutput, nodeOutput, acornOutput) {
   return OUTPUT_HEADER_SLOPPY + '\n' +
     'Parsed with script goal and as if the code did not start with strict mode header.\n' +
     OUTPUT_QUINTICK + sloppyOutput + OUTPUT_QUINTICK +
     babelOutput +
     nodeOutput +
+    acornOutput +
     '';
 }
 function generateOutputStrict(strictOutput, sloppyOutput, babelOutput, nodeOutput) {
@@ -919,11 +941,12 @@ function generateOutputStrict(strictOutput, sloppyOutput, babelOutput, nodeOutpu
     nodeOutput +
     '';
 }
-function generateOutputModule(moduleOutput, strictOutput, sloppyOutput, babelOutput) {
+function generateOutputModule(moduleOutput, strictOutput, sloppyOutput, babelOutput, acornOutput) {
   return OUTPUT_HEADER_MODULE + '\n' +
     'Parsed with the module goal.\n' +
     (moduleOutput === sloppyOutput ? '\n_Output same as sloppy mode._' : moduleOutput === strictOutput ? '\n_Output same as strict mode._' : (OUTPUT_QUINTICK + moduleOutput + OUTPUT_QUINTICK)) + '\n' +
     babelOutput +
+    acornOutput +
     '';
 }
 function generateOutputWeb(webOutput, sloppyOutput, babelOutput) {
